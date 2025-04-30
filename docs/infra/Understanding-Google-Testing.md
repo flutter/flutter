@@ -13,7 +13,7 @@ test of Google presubmits, are still passing.
 This check shows up as one of the many check runs at the bottom of an open pull
 request:
 
-!["Google testing - Google testign passed!"](https://user-images.githubusercontent.com/38773539/221321907-edaca6c3-2165-4bfe-b436-00fcd64e820e.png)
+!["Google testing - Google testing passed!"](https://user-images.githubusercontent.com/38773539/221321907-edaca6c3-2165-4bfe-b436-00fcd64e820e.png)
 
 <details>
 
@@ -37,9 +37,9 @@ request:
 This check helps catch obvious problems, and allow the pull request author and
 reviewers an early warning that either:
 
-1. More changes are needed to avoid a breaking change
-1. Google code or golden-files will need to be updated as a part of the roll
-1. Some communication with the roll team is required to make the change safely
+1. More changes are needed to avoid a breaking change.
+1. Google code or golden-files will need to be updated as a part of the roll.
+1. Some communication with the roll team is required to make the change safely.
 
 Sometimes the check does not function as expected (see: [common issues](#common-issues)).
 
