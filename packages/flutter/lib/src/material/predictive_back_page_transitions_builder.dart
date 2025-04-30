@@ -328,9 +328,13 @@ class _PredictiveBackSharedElementPageTransitionState
   // TODO(justinmc): Maybe rename to just _animation?
   final ProxyAnimation _proxyAnimation = ProxyAnimation();
   late final Listenable _mergedAnimations;
+
+  // After committing a back gesture, the outgoing route fades out.
   late final Animation<double> _opacityAnimation;
 
   late Animation<Offset> _positionAnimation;
+
+  late Animation<double> _borderRadiusAnimation;
 
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   final Tween<double> _scaleCommitTween = Tween<double>(begin: 1.0, end: 1.0);
@@ -339,6 +343,7 @@ class _PredictiveBackSharedElementPageTransitionState
   double _lastXDrag = 0.0;
   double _lastYDrag = 0.0;
   double _lastScale = 1.0;
+  double _lastBorderRadius = 0.0;
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
@@ -380,6 +385,11 @@ class _PredictiveBackSharedElementPageTransitionState
         // animation.
         end: Offset.zero,
       ),
+    });
+
+    _borderRadiusAnimation = _proxyAnimation.drive(switch (widget.phase) {
+      _PredictiveBackPhase.commit => Tween<double>(begin: _lastBorderRadius, end: 0.0),
+      _ => _borderRadiusTween,
     });
   }
 
@@ -434,7 +444,15 @@ class _PredictiveBackSharedElementPageTransitionState
 
   @override
   Widget build(BuildContext context) {
+    /*
+    print(
+      'justin build with widget.animation ${widget.animation.value} and radius ${_borderRadiusTween.evaluate(widget.animation)}',
+    );
+    */
+    print('justin build proxyanimation ${_proxyAnimation.value}');
     return AnimatedBuilder(
+      // TODO(justinmc): Position jumps on commit now that I've modified TransitionRoute.
+      // TODO(justinmc): It looks like widget.animation animates from 1 to 0 after commit. Why?
       // TODO(justinmc): Could this one be _proxyAnimation?
       animation: _mergedAnimations,
       builder: (BuildContext context, Widget? child) {
@@ -454,8 +472,9 @@ class _PredictiveBackSharedElementPageTransitionState
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
                 child: ClipRRect(
+                  // TODO(justinmc): There is no radius for the incoming route when a route is pushed, should there be?
                   borderRadius: BorderRadius.circular(
-                    _borderRadiusTween.evaluate(widget.animation),
+                    _lastBorderRadius = _borderRadiusAnimation.value,
                   ),
                   child: child,
                 ),

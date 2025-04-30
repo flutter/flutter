@@ -15,7 +15,6 @@
 library;
 
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -592,34 +591,18 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   void _handleDragEnd({required bool animateForward}) {
     if (isCurrent) {
       if (animateForward) {
-        // The closer the panel is to dismissing, the shorter the animation is.
-        // We want to cap the animation time, but we want to use a linear curve
-        // to determine it.
-        // These values were eyeballed to match the native predictive back
-        // animation on a Pixel 2 running Android API 34.
-        final int droppedPageForwardAnimationTime = min(
-          ui.lerpDouble(800, 0, _controller!.value)!.floor(),
-          300,
-        );
-        _controller?.animateTo(
-          1.0,
-          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-          curve: Curves.fastLinearToSlowEaseIn,
-        );
+        // Typically, handleUpdateBackGestureProgress will have already
+        // completed the animation. If not, animate to completion.
+        if (!_controller!.isCompleted) {
+          _controller!.forward();
+        }
       } else {
         // This route is destined to pop at this point. Reuse navigator's pop.
         navigator?.pop();
 
         // The popping may have finished inline if already at the target destination.
         if (_controller?.isAnimating ?? false) {
-          // Otherwise, use a custom popping animation duration and curve.
-          final int droppedPageBackAnimationTime =
-              ui.lerpDouble(0, 800, _controller!.value)!.floor();
-          _controller!.animateBack(
-            0.0,
-            duration: Duration(milliseconds: droppedPageBackAnimationTime),
-            curve: Curves.fastLinearToSlowEaseIn,
-          );
+          _controller!.reverse(from: _controller!.upperBound);
         }
       }
     }
