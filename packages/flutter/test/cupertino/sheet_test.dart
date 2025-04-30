@@ -1340,77 +1340,98 @@ void main() {
     expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
   });
 
-  testWidgets('content placed in safe area of showCupertinoSheet is rendered within the safe area bounds', (
-      WidgetTester tester,
-      ) async {
-    final GlobalKey scaffoldKey = GlobalKey();
+  testWidgets(
+    'content placed in safe area of showCupertinoSheet is rendered within the safe area bounds',
+    (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
 
-    Widget sheetScaffoldContent(BuildContext context) {
-      return SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Container(height: 80, width: double.infinity, color: Colors.pink, child: const Text('Top container')),
-            Container(height: 80, width: double.infinity, color: Colors.green, child: const Text('Bottom container')),
-          ],
-        ),
-      );
-    }
+      Widget sheetScaffoldContent(BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Container(
+                height: 80,
+                width: double.infinity,
+                color: Colors.pink,
+                child: const Text('Top container'),
+              ),
+              Container(
+                height: 80,
+                width: double.infinity,
+                color: Colors.green,
+                child: const Text('Bottom container'),
+              ),
+            ],
+          ),
+        );
+      }
 
-    const double bottomPadding = 50;
-    await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              padding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
-              viewPadding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
-            ),
-            child: CupertinoApp(
-              home: CupertinoPageScaffold(
-                key: scaffoldKey,
-                child: Center(
-                  child: Column(
-                    children: <Widget>[
-                      const Text('Page 1'),
-                      CupertinoButton(
-                        onPressed: () {
-                          showCupertinoSheet<void>(
-                            context: scaffoldKey.currentContext!,
-                            pageBuilder: (BuildContext context) {
-                              return CupertinoPageScaffold(child: sheetScaffoldContent(context));
-                            },
-                          );
-                        },
-                        child: const Text('Push Page 2'),
-                      ),
-                    ],
+      const double bottomPadding = 50;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+                viewPadding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+              ),
+              child: CupertinoApp(
+                home: CupertinoPageScaffold(
+                  key: scaffoldKey,
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 1'),
+                        CupertinoButton(
+                          onPressed: () {
+                            showCupertinoSheet<void>(
+                              context: scaffoldKey.currentContext!,
+                              pageBuilder: (BuildContext context) {
+                                return CupertinoPageScaffold(child: sheetScaffoldContent(context));
+                              },
+                            );
+                          },
+                          child: const Text('Push Page 2'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        }
-      ),
-    );
+            );
+          },
+        ),
+      );
 
-    expect(find.text('Page 1'), findsOneWidget);
+      expect(find.text('Page 1'), findsOneWidget);
 
-    await tester.tap(find.text('Push Page 2'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(Container), findsExactly(2));
+      expect(find.byType(Container), findsExactly(2));
 
-    final double pageHeight = tester.getRect(
-        find.ancestor(of: find.text('Top container'), matching: find.byType(CupertinoPageScaffold)),
-    ).bottom;
-    expect(
-       pageHeight - tester
-            .getBottomLeft(
-            find.ancestor(of: find.text('Bottom container'), matching: find.byType(Container)),
-        )
-        .dy,
-      bottomPadding,
-    );
-  });
+      final double pageHeight =
+          tester
+              .getRect(
+                find.ancestor(
+                  of: find.text('Top container'),
+                  matching: find.byType(CupertinoPageScaffold),
+                ),
+              )
+              .bottom;
+      expect(
+        pageHeight -
+            tester
+                .getBottomLeft(
+                  find.ancestor(
+                    of: find.text('Bottom container'),
+                    matching: find.byType(Container),
+                  ),
+                )
+                .dy,
+        bottomPadding,
+      );
+    },
+  );
 }
