@@ -1737,6 +1737,60 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('showCupertinoDialog - custom barrierColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoButton(
+                    child: const Text('Custom BarrierColor'),
+                    onPressed: () {
+                      showCupertinoDialog<void>(
+                        context: context,
+                        barrierColor: Colors.red,
+                        builder: (BuildContext context) {
+                          return CupertinoAlertDialog(
+                            title: const Text('Title'),
+                            content: const Text('Content'),
+                            actions: <Widget>[
+                              const CupertinoDialogAction(child: Text('Yes')),
+                              CupertinoDialogAction(
+                                child: const Text('No'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Custom BarrierColor'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, equals(Colors.red));
+
+    await tester.tap(find.text('No'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) => widget is ModalBarrier && widget.color == Colors.red,
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(restorationScopeId: 'app', home: _RestorableDialogTestWidget()),
