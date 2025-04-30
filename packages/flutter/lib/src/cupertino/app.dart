@@ -754,23 +754,22 @@ class _CupertinoInspectorButton extends StatelessWidget {
     final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
     switch (_variant) {
       case _CupertinoInspectorButtonVariant.filled:
-        return primaryColor;
-      case _CupertinoInspectorButtonVariant.iconOnly:
         return secondaryColor;
+      case _CupertinoInspectorButtonVariant.iconOnly:
+        return primaryColor;
       case _CupertinoInspectorButtonVariant.toggle:
-        return !_toggledOn! ? secondaryColor : primaryColor;
+        return !_toggledOn! ? primaryColor : secondaryColor;
     }
   }
 
   Color _backgroundColor(BuildContext context) {
-    final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
+    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
     switch (_variant) {
       case _CupertinoInspectorButtonVariant.filled:
-        return secondaryColor;
+      case _CupertinoInspectorButtonVariant.toggle:
+        return primaryColor;
       case _CupertinoInspectorButtonVariant.iconOnly:
         return const Color(0x00000000);
-      case _CupertinoInspectorButtonVariant.toggle:
-        return !_toggledOn! ? const Color(0x00000000) : secondaryColor;
     }
   }
 }
