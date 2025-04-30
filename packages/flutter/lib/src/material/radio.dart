@@ -381,7 +381,7 @@ class Radio<T> extends StatelessWidget {
       toggleable: toggleable,
       focusNode: focusNode,
       autofocus: autofocus,
-      builder: (ToggleableStateMixin state) {
+      builder: (BuildContext context, ToggleableStateMixin state) {
         return _RadioPaint(
           toggleableState: state,
           activeColor: activeColor,

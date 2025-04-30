@@ -27,7 +27,7 @@ void main() {
         toggleable: true,
         focusNode: node,
         autofocus: false,
-        builder: (ToggleableStateMixin state) {
+        builder: (BuildContext context, ToggleableStateMixin state) {
           actualState = state;
           return CustomPaint(size: const Size(40, 40), painter: TestPainter());
         },
@@ -40,6 +40,7 @@ void main() {
     await tester.pump();
 
     expect(actualValue, 0);
+    expect(actualState!.value, isTrue);
   });
 }
 

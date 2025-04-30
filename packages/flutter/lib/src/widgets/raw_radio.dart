@@ -17,7 +17,7 @@ import 'widget_state.dart';
 /// the visual.
 ///
 /// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
-typedef RadioBuilder = Widget Function(ToggleableStateMixin state);
+typedef RadioBuilder = Widget Function(BuildContext context, ToggleableStateMixin state);
 
 /// A Radio button that provides basic radio functionalities.
 ///
@@ -199,7 +199,7 @@ class _RawRadioState<T> extends State<RawRadio<T>>
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         mouseCursor: widget.mouseCursor,
-        child: widget.builder(this),
+        child: widget.builder(context, this),
       ),
     );
   }

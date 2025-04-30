@@ -213,9 +213,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
-              (states.contains(WidgetState.disabled)
-                  ? SystemMouseCursors.basic
-                  : kIsWeb
+              (!states.contains(WidgetState.disabled) && kIsWeb
                   ? SystemMouseCursors.click
                   : SystemMouseCursors.basic);
         });
@@ -228,7 +226,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
       toggleable: widget.toggleable,
       focusNode: _effectiveFocusNode,
       autofocus: widget.autofocus,
-      builder: (ToggleableStateMixin state) {
+      builder: (BuildContext context, ToggleableStateMixin state) {
         return _RadioPaint(
           activeColor: widget.activeColor,
           inactiveColor: widget.inactiveColor,
