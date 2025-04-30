@@ -19,15 +19,15 @@ void main() {
     );
 
     expect(find.text('child'), findsOneWidget);
-    expect(state.value, true);
+    expect(state.value, isTrue);
 
     await tester.tap(find.byType(TestToggleable));
     await tester.pumpAndSettle();
-    expect(state.value, false);
+    expect(state.value, isNull);
 
     await tester.tap(find.byType(TestToggleable));
     await tester.pumpAndSettle();
-    expect(state.value, true);
+    expect(state.value, isFalse);
   });
 }
 
