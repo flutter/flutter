@@ -896,7 +896,6 @@ class BrowserManager {
 
     future
         .then((WebSocketChannel webSocket) {
-          print('web socket connected');
           if (completer.isCompleted) {
             return;
           }
@@ -1077,7 +1076,6 @@ class BrowserManager {
 
   /// The callback for handling messages received from the host page.
   void _onMessage(Map<dynamic, dynamic> message) {
-    print('received a message: $message');
     switch (message['command'] as String) {
       case 'ping':
         break;

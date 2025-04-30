@@ -150,7 +150,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
           'parameters': <String>[
             'test',
             '--copy-artifacts',
-            for (final TestSuite suite in suites) '--suite=${suite.name}',
+            for (final TestSuite suite in filteredSuites) '--suite=${suite.name}',
           ],
           'script': 'flutter/lib/web_ui/dev/felt',
         },
