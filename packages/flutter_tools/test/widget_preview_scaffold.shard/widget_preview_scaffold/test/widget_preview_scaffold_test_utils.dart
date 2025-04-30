@@ -33,17 +33,16 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
             );
           },
         ),
-        pageRouteBuilder:
-            <T>(RouteSettings settings, WidgetBuilder builder) =>
-                PageRouteBuilder<T>(
-                  settings: settings,
-                  pageBuilder:
-                      (
-                        BuildContext context,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation,
-                      ) => builder(context),
-                ),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+            PageRouteBuilder<T>(
+              settings: settings,
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            ),
       ),
     );
   }
