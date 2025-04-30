@@ -2898,7 +2898,6 @@ void main() {
           constraints: BoxConstraints(maxWidth: 560),
           child: SizedBox(width: 1000, height: 100),
         ),
-        theme: ThemeData(useMaterial3: true),
       ),
     );
 
