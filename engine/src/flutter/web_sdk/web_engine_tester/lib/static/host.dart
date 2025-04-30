@@ -55,8 +55,6 @@ final Map<int, List<StreamSubscription<dynamic>>> _streamSubscriptions =
 /// The URL for the current page.
 final Uri _currentUrl = Uri.parse(domWindow.location.href);
 
-late final void Function(String) hostLog;
-
 /// Code that runs in the browser and loads test suites at the server's behest.
 ///
 /// One instance of this runs for each browser. When the server tells it to load
@@ -120,11 +118,6 @@ void main() {
   runZonedGuarded(
     () {
       final MultiChannel<dynamic> serverChannel = _connectToServer();
-      hostLog = (String text) {
-        print('[host]: $text');
-        serverChannel.sink.add({'command': 'log', 'text': text});
-      };
-      hostLog('host connected');
       serverChannel.stream.listen((dynamic message) {
         if (message['command'] == 'loadSuite') {
           final int channelId = message['channel'] as int;
@@ -205,7 +198,6 @@ MultiChannel<dynamic> _connectToServer() {
 ///
 /// [id] identifies the suite loaded in this iframe.
 StreamChannel<dynamic> _connectToIframe(String url, int id) {
-  hostLog('connect iframe with url: $url id: $id');
   final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
 
@@ -221,19 +213,16 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       'message',
       createDomEventListener((DomEvent event) {
         final DomMessageEvent message = event as DomMessageEvent;
-        hostLog('received dom message: $message');
         // A message on the Window can theoretically come from any website. It's
         // very unlikely that a malicious site would care about hacking someone's
         // unit tests, let alone be able to find the test server while it's
         // running, but it's good practice to check the origin anyway.
         if (message.origin != domWindow.location.origin) {
-          hostLog('mismatched origin');
           return;
         }
         message.stopPropagation();
 
         if (message.data == 'port') {
-          hostLog('received port');
           final DomMessagePort port = message.ports[0];
           domSubscriptions.add(
             DomSubscription(
@@ -247,7 +236,6 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
           port.start();
           streamSubscriptions.add(controller.local.stream.listen(port.postMessage));
         } else if (message.data['ready'] == true) {
-          hostLog('received ready');
           // This message indicates that the iframe is actively listening for
           // events, so the message channel's second port can now be transferred.
           final DomMessageChannel channel = createDomMessageChannel();
@@ -268,18 +256,14 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
 
           streamSubscriptions.add(controller.local.stream.listen(channel.port1.postMessage));
         } else if (message.data['exception'] == true) {
-          hostLog('received exception');
           // This message from `dart.js` indicates that an exception occurred
           // loading the test.
           controller.local.sink.add(message.data['data']);
-        } else {
-          hostLog('message fell through');
         }
       }),
     ),
   );
 
-  hostLog('loading url: $url $id');
   iframe
     ..src = url
     ..width = '1000'

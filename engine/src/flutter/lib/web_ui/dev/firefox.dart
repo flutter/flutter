@@ -94,7 +94,6 @@ user_pref("browser.aboutwelcome.enabled", false);
           '-new-window',
           '-new-instance',
           '--start-debugger-server $kDevtoolsPort',
-          '-MOZ_LOG=Process:5',
         ];
 
         final Process process = await Process.start(installation.executable, args);

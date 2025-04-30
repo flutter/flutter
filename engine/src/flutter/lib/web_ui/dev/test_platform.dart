@@ -1088,9 +1088,6 @@ class BrowserManager {
       case 'resume':
         _pauseCompleter?.complete();
 
-      case 'log':
-        print('[host]: ${message['text']}');
-
       default:
         // Unreachable.
         assert(false);
