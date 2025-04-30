@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -3477,6 +3478,49 @@ void main() {
       matching: find.byWidgetPredicate((_) => true),
     );
     expect(tester.element(textAncestors.first).size, equals(tooltipConstraints.biggest));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/167359.
+  testWidgets('Tooltip does not show while transitioning from another page', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            leading: const Center(child: Tooltip(message: 'Hello', child: Text('World'))),
+          ),
+          body: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      CupertinoPageRoute<void>(
+                        builder:
+                            (BuildContext context) =>
+                                Scaffold(appBar: AppBar(title: const Text('Second Page'))),
+                      ),
+                    ),
+                child: const Text('Go to Second Page'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go to Second Page'));
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await tester.tap(find.byType(BackButton));
+    await tester.pump(const Duration(milliseconds: 250));
+    await gesture.moveTo(tester.getCenter(find.text('World')));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
   });
 }
 

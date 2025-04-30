@@ -564,6 +564,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       if (!_visible) {
         return;
       }
+
       _controller.forward();
       _timer?.cancel();
       _timer = showDuration == null ? null : Timer(showDuration, _controller.reverse);
@@ -927,8 +928,16 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: widget.child,
     );
 
+    bool visible = _visible;
+
+    // Check if there's an ongoing route transition
+    final ModalRoute<dynamic>? route = ModalRoute.of(context);
+    if (route?.secondaryAnimation != null && route!.secondaryAnimation!.isAnimating) {
+      visible = false;
+    }
+
     // Only check for gestures if tooltip should be visible.
-    if (_visible) {
+    if (visible) {
       result = _ExclusiveMouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
