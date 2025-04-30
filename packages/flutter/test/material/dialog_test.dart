@@ -2890,6 +2890,7 @@ void main() {
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
   });
+
   testWidgets('Dialog respects the given constraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildAppWithDialog(
