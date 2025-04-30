@@ -17,7 +17,7 @@ void main() {
     int? actualValue;
     ToggleableStateMixin? actualState;
 
-    Widget _buildWidget() {
+    Widget buildWidget() {
       return RawRadio<int>(
         value: 0,
         groupValue: actualValue,
@@ -35,13 +35,13 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(_buildWidget());
+    await tester.pumpWidget(buildWidget());
     expect(actualState!.tristate, isTrue);
     expect(actualState!.value, isFalse);
 
     await tester.tap(find.byType(RawRadio<int>));
     // Rebuilds with new group value
-    await tester.pumpWidget(_buildWidget());
+    await tester.pumpWidget(buildWidget());
 
     expect(actualValue, 0);
     expect(actualState!.value, isTrue);
