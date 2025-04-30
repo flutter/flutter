@@ -33,10 +33,7 @@ namespace impeller {
 class PathReceiver {
  public:
   virtual ~PathReceiver() = default;
-  virtual void RecommendSizes(size_t verb_count, size_t point_count) {}
-  virtual void RecommendBounds(const Rect& bounds) {}
-  virtual void SetPathInfo(FillType fill_type, bool is_convex) = 0;
-  virtual void MoveTo(const Point& p2) = 0;
+  virtual void MoveTo(const Point& p2, bool will_be_closed) = 0;
   virtual void LineTo(const Point& p2) = 0;
   virtual void QuadTo(const Point& cp, const Point& p2) = 0;
   virtual bool ConicTo(const Point& cp, const Point& p2, Scalar weight) {

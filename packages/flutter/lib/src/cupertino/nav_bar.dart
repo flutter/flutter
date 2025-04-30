@@ -893,6 +893,12 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// To add a widget to the bottom of the nav bar, wrap it with [PreferredSize] and provide its fully extended size.
+///
+/// ** See code in examples/api/lib/cupertino/nav_bar/cupertino_sliver_nav_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -3001,7 +3007,10 @@ class _NavigationBarComponentsTransition {
     if (topNavBarBottom == null ||
         topNavBarBottom.child is! _InactiveSearchableBottom ||
         bottomNavBarBottom.child is! _InactiveSearchableBottom) {
-      child = FadeTransition(opacity: fadeOutBy(0.8, curve: animationCurve), child: child);
+      child = FadeTransition(
+        opacity: fadeOutBy(0.8, curve: animationCurve),
+        child: ClipRect(child: child),
+      );
     }
 
     return PositionedTransition(
@@ -3325,7 +3334,10 @@ class _NavigationBarComponentsTransition {
     if (bottomNavBarBottom == null ||
         bottomNavBarBottom.child is! _InactiveSearchableBottom ||
         topNavBarBottom.child is! _InactiveSearchableBottom) {
-      child = FadeTransition(opacity: fadeInFrom(0.0, curve: animationCurve), child: child);
+      child = FadeTransition(
+        opacity: fadeInFrom(0.0, curve: animationCurve),
+        child: ClipRect(child: child),
+      );
     }
 
     return PositionedTransition(

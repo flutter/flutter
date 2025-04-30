@@ -495,6 +495,7 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
+    expect(editableText.hintLocales, isNull);
   });
 
   testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (
@@ -1271,6 +1272,39 @@ void main() {
       tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'],
       enableIMEPersonalizedLearning,
     );
+  });
+
+  testWidgets('hintLocales is sent to the engine', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              hintLocales: hintLocales,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+
+    // hintLocales is sent to the engine as a list of language tags.
+    final List<String> localesLanguageTags =
+        hintLocales.map((Locale locale) => locale.toLanguageTag()).toList();
+    expect(tester.testTextInput.setClientArgs!['hintLocales'], localesLanguageTags);
   });
 
   group('smartDashesType and smartQuotesType', () {
@@ -8814,6 +8848,82 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
+  );
+
+  testWidgets(
+    'single-line field cannot be scrolled with touch on iOS',
+    (WidgetTester tester) async {
+      controller.text = 'This is a long string that should overflow the TextField.';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, initialScrollOffset);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'multi-line field can scroll with touch on iOS',
+    (WidgetTester tester) async {
+      // 3 lines of text, where the last line overflows and requires scrolling.
+      controller.text = 'XXXXX\nXXXXX\nXXXXX';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                maxLines: 2,
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
