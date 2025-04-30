@@ -481,9 +481,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.menuMaxHeight,
     required this.enableFeedback,
     this.borderRadius,
-    bool barrierDismissible = true,
-  }) : itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension),
-       _barrierDismissible = barrierDismissible;
+    this.barrierDismissible = true,
+  }) : itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
   final List<_MenuItem<T>> items;
   final EdgeInsetsGeometry padding;
@@ -498,7 +497,6 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final double? menuMaxHeight;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
-  final bool _barrierDismissible;
 
   final List<double> itemHeights;
 
@@ -506,7 +504,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   Duration get transitionDuration => _kDropdownMenuDuration;
 
   @override
-  bool get barrierDismissible => _barrierDismissible;
+  final bool barrierDismissible;
 
   @override
   Color? get barrierColor => null;
