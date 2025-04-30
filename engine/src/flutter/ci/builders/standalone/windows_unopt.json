@@ -21,8 +21,7 @@
         "debug",
         "--unoptimized",
         "--prebuilt-dart-sdk",
-        "--rbe",
-        "--no-goma"
+        "--rbe"
     ],
     "name": "ci\\host_debug_unopt",
     "description": "Builds a debug mode unopt engine for Windows and runs unit tests.",

@@ -17,8 +17,7 @@
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
                 "--dart-debug",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/host_debug_unopt",
             "description": "Builds a debug mode unopt Linux engine. Builds and runs many tests and lints.",
@@ -123,7 +122,6 @@
                 "--target-dir",
                 "ci/host_debug_unopt_impeller_tests",
                 "--rbe",
-                "--no-goma",
                 "--use-glfw-swiftshader"
             ],
             "name": "ci/host_debug_unopt_impeller_tests",
@@ -166,8 +164,7 @@
                 "--target-dir",
                 "ci/android_embedder_debug_unopt",
                 "--unoptimized",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_embedder_debug_unopt",
             "description": "Builds embedder artifacts targeting 32-bit arm Android.",
@@ -194,8 +191,7 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--enable-vulkan-validation-layers",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
             "description": "Builds a debug mode engine targeting 64-bit arm Android with Vulkan validation layers.",
@@ -226,8 +222,7 @@
                 "ci/android_debug_unopt",
                 "--android",
                 "--unoptimized",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_debug_unopt",
             "description": "Builds a debug mode unopt engine targeting 32-bit arm Android. Runs host-side Java unit tests and malioc.",
@@ -283,8 +278,7 @@
                 "--android",
                 "--android-cpu=arm",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_debug_test",
             "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
@@ -334,8 +328,7 @@
                 "debug",
                 "--no-prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/host_debug_no_prebuilt_dart_sdk",
             "description": "Produces debug mode Linux host-side tooling for Linux without use of prebuilt dart sdk artifacts.",

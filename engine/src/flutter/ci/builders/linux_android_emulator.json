@@ -15,7 +15,6 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/android_emulator_debug_x64"
             ],
@@ -84,7 +83,6 @@
                 "--android-cpu=x86",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/android_emulator_debug_x86"
             ],

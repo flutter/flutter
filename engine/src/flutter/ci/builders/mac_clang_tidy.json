@@ -19,7 +19,6 @@
                 "--target-dir",
                 "ci/host_debug_clang_tidy",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_clang_tidy",
@@ -53,7 +52,6 @@
                 "--target-dir",
                 "ci/ios_debug_sim_clang_tidy",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_clang_tidy",
@@ -101,7 +99,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -156,7 +153,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -211,7 +207,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -266,7 +261,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -322,7 +316,6 @@
                         "--target-dir",
                         "ci/host_debug_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },
@@ -339,7 +332,6 @@
                         "--target-dir",
                         "ci/ios_debug_sim_clang_tidy",
                         "--rbe",
-                        "--no-goma",
                         "--xcode-symlinks"
                     ]
                 },

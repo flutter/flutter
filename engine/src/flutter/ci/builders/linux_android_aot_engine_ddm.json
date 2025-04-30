@@ -39,8 +39,7 @@
                 "--android-cpu",
                 "arm64",
                 "--gn-args=dart_dynamic_modules=true",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_release_arm64_ddm",
             "description": "Produces experimental release mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
@@ -95,8 +94,7 @@
                 "--android-cpu",
                 "x64",
                 "--gn-args=dart_dynamic_modules=true",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_release_x64_ddm",
             "description": "Produces experimental release mode artifacts to target x64 Android from a Linux host with dynamic modules enabled.",

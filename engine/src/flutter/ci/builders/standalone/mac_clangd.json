@@ -15,7 +15,6 @@
     "--prebuilt-dart-sdk",
     "--no-lto",
     "--no-rbe",
-    "--no-goma",
     "--xcode-symlinks",
     "--target-dir",
     "ci/mac_unopt_debug_no_rbe"

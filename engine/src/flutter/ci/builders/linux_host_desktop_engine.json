@@ -35,7 +35,6 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_debug_desktop"
             ],
@@ -76,7 +75,6 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_profile_desktop"
             ],
@@ -116,7 +114,6 @@
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--target-dir",
                 "ci/host_release_desktop"
             ],

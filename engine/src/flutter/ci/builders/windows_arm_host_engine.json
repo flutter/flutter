@@ -35,7 +35,6 @@
                 "--no-lto",
                 "--windows-cpu",
                 "arm64",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_debug_arm64",
@@ -82,7 +81,6 @@
                 "--no-lto",
                 "--windows-cpu",
                 "arm64",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_profile_arm64",
@@ -126,7 +124,6 @@
                 "--no-lto",
                 "--windows-cpu",
                 "arm64",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_release_arm64",

@@ -15,8 +15,7 @@
       "gn": [
         "--web",
         "--runtime-mode=release",
-        "--no-rbe",
-        "--no-goma"
+        "--no-rbe"
       ],
       "ninja": {
         "config": "wasm_release",

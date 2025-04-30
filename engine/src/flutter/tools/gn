@@ -1007,8 +1007,6 @@ def parse_args(args):
       '--rbe-dir', default=None, type=str, help='The location of the reclient binaries.'
   )
 
-  parser.add_argument('--goma', default=None, action='store_true')
-  parser.add_argument('--no-goma', dest='goma', action='store_false')
   parser.add_argument(
       '--xcode-symlinks',
       action='store_true',

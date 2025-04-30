@@ -38,8 +38,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/linux_profile_arm64",
             "description": "Produces profile mode artifacts to target arm64 Linux from a Linux host.",
@@ -83,8 +82,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/linux_debug_arm64",
             "description": "Produces debug mode artifacts to target arm64 Linux from a Linux host.",
@@ -128,8 +126,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/linux_release_arm64",
             "description": "Produces release mode artifacts to target arm64 Linux from a Linux host.",
