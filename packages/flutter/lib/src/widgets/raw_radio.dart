@@ -11,7 +11,7 @@ import 'ticker_provider.dart';
 import 'toggleable.dart';
 import 'widget_state.dart';
 
-/// Signature for [RawRadio.builder]
+/// Signature for [RawRadio.builder].
 ///
 /// The builder can use `state` to determine the state of the radio and build
 /// the visual.
