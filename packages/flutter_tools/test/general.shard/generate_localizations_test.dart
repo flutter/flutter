@@ -76,7 +76,6 @@ void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
   late Artifacts artifacts;
-  late ProcessManager processManager;
   late String defaultL10nPathString;
   late String syntheticPackagePath;
   late String syntheticL10nPackagePath;
@@ -152,7 +151,6 @@ void main() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    processManager = FakeProcessManager.empty();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
@@ -757,7 +755,7 @@ flutter:
         projectDir: projectDir,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
     });
 
@@ -780,7 +778,7 @@ flutter:
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
     });
 
@@ -809,7 +807,7 @@ flutter:
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
@@ -880,7 +878,7 @@ flutter:
             projectDir: fs.currentDirectory,
             dependenciesDir: fs.currentDirectory,
             artifacts: artifacts,
-            processManager: processManager,
+            processManager: FakeProcessManager.any(),
           ),
           throwsToolExit(
             message:
@@ -916,7 +914,7 @@ flutter:\r
           projectDir: fs.currentDirectory,
           dependenciesDir: fs.currentDirectory,
           artifacts: artifacts,
-          processManager: processManager,
+          processManager: FakeProcessManager.any(),
         );
         final String content = getInPackageGeneratedFileContent(locale: 'en');
         expect(content, contains('\r\n'));
@@ -940,7 +938,7 @@ flutter:\r
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -973,7 +971,7 @@ class AppLocalizationsEn extends AppLocalizations {
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
