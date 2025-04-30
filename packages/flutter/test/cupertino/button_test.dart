@@ -966,11 +966,17 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Mouse cursor resolves in enabled/disabled states', (WidgetTester tester) async {
+  testWidgets('Mouse cursor resolves in enabled/disabled/pressed/focused states', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    addTearDown(focusNode.dispose);
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoButton(
+            focusNode: focusNode,
             onPressed: enabled ? () {} : null,
             mouseCursor: cursor,
             child: const Text('Tap Me'),
@@ -984,6 +990,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
+    addTearDown(gesture.removePointer);
     await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
     await tester.pump();
@@ -992,17 +999,34 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
-    await gesture.removePointer();
 
     // Test disabled state mouse cursor
     await tester.pumpWidget(buildButton(enabled: false, cursor: const _ButtonMouseCursor()));
-    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
-    await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.forbidden,
     );
+
+    // Test focused state mouse cursor
+    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.copy,
+    );
+    focusNode.unfocus();
+
+    // Test pressed state mouse cursor
+    await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.down(tester.getCenter(find.byType(CupertinoButton)));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+    await gesture.up();
     await gesture.removePointer();
   });
 }
@@ -1016,10 +1040,12 @@ class _ButtonMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return SystemMouseCursors.forbidden;
-    }
-    return SystemMouseCursors.basic;
+    return const WidgetStateProperty<MouseCursor>.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.disabled: SystemMouseCursors.forbidden,
+      WidgetState.pressed: SystemMouseCursors.grab,
+      WidgetState.focused: SystemMouseCursors.copy,
+      WidgetState.any: SystemMouseCursors.basic,
+    }).resolve(states);
   }
 
   @override
