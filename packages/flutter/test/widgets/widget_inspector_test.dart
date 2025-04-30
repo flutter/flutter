@@ -275,6 +275,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     tearDown(() async {
       service.resetAllState();
 
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+      binding.debugShowWidgetInspectorOverride = false;
+      binding.debugWillManuallyInjectWidgetInspector = false;
+
       if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
