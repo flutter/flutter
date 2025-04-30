@@ -424,6 +424,78 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, StrokedRectsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kPurple());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(20.0f);
+
+  DlPaint thin_paint = paint;
+  thin_paint.setColor(DlColor::kYellow());
+  thin_paint.setStrokeWidth(1.0f);
+
+  DlRect rect = DlRect::MakeLTRB(10, 10, 90, 90);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawRect(rect.Shift({100, 100}), paint);
+  builder.DrawRect(rect.Shift({100, 100}), thin_paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawRect(rect.Shift({100, 300}), paint);
+  builder.DrawRect(rect.Shift({100, 300}), thin_paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 + flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({100, 500}), paint);
+  builder.DrawRect(rect.Shift({100, 500}), thin_paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 - flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({300, 500}), paint);
+  builder.DrawRect(rect.Shift({300, 500}), thin_paint);
+
+  paint.setStrokeWidth(120.0f);
+  paint.setColor(DlColor::kBlue());
+  rect = rect.Expand(-20);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawRect(rect.Shift({500, 100}), paint);
+  builder.DrawRect(rect.Shift({500, 100}), thin_paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawRect(rect.Shift({500, 300}), paint);
+  builder.DrawRect(rect.Shift({500, 300}), thin_paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 + flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({500, 500}), paint);
+  builder.DrawRect(rect.Shift({500, 500}), thin_paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 - flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({700, 500}), paint);
+  builder.DrawRect(rect.Shift({700, 500}), thin_paint);
+
+  DlPaint round_mock_paint;
+  round_mock_paint.setColor(DlColor::kGreen());
+  round_mock_paint.setDrawStyle(DlDrawStyle::kFill);
+
+  Scalar x = 900;
+  Scalar y = 50;
+  for (int i = 1; i < 15; i++) {
+    paint.setStrokeWidth(i);
+    paint.setColor(DlColor::kOrange());
+    paint.setStrokeJoin(DlStrokeJoin::kRound);
+    builder.DrawRect(DlRect::MakeXYWH(x, y, 40, 40), paint);
+    y += 42 + i;
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
