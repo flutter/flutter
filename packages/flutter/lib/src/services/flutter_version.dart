@@ -16,8 +16,8 @@ abstract final class FlutterVersion {
   const FlutterVersion._();
 
   /// The value is a [semantic versioning](https://semver.org/) string representing the
-  /// version of the current Flutter version, possibly followed by whitespace and other
-  /// version and build details.
+  /// version of Flutter used to compile the app, possibly followed by whitespace and
+  /// other version and build details.
   static const String? version =
       bool.hasEnvironment('FLUTTER_VERSION') ? String.fromEnvironment('FLUTTER_VERSION') : null;
 
@@ -41,9 +41,12 @@ abstract final class FlutterVersion {
           ? String.fromEnvironment('FLUTTER_ENGINE_REVISION')
           : null;
 
+  // This is included since [Platform.version](https://api.dart.dev/stable/dart-io/Platform/version.html)
+  // is not included on web platforms.
+  //
   /// The value is a [semantic versioning](https://semver.org/) string representing the
-  /// version of the current Dart runtime, possibly followed by whitespace and other
-  /// version and build details.
+  /// version of the Dart runtime used to compile the app, possibly followed by whitespace
+  /// and other version and build details.
   ///
   /// On `dart:io` platforms it is more reliable to use [Platform.version].
   static const String? dartVersion =
