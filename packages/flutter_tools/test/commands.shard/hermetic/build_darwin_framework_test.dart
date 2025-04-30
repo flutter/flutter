@@ -555,7 +555,7 @@ void main() {
               expect(
                 podspecContents,
                 contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/FlutterMacOS.framework.zip'",
+                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/framework.zip'",
                 ),
               );
             },
@@ -583,7 +583,7 @@ void main() {
               expect(
                 podspecContents,
                 contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/FlutterMacOS.framework.zip'",
+                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/framework.zip'",
                 ),
               );
             },
@@ -611,7 +611,7 @@ void main() {
               expect(
                 podspecContents,
                 contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/FlutterMacOS.framework.zip'",
+                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/framework.zip'",
                 ),
               );
             },
