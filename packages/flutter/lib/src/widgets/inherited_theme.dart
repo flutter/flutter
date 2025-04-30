@@ -30,6 +30,7 @@ abstract interface class ThemeSelector<T, V> {
 }
 
 /// A [ThemeSelector] implementation that wraps a function.
+@immutable
 class _FunctionThemeSelector<T, V> implements ThemeSelector<T, V> {
   const _FunctionThemeSelector(this._selector);
 
@@ -37,6 +38,20 @@ class _FunctionThemeSelector<T, V> implements ThemeSelector<T, V> {
 
   @override
   V selectFrom(T themeData) => _selector(themeData);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _FunctionThemeSelector<T, V> && identical(other._selector, _selector);
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, _selector);
 }
 
 // Examples can assume:
