@@ -28,8 +28,6 @@ using ::testing::Return;
 using ::testing::SetArgPointee;
 using ::testing::StrEq;
 
-MockWindowsProcTable* g_windows_proc_table = nullptr;
-
 class FlutterWindowsDisplayMonitorTest : public WindowsTest {};
 
 // Test that the display monitor correctly handles multiple monitors
