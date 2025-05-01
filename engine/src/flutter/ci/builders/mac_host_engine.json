@@ -44,8 +44,7 @@
             "ninja": {
                 "config": "ci/host_debug_framework",
                 "targets": [
-                    "flutter/build/archives:flutter_embedder_framework",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                    "flutter/build/archives:flutter_embedder_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -282,7 +281,6 @@
             "ninja": {
                 "config": "ci/host_profile_framework",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -451,7 +449,6 @@
             "ninja": {
                 "config": "ci/host_release_framework",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -628,8 +625,7 @@
             "ninja": {
                 "config": "ci/mac_debug_framework_arm64",
                 "targets": [
-                    "flutter/build/archives:flutter_embedder_framework",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
+                    "flutter/build/archives:flutter_embedder_framework"
                 ]
             },
             "postsubmit_overrides": {
@@ -805,7 +801,6 @@
             "ninja": {
                 "config": "ci/mac_profile_framework_arm64",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
            "postsubmit_overrides": {
@@ -986,7 +981,6 @@
             "ninja": {
                 "config": "ci/mac_release_framework_arm64",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
            "postsubmit_overrides": {
@@ -1180,21 +1174,6 @@
         {
             "source": "out/debug/framework/FlutterEmbedder.framework.zip",
             "destination": "darwin-x64/FlutterEmbedder.framework.zip",
-            "realm": "production"
-        },
-        {
-            "source": "out/debug/framework/FlutterMacOS.framework.zip",
-            "destination": "darwin-x64/FlutterMacOS.framework.zip",
-            "realm": "production"
-        },
-        {
-            "source": "out/profile/framework/FlutterMacOS.framework.zip",
-            "destination": "darwin-x64-profile/FlutterMacOS.framework.zip",
-            "realm": "production"
-        },
-        {
-            "source": "out/release/framework/FlutterMacOS.framework.zip",
-            "destination": "darwin-x64-release/FlutterMacOS.framework.zip",
             "realm": "production"
         },
         {
