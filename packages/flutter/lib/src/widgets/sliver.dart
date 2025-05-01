@@ -1480,10 +1480,10 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// preserve the state, each item is wrapped in a [KeepAlive] widget, with the
 /// keepAlive parameter set based on the item’s index:
 ///
-/// - For even-indexed items, keepAlive: true, so their state is preserved even
-/// when scrolled off-screen.
-/// - For odd-indexed items, keepAlive: false, so their state is discarded when
-/// they are no longer visible.
+/// - For even-indexed items, `keepAlive: true`, so their state is preserved
+///   even when scrolled off-screen.
+/// - For odd-indexed items, `keepAlive: false`, so their state is discarded
+///   when they are no longer visible.
 ///
 /// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
 /// {@end-tool}
