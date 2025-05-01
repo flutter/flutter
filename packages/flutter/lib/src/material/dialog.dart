@@ -248,7 +248,7 @@ class Dialog extends StatelessWidget {
 
   /// Constrains the size of the [Dialog].
   ///
-  /// If this property is null, then
+  /// By default it is
   /// ```dart
   /// const BoxConstraints(minWidth: 280.0)
   /// ```
