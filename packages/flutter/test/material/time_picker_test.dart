@@ -2078,6 +2078,8 @@ void main() {
         expect(minuteField.focusNode!.hasFocus, isFalse);
       });
 
+      // This test is skipped on non-web platforms because the select all behavior
+      // when pressing the TAB key is specific to web environments.
       testWidgets('TAB key selects text in hour and minute fields on the web', (
         WidgetTester tester,
       ) async {
