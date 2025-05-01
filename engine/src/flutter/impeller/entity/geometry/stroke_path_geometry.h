@@ -7,19 +7,14 @@
 
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/geometry/path_source.h"
 
 namespace impeller {
 
 /// @brief A geometry that is created from a stroked path object.
-class StrokePathGeometry final : public Geometry {
+class StrokePathSourceGeometry : public Geometry {
  public:
-  StrokePathGeometry(const flutter::DlPath& path,
-                     Scalar stroke_width,
-                     Scalar miter_limit,
-                     Cap stroke_cap,
-                     Join stroke_join);
-
-  ~StrokePathGeometry() override;
+  ~StrokePathSourceGeometry() override;
 
   Scalar GetStrokeWidth() const;
 
@@ -30,6 +25,14 @@ class StrokePathGeometry final : public Geometry {
   Join GetStrokeJoin() const;
 
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
+
+ protected:
+  StrokePathSourceGeometry(Scalar stroke_width,
+                           Scalar miter_limit,
+                           Cap stroke_cap,
+                           Join stroke_join);
+
+  virtual const PathSource& GetSource() const = 0;
 
  private:
   // |Geometry|
@@ -57,15 +60,59 @@ class StrokePathGeometry final : public Geometry {
 
   bool SkipRendering() const;
 
-  flutter::DlPath path_;
   Scalar stroke_width_;
   Scalar miter_limit_;
   Cap stroke_cap_;
   Join stroke_join_;
 
-  StrokePathGeometry(const StrokePathGeometry&) = delete;
+  StrokePathSourceGeometry(const StrokePathSourceGeometry&) = delete;
 
-  StrokePathGeometry& operator=(const StrokePathGeometry&) = delete;
+  StrokePathSourceGeometry& operator=(const StrokePathSourceGeometry&) = delete;
+};
+
+class StrokePathGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokePathGeometry(const flutter::DlPath& path,
+                     Scalar stroke_width,
+                     Scalar miter_limit,
+                     Cap stroke_cap,
+                     Join stroke_join);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const flutter::DlPath path_;
+};
+
+class StrokeOvalGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokeOvalGeometry(const Rect& rect,
+                     Scalar stroke_width,
+                     Scalar miter_limit,
+                     Cap stroke_cap,
+                     Join stroke_join);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const OvalPathSource oval_source_;
+};
+
+class StrokeRoundRectGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokeRoundRectGeometry(const RoundRect& rect,
+                          Scalar stroke_width,
+                          Scalar miter_limit,
+                          Cap stroke_cap,
+                          Join stroke_join);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const RoundRectPathSource round_rect_source_;
 };
 
 }  // namespace impeller

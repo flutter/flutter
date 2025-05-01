@@ -673,7 +673,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 }  // namespace
 
 // Private for benchmarking and debugging
-std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
+std::vector<Point> StrokePathSourceGeometry::GenerateSolidStrokeVertices(
     const PathSource& source,
     Scalar stroke_width,
     Scalar miter_limit,
@@ -692,40 +692,39 @@ std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
   return points;
 }
 
-StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
-                                       Scalar stroke_width,
-                                       Scalar miter_limit,
-                                       Cap stroke_cap,
-                                       Join stroke_join)
-    : path_(path),
-      stroke_width_(stroke_width),
+StrokePathSourceGeometry::StrokePathSourceGeometry(Scalar stroke_width,
+                                                   Scalar miter_limit,
+                                                   Cap stroke_cap,
+                                                   Join stroke_join)
+    : stroke_width_(stroke_width),
       miter_limit_(miter_limit),
       stroke_cap_(stroke_cap),
       stroke_join_(stroke_join) {}
 
-StrokePathGeometry::~StrokePathGeometry() = default;
+StrokePathSourceGeometry::~StrokePathSourceGeometry() = default;
 
-Scalar StrokePathGeometry::GetStrokeWidth() const {
+Scalar StrokePathSourceGeometry::GetStrokeWidth() const {
   return stroke_width_;
 }
 
-Scalar StrokePathGeometry::GetMiterLimit() const {
+Scalar StrokePathSourceGeometry::GetMiterLimit() const {
   return miter_limit_;
 }
 
-Cap StrokePathGeometry::GetStrokeCap() const {
+Cap StrokePathSourceGeometry::GetStrokeCap() const {
   return stroke_cap_;
 }
 
-Join StrokePathGeometry::GetStrokeJoin() const {
+Join StrokePathSourceGeometry::GetStrokeJoin() const {
   return stroke_join_;
 }
 
-Scalar StrokePathGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
+Scalar StrokePathSourceGeometry::ComputeAlphaCoverage(
+    const Matrix& transform) const {
   return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
 }
 
-GeometryResult StrokePathGeometry::GetPositionBuffer(
+GeometryResult StrokePathSourceGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
@@ -748,7 +747,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
       scale * stroke_width * 0.5f);
   StrokePathSegmentReceiver::GenerateStrokeVertices(
-      position_writer, path_, stroke_width, miter_limit_, stroke_join_,
+      position_writer, GetSource(), stroke_width, miter_limit_, stroke_join_,
       stroke_cap_, scale, trigs);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
@@ -797,13 +796,13 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
                         .mode = GeometryResult::Mode::kPreventOverdraw};
 }
 
-GeometryResult::Mode StrokePathGeometry::GetResultMode() const {
+GeometryResult::Mode StrokePathSourceGeometry::GetResultMode() const {
   return GeometryResult::Mode::kPreventOverdraw;
 }
 
-std::optional<Rect> StrokePathGeometry::GetCoverage(
+std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
     const Matrix& transform) const {
-  auto path_bounds = path_.GetBounds();
+  auto path_bounds = GetSource().GetBounds();
   if (path_bounds.IsEmpty()) {
     return std::nullopt;
   }
@@ -823,6 +822,51 @@ std::optional<Rect> StrokePathGeometry::GetCoverage(
   Scalar min_size = kMinStrokeSize / max_basis;
   max_radius *= std::max(stroke_width_, min_size);
   return path_bounds.Expand(max_radius).TransformBounds(transform);
+}
+
+StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
+                                       Scalar stroke_width,
+                                       Scalar miter_limit,
+                                       Cap stroke_cap,
+                                       Join stroke_join)
+    : StrokePathSourceGeometry(stroke_width,
+                               miter_limit,
+                               stroke_cap,
+                               stroke_join),
+      path_(path) {}
+
+const PathSource& StrokePathGeometry::GetSource() const {
+  return path_;
+}
+
+StrokeOvalGeometry::StrokeOvalGeometry(const Rect& bounds,
+                                       Scalar stroke_width,
+                                       Scalar miter_limit,
+                                       Cap stroke_cap,
+                                       Join stroke_join)
+    : StrokePathSourceGeometry(stroke_width,
+                               miter_limit,
+                               stroke_cap,
+                               stroke_join),
+      oval_source_(bounds) {}
+
+const PathSource& StrokeOvalGeometry::GetSource() const {
+  return oval_source_;
+}
+
+StrokeRoundRectGeometry::StrokeRoundRectGeometry(const RoundRect& round_rect,
+                                                 Scalar stroke_width,
+                                                 Scalar miter_limit,
+                                                 Cap stroke_cap,
+                                                 Join stroke_join)
+    : StrokePathSourceGeometry(stroke_width,
+                               miter_limit,
+                               stroke_cap,
+                               stroke_join),
+      round_rect_source_(round_rect) {}
+
+const PathSource& StrokeRoundRectGeometry::GetSource() const {
+  return round_rect_source_;
 }
 
 }  // namespace impeller

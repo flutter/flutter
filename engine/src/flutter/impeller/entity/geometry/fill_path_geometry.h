@@ -14,15 +14,17 @@
 namespace impeller {
 
 /// @brief A geometry that is created from a filled path object.
-class FillPathGeometry final : public Geometry {
+class FillPathSourceGeometry : public Geometry {
  public:
-  explicit FillPathGeometry(const flutter::DlPath& path,
-                            std::optional<Rect> inner_rect = std::nullopt);
-
-  ~FillPathGeometry() override;
+  ~FillPathSourceGeometry() override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+
+ protected:
+  explicit FillPathSourceGeometry(std::optional<Rect> inner_rect);
+
+  virtual const PathSource& GetSource() const = 0;
 
  private:
   // |Geometry|
@@ -36,12 +38,34 @@ class FillPathGeometry final : public Geometry {
   // |Geometry|
   GeometryResult::Mode GetResultMode() const override;
 
-  flutter::DlPath path_;
   std::optional<Rect> inner_rect_;
 
-  FillPathGeometry(const FillPathGeometry&) = delete;
+  FillPathSourceGeometry(const FillPathSourceGeometry&) = delete;
 
-  FillPathGeometry& operator=(const FillPathGeometry&) = delete;
+  FillPathSourceGeometry& operator=(const FillPathSourceGeometry&) = delete;
+};
+
+class FillPathGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit FillPathGeometry(const flutter::DlPath& path,
+                            std::optional<Rect> inner_rect = std::nullopt);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const flutter::DlPath path_;
+};
+
+class FillRoundRectGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit FillRoundRectGeometry(const RoundRect& round_rect);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const RoundRectPathSource round_rect_source_;
 };
 
 }  // namespace impeller

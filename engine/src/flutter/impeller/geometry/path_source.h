@@ -53,6 +53,57 @@ class PathSource {
   virtual void Dispatch(PathReceiver& receiver) const = 0;
 };
 
+template <class T>
+class RectPathSource : public PathSource {
+ public:
+  explicit RectPathSource(const TRect<T>& r) : rect_(r) {}
+
+  // |PathSource|
+  bool IsConvex() const override { return true; }
+
+  // |PathSource|
+  FillType GetFillType() const override { return FillType::kNonZero; }
+
+  // |PathSource|
+  Rect GetBounds() const override { return rect_; }
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override {
+    receiver.MoveTo(rect_.GetLeftTop(), true);
+    receiver.LineTo(rect_.GetRightTop());
+    receiver.LineTo(rect_.GetRightBottom());
+    receiver.LineTo(rect_.GetLeftBottom());
+    receiver.LineTo(rect_.GetLeftTop());
+    receiver.Close();
+    receiver.PathEnd();
+  }
+
+ private:
+  const Rect rect_;
+};
+
+class OvalPathSource : public PathSource {
+ public:
+  explicit OvalPathSource(const Rect& bounds);
+
+  ~OvalPathSource();
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const Rect bounds_;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
