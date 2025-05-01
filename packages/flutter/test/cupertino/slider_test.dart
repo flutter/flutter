@@ -340,6 +340,56 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
+  testWidgets(
+    'Slider does not emit haptic feedback on non-iOS platforms',
+    (WidgetTester tester) async {
+      final List<MethodCall> hapticLog = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        hapticLog.add(methodCall);
+        return null;
+      });
+
+      final Key sliderKey = UniqueKey();
+      double value = 0.0;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: CupertinoSlider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      const double unit = CupertinoThumbPainter.radius;
+      final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+      final Offset thumbCenter = topLeft + const Offset(unit, unit);
+
+      // Move the slider to the end.
+      await tester.dragFrom(thumbCenter, const Offset(1000.0, 0.0));
+
+      expect(value, equals(1.0));
+      expect(hapticLog, hasLength(0));
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
+  );
+
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
