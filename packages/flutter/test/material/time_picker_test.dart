@@ -2078,44 +2078,44 @@ void main() {
         expect(minuteField.focusNode!.hasFocus, isFalse);
       });
 
-      // This test is skipped on non-web platforms because the select all behavior
-      // when pressing the TAB key is specific to web environments.
-      testWidgets('TAB key selects text in hour and minute fields on the web', (
-        WidgetTester tester,
-      ) async {
-        await mediaQueryBoilerplate(
-          tester,
-          entryMode: TimePickerEntryMode.input,
-          materialType: materialType,
-        );
+      testWidgets(
+        'TAB key selects text in hour and minute fields on the web',
+        (WidgetTester tester) async {
+          await mediaQueryBoilerplate(
+            tester,
+            entryMode: TimePickerEntryMode.input,
+            materialType: materialType,
+          );
 
-        // Focus on the hour field.
-        final Finder hourField = find.byType(TextField).first;
-        await tester.tap(hourField);
-        await tester.pumpAndSettle();
+          // Focus on the hour field.
+          final Finder hourField = find.byType(TextField).first;
+          await tester.tap(hourField);
+          await tester.pumpAndSettle();
 
-        // Verify that the hour field is focused and its text is selected.
-        final TextField hourTextField = tester.widget(hourField);
-        expect(hourTextField.focusNode!.hasFocus, isTrue);
-        expect(hourTextField.controller!.selection.baseOffset, 0);
-        expect(
-          hourTextField.controller!.selection.extentOffset,
-          hourTextField.controller!.text.length,
-        );
+          // Verify that the hour field is focused and its text is selected.
+          final TextField hourTextField = tester.widget(hourField);
+          expect(hourTextField.focusNode!.hasFocus, isTrue);
+          expect(hourTextField.controller!.selection.baseOffset, 0);
+          expect(
+            hourTextField.controller!.selection.extentOffset,
+            hourTextField.controller!.text.length,
+          );
 
-        // Press TAB to move to the minute field.
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pumpAndSettle();
+          // Press TAB to move to the minute field.
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pumpAndSettle();
 
-        // Verify that the minute field is focused and its text is selected.
-        final Finder minuteField = find.byType(TextField).last;
-        final TextField minuteTextField = tester.widget(minuteField);
-        expect(minuteTextField.controller!.selection.baseOffset, 0);
-        expect(
-          minuteTextField.controller!.selection.extentOffset,
-          minuteTextField.controller!.text.length,
-        );
-      }, skip: !kIsWeb);
+          // Verify that the minute field is focused and its text is selected.
+          final Finder minuteField = find.byType(TextField).last;
+          final TextField minuteTextField = tester.widget(minuteField);
+          expect(minuteTextField.controller!.selection.baseOffset, 0);
+          expect(
+            minuteTextField.controller!.selection.extentOffset,
+            minuteTextField.controller!.text.length,
+          );
+        },
+        skip: !kIsWeb, // [intended] Web-specific behavior
+      );
     });
 
     group('Time picker - Restoration (${materialType.name})', () {
