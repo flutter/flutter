@@ -21,63 +21,56 @@ declare_args() {
   # Path to a specific version of the macOS SDK, not including a backslash at
   # the end.
   mac_sdk_path = ""
+
+  # Path to the iOS platform to use.
+  #
+  # When empty, this will use the default platform based on the value of
+  # use_ios_simulator.
+  ios_platform_path = ""
+
+  # Path to the iOS SDK to use.
+  #
+  # When empty this will use the default SDK based on the value of
+  # use_ios_simulator.
+  ios_sdk_path = ""
+
+  # Set to true when targeting a simulator build on iOS. False means that the
+  # target is for running on the device. The default value is to use the
+  # Simulator except when targeting GYP's Xcode builds (for compat with the
+  # existing GYP build).
+  use_ios_simulator = true
+
+  # Alias for use_ios_simulator used by Skia.
+  ios_use_simulator = true
+
+  # Version of iOS that we're targeting.
+  ios_deployment_target = "13.0"
+
+  # The path to the iOS device platform.
+  ios_device_platform_path = ""
+
+  # The path to the iOS simulator platform.
+  ios_simulator_platform_path = ""
+
+  # The path to the iOS device SDK.
+  ios_device_sdk_path = ""
+
+  # The path to the iOS simulator SDK.
+  ios_simulator_sdk_path = ""
+
+  # The path to iOS SDK Swift libraries.
+  ios_swift_lib_paths = []
+
+  # Version of iOS that we're targeting for tests.
+  ios_testing_deployment_target = "13.0"
 }
 
 # Must be set above or by gn.
 assert(mac_deployment_target != "")
-
-if (is_ios) {
-  # iOS-specific args.
-  declare_args() {
-    # Path to the iOS platform to use.
-    #
-    # When empty, this will use the default platform based on the value of
-    # use_ios_simulator.
-    ios_platform_path = ""
-
-    # Path to the iOS SDK to use.
-    #
-    # When empty this will use the default SDK based on the value of
-    # use_ios_simulator.
-    ios_sdk_path = ""
-
-    # Set to true when targeting a simulator build on iOS. False means that the
-    # target is for running on the device. The default value is to use the
-    # Simulator except when targeting GYP's Xcode builds (for compat with the
-    # existing GYP build).
-    use_ios_simulator = true
-
-    # Alias for use_ios_simulator used by Skia.
-    ios_use_simulator = true
-
-    # Version of iOS that we're targeting.
-    ios_deployment_target = "13.0"
-
-    # The path to the iOS device platform.
-    ios_device_platform_path = ""
-
-    # The path to the iOS simulator platform.
-    ios_simulator_platform_path = ""
-
-    # The path to the iOS device SDK.
-    ios_device_sdk_path = ""
-
-    # The path to the iOS simulator SDK.
-    ios_simulator_sdk_path = ""
-
-    # The path to iOS SDK Swift libraries.
-    ios_swift_lib_paths = []
-
-    # Version of iOS that we're targeting for tests.
-    ios_testing_deployment_target = "13.0"
-  }
-
-  # Must be set above or by gn.
-  assert(defined(use_ios_simulator))
-  assert(defined(ios_use_simulator))
-  assert(ios_deployment_target != "")
-  assert(ios_testing_deployment_target != "")
-}
+assert(defined(use_ios_simulator))
+assert(defined(ios_use_simulator))
+assert(ios_deployment_target != "")
+assert(ios_testing_deployment_target != "")
 
 # Run apple_sdk.gni to determine SDK paths if necessary.
 _need_apple_sdk_run = false
