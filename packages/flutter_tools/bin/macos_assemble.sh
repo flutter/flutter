@@ -26,7 +26,7 @@ BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 FLUTTER_ROOT="$BIN_DIR/../../.."
 DART="$FLUTTER_ROOT/bin/dart"
 
-# # Main entry point.
+# Main entry point.
 if [[ $# == 0 ]]; then
   "$DART" "$BIN_DIR/xcode_backend.dart" "build"
 else

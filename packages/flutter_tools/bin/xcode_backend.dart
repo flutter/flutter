@@ -110,7 +110,8 @@ class Context {
     stderr.writeln(message);
   }
 
-  /// Log message to stderr.
+  /// Log message appended with `warning:` to stderr.
+  /// This will display with a yellow warning icon in Xcode.
   void echoWarning(String message) {
     stderr.writeln('warning: $message');
   }
@@ -142,6 +143,12 @@ class Context {
     scriptOutputStream?.writeStringSync('$output\n');
   }
 
+  /// Parses and normalizes the build mode (debug, profile, release).
+  ///
+  /// Uses `FLUTTER_BUILD_MODE` (uncommon) if set, otherwise uses `CONFIGURATION`.
+  /// The `CONFIGURATION` may not match exactly since it can be named by the developer.
+  /// If the `FLUTTER_BUILD_MODE` and `CONFIGURATION` do not contain either
+  /// debug, profile, or release, print an error and exit the build.
   String parseFlutterBuildMode() {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
@@ -222,8 +229,14 @@ class Context {
     ]);
   }
 
-  // Adds the App.framework as an embedded binary and the flutter_assets as
-  // resources.
+  /// Embeds the App.framework, Flutter/FlutterMacOS.framework, and any native
+  /// asset frameworks into the app.
+  ///
+  /// On macOS, also codesigns the framework binaries. Codesigning occurs here rather
+  /// than during the Run Script `build` phase because the `EXPANDED_CODE_SIGN_IDENTITY`
+  /// is not passed in the build settings during the `build` phase for macOS.
+  ///
+  /// On iOS, also injects local network permissions into the app's Info.plist.
   void embedFlutterFrameworks() {
     final TargetPlatform platform = getPlatform();
 
@@ -257,9 +270,6 @@ class Context {
           '$xcodeFrameworksDir/',
         );
 
-        // Codesigning takes place during the embed phase instead of the build
-        // phase for macOS (compared to iOS) because the `EXPANDED_CODE_SIGN_IDENTITY`
-        // is not passed to the build phase for macOS.
         if (expandedCodeSignIdentity != null &&
             expandedCodeSignIdentity.isNotEmpty &&
             environment['CODE_SIGNING_REQUIRED'] != 'NO') {
@@ -271,8 +281,7 @@ class Context {
         }
     }
 
-    // Copy the native assets. These do not have to be codesigned here because,
-    // they are already codesigned in buildNativeAssetsMacOS.
+    // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     String projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
@@ -291,10 +300,6 @@ class Context {
         nativeAssetsPath,
         xcodeFrameworksDir,
       );
-
-      // Codesigning takes place during the embed phase instead of the build
-      // phase for macOS (compared to iOS) because the `EXPANDED_CODE_SIGN_IDENTITY`
-      // is not passed to the build phase for macOS.
       if (platform == TargetPlatform.macos &&
           expandedCodeSignIdentity != null &&
           expandedCodeSignIdentity.isNotEmpty &&
@@ -342,13 +347,14 @@ class Context {
     } else {
       basename = pathSegments.last;
     }
-    if (!basename.endsWith('.framework')) {
+    final int extensionIndex = basename.indexOf('.framework');
+    if (extensionIndex == -1) {
       return null;
     }
-    return basename.replaceAll('.framework', '');
+    return basename.substring(0, extensionIndex);
   }
 
-  // Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
+  /// Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
   void addVmServiceBonjourService() {
     // Skip adding Bonjour service settings when DISABLE_PORT_PUBLICATION is YES.
     // These settings are not needed if port publication is disabled.
@@ -430,6 +436,7 @@ class Context {
     }
   }
 
+  /// Calls `flutter assemble [buildMode]_unpack_[platform]` (e.g. `debug_unpack_ios`, `debug_unpack_macos`)
   void prepare() {
     // The "prepare" command runs in a pre-action script, which also runs when
     // using the Xcode/xcodebuild clean command. Skip if cleaning.
@@ -475,6 +482,8 @@ class Context {
     }
   }
 
+  /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
+  /// (e.g. `debug_ios_bundle_flutter_assets`, `debug_macos_bundle_flutter_assets`)
   void buildApp() {
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
