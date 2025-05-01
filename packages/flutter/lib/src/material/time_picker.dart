@@ -2038,7 +2038,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
             if (kIsWeb && focusNode.hasFocus && primaryFocus?.context != null) {
               Actions.maybeInvoke(
                 primaryFocus!.context!,
-                SelectAllTextIntent(SelectionChangedCause.keyboard),
+                const SelectAllTextIntent(SelectionChangedCause.keyboard),
               );
             }
           });
