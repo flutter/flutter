@@ -218,6 +218,8 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     );
     _border = _InputBorderTween(begin: widget.border, end: widget.border);
     _hoverAnimation = CurvedAnimation(parent: _hoverColorController, curve: Curves.linear);
+
+    // Animate between transparent [widget.hoverColor] and [widget.hoverColor].
     _hoverColorTween = ColorTween(begin: widget.hoverColor.withAlpha(0), end: widget.hoverColor);
   }
 
@@ -240,6 +242,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         ..forward();
     }
     if (widget.hoverColor != oldWidget.hoverColor) {
+      // Animate between transparent [widget.hoverColor] and [widget.hoverColor].
       _hoverColorTween = ColorTween(begin: widget.hoverColor.withAlpha(0), end: widget.hoverColor);
     }
     if (widget.isHovering != oldWidget.isHovering) {

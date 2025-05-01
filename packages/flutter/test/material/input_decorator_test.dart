@@ -13369,8 +13369,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 15));
       expect(getContainerColor(tester), isSameColorAs(fillColor));
 
-      // Test that for high refresh rate displays, the color mid-animation is somewhere between the
-      // fill color and the hover color.
+      // Test that for high refresh rate displays, the color mid-animation is somewhere between
+      // the fill color and the hover color.
       await pumpDecorator(hovering: true);
       expect(getContainerColor(tester), isSameColorAs(fillColor));
       await tester.pump(const Duration(milliseconds: 6));
