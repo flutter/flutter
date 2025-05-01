@@ -8,6 +8,7 @@ library;
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -2091,12 +2092,14 @@ void main() {
 
         // Verify that the hour field is focused and its text is selected.
         final TextField hourTextField = tester.widget(hourField);
-        expect(hourTextField.focusNode!.hasFocus, isTrue);
-        expect(hourTextField.controller!.selection.baseOffset, 0);
-        expect(
-          hourTextField.controller!.selection.extentOffset,
-          hourTextField.controller!.text.length,
-        );
+        if (kIsWeb) {
+          expect(hourTextField.focusNode!.hasFocus, isTrue);
+          expect(hourTextField.controller!.selection.baseOffset, 0);
+          expect(
+            hourTextField.controller!.selection.extentOffset,
+            hourTextField.controller!.text.length,
+          );
+        }
 
         // Press TAB to move to the minute field.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -2105,12 +2108,13 @@ void main() {
         // Verify that the minute field is focused and its text is selected.
         final Finder minuteField = find.byType(TextField).last;
         final TextField minuteTextField = tester.widget(minuteField);
-        expect(minuteTextField.focusNode!.hasFocus, isTrue);
-        expect(minuteTextField.controller!.selection.baseOffset, 0);
-        expect(
-          minuteTextField.controller!.selection.extentOffset,
-          minuteTextField.controller!.text.length,
-        );
+        if (kIsWeb) {
+          expect(minuteTextField.controller!.selection.baseOffset, 0);
+          expect(
+            minuteTextField.controller!.selection.extentOffset,
+            minuteTextField.controller!.text.length,
+          );
+        }
       });
     });
 

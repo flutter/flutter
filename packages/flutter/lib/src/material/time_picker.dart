@@ -2035,27 +2035,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
         FocusNode()..addListener(() {
           setState(() {
             // Rebuild when focus changes.
+            if (kIsWeb && focusNode.hasFocus && primaryFocus?.context != null) {
+              Actions.maybeInvoke(
+                primaryFocus!.context!,
+                SelectAllTextIntent(SelectionChangedCause.keyboard),
+              );
+            }
           });
-          // Select all text when the field gains focus.
-          if (focusNode.hasFocus) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && controller.value.text.isNotEmpty) {
-                controller.value.selection = TextSelection(
-                  baseOffset: 0,
-                  extentOffset: controller.value.text.length,
-                );
-              }
-            });
-          }
         });
-
-    focusNode.onKey = (FocusNode node, RawKeyEvent event) {
-      if (event is RawKeyDownEvent && event.logicalKey == LogicalKeyboardKey.tab) {
-        FocusScope.of(context).nextFocus();
-        return KeyEventResult.handled;
-      }
-      return KeyEventResult.ignored;
-    };
   }
 
   @override
