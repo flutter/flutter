@@ -369,7 +369,53 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Shift + home
   //   * Meta + shift? + delete
   //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _androidShortcuts = _commonShortcuts;
+  static final Map<ShortcutActivator, Intent> _androidShortcuts = {
+    ..._commonShortcuts,
+    const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
+      forward: false,
+      collapseSelection: true,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(LogicalKeyboardKey.end): const ExtendSelectionToLineBreakIntent(
+      forward: true,
+      collapseSelection: true,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      shift: true,
+    ): const ExtendSelectionToLineBreakIntent(
+      forward: false,
+      collapseSelection: false,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      shift: true,
+    ): const ExtendSelectionToLineBreakIntent(
+      forward: true,
+      collapseSelection: false,
+      continuesAtWrap: true,
+    ),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
+  };
 
   static final Map<ShortcutActivator, Intent> _fuchsiaShortcuts = _androidShortcuts;
 
