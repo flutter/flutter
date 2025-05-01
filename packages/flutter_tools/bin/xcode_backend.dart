@@ -295,19 +295,18 @@ class Context {
       // Codesigning takes place during the embed phase instead of the build
       // phase for macOS (compared to iOS) because the `EXPANDED_CODE_SIGN_IDENTITY`
       // is not passed to the build phase for macOS.
-      if (platform == TargetPlatform.macos) {
-        if (expandedCodeSignIdentity != null &&
-            expandedCodeSignIdentity.isNotEmpty &&
-            environment['CODE_SIGNING_REQUIRED'] != 'NO') {
-          for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
-            if (entity is Directory) {
-              final String? frameworkName = parseFrameworkNameFromDirectory(entity);
-              if (frameworkName != null) {
-                _codesignFramework(
-                  expandedCodeSignIdentity,
-                  '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
-                );
-              }
+      if (platform == TargetPlatform.macos &&
+          expandedCodeSignIdentity != null &&
+          expandedCodeSignIdentity.isNotEmpty &&
+          environment['CODE_SIGNING_REQUIRED'] != 'NO') {
+        for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
+          if (entity is Directory) {
+            final String? frameworkName = parseFrameworkNameFromDirectory(entity);
+            if (frameworkName != null) {
+              _codesignFramework(
+                expandedCodeSignIdentity,
+                '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
+              );
             }
           }
         }
@@ -332,10 +331,13 @@ class Context {
     ]);
   }
 
-  String? parseFrameworkNameFromDirectory(Directory dir) {
+  static String? parseFrameworkNameFromDirectory(Directory dir) {
     final List<String> pathSegments = dir.uri.pathSegments;
+    if (pathSegments.isEmpty) {
+      return null;
+    }
     final String basename;
-    if (pathSegments.last.isEmpty && pathSegments.length > 2) {
+    if (pathSegments.last.isEmpty && pathSegments.length > 1) {
       basename = pathSegments[pathSegments.length - 2];
     } else {
       basename = pathSegments.last;
