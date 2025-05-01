@@ -33,13 +33,13 @@ class SwiftPackageManager {
   static final SwiftPackageSupportedPlatform iosSwiftPackageSupportedPlatform =
       SwiftPackageSupportedPlatform(
         platform: SwiftPackagePlatform.ios,
-        version: Version(12, 0, null),
+        version: Version(13, 0, null),
       );
 
   static final SwiftPackageSupportedPlatform macosSwiftPackageSupportedPlatform =
       SwiftPackageSupportedPlatform(
         platform: SwiftPackagePlatform.macos,
-        version: Version(10, 14, null),
+        version: Version(10, 15, null),
       );
 
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
