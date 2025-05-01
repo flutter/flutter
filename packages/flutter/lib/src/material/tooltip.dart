@@ -944,7 +944,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         cursor: widget.mouseCursor ?? MouseCursor.defer,
         child: Listener(
           onPointerDown: _handlePointerDown,
-          behavior: HitTestBehavior.opaque,
+          behavior: HitTestBehavior.deferToChild,
           child: result,
         ),
       );

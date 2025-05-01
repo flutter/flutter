@@ -3522,6 +3522,74 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Allow scroll events to pass through tooltips on web', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        scrollBehavior: TouchAndMouseScrollBehavior(),
+        home: Scaffold(
+          body: SizedBox(
+            height: 300,
+            child: ListView.builder(
+              itemCount: 20,
+              itemBuilder:
+                  (context, index) => Tooltip(
+                    message: 'Item $index',
+                    child: SizedBox(
+                      key: ValueKey('item_$index'),
+                      height: 50,
+                      child: Center(child: Text('Item $index')),
+                    ),
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final firstItemKey = ValueKey('item_0');
+    final firstItemFinder = find.byKey(firstItemKey);
+
+    // Verify key exists and initial position
+    expect(firstItemFinder, findsOneWidget);
+    final double initialPosition = tester.getTopLeft(firstItemFinder).dy;
+    expect(initialPosition, 0.0);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer();
+
+    // Hover to activate tooltip
+    await mouse.moveTo(tester.getCenter(firstItemFinder));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.byTooltip('Item 0'), findsOneWidget);
+
+    // Get the scroll controller before scrolling
+    final scrollController = tester.widget<Scrollable>(find.byType(Scrollable)).controller!;
+    expect(scrollController.offset, 0.0, reason: 'Initial scroll offset should be 0');
+
+    // Scroll using mouse drag
+    await tester.drag(
+      find.byType(ListView),
+      const Offset(0.0, -300),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump(); // Just pump once to process the scroll
+
+    // Verify scrolling occurred by checking the scroll controller directly
+    expect(scrollController.offset, greaterThan(0.0), reason: 'Scrolling should have occurred');
+
+    // The test is successful if we got here - scrolling worked while hovering over tooltip
+    await mouse.removePointer();
+  });
+
+}
+
+class TouchAndMouseScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => <PointerDeviceKind>{
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+  };
 }
 
 Future<void> setWidgetForTooltipMode(
