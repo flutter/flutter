@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/nav_bar/cupertino_sliver_nav_bar.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 const Offset dragUp = Offset(0.0, -150.0);
@@ -14,6 +14,19 @@ void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 30
 }
 
 void main() {
+  testWidgets('CupertinoSliverNavigationBar bottom widget', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
+    await tester.pumpWidget(const example.SliverNavBarApp());
+
+    final Finder preferredSize = find.byType(PreferredSize);
+    final Finder coloredBox = find.descendant(of: preferredSize, matching: find.byType(ColoredBox));
+    final Finder text = find.text('Bottom Widget');
+
+    expect(preferredSize, findsOneWidget);
+    expect(coloredBox, findsOneWidget);
+    expect(text, findsOneWidget);
+  });
+
   testWidgets('Collapse and expand CupertinoSliverNavigationBar changes title position', (
     WidgetTester tester,
   ) async {
@@ -65,7 +78,7 @@ void main() {
     setWindowToPortrait(tester);
     await tester.pumpWidget(const example.SliverNavBarApp());
 
-    // Navigate to a page that has back button
+    // Navigate to a page that has a back button.
     final Finder nextButton = find.text('Go to Next Page');
     expect(nextButton, findsOneWidget);
     await tester.tap(nextButton);
