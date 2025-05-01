@@ -2078,7 +2078,9 @@ void main() {
         expect(minuteField.focusNode!.hasFocus, isFalse);
       });
 
-      testWidgets('TAB key selects text in hour and minute fields', (WidgetTester tester) async {
+      testWidgets('TAB key selects text in hour and minute fields on the web', (
+        WidgetTester tester,
+      ) async {
         await mediaQueryBoilerplate(
           tester,
           entryMode: TimePickerEntryMode.input,
@@ -2092,14 +2094,12 @@ void main() {
 
         // Verify that the hour field is focused and its text is selected.
         final TextField hourTextField = tester.widget(hourField);
-        if (kIsWeb) {
-          expect(hourTextField.focusNode!.hasFocus, isTrue);
-          expect(hourTextField.controller!.selection.baseOffset, 0);
-          expect(
-            hourTextField.controller!.selection.extentOffset,
-            hourTextField.controller!.text.length,
-          );
-        }
+        expect(hourTextField.focusNode!.hasFocus, isTrue);
+        expect(hourTextField.controller!.selection.baseOffset, 0);
+        expect(
+          hourTextField.controller!.selection.extentOffset,
+          hourTextField.controller!.text.length,
+        );
 
         // Press TAB to move to the minute field.
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -2108,14 +2108,12 @@ void main() {
         // Verify that the minute field is focused and its text is selected.
         final Finder minuteField = find.byType(TextField).last;
         final TextField minuteTextField = tester.widget(minuteField);
-        if (kIsWeb) {
-          expect(minuteTextField.controller!.selection.baseOffset, 0);
-          expect(
-            minuteTextField.controller!.selection.extentOffset,
-            minuteTextField.controller!.text.length,
-          );
-        }
-      });
+        expect(minuteTextField.controller!.selection.baseOffset, 0);
+        expect(
+          minuteTextField.controller!.selection.extentOffset,
+          minuteTextField.controller!.text.length,
+        );
+      }, skip: !kIsWeb);
     });
 
     group('Time picker - Restoration (${materialType.name})', () {
