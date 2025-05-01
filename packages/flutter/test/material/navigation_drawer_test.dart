@@ -495,26 +495,26 @@ void main() {
     final Widget widget = _buildWidget(
       scaffoldKey,
       NavigationDrawer(
-        header: DrawerHeader(
+        header: const DrawerHeader(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 8,
-              children: [
+              children: <Widget>[
                 FlutterLogo(),
-                const Text('Header'),
+                Text('Header'),
               ],
             ),
           ),
         ),
         footer: ListTile(
-          leading: FlutterLogo(),
-          title: Text('Footer'),
+          leading: const FlutterLogo(),
+          title: const Text('Footer'),
           trailing: const Icon(Icons.settings),
           onTap: () {},
         ),
-        children: [
-          for (var i = 0; i < 10; i++)
+        children: <Widget>[
+          for (int i = 0; i < 10; i++)
             NavigationDrawerDestination(
               icon: const Icon(Icons.home),
               label: Text('Item $i'),
