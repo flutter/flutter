@@ -84,9 +84,7 @@ void FlutterWindowsDisplayMonitor::UpdateDisplays() {
     }
   }
 
-  if (!displays.empty()) {
-    engine_->UpdateDisplay(displays);
-  }
+  engine_->UpdateDisplay(displays);
 }
 
 bool FlutterWindowsDisplayMonitor::HandleWindowMessage(HWND hwnd,
