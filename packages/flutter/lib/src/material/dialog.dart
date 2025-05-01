@@ -44,7 +44,19 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 /// ** See code in examples/api/lib/material/dialog/dialog.0.dart **
 /// {@end-tool}
 ///
+/// ## Contraints
+/// The Material 3 guideline recommends that a dialog should have a maximal width of 560dp. 
+/// For historical reasons, Flutter's [Dialog] widget does not come with this constraint by default.
+/// For applications targeting large screens such as desktop or Web, it is recommended to 
+/// set the [constraints] property.
+///
 /// {@tool snippet}
+/// This sample shows a [Dialog] using [BoxConstraints] defined by the Material 3 specification.
+///
+/// ```dart
+/// const Dialog(constraints: BoxConstraints(maxWidth: 560, minHeight: 280));
+/// ```
+/// {@end-tool}
 /// This sample shows a [Dialog] using [BoxConstraints].
 ///
 /// ```dart
