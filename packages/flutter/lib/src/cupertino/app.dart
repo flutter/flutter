@@ -538,7 +538,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     required String semanticLabel,
     required GlobalKey key,
   }) {
-    return _CupertinoInspectorButton(
+    return _CupertinoInspectorButton.filled(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
       icon: CupertinoIcons.xmark,
@@ -680,95 +680,84 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 }
 
-enum _CupertinoInspectorButtonVariant { filled, toggle, iconOnly }
-
-class _CupertinoInspectorButton extends StatelessWidget {
-  const _CupertinoInspectorButton({
-    required this.onPressed,
-    required this.semanticLabel,
-    required this.icon,
-    this.buttonKey,
-  }) : _variant = _CupertinoInspectorButtonVariant.filled,
-       _toggledOn = null;
+class _CupertinoInspectorButton extends InspectorButton {
+  const _CupertinoInspectorButton.filled({
+    required super.onPressed,
+    required super.semanticLabel,
+    required super.icon,
+    super.buttonKey,
+  }) : super.filled();
 
   const _CupertinoInspectorButton.toggle({
-    required this.onPressed,
-    required this.semanticLabel,
-    required this.icon,
-    bool toggledOn = true,
-  }) : buttonKey = null,
-       _variant = _CupertinoInspectorButtonVariant.toggle,
-       _toggledOn = toggledOn;
+    required super.onPressed,
+    required super.semanticLabel,
+    required super.icon,
+    super.toggledOn,
+  }) : super.toggle();
 
   const _CupertinoInspectorButton.iconOnly({
-    required this.onPressed,
-    required this.semanticLabel,
-    required this.icon,
-  }) : buttonKey = null,
-       _variant = _CupertinoInspectorButtonVariant.iconOnly,
-       _toggledOn = null;
-
-  final VoidCallback onPressed;
-  final String semanticLabel;
-  final IconData icon;
-  final GlobalKey? buttonKey;
-  final _CupertinoInspectorButtonVariant _variant;
-  final bool? _toggledOn;
-
-  static const double _buttonSize = 32.0;
-  static const double _buttonIconSize = 18.0;
+    required super.onPressed,
+    required super.semanticLabel,
+    required super.icon,
+  }) : super.iconOnly();
 
   @override
   Widget build(BuildContext context) {
     final Icon buttonIcon = Icon(
       icon,
       semanticLabel: semanticLabel,
-      size: _variant == _CupertinoInspectorButtonVariant.iconOnly ? _buttonSize : _buttonIconSize,
-      color: _foregroundColor(context),
+      size:
+          variant == InspectorButtonVariant.iconOnly
+              ? InspectorButton.buttonSize
+              : InspectorButton.buttonIconSize,
+      color: foregroundColor(context),
     );
 
     return Padding(
       key: buttonKey,
-      padding: const EdgeInsets.all((kMinInteractiveDimensionCupertino - _buttonSize) / 2),
-
+      padding: const EdgeInsets.all(
+        (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
+      ),
       child:
-          _variant == _CupertinoInspectorButtonVariant.toggle && !_toggledOn!
+          variant == InspectorButtonVariant.toggle && !toggledOn!
               ? CupertinoButton.tinted(
-                minSize: _buttonSize,
+                minSize: InspectorButton.buttonSize,
                 onPressed: onPressed,
                 padding: EdgeInsets.zero,
                 child: buttonIcon,
               )
               : CupertinoButton(
-                minSize: _buttonSize,
+                minSize: InspectorButton.buttonSize,
                 onPressed: onPressed,
                 padding: EdgeInsets.zero,
-                color: _backgroundColor(context),
+                color: backgroundColor(context),
                 child: buttonIcon,
               ),
     );
   }
 
-  Color _foregroundColor(BuildContext context) {
+  @override
+  Color foregroundColor(BuildContext context) {
     final Color primaryColor = CupertinoTheme.of(context).primaryColor;
     final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
-    switch (_variant) {
-      case _CupertinoInspectorButtonVariant.filled:
+    switch (variant) {
+      case InspectorButtonVariant.filled:
         return secondaryColor;
-      case _CupertinoInspectorButtonVariant.iconOnly:
+      case InspectorButtonVariant.iconOnly:
         return primaryColor;
-      case _CupertinoInspectorButtonVariant.toggle:
-        return !_toggledOn! ? primaryColor : secondaryColor;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? primaryColor : secondaryColor;
     }
   }
 
-  Color _backgroundColor(BuildContext context) {
+  @override
+  Color backgroundColor(BuildContext context) {
     final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-    switch (_variant) {
-      case _CupertinoInspectorButtonVariant.filled:
-      case _CupertinoInspectorButtonVariant.toggle:
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.toggle:
         return primaryColor;
-      case _CupertinoInspectorButtonVariant.iconOnly:
+      case InspectorButtonVariant.iconOnly:
         return const Color(0x00000000);
     }
   }

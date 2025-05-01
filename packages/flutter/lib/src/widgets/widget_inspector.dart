@@ -34,6 +34,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'icon_data.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 
@@ -3025,6 +3026,123 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
       ],
     );
   }
+}
+
+/// Defines the visual and behavioral variants for an [InspectorButton].
+enum InspectorButtonVariant {
+  /// A standard button with a filled background and foreground icon.
+  filled,
+
+  /// A button that can be toggled on or off, visually representing its state.
+  ///
+  /// The [InspectorButton.toggledOn] property determines its current state.
+  toggle,
+
+  /// A button that displays only an icon, typically with a transparent background.
+  iconOnly,
+}
+
+/// An abstract base class for creating Material or Cupertino-styled inspector
+/// buttons.
+///
+/// Subclasses are responsible for implementing the design-specific rendering
+/// logic in the [build] method and providing design-specific colors via
+/// [foregroundColor] and [backgroundColor].
+abstract class InspectorButton extends StatelessWidget {
+  /// Creates an inspector button.
+  ///
+  /// This is the base constructor used by named constructors.
+  const InspectorButton({
+    super.key,
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    this.buttonKey,
+    required this.variant,
+    this.toggledOn,
+  });
+
+  /// Creates an inspector button with the [InspectorButtonVariant.filled] style.
+  ///
+  /// This button typically has a solid background color and a contrasting icon.
+  const InspectorButton.filled({
+    super.key,
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    this.buttonKey,
+  }) : variant = InspectorButtonVariant.filled,
+       toggledOn = null;
+
+  /// Creates an inspector button with the [InspectorButtonVariant.toggle] style.
+  ///
+  /// This button can be in an "on" or "off" state, visually indicated.
+  /// The [toggledOn] parameter defaults to `true`.
+  const InspectorButton.toggle({
+    super.key,
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    bool this.toggledOn = true,
+  }) : buttonKey = null,
+       variant = InspectorButtonVariant.toggle;
+
+  /// Creates an inspector button with the [InspectorButtonVariant.iconOnly] style.
+  ///
+  /// This button typically displays only an icon with a transparent background.
+  const InspectorButton.iconOnly({
+    super.key,
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+  }) : buttonKey = null,
+       variant = InspectorButtonVariant.iconOnly,
+       toggledOn = null;
+
+  /// The callback that is called when the button is tapped.
+  final VoidCallback onPressed;
+
+  /// The semantic label for the button, used for accessibility.
+  final String semanticLabel;
+
+  /// The icon to display within the button.
+  final IconData icon;
+
+  /// An optional key to identify the button widget.
+  final GlobalKey? buttonKey;
+
+  /// The visual and behavioral variant of the button.
+  ///
+  /// See [InspectorButtonVariant] for available styles.
+  final InspectorButtonVariant variant;
+
+  /// For [InspectorButtonVariant.toggle] buttons, this determines if the button
+  /// is currently in the "on" (true) or "off" (false) state.
+  final bool? toggledOn;
+
+  /// The standard height and width for the button.
+  static const double buttonSize = 32.0;
+
+  /// The standard size for the icon when it's not the only element (e.g., in filled or toggle buttons).
+  ///
+  /// For [InspectorButtonVariant.iconOnly], the icon typically takes up the full [buttonSize].
+  static const double buttonIconSize = 18.0;
+
+  /// Gets the appropriate icon size based on the button's [variant].
+  ///
+  /// Returns [buttonSize] if the variant is [InspectorButtonVariant.iconOnly],
+  /// otherwise returns [buttonIconSize].
+  double get currentIconSize =>
+      variant == InspectorButtonVariant.iconOnly ? buttonSize : buttonIconSize;
+
+  /// Provides the appropriate foreground color for the button's icon.
+  Color foregroundColor(BuildContext context);
+
+  /// Provides the appropriate background color for the button.
+  Color backgroundColor(BuildContext context);
+
+  @override
+  Widget build(BuildContext context);
 }
 
 /// Mutable selection state of the inspector.

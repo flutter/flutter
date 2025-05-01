@@ -939,7 +939,7 @@ class _MaterialAppState extends State<MaterialApp> {
     required String semanticLabel,
     required GlobalKey key,
   }) {
-    return _MaterialInspectorButton(
+    return _MaterialInspectorButton.filled(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
       icon: Icons.close,
@@ -1167,51 +1167,36 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 }
 
-enum _MaterialInspectorButtonVariant { filled, toggle, iconOnly }
-
-class _MaterialInspectorButton extends StatelessWidget {
-  const _MaterialInspectorButton({
-    required this.onPressed,
-    required this.semanticLabel,
-    required this.icon,
+class _MaterialInspectorButton extends InspectorButton {
+  const _MaterialInspectorButton.filled({
+    required super.onPressed,
+    required super.semanticLabel,
+    required super.icon,
     required this.isDarkTheme,
-    this.buttonKey,
-  }) : _variant = _MaterialInspectorButtonVariant.filled,
-       _toggledOn = null;
+    super.buttonKey,
+  }) : super.filled();
 
   const _MaterialInspectorButton.toggle({
-    required this.onPressed,
-    required this.semanticLabel,
-    required this.icon,
+    required super.onPressed,
+    required super.semanticLabel,
+    required super.icon,
     required this.isDarkTheme,
-    bool toggledOn = true,
-  }) : buttonKey = null,
-       _variant = _MaterialInspectorButtonVariant.toggle,
-       _toggledOn = toggledOn;
+    super.toggledOn,
+  }) : super.toggle();
 
   const _MaterialInspectorButton.iconOnly({
-    required this.onPressed,
-    required this.semanticLabel,
-    required this.icon,
+    required super.onPressed,
+    required super.semanticLabel,
+    required super.icon,
     required this.isDarkTheme,
-  }) : buttonKey = null,
-       _variant = _MaterialInspectorButtonVariant.iconOnly,
-       _toggledOn = null;
+  }) : super.iconOnly();
 
-  final VoidCallback onPressed;
-  final String semanticLabel;
-  final IconData icon;
   final bool isDarkTheme;
-  final GlobalKey? buttonKey;
-  final _MaterialInspectorButtonVariant _variant;
-  final bool? _toggledOn;
 
-  static const double _buttonSize = 32.0;
-  static const double _buttonIconSize = 18.0;
   static const EdgeInsets _buttonPadding = EdgeInsets.zero;
   static const BoxConstraints _buttonConstraints = BoxConstraints.tightFor(
-    width: _buttonSize,
-    height: _buttonSize,
+    width: InspectorButton.buttonSize,
+    height: InspectorButton.buttonSize,
   );
 
   @override
@@ -1220,7 +1205,9 @@ class _MaterialInspectorButton extends StatelessWidget {
       key: buttonKey,
       onPressed: onPressed,
       iconSize:
-          _variant == _MaterialInspectorButtonVariant.iconOnly ? _buttonSize : _buttonIconSize,
+          variant == InspectorButtonVariant.iconOnly
+              ? InspectorButton.buttonSize
+              : InspectorButton.buttonIconSize,
       padding: _buttonPadding,
       constraints: _buttonConstraints,
       style: _selectionButtonsIconStyle(context),
@@ -1229,42 +1216,44 @@ class _MaterialInspectorButton extends StatelessWidget {
   }
 
   ButtonStyle _selectionButtonsIconStyle(BuildContext context) {
-    final Color foregroundColor = _foregroundColor(context);
-    final Color backgroundColor = _backgroundColor(context);
+    final Color foreground = foregroundColor(context);
+    final Color background = backgroundColor(context);
 
     return IconButton.styleFrom(
-      foregroundColor: foregroundColor,
-      backgroundColor: backgroundColor,
+      foregroundColor: foreground,
+      backgroundColor: background,
       side:
-          _variant == _MaterialInspectorButtonVariant.toggle && !_toggledOn!
-              ? BorderSide(color: foregroundColor)
+          variant == InspectorButtonVariant.toggle && !toggledOn!
+              ? BorderSide(color: foreground)
               : null,
       tapTargetSize: MaterialTapTargetSize.padded,
     );
   }
 
-  Color _foregroundColor(BuildContext context) {
+  @override
+  Color foregroundColor(BuildContext context) {
     final Color primaryColor = _primaryColor(context);
     final Color secondaryColor = _secondaryColor(context);
-    switch (_variant) {
-      case _MaterialInspectorButtonVariant.filled:
+    switch (variant) {
+      case InspectorButtonVariant.filled:
         return primaryColor;
-      case _MaterialInspectorButtonVariant.iconOnly:
+      case InspectorButtonVariant.iconOnly:
         return secondaryColor;
-      case _MaterialInspectorButtonVariant.toggle:
-        return !_toggledOn! ? secondaryColor : primaryColor;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? secondaryColor : primaryColor;
     }
   }
 
-  Color _backgroundColor(BuildContext context) {
+  @override
+  Color backgroundColor(BuildContext context) {
     final Color secondaryColor = _secondaryColor(context);
-    switch (_variant) {
-      case _MaterialInspectorButtonVariant.filled:
+    switch (variant) {
+      case InspectorButtonVariant.filled:
         return secondaryColor;
-      case _MaterialInspectorButtonVariant.iconOnly:
+      case InspectorButtonVariant.iconOnly:
         return Colors.transparent;
-      case _MaterialInspectorButtonVariant.toggle:
-        return !_toggledOn! ? Colors.transparent : secondaryColor;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? Colors.transparent : secondaryColor;
     }
   }
 
