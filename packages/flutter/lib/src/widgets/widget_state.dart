@@ -1019,10 +1019,10 @@ class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T>
       return null as T;
     } on TypeError {
       throw ArgumentError(
-        'The current set of material states is $states.\n'
+        'The current set of widget states is $states.\n'
         'None of the provided map keys matched this set, '
         'and the type "$T" is non-nullable.\n'
-        'Consider using "WidgetStateProperty<$T?>.fromMap()", '
+        'Consider using "WidgetStateMapper<$T?>()", '
         'or adding the "WidgetState.any" key to this map.',
       );
     }

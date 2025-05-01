@@ -20,6 +20,7 @@ template("impeller_shaders_vk") {
                                   ])
   impellerc_vk = "impellerc_$target_name"
   impellerc(impellerc_vk) {
+    mnemonic = "IMPELLERC_VULKAN"
     shaders = invoker.shaders
     sl_file_extension = "vkspv"
 
