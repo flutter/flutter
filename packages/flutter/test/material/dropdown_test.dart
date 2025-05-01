@@ -4388,4 +4388,65 @@ void main() {
     expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
     expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
+
+  testWidgets('Dropdown closes when barrier is tapped by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButton<String>(
+            value: 'first',
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(enabled: false, child: Text('disabled')),
+              DropdownMenuItem<String>(value: 'first', child: Text('first')),
+              DropdownMenuItem<String>(value: 'second', child: Text('second')),
+            ],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(400, 400));
+    await tester.pumpAndSettle();
+
+    // The dropdown should be closed, i.e., there should be no widget with 'second' text.
+    expect(find.text('second'), findsNothing);
+  });
+
+  testWidgets('Dropdown does not close when barrier dismissible set to false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButton<String>(
+            value: 'first',
+            barrierDismissible: false,
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(enabled: false, child: Text('disabled')),
+              DropdownMenuItem<String>(value: 'first', child: Text('first')),
+              DropdownMenuItem<String>(value: 'second', child: Text('second')),
+            ],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(400, 400));
+    await tester.pumpAndSettle();
+
+    // The dropdown should still be open, i.e., there should be one widget with 'second' text.
+    expect(find.text('second'), findsOneWidget);
+  });
 }
