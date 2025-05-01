@@ -674,10 +674,10 @@ void main() {
 
       await tester.pumpWidget(
         CupertinoApp(
-          theme: const CupertinoThemeData(primaryColor: Colors.red),
+          theme: const CupertinoThemeData(selectionHandleColor: Colors.red),
           home: Center(
             child: CupertinoTheme(
-              data: const CupertinoThemeData(primaryColor: expectedSelectionHandleColor),
+              data: const CupertinoThemeData(selectionHandleColor: expectedSelectionHandleColor),
               child: CupertinoTextField(controller: controller),
             ),
           ),

@@ -193,6 +193,7 @@ void main() {
         'navActionTextStyle',
         'pickerTextStyle',
         'dateTimePickerTextStyle',
+        'selectionHandleColor',
       }),
       isTrue,
     );
@@ -272,6 +273,7 @@ void main() {
       colorMatches(theme.primaryContrastingColor, CupertinoColors.white);
       colorMatches(theme.barBackgroundColor, barBackgroundColor);
       colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.selectionHandleColor, CupertinoColors.systemBlue);
       colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
       colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);
