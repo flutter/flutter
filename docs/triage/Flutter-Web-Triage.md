@@ -11,8 +11,6 @@ When triaging web issues follow the following process:
   * [mdebbar](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Amdebbar)
   * [yjbanov](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Ayjbanov)
   * [flutter-zl](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Aflutter-zl)
-  * [chunhtai](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Achunhtai)
-  * [hannah-hyj](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP2%2CP3+assignee%3Ahannah-hyj)
 * All [P0 issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP0) are assigned and being worked on.
 * The list of [P1 issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP1) should be manageable (<30 issues)
 * [List of open PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+sort%3Aupdated-asc+label%3Aplatform-web) should be manageable (<15).
