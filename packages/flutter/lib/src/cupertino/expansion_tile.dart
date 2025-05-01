@@ -135,25 +135,17 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   Widget? _buildIcon(BuildContext context, Animation<double> animation) {
     _iconTurns = animation.drive(_quarterTween.chain(CurveTween(curve: _kAnimationCurve)));
     final double? size = CupertinoTheme.of(context).textTheme.textStyle.fontSize;
-    // Replicate the Icon logic here to get a slightly bolder icon.
     return RotationTransition(
       turns: _iconTurns,
       child: SizedBox(
         width: size,
         height: size,
-        child: Center(
-          child: Text.rich(
-            TextSpan(
-              text: String.fromCharCode(CupertinoIcons.right_chevron.codePoint),
-              style: TextStyle(
-                inherit: false,
-                color: CupertinoColors.activeBlue,
-                fontSize: _kIconFontSize,
-                fontWeight: FontWeight.w900,
-                fontFamily: CupertinoIcons.right_chevron.fontFamily,
-                package: CupertinoIcons.right_chevron.fontPackage,
-              ),
-            ),
+        child: const Center(
+          child: Icon(
+            CupertinoIcons.right_chevron,
+            color: CupertinoColors.activeBlue,
+            size: _kIconFontSize,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ),
