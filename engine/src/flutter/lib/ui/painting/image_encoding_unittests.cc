@@ -43,7 +43,6 @@ class MockDlImage : public DlImage {
   MOCK_METHOD(bool, isOpaque, (), (const, override));
   MOCK_METHOD(bool, isTextureBacked, (), (const, override));
   MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
-  MOCK_METHOD(SkISize, dimensions, (), (const, override));
   MOCK_METHOD(DlISize, GetSize, (), (const, override));
   MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
 };
@@ -465,13 +464,16 @@ TEST_F(ShellTest, EncodeImageFailsWithoutGPUImpeller) {
   AddNativeCallback("TurnOffGPU", CREATE_NATIVE_ENTRY(turn_off_gpu));
 
   auto flush_awaiting_tasks = [&](Dart_NativeArguments args) {
-    task_runners.GetIOTaskRunner()->PostTask([&] {
-      std::shared_ptr<impeller::Context> impeller_context =
-          shell->GetIOManager()->GetImpellerContext();
-      // This will cause the stored tasks to overflow and start throwing them
-      // away.
-      for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {
-        impeller_context->StoreTaskForGPU([] {}, [] {});
+    fml::WeakPtr io_manager = shell->GetIOManager();
+    task_runners.GetIOTaskRunner()->PostTask([io_manager] {
+      if (io_manager) {
+        std::shared_ptr<impeller::Context> impeller_context =
+            io_manager->GetImpellerContext();
+        // This will cause the stored tasks to overflow and start throwing them
+        // away.
+        for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {
+          impeller_context->StoreTaskForGPU([] {}, [] {});
+        }
       }
     });
   };
@@ -493,8 +495,8 @@ TEST_F(ShellTest, EncodeImageFailsWithoutGPUImpeller) {
 
 TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   sk_sp<MockDlImage> image(new MockDlImage());
-  EXPECT_CALL(*image, dimensions)
-      .WillRepeatedly(Return(SkISize::Make(100, 100)));
+  EXPECT_CALL(*image, GetSize)  //
+      .WillRepeatedly(Return(DlISize(100, 100)));
   impeller::TextureDescriptor desc;
   desc.format = impeller::PixelFormat::kR16G16B16A16Float;
   auto texture = std::make_shared<MockTexture>(desc);
@@ -520,8 +522,8 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
 
 TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   sk_sp<MockDlImage> image(new MockDlImage());
-  EXPECT_CALL(*image, dimensions)
-      .WillRepeatedly(Return(SkISize::Make(100, 100)));
+  EXPECT_CALL(*image, GetSize)  //
+      .WillRepeatedly(Return(DlISize(100, 100)));
   impeller::TextureDescriptor desc;
   desc.format = impeller::PixelFormat::kB10G10R10XR;
   auto texture = std::make_shared<MockTexture>(desc);

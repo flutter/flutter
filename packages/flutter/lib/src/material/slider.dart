@@ -25,6 +25,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'slider_parts.dart';
 import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
 import 'theme.dart';
@@ -1588,7 +1589,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             _currentDragValue = value;
           }
         case SliderInteraction.slideOnly:
-          onChangeStart?.call(_discretize(value));
+          _active = true;
+          _currentDragValue = value;
       }
 
       if (_active) {
@@ -1635,13 +1637,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleDragUpdate(DragUpdateDetails details) {
     if (!_state.mounted) {
       return;
-    }
-
-    // for slide only, there is no start interaction trigger, so _active
-    // will be false and needs to be made true.
-    if (!_active && allowedInteraction == SliderInteraction.slideOnly) {
-      _active = true;
-      _currentDragValue = value;
     }
 
     switch (allowedInteraction) {
@@ -1745,8 +1740,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final double padding =
-        isDiscrete || _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
+    final double padding = _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
     final double thumbPosition =
         isDiscrete
             ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
@@ -1827,7 +1821,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           _sliderTheme.tickMarkShape!
               .getPreferredSize(isEnabled: isInteractive, sliderTheme: _sliderTheme)
               .width;
-      final double adjustedTrackWidth = trackRect.width - padding;
+      final double discreteTrackPadding = trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - discreteTrackPadding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions! >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1835,7 +1830,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double value = i / divisions!;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + padding / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + discreteTrackPadding / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape!.paint(
             context,

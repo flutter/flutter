@@ -11,18 +11,13 @@
 
 namespace flutter {
 namespace testing {
+
 class DlPathReceiverMock : public DlPathReceiver {
  public:
   MOCK_METHOD(void,
-              RecommendSizes,
-              (size_t verb_count, size_t point_count),
+              MoveTo,
+              (const DlPoint& p2, bool will_be_closed),
               (override));
-  MOCK_METHOD(void, RecommendBounds, (const DlRect& bounds), (override));
-  MOCK_METHOD(void,
-              SetPathInfo,
-              (DlPathFillType fill_type, bool is_convex),
-              (override));
-  MOCK_METHOD(void, MoveTo, (const DlPoint& p2), (override));
   MOCK_METHOD(void, LineTo, (const DlPoint& p2), (override));
   MOCK_METHOD(void, QuadTo, (const DlPoint& cp, const DlPoint& p2), (override));
   MOCK_METHOD(bool,
@@ -34,6 +29,7 @@ class DlPathReceiverMock : public DlPathReceiver {
               (const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2),
               (override));
   MOCK_METHOD(void, Close, (), (override));
+  MOCK_METHOD(void, PathEnd, (), (override));
 };
 
 }  // namespace testing

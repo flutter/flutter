@@ -65,7 +65,7 @@ class ZoomControls extends StatelessWidget {
         _WidgetPreviewIconButton(
           tooltip: 'Reset zoom',
           onPressed: enabled ? _reset : null,
-          icon: Icons.refresh,
+          icon: Icons.zoom_out_map,
         ),
       ],
     );
@@ -93,5 +93,70 @@ class ZoomControls extends StatelessWidget {
 
   void _reset() {
     _transformationController.value = Matrix4.identity();
+  }
+}
+
+/// A button that triggers a "soft" restart of a previewed widget.
+///
+/// A soft restart removes the previewed widget from the widget tree for a frame before
+/// re-inserting it on the next frame. This has the effect of re-running local initializers in
+/// State objects, which normally requires a hot restart to accomplish in a normal application.
+class SoftRestartButton extends StatelessWidget {
+  const SoftRestartButton({
+    super.key,
+    required this.enabled,
+    required this.softRestartListenable,
+  });
+
+  final ValueNotifier<bool> softRestartListenable;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return _WidgetPreviewIconButton(
+      tooltip: 'Hot restart',
+      onPressed: enabled ? _onRestart : null,
+      icon: Icons.refresh,
+    );
+  }
+
+  void _onRestart() {
+    softRestartListenable.value = true;
+  }
+}
+
+extension on Brightness {
+  Brightness get invert => isLight ? Brightness.dark : Brightness.light;
+  bool get isLight => this == Brightness.light;
+}
+
+/// A button that toggles the current theme brightness.
+class BrightnessToggleButton extends StatelessWidget {
+  const BrightnessToggleButton({
+    super.key,
+    required this.enabled,
+    required this.brightnessListenable,
+  });
+
+  final ValueNotifier<Brightness> brightnessListenable;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Brightness>(
+      valueListenable: brightnessListenable,
+      builder: (context, brightness, _) {
+        final brightness = brightnessListenable.value;
+        return _WidgetPreviewIconButton(
+          tooltip: 'Switch to ${brightness.isLight ? 'dark' : 'light'} mode',
+          onPressed: enabled ? _toggleBrightness : null,
+          icon: brightness.isLight ? Icons.dark_mode : Icons.light_mode,
+        );
+      },
+    );
+  }
+
+  void _toggleBrightness() {
+    brightnessListenable.value = brightnessListenable.value.invert;
   }
 }

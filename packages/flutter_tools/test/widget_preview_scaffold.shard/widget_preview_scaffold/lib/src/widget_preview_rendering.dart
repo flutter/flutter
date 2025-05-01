@@ -4,13 +4,16 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, ValueListenable;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widget_previews.dart';
 
 import 'package:stack_trace/stack_trace.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
 import 'dtd_services.dart';
@@ -80,15 +83,6 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
         .map((frame) => frame.location.length)
         .fold(0, math.max);
 
-    final TextStyle linkTextStyle = fixBlurryText(
-      TextStyle(
-        decoration: TextDecoration.underline,
-        // TODO(bkonyi): this color scheme is from DevTools and should be responsive
-        // to changes in the previewer theme.
-        color: const Color(0xFF1976D2),
-      ),
-    );
-
     // Print out the stack trace nicely formatted.
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
@@ -112,22 +106,100 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
   }
 }
 
+/// Displayed when no @Preview() annotations are detected in the project.
+///
+/// Links to documentation.
+class NoPreviewsDetectedWidget extends StatelessWidget {
+  const NoPreviewsDetectedWidget({super.key});
+
+  // TODO(bkonyi): update with actual documentation on flutter.dev.
+  static Uri documentationUrl = Uri.https(
+    'github.com',
+    'flutter/flutter/blob/master/packages/flutter/'
+        'lib/src/widget_previews/widget_previews.dart',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(bkonyi): base this on the current color theme (dark vs light)
+    final style = fixBlurryText(TextStyle(color: Colors.black));
+    return Center(
+      child: Column(
+        children: <Widget>[
+          Text(
+            'No previews detected',
+            style: style.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const VerticalSpacer(),
+          Text('Read more about getting started with widget previews at:'),
+          Text.rich(
+            TextSpan(
+              text: documentationUrl.toString(),
+              style: linkTextStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () {
+                      launchUrl(documentationUrl);
+                    },
+            ),
+            style: style,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({super.key, required this.preview});
 
   final WidgetPreview preview;
 
   @override
-  State<WidgetPreviewWidget> createState() => _WidgetPreviewWidgetState();
+  State<WidgetPreviewWidget> createState() => WidgetPreviewWidgetState();
 }
 
-class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
+class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final transformationController = TransformationController();
-  final deviceOrientation = ValueNotifier<Orientation>(Orientation.portrait);
+
+  // Set the initial preview brightness based on the platform default or the
+  // value explicitly specified for the preview.
+  late final brightnessListenable = ValueNotifier<Brightness>(
+    widget.preview.brightness ?? MediaQuery.platformBrightnessOf(context),
+  );
+
+  final softRestartListenable = ValueNotifier<bool>(false);
+  final key = GlobalKey();
+
+  /// Returns the last size of the previewed widget.
+  Size get lastChildSize =>
+      (key.currentContext!.findRenderObject() as RenderBox).size;
 
   @override
-  void initState() {
-    super.initState();
+  void didUpdateWidget(WidgetPreviewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final previousBrightness = oldWidget.preview.brightness;
+    final newBrightness = widget.preview.brightness;
+    final currentBrightness = brightnessListenable.value;
+    final systemBrightness = MediaQuery.platformBrightnessOf(context);
+
+    // No initial brightness was previously defined.
+    if (previousBrightness == null && newBrightness != null) {
+      if (currentBrightness == systemBrightness) {
+        // If the current brightness is different than the system brightness, the user has manually
+        // changed the brightness through the UI, so don't change it automatically.
+        brightnessListenable.value = newBrightness;
+      }
+    }
+    // Changing the initial brightness to either a new initial brightness or system brightness.
+    else if (previousBrightness != null) {
+      // If the current brightness is different than the initial brightness, the user has manually
+      // changed the brightness through the UI, so don't change it automatically.
+      if (currentBrightness == previousBrightness) {
+        brightnessListenable.value = newBrightness ?? systemBrightness;
+      }
+    }
   }
 
   @override
@@ -141,19 +213,44 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     );
 
     bool errorThrownDuringTreeConstruction = false;
-    Widget preview;
-    // Catch any unhandled exceptions and display an error widget instead of taking
-    // down the entire preview environment.
-    try {
-      preview = widget.preview.builder();
-    } on Object catch (error, stackTrace) {
-      errorThrownDuringTreeConstruction = true;
-      preview = _WidgetPreviewErrorWidget(
-        error: error,
-        stackTrace: stackTrace,
-        size: maxSizeConstraints.biggest,
-      );
-    }
+
+    // Wrap the previewed widget with a ValueListenableBuilder responsible for performing a "soft"
+    // restart.
+    //
+    // A soft restart simply removes the previewed widget from the widget tree for a frame before
+    // re-inserting it on the next frame. This has the effect of re-running local initializers in
+    // State objects, which normally requires a hot restart to accomplish in a normal application.
+    Widget preview = ValueListenableBuilder<bool>(
+      valueListenable: softRestartListenable,
+      builder: (context, performRestart, _) {
+        try {
+          final previewWidget = Container(
+            key: key,
+            child: WidgetPreviewTheming(
+              theme: widget.preview.theme,
+              child: widget.preview.builder(),
+            ),
+          );
+          if (performRestart) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Trigger a rebuild on the next frame to re-insert previewWidget.
+              softRestartListenable.value = false;
+            }, debugLabel: 'Soft Restart');
+            return SizedBox.fromSize(size: lastChildSize);
+          }
+          return previewWidget;
+        } on Object catch (error, stackTrace) {
+          // Catch any unhandled exceptions and display an error widget instead of taking
+          // down the entire preview environment.
+          errorThrownDuringTreeConstruction = true;
+          return _WidgetPreviewErrorWidget(
+            error: error,
+            stackTrace: stackTrace,
+            size: maxSizeConstraints.biggest,
+          );
+        }
+      },
+    );
 
     preview = _WidgetPreviewWrapper(
       previewerConstraints: maxSizeConstraints,
@@ -164,7 +261,11 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       ),
     );
 
-    preview = MediaQuery(data: _buildMediaQueryOverride(), child: preview);
+    preview = WidgetPreviewMediaQueryOverride(
+      preview: widget.preview,
+      brightnessListenable: brightnessListenable,
+      child: preview,
+    );
 
     preview = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,12 +286,23 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
         const VerticalSpacer(),
         Row(
           mainAxisSize: MainAxisSize.min,
+          // If an unhandled exception was caught and we're displaying an error
+          // widget, these controls should be disabled.
+          // TODO(bkonyi): improve layout of controls.
           children: [
             ZoomControls(
               transformationController: transformationController,
-              // If an unhandled exception was caught and we're displaying an error
-              // widget, these controls should be disabled.
               enabled: !errorThrownDuringTreeConstruction,
+            ),
+            const SizedBox(width: 30),
+            BrightnessToggleButton(
+              enabled: !errorThrownDuringTreeConstruction,
+              brightnessListenable: brightnessListenable,
+            ),
+            const SizedBox(width: 10),
+            SoftRestartButton(
+              enabled: !errorThrownDuringTreeConstruction,
+              softRestartListenable: softRestartListenable,
             ),
           ],
         ),
@@ -207,22 +319,97 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       ),
     );
   }
+}
 
-  MediaQueryData _buildMediaQueryOverride() {
-    var mediaQueryData = MediaQuery.of(context);
+/// Applies theming defined in [theme] to [child].
+class WidgetPreviewTheming extends StatelessWidget {
+  const WidgetPreviewTheming({
+    super.key,
+    required this.theme,
+    required this.child,
+  });
 
-    if (widget.preview.textScaleFactor != null) {
+  final Widget child;
+
+  /// The set of themes to be applied to [child].
+  final PreviewThemeData? theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final themeData = theme;
+    if (themeData == null) {
+      return child;
+    }
+    final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
+      MediaQuery.platformBrightnessOf(context),
+    );
+    Widget result = child;
+    if (materialTheme != null) {
+      result = Theme(data: materialTheme, child: result);
+    }
+    if (cupertinoTheme != null) {
+      result = CupertinoTheme(data: cupertinoTheme, child: result);
+    }
+    return result;
+  }
+}
+
+/// Wraps the previewed [child] with the correct [MediaQueryData] overrides
+/// based on [preview] and the current device [Brightness].
+class WidgetPreviewMediaQueryOverride extends StatelessWidget {
+  const WidgetPreviewMediaQueryOverride({
+    super.key,
+    required this.preview,
+    required this.brightnessListenable,
+    required this.child,
+  });
+
+  /// The preview specification used to render the preview.
+  final WidgetPreview preview;
+
+  /// The currently set brightness for this preview instance.
+  final ValueListenable<Brightness> brightnessListenable;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Brightness>(
+      valueListenable: brightnessListenable,
+      builder: (context, brightness, _) {
+        return MediaQuery(
+          data: _buildMediaQueryOverride(
+            context: context,
+            brightness: brightness,
+          ),
+          // Use mediaQueryPreview instead of preview to avoid capturing preview
+          // and creating an infinite loop.
+          child: child,
+        );
+      },
+    );
+  }
+
+  MediaQueryData _buildMediaQueryOverride({
+    required BuildContext context,
+    required Brightness brightness,
+  }) {
+    var mediaQueryData = MediaQuery.of(
+      context,
+    ).copyWith(platformBrightness: brightness);
+
+    if (preview.textScaleFactor != null) {
       mediaQueryData = mediaQueryData.copyWith(
-        textScaler: TextScaler.linear(widget.preview.textScaleFactor!),
+        textScaler: TextScaler.linear(preview.textScaleFactor!),
       );
     }
 
     var size = Size(
-      widget.preview.width ?? mediaQueryData.size.width,
-      widget.preview.height ?? mediaQueryData.size.height,
+      preview.width ?? mediaQueryData.size.width,
+      preview.height ?? mediaQueryData.size.height,
     );
 
-    if (widget.preview.width != null || widget.preview.height != null) {
+    if (preview.width != null || preview.height != null) {
       mediaQueryData = mediaQueryData.copyWith(size: size);
     }
 
@@ -413,13 +600,17 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 Future<void> mainImpl() async {
   // TODO(bkonyi): store somewhere.
   await WidgetPreviewScaffoldDtdServices().connect();
-  runApp(_WidgetPreviewScaffold());
+  runApp(WidgetPreviewScaffold(previews: previews));
 }
 
 /// Define the Enum for Layout Types
 enum LayoutType { gridView, listView }
 
-class _WidgetPreviewScaffold extends StatelessWidget {
+class WidgetPreviewScaffold extends StatelessWidget {
+  WidgetPreviewScaffold({super.key, required this.previews});
+
+  final List<WidgetPreview> Function() previews;
+
   // Positioning values for positioning the previewer
   final double _previewLeftPadding = 60.0;
   final double _previewRightPadding = 20.0;
@@ -524,16 +715,7 @@ class _WidgetPreviewScaffold extends StatelessWidget {
     if (previewList.isEmpty) {
       previewView = Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            // TODO: consider including details on how to get started
-            // with Widget Previews.
-            child: Text(
-              'No previews available',
-              style: fixBlurryText(TextStyle(color: Colors.white)),
-            ),
-          ),
-        ],
+        children: <Widget>[NoPreviewsDetectedWidget()],
       );
     } else {
       previewView = LayoutBuilder(

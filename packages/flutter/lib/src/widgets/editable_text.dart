@@ -826,7 +826,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    bool? autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -907,7 +907,9 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
+       autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -1050,7 +1052,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true.
+  /// False on iOS if [autofillHints] contains password-related hints, otherwise true.
   /// {@endtemplate}
   final bool autocorrect;
 
@@ -2032,6 +2034,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
 
@@ -2106,6 +2111,38 @@ class EditableText extends StatefulWidget {
     }
 
     return resultButtonItem;
+  }
+
+  // Infer the value of autocorrect from autofillHints.
+  static bool _inferAutocorrect({required Iterable<String>? autofillHints}) {
+    if (autofillHints == null || autofillHints.isEmpty || kIsWeb) {
+      return true;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        // username, password and newPassword are password related hint.
+        // newUsername is not supported on iOS.
+        final bool passwordRelatedHint = autofillHints.any(
+          (String hint) =>
+              hint == AutofillHints.username ||
+              hint == AutofillHints.password ||
+              hint == AutofillHints.newPassword,
+        );
+        if (passwordRelatedHint) {
+          // https://github.com/flutter/flutter/issues/134723
+          // Set autocorrect to false to prevent password bar from flashing.
+          return false;
+        }
+      case TargetPlatform.macOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    return true;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -2260,7 +2297,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('readOnly', readOnly, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
     properties.add(
       EnumProperty<SmartDashesType>(
         'smartDashesType',
@@ -2357,6 +2394,9 @@ class EditableText extends StatefulWidget {
                 ? const <String>[]
                 : kDefaultContentInsertionMimeTypes,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
   }
 }
@@ -5064,6 +5104,7 @@ class EditableTextState extends State<EditableText>
           widget.contentInsertionConfiguration == null
               ? const <String>[]
               : widget.contentInsertionConfiguration!.allowedMimeTypes,
+      hintLocales: widget.hintLocales,
     );
   }
 
@@ -5650,7 +5691,12 @@ class EditableTextState extends State<EditableText>
                         excludeFromSemantics: true,
                         axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
                         controller: _scrollController,
-                        physics: widget.scrollPhysics,
+                        // On iOS a single-line TextField should not scroll.
+                        physics:
+                            widget.scrollPhysics ??
+                            (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
+                                ? const _NeverUserScrollableScrollPhysics()
+                                : null),
                         dragStartBehavior: widget.dragStartBehavior,
                         restorationId: widget.restorationId,
                         // If a ScrollBehavior is not provided, only apply scrollbars when
@@ -5988,6 +6034,20 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
   }
+}
+
+class _NeverUserScrollableScrollPhysics extends ScrollPhysics {
+  /// Creates a scroll physics that prevents scrolling with user input, for example
+  /// by dragging, but still allows for programmatic scrolling.
+  const _NeverUserScrollableScrollPhysics({super.parent});
+
+  @override
+  _NeverUserScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _NeverUserScrollableScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool get allowUserScrolling => false;
 }
 
 @immutable
