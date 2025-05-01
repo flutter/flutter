@@ -232,7 +232,7 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// Specifies if the [DropdownMenu] should show a [trailingIcon].
   ///
-  /// /// Defaults to true.
+  /// Defaults to true.
   ///
   /// If [trailingIcon] is set, [DropdownMenu] will use that trailing icon,
   /// otherwise a default trailing icon will be created.
