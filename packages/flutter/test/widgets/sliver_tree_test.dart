@@ -905,4 +905,46 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('sliver_tree.pined_header.0.png'));
     expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, 10));
   });
+
+  testWidgets('TreeSliver renders correctly after scrolling.', (WidgetTester tester) async {
+    const ValueKey<String> key = ValueKey<String>('sliver_scrolling');
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: <Widget>[
+                  TreeSliver<Object>(
+                    tree: <TreeSliverNode<Object>>[TreeSliverNode<Object>(Object())],
+                    treeRowExtentBuilder: (_, _) => 10,
+                    treeNodeBuilder: (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle animationStyle,
+                    ) {
+                      return const ColoredBox(color: Colors.red);
+                    },
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    scrollController.jumpTo(5);
+    await tester.pumpAndSettle();
+    await expectLater(find.byKey(key), matchesGoldenFile('sliver_tree.scrolling.1.png'));
+    expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, -5));
+  });
 }
