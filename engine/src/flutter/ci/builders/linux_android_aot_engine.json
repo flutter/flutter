@@ -42,8 +42,7 @@
                 "--android",
                 "--android-cpu",
                 "arm",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_profile",
             "description": "Produces profile mode artifacts to target 32-bit arm Android from a Linux host.",
@@ -87,8 +86,7 @@
                 "--android",
                 "--android-cpu",
                 "arm",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_release",
             "description": "Produces release mode artifacts to target 32-bit arm Android from a Linux host.",
@@ -133,8 +131,7 @@
                 "--android",
                 "--android-cpu",
                 "arm64",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_release_arm64",
             "description": "Produces release mode artifacts to target 64-bit arm Android from a Linux host.",
@@ -191,7 +188,6 @@
                 "--android-cpu",
                 "arm64",
                 "--rbe",
-                "--no-goma",
                 "--slimpeller"
             ],
             "name": "ci/android_release_slimpeller_arm64",
@@ -248,8 +244,7 @@
                 "profile",
                 "--android-cpu",
                 "arm64",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_profile_arm64",
             "description": "Produces profile mode artifacts to target 64-bit arm Android from a Linux host.",
@@ -294,8 +289,7 @@
                 "--android",
                 "--android-cpu",
                 "x64",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_profile_x64",
             "description": "Produces profile mode artifacts to target x64 Android from a Linux host.",
@@ -340,8 +334,7 @@
                 "--android",
                 "--android-cpu",
                 "x64",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/android_release_x64",
             "description": "Produces release mode artifacts to target x64 Android from a Linux host.",

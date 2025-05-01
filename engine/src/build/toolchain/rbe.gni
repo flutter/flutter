@@ -7,7 +7,7 @@
 import("//build/toolchain/toolchain.gni")
 
 declare_args() {
-  # Set to true to enable distributed compilation using Goma.
+  # Set to true to enable distributed compilation using Remote Build Execution.
   use_rbe = false
 
   # Set to true to create symlinks to Xcode toolchain/SDK directories.

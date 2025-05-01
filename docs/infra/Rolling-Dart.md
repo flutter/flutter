@@ -62,12 +62,12 @@ If the script completes without errors, move on to step 10 in the next section t
 set -ex
 
 cd ~/engine/src
-flutter/tools/gn --goma --runtime-mode=debug
-flutter/tools/gn --goma --runtime-mode=profile
-flutter/tools/gn --goma --runtime-mode=release
-flutter/tools/gn --goma --android --runtime-mode=debug
-flutter/tools/gn --goma --android --runtime-mode=profile
-flutter/tools/gn --goma --android --runtime-mode=release
+flutter/tools/gn --runtime-mode=debug
+flutter/tools/gn --runtime-mode=profile
+flutter/tools/gn --runtime-mode=release
+flutter/tools/gn --android --runtime-mode=debug
+flutter/tools/gn --android --runtime-mode=profile
+flutter/tools/gn --android --runtime-mode=release
 cd out
 find . -mindepth 1 -maxdepth 1 -type d | xargs -n 1 sh -c 'ninja -C $0 -j1000 || exit 255'
 ```
