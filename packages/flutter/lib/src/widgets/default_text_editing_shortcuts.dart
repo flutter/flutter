@@ -354,8 +354,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   // The following key combinations have no effect on text editing on this
   // platform:
-  //   * End
-  //   * Home
   //   * Meta + X
   //   * Meta + C
   //   * Meta + V
@@ -365,8 +363,6 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + shift? + arrow left
   //   * Meta + shift? + arrow right
   //   * Meta + shift? + arrow up
-  //   * Shift + end
-  //   * Shift + home
   //   * Meta + shift? + delete
   //   * Meta + shift? + backspace
   static final Map<ShortcutActivator, Intent> _androidShortcuts = {
