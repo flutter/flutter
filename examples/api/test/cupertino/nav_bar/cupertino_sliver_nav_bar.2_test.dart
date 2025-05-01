@@ -8,8 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 const Offset dragUp = Offset(0.0, -150.0);
 
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 3000.0)}) {
+  tester.view.physicalSize = size;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   testWidgets('CupertinoSliverNavigationBar bottom widget', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     final Finder preferredSize = find.byType(PreferredSize);
@@ -24,6 +30,7 @@ void main() {
   testWidgets('Collapse and expand CupertinoSliverNavigationBar changes title position', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Large title is visible and at lower position.
@@ -41,6 +48,7 @@ void main() {
   testWidgets('Middle widget is visible in both collapsed and expanded states', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Navigate to a page that has both middle and large titles.
@@ -67,6 +75,7 @@ void main() {
   testWidgets('CupertinoSliverNavigationBar with previous route has back button', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Navigate to a page that has a back button.

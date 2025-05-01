@@ -1149,11 +1149,13 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late _NavigationBarStaticComponentsKeys keys;
   ScrollableState? _scrollableState;
   _NavigationBarSearchField? preferredSizeSearchField;
+  Widget? effectiveMiddle;
   late AnimationController _animationController;
   late CurvedAnimation _searchAnimation;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   bool searchIsActive = false;
+  bool isPortrait = true;
 
   @override
   void initState() {
@@ -1169,6 +1171,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
+    final Tween<double> largeTitleHeightTween = Tween<double>(
+      begin: isPortrait ? _kNavBarLargeTitleHeightExtension : 0.0,
+      end: 0.0,
+    );
+    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
+    effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
+
     _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     _scrollableState = Scrollable.maybeOf(context);
     _scrollableState?.position.isScrollingNotifier.addListener(_handleScrollChange);
@@ -1203,11 +1213,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     );
     persistentHeightAnimation = persistentHeightTween.animate(_animationController)
       ..addStatusListener(_handleSearchFieldStatusChanged);
-    final Tween<double> largeTitleHeightTween = Tween<double>(
-      begin: _kNavBarLargeTitleHeightExtension,
-      end: 0.0,
-    );
-    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
   }
 
   void _handleScrollChange() {
@@ -1221,16 +1226,17 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         widget.bottomMode == NavigationBarBottomMode.always ? 0.0 : _bottomHeight;
     final bool canScrollBottom =
         (widget._searchable || widget.bottom != null) && bottomScrollOffset > 0.0;
+    final double effectiveLargeTitleHeight = isPortrait ? _kNavBarLargeTitleHeightExtension : 0.0;
 
     // Snap the scroll view to a target determined by the navigation bar's
     // position.
     if (canScrollBottom && position.pixels < bottomScrollOffset) {
       target = position.pixels > bottomScrollOffset / 2 ? bottomScrollOffset : 0.0;
     } else if (position.pixels > bottomScrollOffset &&
-        position.pixels < bottomScrollOffset + _kNavBarLargeTitleHeightExtension) {
+        position.pixels < bottomScrollOffset + effectiveLargeTitleHeight) {
       target =
-          position.pixels > bottomScrollOffset + (_kNavBarLargeTitleHeightExtension / 2)
-              ? bottomScrollOffset + _kNavBarLargeTitleHeightExtension
+          position.pixels > bottomScrollOffset + (effectiveLargeTitleHeight / 2)
+              ? bottomScrollOffset + effectiveLargeTitleHeight
               : bottomScrollOffset;
     }
 
@@ -1280,7 +1286,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       automaticallyImplyTitle: widget.automaticallyImplyTitle,
       previousPageTitle: widget.previousPageTitle,
-      userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
+      userMiddle: _animationController.isAnimating ? const Text('') : effectiveMiddle,
       userTrailing:
           widget.trailing != null
               ? Visibility(visible: !searchIsActive, child: widget.trailing!)
@@ -1304,7 +1310,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               : widget.bottom) ??
           const SizedBox.shrink(),
       padding: widget.padding,
-      large: true,
+      large: isPortrait,
       staticBar: false, // This one scrolls.
       context: context,
     );
@@ -1318,7 +1324,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             delegate: _LargeTitleNavigationBarSliverDelegate(
               keys: keys,
               components: components,
-              userMiddle: widget.middle,
+              userMiddle: effectiveMiddle,
               backgroundColor:
                   CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ??
                   CupertinoTheme.of(context).barBackgroundColor,
@@ -1331,7 +1337,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               heroTag: widget.heroTag,
               persistentHeight: persistentHeightAnimation.value + MediaQuery.paddingOf(context).top,
               largeTitleHeight: largeTitleHeightAnimation.value,
-              alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
+              alwaysShowMiddle: widget.alwaysShowMiddle && effectiveMiddle != null,
               stretchConfiguration:
                   widget.stretch && !searchIsActive ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,

@@ -51,6 +51,9 @@ void main() {
   });
 
   testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
+    // Set window orientation to portrait.
+    tester.view.physicalSize = const Size(2400.0, 3000.0);
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(const CupertinoApp(home: Placeholder()));
 
     tester
