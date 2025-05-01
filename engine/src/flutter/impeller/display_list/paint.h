@@ -59,11 +59,11 @@ struct Paint {
         std::shared_ptr<ColorSourceContents> color_source_contents,
         const flutter::DlColorFilter* color_filter,
         bool invert_colors,
-        RectGeometry* rect_geom) const;
+        FillRectGeometry* rect_geom) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         std::shared_ptr<TextureContents> texture_contents,
-        RectGeometry* rect_geom) const;
+        FillRectGeometry* rect_geom) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         const FilterInput::Ref& input,

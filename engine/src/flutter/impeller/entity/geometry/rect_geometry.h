@@ -9,11 +9,11 @@
 
 namespace impeller {
 
-class RectGeometry final : public Geometry {
+class FillRectGeometry final : public Geometry {
  public:
-  explicit RectGeometry(Rect rect);
+  explicit FillRectGeometry(Rect rect);
 
-  ~RectGeometry() override;
+  ~FillRectGeometry() override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -31,6 +31,36 @@ class RectGeometry final : public Geometry {
 
  private:
   Rect rect_;
+};
+
+class StrokeRectGeometry final : public Geometry {
+ public:
+  explicit StrokeRectGeometry(Rect rect,
+                              Scalar stroke_width,
+                              Join stroke_join,
+                              Scalar miter_limit);
+
+  ~StrokeRectGeometry() override;
+
+  // |Geometry|
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) const override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+ private:
+  const Rect rect_;
+  const Scalar stroke_width_;
+  const Join stroke_join_;
+
+  static Join AdjustStrokeJoin(Join join, Scalar miter_limit);
+
+  static Point* AppendRoundCornerJoin(Point* buffer,
+                                      Point corner,
+                                      Vector2 offset,
+                                      const Tessellator::Trigs& trigs);
 };
 
 }  // namespace impeller
