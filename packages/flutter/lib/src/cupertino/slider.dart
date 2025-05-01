@@ -26,6 +26,8 @@ typedef _SliderValueChanged = void Function(double value, bool isFastDrag)?;
 ///
 /// A threshold of 0.5 means that the user must drag with a velocity
 /// that will move the slider 50% in 1 second.
+///
+/// This value is estimated using a physical iPhone 15 Pro running iOS 18.
 const double _kVelocityThreshold = 1.0;
 
 // Examples can assume:
@@ -257,6 +259,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
   void _emitHapticFeedback(bool isFastDrag) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
+        // The values are estimated using a physical iPhone 15 Pro running iOS 18.
         if (isFastDrag) {
           HapticFeedback.mediumImpact();
         } else {
