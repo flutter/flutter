@@ -3708,6 +3708,8 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
     );
   }
 
+  bool get _tooltipVisible => _tooltipMessage != null;
+
   @override
   Widget build(BuildContext context) {
     final Widget selectionModeButtons = Column(
@@ -3757,7 +3759,9 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
     final bool newValue = selectionOnTapEnabled ?? !_selectionOnTapEnabled;
     _selectionOnTapEnabled = newValue;
     WidgetInspectorService.instance.selection.clear();
-    _changeSelectionOnTapTooltip();
+    if (_tooltipVisible) {
+      _changeSelectionOnTapTooltip();
+    }
   }
 
   void _changeSelectionOnTapTooltip() {
