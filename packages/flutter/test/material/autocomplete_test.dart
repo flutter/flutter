@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -807,6 +809,8 @@ void main() {
                             SemanticsAction.focus,
                             if (kIsWeb) SemanticsAction.paste,
                           ],
+                          currentValueLength: 0,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                           validationResult: SemanticsValidationResult.valid,

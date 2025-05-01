@@ -3769,6 +3769,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.suspend/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
