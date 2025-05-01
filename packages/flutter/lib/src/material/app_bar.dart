@@ -221,7 +221,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.useDefaultSemanticsOrder = true,
     this.clipBehavior,
     this.actionsPadding,
-    this.animateColor = false,
   }) : assert(elevation == null || elevation >= 0.0),
        preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
@@ -774,9 +773,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@endtemplate}
   final EdgeInsetsGeometry? actionsPadding;
 
-  /// Whether the color should be animated.
-  final bool animateColor;
-
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
       switch (theme.platform) {
@@ -1217,7 +1213,7 @@ class _AppBarState extends State<AppBar> {
               ??
               (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
-          animateColor: widget.animateColor,
+          animateColor: true,
           child: Semantics(explicitChildNodes: true, child: appBar),
         ),
       ),
