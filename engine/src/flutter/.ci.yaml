@@ -283,7 +283,6 @@ targets:
     backfill: false
     properties:
       config_name: linux_android_aot_engine_ddm
-      release_build: "false"
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
@@ -320,7 +319,6 @@ targets:
     timeout: 120
     backfill: false
     properties:
-      release_build: "false"
       config_name: linux_android_debug_engine_ddm
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
