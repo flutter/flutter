@@ -497,9 +497,14 @@ mixin WidgetsBinding
   ///
   /// - If true, taps in the app are intercepted by the widget inspector.
   /// - If false, taps in the app are not intercepted by the widget inspector.
-  ValueNotifier<bool> get debugWidgetInspectorSelectionOnTapEnabledNotifier =>
-      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject ??= ValueNotifier<bool>(true);
-  ValueNotifier<bool>? _debugWidgetInspectorSelectionOnTapEnabledNotifierObject;
+  ValueListenable<bool> get debugWidgetInspectorSelectionOnTapEnabledListenable =>
+      _debugWidgetInspectorselectionOnTapEnabledNotifier;
+  final ValueNotifier<bool> _debugWidgetInspectorselectionOnTapEnabledNotifier =
+      ValueNotifier<bool>(true);
+
+  set debugWidgetInspectorSelectionOnTap(bool value) {
+    _debugWidgetInspectorselectionOnTapEnabledNotifier.value = value;
+  }
 
   @visibleForTesting
   @override
@@ -507,9 +512,8 @@ mixin WidgetsBinding
     // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
     super.resetInternalState();
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
-    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
-    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject = null;
+    _debugWidgetInspectorselectionOnTapEnabledNotifier.dispose();
   }
 
   void _debugAddStackFilters() {

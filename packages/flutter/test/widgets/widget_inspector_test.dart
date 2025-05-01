@@ -1027,14 +1027,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           BuildContext context, {
           required VoidCallback onPressed,
           required String semanticLabel,
-          required bool defaultTapBehaviorEnabled,
+          required bool selectionOnTapEnabled,
         }) {
           return Material(
             child: ElevatedButton(
               onPressed: onPressed,
-              child: Text(
-                defaultTapBehaviorEnabled ? 'DEFAULT TAP BEHAVIOR' : 'OTHER TAP BEHAVIOR',
-              ),
+              child: Text(selectionOnTapEnabled ? 'SELECTION ON TAP' : 'APP INTERACTION ON TAP'),
             ),
           );
         }
@@ -1080,15 +1078,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Verify that a navigate event was sent.
         expect(navigateEventsCount(), equals(1));
 
-        // Tap on the default tap behavior button.
-        final Finder tapBehaviorButtonBefore = buttonFinder('DEFAULT TAP BEHAVIOR');
+        // Tap on the SELECTION ON TAP button.
+        final Finder tapBehaviorButtonBefore = buttonFinder('SELECTION ON TAP');
         expect(tapBehaviorButtonBefore, findsOneWidget);
         await tester.tap(tapBehaviorButtonBefore);
         await tester.pump();
 
         // Verify the tap behavior button's UI has been updated.
         expect(tapBehaviorButtonBefore, findsNothing);
-        final Finder tapBehaviorButtonAfter = buttonFinder('OTHER TAP BEHAVIOR');
+        final Finder tapBehaviorButtonAfter = buttonFinder('APP INTERACTION ON TAP');
         expect(tapBehaviorButtonAfter, findsOneWidget);
 
         // Tap on the second child widget.
@@ -1102,7 +1100,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Verify no navigate events were sent.
         expect(navigateEventsCount(), equals(1));
 
-        // Tap on the default tap behavior button again.
+        // Tap on the SELECTION ON TAP button again.
         await tester.tap(tapBehaviorButtonAfter);
         await tester.pump();
 

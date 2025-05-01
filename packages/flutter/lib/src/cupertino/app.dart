@@ -563,13 +563,15 @@ class _CupertinoAppState extends State<CupertinoApp> {
     BuildContext context, {
     required VoidCallback onPressed,
     required String semanticLabel,
-    required bool defaultTapBehaviorEnabled,
+    required bool selectionOnTapEnabled,
   }) {
     return _CupertinoInspectorButton.toggle(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
+      // This icon is also used for the Cupertino-styled icon and for DevTools.
+      // It should be updated in all 3 places if changed.
       icon: CupertinoIcons.cursor_rays,
-      toggledOn: defaultTapBehaviorEnabled,
+      toggledOn: selectionOnTapEnabled,
     );
   }
 

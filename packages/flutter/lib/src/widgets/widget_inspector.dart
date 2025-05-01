@@ -65,7 +65,7 @@ typedef TapBehaviorButtonBuilder =
       BuildContext context, {
       required VoidCallback onPressed,
       required String semanticLabel,
-      required bool defaultTapBehaviorEnabled,
+      required bool selectionOnTapEnabled,
     });
 
 /// Signature for a method that registers the service extension `callback` with
@@ -2814,7 +2814,7 @@ class WidgetInspector extends StatefulWidget {
   /// The `onPressed` callback passed as an argument to the builder should be
   /// hooked up to the returned widget.
   ///
-  /// The button UI should respond to the `defaultTapBehaviorEnabled` argument.
+  /// The button UI should respond to the `selectionOnTapEnabled` argument.
   final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   @override
@@ -2836,11 +2836,11 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
-  ValueNotifier<bool> get _selectionOnTapEnabledNotifier =>
-      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledNotifier;
+  ValueListenable<bool> get _selectionOnTapEnabledListenable =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledListenable;
 
   bool get _isSelectModeWithSelectionOnTapEnabled =>
-      isSelectMode && _selectionOnTapEnabledNotifier.value;
+      isSelectMode && _selectionOnTapEnabledListenable.value;
 
   @override
   void initState() {
@@ -2850,7 +2850,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.addListener(
       _selectionInformationChanged,
     );
-    _selectionOnTapEnabledNotifier.addListener(_selectionInformationChanged);
+    _selectionOnTapEnabledListenable.addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
   }
@@ -2861,7 +2861,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.removeListener(
       _selectionInformationChanged,
     );
-    _selectionOnTapEnabledNotifier.removeListener(_selectionInformationChanged);
+    _selectionOnTapEnabledListenable.removeListener(_selectionInformationChanged);
     super.dispose();
   }
 
@@ -3629,6 +3629,7 @@ class _WidgetInspectorButtonGroup extends StatefulWidget {
 
 class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup> {
   static const double _kExitWidgetSelectionButtonMargin = 10.0;
+  static const bool _defaultSelectionOnTapEnabled = true;
 
   final GlobalKey _exitWidgetSelectionButtonKey = GlobalKey(
     debugLabel: 'Exit Widget Selection button',
@@ -3638,9 +3639,13 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   bool _leftAligned = true;
 
-  ValueNotifier<bool> get _selectionOnTapEnabledNotifier =>
-      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledNotifier;
-  bool get _selectionOnTapEnabled => _selectionOnTapEnabledNotifier.value;
+  ValueListenable<bool> get _selectionOnTapEnabledListenable =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledListenable;
+  bool get _selectionOnTapEnabled => _selectionOnTapEnabledListenable.value;
+
+  set _selectionOnTapEnabled(bool value) {
+    WidgetsBinding.instance.debugWidgetInspectorSelectionOnTap = value;
+  }
 
   Widget? get _moveExitWidgetSelectionButton {
     final MoveExitWidgetSelectionButtonBuilder? buttonBuilder =
@@ -3688,21 +3693,17 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
     if (buttonBuilder == null) {
       return null;
     }
-    final ValueNotifier<bool> selectionOnTapEnabledNotifier =
-        WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledNotifier;
+    final ValueListenable<bool> selectionOnTapEnabledListenable =
+        WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledListenable;
 
     return _WidgetInspectorButton(
       button: buttonBuilder(
         context,
-        onPressed: () {
-          _changeSelectionOnTapMode();
-        },
+        onPressed: _changeSelectionOnTapMode,
         semanticLabel: 'Change widget selection mode for taps',
-        defaultTapBehaviorEnabled: selectionOnTapEnabledNotifier.value,
+        selectionOnTapEnabled: selectionOnTapEnabledListenable.value,
       ),
-      onTooltipVisible: () {
-        _changeSelectionOnTapTooltip();
-      },
+      onTooltipVisible: _changeSelectionOnTapTooltip,
       onTooltipHidden: _onTooltipHidden,
     );
   }
@@ -3749,12 +3750,12 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   void _exitWidgetSelectionMode() {
     WidgetInspectorService.instance._changeWidgetSelectionMode(false);
     // Reset to default selection on tap behavior on exit.
-    _changeSelectionOnTapMode(selectionOnTapEnabled: true);
+    _changeSelectionOnTapMode(selectionOnTapEnabled: _defaultSelectionOnTapEnabled);
   }
 
   void _changeSelectionOnTapMode({bool? selectionOnTapEnabled}) {
     final bool newValue = selectionOnTapEnabled ?? !_selectionOnTapEnabled;
-    _selectionOnTapEnabledNotifier.value = newValue;
+    _selectionOnTapEnabled = newValue;
     WidgetInspectorService.instance.selection.clear();
     _changeSelectionOnTapTooltip();
   }
