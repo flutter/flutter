@@ -15,6 +15,9 @@ import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
 void main() {
+  // Created here as multiple groups use it.
+  final RegExp stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get current');
+
   group('Flutter run for web', () {
     final BasicProject project = BasicProject();
     late Directory tempDir;
@@ -120,11 +123,19 @@ void main() {
       // Test that the call comes from some Dart getter called `current` (the
       // location of which will be compiler-specific) and that the lines and
       // file name of the current location is correct and reports a Dart path.
-      await evaluateStackTraceCurrent(flutter, <String>[
-        'get current',
-        'package:test/main.dart 24:5',
-        'package:test/main.dart 15:7',
-      ]);
+      await evaluateStackTraceCurrent(flutter, (String stackTrace) {
+        final Iterable<RegExpMatch> matches = stackTraceCurrentRegexp.allMatches(stackTrace);
+        if (matches.length != 1) {
+          return false;
+        }
+        int end = matches.first.end;
+        end = stackTrace.indexOf('package:test/main.dart 24:5', end);
+        if (end == -1) {
+          return false;
+        }
+        end = stackTrace.indexOf('package:test/main.dart 15:7', end);
+        return end != -1;
+      });
     });
   });
 
@@ -198,7 +209,15 @@ void main() {
     testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
       await startPaused(expressionEvaluation: true);
       await breakInMethod(flutter);
-      await evaluateStackTraceCurrent(flutter, <String>['get current', 'test.dart 6:9']);
+      await evaluateStackTraceCurrent(flutter, (String stackTrace) {
+        final Iterable<RegExpMatch> matches = stackTraceCurrentRegexp.allMatches(stackTrace);
+        if (matches.length != 1) {
+          return false;
+        }
+        int end = matches.first.end;
+        end = stackTrace.indexOf('test.dart 6:9', end);
+        return end != -1;
+      });
     });
   });
 }
@@ -267,11 +286,11 @@ Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver
 
 Future<void> evaluateStackTraceCurrent(
   FlutterTestDriver flutter,
-  List<String> stackTraceStrings,
+  bool Function(String) matchStackTraces,
 ) async {
   final LibraryRef library = await getRootLibrary(flutter);
   final ObjRef res = await flutter.evaluate(library.id!, 'StackTrace.current.toString()');
-  expectInstance(res, InstanceKind.kString, stringContainsInOrder(stackTraceStrings));
+  expectInstance(res, InstanceKind.kString, predicate(matchStackTraces));
 }
 
 Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
