@@ -8322,7 +8322,7 @@ void main() {
   );
 
   testWidgets(
-    'control + home/end keys (Windows only)',
+    'control + home/end keys',
     (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
@@ -8363,7 +8363,22 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(controller.selection, equals(const TextSelection.collapsed(offset: testText.length)));
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream)),
+          );
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: testText.length)),
+          );
+      }
 
       await sendKeys(
         tester,
@@ -8372,14 +8387,26 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(controller.selection, equals(const TextSelection.collapsed(offset: 0)));
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream)),
+          );
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection, equals(const TextSelection.collapsed(offset: 0)));
+      }
     },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
+    variant: TargetPlatformVariant.all(),
   );
 
   testWidgets(
-    'control + shift + home/end keys (Windows only)',
+    'control + shift + home/end keys',
     (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
@@ -8421,17 +8448,29 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(
-        controller.selection,
-        equals(const TextSelection(baseOffset: 0, extentOffset: testText.length)),
-      );
+      switch (defaultTargetPlatform) {
+        // Apple platforms don't handle this shortcut and do nothing.
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: 0, affinity: TextAffinity.upstream)),
+          );
 
-      // Collapse the selection at the end.
-      await sendKeys(tester, <LogicalKeyboardKey>[
-        LogicalKeyboardKey.arrowRight,
-      ], targetPlatform: defaultTargetPlatform);
+        // These platforms select to the endof the text.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(
+            controller.selection,
+            equals(const TextSelection(baseOffset: 0, extentOffset: testText.length)),
+          );
+      }
+
+      // Set the selection to collapsed at the end to test the home key.
+      controller.selection = const TextSelection.collapsed(offset: testText.length);
       await tester.pump();
-      expect(controller.selection, equals(const TextSelection.collapsed(offset: testText.length)));
 
       await sendKeys(
         tester,
@@ -8441,13 +8480,28 @@ void main() {
         targetPlatform: defaultTargetPlatform,
       );
       await tester.pump();
-      expect(
-        controller.selection,
-        equals(const TextSelection(baseOffset: testText.length, extentOffset: 0)),
-      );
+      switch (defaultTargetPlatform) {
+        // Apple platforms don't handle this shortcut and do nothing.
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(
+            controller.selection,
+            equals(const TextSelection.collapsed(offset: testText.length)),
+          );
+
+        // These platforms select to the beginning of the text.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(
+            controller.selection,
+            equals(const TextSelection(baseOffset: testText.length, extentOffset: 0)),
+          );
+      }
     },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
+    variant: TargetPlatformVariant.all(),
   );
 
   testWidgets(
