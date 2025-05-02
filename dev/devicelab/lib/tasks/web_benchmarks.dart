@@ -57,6 +57,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-launch-url',
           'http://localhost:$benchmarksAppPort/index.html',
           '--debug',
+          '--web-run-headless',
           '--no-web-enable-expression-evaluation',
           '--web-browser-flag=--disable-popup-blocking',
           '--web-browser-flag=--bwsi',
