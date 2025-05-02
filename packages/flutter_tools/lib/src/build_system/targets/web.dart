@@ -540,17 +540,15 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   @override
   Future<void> build(Environment environment) async {
     final Directory webResources = environment.projectDir.childDirectory('web');
+    final bool includeServiceWorkerSettings =
+        environment.serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst;
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
     if (await inputFlutterBootstrapJs.exists()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
-      final ServiceWorkerStrategy serviceWorkerStrategy = ServiceWorkerStrategy.fromCliName(
-        environment.defines[kServiceWorkerStrategy],
-      );
-
       inputBootstrapContent = generateDefaultFlutterBootstrapScript(
-        includeServiceWorkerSettings: serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst,
+        includeServiceWorkerSettings: includeServiceWorkerSettings,
       );
     }
     final WebTemplate bootstrapTemplate = WebTemplate(inputBootstrapContent);
@@ -571,7 +569,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
-    final String serviceWorkerVersion = Random().nextInt(4294967296).toString();
+    final String? serviceWorkerVersion =
+        includeServiceWorkerSettings ? Random().nextInt(1 << 32).toString() : null;
     bootstrapTemplate.applySubstitutions(
       baseHref: '',
       serviceWorkerVersion: serviceWorkerVersion,
@@ -755,9 +754,6 @@ class WebServiceWorker extends Target {
 
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = ServiceWorkerStrategy.fromCliName(
-      environment.defines[kServiceWorkerStrategy],
-    );
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
@@ -770,11 +766,16 @@ class WebServiceWorker extends Target {
       'flutter_bootstrap.js',
       if (urlToHash.containsKey('assets/AssetManifest.bin.json')) 'assets/AssetManifest.bin.json',
       if (urlToHash.containsKey('assets/FontManifest.json')) 'assets/FontManifest.json',
-    ], serviceWorkerStrategy: serviceWorkerStrategy);
+    ], serviceWorkerStrategy: environment.serviceWorkerStrategy);
     serviceWorkerFile.writeAsStringSync(serviceWorker);
     environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('service_worker.d'),
     );
   }
+}
+
+extension on Environment {
+  ServiceWorkerStrategy get serviceWorkerStrategy =>
+      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]);
 }
