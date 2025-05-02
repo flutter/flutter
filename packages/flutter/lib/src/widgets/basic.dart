@@ -4198,7 +4198,7 @@ class IndexedStack extends StatelessWidget {
     this.textDirection,
     this.clipBehavior = Clip.hardEdge,
     this.sizing = StackFit.loose,
-    this.maintainInteractivity = true,
+    this.maintainFocusability = true,
     this.index = 0,
     this.children = const <Widget>[],
   });
@@ -4231,9 +4231,7 @@ class IndexedStack extends StatelessWidget {
   /// Whether or not non-visible children can be focused.
   ///
   /// Defaults to true.
-  // TODO(skimm3): Added to avoid a breaking change, should be removed and set to false someday.
-  //               See https://github.com/flutter/flutter/issues/114213.
-  final bool maintainInteractivity;
+  final bool maintainFocusability;
 
   /// The index of the child to show.
   ///
@@ -4252,7 +4250,8 @@ class IndexedStack extends StatelessWidget {
     final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
       return Visibility(
         visible: i == index,
-        maintainInteractivity: maintainInteractivity,
+        maintainFocusability: maintainFocusability,
+        maintainInteractivity: true,
         maintainSize: true,
         maintainState: true,
         maintainAnimation: true,
