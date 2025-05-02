@@ -536,9 +536,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
-      wasmAllowList: {
-        ${suite.runConfig.wasmAllowList.entries.map((entry) => '"${entry.key}": ${entry.value}').join(',')}
-      },
+      wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
     },
   });
 </script>
