@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart' show SystemChannels, TargetPlatform;
+import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -45,15 +44,4 @@ void main() {
       ]),
     );
   });
-
-  for (final TargetPlatform platform in TargetPlatform.values) {
-    test('Announce not supported on Android. (platform=$platform)', () {
-      debugDefaultTargetPlatformOverride = platform;
-      expect(
-        const DefaultSemanticsService().isAnnounceSupported(),
-        platform != TargetPlatform.android,
-      );
-      debugDefaultTargetPlatformOverride = null;
-    });
-  }
 }

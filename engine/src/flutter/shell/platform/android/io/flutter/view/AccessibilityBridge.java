@@ -491,6 +491,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.accessibilityManager.addTouchExplorationStateChangeListener(
         touchExplorationStateChangeListener);
 
+    accessibilityFeatureFlags |= AccessibilityFeature.NO_ANNOUNCE.value;
     // Tell Flutter whether animations should initially be enabled or disabled. Then register a
     // listener to be notified of changes in the future.
     animationScaleObserver.onChange(false);
@@ -502,8 +503,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
       setBoldTextFlag();
     }
-
-    accessibilityFeatureFlags |= AccessibilityFeature.NO_ANNOUNCE.value;
 
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }

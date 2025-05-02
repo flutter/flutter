@@ -29,7 +29,6 @@ import '../widgets/editable_text_utils.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
-import '../widgets/semantic_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 
@@ -8946,27 +8945,26 @@ void main() {
     semantics.dispose();
   });
 
-  for (final bool isAnnounceSupported in <bool>[true, false]) {
-    testWidgets('InputDecoration errorText semantics (isAnnounceSupported=$isAnnounceSupported)', (
+  for (final bool noAnnounce in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (noAnnounce=$noAnnounce)', (
       WidgetTester tester,
     ) async {
-      final MockSemanticsService mockSemanticsService = MockSemanticsService();
-      mockSemanticsService.mockIsAnnounceSupported = isAnnounceSupported;
-
       final SemanticsTester semantics = SemanticsTester(tester);
       final TextEditingController controller = _textEditingController();
       final Key key = UniqueKey();
 
       await tester.pumpWidget(
         overlay(
-          child: TextField(
-            key: key,
-            controller: controller,
-            decoration: InputDecoration(
-              semanticsService: mockSemanticsService,
-              labelText: 'label',
-              hintText: 'hint',
-              errorText: 'oh no!',
+          child: MediaQuery(
+            data: MediaQueryData(noAnnounce: noAnnounce),
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'label',
+                hintText: 'hint',
+                errorText: 'oh no!',
+              ),
             ),
           ),
         ),
@@ -8987,11 +8985,12 @@ void main() {
                   SemanticsFlag.isEnabled,
                 ],
                 inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,children: <TestSemantics>[
+                currentValueLength: 0,
+                children: <TestSemantics>[
                   TestSemantics(
                     label: 'oh no!',
                     textDirection: TextDirection.ltr,
-                    flags: <SemanticsFlag>[if (!isAnnounceSupported) SemanticsFlag.isLiveRegion],
+                    flags: <SemanticsFlag>[if (noAnnounce) SemanticsFlag.isLiveRegion],
                   ),
                 ],
               ),
