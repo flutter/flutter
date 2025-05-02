@@ -1330,7 +1330,9 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
           ),
           fileSystem: globals.fs,
+          featureFlags: featureFlags,
           logger: globals.logger,
+          analytics: globals.analytics,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: SupportedPlatform.ios);
