@@ -571,7 +571,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // in question.
     final String? serviceWorkerVersion =
         includeServiceWorkerSettings ? Random().nextInt(1 << 32).toString() : null;
-    final String bootstrapContent bootstrapTemplate.applySubstitutions(
+    final String bootstrapContent = bootstrapTemplate.withSubstitutions(
       baseHref: '',
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
