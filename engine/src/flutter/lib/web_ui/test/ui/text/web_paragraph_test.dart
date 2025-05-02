@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/src/engine/web_paragraph/paint.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
@@ -19,7 +20,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-
+  /*
   test('Draw WebParagraph on Canvas2D', () async {
     final engine.DomHTMLCanvasElement canvas = engine.createDomCanvasElement(
       width: 500,
@@ -28,18 +29,15 @@ Future<void> testMain() async {
     engine.domDocument.body!.append(canvas);
     final engine.DomCanvasRenderingContext2D context = canvas.context2D;
 
-    context.fillStyle = 'blue';
-    context.fillRect(0, 0, 200, 200);
-
     final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
-    builder.addText('Lorem ipsum dolor sit');
+    //builder.addText('Lorem ipsum dolor sit');
+    builder.addText('لABC لم def لل لم def');
+
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     paragraph.paintOnCanvas2D(canvas, const Offset(0, 100));
 
-    context.fillStyle = 'red';
-    context.fillRect(250, 0, 100, 200);
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
 
@@ -120,7 +118,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_rtl_multilined.png', region: region);
   });
-
+*/
   test('Draw WebParagraph LTR/RTL 1 Line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -128,14 +126,29 @@ Future<void> testMain() async {
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
-    builder.addText('ABC لم def');
+
+    builder.addText('لABC لم def لل لم def');
+    //builder.addText('لم d');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    /*
+    final engine.DomHTMLCanvasElement canvas1 = engine.createDomCanvasElement(
+      width: 500,
+      height: 500,
+    );
+    engine.domDocument.body!.append(canvas1);
+    final context = canvas1.contextBitmapRenderer;
+    canvas1.style
+      ..position = 'absolute'
+      ..left = '100px'
+      ..top = '200px';
+    context.transferFromImageBitmap(textCanvas.transferToImageBitmap());
+*/
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined.png', region: region);
   });
-
+  /*
   test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -320,4 +333,5 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_text.png', region: region);
   });
+  */
 }

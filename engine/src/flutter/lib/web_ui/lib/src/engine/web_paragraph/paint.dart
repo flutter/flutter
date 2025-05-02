@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/src/engine/web_paragraph/debug.dart';
 import 'package:ui/ui.dart' as ui;
@@ -17,7 +19,10 @@ final textContext = textCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 ///
 /// It uses a [DomCanvasElement] to get text information
 class TextPaint {
-  TextPaint(this.paragraph);
+  TextPaint(this.paragraph); /* {
+    engine.domDocument.body!.append(textCanvas);
+    textCanvas.style..position='absolute'..left='100px'..top='200px';
+  }*/
 
   final WebParagraph paragraph;
 
@@ -44,20 +49,20 @@ class TextPaint {
     double x,
     double y,
   ) {
-    double clusterShiftX = 0.0;
     for (final BidiRun run in line.visualRuns) {
       final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
       final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
       final int step = run.bidiLevel.isEven ? 1 : -1;
+      WebParagraphDebug.log('run.shift: ${run.shift} line.shift: ${line.shift}');
       for (int i = start; i != end; i += step) {
         final clusterText = layout.textClusters[i];
         paintCluster(
           canvas,
           clusterText,
-          ui.Offset(line.shift + clusterShiftX, line.bounds.top),
+          ui.Offset(line.shift - run.shift, line.bounds.top),
           ui.Offset(x, y),
+          run.bidiLevel.isEven,
         );
-        clusterShiftX += clusterText.bounds.width;
       }
     }
   }
@@ -67,39 +72,53 @@ class TextPaint {
     ExtendedTextCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
+    bool ltr,
   ) {
     final WebTextStyle textStyle = webTextCluster.textStyle!;
 
-    // Define the text cluster bounds
-    final ui.Rect sourceRect = ui.Rect.fromLTWH(
-      0,
-      0,
-      webTextCluster.bounds.width,
-      webTextCluster.bounds.height,
+    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
+      webTextCluster.cluster!.begin,
+      webTextCluster.cluster!.end,
     );
+
+    // Define the text cluster bounds
+    final ui.Rect zeroRect = ui.Rect.fromLTWH(
+      2,
+      0,
+      webTextCluster.bounds.width + 2,
+      rects.first.height,
+    );
+
+    final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
-    double tail = webTextCluster.bounds.left - webTextCluster.bounds.left.floorToDouble();
-    if (tail >= 0.5) {
-      tail -= 1.0;
-    }
-    final ui.Rect targetRect = sourceRect
-        .translate(clusterOffset.dx, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy)
-        .translate(-tail, 0);
+    final ui.Rect targetRect = zeroRect
+        .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
+        .translate(lineOffset.dx, lineOffset.dy);
 
     if (textStyle.background != null) {
       // Draw the background color
       final ui.Rect backgroundRect = ui.Rect.fromLTWH(
-        targetRect.left + tail,
+        targetRect.left,
         targetRect.top,
         targetRect.width + 1,
         targetRect.height,
       );
       canvas.drawRect(backgroundRect, textStyle.background!);
     }
+
+    //final ui.Paint transparent = ui.Paint()..color = const ui.Color(0xFF000000);
+    //canvas.saveLayer(const ui.Rect.fromLTWH(0, 0, 500, 500), transparent);
+
+    final String text = paragraph.text!.substring(
+      webTextCluster.textRange.start,
+      webTextCluster.textRange.end,
+    );
+    WebParagraphDebug.log(
+      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+    );
 
     textContext.fillStyle = textStyle.foreground?.color.toCssString();
     // We fill the text cluster into a rectange [0,0,w,h]
@@ -123,20 +142,14 @@ class TextPaint {
       skImage,
       imageSource: engine.ImageBitmapImageSource(bitmap),
     );
-
     canvas.drawImageRect(
       ckImage,
       sourceRect,
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
-    final String text = paragraph.text!.substring(
-      webTextCluster.textRange.start,
-      webTextCluster.textRange.end,
-    );
-    WebParagraphDebug.log(
-      'cluster "$text" ${webTextCluster.bounds.left}:${webTextCluster.bounds.right} ${webTextCluster.bounds.top}:${webTextCluster.bounds.bottom} @${clusterOffset.dx},${clusterOffset.dy}',
-    );
+
+    //canvas.restore();
   }
 
   void printTextCluster(ExtendedTextCluster webTextCluster) {
