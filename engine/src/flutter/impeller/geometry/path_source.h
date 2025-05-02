@@ -53,40 +53,37 @@ class PathSource {
   virtual void Dispatch(PathReceiver& receiver) const = 0;
 };
 
-template <class T>
+/// @brief A PathSource object that provides path iteration for any TRect.
 class RectPathSource : public PathSource {
  public:
+  template <class T>
   explicit RectPathSource(const TRect<T>& r) : rect_(r) {}
 
-  // |PathSource|
-  bool IsConvex() const override { return true; }
+  ~RectPathSource();
 
   // |PathSource|
-  FillType GetFillType() const override { return FillType::kNonZero; }
+  FillType GetFillType() const override;
 
   // |PathSource|
-  Rect GetBounds() const override { return rect_; }
+  Rect GetBounds() const override;
 
   // |PathSource|
-  void Dispatch(PathReceiver& receiver) const override {
-    receiver.MoveTo(rect_.GetLeftTop(), true);
-    receiver.LineTo(rect_.GetRightTop());
-    receiver.LineTo(rect_.GetRightBottom());
-    receiver.LineTo(rect_.GetLeftBottom());
-    receiver.LineTo(rect_.GetLeftTop());
-    receiver.Close();
-    receiver.PathEnd();
-  }
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
 
  private:
   const Rect rect_;
 };
 
-class OvalPathSource : public PathSource {
+/// @brief A PathSource object that provides path iteration for any ellipse
+///        inscribed within a Rect bounds.
+class EllipsePathSource : public PathSource {
  public:
-  explicit OvalPathSource(const Rect& bounds);
+  explicit EllipsePathSource(const Rect& bounds);
 
-  ~OvalPathSource();
+  ~EllipsePathSource();
 
   // |PathSource|
   FillType GetFillType() const override;

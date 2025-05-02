@@ -90,19 +90,16 @@ bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
   return coverage.Contains(rect);
 }
 
+FillPathGeometry::FillPathGeometry(const Path& path,
+                                   std::optional<Rect> inner_rect)
+    : FillPathSourceGeometry(inner_rect), path_(path) {}
+
 FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
                                    std::optional<Rect> inner_rect)
     : FillPathSourceGeometry(inner_rect), path_(path) {}
 
 const PathSource& FillPathGeometry::GetSource() const {
   return path_;
-}
-
-FillRoundRectGeometry::FillRoundRectGeometry(const RoundRect& round_rect)
-    : FillPathSourceGeometry(std::nullopt), round_rect_source_(round_rect) {}
-
-const PathSource& FillRoundRectGeometry::GetSource() const {
-  return round_rect_source_;
 }
 
 }  // namespace impeller

@@ -42,9 +42,9 @@ TEST(PathSourceTest, RectSourceTest) {
   source.Dispatch(receiver);
 }
 
-TEST(PathSourceTest, OvalSourceTest) {
+TEST(PathSourceTest, EllipseSourceTest) {
   Rect rect = Rect::MakeLTRB(10, 15, 20, 30);
-  OvalPathSource source(rect);
+  EllipsePathSource source(rect);
 
   EXPECT_TRUE(source.IsConvex());
   EXPECT_EQ(source.GetFillType(), FillType::kNonZero);

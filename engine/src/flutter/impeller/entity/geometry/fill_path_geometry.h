@@ -13,7 +13,9 @@
 
 namespace impeller {
 
-/// @brief A geometry that is created from a filled path object.
+/// @brief An abstract Geometry base class that produces fillable vertices for
+///        the interior of any |PathSource| provided by the type-specific
+///        subclass.
 class FillPathSourceGeometry : public Geometry {
  public:
   ~FillPathSourceGeometry() override;
@@ -24,6 +26,8 @@ class FillPathSourceGeometry : public Geometry {
  protected:
   explicit FillPathSourceGeometry(std::optional<Rect> inner_rect);
 
+  /// The PathSource object that will be iterated to produce the filled
+  /// vertices.
   virtual const PathSource& GetSource() const = 0;
 
  private:
@@ -45,8 +49,14 @@ class FillPathSourceGeometry : public Geometry {
   FillPathSourceGeometry& operator=(const FillPathSourceGeometry&) = delete;
 };
 
+/// @brief A Geometry that produces fillable vertices from a |DlPath| or
+///        |impeller::Path| object using the |FillPathSourceGeometry|
+///        base class and a |DlPath| object to perform path iteration.
 class FillPathGeometry final : public FillPathSourceGeometry {
  public:
+  explicit FillPathGeometry(const Path& path,
+                            std::optional<Rect> inner_rect = std::nullopt);
+
   explicit FillPathGeometry(const flutter::DlPath& path,
                             std::optional<Rect> inner_rect = std::nullopt);
 
@@ -55,17 +65,6 @@ class FillPathGeometry final : public FillPathSourceGeometry {
 
  private:
   const flutter::DlPath path_;
-};
-
-class FillRoundRectGeometry final : public FillPathSourceGeometry {
- public:
-  explicit FillRoundRectGeometry(const RoundRect& round_rect);
-
- protected:
-  const PathSource& GetSource() const override;
-
- private:
-  const RoundRectPathSource round_rect_source_;
 };
 
 }  // namespace impeller

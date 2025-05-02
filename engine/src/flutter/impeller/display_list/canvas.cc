@@ -175,6 +175,12 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
+struct PaintStrokeParameters : public StrokeParameters {
+  explicit PaintStrokeParameters(const Paint& paint)
+      : StrokeParameters{paint.stroke_width, paint.stroke_miter,
+                         paint.stroke_cap, paint.stroke_join} {}
+};
+
 }  // namespace
 
 Canvas::Canvas(ContentContext& renderer,
@@ -315,8 +321,8 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
     FillPathGeometry geom(path);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokePathGeometry geom(path, paint.stroke_width, paint.stroke_miter,
-                            paint.stroke_cap, paint.stroke_join);
+    PaintStrokeParameters parameters(paint);
+    StrokePathGeometry geom(path, parameters);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }
@@ -601,8 +607,8 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.style == Paint::Style::kStroke) {
-    StrokeOvalGeometry geom(rect, paint.stroke_width, paint.stroke_miter,
-                            paint.stroke_cap, paint.stroke_join);
+    PaintStrokeParameters parameters(paint);
+    StrokeEllipseGeometry geom(rect, parameters);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
     EllipseGeometry geom(rect);
@@ -637,9 +643,8 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
     FillRoundRectGeometry geom(round_rect);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokeRoundRectGeometry geom(round_rect, paint.stroke_width,
-                                 paint.stroke_miter, paint.stroke_cap,
-                                 paint.stroke_join);
+    PaintStrokeParameters parameters(paint);
+    StrokeRoundRectGeometry geom(round_rect, parameters);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }

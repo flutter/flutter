@@ -11,7 +11,16 @@
 
 namespace impeller {
 
-/// @brief A geometry that is created from a stroked path object.
+struct StrokeParameters {
+  Scalar stroke_width;
+  Scalar miter_limit;
+  Cap stroke_cap;
+  Join stroke_join;
+};
+
+/// @brief An abstract Geometry base class that produces fillable vertices
+///        representing the stroked outline from any |PathSource| provided
+///        by the type-specific subclass.
 class StrokePathSourceGeometry : public Geometry {
  public:
   ~StrokePathSourceGeometry() override;
@@ -27,11 +36,10 @@ class StrokePathSourceGeometry : public Geometry {
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
  protected:
-  StrokePathSourceGeometry(Scalar stroke_width,
-                           Scalar miter_limit,
-                           Cap stroke_cap,
-                           Join stroke_join);
+  explicit StrokePathSourceGeometry(const StrokeParameters& parameters);
 
+  /// The PathSource object that will be iterated to produce the stroked
+  /// outline vertices.
   virtual const PathSource& GetSource() const = 0;
 
  private:
@@ -49,10 +57,7 @@ class StrokePathSourceGeometry : public Geometry {
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
       const PathSource& source,
-      Scalar stroke_width,
-      Scalar miter_limit,
-      Join stroke_join,
-      Cap stroke_cap,
+      const StrokeParameters& parameters,
       Scalar scale);
 
   friend class ImpellerBenchmarkAccessor;
@@ -60,59 +65,29 @@ class StrokePathSourceGeometry : public Geometry {
 
   bool SkipRendering() const;
 
-  Scalar stroke_width_;
-  Scalar miter_limit_;
-  Cap stroke_cap_;
-  Join stroke_join_;
+  const StrokeParameters parameters_;
 
   StrokePathSourceGeometry(const StrokePathSourceGeometry&) = delete;
 
   StrokePathSourceGeometry& operator=(const StrokePathSourceGeometry&) = delete;
 };
 
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a |DlPath| or |impeller::Path| object using
+///        the |StrokePathSourceGeometry| base class and a |DlPath| object
+///        to perform path iteration.
 class StrokePathGeometry final : public StrokePathSourceGeometry {
  public:
+  StrokePathGeometry(const Path& path, const StrokeParameters& parameters);
+
   StrokePathGeometry(const flutter::DlPath& path,
-                     Scalar stroke_width,
-                     Scalar miter_limit,
-                     Cap stroke_cap,
-                     Join stroke_join);
+                     const StrokeParameters& parameters);
 
  protected:
   const PathSource& GetSource() const override;
 
  private:
   const flutter::DlPath path_;
-};
-
-class StrokeOvalGeometry final : public StrokePathSourceGeometry {
- public:
-  StrokeOvalGeometry(const Rect& rect,
-                     Scalar stroke_width,
-                     Scalar miter_limit,
-                     Cap stroke_cap,
-                     Join stroke_join);
-
- protected:
-  const PathSource& GetSource() const override;
-
- private:
-  const OvalPathSource oval_source_;
-};
-
-class StrokeRoundRectGeometry final : public StrokePathSourceGeometry {
- public:
-  StrokeRoundRectGeometry(const RoundRect& rect,
-                          Scalar stroke_width,
-                          Scalar miter_limit,
-                          Cap stroke_cap,
-                          Join stroke_join);
-
- protected:
-  const PathSource& GetSource() const override;
-
- private:
-  const RoundRectPathSource round_rect_source_;
 };
 
 }  // namespace impeller

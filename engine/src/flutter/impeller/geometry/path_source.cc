@@ -6,23 +6,47 @@
 
 namespace impeller {
 
-OvalPathSource::OvalPathSource(const Rect& bounds) : bounds_(bounds) {}
+RectPathSource::~RectPathSource() = default;
 
-OvalPathSource::~OvalPathSource() = default;
-
-FillType OvalPathSource::GetFillType() const {
-  return FillType::kNonZero;
-}
-
-Rect OvalPathSource::GetBounds() const {
-  return bounds_;
-}
-
-bool OvalPathSource::IsConvex() const {
+bool RectPathSource::IsConvex() const {
   return true;
 }
 
-void OvalPathSource::Dispatch(PathReceiver& receiver) const {
+FillType RectPathSource::GetFillType() const {
+  return FillType::kNonZero;
+}
+
+Rect RectPathSource::GetBounds() const {
+  return rect_;
+}
+
+void RectPathSource::Dispatch(PathReceiver& receiver) const {
+  receiver.MoveTo(rect_.GetLeftTop(), true);
+  receiver.LineTo(rect_.GetRightTop());
+  receiver.LineTo(rect_.GetRightBottom());
+  receiver.LineTo(rect_.GetLeftBottom());
+  receiver.LineTo(rect_.GetLeftTop());
+  receiver.Close();
+  receiver.PathEnd();
+}
+
+EllipsePathSource::EllipsePathSource(const Rect& bounds) : bounds_(bounds) {}
+
+EllipsePathSource::~EllipsePathSource() = default;
+
+FillType EllipsePathSource::GetFillType() const {
+  return FillType::kNonZero;
+}
+
+Rect EllipsePathSource::GetBounds() const {
+  return bounds_;
+}
+
+bool EllipsePathSource::IsConvex() const {
+  return true;
+}
+
+void EllipsePathSource::Dispatch(PathReceiver& receiver) const {
   Scalar left = bounds_.GetLeft();
   Scalar right = bounds_.GetRight();
   Scalar top = bounds_.GetTop();

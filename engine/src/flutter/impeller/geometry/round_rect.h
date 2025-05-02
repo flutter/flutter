@@ -145,6 +145,8 @@ class RoundRectPathSource : public PathSource {
 
   ~RoundRectPathSource();
 
+  const RoundRect& GetRoundRect() const { return round_rect_; }
+
   // |PathSource|
   FillType GetFillType() const override;
 
