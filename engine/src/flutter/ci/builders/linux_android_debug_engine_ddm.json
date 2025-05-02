@@ -34,7 +34,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--no-prebuilt-dart-sdk",
                 "--gn-args=dart_dynamic_modules=true",
                 "--rbe",
                 "--no-goma"
@@ -74,7 +73,6 @@
                 "--android",
                 "--android-cpu=x64",
                 "--no-lto",
-                "--no-prebuilt-dart-sdk",
                 "--gn-args=dart_dynamic_modules=true",
                 "--rbe",
                 "--no-goma"
