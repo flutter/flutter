@@ -62,7 +62,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // required to call `View#invalidate()` to notify Flutter about the update.
   // This isn't ideal, but given all the other limitations it's a reasonable tradeoff.
   // Related issue: https://github.com/flutter/flutter/issues/103630
-  private static Class[] VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY = {SurfaceView.class};
+  private static Class[] VIEW_TYPES_REQUIRE_NON_TLHC = {SurfaceView.class};
 
   private final PlatformViewRegistryImpl registry;
 
@@ -214,7 +214,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final boolean supportsTextureLayerMode =
               Build.VERSION.SDK_INT >= API_LEVELS.API_23
                   && !ViewUtils.hasChildViewOfType(
-                      embeddedView, VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY);
+                      embeddedView, VIEW_TYPES_REQUIRE_NON_TLHC);
 
           // Fall back to Hybrid Composition or Virtual Display when necessary, depending on which
           // fallback mode is requested.
@@ -549,6 +549,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     enforceMinimumAndroidApiVersion(19);
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
+    if (flutterJNI.IsSurfaceControlEnabled()) {
+      throw new IllegalStateException(
+          "Trying to create a Hybrid Composition view with HC++ enabled.");
+    }
   }
 
   // Configures the view for Virtual Display mode, returning the associated texture ID.
