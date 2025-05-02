@@ -490,7 +490,7 @@ void main() {
   });
 
   testWidgets(
-    'IndexedStack excludes focus for hidden children if maintainInteractivity is set to false',
+    'IndexedStack excludes focus for hidden children if maintainFocusability is set to false',
     (WidgetTester tester) async {
       const List<Widget> children = <Widget>[
         Focus(child: Text('child 0')),
@@ -502,7 +502,7 @@ void main() {
           Directionality(
             textDirection: TextDirection.ltr,
             child: IndexedStack(
-              maintainInteractivity: false,
+              maintainFocusability: false,
               index: activeIndex,
               children: children,
             ),
@@ -546,7 +546,7 @@ void main() {
   );
 
   testWidgets(
-    'IndexedStack: hidden children can be focused if maintainInteractivity is set to true',
+    'IndexedStack: hidden children can be focused if maintainFocusability is set to true',
     (WidgetTester tester) async {
       const List<Widget> children = <Widget>[
         Focus(child: Text('child 0')),
@@ -587,7 +587,7 @@ void main() {
   );
 
   testWidgets(
-    'IndexedStack: hidden children can not receive tap events if maintainInteractivity is set to false',
+    'IndexedStack: hidden children can not receive tap events if maintainFocusability is set to false',
     (WidgetTester tester) async {
       bool tapped = false;
       final List<Widget> children = <Widget>[
@@ -598,7 +598,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: IndexedStack(maintainInteractivity: false, children: children),
+          child: IndexedStack(maintainFocusability: false, children: children),
         ),
       );
 
@@ -610,7 +610,7 @@ void main() {
   );
 
   testWidgets(
-    'IndexedStack: hidden children can not receive tap events if maintainInteractivity is set to true',
+    'IndexedStack: hidden children can not receive tap events if maintainFocusability is set to true',
     (WidgetTester tester) async {
       bool tapped = false;
       final List<Widget> children = <Widget>[

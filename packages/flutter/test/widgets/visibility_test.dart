@@ -403,6 +403,7 @@ void main() {
       await tester.pumpWidget(
         Visibility(
           visible: visible,
+          maintainFocusability: false,
           child: const Focus(child: Text('child', textDirection: TextDirection.ltr)),
         ),
       );
@@ -424,16 +425,12 @@ void main() {
   });
 
   testWidgets(
-    'Visibility with maintainInteractivity true does not exclude focus of child when not visible',
+    'Visibility with maintain* true does not exclude focus of child when not visible',
     (WidgetTester tester) async {
       Future<void> pumpVisibility(bool visible) async {
         await tester.pumpWidget(
-          Visibility(
+          Visibility.maintain(
             visible: visible,
-            maintainInteractivity: true,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
             child: const Focus(child: Text('child', textDirection: TextDirection.ltr)),
           ),
         );
@@ -455,14 +452,19 @@ void main() {
     },
   );
 
-  testWidgets('Visibility with maintainState true excludes focus of child when not visible', (
+  testWidgets('Visibility with maintain* true except maintainFocusability which is false excludes focus of child when not visible', (
     WidgetTester tester,
   ) async {
     Future<void> pumpVisibility(bool visible) async {
       await tester.pumpWidget(
         Visibility(
           visible: visible,
+          maintainFocusability: false,
           maintainState: true,
+          maintainAnimation: true,
+          maintainInteractivity: true,
+          maintainSemantics: true,
+          maintainSize: true,
           child: const Focus(child: Text('child', textDirection: TextDirection.ltr)),
         ),
       );
@@ -482,36 +484,6 @@ void main() {
 
     expect(childFocusNode.hasFocus, false);
   });
-
-  testWidgets(
-    'Visibility with maintainState and maintainAnimation true excludes focus of child when not visible',
-    (WidgetTester tester) async {
-      Future<void> pumpVisibility(bool visible) async {
-        await tester.pumpWidget(
-          Visibility(
-            visible: visible,
-            maintainState: true,
-            maintainAnimation: true,
-            child: const Focus(child: Text('child', textDirection: TextDirection.ltr)),
-          ),
-        );
-      }
-
-      await pumpVisibility(true);
-
-      final Element child = tester.element(find.text('child', skipOffstage: false));
-      final FocusNode childFocusNode = Focus.of(child);
-
-      childFocusNode.requestFocus();
-      await tester.pump();
-
-      expect(childFocusNode.hasFocus, true);
-
-      await pumpVisibility(false);
-
-      expect(childFocusNode.hasFocus, false);
-    },
-  );
 
   testWidgets('Visibility does not force compositing when visible and maintain*', (
     WidgetTester tester,
