@@ -147,8 +147,16 @@ void main() {
         expect(
           fakeAnalytics.sentEvents,
           containsAll(<Event>[
-            Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
-            Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
+            Event.flutterBuildInfo(
+              label: 'app-not-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: null',
+            ),
+            Event.flutterBuildInfo(
+              label: 'gradle-random-event-label-failure',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: null',
+            ),
           ]),
         );
 
@@ -334,7 +342,11 @@ void main() {
         expect(
           fakeAnalytics.sentEvents,
           contains(
-            Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
+            Event.flutterBuildInfo(
+              label: 'gradle-random-event-label-failure',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: null',
+            ),
           ),
         );
       },
@@ -424,7 +436,11 @@ void main() {
         expect(
           fakeAnalytics.sentEvents,
           contains(
-            Event.flutterBuildInfo(label: 'gradle-random-event-label-failure', buildType: 'gradle'),
+            Event.flutterBuildInfo(
+              label: 'gradle-random-event-label-failure',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: null',
+            ),
           ),
         );
       },
@@ -601,7 +617,11 @@ void main() {
         expect(
           fakeAnalytics.sentEvents,
           contains(
-            Event.flutterBuildInfo(label: 'gradle-random-event-label-success', buildType: 'gradle'),
+            Event.flutterBuildInfo(
+              label: 'gradle-random-event-label-success',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: null',
+            ),
           ),
         );
         expect(processManager, hasNoRemainingExpectations);

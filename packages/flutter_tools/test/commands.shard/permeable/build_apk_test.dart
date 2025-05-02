@@ -7,6 +7,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart'
+    show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -707,7 +709,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-not-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -763,7 +771,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
         expect(processManager, hasNoRemainingExpectations);
       },
