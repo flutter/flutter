@@ -23,6 +23,12 @@ static bool DeviceSupportsDeviceTransientTargets(id<MTLDevice> device) {
 }
 
 ISize DeviceMaxTextureSizeSupported(id<MTLDevice> device) {
+  // Since Apple didn't expose API for us to get the max texture size, we have
+  // to use hardcoded data from
+  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+  // According to the feature set table, there are two supported max sizes :
+  // 16384 and 8192 for devices flutter support. The former is used on macs and
+  // latest ios devices. The latter is used on old ios devices.
   if ([device supportsFamily:MTLGPUFamilyApple3] ||
       [device supportsFamily:MTLGPUFamilyMacCatalyst1] ||
       [device supportsFamily:MTLGPUFamilyMac1]) {
