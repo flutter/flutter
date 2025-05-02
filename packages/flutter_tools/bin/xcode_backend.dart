@@ -67,9 +67,7 @@ class Context {
     return file.existsSync();
   }
 
-  Directory directoryFromPath(String path) {
-    return Directory(path);
-  }
+  Directory directoryFromPath(String path) => Directory(path);
 
   /// Run given command in a synchronous subprocess.
   ///
