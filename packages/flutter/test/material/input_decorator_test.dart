@@ -238,7 +238,7 @@ Rect getContainerRect(WidgetTester tester) {
   return box.paintBounds;
 }
 
-Animation<double> getHoverAnimation(WidgetTester tester) {
+Animation<double> _getHoverAnimation(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls
@@ -13375,7 +13375,7 @@ void main() {
       expect(getContainerColor(tester), isSameColorAs(fillColor));
       await tester.pump(const Duration(milliseconds: 6));
       final Color midHoverColor =
-          Color.lerp(hoverColor.withAlpha(0), hoverColor, getHoverAnimation(tester).value)!;
+          Color.lerp(hoverColor.withAlpha(0), hoverColor, _getHoverAnimation(tester).value)!;
       expect(getContainerColor(tester), isSameColorAs(Color.alphaBlend(midHoverColor, fillColor)));
 
       await pumpDecorator(hovering: false, enabled: false);
