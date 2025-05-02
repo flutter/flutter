@@ -497,7 +497,9 @@ mixin WidgetsBinding
   ///
   /// - If true, taps in the app are intercepted by the widget inspector.
   /// - If false, taps in the app are not intercepted by the widget inspector.
-  final ValueNotifier<bool> debugWidgetInspectorSelectionOnTapEnabled = ValueNotifier<bool>(true);
+  ValueNotifier<bool> get debugWidgetInspectorSelectionOnTapEnabled =>
+      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject ??= ValueNotifier<bool>(true);
+  ValueNotifier<bool>? _debugWidgetInspectorSelectionOnTapEnabledNotifierObject;
 
   @visibleForTesting
   @override
@@ -506,7 +508,8 @@ mixin WidgetsBinding
     super.resetInternalState();
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
-    debugWidgetInspectorSelectionOnTapEnabled.dispose();
+    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject?.dispose();
+    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject = null;
   }
 
   void _debugAddStackFilters() {
