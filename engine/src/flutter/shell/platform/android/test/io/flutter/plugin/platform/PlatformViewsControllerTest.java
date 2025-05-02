@@ -17,6 +17,7 @@ import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -110,6 +111,7 @@ public class PlatformViewsControllerTest {
   public void itRemovesPlatformViewBeforeDiposeIsCalled() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     // Get the platform view registry.
     PlatformViewRegistry registry = platformViewsController.getRegistry();
@@ -150,6 +152,7 @@ public class PlatformViewsControllerTest {
   public void itNotifiesPlatformViewsOfEngineAttachmentAndDetachment() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     // Get the platform view registry.
     PlatformViewRegistry registry = platformViewsController.getRegistry();
@@ -224,6 +227,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.attachToView(fakeFlutterView);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     resize(jni, platformViewsController, platformViewId, 10.0, 20.0);
@@ -246,6 +250,7 @@ public class PlatformViewsControllerTest {
     VirtualDisplayController fakeVdController = mock(VirtualDisplayController.class);
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     platformViewsController.attachToView(fakeFlutterView);
 
@@ -456,6 +461,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -483,6 +490,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -507,6 +516,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -532,6 +542,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -557,6 +569,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -583,6 +596,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -616,6 +630,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -640,6 +655,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -665,6 +681,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -695,6 +712,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -727,6 +745,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -755,6 +774,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -786,6 +806,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -815,6 +837,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     verify(androidView, never()).setLayoutDirection(anyInt());
@@ -850,6 +874,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -889,6 +914,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -928,6 +955,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -964,6 +992,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1024,6 +1053,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1065,6 +1095,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
 
     final FlutterView flutterView = attach(jni, platformViewsController);
 
@@ -1107,6 +1138,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1158,6 +1190,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     final FlutterView flutterView = mock(FlutterView.class);
@@ -1196,6 +1229,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     final FlutterView flutterView = mock(FlutterView.class);
@@ -1234,6 +1268,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     final FlutterView flutterView = mock(FlutterView.class);
@@ -1277,6 +1312,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     final FlutterView flutterView = attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1323,6 +1359,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     final FlutterView flutterView = attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1370,6 +1407,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     FlutterView initFlutterView = mock(FlutterView.class);
     attachToFlutterView(jni, platformViewsController, initFlutterView);
 
@@ -1407,6 +1445,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
 
     final FlutterView flutterView = attach(jni, platformViewsController);
 
