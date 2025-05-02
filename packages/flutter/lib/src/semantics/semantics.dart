@@ -1294,6 +1294,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.role,
     this.controlsNodes,
     this.inputType,
+    this.validationResult = SemanticsValidationResult.none,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1316,7 +1317,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
-    this.validationResult = SemanticsValidationResult.none,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',

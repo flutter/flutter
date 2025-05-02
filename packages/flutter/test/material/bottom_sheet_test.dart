@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -868,6 +869,7 @@ void main() {
                     TestSemantics(
                       actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                       label: 'Scrim',
+                      hintOverrides: const SemanticsHintOverrides(onTapHint: 'Close Bottom Sheet'),
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -1040,6 +1042,7 @@ void main() {
                     TestSemantics(
                       actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                       label: 'Scrim',
+                      hintOverrides: const SemanticsHintOverrides(onTapHint: 'Close Bottom Sheet'),
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -1117,6 +1120,7 @@ void main() {
                     TestSemantics(
                       actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                       label: 'Scrim',
+                      hintOverrides: const SemanticsHintOverrides(onTapHint: 'Close Bottom Sheet'),
                       textDirection: TextDirection.ltr,
                     ),
                   ],
@@ -1189,6 +1193,7 @@ void main() {
                     TestSemantics(
                       actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                       label: 'Scrim',
+                      hintOverrides: const SemanticsHintOverrides(onTapHint: 'Close Bottom Sheet'),
                       textDirection: TextDirection.ltr,
                     ),
                   ],
