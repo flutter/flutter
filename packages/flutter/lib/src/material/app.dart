@@ -971,7 +971,7 @@ class _MaterialAppState extends State<MaterialApp> {
     return _MaterialInspectorButton.toggle(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
-      // This icon is also used for the Cupertino-styled icon and for DevTools.
+      // This icon is also used for the Cupertino-styled button and for DevTools.
       // It should be updated in all 3 places if changed.
       icon: CupertinoIcons.cursor_rays,
       isDarkTheme: _isDarkTheme(context),
@@ -1206,10 +1206,7 @@ class _MaterialInspectorButton extends InspectorButton {
     return IconButton(
       key: buttonKey,
       onPressed: onPressed,
-      iconSize:
-          variant == InspectorButtonVariant.iconOnly
-              ? InspectorButton.buttonSize
-              : InspectorButton.buttonIconSize,
+      iconSize: iconSizeForVariant,
       padding: _buttonPadding,
       constraints: _buttonConstraints,
       style: _selectionButtonsIconStyle(context),

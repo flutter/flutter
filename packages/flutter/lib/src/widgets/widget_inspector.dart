@@ -2836,11 +2836,10 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
-  ValueListenable<bool> get _selectionOnTapEnabledListenable =>
-      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledListenable;
+  ValueNotifier<bool> get _selectionOnTapEnabled =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabled;
 
-  bool get _isSelectModeWithSelectionOnTapEnabled =>
-      isSelectMode && _selectionOnTapEnabledListenable.value;
+  bool get _isSelectModeWithSelectionOnTapEnabled => isSelectMode && _selectionOnTapEnabled.value;
 
   @override
   void initState() {
@@ -2850,7 +2849,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.addListener(
       _selectionInformationChanged,
     );
-    _selectionOnTapEnabledListenable.addListener(_selectionInformationChanged);
+    _selectionOnTapEnabled.addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
   }
@@ -2861,7 +2860,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.removeListener(
       _selectionInformationChanged,
     );
-    _selectionOnTapEnabledListenable.removeListener(_selectionInformationChanged);
+    _selectionOnTapEnabled.removeListener(_selectionInformationChanged);
     super.dispose();
   }
 
@@ -3132,7 +3131,7 @@ abstract class InspectorButton extends StatelessWidget {
   ///
   /// Returns [buttonSize] if the variant is [InspectorButtonVariant.iconOnly],
   /// otherwise returns [buttonIconSize].
-  double get currentIconSize =>
+  double get iconSizeForVariant =>
       variant == InspectorButtonVariant.iconOnly ? buttonSize : buttonIconSize;
 
   /// Provides the appropriate foreground color for the button's icon.
@@ -3639,13 +3638,8 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   bool _leftAligned = true;
 
-  ValueListenable<bool> get _selectionOnTapEnabledListenable =>
-      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledListenable;
-  bool get _selectionOnTapEnabled => _selectionOnTapEnabledListenable.value;
-
-  set _selectionOnTapEnabled(bool value) {
-    WidgetsBinding.instance.debugWidgetInspectorSelectionOnTap = value;
-  }
+  ValueNotifier<bool> get _selectionOnTapEnabled =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabled;
 
   Widget? get _moveExitWidgetSelectionButton {
     final MoveExitWidgetSelectionButtonBuilder? buttonBuilder =
@@ -3693,15 +3687,13 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
     if (buttonBuilder == null) {
       return null;
     }
-    final ValueListenable<bool> selectionOnTapEnabledListenable =
-        WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledListenable;
 
     return _WidgetInspectorButton(
       button: buttonBuilder(
         context,
         onPressed: _changeSelectionOnTapMode,
         semanticLabel: 'Change widget selection mode for taps',
-        selectionOnTapEnabled: selectionOnTapEnabledListenable.value,
+        selectionOnTapEnabled: _selectionOnTapEnabled.value,
       ),
       onTooltipVisible: _changeSelectionOnTapTooltip,
       onTooltipHidden: _onTooltipHidden,
@@ -3756,8 +3748,8 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   }
 
   void _changeSelectionOnTapMode({bool? selectionOnTapEnabled}) {
-    final bool newValue = selectionOnTapEnabled ?? !_selectionOnTapEnabled;
-    _selectionOnTapEnabled = newValue;
+    final bool newValue = selectionOnTapEnabled ?? !_selectionOnTapEnabled.value;
+    _selectionOnTapEnabled.value = newValue;
     WidgetInspectorService.instance.selection.clear();
     if (_tooltipVisible) {
       _changeSelectionOnTapTooltip();
@@ -3766,7 +3758,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   void _changeSelectionOnTapTooltip() {
     _changeTooltipMessage(
-      _selectionOnTapEnabled
+      _selectionOnTapEnabled.value
           ? 'Disable widget selection for taps'
           : 'Enable widget selection for taps',
     );

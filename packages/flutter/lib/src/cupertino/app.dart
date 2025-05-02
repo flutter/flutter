@@ -568,7 +568,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     return _CupertinoInspectorButton.toggle(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
-      // This icon is also used for the Cupertino-styled icon and for DevTools.
+      // This icon is also used for the Material-styled button and for DevTools.
       // It should be updated in all 3 places if changed.
       icon: CupertinoIcons.cursor_rays,
       toggledOn: selectionOnTapEnabled,
@@ -708,10 +708,7 @@ class _CupertinoInspectorButton extends InspectorButton {
     final Icon buttonIcon = Icon(
       icon,
       semanticLabel: semanticLabel,
-      size:
-          variant == InspectorButtonVariant.iconOnly
-              ? InspectorButton.buttonSize
-              : InspectorButton.buttonIconSize,
+      size: iconSizeForVariant,
       color: foregroundColor(context),
     );
 
