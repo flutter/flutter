@@ -593,6 +593,24 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       LogicalKeyboardKey.end,
       shift: true,
     ): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: true),
+    const SingleActivator(
+      LogicalKeyboardKey.home,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(
+      LogicalKeyboardKey.end,
+      shift: true,
+      control: true,
+    ): const ExtendSelectionToDocumentBoundaryIntent(forward: true, collapseSelection: false),
     // The following key combinations have no effect on text editing on this
     // platform:
     //   * Control + shift? + end

@@ -913,104 +913,218 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Home and end keys on Android and Windows',
-    (WidgetTester tester) async {
-      final FocusNode editable = FocusNode();
-      addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
-      addTearDown(spy.dispose);
+  testWidgets('Home and end keys on Android and Windows', (WidgetTester tester) async {
+    final FocusNode editable = FocusNode();
+    addTearDown(editable.dispose);
+    final FocusNode spy = FocusNode();
+    addTearDown(spy.dispose);
 
-      await tester.pumpWidget(
-        buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
-      );
-      spy.requestFocus();
-      await tester.pump();
-      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+    await tester.pumpWidget(
+      buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
+    );
+    spy.requestFocus();
+    await tester.pump();
+    final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
 
-      // Home/end
-      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home));
-      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+    // Press home.
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing when home/end are pressed.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
 
-      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end));
-      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
 
-      // Home/end + shift
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.home, shift: true),
-      );
-      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+      // Linux goes to the line start/end but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.end, shift: true),
-      );
-      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
-      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+    // Press end.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing when home/end are pressed.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
 
-      // Home/end + control
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.home, control: true),
-      );
-      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
-      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
-      expect(
-        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
-        true,
-      );
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.end, control: true),
-      );
-      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
-      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
-      expect(
-        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
-        true,
-      );
+      // Linux goes to the line start/end but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
 
-      // Home/end + control + shift
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.home, control: true, shift: true),
-      );
-      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
-      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
-      expect(
-        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
-        false,
-      );
+    // Press home + shift
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home, shift: true));
+    switch (defaultTargetPlatform) {
+      // These platforms select to the start of the document.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isA<ExpandSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExpandSelectionToDocumentBoundaryIntent).forward, false);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.end, control: true, shift: true),
-      );
-      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
-      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
-      expect(
-        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
-        false,
-      );
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.windows,
-    }),
-  );
+      // These platforms select to the line start.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Linux selects to the start but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
+
+    // Press end + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end, shift: true));
+    switch (defaultTargetPlatform) {
+      // These platforms select to the end of the document.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isA<ExpandSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExpandSelectionToDocumentBoundaryIntent).forward, true);
+
+      // These platforms select to the line end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Linux selects to the end but does not wrap.
+      case TargetPlatform.linux:
+        expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+        expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
+    }
+
+    // Press home + control.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home, control: true));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          true,
+        );
+    }
+
+    // Press end + control.
+    state.lastIntent = null;
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end, control: true));
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          true,
+        );
+    }
+
+    // Press home + control + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.home, control: true, shift: true),
+    );
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          false,
+        );
+    }
+
+    // Press end + control + shift.
+    state.lastIntent = null;
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.end, control: true, shift: true),
+    );
+    switch (defaultTargetPlatform) {
+      // These platforms do nothing.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(state.lastIntent, isNull);
+
+      // These platforms go to the line start/end.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+        expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
+        expect(
+          (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+          false,
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
 class ActionSpy extends StatefulWidget {
