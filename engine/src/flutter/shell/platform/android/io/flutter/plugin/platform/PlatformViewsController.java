@@ -166,6 +166,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // API level 19 is required for `android.graphics.ImageReader`.
           enforceMinimumAndroidApiVersion(19);
           ensureValidRequest(request);
+          throwIfHCPPEnabled();
 
           final PlatformView platformView = createPlatformView(request, false);
 
@@ -213,8 +214,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // - The API level is <23, due to TLHC implementation API requirements.
           final boolean supportsTextureLayerMode =
               Build.VERSION.SDK_INT >= API_LEVELS.API_23
-                  && !ViewUtils.hasChildViewOfType(
-                      embeddedView, VIEW_TYPES_REQUIRE_NON_TLHC);
+                  && !ViewUtils.hasChildViewOfType(embeddedView, VIEW_TYPES_REQUIRE_NON_TLHC);
 
           // Fall back to Hybrid Composition or Virtual Display when necessary, depending on which
           // fallback mode is requested.
@@ -499,13 +499,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               + request.viewId
               + ")");
     }
-    if (request.displayMode
-            == PlatformViewsChannel.PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY
-        && flutterJNI.IsSurfaceControlEnabled()) {
-      // HC mode does not work if HC++ is enabled, so we must reply with error.
-      throw new IllegalStateException(
-          "Trying to create a Hybrid Composition view with HC++ enabled.");
-    }
   }
 
   // Creates a platform view based on `request`, performs configuration that's common to
@@ -549,6 +542,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     enforceMinimumAndroidApiVersion(19);
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
+    throwIfHCPPEnabled();
+  }
+
+  // Throws an exception if HC++ is enabled, as HC mode can not work in combination with HC++.
+  private void throwIfHCPPEnabled() {
     if (flutterJNI.IsSurfaceControlEnabled()) {
       throw new IllegalStateException(
           "Trying to create a Hybrid Composition view with HC++ enabled.");
