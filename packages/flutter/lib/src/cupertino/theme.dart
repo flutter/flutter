@@ -29,6 +29,7 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
     // Values extracted from navigation bar. For toolbar or tabbar the dark color is 0xF0161616.
   ),
   CupertinoColors.systemBackground,
+  CupertinoColors.systemBlue,
   false,
   _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
 );
@@ -179,6 +180,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
   }) : this.raw(
          brightness,
@@ -187,6 +189,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
          textTheme,
          barBackgroundColor,
          scaffoldBackgroundColor,
+         selectionHandleColor,
          applyThemeToAll,
        );
 
@@ -202,6 +205,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
   ) : this._rawWithDefaults(
         brightness,
@@ -210,6 +214,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
         textTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
+        selectionHandleColor,
         applyThemeToAll,
         _kDefaultTheme,
       );
@@ -221,6 +226,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
     this._defaults,
   ) : super(
@@ -230,6 +236,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
         textTheme: textTheme,
         barBackgroundColor: barBackgroundColor,
         scaffoldBackgroundColor: scaffoldBackgroundColor,
+        selectionHandleColor: selectionHandleColor,
         applyThemeToAll: applyThemeToAll,
       );
 
@@ -256,6 +263,9 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
 
   @override
+  Color get selectionHandleColor => super.selectionHandleColor ?? _defaults.selectionHandleColor;
+
+  @override
   bool get applyThemeToAll => super.applyThemeToAll ?? _defaults.applyThemeToAll;
 
   @override
@@ -267,6 +277,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       textTheme: super.textTheme,
       barBackgroundColor: super.barBackgroundColor,
       scaffoldBackgroundColor: super.scaffoldBackgroundColor,
+      selectionHandleColor: super.selectionHandleColor,
       applyThemeToAll: super.applyThemeToAll,
     );
   }
@@ -282,6 +293,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       super.textTheme?.resolveFrom(context),
       convertColor(super.barBackgroundColor),
       convertColor(super.scaffoldBackgroundColor),
+      convertColor(super.selectionHandleColor),
       applyThemeToAll,
       _defaults.resolveFrom(context, super.textTheme == null),
     );
@@ -295,6 +307,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
   }) {
     return CupertinoThemeData._rawWithDefaults(
@@ -304,6 +317,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       textTheme ?? super.textTheme,
       barBackgroundColor ?? super.barBackgroundColor,
       scaffoldBackgroundColor ?? super.scaffoldBackgroundColor,
+      selectionHandleColor ?? super.selectionHandleColor,
       applyThemeToAll ?? super.applyThemeToAll,
       _defaults,
     );
@@ -343,6 +357,13 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       ),
     );
     properties.add(
+      createCupertinoColorProperty(
+        'selectionHandleColor',
+        selectionHandleColor,
+        defaultValue: defaultData.selectionHandleColor,
+      ),
+    );
+    properties.add(
       DiagnosticsProperty<bool>(
         'applyThemeToAll',
         applyThemeToAll,
@@ -367,6 +388,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
         other.textTheme == textTheme &&
         other.barBackgroundColor == barBackgroundColor &&
         other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
+        other.selectionHandleColor == selectionHandleColor &&
         other.applyThemeToAll == applyThemeToAll;
   }
 
@@ -378,6 +400,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     textTheme,
     barBackgroundColor,
     scaffoldBackgroundColor,
+    selectionHandleColor,
     applyThemeToAll,
   );
 }
@@ -406,6 +429,7 @@ class NoDefaultCupertinoThemeData {
     this.textTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
+    this.selectionHandleColor,
     this.applyThemeToAll,
   });
 
@@ -474,6 +498,11 @@ class NoDefaultCupertinoThemeData {
   /// Defaults to [CupertinoColors.systemBackground].
   final Color? scaffoldBackgroundColor;
 
+  /// The color of the selection handles on the text field.
+  ///
+  /// Defaults to [CupertinoColors.systemBlue].
+  final Color? selectionHandleColor;
+
   /// Flag to apply this theme to all descendant Cupertino widgets.
   ///
   /// Certain Cupertino widgets previously didn't use theming, matching past
@@ -513,6 +542,7 @@ class NoDefaultCupertinoThemeData {
       textTheme: textTheme?.resolveFrom(context),
       barBackgroundColor: convertColor(barBackgroundColor),
       scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
+      selectionHandleColor: convertColor(selectionHandleColor),
       applyThemeToAll: applyThemeToAll,
     );
   }
@@ -530,6 +560,7 @@ class NoDefaultCupertinoThemeData {
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
   }) {
     return NoDefaultCupertinoThemeData(
@@ -539,6 +570,7 @@ class NoDefaultCupertinoThemeData {
       textTheme: textTheme ?? this.textTheme,
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+      selectionHandleColor: selectionHandleColor ?? this.selectionHandleColor,
       applyThemeToAll: applyThemeToAll ?? this.applyThemeToAll,
     );
   }
@@ -581,6 +613,7 @@ class _CupertinoThemeDefaults {
     this.primaryContrastingColor,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
+    this.selectionHandleColor,
     this.applyThemeToAll,
     this.textThemeDefaults,
   );
@@ -590,6 +623,7 @@ class _CupertinoThemeDefaults {
   final Color primaryContrastingColor;
   final Color barBackgroundColor;
   final Color scaffoldBackgroundColor;
+  final Color selectionHandleColor;
   final bool applyThemeToAll;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
@@ -602,6 +636,7 @@ class _CupertinoThemeDefaults {
       convertColor(primaryContrastingColor),
       convertColor(barBackgroundColor),
       convertColor(scaffoldBackgroundColor),
+      convertColor(selectionHandleColor),
       applyThemeToAll,
       resolveTextTheme ? textThemeDefaults.resolveFrom(context) : textThemeDefaults,
     );
