@@ -90,8 +90,6 @@ class Chrome extends Browser {
         final bool isChromeNoSandbox = Platform.environment['CHROME_NO_SANDBOX'] == 'true';
         final String dir = await generateUserDirectory(installation, useDwarf);
         final List<String> args = <String>[
-          '--enable-features=ExtendedTextMetrics',
-          '--enable-experimental-web-platform-features',
           '--user-data-dir=$dir',
           kBlankPageUrl,
           if (!debug) '--headless',
