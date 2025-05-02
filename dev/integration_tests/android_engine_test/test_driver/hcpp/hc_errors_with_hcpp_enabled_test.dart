@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:android_driver_extensions/native_driver.dart';
 import 'package:android_driver_extensions/skia_gold.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
@@ -46,19 +46,16 @@ void main() async {
 
   test('verify that HCPP is supported and enabled', () async {
     final Map<String, Object?> response =
-    json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
   test('should get a PlatformException when loading HC pv with HCPP enabled', () async {
-    PlatformException? platformException;
-    try {
-      await flutterDriver.tap(find.byValueKey('LoadHCPlatformView'));
-    } on PlatformException catch (e) {
-      platformException = e;
-    }
-    expect(platformException, isNotNull);
-    expect(platformException!.message, contains('HC++'));
+    await flutterDriver.tap(find.byValueKey('LoadHCPlatformView'));
+    final Map<String, Object?> response =
+        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+
+    expect(response['checkErrorText'], contains('HC++'));
   }, timeout: Timeout.none);
 }
