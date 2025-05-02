@@ -68,8 +68,7 @@ class Context {
   }
 
   Directory directoryFromPath(String path) {
-    final Directory directory = Directory(path);
-    return directory;
+    return Directory(path);
   }
 
   /// Run given command in a synchronous subprocess.
