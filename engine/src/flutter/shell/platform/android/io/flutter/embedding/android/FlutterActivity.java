@@ -608,8 +608,16 @@ public class FlutterActivity extends Activity
 
   public FlutterActivity() {
     lifecycle = new LifecycleRegistry(this);
+  }
 
-    if (findViewById(FLUTTER_VIEW_ID) == null) {
+    void setFlutterViewIdIfNeeded() {
+    if (flutterViewId != null) {
+      return;
+    }
+
+    // TODO(camsim99): reduce getActivity(), activity weirdness when sensitive content plugin PR
+    // lands + add tests if needed.
+    if (this.findViewById(FLUTTER_VIEW_ID) == null) {
       flutterViewId = FLUTTER_VIEW_ID;
     } else {
       flutterViewId = View.generateViewId();
@@ -662,6 +670,8 @@ public class FlutterActivity extends Activity
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
 
     configureWindowForTransparency();
+
+    setFlutterViewIdIfNeeded();
 
     setContentView(createFlutterView());
 

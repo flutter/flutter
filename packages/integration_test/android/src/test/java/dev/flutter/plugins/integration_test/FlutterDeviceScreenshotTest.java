@@ -36,7 +36,10 @@ public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
         // For why this test currently doesn't use Robolectric,
         // see https://github.com/flutter/flutter/pull/148803.
         try (MockedStatic<View> mockedStatic = Mockito.mockStatic(View.class)) {
+            // Mock FlutterActivity.FLUTTER_VIEW_ID call to generateViewId. Value
+            // not used in test.
             mockedStatic.when(View::generateViewId).thenReturn(123);
+
             FlutterView mockFlutterView = mock(FlutterView.class);
             FlutterActivity mockFlutterActivity = mock(FlutterActivity.class);
 

@@ -1034,12 +1034,10 @@ public class FlutterFragment extends Fragment
   }
 
   void setFlutterViewIdIfNeeded() {
-    if (flutterViewId == null) {
+    if (flutterViewId != null) {
       return;
     }
 
-    // TODO(camsim99): reduce getActivity(), activity weirdness when sensitive content plugin PR
-    // lands + add tests if needed.
     if (getActivity().findViewById(FLUTTER_VIEW_ID) == null) {
       flutterViewId = FLUTTER_VIEW_ID;
     } else {
@@ -1102,13 +1100,14 @@ public class FlutterFragment extends Fragment
       onBackPressedCallback.setEnabled(frameworkHandlesBack);
     }
     delegate.onRestoreInstanceState(savedInstanceState);
+
+    setFlutterViewIdIfNeeded();
   }
 
   @Nullable
   @Override
   public View onCreateView(
       LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    setFlutterViewIdIfNeeded();
     return delegate.onCreateView(
         inflater,
         container,
