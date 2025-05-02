@@ -17,7 +17,6 @@ import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
-import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.Surface;
