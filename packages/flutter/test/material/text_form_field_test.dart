@@ -1657,15 +1657,9 @@ void main() {
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
         tester.platformDispatcher.supportsShowingSystemContextMenu = true;
-        addTearDown(() async {
+        addTearDown(() {
           tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
-          // Pump one more root view to replace it with one that reads the
-          // updated reset value of supportsShowingSystemContextMenu for
-          // subsequent tests..
-          await tester.pumpWidget(
-            wrapWithView: false,
-            View(view: tester.view, child: const SizedBox.shrink()),
-          );
+          tester.view.reset();
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
