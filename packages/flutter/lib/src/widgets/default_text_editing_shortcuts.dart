@@ -365,7 +365,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + shift? + arrow up
   //   * Meta + shift? + delete
   //   * Meta + shift? + backspace
-  static final Map<ShortcutActivator, Intent> _androidShortcuts = {
+  static final Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
       forward: false,
