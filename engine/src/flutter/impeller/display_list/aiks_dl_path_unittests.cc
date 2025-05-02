@@ -1076,5 +1076,18 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, BlurredCircleWithStrokeWidth) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(30);
+  paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5));
+
+  builder.DrawCircle(DlPoint(200, 200), 100, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

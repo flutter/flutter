@@ -835,6 +835,9 @@ targets:
   - name: Linux fuchsia_precache
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     presubmit: false
     properties:
       shard: fuchsia_precache

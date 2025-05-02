@@ -8,7 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color, SemanticsInputType;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -566,6 +566,7 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
+                            inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,
@@ -673,10 +674,10 @@ void main() {
 
       await tester.pumpWidget(
         CupertinoApp(
-          theme: const CupertinoThemeData(primaryColor: Colors.red),
+          theme: const CupertinoThemeData(selectionHandleColor: Colors.red),
           home: Center(
             child: CupertinoTheme(
-              data: const CupertinoThemeData(primaryColor: expectedSelectionHandleColor),
+              data: const CupertinoThemeData(selectionHandleColor: expectedSelectionHandleColor),
               child: CupertinoTextField(controller: controller),
             ),
           ),
@@ -9757,6 +9758,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.hasEnabledState,
@@ -9823,6 +9825,7 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
+                            inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,

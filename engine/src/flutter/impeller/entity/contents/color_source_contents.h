@@ -194,7 +194,7 @@ class ColorSourceContents : public Contents {
 
     GeometryResult geometry_result;
     if (do_cover_draw) {
-      RectGeometry geom(cover_area);
+      FillRectGeometry geom(cover_area);
       geometry_result = create_geom_callback(renderer, entity, pass, &geom);
     } else {
       geometry_result = create_geom_callback(renderer, entity, pass, geometry);

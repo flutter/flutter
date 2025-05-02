@@ -13,6 +13,8 @@ struct _FlDartProject {
   gchar* assets_path;
   gchar* icu_data_path;
   gchar** dart_entrypoint_args;
+
+  FlUIThreadPolicy ui_thread_policy;
 };
 
 G_DEFINE_TYPE(FlDartProject, fl_dart_project, G_TYPE_OBJECT)
@@ -113,4 +115,18 @@ G_MODULE_EXPORT void fl_dart_project_set_dart_entrypoint_arguments(
   g_return_if_fail(FL_IS_DART_PROJECT(self));
   g_clear_pointer(&self->dart_entrypoint_args, g_strfreev);
   self->dart_entrypoint_args = g_strdupv(argv);
+}
+
+G_MODULE_EXPORT
+void fl_dart_project_set_ui_thread_policy(FlDartProject* project,
+                                          FlUIThreadPolicy policy) {
+  g_return_if_fail(FL_IS_DART_PROJECT(project));
+  project->ui_thread_policy = policy;
+}
+
+G_MODULE_EXPORT
+FlUIThreadPolicy fl_dart_project_get_ui_thread_policy(FlDartProject* project) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(project),
+                       FL_UI_THREAD_POLICY_DEFAULT);
+  return project->ui_thread_policy;
 }

@@ -305,8 +305,8 @@ class RadioListTile<T> extends StatelessWidget {
   /// To indicate returning to an indeterminate state, [onChanged] will be
   /// called with null.
   ///
-  /// If true, [onChanged] can be called with [value] when selected while
-  /// [groupValue] != [value], or with null when selected again while
+  /// If true, [onChanged] is called with [value] when selected while
+  /// [groupValue] != [value], and with null when selected again while
   /// [groupValue] == [value].
   ///
   /// If false, [onChanged] will be called with [value] when it is selected

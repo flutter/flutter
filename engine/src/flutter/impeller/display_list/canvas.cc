@@ -563,11 +563,6 @@ void Canvas::DrawLine(const Point& p0,
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
-  if (paint.style == Paint::Style::kStroke) {
-    DrawPath(flutter::DlPath(PathBuilder{}.AddRect(rect)), paint);
-    return;
-  }
-
   if (AttemptDrawBlurredRRect(rect, {}, paint)) {
     return;
   }
@@ -576,8 +571,14 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  RectGeometry geom(rect);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  if (paint.style == Paint::Style::kStroke) {
+    StrokeRectGeometry geom(rect, paint.stroke_width, paint.stroke_join,
+                            paint.stroke_miter);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    FillRectGeometry geom(rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
 }
 
 void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
@@ -850,7 +851,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  RectGeometry out_rect(Rect{});
+  FillRectGeometry out_rect(Rect{});
 
   entity.SetContents(paint.WithFilters(
       paint.mask_blur_descriptor->CreateMaskBlur(texture_contents, &out_rect)));
@@ -1600,7 +1601,7 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
     // If there's a mask blur and we need to apply the color filter on the GPU,
     // we need to be careful to only apply the color filter to the source
     // colors. CreateMaskBlur is able to handle this case.
-    RectGeometry out_rect(Rect{});
+    FillRectGeometry out_rect(Rect{});
     auto filter_contents = paint.mask_blur_descriptor->CreateMaskBlur(
         contents, needs_color_filter ? paint.color_filter : nullptr,
         needs_color_filter ? paint.invert_colors : false, &out_rect);

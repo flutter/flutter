@@ -26,6 +26,30 @@ import 'sliver.dart';
 /// [KeepAliveNotification.handle].
 ///
 /// To send these notifications, consider using [AutomaticKeepAliveClientMixin].
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use the [AutomaticKeepAlive] widget in
+/// combination with the [AutomaticKeepAliveClientMixin] to selectively preserve
+/// the state of individual items in a scrollable list.
+///
+/// Normally, widgets in a lazily built list like [ListView.builder] are
+/// disposed of when they leave the visible area to save resources. This means
+/// that any state inside a [StatefulWidget] would be lost unless explicitly
+/// preserved.
+///
+/// In this example, each list item is a [StatefulWidget] that includes a
+/// counter and an increment button. To preserve the state of selected items
+/// (based on their index), the [AutomaticKeepAlive] widget and
+/// [AutomaticKeepAliveClientMixin] are used:
+///
+/// - The `wantKeepAlive` getter in the item’s state class returns true for
+///   even-indexed items, indicating that their state should be preserved.
+/// - For odd-indexed items, `wantKeepAlive` returns false, so their state is
+///   not preserved when scrolled out of view.
+///
+/// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive.0.dart **
+/// {@end-tool}
+///
 class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
@@ -341,6 +365,13 @@ class KeepAliveHandle extends ChangeNotifier {
 ///
 /// The type argument `T` is the type of the [StatefulWidget] subclass of the
 /// [State] into which this class is being mixed.
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use the [AutomaticKeepAliveClientMixin]
+/// to keep the state of a widget alive even when it is scrolled out of view.
+///
+/// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive_client_mixin.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
