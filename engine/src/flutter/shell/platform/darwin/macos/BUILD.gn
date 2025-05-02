@@ -23,13 +23,13 @@ config("config_macos") {
   lib_dirs = mac_swift_lib_paths
 
   # Allow use of @testable imports in debug builds and when tests are enabled.
-  if (enable_ios_unittests) {
+  if (enable_unittests) {
     swiftflags = [ "-enable-testing" ]
   }
 }
 
 config("config_macos_test") {
-  configs = [ ":config_ios" ]
+  configs = [ ":config_macos" ]
 
   # Add platform frameworks directory to search path for test frameworks.
   # Add platform lib to search path for test libraries/Swift modules.
