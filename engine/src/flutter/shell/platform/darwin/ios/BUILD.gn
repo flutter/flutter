@@ -367,6 +367,8 @@ action("copy_framework_info_plist") {
     rebase_path(outputs[0]),
     "--minversion",
     ios_deployment_target,
+    "--buildmode",
+    flutter_runtime_mode,
   ]
 }
 
