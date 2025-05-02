@@ -143,6 +143,9 @@ targets:
   - name: Linux linux_fuchsia
     recipe: engine_v2/engine_v2
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       release_build: "true"
       config_name: linux_fuchsia
@@ -166,8 +169,6 @@ targets:
     # Scheduler will fail to get the platform
     drone_dimensions:
       - os=Linux
-    dimensions:
-      kvm: "1"
 
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
