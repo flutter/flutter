@@ -83,7 +83,7 @@ class TextPaint {
 
     // Define the text cluster bounds
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
-      2,
+      webTextCluster.bounds.left - webTextCluster.cluster!.x,
       0,
       webTextCluster.bounds.width + 2,
       rects.first.height,
@@ -94,16 +94,21 @@ class TextPaint {
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
+    double tail = webTextCluster.bounds.left - webTextCluster.bounds.left.floorToDouble();
+    if (tail >= 0.5) {
+      tail -= 1.0;
+    }
     final ui.Rect targetRect = zeroRect
         .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy);
+        .translate(lineOffset.dx, lineOffset.dy)
+        .translate(ltr ? -tail : 0, 0);
 
     if (textStyle.background != null) {
       // Draw the background color
       final ui.Rect backgroundRect = ui.Rect.fromLTWH(
         targetRect.left,
         targetRect.top,
-        targetRect.width + 1,
+        targetRect.width,
         targetRect.height,
       );
       canvas.drawRect(backgroundRect, textStyle.background!);
@@ -117,7 +122,7 @@ class TextPaint {
       webTextCluster.textRange.end,
     );
     WebParagraphDebug.log(
-      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+      'cluster "$text" ${webTextCluster.bounds.left - webTextCluster.cluster!.x} ${tail} source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
     );
 
     textContext.fillStyle = textStyle.foreground?.color.toCssString();
