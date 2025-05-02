@@ -321,10 +321,9 @@ static void ReduceConic(DlPathReceiver& receiver,
 namespace {
 class SkiaPathReceiver final : public DlPathReceiver {
  public:
-  void SetPathInfo(DlPathFillType fill_type, bool is_convex) override {
-    sk_path_.setFillType(ToSkFillType(fill_type));
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+    sk_path_.moveTo(ToSkPoint(p2));
   }
-  void MoveTo(const DlPoint& p2) override { sk_path_.moveTo(ToSkPoint(p2)); }
   void LineTo(const DlPoint& p2) override { sk_path_.lineTo(ToSkPoint(p2)); }
   void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
     sk_path_.quadTo(ToSkPoint(cp), ToSkPoint(p2));
@@ -340,6 +339,10 @@ class SkiaPathReceiver final : public DlPathReceiver {
   }
   void Close() override { sk_path_.close(); }
 
+  void SetFillType(DlPathFillType fill_type) {
+    sk_path_.setFillType(ToSkFillType(fill_type));
+  }
+
   SkPath TakePath() { return sk_path_; }
 
  private:
@@ -352,6 +355,7 @@ SkPath DlPath::ConvertToSkiaPath(const Path& path) {
 
   DispatchFromImpellerPath(path, receiver);
 
+  receiver.SetFillType(path.GetFillType());
   return receiver.TakePath();
 }
 
@@ -360,21 +364,13 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
   bool subpath_needs_close = false;
   std::optional<DlPoint> pending_moveto;
 
-  auto resolve_moveto = [&receiver, &pending_moveto]() {
+  auto resolve_moveto = [&receiver, &pending_moveto, &subpath_needs_close]() {
     if (pending_moveto.has_value()) {
-      receiver.MoveTo(pending_moveto.value());
+      receiver.MoveTo(pending_moveto.value(), subpath_needs_close);
       pending_moveto.reset();
     }
   };
 
-  // The Impeller Point Count is way overestimated due to duplicate
-  // points between elements.
-  receiver.RecommendSizes(path.GetComponentCount(), path.GetPointCount());
-  std::optional<DlRect> bounds = path.GetBoundingBox();
-  if (bounds.has_value()) {
-    receiver.RecommendBounds(bounds.value());
-  }
-  receiver.SetPathInfo(path.GetFillType(), path.IsConvex());
   for (auto it = path.begin(), end = path.end(); it != end; ++it) {
     switch (it.type()) {
       case ComponentType::kContour: {
@@ -429,19 +425,9 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
 namespace {
 class ImpellerPathReceiver final : public DlPathReceiver {
  public:
-  void RecommendSizes(size_t verb_count, size_t point_count) override {
-    // Reserve a path size with some arbitrarily additional padding.
-    builder_.Reserve(point_count + 8, verb_count + 8);
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+    builder_.MoveTo(p2);
   }
-  void RecommendBounds(const DlRect& bounds) override {
-    builder_.SetBounds(bounds);
-  }
-  void SetPathInfo(DlPathFillType fill_type, bool is_convex) override {
-    this->fill_type_ = fill_type;
-    builder_.SetConvexity(is_convex ? Convexity::kConvex  //
-                                    : Convexity::kUnknown);
-  }
-  void MoveTo(const DlPoint& p2) override { builder_.MoveTo(p2); }
   void LineTo(const DlPoint& p2) override { builder_.LineTo(p2); }
   void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
     builder_.QuadraticCurveTo(cp, p2);
@@ -457,11 +443,25 @@ class ImpellerPathReceiver final : public DlPathReceiver {
   }
   void Close() override { builder_.Close(); }
 
-  impeller::Path TakePath() { return builder_.TakePath(fill_type_); }
+  void SetBounds(DlRect bounds) { builder_.SetBounds(bounds); }
+
+  void Reserve(size_t verb_count, size_t point_count) {
+    // Impeller uses an additional point per verb so use the sum for
+    // the number of points to reserve.
+    // And add 8 to the counts for good measure
+    builder_.Reserve(point_count + verb_count + 8, verb_count + 8);
+  }
+
+  void SetConvexity(bool is_convex) {
+    builder_.SetConvexity(is_convex ? Convexity::kConvex : Convexity::kUnknown);
+  }
+
+  impeller::Path TakePath(DlPathFillType fill_type) {
+    return builder_.TakePath(fill_type);
+  }
 
  private:
   PathBuilder builder_;
-  DlPathFillType fill_type_;
 };
 }  // namespace
 
@@ -471,10 +471,13 @@ Path DlPath::ConvertToImpellerPath(const SkPath& path) {
   }
 
   ImpellerPathReceiver receiver;
+  receiver.Reserve(path.countVerbs(), path.countPoints());
 
   DispatchFromSkiaPath(path, receiver);
 
-  return receiver.TakePath();
+  receiver.SetConvexity(path.isConvex());
+  receiver.SetBounds(ToDlRect(path.getBounds()));
+  return receiver.TakePath(ToDlFillType(path.getFillType()));
 }
 
 void DlPath::DispatchFromSkiaPath(const SkPath& path,
@@ -493,15 +496,12 @@ void DlPath::DispatchFromSkiaPath(const SkPath& path,
 
   PathData data;
 
-  receiver.RecommendSizes(path.countVerbs(), path.countPoints());
-  receiver.RecommendBounds(ToDlRect(path.getBounds()));
-  receiver.SetPathInfo(ToDlFillType(path.getFillType()), path.isConvex());
   auto verb = SkPath::Verb::kDone_Verb;
   do {
     verb = iterator.next(data.points);
     switch (verb) {
       case SkPath::kMove_Verb:
-        receiver.MoveTo(ToDlPoint(data.points[0]));
+        receiver.MoveTo(ToDlPoint(data.points[0]), iterator.isClosedContour());
         break;
       case SkPath::kLine_Verb:
         receiver.LineTo(ToDlPoint(data.points[1]));

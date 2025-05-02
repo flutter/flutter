@@ -9,12 +9,19 @@ import("//flutter/common/config.gni")
 is_aot_test =
     flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
 
-# Build unit tests when any of the following are true:
-# * host_toolchain: non-cross-compile, so we can run tests on the host.
-# * is_mac: arm64 builds can run x64 binaries.
-# * is_fuchsia: build unittests for testing on device.
 declare_args() {
+  # Build portable unit tests. These test a broad swath of generic Flutter
+  # functionality on general-purpose operating systems:
+  # * host_toolchain: non-cross-compile. We can run tests on the host.
+  # * Fuchsia: build unittests for testing on device.
+  # * macOS: arm64 builds can run x64 binaries.
   enable_unittests = current_toolchain == host_toolchain || is_fuchsia || is_mac
+
+  # Build iOS target device unit tests.
+  #
+  # Build unittests for testing on device for non-profile/release builds since
+  # we compile with --enable-tests, which impacts exported symbols.
+  enable_ios_unittests = is_ios && flutter_runtime_mode == "debug"
 }
 
 # Creates a translation unit that defines the flutter::testing::GetFixturesPath

@@ -4,7 +4,7 @@
 
 assert(is_mac)
 
-import("//build/config/mac/mac_sdk.gni")
+import("//build/config/apple/apple_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
@@ -60,8 +60,6 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppLifecycleDelegate.mm",
-    "framework/Source/FlutterBackingStore.h",
-    "framework/Source/FlutterBackingStore.mm",
     "framework/Source/FlutterChannelKeyResponder.h",
     "framework/Source/FlutterChannelKeyResponder.mm",
     "framework/Source/FlutterCompositor.h",
