@@ -505,7 +505,7 @@ class _WidgetInputBorderMapper extends WidgetStateMapper<InputBorder>
 ///
 /// Material state properties represent values that depend on a widget's material
 /// "state". The state is encoded as a set of [MaterialState] values, like
-/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
+/// [WidgetState.focused], [WidgetState.hovered], [WidgetState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
 /// uses the overlay color's [resolve] method to compute the color for the
