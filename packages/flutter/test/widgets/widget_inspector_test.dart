@@ -277,7 +277,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
       binding.debugShowWidgetInspectorOverride = false;
-      binding.debugWillManuallyInjectWidgetInspector = false;
+      binding.debugExcludeRootWidgetInspector = false;
 
       if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
         await service.testBoolExtension(
@@ -854,7 +854,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         'debugWillManuallyInjectWidgetInspector is set', (WidgetTester tester) async {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
       // Disable automatic insertion of WidgetInspector into the widget tree by WidgetsApp.
-      binding.debugWillManuallyInjectWidgetInspector = true;
+      binding.debugExcludeRootWidgetInspector = true;
 
       await tester.pumpWidget(WidgetsApp(color: Colors.red, builder: (_, _) => const Text('Foo')));
 

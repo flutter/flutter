@@ -1817,7 +1817,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     assert(() {
-      if (!WidgetsBinding.instance.debugWillManuallyInjectWidgetInspector) {
+      if (!WidgetsBinding.instance.debugExcludeRootWidgetInspector) {
         result = ValueListenableBuilder<bool>(
           valueListenable: WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
           builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {

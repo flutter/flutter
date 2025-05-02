@@ -12,7 +12,7 @@ class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
     required this.child,
   }) {
     // This is set unconditionally by the preview scaffolding.
-    WidgetsBinding.instance.debugWillManuallyInjectWidgetInspector = true;
+    WidgetsBinding.instance.debugExcludeRootWidgetInspector = true;
   }
 
   /// Sets the root platform brightness. Defaults to light.

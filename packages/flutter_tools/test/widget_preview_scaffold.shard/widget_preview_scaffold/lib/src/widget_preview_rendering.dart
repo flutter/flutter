@@ -619,7 +619,7 @@ Future<void> mainImpl() async {
   // [WidgetsApp]. [WidgetInspector] instances will be created for each
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
-  binding.debugWillManuallyInjectWidgetInspector = true;
+  binding.debugExcludeRootWidgetInspector = true;
   // TODO(bkonyi): store somewhere.
   await WidgetPreviewScaffoldDtdServices().connect();
   runApp(WidgetPreviewScaffold(previews: previews));

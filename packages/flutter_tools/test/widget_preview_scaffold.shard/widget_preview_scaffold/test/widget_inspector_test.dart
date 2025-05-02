@@ -31,7 +31,7 @@ void main() {
       await tester.pumpWidget(widgetPreview);
 
       // By default, the widget preview scaffold sets
-      // WidgetsBinding.debugWillManuallyInjectWidgetInspector = true (we copy
+      // WidgetsBinding.debugExcludeRootWidgetInspector = true (we copy
       // this behavior in the WidgetPreviewerWidgetScaffolding utility class),
       // which prevents WidgetInspector from being injected into the widget
       // tree by WidgetApp.
@@ -62,7 +62,7 @@ void main() {
     await tester.pumpWidget(widgetPreview);
 
     // By default, the widget preview scaffold sets
-    // WidgetsBinding.debugWillManuallyInjectWidgetInspector = true (we copy
+    // WidgetsBinding.debugExcludeRootWidgetInspector = true (we copy
     // this behavior in the WidgetPreviewerWidgetScaffolding utility class),
     // which prevents WidgetInspector from being injected into the widget
     // tree by WidgetApp.

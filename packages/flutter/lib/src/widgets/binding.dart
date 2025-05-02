@@ -501,15 +501,15 @@ mixin WidgetsBinding
   /// to true.
   ///
   /// Used by tools that want more control over which widgets can be selected
-  /// and highlighted by the widget inspector by manually injecting instance of
+  /// and highlighted by the widget inspector by manually injecting instances of
   /// [WidgetInspector].
-  bool get debugWillManuallyInjectWidgetInspector => _debugWillManuallyInjectWidgetInspector;
+  bool get debugExcludeRootWidgetInspector => _debugExcludeRootWidgetInspector;
 
-  set debugWillManuallyInjectWidgetInspector(bool value) {
-    _debugWillManuallyInjectWidgetInspector = value;
+  set debugExcludeRootWidgetInspector(bool value) {
+    _debugExcludeRootWidgetInspector = value;
   }
 
-  bool _debugWillManuallyInjectWidgetInspector = false;
+  bool _debugExcludeRootWidgetInspector = false;
 
   @visibleForTesting
   @override
