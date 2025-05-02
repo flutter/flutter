@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../features.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'cocoapods.dart';
@@ -21,20 +24,26 @@ class DarwinDependencyManagement {
     required CocoaPods cocoapods,
     required SwiftPackageManager swiftPackageManager,
     required FileSystem fileSystem,
+    required FeatureFlags featureFlags,
     required Logger logger,
+    required Analytics analytics,
   }) : _project = project,
        _plugins = plugins,
        _cocoapods = cocoapods,
        _swiftPackageManager = swiftPackageManager,
        _fileSystem = fileSystem,
-       _logger = logger;
+       _featureFlags = featureFlags,
+       _logger = logger,
+       _analytics = analytics;
 
   final FlutterProject _project;
   final List<Plugin> _plugins;
   final CocoaPods _cocoapods;
   final SwiftPackageManager _swiftPackageManager;
   final FileSystem _fileSystem;
+  final FeatureFlags _featureFlags;
   final Logger _logger;
+  final Analytics _analytics;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -87,6 +96,7 @@ class DarwinDependencyManagement {
       // whether to run.
       useCocoapods = _plugins.isNotEmpty;
     }
+
     if (useCocoapods) {
       await _cocoapods.setupPodfile(xcodeProject);
     }
@@ -95,6 +105,21 @@ class DarwinDependencyManagement {
     else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
       _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
     }
+
+    final Event event = Event.flutterInjectDarwinPlugins(
+      platform: platform.name,
+      isModule: _project.isModule,
+      swiftPackageManagerUsable: xcodeProject.usesSwiftPackageManager,
+      swiftPackageManagerFeatureEnabled: _featureFlags.isSwiftPackageManagerEnabled,
+      projectDisabledSwiftPackageManager: _project.manifest.disabledSwiftPackageManager,
+      projectHasSwiftPackageManagerIntegration:
+          xcodeProject.flutterPluginSwiftPackageInProjectSettings,
+      pluginCount: totalCount,
+      swiftPackageCount: swiftPackageCount,
+      podCount: podCount,
+    );
+
+    _analytics.send(event);
   }
 
   /// Returns count of total number of plugins, number of Swift Package Manager
