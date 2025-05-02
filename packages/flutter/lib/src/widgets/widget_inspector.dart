@@ -2977,7 +2977,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           excludeFromSemantics: true,
           child: IgnorePointer(ignoring: isSelectMode, key: _ignorePointerKey, child: widget.child),
         ),
-        _InspectorOverlay(selection: selection),
+        Positioned.fill(child: _InspectorOverlay(selection: selection)),
         if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
           _ExitWidgetSelectionButtonGroup(
             exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder!,
