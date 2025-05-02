@@ -3475,6 +3475,90 @@ void main() {
       expect(tester.getSize(find.byKey(bodyKey)).height, 400);
     },
   );
+
+    testWidgets('removeSnackBar removes queued SnackBar before it is shown', (WidgetTester tester) async {
+    late ScaffoldMessengerState messenger;
+    late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> firstController;
+    late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> queuedController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              messenger = ScaffoldMessenger.of(context);
+              return ElevatedButton(
+                onPressed: () {
+                  firstController = messenger.showSnackBar(
+                    const SnackBar(content: Text('first')),
+                  );
+                  queuedController = messenger.showSnackBar(
+                    const SnackBar(content: Text('second')),
+                  );
+                },
+                child: const Text('show'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Trigger both snackBars
+    await tester.tap(find.text('show'));
+    await tester.pump(); // shows the first one
+    expect(find.text('first'), findsOneWidget);
+    expect(find.text('second'), findsNothing);
+
+    // Remove the second (queued) SnackBar before it ever appears
+    messenger.removeSnackBar(queuedController);
+    expect(await queuedController.closed, SnackBarClosedReason.remove);
+
+    // Now dismiss the first one
+    messenger.removeSnackBar(firstController);
+    await tester.pumpAndSettle();
+    expect(find.text('first'), findsNothing);
+    expect(find.text('second'), findsNothing);
+  });
+
+  testWidgets('removeSnackBar dismisses currently visible SnackBar immediately', (WidgetTester tester) async {
+    late ScaffoldMessengerState messenger;
+    late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              messenger = ScaffoldMessenger.of(context);
+              return ElevatedButton(
+                onPressed: () {
+                  controller = messenger.showSnackBar(
+                    const SnackBar(content: Text('only')),
+                  );
+                },
+                child: const Text('show'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Show the SnackBar
+    await tester.tap(find.text('show'));
+    await tester.pump();
+    expect(find.text('only'), findsOneWidget);
+
+    // Capture its closed future and then remove it
+    final Future<SnackBarClosedReason> closedFuture = controller.closed;
+    messenger.removeSnackBar(controller);
+
+    // It should go away immediately
+    await tester.pumpAndSettle();
+    expect(find.text('only'), findsNothing);
+    expect(await closedFuture, SnackBarClosedReason.remove);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {

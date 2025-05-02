@@ -480,6 +480,23 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     hideCurrentSnackBar();
   }
 
+/// Removes the given [SnackBar] from the queue, or dismisses it
+/// immediately if it’s currently visible.
+void removeSnackBar(
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller,
+) {
+  // 1. If it’s queued, drop it before showing:
+  if (_snackBars.remove(controller)) {
+    controller._completer.complete(SnackBarClosedReason.remove);
+    return;
+  }
+  // 2. If it’s the active one, delegate to existing logic:
+  if (_snackBars.isNotEmpty && _snackBars.first == controller) {
+    removeCurrentSnackBar(reason: SnackBarClosedReason.remove);
+  }
+}
+
+
   // MATERIAL BANNER API
 
   /// Shows a [MaterialBanner] across all registered [Scaffold]s. Scaffolds register
