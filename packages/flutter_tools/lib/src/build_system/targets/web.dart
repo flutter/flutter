@@ -545,7 +545,13 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     if (await inputFlutterBootstrapJs.exists()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
-      inputBootstrapContent = generateDefaultFlutterBootstrapScript();
+      final ServiceWorkerStrategy serviceWorkerStrategy = ServiceWorkerStrategy.fromCliName(
+        environment.defines[kServiceWorkerStrategy],
+      );
+
+      inputBootstrapContent = generateDefaultFlutterBootstrapScript(
+        includeServiceWorkerSettings: serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst,
+      );
     }
     final WebTemplate bootstrapTemplate = WebTemplate(inputBootstrapContent);
     for (final WebTemplateWarning warning in bootstrapTemplate.getWarnings()) {
