@@ -20,6 +20,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -299,7 +300,7 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        if (rootProject.tasks.findByName("generateLockfiles") == null) {
+        try {
             rootProject.tasks.register("generateLockfiles") {
                 doLast {
                     rootProject.subprojects.forEach { subproject ->
@@ -314,6 +315,8 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
+        } catch (e: TaskInstantiationException) {
+            // ignored
         }
     }
 
