@@ -569,7 +569,7 @@ typedef MaterialStatePropertyAll<T> = WidgetStatePropertyAll<T>;
 /// the widget. The widget is responsible for ensuring that the
 /// controller's [value] tracks its intrinsic state. For example one
 /// cannot request the keyboard focus for a widget by adding
-/// [MaterialState.focused] to its controller. When the widget gains the
+/// [WidgetState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
 ///
