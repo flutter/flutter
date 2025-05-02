@@ -65,6 +65,7 @@ class RunSuiteStep implements PipelineStep {
     final BrowserEnvironment browserEnvironment = getBrowserEnvironment(
       suite.runConfig.browser,
       useDwarf: useDwarf,
+      browserFlags: suite.runConfig.browserFlags,
     );
     await browserEnvironment.prepare();
 

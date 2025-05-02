@@ -114,7 +114,8 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     String? specificOS,
     String? cpu,
   }) {
-    final filteredSuites = suites.where((suite) => suite.runConfig.browser == browser);
+    final enabledSuites = suites.where((suite) => suite.enableCi);
+    final filteredSuites = enabledSuites.where((suite) => suite.runConfig.browser == browser);
     final bundles = filteredSuites.map((suite) => suite.testBundle).toSet();
     return <String, dynamic>{
       'name': '$platform run ${browser.name} suites',
@@ -148,7 +149,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
           'parameters': <String>[
             'test',
             '--copy-artifacts',
-            for (final TestSuite suite in suites) '--suite=${suite.name}',
+            for (final TestSuite suite in enabledSuites) '--suite=${suite.name}',
           ],
           'script': 'flutter/lib/web_ui/dev/felt',
         },

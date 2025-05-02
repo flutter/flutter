@@ -354,6 +354,9 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         print('  ${bundle.name.ansiMagenta}');
       }
       print('Artifacts:');
+      if (artifacts.canvasKitExperimentalWebParagraph) {
+        print('  canvaskit_experimental_webparagraph'.ansiYellow);
+      }
       if (artifacts.canvasKit) {
         print('  canvaskit'.ansiYellow);
       }
