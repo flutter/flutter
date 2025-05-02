@@ -2172,9 +2172,6 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('A'));
-    await tester.pumpAndSettle();
-
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
     await gesture.moveBy(const Offset(10, 0));
     await tester.pumpAndSettle(const Duration(milliseconds: 206));
