@@ -336,6 +336,7 @@ class DialogThemeData with Diagnosticable {
     this.barrierColor,
     this.insetPadding,
     this.clipBehavior,
+    this.constraints,
   });
 
   /// Overrides the default value for [Dialog.backgroundColor].
@@ -379,6 +380,11 @@ class DialogThemeData with Diagnosticable {
   /// Overrides the default value of [Dialog.clipBehavior].
   final Clip? clipBehavior;
 
+  /// Constrains the size of the [Dialog].
+  ///
+  /// If null, the bottom sheet's size will be unconstrained.
+  final BoxConstraints? constraints;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogThemeData copyWith({
@@ -395,6 +401,7 @@ class DialogThemeData with Diagnosticable {
     Color? barrierColor,
     EdgeInsets? insetPadding,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     return DialogThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -410,6 +417,7 @@ class DialogThemeData with Diagnosticable {
       barrierColor: barrierColor ?? this.barrierColor,
       insetPadding: insetPadding ?? this.insetPadding,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      constraints: constraints ?? this.constraints,
     );
   }
 
@@ -434,6 +442,7 @@ class DialogThemeData with Diagnosticable {
       barrierColor: Color.lerp(a?.barrierColor, b?.barrierColor, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
     );
   }
 
@@ -452,6 +461,7 @@ class DialogThemeData with Diagnosticable {
     barrierColor,
     insetPadding,
     clipBehavior,
+    constraints,
   ]);
 
   @override
@@ -475,7 +485,8 @@ class DialogThemeData with Diagnosticable {
         other.actionsPadding == actionsPadding &&
         other.barrierColor == barrierColor &&
         other.insetPadding == insetPadding &&
-        other.clipBehavior == clipBehavior;
+        other.clipBehavior == clipBehavior &&
+        other.constraints == constraints;
   }
 
   @override
@@ -504,5 +515,8 @@ class DialogThemeData with Diagnosticable {
       DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null),
     );
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null),
+    );
   }
 }

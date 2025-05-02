@@ -2890,6 +2890,22 @@ void main() {
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
   });
+
+  testWidgets('Dialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const Dialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          child: SizedBox(width: 1000, height: 100),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
 }
 
 @pragma('vm:entry-point')
