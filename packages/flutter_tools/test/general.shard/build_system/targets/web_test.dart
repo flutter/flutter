@@ -225,7 +225,7 @@ name: foo
 
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
-        stringContainsInOrder([
+        stringContainsInOrder(<String>[
           '_flutter.loader.load({',
           'serviceWorkerSettings',
           'serviceWorkerVersion',
