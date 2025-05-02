@@ -1346,22 +1346,12 @@ void main() {
       final GlobalKey scaffoldKey = GlobalKey();
 
       Widget sheetScaffoldContent(BuildContext context) {
-        return SafeArea(
+        return const SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Container(
-                height: 80,
-                width: double.infinity,
-                color: Colors.pink,
-                child: const Text('Top container'),
-              ),
-              Container(
-                height: 80,
-                width: double.infinity,
-                color: Colors.green,
-                child: const Text('Bottom container'),
-              ),
+              SizedBox(height: 80, width: double.infinity, child: Text('Top container')),
+              SizedBox(height: 80, width: double.infinity, child: Text('Bottom container')),
             ],
           ),
         );
@@ -1409,8 +1399,6 @@ void main() {
       await tester.tap(find.text('Push Page 2'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(Container), findsExactly(2));
-
       final double pageHeight =
           tester
               .getRect(
@@ -1424,10 +1412,9 @@ void main() {
         pageHeight -
             tester
                 .getBottomLeft(
-                  find.ancestor(
-                    of: find.text('Bottom container'),
-                    matching: find.byType(Container),
-                  ),
+                  find
+                      .ancestor(of: find.text('Bottom container'), matching: find.byType(SizedBox))
+                      .first,
                 )
                 .dy,
         bottomPadding,
