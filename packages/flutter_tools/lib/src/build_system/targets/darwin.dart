@@ -197,7 +197,7 @@ abstract class UnpackDarwin extends Target {
   /// to include only the architectures specified in [archs].
   ///
   /// [archs] should be a space separated list passed from Xcode containing one or
-  /// more architectures (e.g. "x86_64 arm64" or "arm64").
+  /// more architectures (e.g. "x86_64 arm64", "arm64", "x86_64").
   ///
   /// Throws an error if the binary does not contain the [archs] or fails to thin.
   @protected
