@@ -275,6 +275,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     tearDown(() async {
       service.resetAllState();
 
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+      binding.debugShowWidgetInspectorOverride = false;
+      binding.debugExcludeRootWidgetInspector = false;
+
       if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
@@ -860,6 +864,26 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         paragraphText(WidgetInspectorService.instance.selection.current! as RenderParagraph),
         equals('Child 2'),
       );
+    });
+
+    testWidgets("WidgetInspector isn't inserted into the widget tree when "
+        'debugWillManuallyInjectWidgetInspector is set', (WidgetTester tester) async {
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      // Disable automatic insertion of WidgetInspector into the widget tree by WidgetsApp.
+      binding.debugExcludeRootWidgetInspector = true;
+
+      await tester.pumpWidget(WidgetsApp(color: Colors.red, builder: (_, _) => const Text('Foo')));
+
+      // Verify that the widget inspector is disabled and there's no instances of WidgetInspector
+      // in the tree.
+      final Finder widgetInspectorFinder = find.byType(WidgetInspector);
+      expect(binding.debugShowWidgetInspectorOverride, false);
+      expect(widgetInspectorFinder, findsNothing);
+
+      // Enable the widget inspector and verify WidgetInspector hasn't been inserted into the tree.
+      binding.debugShowWidgetInspectorOverride = true;
+      await tester.pump();
+      expect(widgetInspectorFinder, findsNothing);
     });
 
     testWidgets(
