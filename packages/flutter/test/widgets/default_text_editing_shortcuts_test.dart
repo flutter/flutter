@@ -912,6 +912,105 @@ void main() {
       skip: !kIsWeb, // [intended] Web only.
     );
   });
+
+  testWidgets(
+    'Home and end keys on Android and Windows',
+    (WidgetTester tester) async {
+      final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
+      final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
+
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
+      );
+      spy.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+      // Home/end
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home));
+      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.end));
+      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, true);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Home/end + shift
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.home, shift: true),
+      );
+      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.end, shift: true),
+      );
+      expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).collapseSelection, false);
+      expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, true);
+
+      // Home/end + control
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.home, control: true),
+      );
+      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
+      expect(
+        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+        true,
+      );
+
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.end, control: true),
+      );
+      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
+      expect(
+        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+        true,
+      );
+
+      // Home/end + control + shift
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.home, control: true, shift: true),
+      );
+      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, false);
+      expect(
+        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+        false,
+      );
+
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.end, control: true, shift: true),
+      );
+      expect(state.lastIntent, isA<ExtendSelectionToDocumentBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).forward, true);
+      expect(
+        (state.lastIntent! as ExtendSelectionToDocumentBoundaryIntent).collapseSelection,
+        false,
+      );
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.windows,
+    }),
+  );
 }
 
 class ActionSpy extends StatefulWidget {
