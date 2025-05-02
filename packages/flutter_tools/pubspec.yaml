@@ -55,8 +55,9 @@ dependencies:
   unified_analytics: 8.0.1
 
   graphs: 2.3.2
-  native_assets_builder: 0.18.0
-  native_assets_cli: 0.18.0
+  hooks_runner: 0.19.0
+  hooks: 0.19.0
+  code_assets: 0.19.0
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -123,4 +124,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 38a0
+# PUBSPEC CHECKSUM: 771f

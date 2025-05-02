@@ -441,7 +441,7 @@ void DlDispatcherBase::clipRect(const DlRect& rect,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
-  RectGeometry geom(rect);
+  FillRectGeometry geom(rect);
   GetCanvas().ClipGeometry(geom, ToClipOperation(clip_op), /*is_aa=*/is_aa);
 }
 
@@ -463,7 +463,7 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
 
   auto clip_op = ToClipOperation(sk_op);
   if (rrect.IsRect()) {
-    RectGeometry geom(rrect.GetBounds());
+    FillRectGeometry geom(rrect.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (rrect.IsOval()) {
     EllipseGeometry geom(rrect.GetBounds());
@@ -485,7 +485,7 @@ void DlDispatcherBase::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
 
   auto clip_op = ToClipOperation(sk_op);
   if (rse.IsRect()) {
-    RectGeometry geom(rse.GetBounds());
+    FillRectGeometry geom(rse.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (rse.IsOval()) {
     EllipseGeometry geom(rse.GetBounds());
@@ -506,7 +506,7 @@ void DlDispatcherBase::clipPath(const DlPath& path,
 
   DlRect rect;
   if (path.IsRect(&rect)) {
-    RectGeometry geom(rect);
+    FillRectGeometry geom(rect);
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (path.IsOval(&rect)) {
     EllipseGeometry geom(rect);
