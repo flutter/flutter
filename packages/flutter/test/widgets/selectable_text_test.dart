@@ -5589,7 +5589,10 @@ void main() {
           // Don't wrap with the global View so that the change to
           // platformDispatcher is read.
           wrapWithView: false,
-          View(view: tester.view, child: MaterialApp(home: Material(child: TextField(controller: controller)))),
+          View(
+            view: tester.view,
+            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+          ),
         );
 
         // No context menu shown.
