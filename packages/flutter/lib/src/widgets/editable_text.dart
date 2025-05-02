@@ -17,6 +17,7 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
+import 'dart:ui';
 
 import 'package:characters/characters.dart' show CharacterRange, StringCharacters;
 import 'package:flutter/foundation.dart';
@@ -876,8 +877,8 @@ class EditableText extends StatefulWidget {
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
     this.paintCursorAboveText = false,
-    this.selectionHeightStyle = ui.BoxHeightStyle.max,
-    this.selectionWidthStyle = ui.BoxWidthStyle.max,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -964,7 +965,9 @@ class EditableText extends StatefulWidget {
                  ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
                ]
                : inputFormatters,
-       showCursor = showCursor ?? !readOnly;
+       showCursor = showCursor ?? !readOnly,
+       selectionHeightStyle = selectionHeightStyle ?? defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? defaultSelectionWidthStyle;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -2048,6 +2051,52 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
+
+  /// The default value for [selectionHeightStyle].
+  ///
+  /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
+  ///
+  /// On native platforms, this defaults to [ui.BoxHeightStyle.includeLineSpacingMiddle] for all
+  /// platforms.
+  static ui.BoxHeightStyle get defaultSelectionHeightStyle {
+    if (kIsWeb) {
+      return ui.BoxHeightStyle.max;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return ui.BoxHeightStyle.includeLineSpacingMiddle;
+    }
+  }
+
+  /// The default value for [selectionWidthStyle].
+  ///
+  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for iOS and
+  /// [ui.BoxWidthStyle.tight] for all others.
+  ///
+  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max] for all
+  /// platforms.
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle {
+    if (kIsWeb) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        return ui.BoxWidthStyle.max;
+      }
+      return ui.BoxWidthStyle.tight;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return ui.BoxWidthStyle.max;
+    }
+  }
 
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
@@ -5923,15 +5972,17 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.cursorRadius,
     required this.cursorOffset,
     required this.paintCursorAboveText,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     this.enableInteractiveSelection = true,
     required this.textSelectionDelegate,
     required this.devicePixelRatio,
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
+  }) : selectionHeightStyle = selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
+       super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;
