@@ -10,10 +10,10 @@ import 'package:flutter/cupertino.dart' show CupertinoThemeData;
 import 'package:flutter/material.dart' show Brightness, ThemeData;
 import 'package:flutter/widgets.dart';
 
-/// Signature for callbacks that build theming data for [Preview]s.
+/// Signature for callbacks that build theming data used when creating a [Preview].
 typedef PreviewTheme = PreviewThemeData Function();
 
-/// Signature for callbacks that take a [Widget] argument and return a [Widget].
+/// Signature for callbacks that wrap a [Widget] with another [Widget] when creating a [Preview].
 typedef WidgetWrapper = Widget Function(Widget);
 
 /// Annotation used to mark functions that return a widget preview.
@@ -82,6 +82,9 @@ base class Preview {
   ///
   /// If a dimension has a value of `double.infinity`, the previewed widget
   /// will attempt to set its own constraints in the relevant dimension.
+  ///
+  /// To set a single dimension and allow the other to set its own constraints, use
+  /// [Size.fromHeight] or [Size.fromWidth].
   final Size? size;
 
   /// Applies font scaling to text within the previewed widget.

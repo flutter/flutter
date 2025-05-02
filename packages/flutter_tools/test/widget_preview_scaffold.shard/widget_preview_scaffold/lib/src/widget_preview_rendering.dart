@@ -91,10 +91,11 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
           TextSpan(
             text: frame.location,
             style: linkTextStyle,
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                // TODO(bkonyi): notify IDEs to navigate to the source location via DTD.
-              },
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap = () {
+                    // TODO(bkonyi): notify IDEs to navigate to the source location via DTD.
+                  },
           ),
           TextSpan(text: ' ' * (longest - frame.location.length)),
           const TextSpan(text: '  '),
@@ -135,10 +136,11 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
             TextSpan(
               text: documentationUrl.toString(),
               style: linkTextStyle,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  launchUrl(documentationUrl);
-                },
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () {
+                      launchUrl(documentationUrl);
+                    },
             ),
             style: style,
           ),
@@ -431,8 +433,11 @@ class WidgetPreviewerWindowConstraints extends InheritedWidget {
   final BoxConstraints constraints;
 
   static BoxConstraints getRootConstraints(BuildContext context) {
-    final result = context
-        .dependOnInheritedWidgetOfExactType<WidgetPreviewerWindowConstraints>();
+    final result =
+        context
+            .dependOnInheritedWidgetOfExactType<
+              WidgetPreviewerWindowConstraints
+            >();
     assert(
       result != null,
       'No WidgetPreviewerWindowConstraints founds in context',
@@ -532,9 +537,10 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
       // the previewer. In this case, apply finite constraints (e.g., the
       // constraints for the root of the previewer). Otherwise, use the
       // widget's actual constraints.
-      _constraintOverride = minInstrinsicHeight == 0
-          ? _previewerConstraints
-          : const BoxConstraints();
+      _constraintOverride =
+          minInstrinsicHeight == 0
+              ? _previewerConstraints
+              : const BoxConstraints();
     }
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
@@ -672,16 +678,18 @@ class WidgetPreviewScaffold extends StatelessWidget {
                     IconButton(
                       onPressed: () => _toggleLayout(LayoutType.gridView),
                       icon: Icon(Icons.grid_on),
-                      color: selectedLayout == LayoutType.gridView
-                          ? Colors.blue
-                          : Colors.black,
+                      color:
+                          selectedLayout == LayoutType.gridView
+                              ? Colors.blue
+                              : Colors.black,
                     ),
                     IconButton(
                       onPressed: () => _toggleLayout(LayoutType.listView),
                       icon: Icon(Icons.view_list),
-                      color: selectedLayout == LayoutType.listView
-                          ? Colors.blue
-                          : Colors.black,
+                      color:
+                          selectedLayout == LayoutType.listView
+                              ? Colors.blue
+                              : Colors.black,
                     ),
                   ],
                 );
