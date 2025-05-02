@@ -105,6 +105,20 @@ class TextButton extends ButtonStyleButton {
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
+  /// {@tool dartpad}
+  /// This example shows how to create a TextButton with an icon.
+  ///
+  /// ```dart
+  /// TextButton.icon(
+  ///   onPressed: () {
+  ///     print('Pressed');
+  ///   },
+  ///   icon: Icon(Icons.thumb_up),
+  ///   label: Text('Like'),
+  /// )
+  /// ```
+  /// {@end-tool}
+
   factory TextButton.icon({
     Key? key,
     required VoidCallback? onPressed,
