@@ -41,6 +41,9 @@ typedef DebugPrintCallback = void Function(String? message, {int? wrapWidth});
 ///   debugPrint('A useful message');
 /// }
 /// ```
+/// ⚠️ Avoid using `debugPrint()` for large outputs in performance-sensitive code,
+/// especially in production-like debug builds. Excessive output can cause
+/// UI jank by blocking the main thread due to synchronous stdout I/O.
 ///
 /// See also:
 ///
