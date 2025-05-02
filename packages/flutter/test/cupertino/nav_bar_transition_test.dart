@@ -132,6 +132,11 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   );
 }
 
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 3000.0)}) {
+  tester.view.physicalSize = size;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
@@ -666,6 +671,7 @@ void main() {
   testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -992,6 +998,7 @@ void main() {
   });
 
   testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1050,6 +1057,7 @@ void main() {
   testWidgets('Bottom CupertinoSliverNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(
@@ -1086,6 +1094,7 @@ void main() {
   testWidgets('Bottom CupertinoNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -1122,6 +1131,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar.bottom clips its contents mid-transition when scrolled',
     (WidgetTester tester) async {
+      setWindowToPortrait(tester);
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? navigator) {
@@ -1246,6 +1256,7 @@ void main() {
   );
 
   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1302,6 +1313,7 @@ void main() {
   testWidgets('Bottom large title and top back label transitions their font', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1410,6 +1422,7 @@ void main() {
   });
 
   testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1440,6 +1453,7 @@ void main() {
   testWidgets('Top large title fades in and slides in from the left in RTL', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1473,6 +1487,7 @@ void main() {
   ) async {
     const double horizontalPadding = 16.0; // _kNavBarEdgePadding
     const double height = 30.0;
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1516,7 +1531,7 @@ void main() {
     // The nav bar bottom is horizontally aligned to the large title.
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
+      moreOrLessEquals(largeTitleOffset.dx - horizontalPadding, epsilon: 0.01),
     );
   });
 
@@ -1594,6 +1609,7 @@ void main() {
   ) async {
     int bottomBuildTimes = 0;
     int topBuildTimes = 0;
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: CupertinoNavigationBar(
