@@ -40,7 +40,7 @@ A Flutter release is very similar to what would be seen on the master branch, wi
 Prework: Ensure Flutter's release infrastructure is branched for the current version.
 
 1. Apply any Dart cherry-picks to the Dart branch
-2. Roll Dart into [flutter/engine](https://github.com/flutter/engine)
+2. Bump Dart version
 3. Apply any engine cherry-picks
 4. Verify all engine builds are green
 5. Sign engine binaries

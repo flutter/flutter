@@ -45,8 +45,6 @@ wasm_toolchain("canvaskit_chromium") {
     # TODO(mdebbar): Set these to false once all image decoding can be done
     # using the browser's built-in codecs.
     # https://github.com/flutter/flutter/issues/122331
-
-    # In Chromium browsers, we can use the browser's built-in codecs.
     skia_use_libjpeg_turbo_decode = true
     skia_use_libpng_decode = true
     skia_use_libwebp_decode = true
@@ -70,8 +68,8 @@ copy("canvaskit_chromium_group") {
   ]
 }
 
-# This toolchain is only to be used by canvaskit_chromium_group below.
-wasm_toolchain("canvaskit_textclusters") {
+# This toolchain is only to be used by canvaskit_experimental_webparagraph_group below.
+wasm_toolchain("canvaskit_experimental_webparagraph") {
   extra_toolchain_args = {
     # In Chromium browsers, we can use the browser's APIs to get the necessary
     # ICU data.
@@ -81,14 +79,13 @@ wasm_toolchain("canvaskit_textclusters") {
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
 
     skia_enable_skparagraph = false
-    # skia_enable_shaper = false
-    # skia_enable_harfbuzz = false
+    # TODO(mdebbar): This can't be set to false now because it causes font registration to fail.
+    # Once we update the font registration logic, we can come back and uncomment the next line.
+    # skia_canvaskit_enable_paragraph = false
 
     # TODO(mdebbar): Set these to false once all image decoding can be done
     # using the browser's built-in codecs.
     # https://github.com/flutter/flutter/issues/122331
-
-    # In Chromium browsers, we can use the browser's built-in codecs.
     skia_use_libjpeg_turbo_decode = true
     skia_use_libpng_decode = true
     skia_use_libwebp_decode = true
@@ -98,17 +95,17 @@ wasm_toolchain("canvaskit_textclusters") {
   }
 }
 
-copy("canvaskit_textclusters_group") {
+copy("canvaskit_experimental_webparagraph_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_textclusters)" ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_experimental_webparagraph)" ]
 
   sources = [
-    "$root_out_dir/canvaskit_textclusters/canvaskit.js",
-    "$root_out_dir/canvaskit_textclusters/canvaskit.js.symbols",
-    "$root_out_dir/canvaskit_textclusters/canvaskit.wasm",
+    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js",
+    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js.symbols",
+    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.wasm",
   ]
   outputs = [
-    "$root_out_dir/flutter_web_sdk/canvaskit/textclusters/{{source_file_part}}",
+    "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/{{source_file_part}}",
   ]
 }
 
