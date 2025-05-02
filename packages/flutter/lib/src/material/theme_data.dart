@@ -168,6 +168,21 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
 ///   * [Radio]
 ///   * [Switch]
 ///   * [Checkbox]
+
+/// Defines how tap targets are sized for Material widgets.
+///
+/// This enum has two options:
+///
+/// * [MaterialTapTargetSize.padded] – Expands the tap target to 48×48 px for better accessibility.
+/// * [MaterialTapTargetSize.shrinkWrap] – Uses the minimum target size allowed by Material guidelines.
+///
+/// Used by [ThemeData.materialTapTargetSize] to globally control tap area size,
+/// especially for widgets like:
+///
+/// [MaterialButton], [IconButton], [Checkbox], [Switch], [Radio], [Chip] and related variants.
+///
+/// See also:
+/// * <https://m3.material.io/components/buttons/specs#layout>
 enum MaterialTapTargetSize {
   /// Expands the minimum tap target size to 48px by 48px.
   ///
