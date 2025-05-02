@@ -7395,9 +7395,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7406,6 +7404,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7423,9 +7423,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7434,6 +7432,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7511,9 +7511,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7522,6 +7520,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7539,9 +7539,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7557,7 +7555,9 @@ void main() {
             reason: 'on $platform',
           );
 
-        // Windows jumps to the previous wordwrapped line.
+        // Windows, Android, and Fuchsia jump to the previous wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -7633,9 +7633,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7644,6 +7642,8 @@ void main() {
           );
 
         // These platforms go to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -7660,9 +7660,7 @@ void main() {
 
       switch (defaultTargetPlatform) {
         // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
         case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
           expect(
             selection,
@@ -7678,7 +7676,9 @@ void main() {
             reason: 'on $platform',
           );
 
-        // Windows jumps to the next wordwrapped line.
+        // Windows, Android, and Fuchsia jump to the next wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -7771,20 +7771,6 @@ void main() {
       final TextSelection selectionAfterEnd = selection;
 
       switch (defaultTargetPlatform) {
-        // These platforms don't handle shift + home/end at all.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selectionAfterHome,
-            equals(const TextSelection(baseOffset: 23, extentOffset: 23)),
-            reason: 'on $platform',
-          );
-          expect(
-            selectionAfterEnd,
-            equals(const TextSelection(baseOffset: 23, extentOffset: 23)),
-            reason: 'on $platform',
-          );
-
         // Linux extends to the line start/end.
         case TargetPlatform.linux:
           expect(
@@ -7805,6 +7791,8 @@ void main() {
           );
 
         // Windows expands to the line start/end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selectionAfterHome,
@@ -8047,15 +8035,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with shift + home/end at all.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS select to the start of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -8066,6 +8045,8 @@ void main() {
           );
 
         // These platforms select to the line start.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -8085,15 +8066,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS select to the start of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -8112,6 +8084,8 @@ void main() {
           );
 
         // Windows jumps to the previous wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
@@ -8189,15 +8163,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with home/end at all.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS select to the end of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -8208,6 +8173,8 @@ void main() {
           );
 
         // These platforms select to the line end.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(
@@ -8232,15 +8199,6 @@ void main() {
       );
 
       switch (defaultTargetPlatform) {
-        // These platforms don't move the selection with home/end at all still.
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          expect(
-            selection,
-            equals(const TextSelection.collapsed(offset: 32)),
-            reason: 'on $platform',
-          );
-
         // Mac and iOS stay at the end of the document.
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
@@ -8265,6 +8223,8 @@ void main() {
           );
 
         // Windows jumps to the previous wordwrapped line.
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(
             selection,
