@@ -479,6 +479,7 @@ class BrowserPlatform extends PlatformPlugin {
     return switch (suite.runConfig.variant) {
       CanvasKitVariant.full => 'full',
       CanvasKitVariant.chromium => 'chromium',
+      CanvasKitVariant.experimentalWebParagraph => 'experimentalWebParagraph',
       null => 'auto',
     };
   }

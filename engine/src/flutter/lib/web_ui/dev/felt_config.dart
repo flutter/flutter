@@ -32,7 +32,7 @@ class TestBundle {
   final List<CompileConfiguration> compileConfigs;
 }
 
-enum CanvasKitVariant { full, chromium }
+enum CanvasKitVariant { full, chromium, experimentalWebParagraph }
 
 enum BrowserName { chrome, edge, firefox, safari }
 
@@ -40,6 +40,7 @@ class RunConfiguration {
   RunConfiguration(
     this.name,
     this.browser,
+    this.browserFlags,
     this.variant,
     this.crossOriginIsolated,
     this.forceSingleThreadedSkwasm,
@@ -48,6 +49,7 @@ class RunConfiguration {
 
   final String name;
   final BrowserName browser;
+  final List<String> browserFlags;
   final CanvasKitVariant? variant;
   final bool crossOriginIsolated;
   final bool forceSingleThreadedSkwasm;
@@ -56,18 +58,27 @@ class RunConfiguration {
 
 class ArtifactDependencies {
   ArtifactDependencies({
+    required this.canvasKitExperimentalWebParagraph,
     required this.canvasKit,
     required this.canvasKitChromium,
     required this.skwasm,
   });
 
-  ArtifactDependencies.none() : canvasKit = false, canvasKitChromium = false, skwasm = false;
+  ArtifactDependencies.none()
+    : canvasKitExperimentalWebParagraph = false,
+      canvasKit = false,
+      canvasKitChromium = false,
+      skwasm = false;
+
+  final bool canvasKitExperimentalWebParagraph;
   final bool canvasKit;
   final bool canvasKitChromium;
   final bool skwasm;
 
   ArtifactDependencies operator |(ArtifactDependencies other) {
     return ArtifactDependencies(
+      canvasKitExperimentalWebParagraph:
+          canvasKitExperimentalWebParagraph || other.canvasKitExperimentalWebParagraph,
       canvasKit: canvasKit || other.canvasKit,
       canvasKitChromium: canvasKitChromium || other.canvasKitChromium,
       skwasm: skwasm || other.skwasm,
@@ -76,6 +87,8 @@ class ArtifactDependencies {
 
   ArtifactDependencies operator &(ArtifactDependencies other) {
     return ArtifactDependencies(
+      canvasKitExperimentalWebParagraph:
+          canvasKitExperimentalWebParagraph && other.canvasKitExperimentalWebParagraph,
       canvasKit: canvasKit && other.canvasKit,
       canvasKitChromium: canvasKitChromium && other.canvasKitChromium,
       skwasm: skwasm && other.skwasm,
@@ -171,6 +184,8 @@ class FeltConfig {
       final YamlMap runConfigYaml = node as YamlMap;
       final String name = runConfigYaml['name'] as String;
       final BrowserName browser = BrowserName.values.byName(runConfigYaml['browser'] as String);
+      final List<String> browserFlags =
+          (runConfigYaml['browser-flags'] as YamlList?)?.cast<String>() ?? <String>[];
       final dynamic variantNode = runConfigYaml['canvaskit-variant'];
       final CanvasKitVariant? variant =
           variantNode == null ? null : CanvasKitVariant.values.byName(variantNode as String);
@@ -181,6 +196,7 @@ class FeltConfig {
       final RunConfiguration runConfig = RunConfiguration(
         name,
         browser,
+        browserFlags,
         variant,
         crossOriginIsolated,
         forceSingleThreadedSkwasm,
@@ -211,6 +227,7 @@ class FeltConfig {
           'Run config not found with name: `$runConfigName` (referenced by test suite: `$name`)',
         );
       }
+      bool canvasKitExperimentalWebParagraph = false;
       bool canvasKit = false;
       bool canvasKitChromium = false;
       bool skwasm = false;
@@ -218,6 +235,11 @@ class FeltConfig {
       if (depsNode != null) {
         for (final dynamic dep in depsNode as YamlList) {
           switch (dep as String) {
+            case 'canvaskit_experimental_webparagraph':
+              if (canvasKitExperimentalWebParagraph) {
+                throw AssertionError('Artifact dep $dep listed twice in suite $name.');
+              }
+              canvasKitExperimentalWebParagraph = true;
             case 'canvaskit':
               if (canvasKit) {
                 throw AssertionError('Artifact dep $dep listed twice in suite $name.');
@@ -239,6 +261,7 @@ class FeltConfig {
         }
       }
       final ArtifactDependencies artifactDeps = ArtifactDependencies(
+        canvasKitExperimentalWebParagraph: canvasKitExperimentalWebParagraph,
         canvasKit: canvasKit,
         canvasKitChromium: canvasKitChromium,
         skwasm: skwasm,
