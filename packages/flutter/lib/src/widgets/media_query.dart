@@ -1909,14 +1909,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // PlatformDispatcher and need to update our data in response to the
     // PlatformDispatcher changing its accessibility features setting.
     if (_parentData == null) {
-      if (kIsWeb) {
-        // Avoid executing _updateData during build time on web platform
-        WidgetsBinding.instance.addPostFrameCallback((Duration timestamp) {
-          _updateData();
-        });
-      } else {
-        _updateData();
-      }
+      _updateData();
     }
   }
 
