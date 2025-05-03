@@ -993,6 +993,11 @@ class ThemeData with Diagnosticable {
   /// Defaults to a [platform]-appropriate size: [MaterialTapTargetSize.padded]
   /// on mobile platforms, [MaterialTapTargetSize.shrinkWrap] on desktop
   /// platforms.
+  /// Defaults to a [platform]-appropriate size:
+  /// [MaterialTapTargetSize.padded](https://api.flutter.dev/flutter/material/MaterialTapTargetSize.html#MaterialTapTargetSize.padded)
+  /// on mobile platforms,
+  /// [MaterialTapTargetSize.shrinkWrap](https://api.flutter.dev/flutter/material/MaterialTapTargetSize.html#MaterialTapTargetSize.shrinkWrap)
+  /// on desktop platforms.
   final MaterialTapTargetSize materialTapTargetSize;
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
