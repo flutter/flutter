@@ -132,10 +132,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
  public:
   static void GenerateStrokeVertices(PositionWriter& vtx_builder,
                                      const PathSource& source,
-                                     const Scalar stroke_width,
-                                     const Scalar miter_limit,
-                                     const Join join,
-                                     const Cap cap,
+                                     const StrokeParameters& parameters,
                                      const Scalar scale,
                                      const Tessellator::Trigs& trigs) {
     // Trigs ensures that it always contains at least 2 entries.
@@ -145,8 +142,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     FML_DCHECK(trigs.end()[-1].cos == 0.0f);  // Angle == 90 degrees
     FML_DCHECK(trigs.end()[-1].sin == 1.0f);
 
-    StrokePathSegmentReceiver receiver(vtx_builder, stroke_width, miter_limit,
-                                       join, cap, scale, trigs);
+    StrokePathSegmentReceiver receiver(vtx_builder, parameters, scale, trigs);
     PathTessellator::PathToStrokedSegments(source, receiver);
   }
 
@@ -301,19 +297,17 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   bool contour_needs_cap_ = false;
 
   StrokePathSegmentReceiver(PositionWriter& vtx_builder,
-                            const Scalar stroke_width,
-                            const Scalar miter_limit,
-                            const Join join,
-                            const Cap cap,
+                            const StrokeParameters& parameters,
                             const Scalar scale,
                             const Tessellator::Trigs& trigs)
       : vtx_builder_(vtx_builder),
-        half_stroke_width_(stroke_width * 0.5f),
+        half_stroke_width_(parameters.stroke_width * 0.5f),
         maximum_join_cosine_(
-            ComputeMaximumJoinCosine(scale, stroke_width * 0.5f)),
-        minimum_miter_cosine_(ComputeMinimumMiterCosine(miter_limit)),
-        join_(join),
-        cap_(cap),
+            ComputeMaximumJoinCosine(scale, parameters.stroke_width * 0.5f)),
+        minimum_miter_cosine_(
+            ComputeMinimumMiterCosine(parameters.miter_limit)),
+        join_(parameters.stroke_join),
+        cap_(parameters.stroke_cap),
         scale_(scale),
         trigs_(trigs) {}
 
@@ -673,63 +667,54 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 }  // namespace
 
 // Private for benchmarking and debugging
-std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
+std::vector<Point> StrokePathSourceGeometry::GenerateSolidStrokeVertices(
     const PathSource& source,
-    Scalar stroke_width,
-    Scalar miter_limit,
-    Join stroke_join,
-    Cap stroke_cap,
+    const StrokeParameters& parameters,
     Scalar scale) {
   std::vector<Point> points(4096);
   PositionWriter vtx_builder(points);
-  Tessellator::Trigs trigs(scale * stroke_width * 0.5f);
-  StrokePathSegmentReceiver::GenerateStrokeVertices(
-      vtx_builder, source, stroke_width, miter_limit, stroke_join, stroke_cap,
-      scale, trigs);
+  Tessellator::Trigs trigs(scale * parameters.stroke_width * 0.5f);
+  StrokePathSegmentReceiver::GenerateStrokeVertices(vtx_builder, source,
+                                                    parameters, scale, trigs);
   auto [arena, extra] = vtx_builder.GetUsedSize();
   FML_DCHECK(extra == 0u);
   points.resize(arena);
   return points;
 }
 
-StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
-                                       Scalar stroke_width,
-                                       Scalar miter_limit,
-                                       Cap stroke_cap,
-                                       Join stroke_join)
-    : path_(path),
-      stroke_width_(stroke_width),
-      miter_limit_(miter_limit),
-      stroke_cap_(stroke_cap),
-      stroke_join_(stroke_join) {}
+StrokePathSourceGeometry::StrokePathSourceGeometry(
+    const StrokeParameters& parameters)
+    : parameters_(parameters) {}
 
-StrokePathGeometry::~StrokePathGeometry() = default;
+StrokePathSourceGeometry::~StrokePathSourceGeometry() = default;
 
-Scalar StrokePathGeometry::GetStrokeWidth() const {
-  return stroke_width_;
+Scalar StrokePathSourceGeometry::GetStrokeWidth() const {
+  return parameters_.stroke_width;
 }
 
-Scalar StrokePathGeometry::GetMiterLimit() const {
-  return miter_limit_;
+Scalar StrokePathSourceGeometry::GetMiterLimit() const {
+  return parameters_.miter_limit;
 }
 
-Cap StrokePathGeometry::GetStrokeCap() const {
-  return stroke_cap_;
+Cap StrokePathSourceGeometry::GetStrokeCap() const {
+  return parameters_.stroke_cap;
 }
 
-Join StrokePathGeometry::GetStrokeJoin() const {
-  return stroke_join_;
+Join StrokePathSourceGeometry::GetStrokeJoin() const {
+  return parameters_.stroke_join;
 }
 
-Scalar StrokePathGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
-  return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
+Scalar StrokePathSourceGeometry::ComputeAlphaCoverage(
+    const Matrix& transform) const {
+  return Geometry::ComputeStrokeAlphaCoverage(transform,
+                                              parameters_.stroke_width);
 }
 
-GeometryResult StrokePathGeometry::GetPositionBuffer(
+GeometryResult StrokePathSourceGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  if (stroke_width_ < 0.0) {
+  if (parameters_.stroke_width < 0.0) {
     return {};
   }
   Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
@@ -738,7 +723,9 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   }
 
   Scalar min_size = kMinStrokeSize / max_basis;
-  Scalar stroke_width = std::max(stroke_width_, min_size);
+  StrokeParameters adjusted_parameters = parameters_;
+  adjusted_parameters.stroke_width =
+      std::max(parameters_.stroke_width, min_size);
 
   auto& host_buffer = renderer.GetTransientsBuffer();
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
@@ -746,10 +733,9 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   PositionWriter position_writer(
       renderer.GetTessellator().GetStrokePointCache());
   Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
-      scale * stroke_width * 0.5f);
+      scale * adjusted_parameters.stroke_width * 0.5f);
   StrokePathSegmentReceiver::GenerateStrokeVertices(
-      position_writer, path_, stroke_width, miter_limit_, stroke_join_,
-      stroke_cap_, scale, trigs);
+      position_writer, GetSource(), adjusted_parameters, scale, trigs);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {
@@ -797,23 +783,23 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
                         .mode = GeometryResult::Mode::kPreventOverdraw};
 }
 
-GeometryResult::Mode StrokePathGeometry::GetResultMode() const {
+GeometryResult::Mode StrokePathSourceGeometry::GetResultMode() const {
   return GeometryResult::Mode::kPreventOverdraw;
 }
 
-std::optional<Rect> StrokePathGeometry::GetCoverage(
+std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
     const Matrix& transform) const {
-  auto path_bounds = path_.GetBounds();
+  auto path_bounds = GetSource().GetBounds();
   if (path_bounds.IsEmpty()) {
     return std::nullopt;
   }
 
   Scalar max_radius = 0.5;
-  if (stroke_cap_ == Cap::kSquare) {
+  if (parameters_.stroke_cap == Cap::kSquare) {
     max_radius = max_radius * kSqrt2;
   }
-  if (stroke_join_ == Join::kMiter) {
-    max_radius = std::max(max_radius, miter_limit_ * 0.5f);
+  if (parameters_.stroke_join == Join::kMiter) {
+    max_radius = std::max(max_radius, parameters_.miter_limit * 0.5f);
   }
   Scalar max_basis = transform.GetMaxBasisLengthXY();
   if (max_basis == 0) {
@@ -821,8 +807,20 @@ std::optional<Rect> StrokePathGeometry::GetCoverage(
   }
   // Use the most conervative coverage setting.
   Scalar min_size = kMinStrokeSize / max_basis;
-  max_radius *= std::max(stroke_width_, min_size);
+  max_radius *= std::max(parameters_.stroke_width, min_size);
   return path_bounds.Expand(max_radius).TransformBounds(transform);
+}
+
+StrokePathGeometry::StrokePathGeometry(const Path& path,
+                                       const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters), path_(path) {}
+
+StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
+                                       const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters), path_(path) {}
+
+const PathSource& StrokePathGeometry::GetSource() const {
+  return path_;
 }
 
 }  // namespace impeller
