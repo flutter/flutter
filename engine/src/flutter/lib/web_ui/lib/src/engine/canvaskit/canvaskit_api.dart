@@ -2325,6 +2325,7 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
+const String _kWebParagraphCanvasKitJsFileName = 'experimental_webparagraph/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
@@ -2337,6 +2338,7 @@ List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
     ],
     CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
     CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
+    CanvasKitVariant.experimentalWebParagraph => <String>[_kWebParagraphCanvasKitJsFileName],
   };
 }
 

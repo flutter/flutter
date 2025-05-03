@@ -87,4 +87,57 @@ static constexpr Point kLowerRightDirection(1.0f, 1.0f);
   return true;
 }
 
+RoundRectPathSource::RoundRectPathSource(const RoundRect& round_rect)
+    : round_rect_(round_rect) {}
+
+RoundRectPathSource::~RoundRectPathSource() = default;
+
+FillType RoundRectPathSource::GetFillType() const {
+  return FillType::kNonZero;
+}
+
+Rect RoundRectPathSource::GetBounds() const {
+  return round_rect_.GetBounds();
+}
+
+bool RoundRectPathSource::IsConvex() const {
+  return true;
+}
+
+void RoundRectPathSource::Dispatch(PathReceiver& receiver) const {
+  Scalar left = round_rect_.GetBounds().GetLeft();
+  Scalar top = round_rect_.GetBounds().GetTop();
+  Scalar right = round_rect_.GetBounds().GetRight();
+  Scalar bottom = round_rect_.GetBounds().GetBottom();
+  const RoundingRadii& radii = round_rect_.GetRadii();
+
+  receiver.MoveTo(Point(left + radii.top_left.width, top), true);
+  receiver.LineTo(Point(right - radii.top_right.width, top));
+
+  receiver.ConicTo(Point(right, top),
+                   Point(right, top + radii.top_right.height),  //
+                   kSqrt2Over2);
+
+  receiver.LineTo(Point(right, bottom - radii.bottom_right.height));
+
+  receiver.ConicTo(Point(right, bottom),
+                   Point(right - radii.bottom_right.width, bottom),  //
+                   kSqrt2Over2);
+
+  receiver.LineTo(Point(left + radii.bottom_left.width, bottom));
+
+  receiver.ConicTo(Point(left, bottom),
+                   Point(left, bottom - radii.bottom_left.height),  //
+                   kSqrt2Over2);
+
+  receiver.LineTo(Point(left, top + radii.top_left.height));
+
+  receiver.ConicTo(Point(left, top),
+                   Point(left + radii.top_left.width, top),  //
+                   kSqrt2Over2);
+
+  receiver.Close();
+  receiver.PathEnd();
+}
+
 }  // namespace impeller

@@ -202,7 +202,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
       await createTestCommandRunner(command).run(<String>['gen-l10n']);
 
@@ -241,7 +241,7 @@ flutter:
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
       await createTestCommandRunner(command).run(<String>['gen-l10n']);
       expect(command.usage, contains(' If this value is set to false, then '));
@@ -300,6 +300,43 @@ flutter:
   );
 
   testUsingContext(
+    'dart format is not run when --no-format is passed',
+    () async {
+      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+
+      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+
+      await createTestCommandRunner(command).run(<String>['gen-l10n', '--no-format']);
+
+      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
+      expect(outputDirectory.existsSync(), true);
+      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'dart format is run when format: true is passed into l10n.yaml',
     () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
@@ -327,6 +364,45 @@ format: true
           ],
         ),
       );
+      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+      await createTestCommandRunner(command).run(<String>['gen-l10n']);
+
+      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
+      expect(outputDirectory.existsSync(), true);
+      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
+      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FeatureFlags: enableExplicitPackageDependencies,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'dart format is not running when format: false is passed into l10n.yaml',
+    () async {
+      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+      final File configFile = fileSystem.file('l10n.yaml')..createSync();
+      configFile.writeAsStringSync('''
+format: false
+''');
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
       final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
