@@ -394,6 +394,47 @@ void main() {
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
+
+    testWidgets('FadeForwardsPageTransitionBuilder does not blocked interact during animation', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          home: Builder(
+            builder: (BuildContext context) {
+              return Material(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(builder: (_) => const Text('page b')),
+                    );
+                  },
+                  child: const Text('push a'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('push a'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('page b'), findsOneWidget);
+
+      Navigator.pop(tester.element(find.text('page b')));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.tap(find.text('push a'));
+    });
   });
 
   testWidgets(
