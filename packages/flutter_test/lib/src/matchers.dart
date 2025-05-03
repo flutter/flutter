@@ -28,7 +28,7 @@ import 'finders.dart';
 import 'goldens.dart';
 import 'widget_tester.dart' show WidgetTester;
 
-/// Asserts that the [FinderBase] matches nothing in the available candidates.
+/// Asserts that the [Finder] matches nothing in the available candidates.
 ///
 /// ## Sample code
 ///
@@ -62,7 +62,7 @@ const Matcher findsNothing = _FindsCountMatcher(null, 0);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsWidgets = _FindsCountMatcher(1, null);
 
-/// Asserts that the [FinderBase] locates at least one matching candidate.
+/// Asserts that the [Finder] locates at least one matching candidate.
 ///
 /// ## Sample code
 ///
@@ -96,7 +96,7 @@ const Matcher findsAny = _FindsCountMatcher(1, null);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsOneWidget = _FindsCountMatcher(1, 1);
 
-/// Asserts that the [FinderBase] finds exactly one matching candidate.
+/// Asserts that the [Finder] finds exactly one matching candidate.
 ///
 /// ## Sample code
 ///
@@ -130,7 +130,7 @@ const Matcher findsOne = _FindsCountMatcher(1, 1);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 Matcher findsNWidgets(int n) => _FindsCountMatcher(n, n);
 
-/// Asserts that the [FinderBase] locates the specified number of candidates.
+/// Asserts that the [Finder] locates the specified number of candidates.
 ///
 /// ## Sample code
 ///
@@ -164,7 +164,7 @@ Matcher findsExactly(int n) => _FindsCountMatcher(n, n);
 ///  * [findsExactly], when you want the finder to find a specific number of candidates.
 Matcher findsAtLeastNWidgets(int n) => _FindsCountMatcher(n, null);
 
-/// Asserts that the [FinderBase] locates at least the given number of candidates.
+/// Asserts that the [Finder] locates at least the given number of candidates.
 ///
 /// ## Sample code
 ///
