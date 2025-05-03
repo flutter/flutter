@@ -37,11 +37,15 @@ void main() async {
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
-  test('should get a PlatformException when trying to create HC PV with HCPP enabled', () async {
-    await flutterDriver.tap(find.byValueKey('LoadPlatformView'));
-    final Map<String, Object?> response =
-        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+  test(
+    'should get a PlatformException when trying to create HC PV with HCPP enabled',
+    () async {
+      await flutterDriver.tap(find.byValueKey('LoadPlatformView'));
+      final Map<String, Object?> response =
+          json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
-    expect(response['checkErrorText'], contains('HC++'));
-  }, timeout: Timeout.none);
+      expect(response['checkErrorText'], contains('HC++'));
+    },
+    timeout: Timeout.none,
+  );
 }
