@@ -65,6 +65,12 @@ const double _kNavBarBottomPadding = 8.0;
 
 const double _kNavBarBackButtonTapWidth = 50.0;
 
+const double _kLargeTitleMaxScaleFactor = 1.8;
+
+const double _kSearchFieldMaxScaleFactor = 2.6;
+
+const double _kPersistentHeightMaxScaleFactor = 1.2;
+
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
 ///
@@ -1174,17 +1180,21 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    effectiveSearchFieldHeight = MediaQuery.textScalerOf(context).scale(_kSearchFieldHeight);
-    effectiveLargeTitleHeight = MediaQuery.textScalerOf(
-      context,
-    ).scale(_kNavBarLargeTitleHeightExtension);
-    _setupSearchableAnimation();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
-    final Tween<double> largeTitleHeightTween = Tween<double>(
-      begin: isPortrait ? effectiveLargeTitleHeight : 0.0,
-      end: 0.0,
+    effectiveSearchFieldHeight = clampDouble(
+      MediaQuery.textScalerOf(context).scale(_kSearchFieldHeight),
+      0.0,
+      _kSearchFieldHeight * _kSearchFieldMaxScaleFactor,
     );
-    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
+    effectiveLargeTitleHeight =
+        isPortrait
+            ? clampDouble(
+              MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
+              0.0,
+              _kNavBarLargeTitleHeightExtension * _kLargeTitleMaxScaleFactor,
+            )
+            : 0.0;
+    _setupSearchableAnimation();
     effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
     _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     _scrollableState = Scrollable.maybeOf(context);
@@ -1220,6 +1230,11 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     );
     persistentHeightAnimation = persistentHeightTween.animate(_animationController)
       ..addStatusListener(_handleSearchFieldStatusChanged);
+    final Tween<double> largeTitleHeightTween = Tween<double>(
+      begin: effectiveLargeTitleHeight,
+      end: 0.0,
+    );
+    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
   }
 
   void _handleScrollChange() {
@@ -1233,7 +1248,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         widget.bottomMode == NavigationBarBottomMode.always ? 0.0 : _bottomHeight;
     final bool canScrollBottom =
         (widget._searchable || widget.bottom != null) && bottomScrollOffset > 0.0;
-    final double effectiveLargeTitleHeight = isPortrait ? _kNavBarLargeTitleHeightExtension : 0.0;
 
     // Snap the scroll view to a target determined by the navigation bar's
     // position.
@@ -1306,12 +1320,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                     animationController: _animationController,
                     animation: persistentHeightAnimation,
                     searchField: widget.searchField,
+                    searchFieldHeight: effectiveSearchFieldHeight,
                     onSearchFieldTap: _onSearchFieldTap,
                   )
                   : _InactiveSearchableBottom(
                     animationController: _animationController,
                     animation: persistentHeightAnimation,
                     searchField: widget.searchField,
+                    searchFieldHeight: effectiveSearchFieldHeight,
                     onSearchFieldTap: _onSearchFieldTap,
                   )
               : widget.bottom) ??
@@ -1858,6 +1874,7 @@ class _NavigationBarStaticComponents {
          userLeading: userLeading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
+         context: context,
        ),
        backLabel = createBackLabel(
          backLabelKey: keys.backLabelKey,
@@ -1865,6 +1882,7 @@ class _NavigationBarStaticComponents {
          route: route,
          previousPageTitle: previousPageTitle,
          automaticallyImplyLeading: automaticallyImplyLeading,
+         context: context,
        ),
        middle = createMiddle(
          middleKey: keys.middleKey,
@@ -1874,11 +1892,13 @@ class _NavigationBarStaticComponents {
          automaticallyImplyTitle: automaticallyImplyTitle,
          large: large,
          staticBar: staticBar,
+         context: context,
        ),
        trailing = createTrailing(
          trailingKey: keys.trailingKey,
          userTrailing: userTrailing,
          padding: padding,
+         context: context,
        ),
        largeTitle = createLargeTitle(
          largeTitleKey: keys.largeTitleKey,
@@ -1942,7 +1962,14 @@ class _NavigationBarStaticComponents {
       key: leadingKey,
       child: Padding(
         padding: EdgeInsetsDirectional.only(start: padding?.start ?? _kNavBarEdgePadding),
-        child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: leadingContent),
+        child: MediaQuery(
+          data: MediaQueryData(
+            textScaler: MediaQuery.textScalerOf(
+              context,
+            ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ),
+          child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: leadingContent),
+        ),
       ),
     );
   }
@@ -1953,6 +1980,7 @@ class _NavigationBarStaticComponents {
     required Widget? userLeading,
     required ModalRoute<dynamic>? route,
     required bool automaticallyImplyLeading,
+    required BuildContext context,
   }) {
     if (userLeading != null ||
         !automaticallyImplyLeading ||
@@ -1962,7 +1990,17 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return KeyedSubtree(key: backChevronKey, child: const _BackChevron());
+    return KeyedSubtree(
+      key: backChevronKey,
+      child: MediaQuery(
+        data: MediaQueryData(
+          textScaler: MediaQuery.textScalerOf(
+            context,
+          ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+        ),
+        child: const _BackChevron(),
+      ),
+    );
   }
 
   /// This widget is not decorated with a font since the font style could
@@ -1974,6 +2012,7 @@ class _NavigationBarStaticComponents {
     required ModalRoute<dynamic>? route,
     required bool automaticallyImplyLeading,
     required String? previousPageTitle,
+    required BuildContext context,
   }) {
     if (userLeading != null ||
         !automaticallyImplyLeading ||
@@ -1985,7 +2024,14 @@ class _NavigationBarStaticComponents {
 
     return KeyedSubtree(
       key: backLabelKey,
-      child: _BackLabel(specifiedPreviousTitle: previousPageTitle, route: route),
+      child: MediaQuery(
+        data: MediaQueryData(
+          textScaler: MediaQuery.textScalerOf(
+            context,
+          ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+        ),
+        child: _BackLabel(specifiedPreviousTitle: previousPageTitle, route: route),
+      ),
     );
   }
 
@@ -2000,6 +2046,7 @@ class _NavigationBarStaticComponents {
     required bool staticBar,
     required bool automaticallyImplyTitle,
     required ModalRoute<dynamic>? route,
+    required BuildContext context,
   }) {
     Widget? middleContent = userMiddle;
 
@@ -2022,7 +2069,17 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return KeyedSubtree(key: middleKey, child: middleContent);
+    return KeyedSubtree(
+      key: middleKey,
+      child: MediaQuery(
+        data: MediaQueryData(
+          textScaler: MediaQuery.textScalerOf(
+            context,
+          ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+        ),
+        child: middleContent,
+      ),
+    );
   }
 
   final KeyedSubtree? trailing;
@@ -2030,6 +2087,7 @@ class _NavigationBarStaticComponents {
     required GlobalKey trailingKey,
     required Widget? userTrailing,
     required EdgeInsetsDirectional? padding,
+    required BuildContext context,
   }) {
     if (userTrailing == null) {
       return null;
@@ -2039,7 +2097,14 @@ class _NavigationBarStaticComponents {
       key: trailingKey,
       child: Padding(
         padding: EdgeInsetsDirectional.only(end: padding?.end ?? _kNavBarEdgePadding),
-        child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: userTrailing),
+        child: MediaQuery(
+          data: MediaQueryData(
+            textScaler: MediaQuery.textScalerOf(
+              context,
+            ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ),
+          child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: userTrailing),
+        ),
       ),
     );
   }
@@ -2071,7 +2136,11 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: largeTitleKey,
       child: MediaQuery(
-        data: MediaQueryData(textScaler: MediaQuery.textScalerOf(context)),
+        data: MediaQueryData(
+          textScaler: MediaQuery.textScalerOf(
+            context,
+          ).clamp(maxScaleFactor: _kLargeTitleMaxScaleFactor),
+        ),
         child: largeTitleContent!,
       ),
     );
@@ -2326,11 +2395,13 @@ class _InactiveSearchableBottom extends StatelessWidget {
     required this.searchField,
     required this.onSearchFieldTap,
     required this.animation,
+    required this.searchFieldHeight,
   });
 
   final AnimationController animationController;
   final Widget? searchField;
   final Animation<double> animation;
+  final double searchFieldHeight;
   final void Function()? onSearchFieldTap;
 
   @override
@@ -2348,7 +2419,7 @@ class _InactiveSearchableBottom extends StatelessWidget {
                 end: _kNavBarEdgePadding,
                 bottom: _kNavBarBottomPadding,
               ),
-              child: searchField,
+              child: SizedBox(height: searchFieldHeight, child: searchField),
             ),
           ),
         ),
@@ -2389,11 +2460,13 @@ class _ActiveSearchableBottom extends StatelessWidget {
     required this.searchField,
     required this.animation,
     required this.onSearchFieldTap,
+    required this.searchFieldHeight,
   });
 
   final AnimationController animationController;
   final Widget? searchField;
   final Animation<double> animation;
+  final double searchFieldHeight;
   final void Function()? onSearchFieldTap;
 
   @override
@@ -2406,7 +2479,12 @@ class _ActiveSearchableBottom extends StatelessWidget {
       child: Row(
         spacing: 12.0, // Eyeballed on an iPhone 15 simulator running iOS 17.5.
         children: <Widget>[
-          Expanded(child: searchField ?? const SizedBox.shrink()),
+          Expanded(
+            child: SizedBox(
+              height: searchFieldHeight,
+              child: searchField ?? const SizedBox.shrink(),
+            ),
+          ),
           AnimatedBuilder(
             animation: animation,
             child: FadeTransition(

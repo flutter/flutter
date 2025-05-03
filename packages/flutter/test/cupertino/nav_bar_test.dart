@@ -1657,6 +1657,7 @@ void main() {
   });
 
   testWidgets('Contents except large title do not text scale', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -1763,6 +1764,7 @@ void main() {
   });
 
   testWidgets('Large title and search field contents text scale', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     const double scaleFactor = 4.0;
     const double iconSize = 10.0;
     await tester.pumpWidget(
