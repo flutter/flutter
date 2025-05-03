@@ -828,12 +828,17 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
       return builder;
     }
 
-    return ColoredBox(
-      color:
-          secondaryAnimation.isAnimating
-              ? backgroundColor ?? ColorScheme.of(context).surface
-              : Colors.transparent,
-      child: builder,
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
+
+    return IgnorePointer(
+      ignoring: !isCurrent,
+      child: ColoredBox(
+        color:
+            secondaryAnimation.isAnimating
+                ? backgroundColor ?? ColorScheme.of(context).surface
+                : Colors.transparent,
+        child: builder,
+      ),
     );
   }
 
