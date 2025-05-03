@@ -492,6 +492,25 @@ mixin WidgetsBinding
       _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
+  /// If true, [WidgetInspector] will not be automatically injected into the
+  /// widget tree.
+  ///
+  /// This overrides the behavior where [WidgetInspector] is added to the
+  /// widget tree created by [WidgetsApp] when the `debugShowWidgetInspector`
+  /// value is set in [WidgetsApp] or [debugShowWidgetInspectorOverride] is set
+  /// to true.
+  ///
+  /// Used by tools that want more control over which widgets can be selected
+  /// and highlighted by the widget inspector by manually injecting instances of
+  /// [WidgetInspector].
+  bool get debugExcludeRootWidgetInspector => _debugExcludeRootWidgetInspector;
+
+  set debugExcludeRootWidgetInspector(bool value) {
+    _debugExcludeRootWidgetInspector = value;
+  }
+
+  bool _debugExcludeRootWidgetInspector = false;
+
   @visibleForTesting
   @override
   void resetInternalState() {

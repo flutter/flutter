@@ -669,7 +669,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   String get _flutterBootstrapJsContent {
     final WebTemplate bootstrapTemplate = _getWebTemplate(
       'flutter_bootstrap.js',
-      generateDefaultFlutterBootstrapScript(),
+      generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
     bootstrapTemplate.applySubstitutions(
       baseHref: '/',
