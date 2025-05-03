@@ -798,52 +798,44 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Color? backgroundColor,
     Widget? child,
-  ) => DualTransitionBuilder(
-    animation: ReverseAnimation(secondaryAnimation),
-    forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      final Widget builder = FadeTransition(
-        opacity: _fadeInTransition.animate(animation),
-        child: SlideTransition(
-          position: _secondaryForwardTranslationTween.animate(animation),
-          child: child,
-        ),
-      );
+  ) {
+    final Widget builder = DualTransitionBuilder(
+      animation: ReverseAnimation(secondaryAnimation),
+      forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return FadeTransition(
+          opacity: _fadeInTransition.animate(animation),
+          child: SlideTransition(
+            position: _secondaryForwardTranslationTween.animate(animation),
+            child: child,
+          ),
+        );
+      },
+      reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return FadeTransition(
+          opacity: _fadeOutTransition.animate(animation),
+          child: SlideTransition(
+            position: _secondaryBackwardTranslationTween.animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
 
-      if (!(ModalRoute.opaqueOf(context) ?? true)) {
-        return builder;
-      }
+    final bool isOpaque = ModalRoute.opaqueOf(context) ?? true;
 
-      return ColoredBox(
-        color:
-            animation.isAnimating
-                ? backgroundColor ?? ColorScheme.of(context).surface
-                : Colors.transparent,
-        child: builder,
-      );
-    },
-    reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      final Widget builder = FadeTransition(
-        opacity: _fadeOutTransition.animate(animation),
-        child: SlideTransition(
-          position: _secondaryBackwardTranslationTween.animate(animation),
-          child: child,
-        ),
-      );
+    if (!isOpaque) {
+      return builder;
+    }
 
-      if (!(ModalRoute.opaqueOf(context) ?? true)) {
-        return builder;
-      }
-
-      return ColoredBox(
-        color:
-            animation.isAnimating
-                ? backgroundColor ?? ColorScheme.of(context).surface
-                : Colors.transparent,
-        child: builder,
-      );
-    },
-    child: child,
-  );
+    return ColoredBox(
+      color:
+          secondaryAnimation.isAnimating
+              ? backgroundColor ?? ColorScheme.of(context).surface
+              : Colors.transparent,
+      child: builder,
+    );
+  }
 
   @override
   Widget buildTransitions<T>(
