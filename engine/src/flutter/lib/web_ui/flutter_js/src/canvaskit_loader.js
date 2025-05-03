@@ -17,7 +17,9 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
     }
     const useChromiumCanvasKit = supportsChromiumCanvasKit && (config.canvasKitVariant !== "full");
     let baseUrl = canvasKitBaseUrl;
-    if (useChromiumCanvasKit) {
+    if (config.canvasKitVariant == "experimentalWebParagraph") {
+      baseUrl = resolveUrlWithSegments(baseUrl, "experimental_webparagraph");
+    } else if (useChromiumCanvasKit) {
       baseUrl = resolveUrlWithSegments(baseUrl, "chromium");
     }
     let canvasKitUrl = resolveUrlWithSegments(baseUrl, "canvaskit.js");

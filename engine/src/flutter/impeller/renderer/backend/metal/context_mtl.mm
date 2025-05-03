@@ -22,43 +22,28 @@
 namespace impeller {
 
 static bool DeviceSupportsFramebufferFetch(id<MTLDevice> device) {
-  // The iOS simulator lies about supporting framebuffer fetch.
 #if FML_OS_IOS_SIMULATOR
+  // The iOS simulator lies about supporting framebuffer fetch.
   return false;
-#else  // FML_OS_IOS_SIMULATOR
-
-  if (@available(macOS 10.15, iOS 13, tvOS 13, *)) {
-    return [device supportsFamily:MTLGPUFamilyApple2];
-  }
+#else   // FML_OS_IOS_SIMULATOR
   // According to
-  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf , Apple2
+  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf, Apple2
   // corresponds to iOS GPU family 2, which supports A8 devices.
-#if FML_OS_IOS
-  return [device supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v1];
-#else
-  return false;
-#endif  // FML_OS_IOS
+  return [device supportsFamily:MTLGPUFamilyApple2];
 #endif  // FML_OS_IOS_SIMULATOR
 }
 
 static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
-  bool supports_subgroups = false;
   // Refer to the "SIMD-scoped reduction operations" feature in the table
   // below: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
-  if (@available(ios 13.0, tvos 13.0, macos 10.15, *)) {
-    supports_subgroups = [device supportsFamily:MTLGPUFamilyApple7] ||
-                         [device supportsFamily:MTLGPUFamilyMac2];
-  }
-  return supports_subgroups;
+  return [device supportsFamily:MTLGPUFamilyApple7] ||
+         [device supportsFamily:MTLGPUFamilyMac2];
 }
 
 // See "Extended Range and wide color pixel formats" in the metal feature set
 // tables.
 static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
-  if (@available(macOS 10.15, iOS 13, tvOS 13, *)) {
-    return [device supportsFamily:MTLGPUFamilyApple3];
-  }
-  return false;
+  return [device supportsFamily:MTLGPUFamilyApple3];
 }
 
 static std::unique_ptr<Capabilities> InferMetalCapabilities(

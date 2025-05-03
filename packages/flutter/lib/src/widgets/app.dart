@@ -1817,20 +1817,22 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     assert(() {
-      result = ValueListenableBuilder<bool>(
-        valueListenable: WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
-        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
-          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
-            return WidgetInspector(
-              exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
-              moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
-              child: child!,
-            );
-          }
-          return child!;
-        },
-        child: result,
-      );
+      if (!WidgetsBinding.instance.debugExcludeRootWidgetInspector) {
+        result = ValueListenableBuilder<bool>(
+          valueListenable: WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
+          builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
+            if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+              return WidgetInspector(
+                exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
+                moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
+                child: child!,
+              );
+            }
+            return child!;
+          },
+          child: result,
+        );
+      }
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(child: result);
       }
