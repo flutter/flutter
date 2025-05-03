@@ -73,8 +73,8 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  StrokeParameters parameters{stroke_width, miter_limit, stroke_cap,
-                              stroke_join};
+  StrokeParameters parameters{stroke_width, stroke_cap, stroke_join,
+                              miter_limit};
   return std::make_unique<StrokePathGeometry>(path, parameters);
 }
 
