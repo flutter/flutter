@@ -936,7 +936,7 @@ void main() {
     );
     expect(tester.getTopLeft(find.byKey(const ValueKey<int>(1))), const Offset(20, 20));
   });
-  
+
   testWidgets('TreeSliver renders correctly after scrolling.', (WidgetTester tester) async {
     const ValueKey<String> key = ValueKey<String>('sliver_scrolling');
     final ScrollController scrollController = ScrollController();
