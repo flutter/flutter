@@ -1526,6 +1526,36 @@ void main() {
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
   });
+
+  group('findsAscendinglyOrderedWidgets', () {
+    test('An empty list causes an ArgumentError', () {
+      expect(
+        () => findsAscendinglyOrderedWidgets(<Finder>[]),
+        throwsA(
+          predicate(
+            (Error e) =>
+                e is ArgumentError &&
+                e.message ==
+                    'findsAscendinglyOrderedWidgets takes a list that has at least two Finders as its argument',
+          ),
+        ),
+      );
+    });
+
+    test('A singular list causes an ArgumentError', () {
+      expect(
+        () => findsAscendinglyOrderedWidgets(<Finder>[find.text('Save')]),
+        throwsA(
+          predicate(
+            (Error e) =>
+                e is ArgumentError &&
+                e.message ==
+                    'findsAscendinglyOrderedWidgets takes a list that has at least two Finders as its argument',
+          ),
+        ),
+      );
+    });
+  });
 }
 
 enum _ComparatorBehavior { returnTrue, returnFalse, throwTestFailure }

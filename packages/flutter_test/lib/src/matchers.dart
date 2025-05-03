@@ -180,6 +180,22 @@ Matcher findsAtLeastNWidgets(int n) => _FindsCountMatcher(n, null);
 ///  * [findsExactly], when you want the finder to find a specific number of candidates.
 Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 
+/// Asserts that the [Finder] locates at least one widget that could be found
+/// by each finder in the provided [findersList] at a location that is
+/// compatible with ascending order of the provided [findersList]
+///
+/// ## Sample code
+/// ```dart
+/// expect(find.byType(Widget), findsAscendinglyOrderedWidgets(<Finder>[find.text('Save'),
+/// find.widgetWithText(ElevatedButton, 'Ok'), find.bySubtype<StatelessWidget>()]))
+///
+/// This asserts that there is a widget that could be found by find.text('Save') that precedes
+/// a widget that could be found by find.widgetWithText(ElevatedButton, 'Ok') that precedes
+/// a widget that could be found by find.bySubtype<StatelessWidget>() in the widget tree
+
+Matcher findsAscendinglyOrderedWidgets(List<Finder> findersList) =>
+    _FindsAscendinglyOrderedWidgets(findersList);
+
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
 ///
@@ -1153,6 +1169,28 @@ class _FindsCountMatcher extends Matcher {
     }
     assert(max != null && count > min!);
     return mismatchDescription.add('is too many');
+  }
+}
+
+class _FindsAscendinglyOrderedWidgets extends Matcher {
+  _FindsAscendinglyOrderedWidgets(this.findersList) {
+    if (findersList.length < 2) {
+      throw ArgumentError(
+        'findsAscendinglyOrderedWidgets takes a list that has at least two Finders as its argument',
+      );
+    }
+  }
+
+  final List<Finder> findersList;
+
+  @override
+  Description describe(Description description) {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool matches(covariant FinderBase<dynamic> finder, Map<dynamic, dynamic> matchState) {
+    throw UnimplementedError();
   }
 }
 
