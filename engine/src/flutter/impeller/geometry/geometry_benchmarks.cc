@@ -21,7 +21,7 @@ class ImpellerBenchmarkAccessor {
                                                         Cap stroke_cap,
                                                         Scalar scale) {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
-        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+        path, {stroke_width, miter_limit, stroke_cap, stroke_join}, scale);
   }
 };
 

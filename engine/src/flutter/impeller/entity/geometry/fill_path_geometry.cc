@@ -12,19 +12,18 @@
 
 namespace impeller {
 
-FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
-                                   std::optional<Rect> inner_rect)
-    : path_(path), inner_rect_(inner_rect) {}
+FillPathSourceGeometry::FillPathSourceGeometry(std::optional<Rect> inner_rect)
+    : inner_rect_(inner_rect) {}
 
-FillPathGeometry::~FillPathGeometry() {}
+FillPathSourceGeometry::~FillPathSourceGeometry() {}
 
-GeometryResult FillPathGeometry::GetPositionBuffer(
+GeometryResult FillPathSourceGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
   auto& host_buffer = renderer.GetTransientsBuffer();
 
-  const auto& bounding_box = path_.GetBounds();
+  const auto& bounding_box = GetSource().GetBounds();
   if (bounding_box.IsEmpty()) {
     return GeometryResult{
         .type = PrimitiveType::kTriangle,
@@ -44,7 +43,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
       renderer.GetDeviceCapabilities().SupportsTriangleFan() &&
       supports_primitive_restart;
   VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
-      path_, host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
+      GetSource(), host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
       /*supports_primitive_restart=*/supports_primitive_restart,
       /*supports_triangle_fan=*/supports_triangle_fan);
 
@@ -57,13 +56,14 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
   };
 }
 
-GeometryResult::Mode FillPathGeometry::GetResultMode() const {
-  const auto& bounding_box = path_.GetBounds();
-  if (path_.IsConvex() || bounding_box.IsEmpty()) {
+GeometryResult::Mode FillPathSourceGeometry::GetResultMode() const {
+  const PathSource& source = GetSource();
+  const auto& bounding_box = source.GetBounds();
+  if (source.IsConvex() || bounding_box.IsEmpty()) {
     return GeometryResult::Mode::kNormal;
   }
 
-  switch (path_.GetFillType()) {
+  switch (source.GetFillType()) {
     case FillType::kNonZero:
       return GeometryResult::Mode::kNonZero;
     case FillType::kOdd:
@@ -73,13 +73,13 @@ GeometryResult::Mode FillPathGeometry::GetResultMode() const {
   FML_UNREACHABLE();
 }
 
-std::optional<Rect> FillPathGeometry::GetCoverage(
+std::optional<Rect> FillPathSourceGeometry::GetCoverage(
     const Matrix& transform) const {
-  return path_.GetBounds().TransformAndClipBounds(transform);
+  return GetSource().GetBounds().TransformAndClipBounds(transform);
 }
 
-bool FillPathGeometry::CoversArea(const Matrix& transform,
-                                  const Rect& rect) const {
+bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
+                                        const Rect& rect) const {
   if (!inner_rect_.has_value()) {
     return false;
   }
@@ -88,6 +88,18 @@ bool FillPathGeometry::CoversArea(const Matrix& transform,
   }
   Rect coverage = inner_rect_->TransformBounds(transform);
   return coverage.Contains(rect);
+}
+
+FillPathGeometry::FillPathGeometry(const Path& path,
+                                   std::optional<Rect> inner_rect)
+    : FillPathSourceGeometry(inner_rect), path_(path) {}
+
+FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
+                                   std::optional<Rect> inner_rect)
+    : FillPathSourceGeometry(inner_rect), path_(path) {}
+
+const PathSource& FillPathGeometry::GetSource() const {
+  return path_;
 }
 
 }  // namespace impeller

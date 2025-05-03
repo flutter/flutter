@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
@@ -63,7 +64,7 @@ class ImpellerEntityUnitTestAccessor {
                                                         Cap stroke_cap,
                                                         Scalar scale) {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
-        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+        path, {stroke_width, miter_limit, stroke_cap, stroke_join}, scale);
   }
 };
 
@@ -94,6 +95,32 @@ TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));
   ASSERT_FALSE(geometry->CoversArea({}, Rect()));
+}
+
+TEST(EntityGeometryTest, FillRoundRectGeometryCoversArea) {
+  Rect bounds = Rect::MakeLTRB(100, 100, 200, 200);
+  RoundRect round_rect =
+      RoundRect::MakeRectRadii(bounds, RoundingRadii{
+                                           .top_left = Size(1, 11),
+                                           .top_right = Size(2, 12),
+                                           .bottom_left = Size(3, 13),
+                                           .bottom_right = Size(4, 14),
+                                       });
+  FillRoundRectGeometry geom(round_rect);
+
+  // Tall middle rect should barely be covered.
+  EXPECT_TRUE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(102, 100, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 99, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 197, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 196, 201)));
+
+  // Wide middle rect should barely be covered.
+  EXPECT_TRUE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(99, 112, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 111, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 201, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 200, 187)));
 }
 
 TEST(EntityGeometryTest, LineGeometryCoverage) {
