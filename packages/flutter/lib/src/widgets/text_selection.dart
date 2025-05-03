@@ -2062,6 +2062,10 @@ class TextSelectionGestureDetectorBuilder {
 
   // Hides the magnifier on supported platforms, currently only Android and iOS.
   void _hideMagnifierIfSupportedByPlatform() {
+    if (!_isEditableTextMounted) {
+      return;
+    }
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -2190,6 +2194,12 @@ class TextSelectionGestureDetectorBuilder {
   /// provide a [TextSelectionGestureDetector].
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
+
+  /// Returns `true` if a widget with the global key [delegate.editableTextKey]
+  /// is in the tree and the widget is mounted.
+  ///
+  /// Otherwise returns `false`.
+  bool get _isEditableTextMounted => delegate.editableTextKey.currentContext?.mounted ?? false;
 
   /// Whether the Shift key was pressed when the most recent [PointerDownEvent]
   /// was tracked by the [BaseTapAndDragGestureRecognizer].
