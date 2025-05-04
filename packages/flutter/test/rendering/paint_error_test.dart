@@ -20,7 +20,7 @@ void main() {
     layout(
       root,
       onErrors: () {
-        errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+        errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
       },
     );
     pumpFrame(phase: EnginePhase.paint);

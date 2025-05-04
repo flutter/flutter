@@ -43,7 +43,7 @@ Future<void> startTransitionBetween(
       .push(
         CupertinoPageRoute<void>(
           title: fromTitle,
-          builder: (BuildContext context) => scaffoldForNavBar(from)!,
+          builder: (BuildContext context) => scaffoldForNavBar(from),
         ),
       );
 
@@ -55,7 +55,7 @@ Future<void> startTransitionBetween(
       .push(
         CupertinoPageRoute<void>(
           title: toTitle,
-          builder: (BuildContext context) => scaffoldForNavBar(to)!,
+          builder: (BuildContext context) => scaffoldForNavBar(to),
         ),
       );
 
@@ -301,7 +301,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 1',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -314,7 +314,7 @@ void main() {
           CupertinoPageRoute<void>(
             title: 'Page 2',
             fullscreenDialog: true,
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -351,7 +351,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget? navigator) {
-          return navigator!;
+          return navigator;
         },
         home: const Placeholder(),
       ),
@@ -363,7 +363,7 @@ void main() {
           CupertinoSheetRoute<void>(
             builder:
                 (BuildContext context) =>
-                    scaffoldForNavBar(const CupertinoNavigationBar(middle: Text('Page 1')))!,
+                    scaffoldForNavBar(const CupertinoNavigationBar(middle: Text('Page 1'))),
           ),
         );
 
@@ -378,7 +378,7 @@ void main() {
                 (BuildContext context) =>
                     scaffoldForNavBar(
                       const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+                    ),
           ),
         );
 
@@ -717,7 +717,7 @@ void main() {
     final RenderAnimatedOpacity userMiddleOpacity =
         tester
             .element(find.byWidget(userMiddle))
-            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     expect(userMiddleOpacity.opacity.value, 1.0);
 
     tester
@@ -725,7 +725,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 2',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -745,7 +745,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 1',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -790,7 +790,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 1',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -925,7 +925,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 3',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -966,7 +966,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 3',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -1130,7 +1130,7 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? navigator) {
-            return navigator!;
+            return navigator;
           },
           home: const Placeholder(),
         ),
@@ -1150,7 +1150,7 @@ void main() {
                             suffixIcon: Icon(CupertinoIcons.mic_solid),
                           ),
                         ),
-                      )!,
+                      ),
             ),
           );
 
@@ -1180,7 +1180,7 @@ void main() {
                             child: ColoredBox(color: Color(0xffff0000)),
                           ),
                         ),
-                      )!,
+                      ),
             ),
           );
 
@@ -1212,7 +1212,7 @@ void main() {
                             suffixIcon: Icon(CupertinoIcons.mic_solid),
                           ),
                         ),
-                      )!,
+                      ),
             ),
           );
 

@@ -85,10 +85,10 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
     elements.add(FadeInImageElements(rawImageElement));
   }
   if (elements.length == 2) {
-    return FadeInImageParts(fadeInImageElement!, elements.last, elements.first);
+    return FadeInImageParts(fadeInImageElement, elements.last, elements.first);
   } else {
     expect(elements, hasLength(1));
-    return FadeInImageParts(fadeInImageElement!, null, elements.first);
+    return FadeInImageParts(fadeInImageElement, null, elements.first);
   }
 }
 

@@ -519,8 +519,8 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation!);
+    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
 
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
@@ -632,8 +632,8 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
+    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
 
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
@@ -754,7 +754,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     final Color? end =
         isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;
     final Paint paint =
-        Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+        Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation);
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius =
@@ -845,13 +845,13 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     if (isOnTop ?? false) {
       final Paint strokePaint =
           Paint()
-            ..color = sliderTheme.overlappingShapeStrokeColor!
+            ..color = sliderTheme.overlappingShapeStrokeColor
             ..strokeWidth = 1.0
             ..style = PaintingStyle.stroke;
       canvas.drawCircle(center, radius, strokePaint);
     }
 
-    final Color color = colorTween.evaluate(enableAnimation)!;
+    final Color color = colorTween.evaluate(enableAnimation);
 
     final double evaluatedElevation =
         isPressed! ? elevationTween.evaluate(activationAnimation) : elevation;

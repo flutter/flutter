@@ -384,6 +384,17 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
       mouseCursor: mouseCursor?.resolve(states) ?? SystemMouseCursors.basic,
+      onKey: (FocusNode node, RawKeyEvent event) {
+        if (isInteractive && event is RawKeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.space ||
+              event.logicalKey == LogicalKeyboardKey.enter ||
+              event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+            _handleTap();
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
         onTapDown: isInteractive ? _handleTapDown : null,
@@ -634,7 +645,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
                   ),
                   focusColor,
                   reactionFocusFade.value,
-                )!;
+                );
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,

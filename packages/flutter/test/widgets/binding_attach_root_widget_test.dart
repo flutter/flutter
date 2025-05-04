@@ -13,7 +13,7 @@ void main() {
         WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Framework starts with detached statue. Sends resumed signal to enable frame.
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/lifecycle',
       message,

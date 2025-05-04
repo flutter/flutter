@@ -224,7 +224,7 @@ void main() {
       ),
     );
 
-    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text('0')).text.style!;
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text('0')).text.style;
     expect(textStyle.fontSize, 10);
     expect(textStyle.color, green);
     expect(tester.renderObject(find.byType(Badge)), paints..rrect(color: black));

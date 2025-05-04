@@ -3017,7 +3017,7 @@ class EditableTextState extends State<EditableText>
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    final InlineSpan span = renderEditable.text!;
+    final InlineSpan span = renderEditable.text;
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
     if (prevText != currText || !selection.isValid || selection.isCollapsed) {
@@ -3053,7 +3053,7 @@ class EditableTextState extends State<EditableText>
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (renderEditable.lastSecondaryTapDownPosition != null) {
       return TextSelectionToolbarAnchors(
-        primaryAnchor: renderEditable.lastSecondaryTapDownPosition!,
+        primaryAnchor: renderEditable.lastSecondaryTapDownPosition,
       );
     }
 
@@ -4639,7 +4639,7 @@ class EditableTextState extends State<EditableText>
       // handles visible on Android.
       // Unregister as a listener to the text controller while making the change.
       widget.controller.removeListener(_didChangeTextEditingValue);
-      widget.controller.selection = _adjustedSelectionWhenFocused()!;
+      widget.controller.selection = _adjustedSelectionWhenFocused();
       widget.controller.addListener(_didChangeTextEditingValue);
     }
     _updateRemoteEditingValueIfNeeded();
@@ -4746,7 +4746,7 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    final InlineSpan inlineSpan = renderEditable.text!;
+    final InlineSpan inlineSpan = renderEditable.text;
     final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
@@ -5852,8 +5852,8 @@ class EditableTextState extends State<EditableText>
         _value,
         composingRegionOutOfRange,
         _style,
-        _spellCheckConfiguration.misspelledTextStyle!,
-        spellCheckResults!,
+        _spellCheckConfiguration.misspelledTextStyle,
+        spellCheckResults,
       );
     }
 
