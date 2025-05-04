@@ -23,7 +23,7 @@
 .classpath
 .project
 .settings/
-.vscode/*
+**/.vscode/*
 .ccls-cache
 
 # This file, on the master branch, should never exist or be checked-in.
