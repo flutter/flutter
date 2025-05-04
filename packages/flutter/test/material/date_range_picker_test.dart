@@ -1870,7 +1870,9 @@ void main() {
       expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
     });
 
-    testWidgets('showDateRangePicker uses gregorian calendar delegate by default', (WidgetTester tester) async {
+    testWidgets('showDateRangePicker uses gregorian calendar delegate by default', (
+      WidgetTester tester,
+    ) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Finder helpText = find.text('Select range');
         final Finder firstDateHeaderText = find.text('Jan 15');
