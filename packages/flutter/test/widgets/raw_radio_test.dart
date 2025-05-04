@@ -9,6 +9,8 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('RawRadio control test', (WidgetTester tester) async {
@@ -45,6 +47,52 @@ void main() {
 
     expect(actualValue, 0);
     expect(actualState!.value, isTrue);
+  });
+
+  testWidgets('Radio can be selected with space and enter keys', (WidgetTester tester) async {
+    int? groupValue = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: [
+              TextField(),
+              Radio<int>(
+                value: 1,
+                groupValue: groupValue,
+                onChanged: (int? value) {
+                  groupValue = value;
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Focus the TextField first, then tab to the Radio.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    // Now the Radio should be focused. Press space.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    expect(groupValue, 1);
+
+    // Reset and try with enter key.
+    groupValue = 0;
+    await tester.pump();
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    expect(groupValue, 1);
   });
 }
 
