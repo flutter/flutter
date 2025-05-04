@@ -202,7 +202,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + " parent view.");
           }
 
-          // The newer Texture Layer Hybrid Composition mode isn't suppported if any of the
+          // The Texture Layer Hybrid Composition mode isn't supported if any of the
           // following are true:
           // - The embedded view contains any of the VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY view types.
           //   These views allow out-of-band graphics operations that aren't notified to the Android
@@ -977,7 +977,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
     if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      final TextureRegistry.SurfaceProducer textureEntry = textureRegistry.createSurfaceProducer();
+      TextureRegistry.SurfaceLifecycle lifecycle =
+          Build.VERSION.SDK_INT == API_LEVELS.API_34
+              ? TextureRegistry.SurfaceLifecycle.resetInBackground
+              : TextureRegistry.SurfaceLifecycle.manual;
+      final TextureRegistry.SurfaceProducer textureEntry =
+          textureRegistry.createSurfaceProducer(lifecycle);
       Log.i(TAG, "PlatformView is using SurfaceProducer backend");
       return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
     }

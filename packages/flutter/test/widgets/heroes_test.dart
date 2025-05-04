@@ -794,90 +794,100 @@ Future<void> main() async {
     expect(find.byKey(secondKey), findsNothing);
   });
 
-  testWidgets('Hero pop transition interrupted by a push', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        routes: routes,
-        theme: ThemeData(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: <TargetPlatform, PageTransitionsBuilder>{
-              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-            },
+  testWidgets(
+    'Hero pop transition interrupted by a push',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          routes: routes,
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Pushes MaterialPageRoute '/two'.
-    await tester.tap(find.text('two'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+      // Pushes MaterialPageRoute '/two'.
+      await tester.tap(find.text('two'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
-    // Now the secondKey Card on the '/2' route is visible
-    expect(find.byKey(secondKey), isOnstage);
-    expect(find.byKey(secondKey), isInCard);
-    expect(find.byKey(firstKey), findsNothing);
+      // Now the secondKey Card on the '/2' route is visible
+      expect(find.byKey(secondKey), isOnstage);
+      expect(find.byKey(secondKey), isInCard);
+      expect(find.byKey(firstKey), findsNothing);
 
-    // Pop MaterialPageRoute '/two'.
-    await tester.tap(find.text('pop'));
+      // Pop MaterialPageRoute '/two'.
+      await tester.tap(find.text('pop'));
 
-    // Start the flight of Hero 'a' from route '/two' to route '/'. Route '/two'
-    // is now offstage.
-    await tester.pump();
+      // Start the flight of Hero 'a' from route '/two' to route '/'. Route '/two'
+      // is now offstage.
+      await tester.pump();
 
-    final double initialHeight = tester.getSize(find.byKey(secondKey)).height;
-    final double finalHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
-    expect(finalHeight, lessThan(initialHeight)); // simplify the checks below
+      final double initialHeight = tester.getSize(find.byKey(secondKey)).height;
+      final double finalHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
+      expect(finalHeight, lessThan(initialHeight)); // simplify the checks below
 
-    // Build the first hero animation frame in the navigator's overlay.
-    await tester.pump();
+      // Build the first hero animation frame in the navigator's overlay.
+      await tester.pump();
 
-    // At this point the hero widgets have been replaced by placeholders
-    // and the destination hero has been moved to the overlay.
-    expect(
-      find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)),
-      findsNothing,
-    );
-    expect(
-      find.descendant(of: find.byKey(routeTwoKey), matching: find.byKey(secondKey)),
-      findsNothing,
-    );
-    expect(find.byKey(firstKey), isOnstage);
-    expect(find.byKey(secondKey), findsNothing);
+      // At this point the hero widgets have been replaced by placeholders
+      // and the destination hero has been moved to the overlay.
+      expect(
+        find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: find.byKey(routeTwoKey), matching: find.byKey(secondKey)),
+        findsNothing,
+      );
+      expect(find.byKey(firstKey), isOnstage);
+      expect(find.byKey(secondKey), findsNothing);
 
-    // The duration of a MaterialPageRoute's transition is 300ms.
-    // At 150ms Hero 'a' is mid-flight.
-    await tester.pump(const Duration(milliseconds: 150));
-    final double height150ms = tester.getSize(find.byKey(firstKey)).height;
-    expect(height150ms, lessThan(initialHeight));
-    expect(height150ms, greaterThan(finalHeight));
+      // The duration of a MaterialPageRoute's transition is 300ms.
+      // At 150ms Hero 'a' is mid-flight.
+      await tester.pump(const Duration(milliseconds: 150));
+      final double height150ms = tester.getSize(find.byKey(firstKey)).height;
+      expect(height150ms, lessThan(initialHeight));
+      expect(height150ms, greaterThan(finalHeight));
 
-    // Push route '/two' before the pop transition from '/two' has finished.
-    await tester.tap(find.text('two'));
+      // Push route '/two' before the pop transition from '/two' has finished.
+      await tester.tap(find.text('two'));
 
-    // Restart the flight of Hero 'a'. Now it's flying from route '/' to
-    // route '/two'.
-    await tester.pump();
+      // Restart the flight of Hero 'a'. Now it's flying from route '/' to
+      // route '/two'.
+      await tester.pump();
 
-    // After flying in the opposite direction for 50ms Hero 'a' will
-    // be smaller than it was, but bigger than its initial size.
-    await tester.pump(const Duration(milliseconds: 50));
-    final double height200ms = tester.getSize(find.byKey(firstKey)).height;
-    expect(height200ms, greaterThan(height150ms));
-    expect(finalHeight, lessThan(height200ms));
+      // After flying in the opposite direction for 50ms Hero 'a' will
+      // be smaller than it was, but bigger than its initial size.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double height200ms = tester.getSize(find.byKey(firstKey)).height;
+      expect(height200ms, greaterThan(height150ms));
+      expect(finalHeight, lessThan(height200ms));
 
-    // Hero a's return flight at 149ms. The outgoing (push) flight took
-    // 150ms so we should be just about back to where Hero 'a' started.
-    const double epsilon = 0.001;
-    await tester.pump(const Duration(milliseconds: 99));
-    moreOrLessEquals(tester.getSize(find.byKey(firstKey)).height - initialHeight, epsilon: epsilon);
+      // Hero a's return flight at 149ms. The outgoing (push) flight took
+      // 150ms so we should be just about back to where Hero 'a' started.
+      const double epsilon = 0.001;
+      await tester.pump(const Duration(milliseconds: 99));
+      moreOrLessEquals(
+        tester.getSize(find.byKey(firstKey)).height - initialHeight,
+        epsilon: epsilon,
+      );
 
-    // The flight is finished. We're back to where we started.
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byKey(secondKey), isOnstage);
-    expect(find.byKey(secondKey), isInCard);
-    expect(find.byKey(firstKey), findsNothing);
-  });
+      // The flight is finished. We're back to where we started.
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byKey(secondKey), isOnstage);
+      expect(find.byKey(secondKey), isInCard);
+      expect(find.byKey(firstKey), findsNothing);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.linux,
+    }),
+  );
 
   testWidgets('Destination hero disappears mid-flight', (WidgetTester tester) async {
     const Key homeHeroKey = Key('home hero');

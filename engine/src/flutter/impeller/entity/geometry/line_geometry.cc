@@ -78,22 +78,52 @@ Scalar LineGeometry::ComputeAlphaCoverage(const Matrix& entity) const {
   return Geometry::ComputeStrokeAlphaCoverage(entity, width_);
 }
 
+namespace {
+/// Minimizes the err when rounding to the closest 0.5 value.
+/// If we round up, it drops down a half.  If we round down it bumps up a half.
+Scalar RoundToHalf(Scalar x) {
+  Scalar whole;
+  std::modf(x, &whole);
+  return whole + 0.5;
+}
+}  // namespace
+
 GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) const {
   using VT = SolidFillVertexShader::PerVertexData;
 
-  auto& transform = entity.GetTransform();
+  Matrix transform = entity.GetTransform();
   auto radius = ComputePixelHalfWidth(transform, width_);
+
+  Point p0 = p0_;
+  Point p1 = p1_;
+
+  // Hairline pixel alignment.
+  if (width_ == 0.f && transform.IsTranslationScaleOnly()) {
+    p0 = transform * p0_;
+    p1 = transform * p1_;
+    transform = Matrix();
+    if (std::fabs(p0.x - p1.x) < kEhCloseEnough) {
+      p0.x = RoundToHalf(p0.x);
+      p1.x = p0.x;
+    } else if (std::fabs(p0.y - p1.y) < kEhCloseEnough) {
+      p0.y = RoundToHalf(p0.y);
+      p1.y = p0.y;
+    }
+  }
+
+  Entity fixed_transform = entity.Clone();
+  fixed_transform.SetTransform(transform);
 
   if (cap_ == Cap::kRound) {
     auto generator =
-        renderer.GetTessellator().RoundCapLine(transform, p0_, p1_, radius);
-    return ComputePositionGeometry(renderer, generator, entity, pass);
+        renderer.GetTessellator().RoundCapLine(transform, p0, p1, radius);
+    return ComputePositionGeometry(renderer, generator, fixed_transform, pass);
   }
 
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare, p0_, p1_,
+  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare, p0, p1,
                       width_)) {
     return kEmptyResult;
   }
@@ -119,7 +149,7 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
               .vertex_count = count,
               .index_type = IndexType::kNone,
           },
-      .transform = entity.GetShaderTransform(pass),
+      .transform = fixed_transform.GetShaderTransform(pass),
   };
 }
 

@@ -4,7 +4,7 @@
 
 assert(is_mac)
 
-import("//build/config/mac/mac_sdk.gni")
+import("//build/config/apple/apple_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
@@ -60,8 +60,6 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppLifecycleDelegate.mm",
-    "framework/Source/FlutterBackingStore.h",
-    "framework/Source/FlutterBackingStore.mm",
     "framework/Source/FlutterChannelKeyResponder.h",
     "framework/Source/FlutterChannelKeyResponder.mm",
     "framework/Source/FlutterCompositor.h",
@@ -94,6 +92,10 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterPlatformViewController.mm",
     "framework/Source/FlutterRenderer.h",
     "framework/Source/FlutterRenderer.mm",
+    "framework/Source/FlutterResizeSynchronizer.h",
+    "framework/Source/FlutterResizeSynchronizer.mm",
+    "framework/Source/FlutterRunLoop.h",
+    "framework/Source/FlutterRunLoop.mm",
     "framework/Source/FlutterSurface.h",
     "framework/Source/FlutterSurface.mm",
     "framework/Source/FlutterSurfaceManager.h",
@@ -104,8 +106,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterTextInputSemanticsObject.mm",
     "framework/Source/FlutterTextureRegistrar.h",
     "framework/Source/FlutterTextureRegistrar.mm",
-    "framework/Source/FlutterThreadSynchronizer.h",
-    "framework/Source/FlutterThreadSynchronizer.mm",
     "framework/Source/FlutterTimeConverter.h",
     "framework/Source/FlutterTimeConverter.mm",
     "framework/Source/FlutterVSyncWaiter.h",
@@ -194,10 +194,10 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterMutatorViewTest.mm",
     "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
     "framework/Source/FlutterPlatformViewControllerTest.mm",
+    "framework/Source/FlutterResizeSynchronizerTest.mm",
     "framework/Source/FlutterSurfaceManagerTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextInputSemanticsObjectTest.mm",
-    "framework/Source/FlutterThreadSynchronizerTest.mm",
     "framework/Source/FlutterVSyncWaiterTest.mm",
     "framework/Source/FlutterViewControllerTest.mm",
     "framework/Source/FlutterViewControllerTestUtils.h",
@@ -237,10 +237,19 @@ copy("copy_dylib") {
   deps = [ ":flutter_framework_dylib" ]
 }
 
-copy("copy_framework_info_plist") {
+action("copy_framework_info_plist") {
+  script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
   sources = [ "framework/Info.plist" ]
   outputs = [ "$_flutter_framework_dir/Versions/A/Resources/Info.plist" ]
+  args = [
+    "--source",
+    rebase_path(sources[0]),
+    "--destination",
+    rebase_path(outputs[0]),
+    "--buildmode",
+    flutter_runtime_mode,
+  ]
 }
 
 copy("copy_framework_module_map") {

@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import org.gradle.api.GradleException
@@ -13,6 +17,7 @@ import org.gradle.api.GradleException
  * Learn more about extensions in Gradle:
  *  * https://docs.gradle.org/8.0.2/userguide/custom_plugins.html#sec:getting_input_from_the_build
  */
+@Suppress("unused") // The values in this class are used in Flutter developers app-level build.gradle file.
 open class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
     val compileSdkVersion: Int = 35

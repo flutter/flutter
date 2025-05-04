@@ -275,6 +275,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     tearDown(() async {
       service.resetAllState();
 
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+      binding.debugShowWidgetInspectorOverride = false;
+      binding.debugExcludeRootWidgetInspector = false;
+
       if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name,
@@ -846,6 +850,26 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
     });
 
+    testWidgets("WidgetInspector isn't inserted into the widget tree when "
+        'debugWillManuallyInjectWidgetInspector is set', (WidgetTester tester) async {
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      // Disable automatic insertion of WidgetInspector into the widget tree by WidgetsApp.
+      binding.debugExcludeRootWidgetInspector = true;
+
+      await tester.pumpWidget(WidgetsApp(color: Colors.red, builder: (_, _) => const Text('Foo')));
+
+      // Verify that the widget inspector is disabled and there's no instances of WidgetInspector
+      // in the tree.
+      final Finder widgetInspectorFinder = find.byType(WidgetInspector);
+      expect(binding.debugShowWidgetInspectorOverride, false);
+      expect(widgetInspectorFinder, findsNothing);
+
+      // Enable the widget inspector and verify WidgetInspector hasn't been inserted into the tree.
+      binding.debugShowWidgetInspectorOverride = true;
+      await tester.pump();
+      expect(widgetInspectorFinder, findsNothing);
+    });
+
     testWidgets(
       'WidgetInspector Exit Selection Mode button',
       (WidgetTester tester) async {
@@ -895,12 +919,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final String file = event['fileUri']! as String;
         final int line = event['line']! as int;
         final int column = event['column']! as int;
-        expect(file, endsWith('widget_inspector_test.dart'));
+        expect(file, endsWith('text.dart'));
         // We don't hardcode the actual lines the widgets are created on as that
         // would make this test fragile.
         expect(line, isNotNull);
         // Column numbers are more stable than line numbers.
-        expect(column, equals(28));
+        expect(column, equals(16));
       },
       // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
@@ -1988,81 +2012,110 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             expect(columnC, equals(25));
           });
 
-          testWidgets('setSelection notifiers for an Element', (WidgetTester tester) async {
-            await tester.pumpWidget(
-              const Directionality(
-                textDirection: TextDirection.ltr,
-                child: Stack(
-                  children: <Widget>[
-                    Text('a'),
-                    Text('b', textDirection: TextDirection.ltr),
-                    Text('c', textDirection: TextDirection.ltr),
-                  ],
-                ),
-              ),
-            );
-            final Element elementA = find.text('a').evaluate().first;
+          group('setSelection notifiers', () {
+            setUp(() {
+              service.disposeAllGroups();
+              setupDefaultPubRootDirectory(service);
+            });
 
-            service.disposeAllGroups();
+            void verifyDeveloperInspectCalled<T>(T object) {
+              // Ensure that developer.inspect was called on the widget.
+              final List<Object?> objectsInspected = service.inspectedObjects();
+              expect(objectsInspected, equals(<T>[object]));
+            }
 
-            setupDefaultPubRootDirectory(service);
+            void verifyNavigateEvent({
+              required String expectedFileEnding,
+              required int? expectedColumn,
+            }) {
+              // Ensure that a navigate event was sent for the element.
+              final List<Map<Object, Object?>> navigateEventsPosted = service.dispatchedEvents(
+                'navigate',
+                stream: 'ToolEvent',
+              );
+              expect(navigateEventsPosted.length, equals(1));
+              final Map<Object, Object?> event = navigateEventsPosted[0];
 
-            // Select the widget
-            service.setSelection(elementA, 'my-group');
+              // Verify the file URI.
+              final String file = event['fileUri']! as String;
+              expect(file, endsWith(expectedFileEnding));
 
-            // ensure that developer.inspect was called on the widget
-            final List<Object?> objectsInspected = service.inspectedObjects();
-            expect(objectsInspected, equals(<Element>[elementA]));
+              // Verify the column number.
+              final int column = event['column']! as int;
+              expect(column, expectedColumn == null ? isNotNull : equals(expectedColumn));
 
-            // ensure that a navigate event was sent for the element
-            final List<Map<Object, Object?>> navigateEventsPosted = service.dispatchedEvents(
-              'navigate',
-              stream: 'ToolEvent',
-            );
-            expect(navigateEventsPosted.length, equals(1));
-            final Map<Object, Object?> event = navigateEventsPosted[0];
-            final String file = event['fileUri']! as String;
-            final int line = event['line']! as int;
-            final int column = event['column']! as int;
-            expect(file, endsWith('widget_inspector_test.dart'));
-            // We don't hardcode the actual lines the widgets are created on as that
-            // would make this test fragile.
-            expect(line, isNotNull);
-            // Column numbers are more stable than line numbers.
-            expect(column, equals(21));
-          });
+              // Verify the line number is not null. Note: We don't hardcode the
+              // actual lines the widgets are created on as that would make this
+              // test fragile.
+              final int line = event['line']! as int;
+              expect(line, isNotNull);
+            }
 
-          testWidgets('setSelection notifiers for a RenderObject', (WidgetTester tester) async {
-            await pumpWidgetTreeWithABC(tester);
-            final Element elementA = findElementABC('a');
+            testWidgets('for an Element in the local project', (WidgetTester tester) async {
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = find.text('a').evaluate().first;
 
-            service.disposeAllGroups();
+              // Select the widget.
+              service.setSelection(elementA, 'my-group');
 
-            setupDefaultPubRootDirectory(service);
+              // Verify the correct events were dispatched in response.
+              verifyDeveloperInspectCalled<Element>(elementA);
+              verifyNavigateEvent(
+                expectedFileEnding: 'widget_inspector_test.dart',
+                expectedColumn: 15,
+              );
+            });
 
-            // Select the render object for the widget.
-            service.setSelection(elementA.renderObject, 'my-group');
+            testWidgets('for an Element outside the local project', (WidgetTester tester) async {
+              await pumpWidgetTreeWithABC(tester);
+              // Note: RichText is an implementation widget of Text.
+              final Element richTextElement = find.byType(RichText).first.evaluate().first;
 
-            // ensure that developer.inspect was called on the widget
-            final List<Object?> objectsInspected = service.inspectedObjects();
-            expect(objectsInspected, equals(<RenderObject?>[elementA.renderObject]));
+              // Select the widget.
+              service.setSelection(richTextElement, 'my-group');
 
-            // ensure that a navigate event was sent for the renderObject
-            final List<Map<Object, Object?>> navigateEventsPosted = service.dispatchedEvents(
-              'navigate',
-              stream: 'ToolEvent',
-            );
-            expect(navigateEventsPosted.length, equals(1));
-            final Map<Object, Object?> event = navigateEventsPosted[0];
-            final String file = event['fileUri']! as String;
-            final int line = event['line']! as int;
-            final int column = event['column']! as int;
-            expect(file, endsWith('widget_inspector_test.dart'));
-            // We don't hardcode the actual lines the widgets are created on as that
-            // would make this test fragile.
-            expect(line, isNotNull);
-            // Column numbers are more stable than line numbers.
-            expect(column, equals(15));
+              // Verify the correct events were dispatched in response.
+              verifyDeveloperInspectCalled<Element>(richTextElement);
+              verifyNavigateEvent(
+                expectedFileEnding: 'text.dart',
+                expectedColumn: null, // Including column is too fragile.
+              );
+            });
+
+            testWidgets('for a Render Object outside the local project', (
+              WidgetTester tester,
+            ) async {
+              await pumpWidgetTreeWithABC(tester);
+              final Element elementA = find.text('a').evaluate().first;
+
+              // Select the render object for the widget.
+              service.setSelection(elementA.renderObject, 'my-group');
+
+              // Verify the correct events were dispatched in response.
+              verifyDeveloperInspectCalled<RenderObject>(elementA.renderObject!);
+              verifyNavigateEvent(
+                // The Text widget does not have a render object, the backing
+                // render object is provided by RichText which is defined in
+                // text.dart.
+                expectedFileEnding: 'text.dart',
+                expectedColumn: null, // Including column is too fragile.
+              );
+            });
+
+            testWidgets('for a RenderObject in the local project', (WidgetTester tester) async {
+              await pumpWidgetTreeWithABC(tester);
+              final Element stackElement = find.byType(Stack).evaluate().first;
+
+              // Select the render object for the widget.
+              service.setSelection(stackElement.renderObject, 'my-group');
+
+              // Verify the correct events were dispatched in response.
+              verifyDeveloperInspectCalled<RenderObject>(stackElement.renderObject!);
+              verifyNavigateEvent(
+                expectedFileEnding: 'widget_inspector_test.dart',
+                expectedColumn: 18,
+              );
+            });
           });
 
           group('Widget Tree APIs', () {

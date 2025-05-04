@@ -291,7 +291,7 @@ void main() {
               'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
               'An invisible SemanticsNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
               'Consider removing the above invisible SemanticsNodes if they were added by your RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
-              '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ),
         ),
@@ -322,7 +322,7 @@ void main() {
               'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
               'An invisible SemanticsNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
               'Consider removing the above invisible SemanticsNodes if they were added by your RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
-              '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ),
         ),
@@ -597,15 +597,15 @@ void main() {
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
-      ' ├─SemanticsNode#1\n'
+      ' ├─SemanticsNode#2\n'
       ' │   STALE\n'
       ' │   owner: null\n'
-      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
       ' │\n'
-      ' └─SemanticsNode#2\n'
+      ' └─SemanticsNode#1\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
+      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n',
     );
 
     final SemanticsNode child3 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
@@ -664,30 +664,30 @@ void main() {
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
       ' │\n'
-      ' ├─SemanticsNode#1\n'
-      ' │   STALE\n'
-      ' │   owner: null\n'
-      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' ├─SemanticsNode#4\n'
+      ' │ │ STALE\n'
+      ' │ │ owner: null\n'
+      ' │ │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      ' │ │\n'
+      ' │ ├─SemanticsNode#6\n'
+      ' │ │   STALE\n'
+      ' │ │   owner: null\n'
+      ' │ │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      ' │ │\n'
+      ' │ └─SemanticsNode#5\n'
+      ' │     STALE\n'
+      ' │     owner: null\n'
+      ' │     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
       ' │\n'
       ' ├─SemanticsNode#2\n'
       ' │   STALE\n'
       ' │   owner: null\n'
       ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
       ' │\n'
-      ' └─SemanticsNode#4\n'
-      '   │ STALE\n'
-      '   │ owner: null\n'
-      '   │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
-      '   │\n'
-      '   ├─SemanticsNode#5\n'
-      '   │   STALE\n'
-      '   │   owner: null\n'
-      '   │   Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
-      '   │\n'
-      '   └─SemanticsNode#6\n'
-      '       STALE\n'
-      '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
+      ' └─SemanticsNode#1\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n',
     );
   });
 

@@ -33,7 +33,6 @@ import 'input_date_picker_form_field.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'text_button.dart';
 import 'text_field.dart';
@@ -778,13 +777,21 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
               switch (orientation) {
                 case Orientation.portrait:
+                  final bool isInputMode =
+                      _entryMode.value == DatePickerEntryMode.inputOnly ||
+                      _entryMode.value == DatePickerEntryMode.input;
+                  // When the portrait dialog does not fit vertically, hide the header when the entry mode
+                  // is input, or hide the picker when the entry mode is not input.
+                  final bool showHeader = isFullyPortrait || !isInputMode;
+                  final bool showPicker = isFullyPortrait || isInputMode;
+
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      header,
+                      if (showHeader) header,
                       if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
-                      if (isFullyPortrait) ...<Widget>[Expanded(child: picker), actions],
+                      if (showPicker) ...<Widget>[Expanded(child: picker), actions],
                     ],
                   );
                 case Orientation.landscape:
@@ -2830,7 +2837,7 @@ class _DayItem extends StatefulWidget {
 }
 
 class _DayItemState extends State<_DayItem> {
-  final MaterialStatesController _statesController = MaterialStatesController();
+  final WidgetStatesController _statesController = WidgetStatesController();
 
   @override
   void dispose() {
@@ -2857,17 +2864,17 @@ class _DayItemState extends State<_DayItem> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
-      Set<MaterialState> states,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      Set<WidgetState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
         return getProperty(theme)?.resolve(states);
       });
     }
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (widget.isDisabled) MaterialState.disabled,
-      if (widget.isSelectedDayStart || widget.isSelectedDayEnd) MaterialState.selected,
+    final Set<WidgetState> states = <WidgetState>{
+      if (widget.isDisabled) WidgetState.disabled,
+      if (widget.isSelectedDayStart || widget.isSelectedDayEnd) WidgetState.selected,
     };
 
     _statesController.value = states;
@@ -2880,8 +2887,8 @@ class _DayItemState extends State<_DayItem> {
       (DatePickerThemeData? theme) => theme?.dayBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) => effectiveValue(
+    final WidgetStateProperty<Color?> dayOverlayColor = WidgetStateProperty.resolveWith<Color?>(
+      (Set<WidgetState> states) => effectiveValue(
         (DatePickerThemeData? theme) =>
             widget.isInRange
                 ? theme?.rangeSelectionOverlayColor?.resolve(states)
@@ -3178,10 +3185,8 @@ class _InputDateRangePickerDialog extends StatelessWidget {
             return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                header,
-                if (isFullyPortrait) ...<Widget>[Expanded(child: picker), actions],
-              ],
+              // When the portrait dialog does not fit vertically, hide the header.
+              children: <Widget>[if (isFullyPortrait) header, Expanded(child: picker), actions],
             );
           },
         );

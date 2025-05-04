@@ -97,7 +97,6 @@ workspace:
   - tools/clangd_check
   - tools/compare_goldens
   - tools/const_finder
-  - tools/dir_contents_diff
   - tools/engine_tool
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
@@ -167,8 +166,6 @@ dependency_overrides:
     path: ./third_party/pkg/googleapis/discoveryapis_commons
   _fe_analyzer_shared:
     path: ./third_party/dart/pkg/_fe_analyzer_shared
-  _macros:
-    path: ./third_party/dart/pkg/_macros
   analyzer:
     path: ./third_party/dart/pkg/analyzer
   archive:
@@ -223,8 +220,6 @@ dependency_overrides:
     path: ./third_party/dart/pkg/kernel
   logging:
     path: ./third_party/dart/third_party/pkg/core/pkgs/logging
-  macros:
-    path: ./third_party/dart/pkg/macros
   matcher:
     path: ./third_party/dart/third_party/pkg/test/pkgs/matcher
   meta:

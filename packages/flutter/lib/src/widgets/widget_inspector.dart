@@ -1611,7 +1611,7 @@ mixin WidgetInspectorService {
   void _sendInspectEvent(Object? object) {
     inspect(object);
 
-    final _Location? location = _getSelectedSummaryWidgetLocation(null);
+    final _Location? location = _getSelectedWidgetLocation();
     if (location != null) {
       postEvent('navigate', <String, Object>{
         'fileUri': location.file, // URI file path of the location.
@@ -2407,8 +2407,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
-    return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
+  _Location? _getSelectedWidgetLocation() {
+    return _getCreationLocation(_getSelectedWidgetDiagnosticsNode(null)?.value);
   }
 
   DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
@@ -2977,7 +2977,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           excludeFromSemantics: true,
           child: IgnorePointer(ignoring: isSelectMode, key: _ignorePointerKey, child: widget.child),
         ),
-        _InspectorOverlay(selection: selection),
+        Positioned.fill(child: _InspectorOverlay(selection: selection)),
         if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
           _ExitWidgetSelectionButtonGroup(
             exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder!,

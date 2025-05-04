@@ -4,7 +4,7 @@
 
 assert(is_ios)
 
-import("//build/config/ios/ios_sdk.gni")
+import("//build/config/apple/apple_sdk.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
@@ -20,6 +20,31 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_gl = false
   enable_vulkan = false
   enable_metal = true
+}
+
+config("config_ios") {
+  include_dirs = [ target_gen_dir ]
+  lib_dirs = ios_swift_lib_paths
+
+  # Allow use of @testable imports in debug builds and when tests are enabled.
+  if (enable_ios_unittests) {
+    swiftflags = [ "-enable-testing" ]
+  }
+}
+
+config("config_ios_test") {
+  configs = [ ":config_ios" ]
+
+  # Add platform frameworks directory to search path for test frameworks.
+  # Add platform lib to search path for test libraries/Swift modules.
+  cflags = [
+    "-fvisibility=default",
+    "-F$ios_platform_path/Developer/Library/Frameworks",
+  ]
+  swiftflags = [ "-F$ios_platform_path/Developer/Library/Frameworks" ]
+  include_dirs = [ "$ios_platform_path/Developer/usr/lib" ]
+  framework_dirs = [ "$ios_platform_path/Developer/Library/Frameworks" ]
+  lib_dirs = [ "$ios_platform_path/Developer/usr/lib" ]
 }
 
 # The headers that will be copied to the Flutter.framework and be accessed
@@ -39,18 +64,29 @@ _flutter_framework_headers = [
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
+source_set("InternalFlutterSwift") {
+  visibility = [ ":*" ]
+  configs += [ ":config_ios" ]
+
+  sources = [
+    "framework/Source/ConnectionCollection.swift",
+    "framework/Source/UIPressProxy.swift",
+  ]
+}
+
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
   cflags_objcc = flutter_cflags_objcc
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
-  if (darwin_extension_safe) {
-    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
   public_configs = [
     ":ios_gpu_configuration_config",
     "//flutter:config",
+  ]
+  configs += [
+    ":config_ios",
+    "//build/config/ios:ios_application_extension",
   ]
 
   sources = [
@@ -88,6 +124,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSemanticsScrollView.h",
     "framework/Source/FlutterSemanticsScrollView.mm",
+    "framework/Source/FlutterSharedApplication.h",
+    "framework/Source/FlutterSharedApplication.mm",
     "framework/Source/FlutterSpellCheckPlugin.h",
     "framework/Source/FlutterSpellCheckPlugin.mm",
     "framework/Source/FlutterTextInputDelegate.h",
@@ -95,8 +133,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterTextInputPlugin.mm",
     "framework/Source/FlutterTextureRegistryRelay.h",
     "framework/Source/FlutterTextureRegistryRelay.mm",
-    "framework/Source/FlutterUIPressProxy.h",
-    "framework/Source/FlutterUIPressProxy.mm",
     "framework/Source/FlutterUndoManagerDelegate.h",
     "framework/Source/FlutterUndoManagerPlugin.h",
     "framework/Source/FlutterUndoManagerPlugin.mm",
@@ -116,8 +152,6 @@ source_set("flutter_framework_source") {
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
-    "framework/Source/connection_collection.h",
-    "framework/Source/connection_collection.mm",
     "framework/Source/overlay_layer_pool.h",
     "framework/Source/overlay_layer_pool.mm",
     "framework/Source/platform_message_response_darwin.h",
@@ -167,6 +201,7 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
+    ":InternalFlutterSwift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -185,88 +220,95 @@ source_set("flutter_framework_source") {
   ]
 }
 
-platform_frameworks_path =
-    rebase_path("$ios_sdk_path/../../Library/Frameworks/")
-
-shared_library("ios_test_flutter") {
-  testonly = true
-  visibility = [ "*" ]
-
-  cflags_objc = flutter_cflags_objc
-  cflags_objcc = flutter_cflags_objcc
-  cflags = [
-    "-fvisibility=default",
-    "-F$platform_frameworks_path",
-    "-mios-simulator-version-min=$ios_testing_deployment_target",
-  ]
-
-  ldflags = [
-    "-F$platform_frameworks_path",
-    "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
-  ]
-  frameworks = [ "XCTest.framework" ]
-  configs -= [
-    "//build/config/gcc:symbol_visibility_hidden",
-    "//build/config:symbol_visibility_hidden",
-  ]
-  sources = [
-    "framework/Source/FlutterAppDelegateTest.mm",
-    "framework/Source/FlutterChannelKeyResponderTest.mm",
-    "framework/Source/FlutterDartProjectTest.mm",
-    "framework/Source/FlutterEmbedderKeyResponderTest.mm",
-    "framework/Source/FlutterEngineGroupTest.mm",
-    "framework/Source/FlutterEnginePlatformViewTest.mm",
-    "framework/Source/FlutterEngineTest.mm",
-    "framework/Source/FlutterFakeKeyEvents.h",
-    "framework/Source/FlutterFakeKeyEvents.mm",
-    "framework/Source/FlutterKeyboardManagerTest.mm",
-    "framework/Source/FlutterMetalLayerTest.mm",
-    "framework/Source/FlutterPlatformPluginTest.mm",
-    "framework/Source/FlutterPlatformViewsTest.mm",
-    "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
-    "framework/Source/FlutterRestorationPluginTest.mm",
-    "framework/Source/FlutterSpellCheckPluginTest.mm",
-    "framework/Source/FlutterTextInputPluginTest.mm",
-    "framework/Source/FlutterTextureRegistryRelayTest.mm",
-    "framework/Source/FlutterTouchInterceptingView_Test.h",
-    "framework/Source/FlutterUndoManagerPluginTest.mm",
-    "framework/Source/FlutterViewControllerTest.mm",
-    "framework/Source/FlutterViewTest.mm",
-    "framework/Source/SemanticsObjectTest.mm",
-    "framework/Source/SemanticsObjectTestMocks.h",
-    "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
-    "framework/Source/VsyncWaiterIosTest.mm",
-    "framework/Source/accessibility_bridge_test.mm",
-    "framework/Source/availability_version_check_test.mm",
-    "framework/Source/connection_collection_test.mm",
-    "ios_context_noop_unittests.mm",
-    "ios_surface_noop_unittests.mm",
-    "platform_message_handler_ios_test.mm",
-  ]
-  deps = [
-    ":flutter_framework",
-    ":flutter_framework_source",
-    ":ios_gpu_configuration",
-    "//flutter/common:common",
-    "//flutter/lib/ui:ui",
-    "//flutter/shell/platform/darwin/common:framework_common",
-    "//flutter/shell/platform/embedder:embedder_as_internal_library",
-    "//flutter/shell/platform/embedder:embedder_test_utils",
-    "//flutter/third_party/ocmock:ocmock_shared",
-    "//flutter/third_party/rapidjson",
-    "//flutter/third_party/spring_animation",
-    "//flutter/third_party/tonic",
-    "//flutter/txt",
-  ]
-  public_configs = [
-    ":ios_gpu_configuration_config",
-    "//flutter:config",
-  ]
-
-  if (darwin_extension_safe) {
-    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
+if (enable_ios_unittests) {
+  source_set("ios_test_flutter_swift") {
+    testonly = true
+    visibility = [ ":*" ]
+    configs += [ ":config_ios_test" ]
+    sources = [
+      "framework/Source/ConnectionCollectionTest.swift",
+      "framework/Source/FakeUIPressProxy.swift",
+    ]
+    frameworks = [ "XCTest.framework" ]
+    deps = [ ":InternalFlutterSwift" ]
   }
-}
+
+  shared_library("ios_test_flutter") {
+    testonly = true
+    visibility = [ "*" ]
+
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
+    cflags = [
+      "-fvisibility=default",
+      "-mios-simulator-version-min=$ios_testing_deployment_target",
+    ]
+
+    ldflags =
+        [ "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib" ]
+    frameworks = [ "XCTest.framework" ]
+    configs += [ ":config_ios_test" ]
+    configs -= [
+      "//build/config/gcc:symbol_visibility_hidden",
+      "//build/config:symbol_visibility_hidden",
+    ]
+    sources = [
+      "framework/Source/FlutterAppDelegateTest.mm",
+      "framework/Source/FlutterChannelKeyResponderTest.mm",
+      "framework/Source/FlutterDartProjectTest.mm",
+      "framework/Source/FlutterEmbedderKeyResponderTest.mm",
+      "framework/Source/FlutterEngineGroupTest.mm",
+      "framework/Source/FlutterEnginePlatformViewTest.mm",
+      "framework/Source/FlutterEngineTest.mm",
+      "framework/Source/FlutterFakeKeyEvents.h",
+      "framework/Source/FlutterFakeKeyEvents.mm",
+      "framework/Source/FlutterKeyboardManagerTest.mm",
+      "framework/Source/FlutterMetalLayerTest.mm",
+      "framework/Source/FlutterPlatformPluginTest.mm",
+      "framework/Source/FlutterPlatformViewsTest.mm",
+      "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
+      "framework/Source/FlutterRestorationPluginTest.mm",
+      "framework/Source/FlutterSharedApplicationTest.mm",
+      "framework/Source/FlutterSpellCheckPluginTest.mm",
+      "framework/Source/FlutterTextInputPluginTest.mm",
+      "framework/Source/FlutterTextureRegistryRelayTest.mm",
+      "framework/Source/FlutterTouchInterceptingView_Test.h",
+      "framework/Source/FlutterUndoManagerPluginTest.mm",
+      "framework/Source/FlutterViewControllerTest.mm",
+      "framework/Source/FlutterViewTest.mm",
+      "framework/Source/SemanticsObjectTest.mm",
+      "framework/Source/SemanticsObjectTestMocks.h",
+      "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
+      "framework/Source/VsyncWaiterIosTest.mm",
+      "framework/Source/accessibility_bridge_test.mm",
+      "framework/Source/availability_version_check_test.mm",
+      "ios_context_noop_unittests.mm",
+      "ios_surface_noop_unittests.mm",
+      "platform_message_handler_ios_test.mm",
+    ]
+    deps = [
+      ":InternalFlutterSwift",
+      ":flutter_framework",
+      ":flutter_framework_source",
+      ":ios_gpu_configuration",
+      ":ios_test_flutter_swift",
+      "//flutter/common:common",
+      "//flutter/lib/ui:ui",
+      "//flutter/shell/platform/darwin/common:framework_common",
+      "//flutter/shell/platform/embedder:embedder_as_internal_library",
+      "//flutter/shell/platform/embedder:embedder_test_utils",
+      "//flutter/third_party/ocmock:ocmock_shared",
+      "//flutter/third_party/rapidjson",
+      "//flutter/third_party/spring_animation",
+      "//flutter/third_party/tonic",
+      "//flutter/txt",
+    ]
+    public_configs = [
+      ":ios_gpu_configuration_config",
+      "//flutter:config",
+    ]
+  }
+}  # if (enable_ios_unittests)
 
 shared_library("create_flutter_framework_dylib") {
   visibility = [ ":*" ]
@@ -275,15 +317,15 @@ shared_library("create_flutter_framework_dylib") {
 
   ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
 
-  if (darwin_extension_safe) {
-    ldflags += [ "-fapplication-extension" ]
-  }
-
   public = _flutter_framework_headers
 
-  deps = [ ":flutter_framework_source" ]
+  deps = [
+    ":InternalFlutterSwift",
+    ":flutter_framework_source",
+  ]
 
   public_configs = [ "//flutter:config" ]
+  configs += [ "//build/config/ios:ios_application_extension" ]
 }
 
 copy("copy_dylib") {
@@ -325,6 +367,8 @@ action("copy_framework_info_plist") {
     rebase_path(outputs[0]),
     "--minversion",
     ios_deployment_target,
+    "--buildmode",
+    flutter_runtime_mode,
   ]
 }
 
@@ -375,9 +419,11 @@ copy("copy_license") {
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  cflags_objc = [
+  cflags_objc = [ "-F$framework_search_path" ]
+  ldflags = [
     "-F$framework_search_path",
-    "-fapplication-extension",
+    "-Xlinker",
+    "-fatal_warnings",
   ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
@@ -388,16 +434,7 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_privacy_manifest",
   ]
 
-  if (darwin_extension_safe) {
-    ldflags = [
-      "-F$framework_search_path",
-      "-fapplication-extension",
-      "-Xlinker",
-      "-fatal_warnings",
-    ]
-    deps += [ ":copy_dylib" ]
-    frameworks = [ "Flutter.framework" ]
-  }
+  configs += [ "//build/config/ios:ios_application_extension" ]
 }
 
 group("universal_flutter_framework") {

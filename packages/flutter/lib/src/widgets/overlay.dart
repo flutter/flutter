@@ -2632,7 +2632,10 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
 // Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
 // layout algorithm so developers can use the Positioned widget.
 class _RenderLayoutBuilder extends RenderProxyBox
-    with _RenderTheaterMixin, RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
+    with
+        _RenderTheaterMixin,
+        RenderObjectWithLayoutCallbackMixin,
+        RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
   @override
   Iterable<RenderBox> _childrenInPaintOrder() {
     final RenderBox? child = this.child;
@@ -2709,19 +2712,25 @@ class _RenderLayoutBuilder extends RenderProxyBox
     return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
 
+  @override
+  @visibleForOverriding
+  void layoutCallback() {
+    _layoutInfo = _computeNewLayoutInfo();
+    super.layoutCallback();
+  }
+
   int? _callbackId;
   @override
   void performLayout() {
-    // The invokeLayoutCallback allows arbitrary access to the sizes of
-    // RenderBoxes the we know that have finished doing layout.
-    invokeLayoutCallback((_) => _layoutInfo = _computeNewLayoutInfo());
-    rebuildIfNecessary();
+    runLayoutCallback();
+    if (child case final RenderBox child?) {
+      layoutChild(child, constraints);
+    }
     assert(_callbackId == null);
     _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
       _frameCallback,
       scheduleNewFrame: false,
     );
-    layoutChild(child!, constraints);
   }
 
   // This RenderObject is a child of _RenderDeferredLayouts which in turn is a

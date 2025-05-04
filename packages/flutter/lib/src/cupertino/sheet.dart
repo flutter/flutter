@@ -35,7 +35,7 @@ const double _kTopGapRatio = 0.08;
 // the top of the screen. Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, _kTopGapRatio),
+  end: Offset.zero,
 );
 
 // Offset change for when a new sheet covers another sheet. '0.0' represents the
@@ -258,8 +258,6 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
@@ -350,6 +348,12 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
     _setupAnimation();
   }
 
@@ -423,10 +427,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
         scale: _secondaryScaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: child,
-        ),
+        child: child,
       ),
     );
   }
@@ -440,10 +441,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
           context,
           widget.primaryRouteAnimation,
           widget.linearTransition,
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: widget.child,
-          ),
+          widget.child,
         ),
       ),
     );
@@ -494,16 +492,19 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    final double bottomPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+    final double topPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
       removeBottom: true,
       child: Padding(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: builder(context)),
+        padding: EdgeInsets.only(top: topPadding),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: _CupertinoSheetScope(child: builder(context)),
+          ),
         ),
       ),
     );

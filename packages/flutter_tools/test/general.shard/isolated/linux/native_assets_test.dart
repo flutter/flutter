@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -15,7 +16,6 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -112,12 +112,17 @@ void main() {
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));

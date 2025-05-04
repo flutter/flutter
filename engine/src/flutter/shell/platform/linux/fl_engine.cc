@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
+#include <epoxy/egl.h>
 #include <gmodule.h>
 
 #include <cstring>
@@ -12,16 +13,15 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
+#include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
-#include "flutter/shell/platform/linux/fl_renderer.h"
-#include "flutter/shell/platform/linux/fl_renderer_gdk.h"
-#include "flutter/shell/platform/linux/fl_renderer_headless.h"
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/linux/fl_texture_gl_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
@@ -49,7 +49,10 @@ struct _FlEngine {
   FlDisplayMonitor* display_monitor;
 
   // Renders the Flutter app.
-  FlRenderer* renderer;
+  FlCompositor* compositor;
+
+  // Manages OpenGL contexts.
+  FlOpenGLManager* opengl_manager;
 
   // Messenger used to send and receive platform messages.
   FlBinaryMessenger* binary_messenger;
@@ -249,50 +252,48 @@ static bool compositor_create_backing_store_callback(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out,
     void* user_data) {
-  g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
-  return fl_renderer_create_backing_store(FL_RENDERER(user_data), config,
-                                          backing_store_out);
+  FlEngine* self = static_cast<FlEngine*>(user_data);
+  return fl_compositor_create_backing_store(self->compositor, config,
+                                            backing_store_out);
 }
 
 // Called when the backing store is to be released.
 static bool compositor_collect_backing_store_callback(
     const FlutterBackingStore* backing_store,
     void* user_data) {
-  g_return_val_if_fail(FL_IS_RENDERER(user_data), false);
-  return fl_renderer_collect_backing_store(FL_RENDERER(user_data),
-                                           backing_store);
+  FlEngine* self = static_cast<FlEngine*>(user_data);
+  return fl_compositor_collect_backing_store(self->compositor, backing_store);
 }
 
 // Called when embedder should composite contents of each layer onto the screen.
 static bool compositor_present_view_callback(
     const FlutterPresentViewInfo* info) {
-  g_return_val_if_fail(FL_IS_RENDERER(info->user_data), false);
-  return fl_renderer_present_layers(FL_RENDERER(info->user_data), info->view_id,
-                                    info->layers, info->layers_count);
+  FlEngine* self = static_cast<FlEngine*>(info->user_data);
+  return fl_compositor_present_layers(self->compositor, info->view_id,
+                                      info->layers, info->layers_count);
 }
 
 // Flutter engine rendering callbacks.
 
 static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
-  FlEngine* self = static_cast<FlEngine*>(user_data);
-  return fl_renderer_get_proc_address(self->renderer, name);
+  return reinterpret_cast<void*>(eglGetProcAddress(name));
 }
 
 static bool fl_engine_gl_make_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_renderer_make_current(self->renderer);
+  fl_opengl_manager_make_current(self->opengl_manager);
   return true;
 }
 
 static bool fl_engine_gl_clear_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_renderer_clear_current(self->renderer);
+  fl_opengl_manager_clear_current(self->opengl_manager);
   return true;
 }
 
 static uint32_t fl_engine_gl_get_fbo(void* user_data) {
-  FlEngine* self = static_cast<FlEngine*>(user_data);
-  return fl_renderer_get_fbo(self->renderer);
+  // There is only one frame buffer object - always return that.
+  return 0;
 }
 
 static bool fl_engine_gl_present(void* user_data) {
@@ -303,7 +304,7 @@ static bool fl_engine_gl_present(void* user_data) {
 
 static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_renderer_make_resource_current(self->renderer);
+  fl_opengl_manager_make_resource_current(self->opengl_manager);
   return true;
 }
 
@@ -482,7 +483,8 @@ static void fl_engine_dispose(GObject* object) {
 
   g_clear_object(&self->project);
   g_clear_object(&self->display_monitor);
-  g_clear_object(&self->renderer);
+  g_clear_object(&self->compositor);
+  g_clear_object(&self->opengl_manager);
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
@@ -533,6 +535,8 @@ static void fl_engine_init(FlEngine* self) {
     g_warning("Failed get get engine function pointers");
   }
 
+  self->opengl_manager = fl_opengl_manager_new();
+
   self->display_monitor =
       fl_display_monitor_new(self, gdk_display_get_default());
   self->task_runner = fl_task_runner_new(self);
@@ -550,15 +554,13 @@ static void fl_engine_init(FlEngine* self) {
 }
 
 static FlEngine* fl_engine_new_full(FlDartProject* project,
-                                    FlRenderer* renderer,
                                     FlBinaryMessenger* binary_messenger) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
-  g_return_val_if_fail(FL_IS_RENDERER(renderer), nullptr);
 
   FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
 
   self->project = FL_DART_PROJECT(g_object_ref(project));
-  self->renderer = FL_RENDERER(g_object_ref(renderer));
+  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(self));
   if (binary_messenger != nullptr) {
     self->binary_messenger =
         FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
@@ -570,8 +572,6 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
       fl_mouse_cursor_handler_new(self->binary_messenger);
   self->windowing_handler = fl_windowing_handler_new(self);
 
-  fl_renderer_set_engine(self->renderer, self);
-
   return self;
 }
 
@@ -581,33 +581,28 @@ FlEngine* fl_engine_for_id(int64_t id) {
   return FL_ENGINE(engine);
 }
 
-FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
-                                      FlRenderer* renderer) {
-  g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
-  g_return_val_if_fail(FL_IS_RENDERER(renderer), nullptr);
-  return fl_engine_new_full(project, renderer, nullptr);
-}
-
 G_MODULE_EXPORT FlEngine* fl_engine_new(FlDartProject* project) {
-  g_autoptr(FlRendererGdk) renderer = fl_renderer_gdk_new();
-  return fl_engine_new_with_renderer(project, FL_RENDERER(renderer));
+  return fl_engine_new_full(project, nullptr);
 }
 
 FlEngine* fl_engine_new_with_binary_messenger(
     FlBinaryMessenger* binary_messenger) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlRendererGdk) renderer = fl_renderer_gdk_new();
-  return fl_engine_new_full(project, FL_RENDERER(renderer), binary_messenger);
+  return fl_engine_new_full(project, binary_messenger);
 }
 
 G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
-  g_autoptr(FlRendererHeadless) renderer = fl_renderer_headless_new();
-  return fl_engine_new_with_renderer(project, FL_RENDERER(renderer));
+  return fl_engine_new(project);
 }
 
-FlRenderer* fl_engine_get_renderer(FlEngine* self) {
+FlCompositor* fl_engine_get_compositor(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
-  return self->renderer;
+  return self->compositor;
+}
+
+FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->opengl_manager;
 }
 
 FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
@@ -642,6 +637,11 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
 
+  if (fl_dart_project_get_ui_thread_policy(self->project) ==
+      FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD) {
+    custom_task_runners.ui_task_runner = &platform_task_runner;
+  }
+
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
@@ -672,7 +672,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   FlutterCompositor compositor = {};
   compositor.struct_size = sizeof(FlutterCompositor);
-  compositor.user_data = self->renderer;
+  compositor.user_data = self;
   compositor.create_backing_store_callback =
       compositor_create_backing_store_callback;
   compositor.collect_backing_store_callback =

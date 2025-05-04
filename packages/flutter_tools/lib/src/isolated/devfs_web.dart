@@ -147,10 +147,6 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _modules;
   final Map<String, String> _digests;
 
-  // The generation number that maps to the number of hot restarts. This is used
-  // to suffix a query to source paths in order to cache-bust.
-  int _hotRestartGeneration = 0;
-
   int get selectedPort => _httpServer.port;
 
   /// Given a list of [modules] that need to be loaded, compute module names and
@@ -180,14 +176,13 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
-    if (writeRestartScripts && _hotRestartGeneration > 0) {
+    if (writeRestartScripts) {
       final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
       for (final String src in modules) {
-        srcIdsList.add(<String, String>{'src': '$src?gen=$_hotRestartGeneration', 'id': src});
+        srcIdsList.add(<String, String>{'src': src, 'id': src});
       }
       writeFile('restart_scripts.json', json.encode(srcIdsList));
     }
-    _hotRestartGeneration++;
   }
 
   static const String _reloadScriptsFileName = 'reload_scripts.json';
@@ -674,7 +669,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   String get _flutterBootstrapJsContent {
     final WebTemplate bootstrapTemplate = _getWebTemplate(
       'flutter_bootstrap.js',
-      generateDefaultFlutterBootstrapScript(),
+      generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
     bootstrapTemplate.applySubstitutions(
       baseHref: '/',
@@ -1179,7 +1174,10 @@ class WebDevFS implements DevFS {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
     if (fullRestart) {
-      webAssetServer.performRestart(modules, writeRestartScripts: ddcModuleSystem);
+      webAssetServer.performRestart(
+        modules,
+        writeRestartScripts: ddcModuleSystem && !bundleFirstUpload,
+      );
     } else {
       webAssetServer.performReload(modules);
     }

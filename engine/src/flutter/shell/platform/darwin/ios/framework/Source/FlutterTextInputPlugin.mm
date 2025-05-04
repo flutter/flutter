@@ -12,6 +12,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -1133,15 +1134,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputState:(NSDictionary*)state {
-  if (@available(iOS 13.0, *)) {
-    // [UITextInteraction willMoveToView:] sometimes sets the textInput's inputDelegate
-    // to nil. This is likely a bug in UIKit. In order to inform the keyboard of text
-    // and selection changes when that happens, add a dummy UITextInteraction to this
-    // view so it sets a valid inputDelegate that we can call textWillChange et al. on.
-    // See https://github.com/flutter/engine/pull/32881.
-    if (!self.inputDelegate && self.isFirstResponder) {
-      [self addInteraction:self.textInteraction];
-    }
+  // [UITextInteraction willMoveToView:] sometimes sets the textInput's inputDelegate
+  // to nil. This is likely a bug in UIKit. In order to inform the keyboard of text
+  // and selection changes when that happens, add a dummy UITextInteraction to this
+  // view so it sets a valid inputDelegate that we can call textWillChange et al. on.
+  // See https://github.com/flutter/engine/pull/32881.
+  if (!self.inputDelegate && self.isFirstResponder) {
+    [self addInteraction:self.textInteraction];
   }
 
   NSString* newText = state[@"text"];
@@ -1180,10 +1179,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     [self.inputDelegate textDidChange:self];
   }
 
-  if (@available(iOS 13.0, *)) {
-    if (_textInteraction) {
-      [self removeInteraction:_textInteraction];
-    }
+  if (_textInteraction) {
+    [self removeInteraction:_textInteraction];
   }
 }
 
@@ -2518,6 +2515,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return _activeView;
 }
 
+- (void)reset {
+  [self hideTextInput];
+}
+
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSString* method = call.method;
   id args = call.arguments;
@@ -2657,7 +2658,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)hideKeyboardWithoutAnimationAndAvoidCursorDismissUpdate {
   [UIView setAnimationsEnabled:NO];
-  _cachedFirstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  _cachedFirstResponder =
+      flutterApplication
+          ? flutterApplication.keyWindow.flutterFirstResponder
+          : self.viewController.flutterWindowSceneIfViewLoaded.keyWindow.flutterFirstResponder;
+
   _activeView.preventCursorDismissWhenResignFirstResponder = YES;
   [_cachedFirstResponder resignFirstResponder];
   _activeView.preventCursorDismissWhenResignFirstResponder = NO;
@@ -2674,8 +2680,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _keyboardView = keyboardSnap;
   [_keyboardViewContainer addSubview:_keyboardView];
   if (_keyboardViewContainer.superview == nil) {
-    [UIApplication.sharedApplication.delegate.window.rootViewController.view
-        addSubview:_keyboardViewContainer];
+    UIApplication* flutterApplication = FlutterSharedApplication.application;
+    UIView* rootView = flutterApplication
+                           ? flutterApplication.delegate.window.rootViewController.view
+                           : self.viewController.viewIfLoaded.window.rootViewController.view;
+    [rootView addSubview:_keyboardViewContainer];
   }
   _keyboardViewContainer.layer.zPosition = NSIntegerMax;
   _keyboardViewContainer.frame = _keyboardRect;

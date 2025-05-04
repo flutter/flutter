@@ -73,8 +73,9 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_unique<StrokePathGeometry>(path, stroke_width, miter_limit,
-                                              stroke_cap, stroke_join);
+  StrokeParameters parameters{stroke_width, miter_limit, stroke_cap,
+                              stroke_join};
+  return std::make_unique<StrokePathGeometry>(path, parameters);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeCover() {
@@ -82,7 +83,7 @@ std::unique_ptr<Geometry> Geometry::MakeCover() {
 }
 
 std::unique_ptr<Geometry> Geometry::MakeRect(const Rect& rect) {
-  return std::make_unique<RectGeometry>(rect);
+  return std::make_unique<FillRectGeometry>(rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeOval(const Rect& rect) {

@@ -73,22 +73,30 @@ class CopyArtifactsStep implements PipelineStep {
   @override
   Future<void> run() async {
     final String flutterJsSourceDirectory;
+    final String canvaskitExperimentalWebParagraphSourceDirectory;
     final String canvaskitSourceDirectory;
     final String canvaskitChromiumSourceDirectory;
     final String skwasmSourceDirectory;
-    final String skwasmStSourceDirectory;
     switch (source) {
       case LocalArtifactSource(:final mode):
         final buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
         flutterJsSourceDirectory = pathlib.join(buildDirectory, 'flutter_web_sdk', 'flutter_js');
+        canvaskitExperimentalWebParagraphSourceDirectory = pathlib.join(
+          buildDirectory,
+          'canvaskit_experimental_webparagraph',
+        );
         canvaskitSourceDirectory = pathlib.join(buildDirectory, 'canvaskit');
         canvaskitChromiumSourceDirectory = pathlib.join(buildDirectory, 'canvaskit_chromium');
         skwasmSourceDirectory = pathlib.join(buildDirectory, 'skwasm');
-        skwasmStSourceDirectory = pathlib.join(buildDirectory, 'skwasm_st');
 
       case GcsArtifactSource(:final realm):
         final artifactsDirectory = (await _downloadArtifacts(realm)).path;
         flutterJsSourceDirectory = pathlib.join(artifactsDirectory, 'flutter_js');
+        canvaskitExperimentalWebParagraphSourceDirectory = pathlib.join(
+          artifactsDirectory,
+          'canvaskit',
+          'experimental_webparagraph',
+        );
         canvaskitSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
         canvaskitChromiumSourceDirectory = pathlib.join(
           artifactsDirectory,
@@ -96,7 +104,6 @@ class CopyArtifactsStep implements PipelineStep {
           'chromium',
         );
         skwasmSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
-        skwasmStSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
     }
 
     await environment.webTestsArtifactsDir.create(recursive: true);
@@ -105,6 +112,14 @@ class CopyArtifactsStep implements PipelineStep {
     await copySkiaTestImages();
     await copyFlutterJsFiles(flutterJsSourceDirectory);
     final copied = <String>[];
+    if (artifactDeps.canvasKitExperimentalWebParagraph) {
+      copied.add('CanvasKit (Experimental Web Paragraph)');
+      await copyWasmLibrary(
+        'canvaskit',
+        canvaskitExperimentalWebParagraphSourceDirectory,
+        'canvaskit/experimental_webparagraph',
+      );
+    }
     if (artifactDeps.canvasKit) {
       copied.add('CanvasKit');
       await copyWasmLibrary('canvaskit', canvaskitSourceDirectory, 'canvaskit');
@@ -116,7 +131,6 @@ class CopyArtifactsStep implements PipelineStep {
     if (artifactDeps.skwasm) {
       copied.add('Skwasm');
       await copyWasmLibrary('skwasm', skwasmSourceDirectory, 'canvaskit');
-      await copyWasmLibrary('skwasm_st', skwasmStSourceDirectory, 'canvaskit');
     }
     print('Copied artifacts: ${copied.join(', ')}');
   }

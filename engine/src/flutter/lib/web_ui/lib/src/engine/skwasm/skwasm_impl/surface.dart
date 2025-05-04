@@ -12,14 +12,9 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-@JS()
-@staticInterop
-@anonymous
-class RasterResult {}
-
-extension RasterResultExtension on RasterResult {
-  external JSNumber get rasterStartMilliseconds;
-  external JSNumber get rasterEndMilliseconds;
+extension type RasterResult._(JSObject _) implements JSObject {
+  external double get rasterStartMilliseconds;
+  external double get rasterEndMilliseconds;
   external JSArray<JSAny> get imageBitmaps;
 }
 
@@ -104,8 +99,8 @@ class SkwasmSurface {
             (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
         final RenderResult result = (
           imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
-          rasterStartMicros: (rasterResult.rasterStartMilliseconds.toDartDouble * 1000).toInt(),
-          rasterEndMicros: (rasterResult.rasterEndMilliseconds.toDartDouble * 1000).toInt(),
+          rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
+          rasterEndMicros: (rasterResult.rasterEndMilliseconds * 1000).toInt(),
         );
         return result;
       });

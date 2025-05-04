@@ -505,7 +505,7 @@ class Message {
     }
     if (allPlaceholdersMap is! Map<String, Object?>) {
       throw L10nException(
-        'The "placeholders" attribute for message $resourceId, is not '
+        'The "placeholders" attribute for message "$resourceId", is not '
         'properly formatted. Ensure that it is a map with string valued keys.',
       );
     }
@@ -584,7 +584,9 @@ class Message {
       return x && !y && !z || !x && y && !z || !x && !y && z || !x && !y && !z;
     }
 
-    for (final Placeholder placeholder in templatePlaceholders.values) {
+    for (final Placeholder placeholder in templatePlaceholders.values.followedBy(
+      localePlaceholders.values.expand((Map<String, Placeholder> e) => e.values),
+    )) {
       if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
         throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
       } else if (placeholder.isPlural) {

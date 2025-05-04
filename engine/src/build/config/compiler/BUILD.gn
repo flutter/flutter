@@ -66,8 +66,15 @@ config("compiler") {
   cflags_c = []
   cflags_cc = []
   cflags_objcc = []
+  swiftflags = []
   ldflags = []
   defines = []
+  configs = []
+
+  # Platform-specific configs.
+  if (is_ios) {
+    configs += [ "//build/config/ios:compiler" ]
+  }
 
   # In general, Windows is totally different, but all the other builds share
   # some common GCC configuration. This section sets up Windows and the common
@@ -124,6 +131,10 @@ config("compiler") {
     if (is_asan) {
       cflags += [ "-fsanitize=address" ]
       ldflags += [ "-fsanitize=address" ]
+    }
+    if (is_hwasan && is_android && current_cpu == "arm64") {
+      cflags += [ "-fsanitize=hwaddress" ]
+      ldflags += [ "-fsanitize=hwaddress" ]
     }
     if (is_lsan) {
       cflags += [ "-fsanitize=leak" ]
@@ -277,9 +288,9 @@ config("compiler") {
   }
 
   if (is_wasm) {
-    if (wasm_use_pthreads) {
-      cflags += [ "-pthread" ]
-      ldflags += [ "-pthread" ]
+    if (wasm_use_workers) {
+      cflags += [ "-sWASM_WORKERS=1" ]
+      ldflags += [ "-sWASM_WORKERS=1" ]
     } if (wasm_shared_memory) {
       cflags += [ "-sSHARED_MEMORY=1" ]
       ldflags += [ "-sSHARED_MEMORY=1" ]
@@ -396,12 +407,12 @@ config("compiler") {
     # to say that it does. Define them here instead.
     defines += [ "HAVE_SYS_UIO_H" ]
 
-    # When Android requires new flags consider also editing the flags in 
-    # the following locations. 
+    # When Android requires new flags consider also editing the flags in
+    # the following locations.
     # Framework plugin_ffi template: packages/flutter_tools/templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
     # Example PR: https://github.com/flutter/flutter/pull/155508
-    # Dart Lang JNI package: pkgs/jni/src/CMakeLists.txt 
-    # Example PR: https://github.com/dart-lang/native/pull/1615 
+    # Dart Lang JNI package: pkgs/jni/src/CMakeLists.txt
+    # Example PR: https://github.com/dart-lang/native/pull/1615
     ldflags += [
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
@@ -530,17 +541,26 @@ config("runtime_library") {
   }
 
   if (use_flutter_cxx) {
-    cflags_cc += [ "-nostdinc++" ]
-    cflags_objcc += [ "-nostdinc++" ]
+    # Add libcxx[abi]/include via cflags_cc, cflags_objcc to apply to
+    # C++/Obj-C++ only. Adding them via include_dirs is problematic for Swift,
+    # whose core libraries expect the Apple SDK C++ headers, module.modulemap.
+    _libcxx_include = rebase_path("//flutter/third_party/libcxx/include", root_build_dir)
+    _libcxxabi_include = rebase_path("//flutter/third_party/libcxxabi/include", root_build_dir)
+    cflags_cc += [
+      "-nostdinc++",
+      "-I" + _libcxx_include,
+      "-I" + _libcxxabi_include,
+    ]
+    cflags_objcc += [
+      "-nostdinc++",
+      "-I" + _libcxx_include,
+      "-I" + _libcxxabi_include,
+    ]
 
     # Unwind seemes to be in these libraries in Linux.
     if (!is_linux) {
       ldflags += [ "-nostdlib++" ]
     }
-    include_dirs = [
-      "//flutter/third_party/libcxx/include",
-      "//flutter/third_party/libcxxabi/include",
-    ]
   }
 
   # Android standard library setup.
@@ -987,6 +1007,9 @@ config("symbols") {
     }
   } else {
     cflags = [ "-g2" ]
+    if (is_apple) {
+      swiftflags = [ "-g" ]
+    }
   }
 }
 

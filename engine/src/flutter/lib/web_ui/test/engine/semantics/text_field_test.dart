@@ -117,6 +117,22 @@ void testMain() {
       expect(inputElement.disabled, isFalse);
     });
 
+    test('renders text fields with input types', () {
+      const inputTypeEnumToString = <ui.SemanticsInputType, String>{
+        ui.SemanticsInputType.none: 'text',
+        ui.SemanticsInputType.text: 'text',
+        ui.SemanticsInputType.url: 'url',
+        ui.SemanticsInputType.phone: 'tel',
+        ui.SemanticsInputType.search: 'search',
+        ui.SemanticsInputType.email: 'email',
+      };
+      for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
+        createTextFieldSemantics(value: 'text', inputType: type);
+
+        expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
+      }
+    });
+
     test('renders a disabled text field', () {
       createTextFieldSemantics(isEnabled: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input /></sem>''');
@@ -267,6 +283,8 @@ void testMain() {
         'text': 'updated',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState), testTextEditing);
 
@@ -335,7 +353,7 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       // The input will have focus after editing state is set and semantics updated.
-      strategy.setEditingState(EditingState(text: 'foo'));
+      strategy.setEditingState(EditingState(text: 'foo', baseOffset: 0, extentOffset: 0));
 
       // NOTE: at this point some browsers, e.g. some versions of Safari will
       //       have set the focus on the editing element as a result of setting
@@ -498,6 +516,7 @@ SemanticsObject createTextFieldSemantics({
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.text,
 }) {
   final tester = SemanticsTester(owner());
   tester.updateNode(
@@ -516,6 +535,7 @@ SemanticsObject createTextFieldSemantics({
     textDirection: ui.TextDirection.ltr,
     textSelectionBase: textSelectionBase,
     textSelectionExtent: textSelectionExtent,
+    inputType: inputType,
   );
   tester.apply();
   return tester.getSemanticsObject(0);

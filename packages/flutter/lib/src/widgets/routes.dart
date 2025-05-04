@@ -1583,7 +1583,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    if (receivedTransition == null) {
+    if (receivedTransition == null || secondaryAnimation.isDismissed) {
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
@@ -2134,7 +2134,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is ModalRoute<T> &&
         canTransitionTo(nextRoute) &&
-        nextRoute.delegatedTransition != this.delegatedTransition) {
+        nextRoute.delegatedTransition != delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2147,7 +2147,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is ModalRoute<T> &&
         canTransitionTo(nextRoute) &&
-        nextRoute.delegatedTransition != this.delegatedTransition) {
+        nextRoute.delegatedTransition != delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;

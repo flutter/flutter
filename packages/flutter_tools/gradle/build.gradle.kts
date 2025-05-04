@@ -19,27 +19,17 @@ tasks.validatePlugins {
     enableStricterValidation.set(true)
 }
 
-// We need to compile Kotlin first so we can call it from Groovy. See https://stackoverflow.com/q/36214437/7009800
-tasks.withType<GroovyCompile> {
-    dependsOn(tasks.compileKotlin)
-    classpath += files(tasks.compileKotlin.get().destinationDirectory)
-}
-
-tasks.classes {
-    dependsOn(tasks.compileGroovy)
-}
-
 gradlePlugin {
     plugins {
         // The "flutterPlugin" name isn't used anywhere.
         create("flutterPlugin") {
             id = "dev.flutter.flutter-gradle-plugin"
-            implementationClass = "FlutterPlugin"
+            implementationClass = "com.flutter.gradle.FlutterPlugin"
         }
         // The "flutterAppPluginLoaderPlugin" name isn't used anywhere.
         create("flutterAppPluginLoaderPlugin") {
             id = "dev.flutter.flutter-plugin-loader"
-            implementationClass = "FlutterAppPluginLoaderPlugin"
+            implementationClass = "com.flutter.gradle.FlutterAppPluginLoaderPlugin"
         }
     }
 }

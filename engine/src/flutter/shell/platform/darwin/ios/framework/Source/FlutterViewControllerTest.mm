@@ -142,6 +142,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification;
 - (CGFloat)calculateMultitaskingAdjustment:(CGRect)screenRect keyboardFrame:(CGRect)keyboardFrame;
 - (void)startKeyBoardAnimation:(NSTimeInterval)duration;
+- (void)hideKeyboardImmediately;
 - (UIView*)keyboardAnimationView;
 - (SpringAnimation*)keyboardSpringAnimation;
 - (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation;
@@ -473,26 +474,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                   }];
   shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == NO);
-
-  if (@available(iOS 13.0, *)) {
-    // noop
-  } else {
-    // Valid keyboard, keyboard is in background
-    OCMStub([viewControllerMock isKeyboardInOrTransitioningFromBackground]).andReturn(YES);
-
-    isLocal = YES;
-    notification =
-        [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
-                                      object:nil
-                                    userInfo:@{
-                                      @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
-                                      @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                      @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                    }];
-    shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
-    XCTAssertTrue(shouldIgnore == YES);
-  }
 }
+
 - (void)testKeyboardAnimationWillNotCrashWhenEngineDestroyed {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
@@ -777,6 +760,57 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   viewControllerMock.targetViewInsetBottom = 10;
   [viewControllerMock handleKeyboardNotification:fakeNotification];
   XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 0);
+}
+
+- (void)testStopKeyBoardAnimationWhenReceivedWillHideNotificationAfterWillShowNotification {
+  // see: https://github.com/flutter/flutter/issues/112281
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  UIScreen* screen = [self setUpMockScreen];
+  CGRect viewFrame = screen.bounds;
+  [self setUpMockView:viewControllerMock
+               screen:screen
+            viewFrame:viewFrame
+       convertedFrame:viewFrame];
+  viewControllerMock.targetViewInsetBottom = 0;
+
+  CGFloat screenHeight = screen.bounds.size.height;
+  CGFloat screenWidth = screen.bounds.size.height;
+  CGRect keyboardFrame = CGRectMake(0, screenHeight - 320, screenWidth, 320);
+  BOOL isLocal = YES;
+
+  // Receive will show notification
+  NSNotification* fakeShowNotification =
+      [NSNotification notificationWithName:UIKeyboardWillShowNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+                                  }];
+  [viewControllerMock handleKeyboardNotification:fakeShowNotification];
+  XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 320 * screen.scale);
+
+  // Receive will hide notification
+  NSNotification* fakeHideNotification =
+      [NSNotification notificationWithName:UIKeyboardWillHideNotification
+                                    object:nil
+                                  userInfo:@{
+                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+                                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.0),
+                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+                                  }];
+  [viewControllerMock handleKeyboardNotification:fakeHideNotification];
+  XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 0);
+
+  // Check if the keyboard animation is stopped.
+  XCTAssertNil(viewControllerMock.keyboardAnimationView);
+  XCTAssertNil(viewControllerMock.keyboardSpringAnimation);
 }
 
 - (void)testEnsureViewportMetricsWillInvokeAndDisplayLinkWillInvalidateInViewDidDisappear {
@@ -1199,12 +1233,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsDarkPlatformBrightnessWhenTraitCollectionRequestsIt {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
@@ -1245,12 +1273,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 #pragma mark - Platform Contrast
 
 - (void)testItReportsNormalPlatformContrastByDefault {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
@@ -1272,11 +1294,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsPlatformContrastWhenViewWillAppear {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
 
@@ -1300,12 +1317,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsHighContrastWhenTraitCollectionRequestsIt {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
@@ -1365,12 +1376,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagNotSet {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
@@ -1385,12 +1390,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagSet {
-  if (@available(iOS 13, *)) {
-    // noop
-  } else {
-    return;
-  }
-
   // Setup test.
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
@@ -1608,16 +1607,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       } else {
         OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
       }
-      if (@available(iOS 13.0, *)) {
-        mockWindowScene = OCMClassMock([UIWindowScene class]);
-        mockVC = OCMPartialMock(realVC);
-        OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(mockWindowScene);
-        OCMStub(((UIWindowScene*)mockWindowScene).interfaceOrientation)
-            .andReturn(currentOrientation);
-      } else {
-        OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-        OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
-      }
+      mockWindowScene = OCMClassMock([UIWindowScene class]);
+      mockVC = OCMPartialMock(realVC);
+      OCMStub([mockVC flutterWindowSceneIfViewLoaded]).andReturn(mockWindowScene);
+      OCMStub(((UIWindowScene*)mockWindowScene).interfaceOrientation).andReturn(currentOrientation);
     }
 
     [realVC performOrientationUpdate:mask];
@@ -1650,12 +1643,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
                                                                           nibName:nil
                                                                            bundle:nil];
-    [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                      object:nil
-                                                       queue:[NSOperationQueue mainQueue]
-                                                  usingBlock:^(NSNotification* _Nonnull note) {
-                                                    [expectation fulfill];
-                                                  }];
+    [NSNotificationCenter.defaultCenter addObserverForName:FlutterViewControllerWillDealloc
+                                                    object:nil
+                                                     queue:[NSOperationQueue mainQueue]
+                                                usingBlock:^(NSNotification* _Nonnull note) {
+                                                  [expectation fulfill];
+                                                }];
     XCTAssertNotNil(realVC);
     realVC = nil;
   }
@@ -1696,8 +1689,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                         nibName:nil
                                                                          bundle:nil];
   XCTAssertFalse(realVC.prefersHomeIndicatorAutoHidden, @"");
-  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterViewControllerHideHomeIndicator
-                                                      object:nil];
+  [NSNotificationCenter.defaultCenter postNotificationName:FlutterViewControllerHideHomeIndicator
+                                                    object:nil];
   XCTAssertTrue(realVC.prefersHomeIndicatorAutoHidden, @"");
   engine.viewController = nil;
 }
@@ -1906,7 +1899,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [flutterViewController setSplashScreenView:nil];
 }
 
-- (void)testLifeCycleNotificationBecameActive {
+- (void)testLifeCycleNotificationApplicationBecameActive {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
@@ -1922,15 +1915,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                     object:nil
                                   userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify([mockVC sceneBecameActive:[OCMArg any]]);
-  OCMReject([mockVC applicationBecameActive:[OCMArg any]]);
-#else
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMReject([mockVC sceneBecameActive:[OCMArg any]]);
   OCMVerify([mockVC applicationBecameActive:[OCMArg any]]);
-#endif
   XCTAssertFalse(flutterViewController.isKeyboardInOrTransitioningFromBackground);
   OCMVerify([mockVC surfaceUpdated:YES]);
   XCTestExpectation* timeoutApplicationLifeCycle =
@@ -1944,7 +1932,45 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
-- (void)testLifeCycleNotificationWillResignActive {
+- (void)testLifeCycleNotificationSceneBecameActive {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  UIWindow* window = [[UIWindow alloc] init];
+  [window addSubview:flutterViewController.view];
+  flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
+  [flutterViewController viewDidLayoutSubviews];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify([mockVC sceneBecameActive:[OCMArg any]]);
+  OCMReject([mockVC applicationBecameActive:[OCMArg any]]);
+  XCTAssertFalse(flutterViewController.isKeyboardInOrTransitioningFromBackground);
+  OCMVerify([mockVC surfaceUpdated:YES]);
+  XCTestExpectation* timeoutApplicationLifeCycle =
+      [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   [timeoutApplicationLifeCycle fulfill];
+                   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
+                   [flutterViewController deregisterNotifications];
+                 });
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationApplicationWillResignActive {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
@@ -1958,20 +1984,42 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                     object:nil
                                   userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify([mockVC sceneWillResignActive:[OCMArg any]]);
-  OCMReject([mockVC applicationWillResignActive:[OCMArg any]]);
-#else
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMReject([mockVC sceneWillResignActive:[OCMArg any]]);
   OCMVerify([mockVC applicationWillResignActive:[OCMArg any]]);
-#endif
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
 }
 
-- (void)testLifeCycleNotificationWillTerminate {
+- (void)testLifeCycleNotificationSceneWillResignActive {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillDeactivateNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify([mockVC sceneWillResignActive:[OCMArg any]]);
+  OCMReject([mockVC applicationWillResignActive:[OCMArg any]]);
+  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
+  [flutterViewController deregisterNotifications];
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationApplicationWillTerminate {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
@@ -1987,21 +2035,46 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockVC = OCMPartialMock(flutterViewController);
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockVC engine]).andReturn(mockEngine);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify([mockVC sceneWillDisconnect:[OCMArg any]]);
-  OCMReject([mockVC applicationWillTerminate:[OCMArg any]]);
-#else
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMReject([mockVC sceneWillDisconnect:[OCMArg any]]);
   OCMVerify([mockVC applicationWillTerminate:[OCMArg any]]);
-#endif
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.detached"]);
   OCMVerify([mockEngine destroyContext]);
   [flutterViewController deregisterNotifications];
 }
 
-- (void)testLifeCycleNotificationDidEnterBackground {
+- (void)testLifeCycleNotificationSceneWillTerminate {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneDidDisconnectNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationWillTerminateNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+  id mockEngine = OCMPartialMock(engine);
+  OCMStub([mockVC engine]).andReturn(mockEngine);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify([mockVC sceneWillDisconnect:[OCMArg any]]);
+  OCMReject([mockVC applicationWillTerminate:[OCMArg any]]);
+  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.detached"]);
+  OCMVerify([mockEngine destroyContext]);
+  [flutterViewController deregisterNotifications];
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationApplicationDidEnterBackground {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
@@ -2015,22 +2088,46 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                     object:nil
                                   userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify([mockVC sceneDidEnterBackground:[OCMArg any]]);
-  OCMReject([mockVC applicationDidEnterBackground:[OCMArg any]]);
-#else
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMReject([mockVC sceneDidEnterBackground:[OCMArg any]]);
   OCMVerify([mockVC applicationDidEnterBackground:[OCMArg any]]);
-#endif
   XCTAssertTrue(flutterViewController.isKeyboardInOrTransitioningFromBackground);
   OCMVerify([mockVC surfaceUpdated:NO]);
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.paused"]);
   [flutterViewController deregisterNotifications];
 }
 
-- (void)testLifeCycleNotificationWillEnterForeground {
+- (void)testLifeCycleNotificationSceneDidEnterBackground {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify([mockVC sceneDidEnterBackground:[OCMArg any]]);
+  OCMReject([mockVC applicationDidEnterBackground:[OCMArg any]]);
+  XCTAssertTrue(flutterViewController.isKeyboardInOrTransitioningFromBackground);
+  OCMVerify([mockVC surfaceUpdated:NO]);
+  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.paused"]);
+  [flutterViewController deregisterNotifications];
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationApplicationWillEnterForeground {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
@@ -2044,17 +2141,39 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                     object:nil
                                   userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify([mockVC sceneWillEnterForeground:[OCMArg any]]);
-  OCMReject([mockVC applicationWillEnterForeground:[OCMArg any]]);
-#else
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMReject([mockVC sceneWillEnterForeground:[OCMArg any]]);
   OCMVerify([mockVC applicationWillEnterForeground:[OCMArg any]]);
-#endif
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
+}
+
+- (void)testLifeCycleNotificationSceneWillEnterForeground {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify([mockVC sceneWillEnterForeground:[OCMArg any]]);
+  OCMReject([mockVC applicationWillEnterForeground:[OCMArg any]]);
+  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
+  [flutterViewController deregisterNotifications];
+  [mockBundle stopMocking];
 }
 
 - (void)testLifeCycleNotificationCancelledInvalidResumed {
@@ -2071,12 +2190,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                     object:nil
                                   userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
-  [[NSNotificationCenter defaultCenter] postNotification:applicationDidBecomeActiveNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationWillResignActiveNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-#else
+  [NSNotificationCenter.defaultCenter postNotification:applicationDidBecomeActiveNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationWillResignActiveNotification];
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
-#endif
 
   XCTestExpectation* timeoutApplicationLifeCycle =
       [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
@@ -2257,6 +2373,102 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   } else {
     XCTAssertFalse(supportsShowingSystemContextMenu);
   }
+}
+
+- (void)testStateIsActiveAndBackgroundWhenApplicationStateIsActive {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateActive);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  XCTAssertTrue(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsBackground);
+}
+
+- (void)testStateIsActiveAndBackgroundWhenApplicationStateIsBackground {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateBackground);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertTrue(viewController.stateIsBackground);
+}
+
+- (void)testStateIsActiveAndBackgroundWhenApplicationStateIsInactive {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateInactive);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsBackground);
+}
+
+- (void)testStateIsActiveAndBackgroundWhenSceneStateIsActive {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockVC = OCMPartialMock(viewController);
+  OCMStub([mockVC activationState]).andReturn(UISceneActivationStateForegroundActive);
+  XCTAssertTrue(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsBackground);
+
+  [mockBundle stopMocking];
+  [mockVC stopMocking];
+}
+
+- (void)testStateIsActiveAndBackgroundWhenSceneStateIsBackground {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockVC = OCMPartialMock(viewController);
+  OCMStub([mockVC activationState]).andReturn(UISceneActivationStateBackground);
+  XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertTrue(viewController.stateIsBackground);
+
+  [mockBundle stopMocking];
+  [mockVC stopMocking];
+}
+
+- (void)testStateIsActiveAndBackgroundWhenSceneStateIsInactive {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id mockVC = OCMPartialMock(viewController);
+  OCMStub([mockVC activationState]).andReturn(UISceneActivationStateForegroundInactive);
+  XCTAssertFalse(viewController.stateIsActive);
+  XCTAssertFalse(viewController.stateIsBackground);
+
+  [mockBundle stopMocking];
+  [mockVC stopMocking];
 }
 
 @end
