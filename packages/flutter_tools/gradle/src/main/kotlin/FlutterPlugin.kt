@@ -309,8 +309,11 @@ class FlutterPlugin : Plugin<Project> {
     private fun resolveFlutterSdkProperty(defaultValue: String?): String? {
         val propertyName = "flutter.sdk"
         if (localProperties == null) {
-            localProperties =
-                readPropertiesIfExist(File(project!!.projectDir.parentFile, "local.properties"))
+            val projectProperties = File(project!!.projectDir.parentFile, "local.properties")
+            val rootProperties = File(project!!.rootDir, "local.properties")
+            localProperties = readPropertiesIfExist(
+                if (projectProperties.exists()) projectProperties else rootProperties
+            )
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,
