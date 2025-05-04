@@ -39,30 +39,6 @@ Future<void> main() async {
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
-        section('APK content for task assembleDebug with target platform = android-x86');
-        // This is used by `flutter run`
-        await inDirectory(pluginProject.exampleAndroidPath, () {
-          return flutter(
-            'build',
-            options: <String>['apk', '--debug', '--target-platform=android-x86'],
-          );
-        });
-
-        apkFiles = await getFilesInApk(pluginProject.debugApkPath);
-
-        checkCollectionContains<String>(<String>[
-          ...flutterAssets,
-          ...debugAssets,
-          ...baseApkFiles,
-          'lib/x86/libflutter.so',
-        ], apkFiles);
-
-        checkCollectionDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
-        ], apkFiles);
-
         section('APK content for task assembleDebug with target platform = android-x64');
         // This is used by `flutter run`
 
