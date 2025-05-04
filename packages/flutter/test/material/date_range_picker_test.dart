@@ -1870,6 +1870,23 @@ void main() {
       expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
     });
 
+    testWidgets('showDateRangePicker using default calendar delegate', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final Finder helpText = find.text('Select range');
+        final Finder firstDateHeaderText = find.text('Jan 15');
+        final Finder lastDateHeaderText = find.text('Jan 25, 2016');
+        final Finder saveText = find.text('Save');
+
+        expect(helpText, findsOneWidget);
+        expect(firstDateHeaderText, findsOneWidget);
+        expect(lastDateHeaderText, findsOneWidget);
+        expect(saveText, findsOneWidget);
+
+        final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+        expect(dialog.calendarDelegate, isA<GregorianCalendarDelegate>());
+      }, useMaterial3: true);
+    });
+
     testWidgets('showDateRangePicker using custom calendar delegate implementation', (
       WidgetTester tester,
     ) async {
