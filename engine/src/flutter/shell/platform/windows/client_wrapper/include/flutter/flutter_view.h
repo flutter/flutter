@@ -36,7 +36,6 @@ class FlutterView {
     return FlutterDesktopPluginViewGetID3D11Device(view_);
   }
 
-
  private:
   // Handle for interacting with the C API's view.
   FlutterDesktopViewRef view_ = nullptr;
