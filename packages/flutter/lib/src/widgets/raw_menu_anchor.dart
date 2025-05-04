@@ -209,23 +209,20 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when the menu overlay is shown
   ///
-  /// This callback is triggered when the menu overlay is added to the widget
-  /// tree, typically at the start of an opening animation. This
-  /// callback can be used to respond when the menu first becomes interactive.
-  /// Repositioning an open menu will not trigger [onOpen].
+  /// This callback is called when the menu overlay is added to the widget tree,
+  /// typically before opening animations begin. [onOpen] can be used to respond
+  /// when the menu first becomes interactive, such as by setting focus to the
+  /// menu.
   ///
-  /// If an [onOpenRequested] callback is provided, [onOpen] will be called in
-  /// response to `showOverlay`, if the menu is not already open.
+  /// An open menu that is repositioned will not trigger [onOpen].
   final VoidCallback? onOpen;
 
   /// Called when the menu overlay is hidden.
   ///
-  /// This callback is triggered after the menu is fully closed and any
-  /// transition animations have completed. It is typically used by
-  /// applications to respond when the menu has been dismissed.
-  ///
-  /// If an [onCloseRequested] callback is provided, [onClose] will be called
-  /// in response to `hideOverlay`, assuming the menu is not already closed.
+  /// This callback is triggered after the menu overlay has been removed from
+  /// the widget tree, typically after all closing animations have completed. It
+  /// is typically used by applications to respond when the menu has been
+  /// dismissed.
   final VoidCallback? onClose;
 
   /// Called when a request is made to open the menu.
