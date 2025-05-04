@@ -1181,7 +1181,10 @@ class _DayState extends State<_Day> {
             )
             : ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
 
-    Widget dayWidget = Ink(
+
+    Widget dayWidget = Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Ink(
       decoration: decoration,
       child: Center(
         child: Text(
@@ -1189,6 +1192,7 @@ class _DayState extends State<_Day> {
           style: dayStyle?.apply(color: dayForegroundColor),
         ),
       ),
+    )
     );
 
     if (widget.isDisabled) {
