@@ -30,6 +30,8 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
+import kotlin.io.path.exists
+import kotlin.io.path.name
 
 class FlutterPlugin : Plugin<Project> {
     private var project: Project? = null
@@ -104,6 +106,23 @@ class FlutterPlugin : Plugin<Project> {
                 dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
+            }
+        }
+
+        if (project.hasProperty("android.injected.invoked.from.ide")) {
+            val settingsFile = Paths.get(project.rootDir.absolutePath, "settings.gradle")
+            val settingsKtsFile = Paths.get(project.rootDir.absolutePath, "settings.gradle.kts")
+            val hasSettings = settingsFile.exists()
+            val hasSettingsKts = settingsKtsFile.exists()
+            val hasPubspec = Paths.get(project.rootDir.absolutePath, "pubspec.yaml").exists()
+            val hasParentSettings = Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle").exists()
+            val hasParentSettingsKts = Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle.kts").exists()
+            val hasParentPubspec = Paths.get(project.rootDir.parentFile.absolutePath, "pubspec.yaml").exists()
+
+            if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
+                val file = if (hasSettings) settingsFile else settingsKtsFile
+                // TODO(rekire): Ensure that this url is live before merging
+                project.logger.warn("w: You should migrate your ${file.name}. See https://docs.flutter.dev/release/breaking-changes/gradle-settings-migration")
             }
         }
 
