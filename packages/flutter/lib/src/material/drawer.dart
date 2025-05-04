@@ -339,7 +339,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-    this.dismissible = true,
+    this.drawerBarrierDismissible = true,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -361,7 +361,7 @@ class DrawerController extends StatefulWidget {
   /// Defaults to true.
   ///
   /// If false, tapping the barrier will not dismiss the drawer.
-  final bool dismissible;
+  final bool drawerBarrierDismissible;
 
   /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
