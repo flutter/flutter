@@ -394,14 +394,14 @@ TextStyle _selectedLabelStyle(WidgetTester tester) {
   return tester
       .widget<RichText>(find.descendant(of: find.text('Abc'), matching: find.byType(RichText)))
       .text
-      .style!;
+      .style;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
   return tester
       .widget<RichText>(find.descendant(of: find.text('Def'), matching: find.byType(RichText)))
       .text
-      .style!;
+      .style;
 }
 
 NavigationDestinationLabelBehavior _labelBehavior(WidgetTester tester) {

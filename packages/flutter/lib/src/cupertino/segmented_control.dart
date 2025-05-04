@@ -424,7 +424,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
         ),
       );
 
-      backgroundColors.add(getBackgroundColor(index, currentKey)!);
+      backgroundColors.add(getBackgroundColor(index, currentKey));
       gestureChildren.add(child);
       index += 1;
     }
@@ -433,7 +433,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: backgroundColors,
-      borderColor: _borderColor!,
+      borderColor: _borderColor,
       children: gestureChildren,
     );
 

@@ -1456,7 +1456,7 @@ void main() {
       context: scaffoldKey.currentContext!,
       routeSettings: routeSettings,
       builder: (BuildContext context) {
-        retrievedRouteSettings = ModalRoute.settingsOf(context)!;
+        retrievedRouteSettings = ModalRoute.settingsOf(context);
         return const Text('BottomSheet');
       },
     );
@@ -1709,7 +1709,7 @@ void main() {
       MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
     );
 
-    final ModalRoute<dynamic> route = ModalRoute.of(scaffoldKey.currentContext!)!;
+    final ModalRoute<dynamic> route = ModalRoute.of(scaffoldKey.currentContext!);
     expect(route.canPop, false);
 
     scaffoldKey.currentState!.showBottomSheet((_) {

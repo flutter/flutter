@@ -588,10 +588,10 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
 
   static _CupertinoDownGestureController<T> _startPopGesture<T>(ModalRoute<T> route) {
     return _CupertinoDownGestureController<T>(
-      navigator: route.navigator!,
+      navigator: route.navigator,
       getIsCurrent: () => route.isCurrent,
       getIsActive: () => route.isActive,
-      controller: route.controller!, // protected access
+      controller: route.controller, // protected access
     );
   }
 
