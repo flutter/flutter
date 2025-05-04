@@ -6,11 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
 class WidgetPreviewerWidgetScaffolding extends StatelessWidget {
-  const WidgetPreviewerWidgetScaffolding({
+  WidgetPreviewerWidgetScaffolding({
     super.key,
     this.platformBrightness = Brightness.light,
     required this.child,
-  });
+  }) {
+    // This is set unconditionally by the preview scaffolding.
+    WidgetsBinding.instance.debugExcludeRootWidgetInspector = true;
+  }
 
   /// Sets the root platform brightness. Defaults to light.
   final Brightness platformBrightness;

@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, ValueListenable;
+import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -251,12 +251,35 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     );
 
     final Size? size = widget.preview.size;
-    preview = _WidgetPreviewWrapper(
-      previewerConstraints: maxSizeConstraints,
-      child: SizedBox(
-        width: size?.width == double.infinity ? null : size?.width,
-        height: size?.height == double.infinity ? null : size?.height,
-        child: preview,
+
+    // Add support for selecting only previewed widgets via the widget
+    // inspector.
+    preview = ValueListenableBuilder(
+      valueListenable:
+          WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
+      builder: (context, enableWidgetInspector, child) {
+        if (enableWidgetInspector) {
+          return WidgetInspector(
+            // TODO(bkonyi): wire up inspector controls for individual previews or
+            // the entire preview environment. This currently requires users to
+            // to enable widget selection via the Widget Inspector tool in DevTools.
+
+            // These buttons would be rendered on top of the previewed widget, so
+            // don't display them.
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            child: child!,
+          );
+        }
+        return child!;
+      },
+      child: _WidgetPreviewWrapper(
+        previewerConstraints: maxSizeConstraints,
+        child: SizedBox(
+          width: size?.width == double.infinity ? null : size?.width,
+          height: size?.height == double.infinity ? null : size?.height,
+          child: preview,
+        ),
       ),
     );
 
@@ -593,6 +616,12 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  // Disable the injection of [WidgetInspector] into the widget tree built by
+  // [WidgetsApp]. [WidgetInspector] instances will be created for each
+  // individual preview so the widget inspector won't allow for users to select
+  // widgets that make up the widget preview scaffolding.
+  binding.debugExcludeRootWidgetInspector = true;
   // TODO(bkonyi): store somewhere.
   await WidgetPreviewScaffoldDtdServices().connect();
   runApp(WidgetPreviewScaffold(previews: previews));
