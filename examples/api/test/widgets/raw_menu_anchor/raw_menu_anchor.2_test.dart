@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
 import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.2.dart' as example;
-
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,7 +28,7 @@ void main() {
 
     expect(
       tester.getRect(message),
-      rectMoreOrLessEquals(const Rect.fromLTRB(323.7, 326.2, 476.3, 533.2), epsilon: 0.1),
+      rectMoreOrLessEquals(const Rect.fromLTRB(325.0, 328.0, 475.0, 528.0), epsilon: 0.1),
     );
 
     await tester.pump(const Duration(milliseconds: 1100));
@@ -48,7 +46,7 @@ void main() {
 
     expect(
       tester.getRect(message),
-      rectMoreOrLessEquals(const Rect.fromLTRB(382.4, 345.9, 417.6, 356.9), epsilon: 0.1),
+      rectMoreOrLessEquals(const Rect.fromLTRB(362.5, 353.0, 437.5, 403.0), epsilon: 0.1),
     );
 
     await tester.pump(const Duration(milliseconds: 920));
@@ -80,5 +78,22 @@ void main() {
 
     // The panel text should be removed when the animation is dismissed.
     expect(find.textContaining('reverse'), findsNothing);
+  });
+
+  testWidgets('Menu closes on outside tap', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.RawMenuAnchorAnimationApp());
+
+    // Open the menu.
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+
+    expect(find.text('Close'), findsOneWidget);
+
+    // Tap outside the menu to close it.
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+
+    expect(find.text('Close'), findsNothing);
+    expect(find.text('Open'), findsOneWidget);
   });
 }

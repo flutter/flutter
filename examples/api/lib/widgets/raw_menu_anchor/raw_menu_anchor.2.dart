@@ -4,15 +4,12 @@
 
 // ignore_for_file: public_member_api_docs
 
-import 'dart:ui' as ui;
+import 'dart:ui';
 
-import 'package:flutter/material.dart' hide MenuController, RawMenuAnchor, RawMenuOverlayInfo;
-import 'package:flutter/physics.dart';
+import 'package:flutter/material.dart';
 
-import 'raw_menu_anchor.dart';
-
-/// Flutter code sample for a [RawMenuAnchor] that animates a menu with a
-/// [SpringSimulation].
+/// Flutter code sample for a [RawMenuAnchor] that animates a simple menu using
+/// [RawMenuAnchor.onOpenRequested] and [RawMenuAnchor.onCloseRequested].
 void main() {
   runApp(const RawMenuAnchorAnimationApp());
 }
@@ -28,19 +25,19 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
   final MenuController menuController = MenuController();
-
-  bool get isOpenOrOpening {
-    return animationController.isForwardOrCompleted;
-  }
+  AnimationStatus get _animationStatus => animationController.status;
 
   @override
   void initState() {
     super.initState();
-    // Use an unbounded animation controller to allow simulations to overshoot.
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    );
+    )..addStatusListener((AnimationStatus status) {
+      setState(() {
+        // Rebuild to reflect animation status changes on the UI.
+      });
+    });
   }
 
   @override
@@ -49,26 +46,44 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     super.dispose();
   }
 
-  void _handleCloseRequest() {
-    animationController.reverse().whenComplete(() {
-      menuController.close(transition: false);
-    });
+  void _handleMenuOpenRequest(Offset? position, void Function({Offset? position}) showOverlay) {
+    // Mount or reposition the menu before animating the menu open.
+    showOverlay(position: position);
+
+    if (_animationStatus.isForwardOrCompleted) {
+      // If the menu is already open or opening, the animation is already
+      // running forward.
+      return;
+    }
+
+    // Animate the menu into view.
+    animationController.forward();
   }
 
-  void _handleOpenRequest() {
-    menuController.open(transition: false);
-    animationController.forward();
+  void _handleMenuCloseRequest(VoidCallback hideOverlay) {
+    if (!_animationStatus.isForwardOrCompleted) {
+      // If the menu is already closed or closing, do nothing.
+      return;
+    }
+
+    // Animate the menu out of view.
+    animationController.reverse().whenComplete(() {
+      if (mounted) {
+        // Hide the menu after the menu has closed
+        hideOverlay();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return RawMenuAnchor(
       controller: menuController,
-      onCloseRequested: _handleCloseRequest,
-      onOpenRequested: _handleOpenRequest,
+      onOpenRequested: _handleMenuOpenRequest,
+      onCloseRequested: _handleMenuCloseRequest,
       overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
         // Center the menu below the anchor.
-        final ui.Offset position = info.anchorRect.bottomCenter.translate(-75, 4);
+        final Offset position = info.anchorRect.bottomCenter.translate(-75, 4);
         final ColorScheme colorScheme = ColorScheme.of(context);
         return Positioned(
           top: position.dy,
@@ -76,27 +91,38 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
           child: Semantics(
             explicitChildNodes: true,
             scopesRoute: true,
-            child: TapRegion(
-              groupId: info.tapRegionGroupId,
-              onTapOutside: (PointerDownEvent event) {
-                menuController.close();
-              },
-              child: ScaleTransition(
-                scale: animationController.view,
-                child: FadeTransition(
-                  opacity: animationController.drive(
-                    Animatable<double>.fromCallback((double value) => ui.clampDouble(value, 0, 1)),
-                  ),
-                  child: Material(
-                    elevation: 8,
-                    clipBehavior: Clip.antiAlias,
-                    borderRadius: BorderRadius.circular(16),
-                    color: colorScheme.primary,
-                    child: SizeTransition(
-                      axisAlignment: -1,
-                      sizeFactor: animationController.view,
-                      fixedCrossAxisSizeFactor: 1.0,
-                      child: const SizedBox(height: 200, width: 150),
+            child: ExcludeFocus(
+              excluding: !_animationStatus.isForwardOrCompleted,
+              child: TapRegion(
+                groupId: info.tapRegionGroupId,
+                onTapOutside: (PointerDownEvent event) {
+                  menuController.close();
+                },
+                child: ScaleTransition(
+                  scale: animationController.view,
+                  child: FadeTransition(
+                    opacity: animationController.drive(
+                      Animatable<double>.fromCallback((double value) => clampDouble(value, 0, 1)),
+                    ),
+                    child: Material(
+                      elevation: 8,
+                      clipBehavior: Clip.antiAlias,
+                      borderRadius: BorderRadius.circular(16),
+                      color: colorScheme.primary,
+                      child: SizeTransition(
+                        axisAlignment: -1,
+                        sizeFactor: animationController.view,
+                        fixedCrossAxisSizeFactor: 1.0,
+                        child: SizedBox(
+                          height: 200,
+                          width: 150,
+                          child: Text(
+                            'ANIMATION STATUS:\n${_animationStatus.name}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: colorScheme.onPrimary, fontSize: 12),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -108,13 +134,13 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
       builder: (BuildContext context, MenuController menuController, Widget? child) {
         return FilledButton(
           onPressed: () {
-            if (isOpenOrOpening) {
+            if (_animationStatus.isForwardOrCompleted) {
               menuController.close();
             } else {
               menuController.open();
             }
           },
-          child: const Text('Toggle'),
+          child: _animationStatus.isForwardOrCompleted ? const Text('Close') : const Text('Open'),
         );
       },
     );

@@ -6,76 +6,67 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart'
-    hide
-        MenuController,
-        RawMenuAnchor,
-        RawMenuAnchorChildBuilder,
-        RawMenuAnchorGroup,
-        RawMenuOverlayInfo;
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
-import 'raw_menu_anchor.dart';
-
-/// Flutter code sample for a [MenuControllerDecorator] that animates a nested
-/// menu.
+/// Flutter code sample for a [RawMenuAnchor] that animates a nested menu using
+/// [RawMenuAnchor.onOpenRequested] and [RawMenuAnchor.onCloseRequested].
 void main() {
   runApp(const RawMenuAnchorSubmenuAnimationApp());
 }
 
-class NestedMenuControllerDecoratorExample extends StatelessWidget {
-  const NestedMenuControllerDecoratorExample({super.key});
+class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
+  const RawMenuAnchorSubmenuAnimationExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Menu(
-      panel: Builder(
-        builder: (BuildContext context) {
-          final MenuController rootMenuController = MenuController.maybeOf(context)!;
-          return Align(
-            alignment: Alignment.topRight,
-            child: Column(
-              children: <Widget>[
-                for (int i = 0; i < 4; i++)
-                  Menu(
-                    panel: Builder(
-                      builder: (BuildContext context) {
-                        return SizedBox(
-                          height: 120,
-                          width: 120,
-                          child: Center(child: Text('Panel $i', textAlign: TextAlign.center)),
-                        );
+      panelBuilder: (BuildContext context, AnimationStatus animationStatus) {
+        final MenuController rootMenuController = MenuController.maybeOf(context)!;
+        return Align(
+          alignment: Alignment.topRight,
+          child: Column(
+            children: <Widget>[
+              for (int i = 0; i < 4; i++)
+                Menu(
+                  panelBuilder: (BuildContext context, AnimationStatus status) {
+                    return SizedBox(
+                      height: 120,
+                      width: 120,
+                      child: Center(
+                        child: Text('Panel $i:\n${status.name}', textAlign: TextAlign.center),
+                      ),
+                    );
+                  },
+                  builder: (
+                    BuildContext context,
+                    MenuController controller,
+                    AnimationStatus animationStatus,
+                  ) {
+                    return MenuItemButton(
+                      onFocusChange: (bool focused) {
+                        if (focused) {
+                          rootMenuController.closeChildren();
+                          controller.open();
+                        }
                       },
-                    ),
-                    builder: (
-                      BuildContext context,
-                      MenuController controller,
-                      AnimationStatus animationStatus,
-                    ) {
-                      return MenuItemButton(
-                        onFocusChange: (bool focused) {
-                          if (focused) {
-                            rootMenuController.closeChildren();
-                            controller.open();
-                          }
-                        },
-                        onPressed: () {
-                          if (!animationStatus.isForwardOrCompleted) {
-                            rootMenuController.closeChildren();
-                            controller.open();
-                          } else {
-                            controller.close();
-                          }
-                        },
-                        trailingIcon: const Text('▶'),
-                        child: Text('Submenu $i'),
-                      );
-                    },
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
+                      onPressed: () {
+                        if (!animationStatus.isForwardOrCompleted) {
+                          rootMenuController.closeChildren();
+                          controller.open();
+                        } else {
+                          controller.close();
+                        }
+                      },
+                      trailingIcon: const Text('▶'),
+                      child: Text('Submenu $i'),
+                    );
+                  },
+                ),
+            ],
+          ),
+        );
+      },
       builder: (BuildContext context, MenuController controller, AnimationStatus animationStatus) {
         return FilledButton(
           onPressed: () {
@@ -93,8 +84,8 @@ class NestedMenuControllerDecoratorExample extends StatelessWidget {
 }
 
 class Menu extends StatefulWidget {
-  const Menu({super.key, required this.panel, required this.builder});
-  final Widget panel;
+  const Menu({super.key, required this.panelBuilder, required this.builder});
+  final Widget Function(BuildContext, AnimationStatus) panelBuilder;
   final Widget Function(BuildContext, MenuController, AnimationStatus) builder;
 
   @override
@@ -106,6 +97,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   late final AnimationController animationController;
   late final CurvedAnimation animation;
   bool get isSubmenu => MenuController.maybeOf(context) != null;
+  AnimationStatus get animationStatus => animationController.status;
 
   @override
   void initState() {
@@ -115,7 +107,9 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
     )..addStatusListener((AnimationStatus status) {
       if (mounted) {
-        setState(() {});
+        setState(() {
+          // Rebuild to reflect animation status changes.
+        });
       }
     });
 
@@ -129,74 +123,88 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _handleCloseRequest() {
-    if (animationController.isForwardOrCompleted) {
-      animationController.reverse().whenComplete(() {
-        menuController.close(transition: false);
-      });
+  void _handleMenuOpenRequest(Offset? position, void Function({Offset? position}) showOverlay) {
+    // Mount or reposition the menu before animating the menu open.
+    showOverlay(position: position);
+
+    if (animationStatus.isForwardOrCompleted) {
+      // If the menu is already open or opening, the animation is already
+      // running forward.
+      return;
     }
+
+    // Animate the menu into view.
+    animationController.forward();
   }
 
-  void _handleOpenRequest() {
-    if (!animationController.isForwardOrCompleted) {
-      menuController.open(transition: false);
-      animationController.forward();
+  void _handleMenuCloseRequest(VoidCallback hideOverlay) {
+    if (!animationStatus.isForwardOrCompleted) {
+      // If the menu is already closed or closing, do nothing.
+      return;
     }
-  }
 
-  Widget _buildFocusExcluder(BuildContext context, Widget? child) {
-    // Helper method to exclude focus when the menu is closing.
-    return ExcludeFocus(excluding: animation.status == AnimationStatus.reverse, child: child!);
+    // Animate the menu's children out of view.
+    menuController.closeChildren();
+
+    // Animate the menu out of view.
+    animationController.reverse().whenComplete(() {
+      if (mounted) {
+        // Hide the menu after the closing animation completes.
+        hideOverlay();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return RawMenuAnchor(
-      controller: menuController,
-      onOpenRequested: _handleOpenRequest,
-      onCloseRequested: _handleCloseRequest,
-      overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
-        final ui.Offset position =
-            isSubmenu ? info.anchorRect.topRight : info.anchorRect.bottomLeft;
-        final ColorScheme colorScheme = ColorScheme.of(context);
-        return Positioned(
-          top: position.dy,
-          left: position.dx,
-          child: Semantics(
-            explicitChildNodes: true,
-            scopesRoute: true,
-            // Remove focus while the menu is closing.
-            child: AnimatedBuilder(
-              animation: animationController,
-              builder: _buildFocusExcluder,
-              child: TapRegion(
-                groupId: info.tapRegionGroupId,
-                onTapOutside: (PointerDownEvent event) {
-                  menuController.close();
-                },
-                child: FadeTransition(
-                  opacity: animation,
-                  child: Material(
-                    elevation: 8,
-                    clipBehavior: Clip.antiAlias,
-                    borderRadius: BorderRadius.circular(8),
-                    shadowColor: colorScheme.shadow,
-                    child: SizeTransition(
-                      axisAlignment: position.dx < 0 ? 1 : -1,
-                      sizeFactor: animation,
-                      fixedCrossAxisSizeFactor: 1.0,
-                      child: widget.panel,
+    return Semantics(
+      role: SemanticsRole.menu,
+      child: RawMenuAnchor(
+        controller: menuController,
+        onOpenRequested: _handleMenuOpenRequest,
+        onCloseRequested: _handleMenuCloseRequest,
+        overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+          final ui.Offset position =
+              isSubmenu ? info.anchorRect.topRight : info.anchorRect.bottomLeft;
+          final ColorScheme colorScheme = ColorScheme.of(context);
+          return Positioned(
+            top: position.dy,
+            left: position.dx,
+            child: Semantics(
+              explicitChildNodes: true,
+              scopesRoute: true,
+              // Remove focus while the menu is closing.
+              child: ExcludeFocus(
+                excluding: !animationStatus.isForwardOrCompleted,
+                child: TapRegion(
+                  groupId: info.tapRegionGroupId,
+                  onTapOutside: (PointerDownEvent event) {
+                    menuController.close();
+                  },
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: Material(
+                      elevation: 8,
+                      clipBehavior: Clip.antiAlias,
+                      borderRadius: BorderRadius.circular(8),
+                      shadowColor: colorScheme.shadow,
+                      child: SizeTransition(
+                        axisAlignment: position.dx < 0 ? 1 : -1,
+                        sizeFactor: animation,
+                        fixedCrossAxisSizeFactor: 1.0,
+                        child: widget.panelBuilder(context, animationStatus),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      },
-      builder: (BuildContext context, MenuController controller, Widget? child) {
-        return widget.builder(context, controller, animation.status);
-      },
+          );
+        },
+        builder: (BuildContext context, MenuController controller, Widget? child) {
+          return widget.builder(context, controller, animationStatus);
+        },
+      ),
     );
   }
 }
@@ -214,7 +222,7 @@ class RawMenuAnchorSubmenuAnimationApp extends StatelessWidget {
           dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
         ),
       ),
-      home: const Scaffold(body: Center(child: NestedMenuControllerDecoratorExample())),
+      home: const Scaffold(body: Center(child: RawMenuAnchorSubmenuAnimationExample())),
     );
   }
 }

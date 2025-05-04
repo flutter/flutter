@@ -34,6 +34,7 @@ void main() {
       tester.getRect(panel),
       rectMoreOrLessEquals(const ui.Rect.fromLTRB(347.8, 324.0, 524.8, 324.0), epsilon: 0.1),
     );
+
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
