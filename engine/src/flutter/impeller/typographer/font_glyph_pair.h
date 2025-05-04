@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
+#include <optional>
+
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rational.h"
 #include "impeller/geometry/scalar.h"
