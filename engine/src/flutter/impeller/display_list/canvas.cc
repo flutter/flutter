@@ -175,6 +175,12 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
+struct PaintStrokeParameters : public StrokeParameters {
+  explicit PaintStrokeParameters(const Paint& paint)
+      : StrokeParameters{paint.stroke_width, paint.stroke_miter,
+                         paint.stroke_cap, paint.stroke_join} {}
+};
+
 }  // namespace
 
 Canvas::Canvas(ContentContext& renderer,
@@ -315,8 +321,8 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
     FillPathGeometry geom(path);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokePathGeometry geom(path, paint.stroke_width, paint.stroke_miter,
-                            paint.stroke_cap, paint.stroke_join);
+    PaintStrokeParameters parameters(paint);
+    StrokePathGeometry geom(path, parameters);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }
@@ -593,12 +599,6 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
     return;
   }
 
-  if (paint.style == Paint::Style::kStroke) {
-    // No stroked ellipses yet
-    DrawPath(flutter::DlPath(PathBuilder{}.AddOval(rect)), paint);
-    return;
-  }
-
   if (AttemptDrawBlurredRRect(rect, rect.GetSize() * 0.5f, paint)) {
     return;
   }
@@ -607,8 +607,14 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  EllipseGeometry geom(rect);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  if (paint.style == Paint::Style::kStroke) {
+    PaintStrokeParameters parameters(paint);
+    StrokeEllipseGeometry geom(rect, parameters);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    EllipseGeometry geom(rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
 }
 
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
@@ -630,12 +636,18 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
     }
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
-                  .AddRoundRect(round_rect)
-                  .SetBounds(rect)
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kFill) {
+    FillRoundRectGeometry geom(round_rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    PaintStrokeParameters parameters(paint);
+    StrokeRoundRectGeometry geom(round_rect, parameters);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
 }
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
