@@ -6167,6 +6167,37 @@ void main() {
       SystemMouseCursors.forbidden,
     );
   });
+
+  testWidgets('Delete button semantic tap target complies with Material guideline', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final UniqueKey deleteKey = UniqueKey();
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Column(
+          children: <Widget>[
+            Chip(
+              label: const Text('Label'),
+              deleteIcon: Icon(Icons.delete, key: deleteKey),
+              onDeleted: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+
+    final Finder deleteIcon = find.byKey(deleteKey);
+    final Size iconSize = tester.getSize(deleteIcon);
+    final Rect semanticRect = tester.getSemantics(deleteIcon).rect;
+
+    // Semantic rect is centered around the icon.
+    expect(semanticRect.center, Offset(iconSize.width / 2, iconSize.height / 2));
+
+    handle.dispose();
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
