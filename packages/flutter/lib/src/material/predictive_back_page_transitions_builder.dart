@@ -322,6 +322,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   final Tween<double> _gapTween = Tween<double>(begin: 0, end: _kMargin);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+  final Tween<double> _scaleTween = Tween<double>(begin: 1.0, end: _kMinScale);
 
   late final AnimationController _commitController;
   late final CurvedAnimation _commitAnimation;
@@ -330,10 +331,10 @@ class _PredictiveBackSharedElementPageTransitionState
   late final Listenable _mergedAnimations;
 
   // TODO(justinmc): Naming and clean up many animations.
-  // An animation that goes from zero to one during a predictive back gesture,
-  // and then at commit, it goes from its current value to 1. Used for
-  // animations that follow the gesture and then animate back to their original
-  // value after commit.
+  // An animation that goes from zero to a maximum of one during a predictive
+  // back gesture, and then at commit, it goes from its current value to zero.
+  // Used for animations that follow the gesture and then animate back to their
+  // original value after commit.
   final ProxyAnimation _continuousAnimation = ProxyAnimation();
   double _lastContinuousAnimationValue = 0.0;
 
@@ -342,13 +343,8 @@ class _PredictiveBackSharedElementPageTransitionState
 
   late Animation<Offset> _positionAnimation;
 
-  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
-  final Tween<double> _scaleCommitTween = Tween<double>(begin: 1.0, end: 1.0);
-  late Animation<double> _scaleAnimation;
-
   double _lastXDrag = 0.0;
   double _lastYDrag = 0.0;
-  double _lastScale = 1.0;
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
@@ -368,12 +364,6 @@ class _PredictiveBackSharedElementPageTransitionState
   }
 
   void _updateAnimations(Size screenSize) {
-    _scaleCommitTween.begin = _lastScale;
-    _scaleAnimation = _proxyAnimation.drive(switch (widget.phase) {
-      _PredictiveBackPhase.commit => _scaleCommitTween,
-      _ => _scaleTween,
-    });
-
     final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
     _positionAnimation = _proxyAnimation.drive(switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<Offset>(
@@ -394,7 +384,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
     _continuousAnimation.parent = switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<double>(
-        begin: 1.0,
+        begin: 0.0,
         end: _lastContinuousAnimationValue,
       ).animate(widget.animation),
       _ => ReverseAnimation(widget.animation),
@@ -463,7 +453,7 @@ class _PredictiveBackSharedElementPageTransitionState
         // TODO(justinmc): Any better way to get this?
         _lastContinuousAnimationValue = _continuousAnimation.value;
         return Transform.scale(
-          scale: _lastScale = _scaleAnimation.value,
+          scale: _scaleTween.evaluate(_continuousAnimation),
           child: Transform.translate(
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _positionAnimation.value,
