@@ -182,7 +182,7 @@ Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 
 /// Asserts that the [Finder] locates at least one widget that could be found
 /// by each finder in the provided [findersList] at a location that is
-/// compatible with ascending order of the provided [findersList]
+/// compatible with the ascending order of the provided [findersList]
 ///
 /// ## Sample code
 /// ```dart
@@ -1185,7 +1185,9 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
 
   @override
   Description describe(Description description) {
-    throw UnimplementedError();
+    return description.add(
+      'at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList',
+    );
   }
 
   @override
