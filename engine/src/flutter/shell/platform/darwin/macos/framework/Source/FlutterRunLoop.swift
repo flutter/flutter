@@ -7,7 +7,7 @@ import Foundation
 /// schedules the task in both common run loop mode and a private run loop mode,
 /// which allows it to run in a mode where it only processes Flutter messages
 /// (`pollFlutterMessagesOnce()`).
-@objc public class FlutterRunLoop: NSObject {
+@objc public final class FlutterRunLoop: NSObject {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
   private static var _mainRunLoop: FlutterRunLoop?
 
@@ -57,10 +57,10 @@ import Foundation
     guard
       let createdTimer = CFRunLoopTimerCreate(
         kCFAllocatorDefault,
-        CFAbsoluteTime.greatestFiniteMagnitude,
-        CFAbsoluteTime.greatestFiniteMagnitude,
-        0,
-        0,
+        CFAbsoluteTime.greatestFiniteMagnitude,  // fireDate.
+        CFAbsoluteTime.greatestFiniteMagnitude,  // interval.
+        0,  // flags.
+        0,  // order.
         { timer, info in
           let runner = Unmanaged<FlutterRunLoop>.fromOpaque(info!).takeUnretainedValue()
           runner.performExpiredTasks()
@@ -124,17 +124,19 @@ import Foundation
   }
 
   private func performExpiredTasks() {
+    var pendingTasks: [Task] = []
     var expiredTasks: [Task] = []
 
     tasksLock.lock()
     let now = CFAbsoluteTimeGetCurrent()
-    tasks.removeAll { task -> Bool in
+    for task in tasks {
       if task.targetTime <= now {
         expiredTasks.append(task)
-        return true
+      } else {
+        pendingTasks.append(task)
       }
-      return false
     }
+    tasks = pendingTasks
     rearmTimer()
     tasksLock.unlock()
 
@@ -144,9 +146,8 @@ import Foundation
   }
 
   private func rearmTimer() {
-    var nextFireTime: CFAbsoluteTime = .greatestFiniteMagnitude
-    for task in tasks {
-      nextFireTime = min(nextFireTime, task.targetTime)
+    let nextFireTime = tasks.reduce(CFAbsoluteTime.greatestFiniteMagnitude) { currentMin, task in
+      min(currentMin, task.targetTime)
     }
     CFRunLoopTimerSetNextFireDate(timer, nextFireTime)
   }
