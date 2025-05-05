@@ -318,7 +318,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   // Since we don't know the device border radius, this provides a smooth
   // transition between the default radius and the actual radius.
-  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
+  final Tween<double> _borderRadiusTween = Tween<double>(begin: 0.0, end: _kDeviceBorderRadius);
 
   final Tween<double> _gapTween = Tween<double>(begin: 0, end: _kMargin);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
@@ -342,8 +342,6 @@ class _PredictiveBackSharedElementPageTransitionState
 
   late Animation<Offset> _positionAnimation;
 
-  late Animation<double> _borderRadiusAnimation;
-
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   final Tween<double> _scaleCommitTween = Tween<double>(begin: 1.0, end: 1.0);
   late Animation<double> _scaleAnimation;
@@ -351,7 +349,6 @@ class _PredictiveBackSharedElementPageTransitionState
   double _lastXDrag = 0.0;
   double _lastYDrag = 0.0;
   double _lastScale = 1.0;
-  double _lastBorderRadius = 0.0;
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
@@ -393,11 +390,6 @@ class _PredictiveBackSharedElementPageTransitionState
         // animation.
         end: Offset.zero,
       ),
-    });
-
-    _borderRadiusAnimation = _proxyAnimation.drive(switch (widget.phase) {
-      _PredictiveBackPhase.commit => Tween<double>(begin: _lastBorderRadius, end: 0.0),
-      _ => _borderRadiusTween,
     });
 
     _continuousAnimation.parent = switch (widget.phase) {
@@ -483,14 +475,11 @@ class _PredictiveBackSharedElementPageTransitionState
             child: Opacity(
               opacity: _opacityAnimation.value,
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: _gapTween.evaluate(_continuousAnimation),
-                ),
+                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(_continuousAnimation)),
                 child: ClipRRect(
                   // TODO(justinmc): There is no radius for the incoming route when a route is pushed, should there be?
-                  // TODO(justinmc): Could this be done with _continuousAnimation?
                   borderRadius: BorderRadius.circular(
-                    _lastBorderRadius = _borderRadiusAnimation.value,
+                    _borderRadiusTween.evaluate(_continuousAnimation),
                   ),
                   child: child,
                 ),
