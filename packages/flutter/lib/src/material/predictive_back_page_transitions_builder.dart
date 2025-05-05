@@ -320,7 +320,7 @@ class _PredictiveBackSharedElementPageTransitionState
   // transition between the default radius and the actual radius.
   final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
 
-  final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
+  final Tween<double> _gapTween = Tween<double>(begin: 0, end: _kMargin);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
 
   late final AnimationController _commitController;
@@ -328,6 +328,14 @@ class _PredictiveBackSharedElementPageTransitionState
   // TODO(justinmc): Maybe rename to just _animation?
   final ProxyAnimation _proxyAnimation = ProxyAnimation();
   late final Listenable _mergedAnimations;
+
+  // TODO(justinmc): Naming and clean up many animations.
+  // An animation that goes from zero to one during a predictive back gesture,
+  // and then at commit, it goes from its current value to 1. Used for
+  // animations that follow the gesture and then animate back to their original
+  // value after commit.
+  final ProxyAnimation _continuousAnimation = ProxyAnimation();
+  double _lastContinuousAnimationValue = 0.0;
 
   // After committing a back gesture, the outgoing route fades out.
   late final Animation<double> _opacityAnimation;
@@ -391,6 +399,14 @@ class _PredictiveBackSharedElementPageTransitionState
       _PredictiveBackPhase.commit => Tween<double>(begin: _lastBorderRadius, end: 0.0),
       _ => _borderRadiusTween,
     });
+
+    _continuousAnimation.parent = switch (widget.phase) {
+      _PredictiveBackPhase.commit => Tween<double>(
+        begin: 1.0,
+        end: _lastContinuousAnimationValue,
+      ).animate(widget.animation),
+      _ => ReverseAnimation(widget.animation),
+    };
   }
 
   // TODO(justinmc): Should have a delegatedTransition to animate the incoming
@@ -423,6 +439,9 @@ class _PredictiveBackSharedElementPageTransitionState
     super.didUpdateWidget(oldWidget);
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
+      // TODO(justinmc): I suspect we can just use widget.animation and get rid
+      // of commitController and commitAnimation? widget.animation goes from 1-0
+      // during drag and 1-0 during commit.
       _commitController.forward(from: 0.0);
       _proxyAnimation.parent = _commitController;
       _updateAnimations(MediaQuery.sizeOf(context));
@@ -444,19 +463,13 @@ class _PredictiveBackSharedElementPageTransitionState
 
   @override
   Widget build(BuildContext context) {
-    /*
-    print(
-      'justin build with widget.animation ${widget.animation.value} and radius ${_borderRadiusTween.evaluate(widget.animation)}',
-    );
-    */
-    print('justin build proxyanimation ${_proxyAnimation.value}');
     return AnimatedBuilder(
-      // TODO(justinmc): Position jumps on commit now that I've modified TransitionRoute.
-      // TODO(justinmc): It looks like widget.animation animates from 1 to 0 after commit. Why?
       // TODO(justinmc): Could this one be _proxyAnimation?
       animation: _mergedAnimations,
       builder: (BuildContext context, Widget? child) {
         // TODO(justinmc): You could even split out things like Transform.scale into their own widgets, if there's not a lot of overlap in initState and didUpdateWidget.
+        // TODO(justinmc): Any better way to get this?
+        _lastContinuousAnimationValue = _continuousAnimation.value;
         return Transform.scale(
           scale: _lastScale = _scaleAnimation.value,
           child: Transform.translate(
@@ -470,9 +483,12 @@ class _PredictiveBackSharedElementPageTransitionState
             child: Opacity(
               opacity: _opacityAnimation.value,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
+                padding: EdgeInsets.symmetric(
+                  horizontal: _gapTween.evaluate(_continuousAnimation),
+                ),
                 child: ClipRRect(
                   // TODO(justinmc): There is no radius for the incoming route when a route is pushed, should there be?
+                  // TODO(justinmc): Could this be done with _continuousAnimation?
                   borderRadius: BorderRadius.circular(
                     _lastBorderRadius = _borderRadiusAnimation.value,
                   ),
