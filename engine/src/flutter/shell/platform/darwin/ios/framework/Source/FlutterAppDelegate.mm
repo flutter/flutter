@@ -7,6 +7,7 @@
 #import "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
@@ -233,7 +234,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return nil;
+  return [[FlutterLaunchEngine sharedInstance].engine registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -241,7 +242,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return false;
+  return [[FlutterLaunchEngine sharedInstance].engine hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -249,7 +250,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return nil;
+  return [[FlutterLaunchEngine sharedInstance].engine valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling
