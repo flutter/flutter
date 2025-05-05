@@ -503,20 +503,14 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// This method should not be directly called by subclasses. Its call chain
   /// should eventually invoke [open].
-  void handleOpenRequest({Offset? position}) {
-    assert(_debugMenuInfo('Requesting open $this'));
-    open(position: position);
-  }
+  void handleOpenRequest({Offset? position});
 
   /// Implemented by subclasses to define what to do when [MenuController.close]
   /// is called.
   ///
   /// This method should not be directly called by subclasses. Its call chain
   /// should eventually invoke [close].
-  void handleCloseRequest() {
-    assert(_debugMenuInfo('Requesting close $this'));
-    close();
-  }
+  void handleCloseRequest();
 
   /// Request that the submenus of this menu be closed.
   ///
@@ -891,6 +885,19 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
     assert(menuController._anchor == this);
     // Menu nodes are always open, so this is a no-op.
     return;
+  }
+
+
+  @override
+  void handleCloseRequest() {
+    assert(_debugMenuInfo('Requesting close $this'));
+    close();
+  }
+
+  @override
+  void handleOpenRequest({ui.Offset? position}) {
+    assert(_debugMenuInfo('Requesting open $this'));
+    open(position: position);
   }
 
   @override
