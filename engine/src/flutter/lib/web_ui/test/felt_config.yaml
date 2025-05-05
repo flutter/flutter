@@ -62,6 +62,12 @@ test-bundles:
       - dart2js-canvaskit
 
 run-configs:
+  - name: chrome-experimental-webparagraph
+    browser: chrome
+    browser-flags:
+      - --enable-features=ExtendedTextMetrics
+    canvaskit-variant: experimentalWebParagraph
+
   - name: chrome
     browser: chrome
     canvaskit-variant: chromium
@@ -98,6 +104,12 @@ run-configs:
     canvaskit-variant: full
 
 test-suites:
+  - name: chrome-dart2js-experimental-webparagraph-ui
+    test-bundle: dart2js-canvaskit-ui
+    run-config: chrome-experimental-webparagraph
+    artifact-deps: [ canvaskit_experimental_webparagraph ]
+    enable-ci: false
+
   - name: chrome-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
     run-config: chrome

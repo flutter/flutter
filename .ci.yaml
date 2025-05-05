@@ -584,6 +584,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
+    backfill: false
     timeout: 60
     dimensions:
       os: "Linux"
@@ -602,7 +603,6 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      backfill: "false"
       validation: docs
       validation_name: Docs
       firebase_project: main-docs-flutter-prod
@@ -835,6 +835,9 @@ targets:
   - name: Linux fuchsia_precache
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     presubmit: false
     properties:
       shard: fuchsia_precache
