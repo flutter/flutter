@@ -623,6 +623,7 @@ flutter:
       expect(gradle_utils.getGradleVersionFor('8.4'), '8.6');
       expect(gradle_utils.getGradleVersionFor('8.5'), '8.7');
       expect(gradle_utils.getGradleVersionFor('8.7'), '8.9');
+      expect(gradle_utils.getGradleVersionFor('8.8'), '8.10.2');
       expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.11.1');
     });
 

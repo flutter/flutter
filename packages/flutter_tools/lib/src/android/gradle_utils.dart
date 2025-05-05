@@ -692,6 +692,7 @@ String getGradleVersionFor(String androidPluginVersion) {
     GradleForAgp(agpMin: '8.4.0', agpMax: '8.4.99', minRequiredGradle: '8.6'),
     GradleForAgp(agpMin: '8.5.0', agpMax: '8.6.99', minRequiredGradle: '8.7'),
     GradleForAgp(agpMin: '8.7.0', agpMax: '8.7.99', minRequiredGradle: '8.9'),
+    GradleForAgp(agpMin: '8.8.0', agpMax: '8.8.99', minRequiredGradle: '8.10.2'),
     GradleForAgp(agpMin: '8.9.0', agpMax: '8.9.99', minRequiredGradle: '8.11.1'),
     // Assume if AGP is newer than this code know about return the highest gradle
     // version we know about.
