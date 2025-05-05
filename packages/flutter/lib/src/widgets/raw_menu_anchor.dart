@@ -238,7 +238,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// When an open request is intercepted, it is the responsibility of this
   /// handler to call the `showOverlay` callback when the menu is ready to be
   /// shown. For example, when animating the menu open, `showOverlay` should be
-  /// called before the animation begins.
+  /// called before the animation begins. If the menu overlay is hidden,
+  /// [MenuController.isOpen] will be false until `showOverlay` is called.
   ///
   /// The `position` argument is the position passed to [MenuController.open].
   /// Handlers should provide this argument to `showOverlay` in order to
@@ -257,7 +258,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// menu is hidden. When a request is intercepted, it is the responsibility of
   /// the handler to to call the `hideOverlay` callback when the menu is ready
   /// to be hidden. For example, when animating a menu closed, `hideOverlay`
-  /// should be called after all closing animations finish.
+  /// should be called after all closing animations finish. If the menu overlay
+  /// is shown when [onCloseRequested] is called, [MenuController.isOpen] will
+  /// remain true until `hideOverlay` is called.
   ///
   /// Defaults to null, which means that the menu will be closed immediately.
   final RawMenuAnchorCloseRequestedCallback? onCloseRequested;
