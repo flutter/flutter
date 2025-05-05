@@ -218,6 +218,8 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   /// When [onOpen] is called, the [MenuController.isOpen] will be true until
   /// [onClose] is called.
+  ///
+  /// By default, [onOpen] does nothing.
   final VoidCallback? onOpen;
 
   /// Called when the menu overlay is hidden.
@@ -225,9 +227,11 @@ class RawMenuAnchor extends StatefulWidget {
   /// This callback is triggered after the menu overlay has been removed from
   /// the widget tree, typically after all closing animations have completed. It
   /// is typically used by applications to respond when the menu has been
-  /// dismissed.
+  /// dismissed. It is not called when the menu is unmounted.
   ///
   /// When [onClose] is called, the [MenuController.isOpen] will be false.
+  ///
+  /// By default, [onClose] does nothing.
   final VoidCallback? onClose;
 
   /// Called when a request is made to open the menu.
