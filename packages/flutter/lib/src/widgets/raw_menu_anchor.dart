@@ -925,7 +925,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 final class MenuController {
   // The anchor that this controller controls.
   //
-  // This is set automatically when a [MenuController] is given to the anchor
+  // This is set automatically when this `MenuController` is attached to the anchor
   // it controls.
   _RawMenuAnchorBaseMixin? _anchor;
 
