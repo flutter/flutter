@@ -733,7 +733,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   // On Android, the back button is used to dismiss a modal.
                   excluding: platformHasBackButton,
                   child: GestureDetector(
-                    onTap: widget.dismissible ? close : null,
+                    onTap: widget.drawerBarrierDismissible ? close : null,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: drawerScrim,

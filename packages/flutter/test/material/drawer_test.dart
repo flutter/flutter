@@ -784,7 +784,7 @@ void main() {
 
     // Check the flag is set at the Scaffold level.
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-    expect(scaffold.drawerDismissible, true);
+    expect(scaffold.drawerBarrierDismissible, true);
 
     // Open the drawer initially.
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -826,7 +826,7 @@ void main() {
     await tester.tapAt(tapPosition);
     await tester.pumpAndSettle();
 
-    // Make sure the drawer is gone, since the drawerDismissible flag is set to true by default.
+    // Make sure the drawer is gone, since the drawerBarrierDismissible flag is set to true by default.
     expect(find.byType(Drawer), findsExactly(0));
   });
 
@@ -835,7 +835,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
-          drawerDismissible: false,
+          drawerBarrierDismissible: false,
           appBar: AppBar(
             title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
           ),
@@ -852,7 +852,7 @@ void main() {
 
     // Make sure the flag is set to false at the Scaffold level.
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-    expect(scaffold.drawerDismissible, false);
+    expect(scaffold.drawerBarrierDismissible, false);
 
     // Open the drawer initially.
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -895,7 +895,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Make sure the drawer is still present, and by tapping on the modal barrier
-    // didn't dismiss it, since the drawerDismissible property is set to false.
+    // didn't dismiss it, since the drawerBarrierDismissible property is set to false.
     expect(find.byType(Drawer), findsExactly(1));
   });
 
