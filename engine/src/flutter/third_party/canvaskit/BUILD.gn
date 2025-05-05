@@ -110,26 +110,40 @@ copy("canvaskit_experimental_webparagraph_group") {
 }
 
 # This toolchain is only to be used by skwasm_group below.
-wasm_toolchain("skwasm") {
-  extra_toolchain_args = {
-    # In Chromium browsers, we can use the browser's APIs to get the necessary
-    # ICU data.
-    skia_use_icu = false
-    skia_use_client_icu = true
-    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+template("skwasm_toolchain") {
+  assert(defined(invoker.skwasm_is_heavy))
+  forward_variables_from(invoker, ["skwasm_is_mt",  "skwasm_is_heavy"])
+  wasm_toolchain(target_name) {
+    extra_toolchain_args = {
+      # In Chromium browsers, we can use the browser's APIs to get the necessary
+      # ICU data. So we use built-in ICU data only in the heavy (non-chromium) case
+      skia_use_icu = skwasm_is_heavy
+      skia_use_client_icu = !skwasm_is_heavy
+      if (!skwasm_is_heavy) {
+        skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+      }
 
-    skia_use_libjpeg_turbo_decode = false
-    skia_use_libpng_decode = false
-    skia_use_libwebp_decode = false
+      skia_use_libjpeg_turbo_decode = skwasm_is_heavy
+      skia_use_libpng_decode = skwasm_is_heavy
+      skia_use_libwebp_decode = skwasm_is_heavy
 
-    # We use OffscreenCanvas to produce PNG data instead of skia
-    skia_use_no_png_encode = true
-    skia_use_libpng_encode = false
+      # We use OffscreenCanvas to produce PNG data instead of skia
+      skia_use_no_png_encode = true
+      skia_use_libpng_encode = false
 
-    # skwasm is multithreaded
-    wasm_use_workers = true
-    wasm_prioritize_size = true
+      # skwasm is multithreaded
+      wasm_use_workers = true
+      wasm_prioritize_size = true
+    }
   }
+}
+
+skwasm_toolchain("skwasm") {
+  skwasm_is_heavy = false
+}
+
+skwasm_toolchain("skwasm_heavy") {
+  skwasm_is_heavy = true
 }
 
 copy("skwasm_group") {
@@ -144,6 +158,23 @@ copy("skwasm_group") {
   if (is_debug) {
     if (!wasm_use_dwarf) {
       sources += [ "$root_out_dir/skwasm/skwasm.wasm.map" ]
+    }
+  }
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+
+copy("skwasm_heavy_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/lib/web_ui/skwasm:skwasm_heavy(:skwasm_heavy)" ]
+
+  sources = [
+    "$root_out_dir/skwasm_heavy/skwasm_heavy.js",
+    "$root_out_dir/skwasm_heavy/skwasm_heavy.js.symbols",
+    "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm",
+  ]
+  if (is_debug) {
+    if (!wasm_use_dwarf) {
+      sources += [ "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm.map" ]
     }
   }
   outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]

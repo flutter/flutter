@@ -333,21 +333,30 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image from data');
     }
-    final SkwasmImageDecoder baseDecoder = SkwasmImageDecoder(
-      contentType: contentType.mimeType,
-      dataSource: list.toJS,
-      debugSource: 'encoded image bytes',
-    );
-    await baseDecoder.initialize();
-    if (targetWidth == null && targetHeight == null) {
-      return baseDecoder;
+    if (browserSupportsImageDecoder) {
+      final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
+        contentType: contentType.mimeType,
+        dataSource: list.toJS,
+        debugSource: 'encoded image bytes',
+      );
+      await baseDecoder.initialize();
+      if (targetWidth == null && targetHeight == null) {
+        return baseDecoder;
+      }
+      return ResizingCodec(
+        baseDecoder,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+        allowUpscaling: allowUpscaling,
+      );
+    } else {
+      if (contentType.isAnimated) {
+        return SkwasmAnimatedImageDecoder(list, targetWidth, targetHeight);
+      } else {
+        final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
+        return SkwasmDomImageDecoder(blob, targetWidth, targetHeight);
+      }
     }
-    return ResizingCodec(
-      baseDecoder,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-      allowUpscaling: allowUpscaling,
-    );
   }
 
   @override
@@ -360,13 +369,28 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image at url $uri');
     }
-    final SkwasmImageDecoder decoder = SkwasmImageDecoder(
-      contentType: contentType,
-      dataSource: response.body,
-      debugSource: uri.toString(),
-    );
-    await decoder.initialize();
-    return decoder;
+    if (browserSupportsImageDecoder) {
+      final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
+        contentType: contentType,
+        dataSource: response.body,
+        debugSource: uri.toString(),
+      );
+      await decoder.initialize();
+      return decoder;
+    } else {
+      final ByteBuffer buffer = await response.arrayBuffer();
+      final Uint8List data = buffer.asUint8List();
+      final ImageType? parsedContentType = detectImageType(data);
+      if (parsedContentType == null) {
+        throw Exception('Could not determine content type of image from data');
+      }
+      if (parsedContentType.isAnimated) {
+        return SkwasmAnimatedImageDecoder(data);
+      } else {
+        final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
+        return SkwasmDomImageDecoder(blob);
+      }
+    }
   }
 
   @override

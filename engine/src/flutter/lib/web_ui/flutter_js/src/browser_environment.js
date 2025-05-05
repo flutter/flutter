@@ -2,13 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const isBlink = () => {
-  return (navigator.vendor === 'Google Inc.') ||
-    (navigator.agent === 'Edg/');
+/** @type {import("./types").WasmAllowList} */
+export const defaultWasmSupport = {
+  "blink": true,
+  "gecko": false,
+  "webkit": false,
+  "unknown": false,
 }
 
+/**
+ * @returns {import("./types").BrowserEngine}
+ */
+const getBrowserEngine = () => {
+  if ((navigator.vendor === 'Google Inc.') ||
+    (navigator.userAgent.includes('Edg/'))) {
+    return "blink";
+  }
+  if (navigator.vendor === "Apple Computer, Inc.") {
+    return "webkit";
+  }
+  if (navigator.vendor === "" && navigator.userAgent.includes('Firefox')) {
+    return "gecko";
+  }
+  return "unknown";
+}
+
+/** @type {import("./types").BrowserEnvironment} */
+const browserEngine = getBrowserEngine();
+
 const hasImageCodecs = () => {
-  if (typeof ImageDecoder === 'undefined') {
+  if (typeof ImageDecoder === "undefined") {
     return false;
   }
   // TODO(yjbanov): https://github.com/flutter/flutter/issues/122761
@@ -18,7 +41,7 @@ const hasImageCodecs = () => {
   // up potentially incompatible implementations of ImagdeDecoder API. Instead,
   // when a new browser engine launches the API, we'll evaluate it and enable it
   // explicitly.
-  return isBlink();
+  return browserEngine === "blink";
 }
 
 const hasChromiumBreakIterators = () => {
@@ -35,10 +58,9 @@ const supportsWasmGC = () => {
   return WebAssembly.validate(new Uint8Array(bytes));
 }
 
-/**
- * @returns {import("./types").BrowserEnvironment}
- */
+/** @type {import("./types").BrowserEnvironment} */
 export const browserEnvironment = {
+  browserEngine: browserEngine,
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
   supportsWasmGC: supportsWasmGC(),
