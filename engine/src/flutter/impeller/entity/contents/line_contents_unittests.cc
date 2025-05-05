@@ -40,8 +40,10 @@ TEST(LineContents, Create) {
   auto geometry = std::make_unique<LineGeometry>(
       /*p0=*/Point{0, 0},      //
       /*p1=*/Point{100, 100},  //
-      /*width=*/width,         //
-      /*cap=*/Cap::kSquare);
+      StrokeParameters{
+          .width = width,
+          .cap = Cap::kSquare,
+      });
   std::unique_ptr<LineContents> contents =
       LineContents::Make(std::move(geometry), Color(1.f, 0.f, 0.f, 1.f));
   EXPECT_TRUE(contents);
@@ -60,8 +62,10 @@ TEST(LineContents, CalculatePerVertex) {
   auto geometry = std::make_unique<LineGeometry>(
       /*p0=*/Point{100, 100},  //
       /*p1=*/Point{200, 100},  //
-      /*width=*/5.f,           //
-      /*cap=*/Cap::kButt);
+      StrokeParameters{
+          .width = 5.f,
+          .cap = Cap::kButt,
+      });
   Matrix transform;
 
   fml::StatusOr<LineContents::EffectiveLineParameters> status =
@@ -125,8 +129,10 @@ TEST(LineContents, CalculatePerVertexLimit) {
   auto geometry = std::make_unique<LineGeometry>(
       /*p0=*/Point{100, 100},  //
       /*p1=*/Point{200, 100},  //
-      /*width=*/10.f,          //
-      /*cap=*/Cap::kButt);
+      StrokeParameters{
+          .width = 10.f,
+          .cap = Cap::kButt,
+      });
   Matrix transform = Matrix::MakeTranslation({100, 100, 1.0}) *
                      Matrix::MakeScale({scale, scale, 1.0}) *
                      Matrix::MakeTranslation({-100, -100, 1.0});
