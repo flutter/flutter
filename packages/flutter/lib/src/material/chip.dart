@@ -1290,9 +1290,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         chipTheme.iconTheme?.size ??
         theme.chipTheme.iconTheme?.size ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!.size!;
-    return Semantics(
-      container: true,
-      button: true,
+
+    return _DeleteButtonSemantic(
       child: _wrapWithTooltip(
         tooltip:
             widget.deleteButtonTooltipMessage ??
@@ -2423,6 +2422,31 @@ bool _hitIsOnDeleteIcon({
     TextDirection.ltr => adjustedPosition.dx >= deflatedSize.width - accessibleDeleteButtonWidth,
     TextDirection.rtl => adjustedPosition.dx <= accessibleDeleteButtonWidth,
   };
+}
+
+class _DeleteButtonSemantic extends SingleChildRenderObjectWidget {
+  const _DeleteButtonSemantic({super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderDeleteButtonSemantic();
+  }
+}
+
+class _RenderDeleteButtonSemantic extends RenderProxyBox {
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.isButton = true;
+  }
+
+  @override
+  Rect get semanticBounds => Rect.fromCenter(
+    center: paintBounds.center,
+    width: kMinInteractiveDimension,
+    height: kMinInteractiveDimension,
+  );
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chip
