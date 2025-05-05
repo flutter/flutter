@@ -285,7 +285,6 @@ platform_properties:
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
       os: Mac-14
-      cpu: x86
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
