@@ -92,9 +92,8 @@ std::unique_ptr<Geometry> Geometry::MakeOval(const Rect& rect) {
 
 std::unique_ptr<Geometry> Geometry::MakeLine(const Point& p0,
                                              const Point& p1,
-                                             Scalar width,
-                                             Cap cap) {
-  return std::make_unique<LineGeometry>(p0, p1, width, cap);
+                                             const StrokeParameters& stroke) {
+  return std::make_unique<LineGeometry>(p0, p1, stroke);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeCircle(const Point& center,

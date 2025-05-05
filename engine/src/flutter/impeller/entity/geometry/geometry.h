@@ -71,8 +71,7 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeLine(const Point& p0,
                                             const Point& p1,
-                                            Scalar width,
-                                            Cap cap);
+                                            const StrokeParameters& stroke);
 
   static std::unique_ptr<Geometry> MakeCircle(const Point& center,
                                               Scalar radius);

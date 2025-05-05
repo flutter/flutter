@@ -546,8 +546,7 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke.width,
-                                                 paint.stroke.cap);
+  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
   if (renderer_.GetContext()->GetFlags().antialiased_lines &&
       !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
