@@ -611,7 +611,7 @@ public class FlutterActivity extends Activity
     lifecycle = new LifecycleRegistry(this);
   }
 
-    void setFlutterViewIdIfNeeded() {
+  void setFlutterViewIdIfNeeded() {
     if (flutterViewId != null) {
       return;
     }
