@@ -22,6 +22,8 @@ declare_args() {
   # the end.
   mac_sdk_path = ""
 
+  mac_swift_lib_paths = []
+
   # Path to the iOS platform to use.
   #
   # When empty, this will use the default platform based on the value of
@@ -117,6 +119,13 @@ if (mac_platform_path == "") {
   mac_platform_path = _sdk_result.macosx_platform_path
 }
 assert(mac_platform_path != "")
+
+if (mac_swift_lib_paths == []) {
+  mac_swift_lib_paths += [
+    rebase_path("$mac_sdk_path/usr/lib/swift"),
+    rebase_path("$mac_host_toolchain_path/usr/lib/swift/macosx"),
+  ]
+}
 
 if (is_ios) {
   if (ios_platform_path == "" || ios_sdk_path == "") {

@@ -1,11 +1,11 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
-
-#include "flutter/fml/logging.h"
 
 #include <optional>
 #include <vector>
+
+#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
 
 #if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
 #define VSYNC_TRACING_ENABLED 1
