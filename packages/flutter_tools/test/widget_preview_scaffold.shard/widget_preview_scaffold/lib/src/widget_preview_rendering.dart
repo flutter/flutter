@@ -268,6 +268,7 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             // don't display them.
             exitWidgetSelectionButtonBuilder: null,
             moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
             child: child!,
           );
         }
