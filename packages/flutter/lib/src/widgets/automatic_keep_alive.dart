@@ -50,6 +50,13 @@ import 'sliver.dart';
 /// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive.0.dart **
 /// {@end-tool}
 ///
+/// See also:
+///
+///  * [AutomaticKeepAliveClientMixin], which is a mixin with convenience
+///    methods for clients of [AutomaticKeepAlive]. Used with [State]
+///    subclasses.
+///  * [KeepAlive] which marks a child as needing to stay alive even when it's
+///    in a lazy list that would otherwise remove it.
 class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
@@ -353,9 +360,19 @@ class KeepAliveHandle extends ChangeNotifier {
     super.dispose();
   }
 }
-
 /// A mixin with convenience methods for clients of [AutomaticKeepAlive]. Used
-/// with [State] subclasses.
+/// with [State] subclasses to manage keep-alive behavior in lazily built lists.
+///
+/// This mixin simplifies interaction with [AutomaticKeepAlive] by automatically
+/// sending [KeepAliveNotification]s when necessary. Subclasses must implement
+/// [wantKeepAlive] to indicate whether the widget should be kept alive and call
+/// [updateKeepAlive] whenever its value changes.
+///
+/// The mixin internally manages a [KeepAliveHandle], which is used to notify
+/// the nearest [AutomaticKeepAlive] ancestor of changes in keep-alive
+/// requirements. [AutomaticKeepAlive] listens for [KeepAliveNotification]s sent
+/// by this mixin and dynamically wraps the subtree in a [KeepAlive] widget to
+/// preserve its state when it is no longer visible in the viewport.
 ///
 /// Subclasses must implement [wantKeepAlive], and their [build] methods must
 /// call `super.build` (though the return value should be ignored).
@@ -367,8 +384,9 @@ class KeepAliveHandle extends ChangeNotifier {
 /// [State] into which this class is being mixed.
 ///
 /// {@tool dartpad}
-/// This example demonstrates how to use the [AutomaticKeepAliveClientMixin]
-/// to keep the state of a widget alive even when it is scrolled out of view.
+/// This example demonstrates how to use the
+/// [AutomaticKeepAliveClientMixin] to keep the state of a widget alive even
+/// when it is scrolled out of view.
 ///
 /// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive_client_mixin.0.dart **
 /// {@end-tool}
@@ -377,6 +395,8 @@ class KeepAliveHandle extends ChangeNotifier {
 ///
 ///  * [AutomaticKeepAlive], which listens to messages from this mixin.
 ///  * [KeepAliveNotification], the notifications sent by this mixin.
+///  * [KeepAlive] which marks a child as needing to stay alive even when it's
+///    in a lazy list that would otherwise remove it.
 @optionalTypeArgs
 mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   KeepAliveHandle? _keepAliveHandle;
