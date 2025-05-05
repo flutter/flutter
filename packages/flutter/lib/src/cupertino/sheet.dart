@@ -496,7 +496,6 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      removeBottom: true,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding),
         child: ClipRRect(
