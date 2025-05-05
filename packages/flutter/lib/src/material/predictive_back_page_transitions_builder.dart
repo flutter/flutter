@@ -297,6 +297,7 @@ class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
       _PredictiveBackSharedElementPageTransitionState();
 }
 
+// TODO(justinmc): The animation when you just press the back button is not correct. Wasn't that recently updated?
 class _PredictiveBackSharedElementPageTransitionState
     extends State<_PredictiveBackSharedElementPageTransition>
     with SingleTickerProviderStateMixin {
@@ -320,26 +321,35 @@ class _PredictiveBackSharedElementPageTransitionState
   // transition between the default radius and the actual radius.
   final Tween<double> _borderRadiusTween = Tween<double>(begin: 0.0, end: _kDeviceBorderRadius);
 
-  final Tween<double> _gapTween = Tween<double>(begin: 0, end: _kMargin);
+  // The overall padding for the route shrinks during the gesture and animates
+  // back to normal after commit.
+  final Tween<double> _paddingTween = Tween<double>(begin: 0, end: _kMargin);
+
+  // The route fades out after commit.
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+
+  // The route shrinks during the gesture and animates back to normal after
+  // commit.
   final Tween<double> _scaleTween = Tween<double>(begin: 1.0, end: _kMinScale);
 
-  late final AnimationController _commitController;
-  late final CurvedAnimation _commitAnimation;
-  // TODO(justinmc): Maybe rename to just _animation?
-  final ProxyAnimation _proxyAnimation = ProxyAnimation();
-  late final Listenable _mergedAnimations;
+  // An animation that stays constant at zero before the commit, and after the
+  // commit goes from zero to one.
+  final ProxyAnimation _commitAnimation = ProxyAnimation();
 
   // TODO(justinmc): Naming and clean up many animations.
+  // TODO(justinmc): Should this include an easeOut curve? I think so.
+  // TODO(justinmc): Maybe this should be shorter after commit? _kCommitMilliseconds.
   // An animation that goes from zero to a maximum of one during a predictive
   // back gesture, and then at commit, it goes from its current value to zero.
   // Used for animations that follow the gesture and then animate back to their
   // original value after commit.
-  final ProxyAnimation _continuousAnimation = ProxyAnimation();
-  double _lastContinuousAnimationValue = 0.0;
+  final ProxyAnimation _bounceAnimation = ProxyAnimation();
+  double _lastBounceAnimationValue = 0.0;
 
-  // After committing a back gesture, the outgoing route fades out.
-  late final Animation<double> _opacityAnimation;
+  // An animation that proxies to widget.animation during the gesture and then
+  // to _commitAnimation after the commit. So, it goes from zero to a maximum of
+  // one before commit, and then after commit goes from zero to one again.
+  final ProxyAnimation _animation = ProxyAnimation();
 
   late Animation<Offset> _positionAnimation;
 
@@ -364,8 +374,13 @@ class _PredictiveBackSharedElementPageTransitionState
   }
 
   void _updateAnimations(Size screenSize) {
+    _animation.parent = switch (widget.phase) {
+      _PredictiveBackPhase.commit => _commitAnimation,
+      _ => widget.animation,
+    };
+
     final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
-    _positionAnimation = _proxyAnimation.drive(switch (widget.phase) {
+    _positionAnimation = _animation.drive(switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<Offset>(
         begin: Offset(_lastXDrag, _lastYDrag),
         end: Offset(screenSize.height * _kYPositionFactor, 0.0),
@@ -382,12 +397,18 @@ class _PredictiveBackSharedElementPageTransitionState
       ),
     });
 
-    _continuousAnimation.parent = switch (widget.phase) {
+    _bounceAnimation.parent = switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<double>(
         begin: 0.0,
-        end: _lastContinuousAnimationValue,
+        end: _lastBounceAnimationValue,
       ).animate(widget.animation),
       _ => ReverseAnimation(widget.animation),
+    };
+
+    // TODO(justinmc): Curve.
+    _commitAnimation.parent = switch (widget.phase) {
+      _PredictiveBackPhase.commit => ReverseAnimation(widget.animation),
+      _ => kAlwaysDismissedAnimation,
     };
   }
 
@@ -396,36 +417,10 @@ class _PredictiveBackSharedElementPageTransitionState
   // https://github.com/flutter/flutter/issues/153577
 
   @override
-  void initState() {
-    super.initState();
-
-    _commitController = AnimationController(
-      duration: const Duration(milliseconds: _kCommitMilliseconds),
-      vsync: this,
-    );
-    _commitAnimation = CurvedAnimation(parent: _commitController, curve: Curves.easeOut);
-    _proxyAnimation.parent = switch (widget.phase) {
-      _PredictiveBackPhase.commit => _commitAnimation,
-      _ => widget.animation,
-    };
-    _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
-    _opacityAnimation = _opacityTween.animate(_commitAnimation);
-
-    if (widget.phase == _PredictiveBackPhase.commit) {
-      _commitController.forward(from: 0.0);
-    }
-  }
-
-  @override
   void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
-      // TODO(justinmc): I suspect we can just use widget.animation and get rid
-      // of commitController and commitAnimation? widget.animation goes from 1-0
-      // during drag and 1-0 during commit.
-      _commitController.forward(from: 0.0);
-      _proxyAnimation.parent = _commitController;
       _updateAnimations(MediaQuery.sizeOf(context));
     }
   }
@@ -437,39 +432,35 @@ class _PredictiveBackSharedElementPageTransitionState
   }
 
   @override
-  void dispose() {
-    _commitController.dispose();
-    _commitAnimation.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      // TODO(justinmc): Could this one be _proxyAnimation?
-      animation: _mergedAnimations,
+      animation: widget.animation,
       builder: (BuildContext context, Widget? child) {
         // TODO(justinmc): You could even split out things like Transform.scale into their own widgets, if there's not a lot of overlap in initState and didUpdateWidget.
         // TODO(justinmc): Any better way to get this?
-        _lastContinuousAnimationValue = _continuousAnimation.value;
+        _lastBounceAnimationValue = _bounceAnimation.value;
+        print(
+          'justin _commitAnimation2 = ${_commitAnimation.value}, widget.animation = ${widget.animation.value}.',
+        );
         return Transform.scale(
-          scale: _scaleTween.evaluate(_continuousAnimation),
+          scale: _scaleTween.evaluate(_bounceAnimation),
           child: Transform.translate(
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _positionAnimation.value,
+              // TODO(justinmc): _lastDrag, an Offset?
               _ => Offset(
                 _lastXDrag = _positionAnimation.value.dx,
                 _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
               ),
             },
             child: Opacity(
-              opacity: _opacityAnimation.value,
+              opacity: _opacityTween.evaluate(_commitAnimation),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(_continuousAnimation)),
+                padding: EdgeInsets.symmetric(horizontal: _paddingTween.evaluate(_bounceAnimation)),
                 child: ClipRRect(
                   // TODO(justinmc): There is no radius for the incoming route when a route is pushed, should there be?
                   borderRadius: BorderRadius.circular(
-                    _borderRadiusTween.evaluate(_continuousAnimation),
+                    _borderRadiusTween.evaluate(_bounceAnimation),
                   ),
                   child: child,
                 ),
@@ -517,6 +508,7 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _weightPostCommit = 1 - _weightPreCommit;
   static const double _screenWidthDivisionFactor = 20.0;
   static const double _xShiftAdjustment = 8.0;
+  // TODO(justinmc): Reuse this constant.
   static const Duration _commitDuration = Duration(milliseconds: 100);
 
   final Animatable<double> _primaryOpacityTween = Tween<double>(
