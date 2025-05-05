@@ -924,7 +924,7 @@ class EditableText extends StatefulWidget {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-       selectAllOnFocus = selectAllOnFocus ?? defaultSelectAllOnFocus,
+       selectAllOnFocus = selectAllOnFocus ?? _defaultSelectAllOnFocus,
        toolbarOptions =
            selectionControls is TextSelectionHandleControls && toolbarOptions == null
                ? ToolbarOptions.empty
@@ -1801,9 +1801,12 @@ class EditableText extends StatefulWidget {
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.widgets.editableText.selectAllOnFocus}
-  /// Whether or not this field should select all text when gaining focus
+  /// Whether this field should select all text when gaining focus.
   ///
-  /// By default this will select all text on web and desktop
+  /// When false, focusing this text field will leave its
+  /// existing text selection unchanged.
+  ///
+  /// Defaults to true on web and desktop platforms, and false on mobile platforms.
   /// {@endtemplate}
   final bool selectAllOnFocus;
 
@@ -2047,7 +2050,7 @@ class EditableText extends StatefulWidget {
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
   /// The default value for [selectAllOnFocus].
-  static bool get defaultSelectAllOnFocus {
+  static bool get _defaultSelectAllOnFocus {
     if (kIsWeb) {
       return true;
     }

@@ -284,7 +284,7 @@ class TextFormField extends FormField<String> {
                keyboardAppearance: keyboardAppearance,
                enableInteractiveSelection:
                    enableInteractiveSelection ?? (!obscureText || !readOnly),
-               selectAllOnFocus: selectAllOnFocus ?? EditableText.defaultSelectAllOnFocus,
+               selectAllOnFocus: selectAllOnFocus,
                selectionControls: selectionControls,
                buildCounter: buildCounter,
                autofillHints: autofillHints,
