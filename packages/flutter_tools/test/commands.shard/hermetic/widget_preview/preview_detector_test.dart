@@ -106,8 +106,7 @@ void main() {
           functionName: 'attributesPreview',
           isBuilder: false,
           name: 'Attributes preview',
-          width: '100.0',
-          height: '100',
+          size: 'Size(width: 100.0, height: 100)',
           textScaleFactor: '2',
           wrapper: 'testWrapper',
           theme: 'theming',
@@ -183,8 +182,7 @@ void main() {
           functionName: 'attributesPreview',
           isBuilder: false,
           name: 'Attributes preview',
-          width: '100.0',
-          height: '100',
+          size: 'Size(width: 100.0, height: 100)',
           textScaleFactor: '2',
           wrapper: 'testWrapper',
           theme: 'theming',
@@ -295,7 +293,7 @@ PreviewThemeData theming() => PreviewThemeData(
   cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
 );
 
-@Preview(name: 'Attributes preview', height: 100, width: 100.0, textScaleFactor: 2, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
+@Preview(name: 'Attributes preview', size: Size(width: 100.0, height: 100), textScaleFactor: 2, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
 Widget attributesPreview() {
   return Text('Attributes');
 }
