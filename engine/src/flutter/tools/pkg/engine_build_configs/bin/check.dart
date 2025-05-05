@@ -240,13 +240,13 @@ List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
   final List<String> errors = <String>[];
   final Set<String> archivePaths = <String>{};
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
-    for (BuildArchive archive in build.archives) {
-      for (String path in archive.includePaths) {
-        RegExpMatch? match = zipPathPattern.firstMatch(path);
+    for (final BuildArchive archive in build.archives) {
+      for (final String path in archive.includePaths) {
+        final RegExpMatch? match = zipPathPattern.firstMatch(path);
         if (match == null) {
           continue;
         }
-        String zipPath = match.group(1)!;
+        final String zipPath = match.group(1)!;
         if (!archivePaths.add(zipPath)) {
           errors.add('$zipPath is duplicated in $name\n');
         }
