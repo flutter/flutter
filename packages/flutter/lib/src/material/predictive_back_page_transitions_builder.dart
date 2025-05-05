@@ -45,6 +45,10 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   const PredictiveBackPageTransitionsBuilder();
 
   @override
+  Duration get transitionDuration =>
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.transitionMilliseconds);
+
+  @override
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -75,7 +79,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
           );
         }
 
-        return const ZoomPageTransitionsBuilder().buildTransitions(
+        return const FadeForwardsPageTransitionsBuilder().buildTransitions(
           route,
           context,
           animation,
@@ -314,8 +318,18 @@ class _PredictiveBackSharedElementPageTransitionState
   // See https://github.com/flutter/flutter/issues/97349.
   static const double _kDeviceBorderRadius = 32.0;
 
+  // The duration of the commit transition.
+  //
+  // This is not the same as PredictiveBackpageTransitionsBuilder's duration,
+  // which is the duration of widget.animation, so an Interval is used.
+  //
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kCommitMilliseconds = 100;
+  static const Interval _commitInterval = Interval(
+    0.0,
+    _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.transitionMilliseconds,
+    curve: Curves.easeOut,
+  );
 
   // Since we don't know the device border radius, this provides a smooth
   // transition between the default radius and the actual radius.
@@ -375,8 +389,24 @@ class _PredictiveBackSharedElementPageTransitionState
 
   void _updateAnimations(Size screenSize) {
     _animation.parent = switch (widget.phase) {
-      _PredictiveBackPhase.commit => _commitAnimation,
+      _PredictiveBackPhase.commit => CurvedAnimation(
+        parent: ReverseAnimation(widget.animation),
+        curve: _commitInterval,
+      ),
       _ => widget.animation,
+    };
+
+    _bounceAnimation.parent = switch (widget.phase) {
+      _PredictiveBackPhase.commit => Tween<double>(
+        begin: 0.0,
+        end: _lastBounceAnimationValue,
+      ).animate(CurvedAnimation(parent: widget.animation, curve: _commitInterval)),
+      _ => ReverseAnimation(widget.animation),
+    };
+
+    _commitAnimation.parent = switch (widget.phase) {
+      _PredictiveBackPhase.commit => _animation,
+      _ => kAlwaysDismissedAnimation,
     };
 
     final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
@@ -396,20 +426,6 @@ class _PredictiveBackSharedElementPageTransitionState
         end: Offset.zero,
       ),
     });
-
-    _bounceAnimation.parent = switch (widget.phase) {
-      _PredictiveBackPhase.commit => Tween<double>(
-        begin: 0.0,
-        end: _lastBounceAnimationValue,
-      ).animate(widget.animation),
-      _ => ReverseAnimation(widget.animation),
-    };
-
-    // TODO(justinmc): Curve.
-    _commitAnimation.parent = switch (widget.phase) {
-      _PredictiveBackPhase.commit => ReverseAnimation(widget.animation),
-      _ => kAlwaysDismissedAnimation,
-    };
   }
 
   // TODO(justinmc): Should have a delegatedTransition to animate the incoming
