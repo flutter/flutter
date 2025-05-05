@@ -356,7 +356,7 @@ class LocalizationOptions {
        syntheticPackage = syntheticPackage ?? !featureFlags.isExplicitPackageDependenciesEnabled,
        requiredResourceAttributes = requiredResourceAttributes ?? false,
        nullableGetter = nullableGetter ?? true,
-       format = format ?? false,
+       format = format ?? true,
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,

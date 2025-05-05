@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
-#import "flutter/fml/logging.h"
 
 #include <atomic>
+
+#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 
 @implementation FlutterResizeSynchronizer {
   std::atomic_bool _inResize;

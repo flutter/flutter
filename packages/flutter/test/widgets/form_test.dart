@@ -89,6 +89,32 @@ void main() {
     await checkText('');
   });
 
+  testWidgets('onReset callback is called', (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    bool resetCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Form(
+          key: formKey,
+          child: FormField<String>(
+            builder: (_) => const SizedBox.shrink(),
+            onReset: () {
+              resetCalled = true;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(resetCalled, isFalse);
+
+    formKey.currentState!.reset();
+    await tester.pump();
+
+    expect(resetCalled, isTrue);
+  });
+
   testWidgets('Validator sets the error text only when validate is called', (
     WidgetTester tester,
   ) async {
