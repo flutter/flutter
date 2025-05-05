@@ -232,13 +232,18 @@ static void DrawGlyph(SkCanvas* canvas,
   SkPaint glyph_paint;
   glyph_paint.setColor(glyph_color);
   glyph_paint.setBlendMode(SkBlendMode::kSrc);
-  if (prop.has_value() && prop->stroke) {
-    glyph_paint.setStroke(true);
-    glyph_paint.setStrokeWidth(prop->stroke_width *
-                               static_cast<Scalar>(scaled_font.scale));
-    glyph_paint.setStrokeCap(ToSkiaCap(prop->stroke_cap));
-    glyph_paint.setStrokeJoin(ToSkiaJoin(prop->stroke_join));
-    glyph_paint.setStrokeMiter(prop->stroke_miter);
+  if (prop.has_value()) {
+    auto stroke = prop->stroke;
+    if (stroke.has_value()) {
+      glyph_paint.setStroke(true);
+      glyph_paint.setStrokeWidth(stroke->width *
+                                 static_cast<Scalar>(scaled_font.scale));
+      glyph_paint.setStrokeCap(ToSkiaCap(stroke->cap));
+      glyph_paint.setStrokeJoin(ToSkiaJoin(stroke->join));
+      glyph_paint.setStrokeMiter(stroke->miter_limit);
+    } else {
+      glyph_paint.setStroke(false);
+    }
   }
   canvas->save();
   Point subpixel_offset = SubpixelPositionToPoint(glyph.subpixel_offset);
@@ -396,10 +401,10 @@ static Rect ComputeGlyphSize(const SkFont& font,
   SkPaint glyph_paint;
   if (glyph.properties.has_value() && glyph.properties->stroke) {
     glyph_paint.setStroke(true);
-    glyph_paint.setStrokeWidth(glyph.properties->stroke_width * scale);
-    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties->stroke_cap));
-    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke_join));
-    glyph_paint.setStrokeMiter(glyph.properties->stroke_miter);
+    glyph_paint.setStrokeWidth(glyph.properties->stroke->width * scale);
+    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties->stroke->cap));
+    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke->join));
+    glyph_paint.setStrokeMiter(glyph.properties->stroke->miter_limit);
   }
   font.getBounds(&glyph.glyph.index, 1, &scaled_bounds, &glyph_paint);
 

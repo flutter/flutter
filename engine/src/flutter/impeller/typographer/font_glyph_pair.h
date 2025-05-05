@@ -5,10 +5,12 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
+#include <optional>
+
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/point.h"
 #include "impeller/geometry/rational.h"
+#include "impeller/geometry/scalar.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 
@@ -16,20 +18,13 @@ namespace impeller {
 
 struct GlyphProperties {
   Color color = Color::Black();
-  Scalar stroke_width = 0.0;
-  Cap stroke_cap = Cap::kButt;
-  Join stroke_join = Join::kMiter;
-  Scalar stroke_miter = 4.0;
-  bool stroke = false;
+  std::optional<StrokeParameters> stroke;
 
   struct Equal {
     constexpr bool operator()(const impeller::GlyphProperties& lhs,
                               const impeller::GlyphProperties& rhs) const {
       return lhs.color.ToARGB() == rhs.color.ToARGB() &&
-             lhs.stroke == rhs.stroke && lhs.stroke_cap == rhs.stroke_cap &&
-             lhs.stroke_join == rhs.stroke_join &&
-             lhs.stroke_miter == rhs.stroke_miter &&
-             lhs.stroke_width == rhs.stroke_width;
+             lhs.stroke == rhs.stroke;
     }
   };
 };
@@ -104,10 +99,14 @@ struct SubpixelGlyph {
     if (!sg.properties.has_value()) {
       return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset);
     }
+    StrokeParameters stroke;
+    bool has_stroke = sg.properties->stroke.has_value();
+    if (has_stroke) {
+      stroke = sg.properties->stroke.value();
+    }
     return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset,
-                      sg.properties->color.ToARGB(), sg.properties->stroke,
-                      sg.properties->stroke_cap, sg.properties->stroke_join,
-                      sg.properties->stroke_miter, sg.properties->stroke_width);
+                      sg.properties->color.ToARGB(), has_stroke, stroke.cap,
+                      stroke.join, stroke.miter_limit, stroke.width);
   }
 
   struct Equal {
