@@ -368,11 +368,11 @@ void _tests() {
                     TestSemantics(
                       flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                       children: <TestSemantics>[
-                        TestSemantics(label: 'Item 0', textDirection: TextDirection.ltr),
-                        TestSemantics(label: 'Item 1', textDirection: TextDirection.ltr),
-                        TestSemantics(label: 'Item 2', textDirection: TextDirection.ltr),
-                        TestSemantics(label: 'Item 3', textDirection: TextDirection.ltr),
                         TestSemantics(label: 'Item 4', textDirection: TextDirection.ltr),
+                        TestSemantics(label: 'Item 3', textDirection: TextDirection.ltr),
+                        TestSemantics(label: 'Item 2', textDirection: TextDirection.ltr),
+                        TestSemantics(label: 'Item 1', textDirection: TextDirection.ltr),
+                        TestSemantics(label: 'Item 0', textDirection: TextDirection.ltr),
                       ],
                     ),
                   ],
