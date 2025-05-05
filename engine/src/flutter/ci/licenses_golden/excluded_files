@@ -1037,6 +1037,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/kyber/kyber_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/lhash/lhash_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/md5/md5_test.cc
+../../../flutter/third_party/boringssl/src/crypto/mem_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/mldsa/mldsa_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/mlkem/mlkem_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/obj/README
