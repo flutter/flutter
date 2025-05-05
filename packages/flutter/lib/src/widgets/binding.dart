@@ -492,6 +492,15 @@ mixin WidgetsBinding
       _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
+  /// The notifier for whether or not taps on the device are treated as widget
+  /// selections when the widget inspector is enabled.
+  ///
+  /// - If true, taps in the app are intercepted by the widget inspector.
+  /// - If false, taps in the app are not intercepted by the widget inspector.
+  ValueNotifier<bool> get debugWidgetInspectorSelectionOnTapEnabled =>
+      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject ??= ValueNotifier<bool>(true);
+  ValueNotifier<bool>? _debugWidgetInspectorSelectionOnTapEnabledNotifierObject;
+
   /// If true, [WidgetInspector] will not be automatically injected into the
   /// widget tree.
   ///
@@ -518,6 +527,8 @@ mixin WidgetsBinding
     super.resetInternalState();
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
+    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject?.dispose();
+    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject = null;
   }
 
   void _debugAddStackFilters() {
