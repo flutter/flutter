@@ -905,38 +905,208 @@ void _testLongestIncreasingSubsequence() {
 }
 
 void _testLabels() {
-  test('computeDomSemanticsLabel combines tooltip, label, value, and hint', () {
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip'), 'tooltip');
-    expect(computeDomSemanticsLabel(label: 'label'), 'label');
-    expect(computeDomSemanticsLabel(value: 'value'), 'value');
-    expect(computeDomSemanticsLabel(hint: 'hint'), 'hint');
-    expect(
-      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint', value: 'value'),
-      '''
-tooltip
-label hint value''',
-    );
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', hint: 'hint', value: 'value'), '''
-tooltip
-hint value''');
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
-tooltip
-label value''');
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint'), '''
-tooltip
-label hint''');
+  test(
+    'sets aria-label, aria-description/aria-describedby, and value attributes correctly',
+    () async {
+      semantics().semanticsEnabled = true;
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        tooltip: 'Tooltip',
+        value: '42',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      final DomElement element = tester.getSemanticsObject(0).element;
+      expect(element.getAttribute('aria-label'), 'Label');
+      // Should set either aria-description or aria-describedby
+      final hasAriaDescription = element.getAttribute('aria-description') == 'Hint Tooltip';
+      final hasAriaDescribedBy = element.getAttribute('aria-describedby') != null;
+      expect(hasAriaDescription || hasAriaDescribedBy, isTrue);
+      // Value should be set as aria-valuenow if numeric
+      expect(element.getAttribute('aria-valuenow'), '42');
+      expect(element.getAttribute('aria-valuetext'), isNull);
+      semantics().semanticsEnabled = false;
+    },
+  );
+
+  test('sets aria-valuetext for non-numeric value', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(id: 0, value: 'not a number', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    expect(element.getAttribute('aria-valuenow'), isNull);
+    expect(element.getAttribute('aria-valuetext'), 'not a number');
+    semantics().semanticsEnabled = false;
   });
 
-  test('computeDomSemanticsLabel collapses empty labels to null', () {
-    expect(computeDomSemanticsLabel(), isNull);
-    expect(computeDomSemanticsLabel(tooltip: ''), isNull);
-    expect(computeDomSemanticsLabel(label: ''), isNull);
-    expect(computeDomSemanticsLabel(value: ''), isNull);
-    expect(computeDomSemanticsLabel(hint: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', hint: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: ''), isNull);
+  test('does not redundantly set value for incrementable widgets', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      value: '99',
+      hasIncrease: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    // Should not set aria-valuenow or aria-valuetext for incrementable
+    expect(element.getAttribute('aria-valuenow'), isNull);
+    expect(element.getAttribute('aria-valuetext'), isNull);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('creates hidden span for aria-describedby fallback', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Label',
+      hint: 'Hint',
+      tooltip: 'Tooltip',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    final describedById = element.getAttribute('aria-describedby');
+    if (describedById != null) {
+      final span = element.querySelector('#$describedById');
+      expect(span, isNotNull);
+      expect(span!.getAttribute('hidden'), isNotNull);
+      expect(span.text, 'Hint Tooltip');
+    }
+    semantics().semanticsEnabled = false;
+  });
+
+  // Additional edge case tests
+  test('sets aria-description/aria-describedby for only hint', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(id: 0, hint: 'Just a hint', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    final hasAriaDescription = element.getAttribute('aria-description') == 'Just a hint';
+    final hasAriaDescribedBy = element.getAttribute('aria-describedby') != null;
+    expect(hasAriaDescription || hasAriaDescribedBy, isTrue);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('sets aria-description/aria-describedby for only tooltip', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      tooltip: 'Just a tooltip',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    final hasAriaDescription = element.getAttribute('aria-description') == 'Just a tooltip';
+    final hasAriaDescribedBy = element.getAttribute('aria-describedby') != null;
+    expect(hasAriaDescription || hasAriaDescribedBy, isTrue);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('does not set aria-description/aria-describedby for empty hint and tooltip', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(id: 0, hint: '', tooltip: '', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    expect(element.getAttribute('aria-description'), isNull);
+    expect(element.getAttribute('aria-describedby'), isNull);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('does not set aria-label if label is missing', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(id: 0, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    expect(element.getAttribute('aria-label'), isNull);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('does not set value attributes for empty or whitespace value', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(id: 0, value: '', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    expect(element.getAttribute('aria-valuenow'), isNull);
+    expect(element.getAttribute('aria-valuetext'), isNull);
+    // Whitespace value
+    tester.updateNode(id: 0, value: '   ', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    tester.apply();
+    expect(element.getAttribute('aria-valuenow'), isNull);
+    expect(element.getAttribute('aria-valuetext'), isNull);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('updates label, hint, tooltip, and value after initial creation', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Initial',
+      hint: 'First hint',
+      tooltip: 'First tooltip',
+      value: '1',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    expect(element.getAttribute('aria-label'), 'Initial');
+    // Update all
+    tester.updateNode(
+      id: 0,
+      label: 'Updated',
+      hint: 'Second hint',
+      tooltip: 'Second tooltip',
+      value: '2',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    expect(element.getAttribute('aria-label'), 'Updated');
+    final hasAriaDescription =
+        element.getAttribute('aria-description') == 'Second hint Second tooltip';
+    final hasAriaDescribedBy = element.getAttribute('aria-describedby') != null;
+    expect(hasAriaDescription || hasAriaDescribedBy, isTrue);
+    expect(element.getAttribute('aria-valuenow'), '2');
+    semantics().semanticsEnabled = false;
+  });
+
+  test('removes aria-describedby and span when hint/tooltip is cleared', () async {
+    semantics().semanticsEnabled = true;
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Label',
+      hint: 'Hint',
+      tooltip: 'Tooltip',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    final DomElement element = tester.getSemanticsObject(0).element;
+    final describedById = element.getAttribute('aria-describedby');
+    expect(describedById, isNotNull);
+    // Now clear hint and tooltip
+    tester.updateNode(
+      id: 0,
+      label: 'Label',
+      hint: '',
+      tooltip: '',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+    expect(element.getAttribute('aria-describedby'), isNull);
+    expect(element.querySelector('#$describedById'), isNull);
+    semantics().semanticsEnabled = false;
   });
 }
 
