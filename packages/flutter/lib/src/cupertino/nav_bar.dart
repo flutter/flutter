@@ -784,7 +784,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
                     style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    child: _LargeTitle(child: components.largeTitle),
+                    child: _LargeTitle(
+                      height: _kNavBarLargeTitleHeightExtension,
+                      child: components.largeTitle,
+                    ),
                   ),
                 ),
               ),
@@ -1166,9 +1169,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late CurvedAnimation _searchAnimation;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
+  late double scaledSearchFieldHeight;
+  late double scaledLargeTitleHeight;
   bool searchIsActive = false;
-  late double effectiveSearchFieldHeight;
-  late double effectiveLargeTitleHeight;
   bool isPortrait = true;
 
   @override
@@ -1181,16 +1184,16 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   void didChangeDependencies() {
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
-    effectiveSearchFieldHeight = clampDouble(
+    scaledSearchFieldHeight = clampDouble(
       MediaQuery.textScalerOf(context).scale(_kSearchFieldHeight),
-      0.0,
+      _kSearchFieldHeight,
       _kSearchFieldHeight * _kSearchFieldMaxScaleFactor,
     );
-    effectiveLargeTitleHeight =
+    scaledLargeTitleHeight =
         isPortrait
             ? clampDouble(
               MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
-              0.0,
+              _kNavBarLargeTitleHeightExtension,
               _kNavBarLargeTitleHeightExtension * _kLargeTitleMaxScaleFactor,
             )
             : 0.0;
@@ -1214,7 +1217,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   double get _bottomHeight {
     assert(!widget._searchable || widget.bottom == null);
     if (widget._searchable) {
-      return effectiveSearchFieldHeight + _kNavBarBottomPadding;
+      return scaledSearchFieldHeight + _kNavBarBottomPadding;
     } else if (widget.bottom != null) {
       return widget.bottom!.preferredSize.height;
     }
@@ -1231,7 +1234,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     persistentHeightAnimation = persistentHeightTween.animate(_animationController)
       ..addStatusListener(_handleSearchFieldStatusChanged);
     final Tween<double> largeTitleHeightTween = Tween<double>(
-      begin: effectiveLargeTitleHeight,
+      begin: scaledLargeTitleHeight,
       end: 0.0,
     );
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
@@ -1254,10 +1257,10 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     if (canScrollBottom && position.pixels < bottomScrollOffset) {
       target = position.pixels > bottomScrollOffset / 2 ? bottomScrollOffset : 0.0;
     } else if (position.pixels > bottomScrollOffset &&
-        position.pixels < bottomScrollOffset + effectiveLargeTitleHeight) {
+        position.pixels < bottomScrollOffset + scaledLargeTitleHeight) {
       target =
-          position.pixels > bottomScrollOffset + (effectiveLargeTitleHeight / 2)
-              ? bottomScrollOffset + effectiveLargeTitleHeight
+          position.pixels > bottomScrollOffset + (scaledLargeTitleHeight / 2)
+              ? bottomScrollOffset + scaledLargeTitleHeight
               : bottomScrollOffset;
     }
 
@@ -1320,14 +1323,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                     animationController: _animationController,
                     animation: persistentHeightAnimation,
                     searchField: widget.searchField,
-                    searchFieldHeight: effectiveSearchFieldHeight,
+                    searchFieldHeight: scaledSearchFieldHeight,
                     onSearchFieldTap: _onSearchFieldTap,
                   )
                   : _InactiveSearchableBottom(
                     animationController: _animationController,
                     animation: persistentHeightAnimation,
                     searchField: widget.searchField,
-                    searchFieldHeight: effectiveSearchFieldHeight,
+                    searchFieldHeight: scaledSearchFieldHeight,
                     onSearchFieldTap: _onSearchFieldTap,
                   )
               : widget.bottom) ??
@@ -1517,7 +1520,10 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
                                 style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                child: _LargeTitle(child: components.largeTitle),
+                                child: _LargeTitle(
+                                  height: largeTitleHeight,
+                                  child: components.largeTitle,
+                                ),
                               ),
                             ),
                           ),
@@ -1601,23 +1607,31 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
 /// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch]
 /// parameter is true.
 class _LargeTitle extends SingleChildRenderObjectWidget {
-  const _LargeTitle({super.child});
+  const _LargeTitle({super.child, required this.height});
+
+  final double height;
 
   @override
   _RenderLargeTitle createRenderObject(BuildContext context) {
     return _RenderLargeTitle(
       alignment: AlignmentDirectional.bottomStart.resolve(Directionality.of(context)),
+      height: height,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderLargeTitle renderObject) {
-    renderObject.alignment = AlignmentDirectional.bottomStart.resolve(Directionality.of(context));
+    renderObject
+      ..alignment = AlignmentDirectional.bottomStart.resolve(Directionality.of(context))
+      ..height = height;
   }
 }
 
 class _RenderLargeTitle extends RenderShiftedBox {
-  _RenderLargeTitle({required Alignment alignment}) : _alignment = alignment, super(null);
+  _RenderLargeTitle({required Alignment alignment, required double height})
+    : _alignment = alignment,
+      _height = height,
+      super(null);
 
   Alignment get alignment => _alignment;
   Alignment _alignment;
@@ -1630,10 +1644,21 @@ class _RenderLargeTitle extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  double get height => _height;
+  double _height;
+  set height(double value) {
+    if (_height == value) {
+      return;
+    }
+    _height = value;
+
+    markNeedsLayout();
+  }
+
   double _scale = 1.0;
 
-  static double _computeTitleScale(Size childSize, BoxConstraints constraints) {
-    const double maxHeight = _kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding;
+  static double _computeTitleScale(Size childSize, BoxConstraints constraints, double height) {
+    final double maxHeight = height - _kNavBarBottomPadding;
     final double scale = 1.0 + 0.03 * (constraints.maxHeight - maxHeight) / maxHeight;
     final double maxScale =
         childSize.width != 0.0
@@ -1664,7 +1689,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final double scale = _computeTitleScale(childSize, constraints);
+    final double scale = _computeTitleScale(childSize, constraints, height);
     final Size scaledChildSize = childSize * scale;
     return result * scale +
         alignment.alongOffset(constraints.biggest - scaledChildSize as Offset).dy;
@@ -1681,7 +1706,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
     final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
     child.layout(childConstraints, parentUsesSize: true);
-    _scale = _computeTitleScale(child.size, constraints);
+    _scale = _computeTitleScale(child.size, constraints, height);
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     childParentData.offset = alignment.alongOffset(size - (child.size * _scale) as Offset);
   }
