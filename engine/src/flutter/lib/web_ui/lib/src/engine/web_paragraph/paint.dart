@@ -62,6 +62,19 @@ class TextPaint {
           run.bidiLevel.isEven,
         );
       }
+      /*
+      WebParagraphDebug.log('run.shift: ${run.shift} line.shift: ${line.shift}');
+      for (int i = run.clusterRange.start; i < run.clusterRange.end; i += 1) {
+        final clusterText = layout.textClusters[i];
+        paintCluster(
+          canvas,
+          clusterText,
+          ui.Offset(line.shift - run.shift, line.bounds.top),
+          ui.Offset(x, y),
+          run.bidiLevel.isEven,
+        );
+      }
+      */
     }
   }
 
@@ -80,7 +93,13 @@ class TextPaint {
     );
 
     // Define the text cluster bounds
-    final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, rects.first.width, rects.first.height);
+    final pos = webTextCluster.bounds.left - webTextCluster.cluster!.x;
+    final ui.Rect zeroRect = ui.Rect.fromLTWH(
+      pos,
+      0,
+      webTextCluster.bounds.width,
+      rects.first.height,
+    );
     final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
@@ -88,7 +107,7 @@ class TextPaint {
     // (and then to the paragraph.paint x and y)
 
     final double left = clusterOffset.dx + webTextCluster.cluster!.x + lineOffset.dx;
-    final double shift = left - left.floorToDouble();
+    final double shift = ltr ? left - left.floorToDouble() : left.ceilToDouble() - left;
     final ui.Rect targetRect = zeroRect
         .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
         .translate(lineOffset.dx, lineOffset.dy)
@@ -105,19 +124,12 @@ class TextPaint {
       canvas.drawRect(backgroundRect, textStyle.background!);
     }
 
-    //final ui.Paint transparent = ui.Paint()..color = const ui.Color(0xFF000000);
-    //canvas.saveLayer(const ui.Rect.fromLTWH(0, 0, 500, 500), transparent);
-
     final String text = paragraph.text!.substring(
       webTextCluster.textRange.start,
       webTextCluster.textRange.end,
     );
 
     String diff = '';
-    if (targetRect.left + 1 != webTextCluster.cluster!.x) {
-      diff =
-          'pos ${targetRect.left + 1} - ${webTextCluster.cluster!.x} = ${targetRect.left + 1 - webTextCluster.cluster!.x}';
-    }
     if (rects.first.left > webTextCluster.bounds.left) {
       diff += ' left: ${rects.first.left - webTextCluster.bounds.left}';
     }
@@ -125,8 +137,11 @@ class TextPaint {
       diff += ' right: ${rects.first.right - webTextCluster.bounds.right}';
     }
 
+    //final ui.Paint transparent = ui.Paint()..color = ui.Color(ltr ? 0xFFFF0000 : 0xFF0000FF);
+    //canvas.saveLayer(const ui.Rect.fromLTWH(0, 0, 500, 500), transparent);
+
     WebParagraphDebug.log(
-      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} $diff shift $shift',
+      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} pos $pos shift $shift ${textStyle.foreground?.color.toCssString()}',
     );
 
     textContext.fillStyle = textStyle.foreground?.color.toCssString();
@@ -157,7 +172,6 @@ class TextPaint {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
-
     //canvas.restore();
   }
 
