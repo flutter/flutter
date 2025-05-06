@@ -775,12 +775,14 @@ void main() {
         child: Column(
           children: <Widget>[
             Semantics(
+              container: true,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
               child: const SizedBox(width: 10, height: 10),
             ),
             Semantics(
+              container: true,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action2'): () {},
               },
