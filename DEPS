@@ -314,7 +314,7 @@ deps = {
    Var('dart_git') + '/core.git' + '@' + Var('dart_core_rev'),
 
   'engine/src/flutter/third_party/dart/third_party/pkg/dart_style':
-   Var('dart_git') + '/dart_style.git@21de99ec0ff8ace4d946a746fb427fffd6afa535',
+   Var('dart_git') + '/dart_style.git@100db45075abdd66fd8788b205243e90ff0595df',
 
   'engine/src/flutter/third_party/dart/third_party/pkg/dartdoc':
    Var('dart_git') + '/dartdoc.git@62aefbb788baf5b73b2d704d66d9735a7ca56a69',
