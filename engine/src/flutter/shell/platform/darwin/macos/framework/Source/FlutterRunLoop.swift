@@ -103,8 +103,7 @@ import Foundation
   }
 
   // Schedules a block to be executed on the main thread.
-  @objc(performWithDelay:block:)
-  public func perform(withDelay delay: TimeInterval, block: @escaping () -> Void) {
+  @objc public func perform(afterDelay delay: TimeInterval, block: @escaping () -> Void) {
     tasksLock.lock()
     defer { tasksLock.unlock() }
 
@@ -120,7 +119,7 @@ import Foundation
   // Schedules a block to be executed on the main thread after a delay.
   @objc(performBlock:)
   public func perform(_ block: @escaping () -> Void) {
-    perform(withDelay: 0, block: block)
+    perform(afterDelay: 0, block: block)
   }
 
   private func performExpiredTasks() {
