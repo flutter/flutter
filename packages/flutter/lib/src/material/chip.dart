@@ -1291,7 +1291,16 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         theme.chipTheme.iconTheme?.size ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!.size!;
 
+    final MaterialTapTargetSize effectiveMaterialTapTargetSize =
+        widget.materialTapTargetSize ?? theme.materialTapTargetSize;
+    final Size semanticSize = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded => const Size.square(kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size.square(kMinInteractiveDimension - 8.0),
+    };
+    final VisualDensity effectiveVisualDensity = widget.visualDensity ?? theme.visualDensity;
+
     return _DeleteButtonSemantic(
+      semanticSize: semanticSize + effectiveVisualDensity.baseSizeAdjustment,
       child: _wrapWithTooltip(
         tooltip:
             widget.deleteButtonTooltipMessage ??
@@ -2425,15 +2434,37 @@ bool _hitIsOnDeleteIcon({
 }
 
 class _DeleteButtonSemantic extends SingleChildRenderObjectWidget {
-  const _DeleteButtonSemantic({super.child});
+  const _DeleteButtonSemantic({super.child, required this.semanticSize});
+
+  final Size semanticSize;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderDeleteButtonSemantic();
+    return _RenderDeleteButtonSemantic(semanticSize);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderDeleteButtonSemantic renderObject,
+  ) {
+    renderObject.semanticSize = semanticSize;
   }
 }
 
 class _RenderDeleteButtonSemantic extends RenderProxyBox {
+  _RenderDeleteButtonSemantic(this._semanticSize, [RenderBox? child]) : super(child);
+
+  Size get semanticSize => _semanticSize;
+  Size _semanticSize;
+  set semanticSize(Size value) {
+    if (_semanticSize == value) {
+      return;
+    }
+    _semanticSize = value;
+    markNeedsLayout();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -2442,11 +2473,13 @@ class _RenderDeleteButtonSemantic extends RenderProxyBox {
   }
 
   @override
-  Rect get semanticBounds => Rect.fromCenter(
-    center: paintBounds.center,
-    width: kMinInteractiveDimension,
-    height: kMinInteractiveDimension,
-  );
+  Rect get semanticBounds {
+    return Rect.fromCenter(
+      center: paintBounds.center,
+      width: math.max(_semanticSize.width, size.width),
+      height: math.max(_semanticSize.height, size.height),
+    );
+  }
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chip
