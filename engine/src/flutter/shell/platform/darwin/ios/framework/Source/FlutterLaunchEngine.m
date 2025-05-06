@@ -31,10 +31,13 @@
 
 - (FlutterEngine*)engine {
   if (!_did_make_engine && !_engine) {
+    // A FlutterViewController without restoration have a nil restorationIdentifier
+    // leading no restoration data being saved.
     _engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
                                           project:[[FlutterDartProject alloc] init]
-                           allowHeadlessExecution:YES //TODO(gaaclarke): decide what to do here.
-                               restorationEnabled:NO]; //TODO(gaaclarke): decide what to do here.
+                           allowHeadlessExecution:YES  // TODO(gaaclarke): decide what to do here.
+                               restorationEnabled:YES];
+    [_engine run];
   }
   return _engine;
 }

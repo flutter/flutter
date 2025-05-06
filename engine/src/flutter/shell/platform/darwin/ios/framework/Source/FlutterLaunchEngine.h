@@ -5,16 +5,15 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERLAUNCHENGINE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERLAUNCHENGINE_H_
 
-
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
 @interface FlutterLaunchEngine : NSObject
 
-@property (nonatomic, strong, nullable, readonly) FlutterEngine* engine;
+@property(nonatomic, strong, nullable, readonly) FlutterEngine* engine;
 
 + (nonnull instancetype)sharedInstance;
 
--(nullable FlutterEngine*)grabEngine;
+- (nullable FlutterEngine*)grabEngine;
 
 @end
 
