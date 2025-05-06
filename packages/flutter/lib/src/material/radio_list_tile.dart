@@ -186,7 +186,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.materialTapTargetSize,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.secondary,
     this.selected = false,
@@ -204,7 +204,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// Creates a combination of a list tile and a platform adaptive radio.
   ///
@@ -227,7 +227,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.materialTapTargetSize,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.secondary,
     this.selected = false,
@@ -245,7 +245,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.useCupertinoCheckmarkStyle = false,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -385,9 +385,10 @@ class RadioListTile<T> extends StatelessWidget {
 
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
-  final bool isThreeLine;
+  /// If null, the value from [ListTileThemeData.isThreeLine] is used.
+  /// If that is also null, the value from [ThemeData.listTileTheme] is used.
+  /// If still null, the default value is `false`.
+  final bool? isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
   ///
