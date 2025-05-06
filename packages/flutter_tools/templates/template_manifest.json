@@ -144,6 +144,7 @@
     "templates/app/windows.tmpl/runner/utils.h",
     "templates/app/windows.tmpl/runner/win32_window.cpp",
     "templates/app/windows.tmpl/runner/win32_window.h",
+    "templates/app/build.gradle.kts.tmpl",
 
     "templates/app_test_widget/test/widget_test.dart.tmpl",
 
