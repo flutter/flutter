@@ -53,6 +53,7 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
 
     final SkwasmPicture picture = SkwasmPicture.fromHandle(pictureRecorderEndRecording(handle));
     ui.Picture.onCreate?.call(picture);
+    dispose();
     return picture;
   }
 

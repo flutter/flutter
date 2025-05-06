@@ -490,6 +490,43 @@ class SkwasmRenderer implements Renderer {
 
   @override
   void dumpDebugInfo() {
+    withStackScope((StackScope scope) {
+        final Pointer<Uint32> counts = scope.allocUint32Array(28);
+        skwasmGetLiveObjectCounts(counts);
+        print('''
+{
+  lineBreakBufferCount: ${counts[0]},
+  unicodePositionBufferCount: ${counts[1]},
+  lineMetricsCount: ${counts[2]},
+  textBoxListCount: ${counts[3]},
+  paragraphBuilderCount: ${counts[4]},
+  paragraphCount: ${counts[5]},
+  strutStyleCount: ${counts[6]},
+  textStyleCount: ${counts[7]},
+  animatedImageCount: ${counts[8]},
+  countourMeasureIterCount: ${counts[9]},
+  countourMeasureCount: ${counts[10]},
+  dataCount: ${counts[11]},
+  colorFilterCount: ${counts[12]},
+  imageFilterCount: ${counts[13]},
+  maskFilterCount: ${counts[14]},
+  typefaceCount: ${counts[15]},
+  fontCollectionCount: ${counts[16]},
+  imageCount: ${counts[17]},
+  paintCount: ${counts[18]},
+  pathCount: ${counts[19]},
+  pictureCount: ${counts[20]},
+  pictureRecorderCount: ${counts[21]},
+  shaderCount: ${counts[22]},
+  runtimeEffectCount: ${counts[23]},
+  stringCount: ${counts[24]},
+  string16Count: ${counts[25]},
+  surfaceCount: ${counts[26]},
+  verticesCount: ${counts[27]},
+}
+''');
+      });
+
     for (final view in _sceneViews.values) {
       view.dumpDebugInfo();
     }
