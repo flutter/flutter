@@ -96,7 +96,7 @@ class TextLayout {
           '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
       layoutContext.fillStyle = styledBlock.textStyle.color;
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
-      for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
+      for (final DomTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
           cluster.begin,
           cluster.end,
@@ -332,7 +332,7 @@ class ExtendedTextCluster {
 
   ExtendedTextCluster.empty() : bounds = ui.Rect.zero;
 
-  WebTextCluster? cluster;
+  DomTextCluster? cluster;
   int start = 0;
   int end = 0;
   ui.Rect bounds;
