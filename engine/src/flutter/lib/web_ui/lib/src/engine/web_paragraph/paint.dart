@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/src/engine/web_paragraph/debug.dart';
 import 'package:ui/ui.dart' as ui;
@@ -82,26 +80,19 @@ class TextPaint {
     );
 
     // Define the text cluster bounds
-    final ui.Rect zeroRect = ui.Rect.fromLTWH(
-      webTextCluster.bounds.left - webTextCluster.cluster!.x,
-      0,
-      webTextCluster.bounds.width + 2,
-      rects.first.height,
-    );
-
+    final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, rects.first.width, rects.first.height);
     final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
-    double tail = webTextCluster.bounds.left - webTextCluster.bounds.left.floorToDouble();
-    if (tail >= 0.5) {
-      tail -= 1.0;
-    }
+
+    final double left = clusterOffset.dx + webTextCluster.cluster!.x + lineOffset.dx;
+    final double shift = left - left.floorToDouble();
     final ui.Rect targetRect = zeroRect
         .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
         .translate(lineOffset.dx, lineOffset.dy)
-        .translate(ltr ? -tail : 0, 0);
+        .translate(-shift, 0);
 
     if (textStyle.background != null) {
       // Draw the background color
@@ -121,8 +112,21 @@ class TextPaint {
       webTextCluster.textRange.start,
       webTextCluster.textRange.end,
     );
+
+    String diff = '';
+    if (targetRect.left + 1 != webTextCluster.cluster!.x) {
+      diff =
+          'pos ${targetRect.left + 1} - ${webTextCluster.cluster!.x} = ${targetRect.left + 1 - webTextCluster.cluster!.x}';
+    }
+    if (rects.first.left > webTextCluster.bounds.left) {
+      diff += ' left: ${rects.first.left - webTextCluster.bounds.left}';
+    }
+    if (rects.first.right < webTextCluster.bounds.right) {
+      diff += ' right: ${rects.first.right - webTextCluster.bounds.right}';
+    }
+
     WebParagraphDebug.log(
-      'cluster "$text" ${webTextCluster.bounds.left - webTextCluster.cluster!.x} ${tail} source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} $diff shift $shift',
     );
 
     textContext.fillStyle = textStyle.foreground?.color.toCssString();
