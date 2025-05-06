@@ -49,6 +49,12 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.size].
   size,
 
+  /// Specifies the aspect corresponding to the width of [MediaQueryData.size].
+  width,
+
+  /// Specifies the aspect corresponding to the height of [MediaQueryData.size].
+  height,
+
   /// Specifies the aspect corresponding to [MediaQueryData.orientation].
   orientation,
 
@@ -1306,6 +1312,49 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@endtemplate}
   static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.size)?.size;
 
+  /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the width of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double widthOf(BuildContext context) => _of(context, _MediaQueryAspect.width).size.width;
+
+  /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the width of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeWidthOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.width)?.size.width;
+
+  /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the height of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double heightOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.height).size.height;
+
+  /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the height of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeHeightOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.height)?.size.height;
+
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
   ///
@@ -1776,6 +1825,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
           dependency is _MediaQueryAspect &&
           switch (dependency) {
             _MediaQueryAspect.size => data.size != oldWidget.data.size,
+            _MediaQueryAspect.width => data.size.width != oldWidget.data.size.width,
+            _MediaQueryAspect.height => data.size.height != oldWidget.data.size.height,
             _MediaQueryAspect.orientation => data.orientation != oldWidget.data.orientation,
             _MediaQueryAspect.devicePixelRatio =>
               data.devicePixelRatio != oldWidget.data.devicePixelRatio,
