@@ -320,7 +320,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
-      &(flags_.back()),
+      &flags_.back(),
   });
 }
 
