@@ -2121,4 +2121,74 @@ void main() {
     );
     expectThreeLine();
   });
+
+  testWidgets('Material3 - SwitchListTile activeThumbColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: SwitchListTile(
+                value: true,
+                selected: true,
+                onChanged: (_) {},
+                activeColor: Colors.red[500],
+                activeThumbColor: Colors.yellow[500],
+                activeTrackColor: Colors.green[500],
+                title: const Text('title'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(color: Colors.green[500])
+        ..rrect()
+        ..rrect(color: Colors.yellow[500]),
+    );
+    final RenderParagraph title = tester.renderObject(
+      find.descendant(of: find.byType(ListTile), matching: find.text('title')),
+    );
+    expect(title.text.style!.color, Colors.yellow[500]);
+  });
+
+  testWidgets('Material3 - SwitchListTile.adaptive activeThumbColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: SwitchListTile.adaptive(
+                value: true,
+                selected: true,
+                onChanged: (_) {},
+                activeColor: Colors.red[500],
+                activeThumbColor: Colors.yellow[500],
+                activeTrackColor: Colors.green[500],
+                title: const Text('title'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(color: Colors.green[500])
+        ..rrect()
+        ..rrect(color: Colors.yellow[500]),
+    );
+    final RenderParagraph title = tester.renderObject(
+      find.descendant(of: find.byType(ListTile), matching: find.text('title')),
+    );
+    expect(title.text.style!.color, Colors.yellow[500]);
+  });
 }

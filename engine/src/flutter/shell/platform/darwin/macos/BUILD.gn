@@ -4,7 +4,7 @@
 
 assert(is_mac)
 
-import("//build/config/mac/mac_sdk.gni")
+import("//build/config/apple/apple_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
@@ -16,6 +16,31 @@ shell_gpu_configuration("macos_gpu_configuration") {
   enable_gl = true
   enable_vulkan = false
   enable_metal = true
+}
+
+config("config_macos") {
+  include_dirs = [ target_gen_dir ]
+  lib_dirs = mac_swift_lib_paths
+
+  # Allow use of @testable imports in debug builds and when tests are enabled.
+  if (enable_unittests) {
+    swiftflags = [ "-enable-testing" ]
+  }
+}
+
+config("config_macos_test") {
+  configs = [ ":config_macos" ]
+
+  # Add platform frameworks directory to search path for test frameworks.
+  # Add platform lib to search path for test libraries/Swift modules.
+  cflags = [
+    "-fvisibility=default",
+    "-F$mac_platform_path/Developer/Library/Frameworks",
+  ]
+  swiftflags = [ "-F$mac_platform_path/Developer/Library/Frameworks" ]
+  include_dirs = [ "$mac_platform_path/Developer/usr/lib" ]
+  framework_dirs = [ "$mac_platform_path/Developer/Library/Frameworks" ]
+  lib_dirs = [ "$mac_platform_path/Developer/usr/lib" ]
 }
 
 group("macos") {
@@ -50,6 +75,13 @@ _flutter_framework_headers = [
 _flutter_framework_headers_copy_dir =
     "$_flutter_framework_dir/Versions/A/Headers"
 
+source_set("InternalFlutterSwift") {
+  visibility = [ ":*" ]
+  configs += [ ":config_macos" ]
+
+  sources = [ "framework/Source/FlutterRunLoop.swift" ]
+}
+
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
@@ -60,8 +92,6 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppLifecycleDelegate.mm",
-    "framework/Source/FlutterBackingStore.h",
-    "framework/Source/FlutterBackingStore.mm",
     "framework/Source/FlutterChannelKeyResponder.h",
     "framework/Source/FlutterChannelKeyResponder.mm",
     "framework/Source/FlutterCompositor.h",
@@ -96,8 +126,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRenderer.mm",
     "framework/Source/FlutterResizeSynchronizer.h",
     "framework/Source/FlutterResizeSynchronizer.mm",
-    "framework/Source/FlutterRunLoop.h",
-    "framework/Source/FlutterRunLoop.mm",
     "framework/Source/FlutterSurface.h",
     "framework/Source/FlutterSurface.mm",
     "framework/Source/FlutterSurfaceManager.h",
@@ -125,6 +153,7 @@ source_set("flutter_framework_source") {
   sources += _flutter_framework_headers
 
   deps = [
+    ":InternalFlutterSwift",
     ":macos_gpu_configuration",
     "//flutter/flow:flow",
     "//flutter/fml",
@@ -212,6 +241,7 @@ executable("flutter_desktop_darwin_unittests") {
   ]
 
   deps = [
+    ":InternalFlutterSwift",
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
     "//flutter/fml",
@@ -239,10 +269,19 @@ copy("copy_dylib") {
   deps = [ ":flutter_framework_dylib" ]
 }
 
-copy("copy_framework_info_plist") {
+action("copy_framework_info_plist") {
+  script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
   sources = [ "framework/Info.plist" ]
   outputs = [ "$_flutter_framework_dir/Versions/A/Resources/Info.plist" ]
+  args = [
+    "--source",
+    rebase_path(sources[0]),
+    "--destination",
+    rebase_path(outputs[0]),
+    "--buildmode",
+    flutter_runtime_mode,
+  ]
 }
 
 copy("copy_framework_module_map") {
