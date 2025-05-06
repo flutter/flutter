@@ -29,7 +29,8 @@ If the automated cherry-pick process fails, you will have to create the cherry-p
   - Risk (What is the risk level of this cherry-pick?)
   - Test Coverage (Are you confident that your fix is well-tested by automated tests?)
   - Validation Steps (What are the steps to validate that this fix works?)
-4. [STABLE ONLY] Ensure that your cherry-pick PR updates CHANGELOG.md.
+4. Add the label `cp: review` to your PR
+5. [STABLE ONLY] Ensure that your cherry-pick PR updates CHANGELOG.md.
 
 ## Frequently asked questions
 
