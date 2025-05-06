@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.doThrow;
@@ -558,11 +559,7 @@ public class PlatformPluginTest {
     platformPlugin.mPlatformMessageHandler.showSystemUiMode(
         PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
     // Does not use view.
-    verify(fakeDecorView, never())
-        .setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    verify(fakeDecorView, never()).setSystemUiVisibility(anyInt());
     // Should use window.
     verify(fakeWindow).setDecorFitsSystemWindows(false /* Should be false for edge to edge. */);
   }
