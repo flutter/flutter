@@ -151,6 +151,7 @@ public class PlatformViewsChannel {
             result.success(null);
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
+            // change a random line
           }
         }
 
