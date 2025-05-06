@@ -158,7 +158,8 @@ TEST_P(EntityTest, TriangleInsideASquare) {
     Point a = DrawPlaygroundPoint(point_a);
     static PlaygroundPoint point_b(Point(210, 10) + offset, 20, Color::White());
     Point b = DrawPlaygroundPoint(point_b);
-    static PlaygroundPoint point_c(Point(210, 210) + offset, 20, Color::White());
+    static PlaygroundPoint point_c(Point(210, 210) + offset, 20,
+                                   Color::White());
     Point c = DrawPlaygroundPoint(point_c);
     static PlaygroundPoint point_d(Point(10, 210) + offset, 20, Color::White());
     Point d = DrawPlaygroundPoint(point_d);
@@ -290,9 +291,12 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Join::kBevel demo.
     {
       Point off = Point(0, 1) * padding + margin;
-      static PlaygroundPoint point_a = PlaygroundPoint(off + a_def, r, Color::White());
-      static PlaygroundPoint point_b = PlaygroundPoint(off + e_def, r, Color::White());
-      static PlaygroundPoint point_c = PlaygroundPoint(off + c_def, r, Color::White());
+      static PlaygroundPoint point_a =
+          PlaygroundPoint(off + a_def, r, Color::White());
+      static PlaygroundPoint point_b =
+          PlaygroundPoint(off + e_def, r, Color::White());
+      static PlaygroundPoint point_c =
+          PlaygroundPoint(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
@@ -1337,7 +1341,8 @@ TEST_P(EntityTest, RRectShadowTest) {
     static bool show_coverage = false;
     static Color coverage_color = Color::Green().WithAlpha(0.2);
     static PlaygroundPoint top_left_point(Point(200, 200), 30, Color::White());
-    static PlaygroundPoint bottom_right_point(Point(600, 400), 30, Color::White());
+    static PlaygroundPoint bottom_right_point(Point(600, 400), 30,
+                                              Color::White());
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
