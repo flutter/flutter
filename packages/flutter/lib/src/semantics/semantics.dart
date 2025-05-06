@@ -126,7 +126,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.row => _semanticsRow,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
-    SemanticsRole.menu => _noCheckRequired,
+    SemanticsRole.menu => _semanticsMenu,
     SemanticsRole.menuBar => _semanticsMenuBar,
     SemanticsRole.menuItem => _semanticsMenuItem,
     SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
@@ -257,6 +257,14 @@ sealed class _DebugSemanticsRoleChecks {
 
     node.visitChildren(validateRadioGroupChildren);
     return error;
+  }
+
+  static FlutterError? _semanticsMenu(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu cannot be empty');
+    }
+
+    return null;
   }
 
   static FlutterError? _semanticsMenuBar(SemanticsNode node) {
@@ -2444,7 +2452,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   // CHILDREN
 
-  /// Contains the children in hit test order (i.e. `childrenInInversePaintOrder`).
+  /// Contains the children in inverse hit test order (i.e. paint order).
   List<SemanticsNode>? _children;
 
   /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
@@ -3471,11 +3479,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       for (int i = 0; i < childCount; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
-      // _children is sorted in inversed paint order, so we use it to get the hit test
+      // _children is sorted in paint order, so we invert it to get the hit test
       // order.
       childrenInHitTestOrder = Int32List(childCount);
-      for (int i = 0; i < childCount; i += 1) {
-        childrenInHitTestOrder[i] = _children![i].id;
+      for (int i = childCount - 1; i >= 0; i -= 1) {
+        childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
       }
     }
     Int32List? customSemanticsActionIds;
@@ -3543,8 +3551,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (inheritedTextDirection != null) {
       childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
     } else {
-      // In the absence of text direction default to the hit test order (i.e.
-      // `childrenInInversePaintOrder`).
+      // In the absence of text direction default to paint order.
       childrenInDefaultOrder = _children;
     }
 
@@ -3781,7 +3788,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     return switch (childOrder) {
-      DebugSemanticsDumpOrder.inverseHitTest => _children!.reversed.toList(),
+      DebugSemanticsDumpOrder.inverseHitTest => _children!,
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
     };
   }

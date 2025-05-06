@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -1800,6 +1801,40 @@ void main() {
   );
 
   testWidgets(
+    'The framework removes all animation listeners from foreign controllers when disposing.',
+    (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final _StatusTestAnimationController controller = _StatusTestAnimationController(
+        vsync: const TestVSync(),
+        duration: const Duration(seconds: 2),
+        reverseDuration: const Duration(seconds: 2),
+      );
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      );
+
+      await tester.pump();
+      expect(controller.isListening, isFalse);
+
+      scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
+        return const SizedBox(height: 200.0, child: Text('BottomSheet'));
+      }, transitionAnimationController: controller);
+
+      await tester.pumpAndSettle();
+      expect(controller.isListening, isTrue);
+      expect(find.text('BottomSheet'), findsOneWidget);
+
+      // Swipe the bottom sheet to dismiss it.
+      await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
+      await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+      expect(controller.isListening, isFalse);
+      expect(find.text('BottomSheet'), findsNothing);
+    },
+  );
+
+  testWidgets(
     'Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/93717
@@ -2807,4 +2842,14 @@ class _TestPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StatusTestAnimationController extends AnimationController with AnimationLazyListenerMixin {
+  _StatusTestAnimationController({super.duration, super.reverseDuration, required super.vsync});
+
+  @override
+  void didStartListening() {}
+
+  @override
+  void didStopListening() {}
 }

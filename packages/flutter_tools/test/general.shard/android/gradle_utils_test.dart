@@ -1143,14 +1143,15 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '4.2'),
       // Strictly too new AGP versions.
       // *The tests that follow need to be updated* when max supported AGP versions are updated:
-      JavaAgpTestData(false, javaVersion: '24', agpVersion: '8.8'),
-      JavaAgpTestData(false, javaVersion: '20', agpVersion: '8.8'),
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.8'),
+      JavaAgpTestData(false, javaVersion: '24', agpVersion: '9.0'),
+      JavaAgpTestData(false, javaVersion: '20', agpVersion: '9.0'),
+      JavaAgpTestData(false, javaVersion: '17', agpVersion: '9.0'),
       // Java 17 & patch versions compatibility cases
       // *The tests that follow need to be updated* when maxKnownAndSupportedAgpVersion is
       // updated:
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.8'),
+      JavaAgpTestData(false, javaVersion: '17', agpVersion: '9.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.7'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.6'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.5'),
@@ -1159,8 +1160,9 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.4'),
-      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '8.8'),
+      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '9.0'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.7'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.6'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.5'),
@@ -1561,7 +1563,7 @@ allprojects {
       );
       // Strictly too new Gradle and AGP versions.
       expect(
-        getJavaVersionFor(gradleV: '8.13', agpV: '8.9'),
+        getJavaVersionFor(gradleV: '8.13', agpV: '9.0'),
         equals(const VersionRange(null, null)),
       );
       // Strictly too new Gradle version and maximum version of AGP.
@@ -1573,7 +1575,7 @@ allprojects {
       // Strictly too new AGP version and maximum version of Gradle.
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
       expect(
-        getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.8'),
+        getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '9.0'),
         equals(const VersionRange(null, '24')),
       );
       // Tests with a known compatible Gradle/AGP version pair.
