@@ -152,6 +152,14 @@
   }
 }
 
+- (void)closeAllWindows {
+  for (FlutterWindowOwner* owner in _windows) {
+    [owner.flutterViewController dispose];
+    [owner.window close];
+  }
+  [_windows removeAllObjects];
+}
+
 @end
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -194,20 +202,22 @@ void FlutterSetWindowTitle(void* window, const char* title) {
 
 int64_t FlutterGetWindowState(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
-  if (w.isZoomed) {
-    return static_cast<int64_t>(flutter::WindowState::kMaximized);
-  } else if (w.isMiniaturized) {
+  if (w.isMiniaturized) {
     return static_cast<int64_t>(flutter::WindowState::kMinimized);
+  } else if (w.isZoomed) {
+    return static_cast<int64_t>(flutter::WindowState::kMaximized);
   } else {
     return static_cast<int64_t>(flutter::WindowState::kRestored);
   }
 }
 
 void FlutterSetWindowState(void* window, int64_t state) {
+  flutter::WindowState windowState = static_cast<flutter::WindowState>(state);
   NSWindow* w = (__bridge NSWindow*)window;
-  if (state == 1) {
+  if (windowState == flutter::WindowState::kMaximized) {
+    [w deminiaturize:nil];
     [w zoom:nil];
-  } else if (state == 2) {
+  } else if (state == static_cast<int64_t>(flutter::WindowState::kMinimized)) {
     [w miniaturize:nil];
   } else {
     if (w.isMiniaturized) {

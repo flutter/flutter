@@ -18,6 +18,12 @@
 
 @end
 
+@interface FlutterWindowController (Testing)
+
+- (void)closeAllWindows;
+
+@end
+
 struct FlutterWindowSizing {
   bool hasSize;
   double width;

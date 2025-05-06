@@ -98,3 +98,6 @@ void testEngineId() {
 void testWindowController() {
   signalNativeTest();
 }
+
+@pragma('vm:entry-point')
+void testWindowControllerRetainCycle() {}
