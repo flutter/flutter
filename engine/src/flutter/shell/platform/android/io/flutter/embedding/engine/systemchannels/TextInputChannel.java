@@ -488,6 +488,7 @@ public class TextInputChannel {
           hintLocales[i] = Locale.forLanguageTag(hintLocalesJson.optString(i));
         }
       }
+
       return new Configuration(
           json.optBoolean("obscureText"),
           json.optBoolean("autocorrect", true),
