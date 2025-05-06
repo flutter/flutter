@@ -259,6 +259,7 @@ typedef enum {
 } FlutterSemanticsFlag;
 
 typedef struct {
+  size_t struct_size;
   bool has_checked_state;
   bool is_checked;
   bool is_selected;
