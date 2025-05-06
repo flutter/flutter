@@ -300,6 +300,43 @@ void main() {
     });
   });
 
+  group('menu', () {
+    testWidgets('failure case, empty child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'a menu cannot be empty');
+    });
+
+    testWidgets('Success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItem,
+              selected: false,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('menuBar', () {
     testWidgets('failure case, empty child', (WidgetTester tester) async {
       await tester.pumpWidget(
