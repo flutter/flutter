@@ -162,9 +162,12 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
   root.decreased_value = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsExpanded);
+  auto flags = FlutterSemanticsFlags{
+      .has_expanded_state = true,
+      .is_expanded = true,
+  };
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -200,8 +203,11 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
   }
 
   // Test collapsed too.
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasExpandedState);
+  auto updated_flags = FlutterSemanticsFlags{
+      .has_expanded_state = true,
+  };
+  root.flags2 = &updated_flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -1154,9 +1160,11 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   root.decreased_value = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
+  auto flags = FlutterSemanticsFlags{
+      .has_checked_state = true,
+      .is_checked = true,
+  };
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -1194,8 +1202,10 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   }
 
   // Test unchecked too.
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState);
+  auto updated_flags = FlutterSemanticsFlags{
+      .has_checked_state = true,
+  };
+  root.flags2 = &updated_flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -1232,9 +1242,11 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   }
 
   // Now check mixed state.
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsCheckStateMixed);
+  auto updated_mixe_flags = FlutterSemanticsFlags{
+      .has_checked_state = true,
+      .is_check_state_mixed = true,
+  };
+  root.flags2 = &updated_mixe_flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -1298,9 +1310,12 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   root.decreased_value = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsToggled);
+
+  auto flags = FlutterSemanticsFlags{
+      .has_toggled_state = true,
+      .is_toggled = true,
+  };
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -1349,8 +1364,11 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   }
 
   // Test unpressed too.
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState);
+  auto updated_flags = FlutterSemanticsFlags{
+      .has_toggled_state = true,
+  };
+  root.flags2 = &updated_flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -1416,8 +1434,10 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
   root.tooltip = "tooltip";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField);
+  auto flags = FlutterSemanticsFlags{
+      .is_text_field = true,
+  };
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
