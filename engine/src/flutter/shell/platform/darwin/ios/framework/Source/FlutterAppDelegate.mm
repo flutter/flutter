@@ -21,7 +21,30 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterAppDelegate () <UIWindowSceneDelegate>
+@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
+@property(nonatomic, strong, nullable) UIWindow* window;
+@end
+
+@implementation FlutterSceneDelegate
+
+- (void)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+                 options:(UISceneConnectionOptions*)connectionOptions API_AVAILABLE(ios(13.0)) {
+  NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
+  if (appDelegate.window.rootViewController) {
+    // If this is not nil we are running into a case where someone is manually
+    // performing root view controller setup outside of Storyboard initialization.
+    UIWindowScene* windowScene = (UIWindowScene*)scene;
+    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+    self.window.rootViewController = appDelegate.window.rootViewController;
+    appDelegate.window = self.window;
+    [self.window makeKeyAndVisible];
+  }
+}
+
+@end
+
+@interface FlutterAppDelegate ()
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
@@ -362,8 +385,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
     UISceneConfiguration* config =
         [UISceneConfiguration configurationWithName:@"flutter"
                                         sessionRole:connectingSceneSession.role];
-    config.sceneClass = [UIWindowScene class];
-    config.delegateClass = [FlutterAppDelegate class];
+    config.delegateClass = [FlutterSceneDelegate class];
 
     NSString* mainStoryboard =
         [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIMainStoryboardFile"];
