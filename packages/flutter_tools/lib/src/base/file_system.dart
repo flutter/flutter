@@ -66,9 +66,13 @@ class FileSystemUtils {
   String escapePath(String path) {
     if (_platform.isWindows) {
       final unified = path.replaceAll(r'\', r'\\');
-      // ensure that the drive letter is upper case see
-      // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
-      return unified[0].toUpperCase() + unified.substring(1);
+      if (unified.length > 2 && unified[1] == ':') {
+        // ensure that the drive letter is upper case see
+        // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
+        return unified[0].toUpperCase() + unified.substring(1);
+      } else {
+        return unified;
+      }
     } else {
       return path;
     }
