@@ -20,7 +20,14 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.TextAlign? textAlign,
     String? fontFamily,
     double? fontSize,
-  }) : _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
+    ui.Paint? foreground,
+    ui.Paint? background,
+  }) : _defaultTextStyle = WebTextStyle(
+         fontFamily: fontFamily,
+         fontSize: fontSize,
+         foreground: foreground,
+         background: background,
+       ),
        _textDirection = textDirection ?? ui.TextDirection.ltr,
        _textAlign = textAlign ?? ui.TextAlign.left;
 
@@ -78,19 +85,31 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
 @immutable
 class WebTextStyle implements ui.TextStyle {
-  factory WebTextStyle({String? fontFamily, double? fontSize, ui.Color? color}) {
-    return WebTextStyle._(originalFontFamily: fontFamily, fontSize: fontSize, color: color);
+  factory WebTextStyle({
+    String? fontFamily,
+    double? fontSize,
+    ui.Paint? foreground,
+    ui.Paint? background,
+  }) {
+    return WebTextStyle._(
+      originalFontFamily: fontFamily ?? 'Arial',
+      fontSize: fontSize ?? 14.0,
+      foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
+      background: background ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
+    );
   }
 
   const WebTextStyle._({
     required this.originalFontFamily,
     required this.fontSize,
-    required this.color,
+    required this.foreground,
+    required this.background,
   });
 
   final String? originalFontFamily;
   final double? fontSize;
-  final ui.Color? color;
+  final ui.Paint? foreground;
+  final ui.Paint? background;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -100,7 +119,8 @@ class WebTextStyle implements ui.TextStyle {
     return WebTextStyle._(
       originalFontFamily: other.originalFontFamily ?? originalFontFamily,
       fontSize: other.fontSize ?? fontSize,
-      color: other.color ?? color,
+      foreground: other.foreground ?? foreground,
+      background: other.background ?? background,
     );
   }
 
@@ -112,12 +132,13 @@ class WebTextStyle implements ui.TextStyle {
     return other is WebTextStyle &&
         other.originalFontFamily == originalFontFamily &&
         other.fontSize == fontSize &&
-        other.color == color;
+        other.foreground == foreground &&
+        other.background == background;
   }
 
   @override
   int get hashCode {
-    return Object.hash(originalFontFamily, fontSize, color);
+    return Object.hash(originalFontFamily, fontSize, foreground, background);
   }
 
   @override
@@ -129,7 +150,8 @@ class WebTextStyle implements ui.TextStyle {
           'WebTextStyle('
           'fontFamily: ${originalFontFamily ?? ""} '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
-          'color: ${color != null ? color.toString() : ""}'
+          'foreground: ${foreground != null ? foreground.toString() : ""}'
+          'background: ${background != null ? background.toString() : ""}'
           ')';
       return true;
     }());

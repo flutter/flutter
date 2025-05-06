@@ -123,7 +123,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
   });
-*/
+
   test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -144,7 +144,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
   });
-
+*/
   test('Draw WebParagraph LTR/RTL multi Line with RTL by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);

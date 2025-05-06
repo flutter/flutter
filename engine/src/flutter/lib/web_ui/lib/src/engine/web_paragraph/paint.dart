@@ -8,6 +8,7 @@ import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/canvaskit_canvas.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
+import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
@@ -51,18 +52,19 @@ class TextPaint {
     WebParagraphDebug.log(
       'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
     );
-
     for (final BidiRun run in line.visualRuns) {
-      for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
+      final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
+      final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
+      final int step = run.bidiLevel.isEven ? 1 : -1;
+      WebParagraphDebug.log('run.shift: ${run.shift} line.shift: ${line.shift}');
+      for (int i = start; i != end; i += step) {
         final clusterText = layout.textClusters[i];
         paintCluster(
           canvas,
           clusterText,
-          ui.Offset(
-            line.shift - line.bounds.left + run.shift,
-            line.bounds.top + line.fontBoundingBoxAscent,
-          ),
+          ui.Offset(line.shift + run.shift, line.bounds.top),
           ui.Offset(x, y),
+          run.bidiLevel.isEven,
         );
       }
     }
@@ -73,8 +75,77 @@ class TextPaint {
     ExtendedTextCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
+    bool ltr,
   ) {
-    paintContext.fillTextCluster(webTextCluster.cluster!, clusterOffset.dx, clusterOffset.dy);
+    final WebTextStyle textStyle = webTextCluster.textStyle!;
+
+    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
+      webTextCluster.cluster!.begin,
+      webTextCluster.cluster!.end,
+    );
+
+    // Define the text cluster bounds
+    final pos = webTextCluster.bounds.left - webTextCluster.cluster!.x;
+    final ui.Rect zeroRect = ui.Rect.fromLTWH(
+      pos,
+      0,
+      webTextCluster.bounds.width,
+      rects.first.height,
+    );
+    final ui.Rect sourceRect = zeroRect;
+
+    // We shift the target rect to the correct x position inside the line and
+    // the correct y position of the line itself
+    // (and then to the paragraph.paint x and y)
+
+    final double left = clusterOffset.dx + webTextCluster.cluster!.x + lineOffset.dx;
+    final double shift = left - left.floorToDouble();
+    final ui.Rect targetRect = zeroRect
+        .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
+        .translate(lineOffset.dx, lineOffset.dy)
+        .translate(-shift, 0);
+
+    if (textStyle.background != null) {
+      // Draw the background color
+      final ui.Rect backgroundRect = ui.Rect.fromLTWH(
+        targetRect.left,
+        targetRect.top,
+        targetRect.width,
+        targetRect.height,
+      );
+      canvas.drawRect(backgroundRect, textStyle.background!);
+    }
+
+    final String text = paragraph.text!.substring(
+      webTextCluster.textRange.start,
+      webTextCluster.textRange.end,
+    );
+
+    String diff = '';
+    if (rects.first.left > webTextCluster.bounds.left) {
+      diff += ' left: ${rects.first.left - webTextCluster.bounds.left}';
+    }
+    if (rects.first.right < webTextCluster.bounds.right) {
+      diff += ' right: ${rects.first.right - webTextCluster.bounds.right}';
+    }
+
+    //final ui.Paint transparent = ui.Paint()..color = ui.Color(ltr ? 0xFFFF0000 : 0xFF0000FF);
+    //canvas.saveLayer(const ui.Rect.fromLTWH(0, 0, 500, 500), transparent);
+
+    WebParagraphDebug.log(
+      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} pos $pos shift $shift ',
+    );
+
+    paintContext.fillStyle = textStyle.foreground?.color.toCssString();
+    // We fill the text cluster into a rectange [0,0,w,h]
+    // but we need to shift the y coordinate by the font ascent
+    // becase the text is drawn at the ascent, not at 0
+    paintContext.fillTextCluster(
+      webTextCluster.cluster!,
+      /*left:*/ 0,
+      /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
+      /*ignore the text cluster shift from the text run*/ {'x': 0, 'y': 0},
+    );
 
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
@@ -84,23 +155,23 @@ class TextPaint {
     }
 
     final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-    final ui.Rect clusterRect = webTextCluster.bounds.translate(clusterOffset.dx, clusterOffset.dy);
     canvas.drawImageRect(
       ckImage,
-      clusterRect,
-      clusterRect.translate(lineOffset.dx, lineOffset.dy),
+      sourceRect,
+      targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
-    WebParagraphDebug.log(
-      '[${webTextCluster.start}:${webTextCluster.end}) ${webTextCluster.bounds.left},${webTextCluster.bounds.top},${clusterRect.width}${clusterRect.height} => ${clusterOffset.dx},${clusterOffset.dy}',
-    );
+    //canvas.restore();
   }
 
   void printTextCluster(ExtendedTextCluster webTextCluster) {
-    final String text = paragraph.text!.substring(webTextCluster.start, webTextCluster.end);
+    final String text = paragraph.text!.substring(
+      webTextCluster.textRange.start,
+      webTextCluster.textRange.end,
+    );
     final ui.Rect box = webTextCluster.bounds;
     print(
-      '[${webTextCluster.start}:${webTextCluster.end}) = "$text", ${box.width}, ${box.height}\n',
+      '[${webTextCluster.textRange.start}:${webTextCluster.textRange.end}) = "$text", ${box.width}, ${box.height}\n',
     );
   }
 }

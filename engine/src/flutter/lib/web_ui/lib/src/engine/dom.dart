@@ -2691,8 +2691,13 @@ extension WebTextMetricsExtension on DomTextMetrics {
 
 extension WebDomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
   @JS('fillTextCluster')
-  external void _fillTextCluster(JSAny? textCluster, double x, double y);
+  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
 
-  void fillTextCluster(WebTextCluster textCluster, double x, double y) =>
-      _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+  void fillTextCluster(WebTextCluster textCluster, double x, double y, [Object? options]) {
+    if (options == null) {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+    } else {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
+    }
+  }
 }
