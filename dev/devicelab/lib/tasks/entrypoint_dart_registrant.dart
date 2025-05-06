@@ -78,7 +78,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
         .listen((String line) async {
           print(line);
         });
-    final Object result = await Future.any([completer.future, process.exitCode]);
+    final Object result = await Future.any(<Future<Object>>[completer.future, process.exitCode]);
     if (result is int) {
       throw Exception('flutter run failed, exitCode=$result');
     }
