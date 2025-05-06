@@ -65,11 +65,13 @@ const double _kNavBarBottomPadding = 8.0;
 
 const double _kNavBarBackButtonTapWidth = 50.0;
 
-const double _kLargeTitleMaxScaleFactor = 1.8;
+const double _kMinScaleFactor = 0.9;
 
-const double _kSearchFieldMaxScaleFactor = 2.6;
+const double _kLargeTitleScaleFactor = 3.0;
 
-const double _kPersistentHeightMaxScaleFactor = 1.2;
+const double _kSearchFieldScaleFactor = 1.2;
+
+const double _kPersistentHeightMaxScaleFactor = 1.235;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
@@ -241,6 +243,13 @@ Widget _wrapWithBackground({
       child: childWithBackground,
     ),
   );
+}
+
+double _computeScaleFactor(BuildContext context, double value, double gradient) {
+  final double scaleFactor = MediaQuery.textScalerOf(context).scale(value) / value;
+  return scaleFactor < 1.0
+      ? math.max(_kMinScaleFactor, scaleFactor)
+      : 1.0 + ((scaleFactor - 1.0) / gradient);
 }
 
 // Whether the current route supports nav bar hero transitions from or to.
@@ -1184,18 +1193,17 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   void didChangeDependencies() {
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
-    scaledSearchFieldHeight = clampDouble(
-      MediaQuery.textScalerOf(context).scale(_kSearchFieldHeight),
-      _kSearchFieldHeight,
-      _kSearchFieldHeight * _kSearchFieldMaxScaleFactor,
-    );
+    scaledSearchFieldHeight =
+        _computeScaleFactor(context, _kSearchFieldHeight, _kSearchFieldScaleFactor) *
+        _kSearchFieldHeight;
     scaledLargeTitleHeight =
         isPortrait
-            ? clampDouble(
-              MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
-              _kNavBarLargeTitleHeightExtension,
-              _kNavBarLargeTitleHeightExtension * _kLargeTitleMaxScaleFactor,
-            )
+            ? _computeScaleFactor(
+                  context,
+                  _kNavBarLargeTitleHeightExtension,
+                  _kLargeTitleScaleFactor,
+                ) *
+                _kNavBarLargeTitleHeightExtension
             : 0.0;
     _setupSearchableAnimation();
     effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
@@ -1991,7 +1999,7 @@ class _NavigationBarStaticComponents {
           data: MediaQueryData(
             textScaler: MediaQuery.textScalerOf(
               context,
-            ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
           ),
           child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: leadingContent),
         ),
@@ -2021,7 +2029,7 @@ class _NavigationBarStaticComponents {
         data: MediaQueryData(
           textScaler: MediaQuery.textScalerOf(
             context,
-          ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
         ),
         child: const _BackChevron(),
       ),
@@ -2053,7 +2061,7 @@ class _NavigationBarStaticComponents {
         data: MediaQueryData(
           textScaler: MediaQuery.textScalerOf(
             context,
-          ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
         ),
         child: _BackLabel(specifiedPreviousTitle: previousPageTitle, route: route),
       ),
@@ -2100,7 +2108,7 @@ class _NavigationBarStaticComponents {
         data: MediaQueryData(
           textScaler: MediaQuery.textScalerOf(
             context,
-          ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
         ),
         child: middleContent,
       ),
@@ -2126,7 +2134,7 @@ class _NavigationBarStaticComponents {
           data: MediaQueryData(
             textScaler: MediaQuery.textScalerOf(
               context,
-            ).clamp(maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
           ),
           child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: userTrailing),
         ),
@@ -2162,9 +2170,13 @@ class _NavigationBarStaticComponents {
       key: largeTitleKey,
       child: MediaQuery(
         data: MediaQueryData(
-          textScaler: MediaQuery.textScalerOf(
-            context,
-          ).clamp(maxScaleFactor: _kLargeTitleMaxScaleFactor),
+          textScaler: TextScaler.linear(
+            _computeScaleFactor(
+              context,
+              _kNavBarLargeTitleHeightExtension,
+              _kLargeTitleScaleFactor,
+            ),
+          ),
         ),
         child: largeTitleContent!,
       ),
