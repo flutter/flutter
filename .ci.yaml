@@ -1677,6 +1677,7 @@ targets:
       tags: >
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_ddc
+      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   - name: Linux web_benchmarks_ddc_hot_reload
     recipe: devicelab/devicelab_drone
@@ -1691,6 +1692,7 @@ targets:
       tags: >
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_ddc_hot_reload
+      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
