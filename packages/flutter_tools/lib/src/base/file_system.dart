@@ -65,7 +65,7 @@ class FileSystemUtils {
   /// path unchanged.
   String escapePath(String path) {
     if (_platform.isWindows) {
-      final unified = path.replaceAll(r'\', r'\\');
+      final String unified = path.replaceAll(r'\', r'\\');
       if (unified.length > 2 && unified[1] == ':') {
         // ensure that the drive letter is upper case see
         // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
