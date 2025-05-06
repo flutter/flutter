@@ -4,6 +4,45 @@
 
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
+namespace {
+FlutterSemanticsFlags ConvertToFlutterSemanticsFlags(
+    const flutter::SemanticsFlags& source) {
+  return {
+      .has_checked_state = source.hasCheckedState,
+      .is_checked = source.isChecked,
+      .is_selected = source.isSelected,
+      .is_button = source.isButton,
+      .is_text_field = source.isTextField,
+      .is_focused = source.isFocused,
+      .has_enabled_state = source.hasEnabledState,
+      .is_enabled = source.isEnabled,
+      .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,
+      .is_header = source.isHeader,
+      .is_obscured = source.isObscured,
+      .scopes_route = source.scopesRoute,
+      .names_route = source.namesRoute,
+      .is_hidden = source.isHidden,
+      .is_image = source.isImage,
+      .is_live_region = source.isLiveRegion,
+      .has_toggled_state = source.hasToggledState,
+      .is_toggled = source.isToggled,
+      .has_implicit_scrolling = source.hasImplicitScrolling,
+      .is_multiline = source.isMultiline,
+      .is_read_only = source.isReadOnly,
+      .is_focusable = source.isFocusable,
+      .is_link = source.isLink,
+      .is_slider = source.isSlider,
+      .is_keyboard_key = source.isKeyboardKey,
+      .is_check_state_mixed = source.isCheckStateMixed,
+      .has_expanded_state = source.hasExpandedState,
+      .is_expanded = source.isExpanded,
+      .has_selected_state = source.hasSelectedState,
+      .has_required_state = source.hasRequiredState,
+      .is_required = source.isRequired,
+  };
+}
+}  // namespace
+
 namespace flutter {
 
 EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
@@ -126,44 +165,6 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   return static_cast<FlutterSemanticsFlag>(result);
 }
 
-const FlutterSemanticsFlags convertToFlutterSemanticsFlags(
-    const SemanticsFlags& source) {
-  FlutterSemanticsFlags dest = {};
-
-  dest.hasCheckedState = source.hasCheckedState;
-  dest.isChecked = source.isChecked;
-  dest.isSelected = source.isSelected;
-  dest.isButton = source.isButton;
-  dest.isTextField = source.isTextField;
-  dest.isFocused = source.isFocused;
-  dest.hasEnabledState = source.hasEnabledState;
-  dest.isEnabled = source.isEnabled;
-  dest.isInMutuallyExclusiveGroup = source.isInMutuallyExclusiveGroup;
-  dest.isHeader = source.isHeader;
-  dest.isObscured = source.isObscured;
-  dest.scopesRoute = source.scopesRoute;
-  dest.namesRoute = source.namesRoute;
-  dest.isHidden = source.isHidden;
-  dest.isImage = source.isImage;
-  dest.isLiveRegion = source.isLiveRegion;
-  dest.hasToggledState = source.hasToggledState;
-  dest.isToggled = source.isToggled;
-  dest.hasImplicitScrolling = source.hasImplicitScrolling;
-  dest.isMultiline = source.isMultiline;
-  dest.isReadOnly = source.isReadOnly;
-  dest.isFocusable = source.isFocusable;
-  dest.isLink = source.isLink;
-  dest.isSlider = source.isSlider;
-  dest.isKeyboardKey = source.isKeyboardKey;
-  dest.isCheckStateMixed = source.isCheckStateMixed;
-  dest.hasExpandedState = source.hasExpandedState;
-  dest.isExpanded = source.isExpanded;
-  dest.hasSelectedState = source.hasSelectedState;
-  dest.hasRequiredState = source.hasRequiredState;
-  dest.isRequired = source.isRequired;
-
-  return dest;
-}
 void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
   SkMatrix transform = node.transform.asM33();
   FlutterTransformation flutter_transform{
@@ -277,7 +278,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       CreateStringAttributes(node.increasedValueAttributes);
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
-  FlutterSemanticsFlags flags = convertToFlutterSemanticsFlags(node.flags);
+  FlutterSemanticsFlags flags = ConvertToFlutterSemanticsFlags(node.flags);
   flags_.push_back(flags);
 
   nodes_.push_back({
