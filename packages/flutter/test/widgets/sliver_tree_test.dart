@@ -906,6 +906,37 @@ void main() {
     expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, 10));
   });
 
+  testWidgets('The child node positions of TreeSliver are correct.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<Object>(
+              indentation: TreeSliverIndentationType.custom(20),
+              tree: <TreeSliverNode<Key>>[
+                TreeSliverNode<Key>(
+                  const ValueKey<int>(0),
+                  expanded: true,
+                  children: <TreeSliverNode<Key>>[TreeSliverNode<Key>(const ValueKey<int>(1))],
+                ),
+              ],
+              treeRowExtentBuilder: (_, _) => 20,
+              treeNodeBuilder: (
+                BuildContext context,
+                TreeSliverNode<Object?> node,
+                AnimationStyle animationStyle,
+              ) {
+                return Container(key: node.content! as Key);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byKey(const ValueKey<int>(1))), const Offset(20, 20));
+  });
+
   testWidgets('TreeSliver renders correctly after scrolling.', (WidgetTester tester) async {
     const ValueKey<String> key = ValueKey<String>('sliver_scrolling');
     final ScrollController scrollController = ScrollController();
