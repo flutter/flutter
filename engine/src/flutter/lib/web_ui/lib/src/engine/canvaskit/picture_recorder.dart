@@ -43,4 +43,7 @@ class CkPictureRecorder implements ui.PictureRecorder {
 
   @override
   bool get isRecording => _skRecorder != null;
+
+  @override
+  bool get debugDisposed => _skRecorder == null;
 }
