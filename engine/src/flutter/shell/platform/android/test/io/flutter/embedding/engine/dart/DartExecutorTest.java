@@ -50,7 +50,8 @@ public class DartExecutorTest {
     assertNotNull(dartExecutor.getBinaryMessenger());
 
     // Execute the behavior under test.
-    // ByteBuffer class can no longer be mocked, so we use a real message.
+    // ByteBuffer class can no longer be mocked https://github.com/mockito/mockito/issues/3202,
+    // so we use a real message.
     ByteBuffer testMessage = ByteBuffer.wrap(new byte[] {1});
     ArgumentCaptor<ByteBuffer> messageCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
     dartExecutor.getBinaryMessenger().send("fake_channel", testMessage);
