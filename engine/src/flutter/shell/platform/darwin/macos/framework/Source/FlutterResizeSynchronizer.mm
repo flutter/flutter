@@ -45,13 +45,12 @@
   if (_inResize) {
     delay = 0;
   }
-  [FlutterRunLoop.mainRunLoop
-      performBlock:^{
-        _didReceiveFrame = YES;
-        _contentSize = size;
-        notify();
-      }
-        afterDelay:delay];
+  [FlutterRunLoop.mainRunLoop performWithDelay:delay
+                                         block:^{
+                                           _didReceiveFrame = YES;
+                                           _contentSize = size;
+                                           notify();
+                                         }];
 }
 
 - (void)shutDown {
