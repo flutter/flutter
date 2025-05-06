@@ -1576,6 +1576,10 @@ void main() {
       values: <_MediaQueryAspectCase>[
         const _MediaQueryAspectCase(MediaQuery.sizeOf, MediaQueryData(size: Size(1, 1))),
         const _MediaQueryAspectCase(MediaQuery.maybeSizeOf, MediaQueryData(size: Size(1, 1))),
+        const _MediaQueryAspectCase(MediaQuery.widthOf, MediaQueryData(size: Size(1, 0))),
+        const _MediaQueryAspectCase(MediaQuery.maybeWidthOf, MediaQueryData(size: Size(1, 0))),
+        const _MediaQueryAspectCase(MediaQuery.heightOf, MediaQueryData(size: Size(0, 1))),
+        const _MediaQueryAspectCase(MediaQuery.maybeHeightOf, MediaQueryData(size: Size(0, 1))),
         const _MediaQueryAspectCase(MediaQuery.orientationOf, MediaQueryData(size: Size(2, 1))),
         const _MediaQueryAspectCase(
           MediaQuery.maybeOrientationOf,
@@ -1732,4 +1736,79 @@ void main() {
       ],
     ),
   );
+
+  testWidgets('MediaQuery width and height can be listened to independently', (
+    WidgetTester tester,
+  ) async {
+    MediaQueryData data = const MediaQueryData(size: Size(800, 600));
+
+    int widthBuildCount = 0;
+    int heightBuildCount = 0;
+
+    final Widget showWidth = Builder(
+      builder: (BuildContext context) {
+        widthBuildCount++;
+        return Text('width: ${MediaQuery.widthOf(context).toStringAsFixed(1)}');
+      },
+    );
+
+    final Widget showHeight = Builder(
+      builder: (BuildContext context) {
+        heightBuildCount++;
+        return Text('height: ${MediaQuery.heightOf(context).toStringAsFixed(1)}');
+      },
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                showWidth,
+                showHeight,
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
+                    });
+                  },
+                  child: const Text('Increase width by 100'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
+                    });
+                  },
+                  child: const Text('Increase height by 100'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(find.text('width: 800.0'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 1);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase width by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase height by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('height: 700.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(heightBuildCount, 2);
+  });
 }
