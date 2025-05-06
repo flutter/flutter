@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' as engine;
-import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../canvaskit/canvaskit_canvas.dart';
 import '../dom.dart';
+import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
@@ -291,7 +291,7 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
-  void paintOnCanvasKit(engine.CanvasKitCanvas canvas, ui.Offset offset) {
+  void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
     }

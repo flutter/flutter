@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/src/engine.dart' as engine;
-import 'package:ui/src/engine/web_paragraph/debug.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../canvaskit/canvaskit_api.dart';
+import '../canvaskit/canvaskit_canvas.dart';
+import '../canvaskit/image.dart';
 import '../dom.dart';
+import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
@@ -38,7 +40,7 @@ class TextPaint {
   }
 
   void paintLineOnCanvasKit(
-    engine.CanvasKitCanvas canvas,
+    CanvasKitCanvas canvas,
     TextLayout layout,
     TextLine line,
     double x,
@@ -67,7 +69,7 @@ class TextPaint {
   }
 
   void paintCluster(
-    engine.CanvasKitCanvas canvas,
+    CanvasKitCanvas canvas,
     ExtendedTextCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
@@ -76,15 +78,12 @@ class TextPaint {
 
     final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
 
-    final engine.SkImage? skImage = engine.canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
     if (skImage == null) {
       throw Exception('Failed to convert text image bitmap to an SkImage.');
     }
 
-    final engine.CkImage ckImage = engine.CkImage(
-      skImage,
-      imageSource: engine.ImageBitmapImageSource(bitmap),
-    );
+    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     final ui.Rect clusterRect = webTextCluster.bounds.translate(clusterOffset.dx, clusterOffset.dy);
     canvas.drawImageRect(
       ckImage,

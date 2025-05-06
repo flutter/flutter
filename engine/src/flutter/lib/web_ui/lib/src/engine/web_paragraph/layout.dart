@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
+import '../canvaskit/text_fragmenter.dart';
 import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
@@ -64,7 +64,7 @@ class TextLayout {
     }
 
     // Get the information from the browser
-    final engine.SegmentationResult result = engine.segmentText(paragraph.text!);
+    final SegmentationResult result = segmentText(paragraph.text!);
 
     // Fill out grapheme flags
     for (final grapheme in result.graphemes) {
@@ -123,8 +123,9 @@ class TextLayout {
 
   String getTextFromClusterRange(ClusterRange clusterRange) {
     final ExtendedTextCluster start =
-        textClusters[min(clusterRange.start, textClusters.length - 1)];
-    final ExtendedTextCluster end = textClusters[min(clusterRange.end, textClusters.length - 1)];
+        textClusters[math.min(clusterRange.start, textClusters.length - 1)];
+    final ExtendedTextCluster end =
+        textClusters[math.min(clusterRange.end, textClusters.length - 1)];
     if (start.cluster != null && end.cluster != null) {
       return paragraph.text!.substring(start.start, end.start);
     } else {
@@ -182,7 +183,7 @@ class TextLayout {
   }
 
   ClusterRange intersect(ClusterRange a, ClusterRange b) {
-    return ClusterRange(start: max(a.start, b.start), end: min(a.end, b.end));
+    return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
   }
 
   double addLine(
@@ -241,11 +242,11 @@ class TextLayout {
       if (cluster.textMetrics == null) {
         continue;
       }
-      line.fontBoundingBoxAscent = max(
+      line.fontBoundingBoxAscent = math.max(
         line.fontBoundingBoxAscent,
         cluster.textMetrics!.fontBoundingBoxAscent,
       );
-      line.fontBoundingBoxDescent = max(
+      line.fontBoundingBoxDescent = math.max(
         line.fontBoundingBoxDescent,
         cluster.textMetrics!.fontBoundingBoxDescent,
       );
