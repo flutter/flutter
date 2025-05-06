@@ -4,6 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -16,7 +17,7 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('recorder and picture dispose underlying objects properly', () {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ScenePictureRecorder recorder = ui.PictureRecorder() as ScenePictureRecorder;
     final ui.Canvas canvas = ui.Canvas(recorder);
     const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     canvas.clipRect(rect);

@@ -61,9 +61,6 @@ class StubPictureRecorder implements ui.PictureRecorder {
 
   @override
   bool get isRecording => throw UnimplementedError();
-
-  @override
-  bool get debugDisposed => throw UnimplementedError();
 }
 
 class StubSceneCanvas implements SceneCanvas {

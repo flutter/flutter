@@ -50,12 +50,6 @@ abstract class PictureRecorder {
   factory PictureRecorder() => engine.renderer.createPictureRecorder();
   bool get isRecording;
   Picture endRecording();
-
-  /// Whether this reference to the underlying picture recorder is [dispose]d.
-  ///
-  /// This only returns a valid value if asserts are enabled, and must not be
-  /// used otherwise.
-  bool get debugDisposed;
 }
 
 abstract class Canvas {
