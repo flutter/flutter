@@ -1146,6 +1146,23 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
+  - name: Linux linux_feature_flags_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    presubmit: false
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: linux_feature_flags_test
+
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -2287,6 +2304,16 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
+
+  - name: Linux_android_emu android_feature_flags_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_feature_flags_test
 
   - name: Linux_pixel_7pro android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -5163,6 +5190,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: ios_defines_test
 
+  - name: Mac_ios ios_feature_flags_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: ios_feature_flags_test
+
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5614,6 +5651,20 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: run_release_test_macos
+
+  - name: Mac_arm64 macos_feature_flags_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac", "arm64"]
+      task_name: macos_feature_flags_test
 
   - name: Mac_ios keyboard_hot_restart_ios
     recipe: devicelab/devicelab_drone
@@ -6270,6 +6321,20 @@ targets:
       - .ci.yaml
       - engine/**
       - DEPS
+
+  - name: Windows windows_feature_flags_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: windows_feature_flags_test
 
   - name: Windows tool_integration_tests_1_9
     recipe: flutter/flutter_drone
