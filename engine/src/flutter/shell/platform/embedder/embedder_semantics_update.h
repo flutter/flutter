@@ -66,8 +66,8 @@ class EmbedderSemanticsUpdate2 {
   std::vector<FlutterSemanticsNode2> nodes_;
   std::vector<FlutterSemanticsNode2*> node_pointers_;
   std::vector<FlutterSemanticsCustomAction2> actions_;
-  std::vector<FlutterSemanticsFlags> flags_;
   std::vector<FlutterSemanticsCustomAction2*> action_pointers_;
+  std::vector<FlutterSemanticsFlags> flags_;
 
   std::vector<std::unique_ptr<std::vector<const FlutterStringAttribute*>>>
       node_string_attributes_;
