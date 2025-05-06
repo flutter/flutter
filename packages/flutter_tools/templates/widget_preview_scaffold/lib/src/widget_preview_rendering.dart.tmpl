@@ -250,6 +250,8 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       },
     );
 
+    final Size? size = widget.preview.size;
+
     // Add support for selecting only previewed widgets via the widget
     // inspector.
     preview = ValueListenableBuilder(
@@ -266,6 +268,7 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             // don't display them.
             exitWidgetSelectionButtonBuilder: null,
             moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
             child: child!,
           );
         }
@@ -274,8 +277,8 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: _WidgetPreviewWrapper(
         previewerConstraints: maxSizeConstraints,
         child: SizedBox(
-          width: widget.preview.width,
-          height: widget.preview.height,
+          width: size?.width == double.infinity ? null : size?.width,
+          height: size?.height == double.infinity ? null : size?.height,
           child: preview,
         ),
       ),
@@ -425,11 +428,11 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
     }
 
     var size = Size(
-      preview.width ?? mediaQueryData.size.width,
-      preview.height ?? mediaQueryData.size.height,
+      preview.size?.width ?? mediaQueryData.size.width,
+      preview.size?.height ?? mediaQueryData.size.height,
     );
 
-    if (preview.width != null || preview.height != null) {
+    if (preview.size != null) {
       mediaQueryData = mediaQueryData.copyWith(size: size);
     }
 
