@@ -113,14 +113,14 @@ class PluginTest {
           await _testLocalEngineConfiguration(app, fakeEngineSourcePath);
         }
       } finally {
-        // await plugin.delete();
-        // await app.delete();
+        await plugin.delete();
+        await app.delete();
       }
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      // rmTree(tempDir);
+      rmTree(tempDir);
     }
   }
 
