@@ -2758,7 +2758,7 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget? get bottomNavBarBackground {
-    if (bottomBackgroundColor == null) {
+    if (bottomBackgroundColor == null || bottomLargeExpanded) {
       return null;
     }
     final Curve animationCurve =
