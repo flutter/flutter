@@ -12,10 +12,10 @@ import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
-final engine.DomOffscreenCanvas textCanvas = engine.createDomOffscreenCanvas(500, 500);
-final textContext = textCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(500, 500);
+final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
-/// Performs layout on a [CanvasParagraph].
+/// Performs layout on a [WebParagraph].
 ///
 /// It uses a [DomCanvasElement] to get text information
 class TextPaint {
@@ -74,9 +74,9 @@ class TextPaint {
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
   ) {
-    textContext.fillTextCluster(webTextCluster.cluster!, clusterOffset.dx, clusterOffset.dy);
+    paintContext.fillTextCluster(webTextCluster.cluster!, clusterOffset.dx, clusterOffset.dy);
 
-    final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
+    final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
     if (skImage == null) {

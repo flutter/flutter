@@ -18,7 +18,7 @@ import 'wrapper.dart';
 
 /// A single canvas2d context to use for all text information.
 @visibleForTesting
-final DomCanvasRenderingContext2D textContext =
+final DomCanvasRenderingContext2D layoutContext =
     // We don't use this canvas to draw anything, so let's make it as small as
     // possible to save memory.
     createDomCanvasElement(width: 0, height: 0).context2D;
@@ -92,10 +92,10 @@ class TextLayout {
         styledBlock.textRange.start,
         styledBlock.textRange.end,
       );
-      textContext.font =
+      layoutContext.font =
           '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
-      textContext.fillStyle = styledBlock.textStyle.color;
-      final DomTextMetrics blockTextMetrics = textContext.measureText(text);
+      layoutContext.fillStyle = styledBlock.textStyle.color;
+      final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
           cluster.begin,

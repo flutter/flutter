@@ -445,7 +445,7 @@ class CanvasKitRenderer implements Renderer {
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isExperimentalWebParagraph ? WebParagraphBuilder() : CkParagraphBuilder(style);
+      isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
 
   // TODO(harryterkelsen): Merge this logic with the async logic in
   // [EngineScene], https://github.com/flutter/flutter/issues/142072.
