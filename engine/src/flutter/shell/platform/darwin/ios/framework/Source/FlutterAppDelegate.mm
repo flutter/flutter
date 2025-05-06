@@ -24,6 +24,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 @interface FlutterAppDelegate () <UIWindowSceneDelegate>
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
+@property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
 @end
 
 @implementation FlutterAppDelegate
@@ -31,8 +32,13 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (instancetype)init {
   if (self = [super init]) {
     _lifeCycleDelegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+    _launchEngine = [[FlutterLaunchEngine alloc] init];
   }
   return self;
+}
+
+- (nullable FlutterEngine*)grabLaunchEngine {
+  return [self.launchEngine grabEngine];
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -234,7 +240,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return [[FlutterLaunchEngine sharedInstance].engine registrarForPlugin:pluginKey];
+  return [self.launchEngine.engine registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -242,7 +248,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return [[FlutterLaunchEngine sharedInstance].engine hasPlugin:pluginKey];
+  return [self.launchEngine.engine hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -250,7 +256,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return [[FlutterLaunchEngine sharedInstance].engine valuePublishedByPlugin:pluginKey];
+  return [self.launchEngine.engine valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling

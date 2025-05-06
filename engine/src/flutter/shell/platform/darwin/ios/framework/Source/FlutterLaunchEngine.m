@@ -12,15 +12,6 @@
 
 @implementation FlutterLaunchEngine
 
-+ (nonnull instancetype)sharedInstance {
-  static FlutterLaunchEngine* s_instance;
-  static dispatch_once_t s_token;
-  dispatch_once(&s_token, ^{
-    s_instance = [[FlutterLaunchEngine alloc] init];
-  });
-  return s_instance;
-}
-
 - (instancetype)init {
   self = [super init];
   if (self) {

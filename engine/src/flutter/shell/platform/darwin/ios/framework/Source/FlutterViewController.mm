@@ -16,6 +16,7 @@
 #include "flutter/runtime/ptrace_check.h"
 #include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -259,7 +260,11 @@ typedef struct MouseState {
     project = [[FlutterDartProject alloc] init];
   }
 
-  FlutterEngine* engine = [[FlutterLaunchEngine sharedInstance] grabEngine];
+  id appDelegate = FlutterSharedApplication.application.delegate;
+  FlutterEngine* engine;
+  if ([appDelegate respondsToSelector:@selector(grabLaunchEngine)]) {
+    engine = [appDelegate grabLaunchEngine];
+  }
   if (!engine) {
     engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
                                          project:project

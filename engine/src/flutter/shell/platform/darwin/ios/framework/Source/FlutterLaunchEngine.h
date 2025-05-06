@@ -11,8 +11,6 @@
 
 @property(nonatomic, strong, nullable, readonly) FlutterEngine* engine;
 
-+ (nonnull instancetype)sharedInstance;
-
 - (nullable FlutterEngine*)grabEngine;
 
 @end
