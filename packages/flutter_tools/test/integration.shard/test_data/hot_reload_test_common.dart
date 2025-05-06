@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice, kChromeDeviceId;
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -31,12 +32,12 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot reload works without error', () async {
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
       await flutter.hotReload();
     });
 
     testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
       // Capture how many *real* hot reloads occur.
       int numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
@@ -88,7 +89,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           sawTick2.complete();
         }
       });
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
       await sawTick1.future;
       project.uncommentHotReloadPrint();
       try {
@@ -103,7 +104,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     testWithoutContext('hot restart works without error', () async {
       await flutter.run(
         verbose: true,
-        chrome: chrome,
+        device: GoogleChromeDevice.kChromeDeviceId,
         additionalCommandArgs: additionalCommandArgs,
       );
       await flutter.hotRestart();
@@ -126,7 +127,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       await flutter.run(
         withDebugger: true,
         startPaused: true,
-        chrome: chrome,
+        device: GoogleChromeDevice.kChromeDeviceId,
         additionalCommandArgs: additionalCommandArgs,
       );
       await flutter
@@ -203,7 +204,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         });
         await flutter.run(
           withDebugger: true,
-          chrome: chrome,
+          device: GoogleChromeDevice.kChromeDeviceId,
           additionalCommandArgs: additionalCommandArgs,
         );
         await Future<void>.delayed(const Duration(seconds: 1));
