@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLUTTER_LIB_WEB_UI_SKWASM_LIVE_OBJECTS_H_
+#define FLUTTER_LIB_WEB_UI_SKWASM_LIVE_OBJECTS_H_
 
 #include <cinttypes>
 
@@ -30,3 +31,5 @@ extern uint32_t liveStringCount;
 extern uint32_t liveString16Count;
 extern uint32_t liveSurfaceCount;
 extern uint32_t liveVerticesCount;
+
+#endif  // FLUTTER_LIB_WEB_UI_SKWASM_LIVE_OBJECTS_H_
