@@ -472,6 +472,21 @@ typedef enum ImpellerTextDirection {
   kImpellerTextDirectionLTR,
 } ImpellerTextDirection;
 
+typedef enum ImpellerTextDecorationType {
+  kImpellerTextDecorationTypeNone = 0 << 0,
+  kImpellerTextDecorationTypeUnderline = 1 << 0,
+  kImpellerTextDecorationTypeOverline = 1 << 1,
+  kImpellerTextDecorationTypeLineThrough = 1 << 2,
+} ImpellerTextDecorationType;
+
+typedef enum ImpellerTextDecorationStyle {
+  kImpellerTextDecorationStyleSolid,
+  kImpellerTextDecorationStyleDouble,
+  kImpellerTextDecorationStyleDotted,
+  kImpellerTextDecorationStyleDashed,
+  kImpellerTextDecorationStyleWavy,
+} ImpellerTextDecorationStyle;
+
 //------------------------------------------------------------------------------
 // Non-opaque structs
 // -----------------------------------------------------------------------------
@@ -618,6 +633,18 @@ typedef struct ImpellerContextVulkanInfo {
   uint32_t graphics_queue_family_index;
   uint32_t graphics_queue_index;
 } ImpellerContextVulkanInfo;
+
+typedef struct ImpellerTextDecoration {
+  /// A mask of `ImpellerTextDecorationType`s to enable.
+  int types;
+  /// The decoration color.
+  ImpellerColor color;
+  /// The decoration style.
+  ImpellerTextDecorationStyle style;
+  // The multiplier applied to the default thickness of the font to use for the
+  // decoration.
+  float thickness_multiplier;
+} ImpellerTextDecoration;
 
 //------------------------------------------------------------------------------
 // Version
@@ -2395,6 +2422,19 @@ IMPELLER_EXPORT
 void ImpellerParagraphStyleSetTextDirection(
     ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
     ImpellerTextDirection direction);
+
+//------------------------------------------------------------------------------
+/// @brief      Set one of more text decorations on the paragraph. Decorations
+///             can be underlines, overlines, strikethroughs, etc.. The style of
+///             decorations can be set as well (dashed, dotted, wavy, etc..)
+///
+/// @param[in]  ImpellerParagraphStyle  The paragraph style.
+/// @param[in]  decoration              The text decoration.
+///
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetTextDecoration(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    const ImpellerTextDecoration* IMPELLER_NONNULL decoration);
 
 //------------------------------------------------------------------------------
 /// @brief      Set the maximum line count within the paragraph.

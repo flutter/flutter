@@ -178,6 +178,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleSetMaxLines)                         \
   PROC(ImpellerParagraphStyleSetTextAlignment)                    \
   PROC(ImpellerParagraphStyleSetTextDirection)                    \
+  PROC(ImpellerParagraphStyleSetTextDecoration)                   \
   PROC(ImpellerPathBuilderAddArc)                                 \
   PROC(ImpellerPathBuilderAddOval)                                \
   PROC(ImpellerPathBuilderAddRect)                                \
@@ -1106,6 +1107,15 @@ class ParagraphStyle final
   ///
   ParagraphStyle& SetTextDirection(ImpellerTextDirection direction) {
     gGlobalProcTable.ImpellerParagraphStyleSetTextDirection(Get(), direction);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetTextDecoration
+  ///
+  ParagraphStyle& SetTextDecoration(const ImpellerTextDecoration& decoration) {
+    gGlobalProcTable.ImpellerParagraphStyleSetTextDecoration(Get(),
+                                                             &decoration);
     return *this;
   }
 };

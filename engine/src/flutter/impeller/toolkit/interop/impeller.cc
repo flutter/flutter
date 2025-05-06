@@ -1136,6 +1136,13 @@ void ImpellerParagraphStyleSetTextDirection(
 }
 
 IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetTextDecoration(
+    ImpellerParagraphStyle paragraph_style,
+    const ImpellerTextDecoration* decoration) {
+  GetPeer(paragraph_style)->SetTextDecoration(*decoration);
+}
+
+IMPELLER_EXTERN_C
 void ImpellerParagraphStyleSetMaxLines(ImpellerParagraphStyle paragraph_style,
                                        uint32_t max_lines) {
   GetPeer(paragraph_style)->SetMaxLines(max_lines);
