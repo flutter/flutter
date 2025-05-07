@@ -323,11 +323,12 @@ class _PredictiveBackSharedElementPageTransitionState
   // which is the duration of widget.animation, so an Interval is used.
   //
   // Eyeballed on a Pixel 9 running Android 16.
-  static const int _kCommitMilliseconds = 100;
+  static const int _kCommitMilliseconds = 400;
+  static const Curve _curve = Curves.easeInOutCubicEmphasized;
   static const Interval _commitInterval = Interval(
     0.0,
     _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.transitionMilliseconds,
-    curve: Curves.easeOut,
+    curve: _curve,
   );
 
   // Since we don't know the device border radius, this provides a smooth
@@ -379,7 +380,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
     final double rawYShift = currentTouchY - startTouchY;
     final double easedYShift =
-        Curves.easeOut.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
+        _curve.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
         rawYShift.sign *
         yShiftMax;
 
@@ -514,6 +515,7 @@ class _PredictiveBackFullscreenPageTransitionState
   // These values were eyeballed to match the Android spec for the Full Screen
   // page transition:
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
+  // TODO(justinmc): These should start with k.
   static const double _scaleStart = 1.0;
   static const double _scaleCommit = 0.95;
   static const double _opacityFullyOpened = 1.0;
@@ -523,8 +525,7 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _weightPostCommit = 1 - _weightPreCommit;
   static const double _screenWidthDivisionFactor = 20.0;
   static const double _xShiftAdjustment = 8.0;
-  // TODO(justinmc): Reuse this constant.
-  static const Duration _commitDuration = Duration(milliseconds: 100);
+  static const Duration _kCommitDuration = Duration(milliseconds: _PredictiveBackSharedElementPageTransitionState._kCommitMilliseconds);
 
   final Animatable<double> _primaryOpacityTween = Tween<double>(
     begin: _opacityStartTransition,
@@ -630,7 +631,7 @@ class _PredictiveBackFullscreenPageTransitionState
           // gesture.
           child: AnimatedOpacity(
             opacity: widget.animation.value < _commitAt ? 0.0 : 1.0,
-            duration: _commitDuration,
+            duration: _kCommitDuration,
             child: child,
           ),
         ),
