@@ -24,7 +24,6 @@ import java.nio.ByteBuffer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -50,18 +49,12 @@ public class DartExecutorTest {
     assertNotNull(dartExecutor.getBinaryMessenger());
 
     // Execute the behavior under test.
-    // ByteBuffer class can no longer be mocked https://github.com/mockito/mockito/issues/3202,
-    // so we use a real message.
-    ByteBuffer testMessage = ByteBuffer.wrap(new byte[] {1});
-    ArgumentCaptor<ByteBuffer> messageCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
-    dartExecutor.getBinaryMessenger().send("fake_channel", testMessage);
+    ByteBuffer fakeMessage = mock(ByteBuffer.class);
+    dartExecutor.getBinaryMessenger().send("fake_channel", fakeMessage);
 
     // Verify that DartExecutor sent our message to FlutterJNI.
     verify(fakeFlutterJni, times(1))
-        .dispatchPlatformMessage(eq("fake_channel"), messageCaptor.capture(), anyInt(), anyInt());
-
-    ByteBuffer capturedMessage = messageCaptor.getValue();
-    assertEquals(testMessage, capturedMessage);
+        .dispatchPlatformMessage(eq("fake_channel"), eq(fakeMessage), anyInt(), anyInt());
   }
 
   @Test
