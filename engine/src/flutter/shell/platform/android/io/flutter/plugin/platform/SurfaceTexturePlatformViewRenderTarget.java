@@ -6,11 +6,10 @@ import static io.flutter.Build.API_LEVELS;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.Surface;
-import androidx.annotation.RequiresApi;
+
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 
-@RequiresApi(API_LEVELS.API_26)
 public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRenderTarget {
   private static final String TAG = "SurfaceTexturePlatformViewRenderTarget";
 
@@ -58,6 +57,11 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
 
   /** Implementation of PlatformViewRenderTarget */
   public SurfaceTexturePlatformViewRenderTarget(SurfaceTextureEntry surfaceTextureEntry) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
+      throw new UnsupportedOperationException(
+          "Platform views cannot be displayed below API level 23"
+              + "You can prevent this issue by setting `minSdkVersion: 23` in build.gradle.");
+    }
     this.surfaceTextureEntry = surfaceTextureEntry;
     this.surfaceTexture = surfaceTextureEntry.surfaceTexture();
     surfaceTextureEntry.setOnTrimMemoryListener(trimMemoryListener);
@@ -98,9 +102,11 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
 
   public Surface getSurface() {
     recreateSurfaceIfNeeded();
-    if (surfaceTexture == null || surfaceTexture.isReleased()) {
-      return null;
-    }
-    return surface;
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
+          if (surfaceTexture == null || surfaceTexture.isReleased()) {
+            return null;
+          }
+      }
+      return surface;
   }
 }

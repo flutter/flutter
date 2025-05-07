@@ -9,11 +9,12 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
+
 import androidx.annotation.RequiresApi;
+
 import io.flutter.Log;
 import io.flutter.view.TextureRegistry.ImageTextureEntry;
 
-@RequiresApi(API_LEVELS.API_29)
 public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTarget {
   private ImageTextureEntry textureEntry;
   private ImageReader reader;
@@ -85,12 +86,18 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   protected ImageReader createImageReader() {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
       return createImageReader33();
-    } else {
+    } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       return createImageReader29();
     }
+    throw new UnsupportedOperationException(
+        "ImageReaderPlatformViewRenderTarget requires API version 29+");
   }
 
   public ImageReaderPlatformViewRenderTarget(ImageTextureEntry textureEntry) {
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_29) {
+      throw new UnsupportedOperationException(
+          "ImageReaderPlatformViewRenderTarget requires API version 29+");
+    }
     this.textureEntry = textureEntry;
   }
 

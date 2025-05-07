@@ -408,7 +408,6 @@ public class FlutterRenderer implements TextureRegistry {
   // When we acquire the next image, close any ImageReaders that don't have any
   // more pending images.
   @Keep
-  @RequiresApi(API_LEVELS.API_29)
   final class ImageReaderSurfaceProducer
       implements TextureRegistry.SurfaceProducer,
           TextureRegistry.ImageConsumer,
@@ -913,9 +912,11 @@ public class FlutterRenderer implements TextureRegistry {
     private ImageReader createImageReader() {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
-      } else {
+      } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
         return createImageReader29();
       }
+      throw new UnsupportedOperationException(
+          "ImageReaderPlatformViewRenderTarget requires API version 29+");
     }
 
     @VisibleForTesting
