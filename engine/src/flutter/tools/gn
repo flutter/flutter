@@ -271,7 +271,7 @@ def setup_apple_sdks():
 
   # The MACOSX_DEPLOYMENT_TARGET variable used when compiling.
   # Must be of the form x.x.x for Info.plist files.
-  sdks_gn_args['mac_deployment_target'] = '10.15.0'
+  sdks_gn_args['mac_deployment_target'] = '10.14.0'
 
   running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
   if running_on_luci:

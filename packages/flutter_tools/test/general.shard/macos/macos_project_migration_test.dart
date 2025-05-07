@@ -195,12 +195,12 @@ keep this 2
     });
 
     testWithoutContext('skipped if nothing to upgrade', () async {
-      const String xcodeProjectInfoFileContents = 'MACOSX_DEPLOYMENT_TARGET = 10.15;';
+      const String xcodeProjectInfoFileContents = 'MACOSX_DEPLOYMENT_TARGET = 10.14;';
       xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
       final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-      const String podfileFileContents = "# platform :osx, '10.15'";
+      const String podfileFileContents = "# platform :osx, '10.14'";
       podfile.writeAsStringSync(podfileFileContents);
       final DateTime podfileLastModified = podfile.lastModifiedSync();
 
@@ -218,7 +218,7 @@ keep this 2
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('Xcode project is migrated from 10.11 to 10.15', () async {
+    testWithoutContext('Xcode project is migrated from 10.11 to 10.14', () async {
       xcodeProjectInfoFile.writeAsStringSync('''
  				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
@@ -238,61 +238,24 @@ platform :osx, '10.11'
 
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
  				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
- 				MTL_ENABLE_DEBUG_INFO = YES;
-''');
-
-      expect(podfile.readAsStringSync(), '''
-# platform :osx, '10.15'
-platform :osx, '10.15'
-''');
-      // Only print once even though 2 lines were changed.
-      expect(
-        'Updating minimum macOS deployment target to 10.15'
-            .allMatches(testLogger.statusText)
-            .length,
-        1,
-      );
-    });
-
-    testWithoutContext('Xcode project is migrated from 10.14 to 10.15', () async {
-      xcodeProjectInfoFile.writeAsStringSync('''
- 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
  				MTL_ENABLE_DEBUG_INFO = YES;
 ''');
 
-      podfile.writeAsStringSync('''
+      expect(podfile.readAsStringSync(), '''
 # platform :osx, '10.14'
 platform :osx, '10.14'
 ''');
-
-      final MacOSDeploymentTargetMigration macOSProjectMigration = MacOSDeploymentTargetMigration(
-        project,
-        testLogger,
-      );
-      await macOSProjectMigration.migrate();
-
-      expect(xcodeProjectInfoFile.readAsStringSync(), '''
- 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
- 				MTL_ENABLE_DEBUG_INFO = YES;
-''');
-
-      expect(podfile.readAsStringSync(), '''
-# platform :osx, '10.15'
-platform :osx, '10.15'
-''');
       // Only print once even though 2 lines were changed.
       expect(
-        'Updating minimum macOS deployment target to 10.15'
+        'Updating minimum macOS deployment target to 10.14'
             .allMatches(testLogger.statusText)
             .length,
         1,
       );
     });
 
-    testWithoutContext('Xcode project is migrated from 10.13 to 10.15', () async {
+    testWithoutContext('Xcode project is migrated from 10.13 to 10.14', () async {
       xcodeProjectInfoFile.writeAsStringSync('''
  				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
@@ -312,17 +275,17 @@ platform :osx, '10.13'
 
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
  				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
  				MTL_ENABLE_DEBUG_INFO = YES;
 ''');
 
       expect(podfile.readAsStringSync(), '''
-# platform :osx, '10.15'
-platform :osx, '10.15'
+# platform :osx, '10.14'
+platform :osx, '10.14'
 ''');
       // Only print once even though 2 lines were changed.
       expect(
-        'Updating minimum macOS deployment target to 10.15'
+        'Updating minimum macOS deployment target to 10.14'
             .allMatches(testLogger.statusText)
             .length,
         1,
