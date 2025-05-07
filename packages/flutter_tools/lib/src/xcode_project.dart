@@ -162,11 +162,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return false;
     }
 
-    // The project can disable Swift Package Manager in its pubspec.yaml.
-    if (parent.manifest.disabledSwiftPackageManager) {
-      return false;
-    }
-
     // TODO(loic-sharma): Support Swift Package Manager in add-to-app modules.
     // https://github.com/flutter/flutter/issues/146957
     if (parent.isModule) {

@@ -173,7 +173,8 @@ class _FlutterProject {
       '# The following section is specific to Flutter packages.\n'
           'flutter:\n'
           '\n'
-          '  disable-swift-package-manager: true\n',
+          '  config:\n'
+          '    enable-swift-package-manager: false\n',
     );
     await pubspec.writeAsString(content, flush: true);
   }

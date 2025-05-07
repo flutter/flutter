@@ -172,22 +172,6 @@ void main() {
       );
 
       testUsingContext(
-        'is false when disabled via manifest',
-        () async {
-          final MemoryFileSystem fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest(disabledSwiftPackageManager: true);
-          final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
-
-      testUsingContext(
         'is false when Xcode is less than 15',
         () async {
           final MemoryFileSystem fs = MemoryFileSystem.test();
@@ -505,22 +489,6 @@ void main() {
       );
 
       testUsingContext(
-        'is false when disabled via manifest',
-        () async {
-          final MemoryFileSystem fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest(disabledSwiftPackageManager: true);
-          final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
-
-      testUsingContext(
         'is false when Xcode is less than 15',
         () async {
           final MemoryFileSystem fs = MemoryFileSystem.test();
@@ -608,10 +576,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
-  FakeFlutterManifest({this.disabledSwiftPackageManager = false, this.isModule = false});
-
-  @override
-  bool disabledSwiftPackageManager;
+  FakeFlutterManifest({this.isModule = false});
 
   @override
   bool isModule;
