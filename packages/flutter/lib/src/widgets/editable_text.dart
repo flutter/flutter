@@ -2075,7 +2075,7 @@ class EditableText extends StatefulWidget {
 
   /// The default value for [selectionWidthStyle].
   ///
-  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for iOS and
+  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms and
   /// [ui.BoxWidthStyle.tight] for all others.
   ///
   /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max] for all
