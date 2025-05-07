@@ -293,8 +293,7 @@ class MediaQueryData {
           platformData?.disableAnimations ??
           view.platformDispatcher.accessibilityFeatures.disableAnimations,
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
-      announce =
-          platformData?.announce ?? view.platformDispatcher.accessibilityFeatures.announce,
+      announce = platformData?.announce ?? view.platformDispatcher.accessibilityFeatures.announce,
       highContrast =
           platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
       onOffSwitchLabels =

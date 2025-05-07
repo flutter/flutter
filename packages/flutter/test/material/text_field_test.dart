@@ -8945,8 +8945,8 @@ void main() {
     semantics.dispose();
   });
 
-  for (final bool noAnnounce in <bool>[true, false]) {
-    testWidgets('InputDecoration errorText semantics (noAnnounce=$noAnnounce)', (
+  for (final bool announce in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (announce=$announce)', (
       WidgetTester tester,
     ) async {
       final SemanticsTester semantics = SemanticsTester(tester);
