@@ -618,7 +618,7 @@ void main() {
                     isModule: false,
                     swiftPackageManagerUsable: false,
                     swiftPackageManagerFeatureEnabled: false,
-                    projectDisabledSwiftPackageManager: false,
+                    projectDisabledSwiftPackageManager: true,
                     projectHasSwiftPackageManagerIntegration: false,
                     pluginCount: 1,
                     swiftPackageCount: 0,
