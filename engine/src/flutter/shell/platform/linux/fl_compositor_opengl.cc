@@ -384,7 +384,7 @@ static gboolean present_layers(FlCompositorOpenGL* self,
 
     // Write into a texture in the views context.
     fl_renderable_make_current(renderable);
-    FlFramebuffer* view_framebuffer =
+    g_autoptr(FlFramebuffer) view_framebuffer =
         fl_framebuffer_new(self->general_format, width, height);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                       fl_framebuffer_get_id(view_framebuffer));
