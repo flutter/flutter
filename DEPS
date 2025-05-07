@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': '5cf5d0ff46d9a3f0abbf4149b125ed0aee93db91',
+  'skia_revision': '1ea3ec8e786314b3d55d2e0d5796ead409ac661c',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -207,7 +207,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'TcALRG6cjvR6RVe4L8oiH60SOFvQQM9bP54kURsCgyAC',
+  'fuchsia_test_scripts_version': 'xobrcSN07udKdXOq_shTG6-PJwjxpSfB8_kUx-Jv7D0C',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
@@ -809,7 +809,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'SOlRUoAtzxSsarx-6jTZ97MPlUcb0RymBqTjolKQZNgC'
+        'version': '_GJje-N2Jk51qtBs6L6nKhX0oDxMv7Lz7SO5jN9sgpkC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
