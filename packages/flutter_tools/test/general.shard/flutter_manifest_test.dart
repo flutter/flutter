@@ -1402,8 +1402,10 @@ name: test
     expect(flutterManifest!.dependencies, isEmpty);
   });
 
-  testWithoutContext('FlutterManifest knows if Swift Package Manager is disabled', () async {
-    const String manifest = '''
+  testWithoutContext(
+    'FlutterManifest provides a guided error to migrate disable-swift-package-manager',
+    () async {
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -1411,25 +1413,17 @@ dependencies:
 flutter:
   disable-swift-package-manager: true
 ''';
-    final FlutterManifest flutterManifest =
-        FlutterManifest.createFromString(manifest, logger: logger)!;
-
-    expect(flutterManifest.disabledSwiftPackageManager, true);
-  });
-
-  testWithoutContext('FlutterManifest does not disable Swift Package Manager if missing', () async {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-    final FlutterManifest flutterManifest =
-        FlutterManifest.createFromString(manifest, logger: logger)!;
-
-    expect(flutterManifest.disabledSwiftPackageManager, false);
-  });
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      );
+      expect(flutterManifest, isNull);
+      expect(
+        logger.errorText,
+        contains('The "disable-swift-package-manager" configuration has moved'),
+      );
+    },
+  );
 
   testWithoutContext('FlutterManifest can parse default flavor', () async {
     const String manifest = '''
