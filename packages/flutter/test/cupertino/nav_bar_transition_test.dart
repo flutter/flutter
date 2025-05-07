@@ -639,6 +639,134 @@ void main() {
     checkBackgroundBoxOffset(tester, 2, const Offset(846.12, 44.0));
   });
 
+  testWidgets('Extended large title removes bottom nav bar transition background box ', (
+    WidgetTester tester,
+  ) async {
+    setWindowToPortrait(tester);
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(largeTitle: Text('Page 1')),
+              SliverToBoxAdapter(child: SizedBox(height: 1200.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            title: 'Page 2',
+            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final int numComponents =
+        tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length;
+
+    await tester.pumpAndSettle();
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            title: 'Page 2',
+            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // The bottom nav bar transition background box has been added.
+    expect(
+      tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length,
+      equals(numComponents + 1),
+    );
+  });
+
+  testWidgets(
+    'Opaque extended large title background keeps bottom nav bar transition background box ',
+    (WidgetTester tester) async {
+      setWindowToPortrait(tester);
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: const <Widget>[
+                CupertinoSliverNavigationBar(
+                  largeTitle: Text('Page 1'),
+                  automaticBackgroundVisibility: false,
+                ),
+                SliverToBoxAdapter(child: SizedBox(height: 1200.0)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 2',
+              builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      final int numComponents =
+          tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length;
+
+      await tester.pumpAndSettle();
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pumpAndSettle();
+
+      scrollController.jumpTo(600.0);
+      await tester.pumpAndSettle();
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 2',
+              builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The bottom nav bar transition background box has been added.
+      expect(
+        tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length,
+        equals(numComponents),
+      );
+    },
+  );
+
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
