@@ -19,6 +19,14 @@ abstract class ScenePicture implements ui.Picture {
   ui.Rect get cullRect;
 }
 
+abstract class ScenePictureRecorder implements ui.PictureRecorder {
+  /// Whether this reference to the underlying picture recorder is [dispose]d.
+  ///
+  /// This only returns a valid value if asserts are enabled, and must not be
+  /// used otherwise.
+  bool get debugDisposed;
+}
+
 abstract class SceneImageFilter implements ui.ImageFilter {
   // Since some image filters affect the actual drawing bounds of a given picture, this
   // gives the maximum draw boundary for a picture with the given input bounds after it

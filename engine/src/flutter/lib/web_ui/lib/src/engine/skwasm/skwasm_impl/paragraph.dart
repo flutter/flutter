@@ -1080,7 +1080,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
 
   @override
   ui.Paragraph build() {
-    _addSegmenterData();
+    if (!skwasmIsHeavy()) {
+      _addSegmenterData();
+    }
     return SkwasmParagraph(paragraphBuilderBuild(handle));
   }
 
