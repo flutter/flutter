@@ -3132,7 +3132,7 @@ abstract class InspectorButton extends StatelessWidget {
   /// Returns [buttonSize] if the variant is [InspectorButtonVariant.iconOnly],
   /// otherwise returns [buttonIconSize].
   double get iconSizeForVariant {
-    switch(variant) {
+    switch (variant) {
       case InspectorButtonVariant.iconOnly:
         return buttonSize;
       case InspectorButtonVariant.filled:
