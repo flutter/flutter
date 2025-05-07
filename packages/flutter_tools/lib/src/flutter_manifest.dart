@@ -196,12 +196,6 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] as bool? ?? false;
   }
 
-  /// If true, does not use Swift Package Manager as a dependency manager.
-  /// CocoaPods will be used instead.
-  bool get disabledSwiftPackageManager {
-    return _flutterDescriptor['disable-swift-package-manager'] as bool? ?? false;
-  }
-
   /// True if this Flutter module should use AndroidX dependencies.
   ///
   /// If false the deprecated Android Support library will be used.
@@ -613,12 +607,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
-      case 'disable-swift-package-manager':
-        if (yamlValue is! bool) {
-          errors.add(
-            'Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).',
-          );
-        }
       case 'default-flavor':
         if (yamlValue is! String) {
           errors.add(
