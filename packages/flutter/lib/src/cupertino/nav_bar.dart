@@ -3014,10 +3014,7 @@ class _NavigationBarComponentsTransition {
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (!searchable) {
-      child = FadeTransition(
-        opacity: fadeOutBy(0.8, curve: animationCurve),
-        child: ClipRect(child: child),
-      );
+      child = FadeTransition(opacity: fadeOutBy(0.8, curve: animationCurve), child: child);
     }
 
     return PositionedTransition(
@@ -3027,7 +3024,7 @@ class _NavigationBarComponentsTransition {
               ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
 
-      child: child,
+      child: ClipRect(child: child),
     );
   }
 
@@ -3337,10 +3334,7 @@ class _NavigationBarComponentsTransition {
     // Fade in only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (!searchable) {
-      child = FadeTransition(
-        opacity: fadeInFrom(0.0, curve: animationCurve),
-        child: ClipRect(child: child),
-      );
+      child = FadeTransition(opacity: fadeInFrom(0.0, curve: animationCurve), child: child);
     }
 
     return PositionedTransition(
@@ -3349,7 +3343,7 @@ class _NavigationBarComponentsTransition {
           userGestureInProgress
               ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
-      child: child,
+      child: ClipRect(child: child),
     );
   }
 }
