@@ -29,7 +29,6 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
-import 'theme_data.dart' show MaterialTapTargetSize;
 import 'tooltip.dart';
 
 // Examples can assume:
