@@ -18,8 +18,23 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
+import 'color_scheme.dart';
+import 'colors.dart';
+import 'constants.dart';
+import 'debug.dart';
+import 'divider.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
+import 'ink_decoration.dart';
+import 'ink_well.dart';
+import 'list_tile_theme.dart';
+import 'material_state.dart';
+import 'text_theme.dart';
+import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // int _act = 1;
