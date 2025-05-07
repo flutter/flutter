@@ -227,7 +227,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to an [Icon] with [Icons.arrow_drop_down].
   ///
-  /// if [showTrailingIcon] is false, the trailing icon will not be shown.
+  /// If [showTrailingIcon] is false, the trailing icon will not be shown.
   final Widget? trailingIcon;
 
   /// Specifies if the [DropdownMenu] should show a [trailingIcon].
