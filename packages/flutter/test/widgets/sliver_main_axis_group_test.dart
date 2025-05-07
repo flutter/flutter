@@ -879,6 +879,81 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/167801
+  testWidgets(
+    'Nesting SliverMainAxisGroups does not break ShowCaretOnScreen for text fields inside nested SliverMainAxisGroup',
+    (WidgetTester tester) async {
+      // The number of groups and items per group needs to be high enough to reproduce the bug.
+      const int sliverGroupsCount = 3;
+      const int sliverGroupItemsCount = 60;
+      // To make working with the scroll offset easier, each item is a fixed height.
+      const double itemHeight = 72.0;
+
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      final Widget widget = MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF1489FD))),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFB1BDC5))),
+          ),
+        ),
+        home: Scaffold(
+          body: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  for (int i = 1; i <= sliverGroupsCount; i++)
+                    SliverMainAxisGroup(
+                      slivers: <Widget>[
+                        SliverList.builder(
+                          itemCount: sliverGroupItemsCount,
+                          itemBuilder: (_, int index) {
+                            final String label = 'Field $i.${index + 1}';
+
+                            return SizedBox(
+                              height: itemHeight,
+                              child: Padding(
+                                // This extra padding is to make visually debugging the test app a bit better,
+                                // othwerwise the label text clips the text field above.
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: TextField(
+                                  key: ValueKey<String>(label),
+                                  decoration: InputDecoration(labelText: label),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      // Scroll down to the first field in the second group, so that it is at the top of the screen.
+      const double offset = sliverGroupItemsCount * itemHeight;
+      scrollController.jumpTo(offset);
+
+      await tester.pumpAndSettle();
+
+      // Tap the field so that it gains focus and requests the scrollable to scroll it into view.
+      // However, since the field is at the top of the screen, far away from the keyboard,
+      // the scroll position should not change.
+      await tester.tap(find.byKey(const ValueKey<String>('Field 2.1')));
+      await tester.pumpAndSettle();
+
+      expect(scrollController.offset, offset);
+    },
+  );
+
   testWidgets('SliverMainAxisGroup offstage child', (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
