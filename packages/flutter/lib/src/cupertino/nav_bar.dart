@@ -2741,7 +2741,7 @@ class _NavigationBarComponentsTransition {
       offsetAnimation: animation
           .drive(CurveTween(curve: curve))
           .drive(anchorMovementInTransitionBox),
-      width: math.max(fromBox.size.width, toBox.size.width),
+      width: fromNavBarBox.size.width,
       height: fromBox.size.height,
       child: child,
     );

@@ -1774,7 +1774,7 @@ void main() {
 
     // A smaller width clips the back label.
     final Positioned positionedWidget = tester.widget<Positioned>(positionedFinder);
-    expect(positionedWidget.width, moreOrLessEquals(199.08, epsilon: 0.01));
+    expect(positionedWidget.width, moreOrLessEquals(800.0, epsilon: 0.01));
 
     // End the transition.
     await tester.pumpAndSettle();
