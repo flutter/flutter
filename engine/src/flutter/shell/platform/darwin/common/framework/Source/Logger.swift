@@ -101,6 +101,8 @@ protocol OutputWriter {
 
 final class SyslogOutputWriter: OutputWriter {
   func writeLine(_ message: String) {
+    // TODO(cbracken): replace this with os_log-based approach.
+    // https://github.com/flutter/flutter/issues/44030
     message.withCString { vsyslog(LOG_ALERT, "%s", getVaList([$0])) }
   }
 }
