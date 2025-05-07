@@ -3131,8 +3131,15 @@ abstract class InspectorButton extends StatelessWidget {
   ///
   /// Returns [buttonSize] if the variant is [InspectorButtonVariant.iconOnly],
   /// otherwise returns [buttonIconSize].
-  double get iconSizeForVariant =>
-      variant == InspectorButtonVariant.iconOnly ? buttonSize : buttonIconSize;
+  double get iconSizeForVariant {
+    switch(variant) {
+      case InspectorButtonVariant.iconOnly:
+        return buttonSize;
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.toggle:
+        return buttonIconSize;
+    }
+  }
 
   /// Provides the appropriate foreground color for the button's icon.
   Color foregroundColor(BuildContext context);

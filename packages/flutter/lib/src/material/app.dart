@@ -29,7 +29,7 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
-import 'theme_data.dart';
+import 'theme_data.dart' show MaterialTapTargetSize;
 import 'tooltip.dart';
 
 // Examples can assume:
@@ -1221,12 +1221,19 @@ class _MaterialInspectorButton extends InspectorButton {
     return IconButton.styleFrom(
       foregroundColor: foreground,
       backgroundColor: background,
-      side:
-          variant == InspectorButtonVariant.toggle && !toggledOn!
-              ? BorderSide(color: foreground)
-              : null,
+      side: _borderSide(color: foreground),
       tapTargetSize: MaterialTapTargetSize.padded,
     );
+  }
+
+  BorderSide? _borderSide({required Color color}) {
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.iconOnly:
+        return null;
+      case InspectorButtonVariant.toggle:
+        return toggledOn == false ? BorderSide(color: color) : null;
+    }
   }
 
   @override
