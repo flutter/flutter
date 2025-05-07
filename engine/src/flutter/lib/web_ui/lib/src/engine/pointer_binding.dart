@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -17,7 +18,6 @@ import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
 import 'pointer_converter.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'window.dart';
 
@@ -439,7 +439,7 @@ class ClickDebouncer {
 class PointerSupportDetector {
   const PointerSupportDetector();
 
-  bool get hasPointerEvents => hasJsProperty(domWindow, 'PointerEvent');
+  bool get hasPointerEvents => domWindow.has('PointerEvent');
 
   @override
   String toString() => 'pointers:$hasPointerEvents';
@@ -1102,7 +1102,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   List<DomPointerEvent> _expandEvents(DomPointerEvent event) {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
-    if (hasJsProperty(event, 'getCoalescedEvents')) {
+    if (event.has('getCoalescedEvents')) {
       final List<DomPointerEvent> coalescedEvents =
           event.getCoalescedEvents().cast<DomPointerEvent>();
       // Some events don't perform coalescing, so they return an empty list. In
