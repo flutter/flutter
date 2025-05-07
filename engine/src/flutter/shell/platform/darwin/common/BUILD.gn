@@ -157,7 +157,10 @@ source_set("framework_common") {
     ":framework_relative_headers",
   ]
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    ":InternalFlutterSwiftCommon",
+    "//flutter/fml",
+  ]
 }
 
 test_fixtures("framework_common_fixtures") {
