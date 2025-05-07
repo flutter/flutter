@@ -2244,6 +2244,7 @@ void main() {
       required double contentHeight,
       bool reverse = false,
       bool includeFlexibleSpace = false,
+      bool animateColor = false,
       double? scrolledUnderElevation,
     }) {
       return MaterialApp(
@@ -2257,6 +2258,7 @@ void main() {
             title: const Text('AppBar'),
             flexibleSpace:
                 includeFlexibleSpace ? const FlexibleSpaceBar(title: Text('FlexibleSpace')) : null,
+            animateColor: animateColor,
           ),
           body: ListView(
             reverse: reverse,
@@ -2342,7 +2344,9 @@ void main() {
     });
 
     testWidgets('backgroundColor animation', (WidgetTester tester) async {
-      await tester.pumpWidget(buildAppBar(contentHeight: 1200.0, scrolledUnderElevation: 0));
+      await tester.pumpWidget(
+        buildAppBar(contentHeight: 1200.0, scrolledUnderElevation: 0, animateColor: true),
+      );
 
       expect(getAppBarAnimatedBackgroundColor(tester), defaultColor);
 
