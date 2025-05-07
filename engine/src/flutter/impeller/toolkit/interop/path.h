@@ -25,6 +25,8 @@ class Path final
 
   const SkPath& GetPath() const;
 
+  ImpellerRect GetBounds() const;
+
  private:
   SkPath path_;
 };
