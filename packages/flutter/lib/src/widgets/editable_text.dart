@@ -64,6 +64,7 @@ import 'ticker_provider.dart';
 import 'undo_history.dart';
 import 'view.dart';
 import 'widget_span.dart';
+import 'web_browser_detection.dart';
 
 export 'package:flutter/services.dart'
     show
@@ -2081,8 +2082,7 @@ class EditableText extends StatefulWidget {
   /// platforms.
   static ui.BoxWidthStyle get defaultSelectionWidthStyle {
     if (kIsWeb) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        // TODO(Renzo-Olivares): On macOS Safari this is set to max aswell.
+      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.browserIsSafari) {
         return ui.BoxWidthStyle.max;
       }
       return ui.BoxWidthStyle.tight;
