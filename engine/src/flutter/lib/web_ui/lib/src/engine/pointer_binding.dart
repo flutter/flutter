@@ -439,7 +439,7 @@ class ClickDebouncer {
 class PointerSupportDetector {
   const PointerSupportDetector();
 
-  bool get hasPointerEvents => domWindow.hasProperty('PointerEvent'.toJS).toDart;
+  bool get hasPointerEvents => domWindow.has('PointerEvent');
 
   @override
   String toString() => 'pointers:$hasPointerEvents';
@@ -1102,7 +1102,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   List<DomPointerEvent> _expandEvents(DomPointerEvent event) {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
-    if (event.hasProperty('getCoalescedEvents'.toJS).toDart) {
+    if (event.has('getCoalescedEvents')) {
       final List<DomPointerEvent> coalescedEvents =
           event.getCoalescedEvents().cast<DomPointerEvent>();
       // Some events don't perform coalescing, so they return an empty list. In

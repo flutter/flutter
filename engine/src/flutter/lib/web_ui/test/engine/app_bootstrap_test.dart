@@ -5,6 +5,7 @@
 @TestOn('browser')
 library;
 
+import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:js_util';
 
@@ -107,8 +108,8 @@ void testMain() {
         callMethod<Object>(appInitializer, 'runApp', <Object?>[]),
       );
 
-      expect(maybeApp['addView'], isA<Function>());
-      expect(maybeApp['removeView'], isA<Function>());
+      expect(maybeApp['addView'].isA<JSFunction>(), isTrue);
+      expect(maybeApp['removeView'].isA<JSFunction>(), isTrue);
     });
     test('addView/removeView respectively adds/removes view', () async {
       final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);

@@ -1790,7 +1790,7 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   );
 
   bool RequiresClientICU() {
-    if (!hasProperty('RequiresClientICU'.toJS).toDart) {
+    if (!has('RequiresClientICU')) {
       return false;
     }
     return callMethod<JSBoolean>('RequiresClientICU'.toJS).toDart;

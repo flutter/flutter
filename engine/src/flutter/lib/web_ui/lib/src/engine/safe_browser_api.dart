@@ -27,7 +27,7 @@ import 'dom.dart';
 double? parseFloat(String source) {
   // Using JavaScript's `parseFloat` here because it can parse values
   // like "20px", while Dart's `double.tryParse` fails.
-  final double result = parseFloatImpl(source.toJS).toDartDouble;
+  final double result = parseFloatImpl(source);
 
   if (result.isNaN) {
     return null;
@@ -39,15 +39,13 @@ double? parseFloat(String source) {
 num? parseFontSize(DomElement element) {
   num? fontSize;
 
-  if (element.hasProperty('computedStyleMap'.toJS).toDart) {
-    // Use the newer `computedStyleMap` API available on some browsers.
-    final computedStyleMap = element.callMethod<JSObject?>('computedStyleMap'.toJS);
-    if (computedStyleMap != null) {
-      final fontSizeObject = computedStyleMap.callMethod<JSObject?>('get'.toJS, 'font-size'.toJS);
-      if (fontSizeObject != null) {
-        fontSize = fontSizeObject.getProperty<JSNumber>('value'.toJS).toDartDouble;
-      }
-    }
+  if (element.has('computedStyleMap')) {
+    fontSize =
+        element
+            .computedStyleMap()
+            .get('font-size')
+            ?.getProperty<JSNumber>('value'.toJS)
+            .toDartDouble;
   }
 
   if (fontSize == null) {
@@ -62,8 +60,8 @@ num? parseFontSize(DomElement element) {
 /// Provides haptic feedback.
 void vibrate(int durationMs) {
   final DomNavigator navigator = domWindow.navigator;
-  if (navigator.hasProperty('vibrate'.toJS).toDart) {
-    navigator.callMethod('vibrate'.toJS, durationMs.toJS);
+  if (navigator.has('vibrate')) {
+    navigator.vibrate(durationMs.toJS);
   }
 }
 
@@ -217,5 +215,5 @@ class OffScreenCanvas {
       _supported ??=
           // Safari 16.4 implements OffscreenCanvas, but without WebGL support. So
           // it's not really supported in a way that is useful to us.
-          !ui_web.browser.isSafari && domWindow.hasProperty('OffscreenCanvas'.toJS).toDart;
+          !ui_web.browser.isSafari && domWindow.has('OffscreenCanvas');
 }
