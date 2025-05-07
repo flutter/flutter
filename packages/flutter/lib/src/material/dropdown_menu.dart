@@ -164,6 +164,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.menuHeight,
     this.leadingIcon,
     this.trailingIcon,
+    this.showTrailingIcon = true,
     this.label,
     this.hintText,
     this.helperText,
@@ -225,7 +226,17 @@ class DropdownMenu<T> extends StatefulWidget {
   /// An optional icon at the end of the text field.
   ///
   /// Defaults to an [Icon] with [Icons.arrow_drop_down].
+  ///
+  /// If [showTrailingIcon] is false, the trailing icon will not be shown.
   final Widget? trailingIcon;
+
+  /// Specifies if the [DropdownMenu] should show a [trailingIcon].
+  ///
+  /// If [trailingIcon] is set, [DropdownMenu] will use that trailing icon,
+  /// otherwise a default trailing icon will be created.
+  ///
+  /// Defaults to true.
+  final bool showTrailingIcon;
 
   /// Optional widget that describes the input field.
   ///
@@ -1008,22 +1019,25 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
-        final Widget trailingButton = Padding(
-          padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
-          child: IconButton(
-            isSelected: controller.isOpen,
-            constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-            padding: isCollapsed ? EdgeInsets.zero : null,
-            icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
-            selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-            onPressed:
-                !widget.enabled
-                    ? null
-                    : () {
-                      handlePressed(controller);
-                    },
-          ),
-        );
+        final Widget trailingButton =
+            widget.showTrailingIcon
+                ? Padding(
+                  padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
+                  child: IconButton(
+                    isSelected: controller.isOpen,
+                    constraints: widget.inputDecorationTheme?.suffixIconConstraints,
+                    padding: isCollapsed ? EdgeInsets.zero : null,
+                    icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
+                    selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
+                    onPressed:
+                        !widget.enabled
+                            ? null
+                            : () {
+                              handlePressed(controller);
+                            },
+                  ),
+                )
+                : const SizedBox.shrink();
 
         final Widget leadingButton = Padding(
           padding: const EdgeInsets.all(8.0),
@@ -1070,7 +1084,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 widget.leadingIcon != null
                     ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
                     : null,
-            suffixIcon: trailingButton,
+            suffixIcon: widget.showTrailingIcon ? trailingButton : null,
           ).applyDefaults(effectiveInputDecorationTheme),
           restorationId: widget.restorationId,
         );
