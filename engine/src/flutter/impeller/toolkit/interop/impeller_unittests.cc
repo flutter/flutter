@@ -582,4 +582,14 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, CanGetPathBounds) {
+  const auto path =
+      hpp::PathBuilder{}.MoveTo({100, 100}).LineTo({200, 200}).Build();
+  const auto bounds = path.GetBounds();
+  ASSERT_EQ(bounds.x, 100);
+  ASSERT_EQ(bounds.y, 100);
+  ASSERT_EQ(bounds.width, 100);
+  ASSERT_EQ(bounds.height, 100);
+}
+
 }  // namespace impeller::interop::testing
