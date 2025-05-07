@@ -4242,10 +4242,8 @@ void main() {
   testWidgets(
     'DropdownMenu does not include the default trailing icon when showTrailingIcon is false',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeData,
           home: Scaffold(
             body: DropdownMenu<TestMenu>(
               showTrailingIcon: false,
@@ -4264,10 +4262,8 @@ void main() {
   testWidgets(
     'DropdownMenu does not include the provided trailing icon when showTrailingIcon is false',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeData,
           home: Scaffold(
             body: DropdownMenu<TestMenu>(
               trailingIcon: const Icon(Icons.ac_unit),
