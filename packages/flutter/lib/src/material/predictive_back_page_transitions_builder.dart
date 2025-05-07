@@ -301,7 +301,6 @@ class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
       _PredictiveBackSharedElementPageTransitionState();
 }
 
-// TODO(justinmc): The animation when you just press the back button is not correct. Wasn't that recently updated?
 class _PredictiveBackSharedElementPageTransitionState
     extends State<_PredictiveBackSharedElementPageTransition>
     with SingleTickerProviderStateMixin {
