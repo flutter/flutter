@@ -1739,7 +1739,7 @@ class CompileTest {
       /* Time to First Frame */
       await Process.run(workingDirectory: testDirectory, 'rm', <String>[
         '-rf',
-        'benchmarkResults.xcresult'
+        '$testDirectory/benchmarkResults.xcresult'
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
@@ -1756,7 +1756,7 @@ class CompileTest {
         'platform=iOS',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
-        'benchmarkResults.xcresult',
+        '$testDirectory/benchmarkResults.xcresult',
         '-verbose',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
@@ -1777,18 +1777,10 @@ class CompileTest {
         'test-results',
         'metrics',
         '--path',
-        'benchmarkResults.xcresult',
+        '$testDirectory/benchmarkResults.xcresult',
         '--format',
         'json'
       ]).then((ProcessResult results) {
-        Directory dir = Directory(testDirectory);
-        dir.list(recursive: false).forEach((FileSystemEntity f) {
-          print(f);
-          if (f is File) {
-            print(f.lengthSync());
-          }
-        });
-        print(results.stdout);
         metricsJson = json.decode(results.stdout.toString());
       });
 
