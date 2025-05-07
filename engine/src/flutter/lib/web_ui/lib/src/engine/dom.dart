@@ -2342,7 +2342,7 @@ extension type DomSegmenter._(JSObject _) implements JSObject {
 @JS('Segments')
 extension type DomSegments._(JSObject _) implements JSObject {
   DomIteratorWrapper<DomSegment> iterator() {
-    final DomIterator segmentIterator = callMethod(domSymbol.iterator)! as DomIterator;
+    final DomIterator segmentIterator = callMethod<DomIterator>(domSymbol.iterator);
     return DomIteratorWrapper<DomSegment>(segmentIterator);
   }
 }
