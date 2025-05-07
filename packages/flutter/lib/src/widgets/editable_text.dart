@@ -63,8 +63,8 @@ import 'text_selection_toolbar_anchors.dart';
 import 'ticker_provider.dart';
 import 'undo_history.dart';
 import 'view.dart';
-import 'widget_span.dart';
 import 'web_browser_detection.dart';
+import 'widget_span.dart';
 
 export 'package:flutter/services.dart'
     show
