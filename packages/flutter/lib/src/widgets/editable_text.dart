@@ -17,7 +17,6 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
-import 'dart:ui';
 
 import 'package:characters/characters.dart' show CharacterRange, StringCharacters;
 import 'package:flutter/foundation.dart';
@@ -2083,6 +2082,7 @@ class EditableText extends StatefulWidget {
   static ui.BoxWidthStyle get defaultSelectionWidthStyle {
     if (kIsWeb) {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
+        // TODO(Renzo-Olivares): On macOS Safari this is set to max aswell.
         return ui.BoxWidthStyle.max;
       }
       return ui.BoxWidthStyle.tight;
