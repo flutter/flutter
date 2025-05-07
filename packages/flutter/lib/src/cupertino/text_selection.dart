@@ -266,7 +266,7 @@ class _CupertinoTextSelectionControlsToolbarState
     final double anchorX = clampDouble(
       widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
       _kArrowScreenPadding + mediaQueryPadding.left,
-      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
+      MediaQuery.widthOf(context) - mediaQueryPadding.right - _kArrowScreenPadding,
     );
 
     final double topAmountInEditableRegion =

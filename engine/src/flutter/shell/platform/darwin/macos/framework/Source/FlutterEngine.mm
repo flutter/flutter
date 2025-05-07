@@ -1565,16 +1565,16 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
   const auto engine_time = _embedderAPI.GetCurrentTime();
   [FlutterRunLoop.mainRunLoop
-      performBlock:^{
-        FlutterEngine* self = weakSelf;
-        if (self != nil && self->_engine != nil) {
-          auto result = _embedderAPI.RunTask(self->_engine, &task);
-          if (result != kSuccess) {
-            NSLog(@"Could not post a task to the Flutter engine.");
-          }
-        }
-      }
-        afterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC];
+      performAfterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC
+                  block:^{
+                    FlutterEngine* self = weakSelf;
+                    if (self != nil && self->_engine != nil) {
+                      auto result = _embedderAPI.RunTask(self->_engine, &task);
+                      if (result != kSuccess) {
+                        NSLog(@"Could not post a task to the Flutter engine.");
+                      }
+                    }
+                  }];
 }
 
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category
