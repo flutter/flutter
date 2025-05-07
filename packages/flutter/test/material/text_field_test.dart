@@ -8956,7 +8956,7 @@ void main() {
       await tester.pumpWidget(
         overlay(
           child: MediaQuery(
-            data: MediaQueryData(noAnnounce: noAnnounce),
+            data: MediaQueryData(announce: announce),
             child: TextField(
               key: key,
               controller: controller,
@@ -8990,7 +8990,7 @@ void main() {
                   TestSemantics(
                     label: 'oh no!',
                     textDirection: TextDirection.ltr,
-                    flags: <SemanticsFlag>[if (noAnnounce) SemanticsFlag.isLiveRegion],
+                    flags: <SemanticsFlag>[if (!announce) SemanticsFlag.isLiveRegion],
                   ),
                 ],
               ),

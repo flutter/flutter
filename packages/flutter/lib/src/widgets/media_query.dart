@@ -97,8 +97,8 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
   boldText,
 
-  /// Specifies the aspect corresponding to [MediaQueryData.noAnnounce].
-  noAnnounce,
+  /// Specifies the aspect corresponding to [MediaQueryData.announce].
+  announce,
 
   /// Specifies the aspect corresponding to [MediaQueryData.navigationMode].
   navigationMode,
@@ -207,7 +207,7 @@ class MediaQueryData {
     this.onOffSwitchLabels = false,
     this.disableAnimations = false,
     this.boldText = false,
-    this.noAnnounce = false,
+    this.announce = false,
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
@@ -293,8 +293,8 @@ class MediaQueryData {
           platformData?.disableAnimations ??
           view.platformDispatcher.accessibilityFeatures.disableAnimations,
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
-      noAnnounce =
-          platformData?.noAnnounce ?? view.platformDispatcher.accessibilityFeatures.noAnnounce,
+      announce =
+          platformData?.announce ?? view.platformDispatcher.accessibilityFeatures.announce,
       highContrast =
           platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
       onOffSwitchLabels =
@@ -587,19 +587,21 @@ class MediaQueryData {
   final bool boldText;
 
   /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are discouraged on the current platform.
+  /// are allowed on the current platform.
   ///
-  /// Returns `true` on Android, where platform announcements are deprecated
+  /// Returns `false` on Android, where platform announcements are deprecated
   /// by the underlying platform.
   ///
-  /// Returns `false` on all other platforms (iOS, web, desktop) where such
+  /// Returns `true` on all other platforms (iOS, web, desktop) where such
   /// announcements are generally supported without discouragement.
+  ///
+  /// Use this flag to conditionally avoid making announcements on Android.
   ///
   /// See also:
   ///
   ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
   ///    originates.
-  final bool noAnnounce;
+  final bool announce;
 
   /// Describes the navigation mode requested by the platform.
   ///
@@ -682,7 +684,7 @@ class MediaQueryData {
     bool? invertColors,
     bool? accessibleNavigation,
     bool? boldText,
-    bool? noAnnounce,
+    bool? announce,
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
@@ -708,7 +710,7 @@ class MediaQueryData {
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
-      noAnnounce: noAnnounce ?? this.noAnnounce,
+      announce: announce ?? this.announce,
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
@@ -911,7 +913,7 @@ class MediaQueryData {
         other.invertColors == invertColors &&
         other.accessibleNavigation == accessibleNavigation &&
         other.boldText == boldText &&
-        other.noAnnounce == noAnnounce &&
+        other.announce == announce &&
         other.navigationMode == navigationMode &&
         other.gestureSettings == gestureSettings &&
         listEquals(other.displayFeatures, displayFeatures) &&
@@ -1690,26 +1692,26 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeBoldTextOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
-  /// Returns the [MediaQueryData.noAnnounce] accessibility setting for the
+  /// Returns the [MediaQueryData.announce] accessibility setting for the
   /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.noAnnounce] property of the ancestor [MediaQuery]
+  /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool noAnnounceOf(BuildContext context) => maybeNoAnnounceOf(context) ?? false;
+  static bool announceOf(BuildContext context) => maybeAnnounceOf(context) ?? false;
 
-  /// Returns the [MediaQueryData.noAnnounce] accessibility setting for the
+  /// Returns the [MediaQueryData.announce] accessibility setting for the
   /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.noAnnounce] property of the ancestor [MediaQuery]
+  /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeNoAnnounceOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.noAnnounce)?.noAnnounce;
+  static bool? maybeAnnounceOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.announce)?.announce;
 
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
@@ -1839,7 +1841,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.disableAnimations =>
               data.disableAnimations != oldWidget.data.disableAnimations,
             _MediaQueryAspect.boldText => data.boldText != oldWidget.data.boldText,
-            _MediaQueryAspect.noAnnounce => data.noAnnounce != oldWidget.data.noAnnounce,
+            _MediaQueryAspect.announce => data.announce != oldWidget.data.announce,
             _MediaQueryAspect.navigationMode =>
               data.navigationMode != oldWidget.data.navigationMode,
             _MediaQueryAspect.gestureSettings =>

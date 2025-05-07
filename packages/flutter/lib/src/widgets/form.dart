@@ -370,7 +370,7 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty && !MediaQuery.noAnnounceOf(context)) {
+    if (errorMessage.isNotEmpty && MediaQuery.announceOf(context)) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(

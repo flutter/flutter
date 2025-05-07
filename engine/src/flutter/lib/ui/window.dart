@@ -970,16 +970,16 @@ class AccessibilityFeatures {
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
   /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are discouraged on the current platform.
+  /// are allowed on the current platform.
   ///
-  /// Returns `true` on Android, where platform announcements are deprecated
+  /// Returns `false` on Android, where platform announcements are deprecated
   /// by the underlying platform.
   ///
-  /// Returns `false` on all other platforms (iOS, web, desktop) where such
+  /// Returns `true` on all other platforms (iOS, web, desktop) where such
   /// announcements are generally supported without discouragement.
   ///
   /// Use this flag to conditionally avoid making announcements on Android.
-  bool get noAnnounce => _kNoAnnounceIndex & _index != 0;
+  bool get announce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -1005,8 +1005,8 @@ class AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (noAnnounce) {
-      features.add('noAnnounce');
+    if (announce) {
+      features.add('announce');
     }
     return 'AccessibilityFeatures$features';
   }

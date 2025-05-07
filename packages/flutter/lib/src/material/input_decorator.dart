@@ -404,7 +404,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       builder: (BuildContext context) {
         return Semantics(
           container: true,
-          liveRegion: MediaQuery.noAnnounceOf(context),
+          liveRegion: !MediaQuery.announceOf(context),
           child: FadeTransition(
             opacity: _controller,
             child: FractionalTranslation(

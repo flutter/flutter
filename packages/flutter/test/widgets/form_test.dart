@@ -171,14 +171,14 @@ void main() {
 
   for (final _PlatformAnnounceScenario test in <_PlatformAnnounceScenario>[
     _PlatformAnnounceScenario(
-      noAnnounce: false,
+      announce: false,
       testName:
-          'Should announce only the first error message when validate returns errors and noAnnounce = false',
+          'Should announce only the first error message when validate returns errors and announce = false',
     ),
     _PlatformAnnounceScenario(
-      noAnnounce: true,
+      announce: true,
       testName:
-          'Should not announce error message when validate returns errors and noAnnounce = true',
+          'Should not announce error message when validate returns errors and announce = true',
     ),
   ]) {
     testWidgets(test.testName, (WidgetTester tester) async {
@@ -186,7 +186,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
-            data: MediaQueryData(noAnnounce: test.noAnnounce),
+            data: MediaQueryData(announce: test.announce),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
@@ -218,15 +218,15 @@ void main() {
       expect(find.text('First error message'), findsOneWidget);
       expect(find.text('Second error message'), findsOneWidget);
 
-      if (test.noAnnounce) {
-        final CapturedAccessibilityAnnouncement? announcement =
-            tester.takeAnnouncements().firstOrNull;
-        expect(announcement, null);
-      } else {
+      if (test.announce) {
         final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
         expect(announcement.message, 'First error message');
         expect(announcement.textDirection, TextDirection.ltr);
         expect(announcement.assertiveness, Assertiveness.assertive);
+      } else {
+        final CapturedAccessibilityAnnouncement? announcement =
+            tester.takeAnnouncements().firstOrNull;
+        expect(announcement, null);
       }
     });
   }
@@ -1634,7 +1634,7 @@ void main() {
 }
 
 class _PlatformAnnounceScenario {
-  _PlatformAnnounceScenario({required this.noAnnounce, required this.testName});
-  final bool noAnnounce;
+  _PlatformAnnounceScenario({required this.announce, required this.testName});
+  final bool announce;
   final String testName;
 }

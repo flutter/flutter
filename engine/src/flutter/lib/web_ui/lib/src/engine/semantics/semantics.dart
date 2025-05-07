@@ -74,7 +74,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   @override
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
   @override
-  bool get noAnnounce => _kNoAnnounceIndex & _index != 0;
+  bool get announce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -100,8 +100,8 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (noAnnounce) {
-      features.add('noAnnounce');
+    if (announce) {
+      features.add('announce');
     }
     return 'AccessibilityFeatures$features';
   }
@@ -125,7 +125,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? reduceMotion,
     bool? highContrast,
     bool? onOffSwitchLabels,
-    bool? noAnnounce,
+    bool? announce,
   }) {
     final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
 
@@ -136,7 +136,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     builder.reduceMotion = reduceMotion ?? this.reduceMotion;
     builder.highContrast = highContrast ?? this.highContrast;
     builder.onOffSwitchLabels = onOffSwitchLabels ?? this.onOffSwitchLabels;
-    builder.noAnnounce = noAnnounce ?? this.noAnnounce;
+    builder.announce = announce ?? this.announce;
 
     return builder.build();
   }
@@ -154,7 +154,7 @@ class EngineAccessibilityFeaturesBuilder {
   bool get reduceMotion => EngineAccessibilityFeatures._kReduceMotionIndex & _index != 0;
   bool get highContrast => EngineAccessibilityFeatures._kHighContrastIndex & _index != 0;
   bool get onOffSwitchLabels => EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex & _index != 0;
-  bool get noAnnounce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index != 0;
+  bool get announce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -191,9 +191,10 @@ class EngineAccessibilityFeaturesBuilder {
     _index = value ? _index | onOffSwitchLabels : _index & ~onOffSwitchLabels;
   }
 
-  set noAnnounce(bool value) {
+  set announce(bool value) {
     const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
-    _index = value ? _index | noAnnounce : _index & ~noAnnounce;
+    // Since we are using noAnnounce for the embedder, we need to flip the value.
+    _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
   }
 
   /// Creates and returns an instance of EngineAccessibilityFeatures based on the value of _index

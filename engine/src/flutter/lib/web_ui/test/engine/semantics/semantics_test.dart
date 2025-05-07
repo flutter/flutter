@@ -299,11 +299,11 @@ void _testEngineAccessibilityBuilder() {
     expect(features.onOffSwitchLabels, isTrue);
   });
 
-  test('no announce', () {
-    expect(features.noAnnounce, isFalse);
-    builder.noAnnounce = true;
+  test('announce', () {
+    expect(features.announce, isFalse);
+    builder.announce = true;
     features = builder.build();
-    expect(features.noAnnounce, isTrue);
+    expect(features.announce, isTrue);
   });
 
   test('reduce motion', () {
@@ -406,7 +406,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.noAnnounce, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(boldText: true);
@@ -425,7 +425,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.noAnnounce, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(highContrast: true);
@@ -435,7 +435,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, true);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.noAnnounce, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(invertColors: true);
@@ -445,7 +445,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, true);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.noAnnounce, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(onOffSwitchLabels: true);
@@ -457,14 +457,14 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, true);
     expect(copy.reduceMotion, false);
 
-    copy = original.copyWith(noAnnounce: true);
+    copy = original.copyWith(announce: true);
     expect(copy.accessibleNavigation, false);
     expect(copy.boldText, false);
     expect(copy.disableAnimations, false);
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.noAnnounce, true);
+    expect(copy.announce, true);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(reduceMotion: true);
@@ -474,7 +474,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.noAnnounce, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, true);
   });
 
