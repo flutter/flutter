@@ -9,7 +9,8 @@ description: The Flutter application's synthetic package.
 ''';
 
 const String fileTemplate = '''
-@(header)import 'dart:async';
+@(header)// dart format off
+import 'dart:async';
 
 @(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
@@ -173,7 +174,8 @@ const String dateVariableTemplate = '''
     String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
-@(header)// ignore: unused_import
+@(header)// dart format off
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import '@(fileName)';
 
