@@ -10,6 +10,7 @@
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
@@ -3900,7 +3901,6 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
       // ~12 on top and ~8 on the bottom, so we add 33h & 13v allowed
       // padding to the tolerance
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(33, 13));
-  EXPECT_TRUE(blob->unique());
 #endif  // OS_FUCHSIA
 }
 

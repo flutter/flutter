@@ -25,7 +25,7 @@
 
 // Tripping this assertion means that the C++ wrapper needs to be updated to
 // account for impeller.h changes as necessary.
-static_assert(IMPELLER_VERSION == IMPELLER_MAKE_VERSION(1, 1, 3, 0),
+static_assert(IMPELLER_VERSION == IMPELLER_MAKE_VERSION(1, 1, 4, 0),
               "C++ bindings must be for the same version as the C API.");
 
 namespace IMPELLER_HPP_NAMESPACE {
@@ -120,10 +120,10 @@ struct Proc {
   PROC(ImpellerLineMetricsGetCodeUnitStartIndex)                  \
   PROC(ImpellerLineMetricsGetDescent)                             \
   PROC(ImpellerLineMetricsGetHeight)                              \
-  PROC(ImpellerLineMetricsIsHardbreak)                            \
   PROC(ImpellerLineMetricsGetLeft)                                \
   PROC(ImpellerLineMetricsGetUnscaledAscent)                      \
   PROC(ImpellerLineMetricsGetWidth)                               \
+  PROC(ImpellerLineMetricsIsHardbreak)                            \
   PROC(ImpellerLineMetricsRelease)                                \
   PROC(ImpellerLineMetricsRetain)                                 \
   PROC(ImpellerMaskFilterCreateBlurNew)                           \
@@ -192,6 +192,7 @@ struct Proc {
   PROC(ImpellerPathBuilderRelease)                                \
   PROC(ImpellerPathBuilderRetain)                                 \
   PROC(ImpellerPathBuilderTakePathNew)                            \
+  PROC(ImpellerPathGetBounds)                                     \
   PROC(ImpellerPathRelease)                                       \
   PROC(ImpellerPathRetain)                                        \
   PROC(ImpellerSurfaceCreateWrappedFBONew)                        \
@@ -1211,6 +1212,12 @@ class ParagraphBuilder final
 class Path final : public Object<ImpellerPath, ImpellerPathTraits> {
  public:
   Path(ImpellerPath path, AdoptTag tag) : Object(path, tag) {}
+
+  ImpellerRect GetBounds() const {
+    ImpellerRect bounds = {};
+    gGlobalProcTable.ImpellerPathGetBounds(Get(), &bounds);
+    return bounds;
+  }
 };
 
 //------------------------------------------------------------------------------

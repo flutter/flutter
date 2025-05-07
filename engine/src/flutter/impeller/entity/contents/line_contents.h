@@ -9,10 +9,29 @@
 
 #include "flutter/impeller/entity/contents/contents.h"
 #include "flutter/impeller/entity/geometry/line_geometry.h"
+#include "impeller/entity/line.vert.h"
 
 namespace impeller {
 class LineContents : public Contents {
  public:
+  static const Scalar kSampleRadius;
+  static std::vector<uint8_t> CreateCurveData(Scalar width,
+                                              Scalar radius,
+                                              Scalar scale);
+
+  struct EffectiveLineParameters {
+    Scalar width;
+    Scalar radius;
+  };
+
+  /// Calculates the values needed for the vertex shader, per vertex.
+  /// Returns the effective line parameters that are used. These differ from the
+  /// ones provided by `geometry` when the line gets clamped for being too thin.
+  static fml::StatusOr<EffectiveLineParameters> CalculatePerVertex(
+      LineVertexShader::PerVertexData* per_vertex,
+      const LineGeometry* geometry,
+      const Matrix& entity_transform);
+
   static std::unique_ptr<LineContents> Make(
       std::unique_ptr<LineGeometry> geometry,
       Color color);

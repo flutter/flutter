@@ -208,7 +208,6 @@ class BuildWebCommand extends BuildSubCommand {
       ];
     }
 
-    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
@@ -218,7 +217,10 @@ class BuildWebCommand extends BuildSubCommand {
       );
     }
     if (!project.web.existsSync()) {
-      throwToolExit('Missing index.html.');
+      throwToolExit(
+        'This project is not configured for the web.\n'
+        'To configure this project for the web, run flutter create . --platforms web',
+      );
     }
     if (!_fileSystem.currentDirectory
             .childDirectory('web')
@@ -246,7 +248,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     await webBuilder.buildWeb(
       project,
-      target,
+      targetFile,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
       compilerConfigs: compilerConfigs,

@@ -13,6 +13,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
@@ -26,6 +27,56 @@
 namespace impeller {
 
 namespace {
+
+/// A generic version of `Variants` which mostly exists to reduce code size.
+class GenericVariants {
+ public:
+  void Set(const ContentContextOptions& options,
+           std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return;
+      }
+    }
+    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+  }
+
+  void SetDefault(const ContentContextOptions& options,
+                  std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
+    default_options_ = options;
+    if (pipeline) {
+      Set(options, std::move(pipeline));
+    }
+  }
+
+  GenericRenderPipelineHandle* Get(const ContentContextOptions& options) const {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return pipeline.get();
+      }
+    }
+    return nullptr;
+  }
+
+  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
+    desc_ = std::move(desc);
+  }
+
+  size_t GetPipelineCount() const { return pipelines_.size(); }
+
+  bool IsDefault(const ContentContextOptions& opts) {
+    return default_options_.has_value() &&
+           opts.ToKey() == default_options_.value().ToKey();
+  }
+
+ protected:
+  std::optional<PipelineDescriptor> desc_;
+  std::optional<ContentContextOptions> default_options_;
+  std::vector<std::pair<uint64_t, std::unique_ptr<GenericRenderPipelineHandle>>>
+      pipelines_;
+};
 
 /// Holds multiple Pipelines associated with the same PipelineHandle types.
 ///
@@ -41,7 +92,7 @@ namespace {
 ///  - impeller::RenderPipelineHandle<> - The type of objects this typically
 ///    contains.
 template <class PipelineHandleT>
-class Variants {
+class Variants : public GenericVariants {
   static_assert(
       ShaderStageCompatibilityChecker<
           typename PipelineHandleT::VertexShader,
@@ -54,32 +105,20 @@ class Variants {
 
   void Set(const ContentContextOptions& options,
            std::unique_ptr<PipelineHandleT> pipeline) {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return;
-      }
-    }
-    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+    GenericVariants::Set(options, std::move(pipeline));
   }
 
   void SetDefault(const ContentContextOptions& options,
                   std::unique_ptr<PipelineHandleT> pipeline) {
-    default_options_ = options;
-    if (pipeline) {
-      Set(options, std::move(pipeline));
-    }
-  }
-
-  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
-    desc_ = std::move(desc);
+    GenericVariants::SetDefault(options, std::move(pipeline));
   }
 
   void CreateDefault(const Context& context,
                      const ContentContextOptions& options,
                      const std::vector<Scalar>& constants = {}) {
-    auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
-        context, constants);
+    std::optional<PipelineDescriptor> desc =
+        PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(context,
+                                                                constants);
     if (!desc.has_value()) {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
@@ -95,18 +134,7 @@ class Variants {
   }
 
   PipelineHandleT* Get(const ContentContextOptions& options) const {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return pipeline.get();
-      }
-    }
-    return nullptr;
-  }
-
-  bool IsDefault(const ContentContextOptions& opts) {
-    return default_options_.has_value() &&
-           opts.ToKey() == default_options_.value().ToKey();
+    return static_cast<PipelineHandleT*>(GenericVariants::Get(options));
   }
 
   PipelineHandleT* GetDefault(const Context& context) {
@@ -122,13 +150,7 @@ class Variants {
     return Get(default_options_.value());
   }
 
-  size_t GetPipelineCount() const { return pipelines_.size(); }
-
  private:
-  std::optional<PipelineDescriptor> desc_;
-  std::optional<ContentContextOptions> default_options_;
-  std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>> pipelines_;
-
   Variants(const Variants&) = delete;
 
   Variants& operator=(const Variants&) = delete;
@@ -531,8 +553,11 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator(),
-                                      context_->GetIdleWaiter())) {
+      host_buffer_(HostBuffer::Create(
+          context_->GetResourceAllocator(),
+          context_->GetIdleWaiter(),
+          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+      text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -931,6 +956,13 @@ PipelineRef ContentContext::GetCachedRuntimeEffectPipeline(
 
 void ContentContext::ClearCachedRuntimeEffectPipeline(
     const std::string& unique_entrypoint_name) const {
+#ifdef IMPELLER_DEBUG
+  // destroying in-use pipleines is a validation error.
+  const auto& idle_waiter = GetContext()->GetIdleWaiter();
+  if (idle_waiter) {
+    idle_waiter->WaitIdle();
+  }
+#endif  // IMPELLER_DEBUG
   for (auto it = runtime_effect_pipelines_.begin();
        it != runtime_effect_pipelines_.end();) {
     if (it->first.unique_entrypoint_name == unique_entrypoint_name) {
@@ -1427,7 +1459,7 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
 PipelineRef ContentContext::GetDrawVerticesUberPipeline(
     BlendMode blend_mode,
     ContentContextOptions opts) const {
-  if (blend_mode <= BlendMode::kSoftLight) {
+  if (blend_mode <= BlendMode::kHardLight) {
     return GetPipeline(this, pipelines_->vertices_uber_1_, opts);
   } else {
     return GetPipeline(this, pipelines_->vertices_uber_2_, opts);

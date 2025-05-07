@@ -571,11 +571,14 @@ class _FadeForwardsPageTransition extends StatelessWidget {
         );
       },
       reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-        return FadeTransition(
-          opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
-          child: SlideTransition(
-            position: _backwardTranslationTween.animate(animation),
-            child: child,
+        return IgnorePointer(
+          ignoring: animation.status == AnimationStatus.forward,
+          child: FadeTransition(
+            opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
+            child: SlideTransition(
+              position: _backwardTranslationTween.animate(animation),
+              child: child,
+            ),
           ),
         );
       },
@@ -1077,8 +1080,8 @@ class PageTransitionsTheme with Diagnosticable {
   /// Constructs an object that selects a transition based on the platform.
   ///
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
-  /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
-  /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
+  /// for [TargetPlatform.android], [TargetPlatform.windows] and [TargetPlatform.linux]
+  /// and [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS] and [TargetPlatform.macOS].
   const PageTransitionsTheme({
     Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders,
   }) : _builders = builders;
@@ -1088,6 +1091,8 @@ class PageTransitionsTheme with Diagnosticable {
         TargetPlatform.android: ZoomPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
       };
 
   /// The [PageTransitionsBuilder]s supported by this theme.

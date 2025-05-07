@@ -546,6 +546,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   set textAlign(String value) => setProperty('text-align', value);
   set font(String value) => setProperty('font', value);
   set cursor(String value) => setProperty('cursor', value);
+  set scrollbarWidth(String value) => setProperty('scrollbar-width', value);
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -607,6 +608,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   String get textAlign => getPropertyValue('text-align');
   String get font => getPropertyValue('font');
   String get cursor => getPropertyValue('cursor');
+  String get scrollbarWidth => getPropertyValue('scrollbar-width');
 
   external String getPropertyValue(String property);
 
@@ -1481,7 +1483,7 @@ extension type DomHTMLTextAreaElement._(JSObject _) implements DomHTMLElement {
   external double? get selectionEnd;
   external set selectionStart(double? value);
   external set selectionEnd(double? value);
-  external String? get value;
+  external String get value;
 
   @JS('setSelectionRange')
   external void _setSelectionRange(int start, int end, [String direction]);
@@ -1856,7 +1858,7 @@ extension type DomHTMLInputElement._(JSObject _) implements DomHTMLElement {
   external String? type;
   external set max(String? value);
   external set min(String value);
-  external String? value;
+  external String value;
   external bool? disabled;
   external String placeholder;
   external String? name;

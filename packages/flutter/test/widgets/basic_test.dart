@@ -624,6 +624,23 @@ void main() {
       expect(data.controlsNodes, <String>{'abc', 'ghi', 'def'});
     });
 
+    testWidgets('Semantics can set semantics input type', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              inputType: SemanticsInputType.phone,
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      expect(node1.inputType, SemanticsInputType.phone);
+    });
+
     testWidgets('Semantics can set alert rule', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -773,6 +790,86 @@ void main() {
       expect(attributedLabel.attributes[1] is SpellOutStringAttribute, isTrue);
       expect(attributedLabel.attributes[1].range, const TextRange(start: 15, end: 17));
     });
+
+    testWidgets(
+      'Semantics with attributedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Semantics(
+              attributedValue: AttributedString('test value'),
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Semantics with attributedDecreasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Semantics(
+              attributedDecreasedValue: AttributedString('test value'),
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Semantics with attributedIncreasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Semantics(
+              attributedIncreasedValue: AttributedString('test value'),
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Semantics with decreasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(home: Semantics(decreasedValue: 'test value', child: const Placeholder())),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Semantics with increasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(home: Semantics(increasedValue: 'test value', child: const Placeholder())),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'Semantics with attributedHint should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Semantics(
+              attributedHint: AttributedString('test value'),
+              child: const Placeholder(),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 
   group('Row', () {

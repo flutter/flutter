@@ -207,7 +207,8 @@ class Layer {
   /// layer.
   bool IntersectsPlatformView(const DlRegion& region) {
     for (auto& platform_view : platform_views_) {
-      if (region.intersects(platform_view.clipped_frame.roundOut())) {
+      auto clipped_frame = ToDlIRect(platform_view.clipped_frame.roundOut());
+      if (region.intersects(clipped_frame)) {
         return true;
       }
     }
@@ -217,7 +218,7 @@ class Layer {
   /// Returns whether the rectangle intersects any of the Flutter contents of
   /// this layer.
   bool IntersectsFlutterContents(const SkRect& rect) {
-    return flutter_contents_region_.intersects(rect.roundOut());
+    return flutter_contents_region_.intersects(ToDlIRect(rect.roundOut()));
   }
 
   /// Returns whether the region intersects any of the Flutter contents of this

@@ -1299,7 +1299,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     final List<Widget> children = <Widget>[
       Flexible(
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(
@@ -1593,24 +1593,30 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   @override
   Widget build(BuildContext context) {
-    late final Color backgroundColor;
-    BorderRadius? borderRadius;
+    late final Widget child;
     if (!widget.isCancel) {
-      backgroundColor = widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor;
-    } else {
-      backgroundColor = widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor;
-      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
-    }
-    return MetaData(
-      metaData: this,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: borderRadius,
+      child = ColoredBox(
+        color: CupertinoDynamicColor.resolve(
+          widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor,
+          context,
         ),
         child: widget.child,
-      ),
-    );
+      );
+    } else {
+      child = DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+          ),
+          color: CupertinoDynamicColor.resolve(
+            widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
+            context,
+          ),
+        ),
+        child: widget.child,
+      );
+    }
+    return MetaData(metaData: this, child: child);
   }
 }
 
@@ -2301,23 +2307,31 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderAlertDialogActionsLayout(dividerThickness: _dividerThickness);
+    return _RenderAlertDialogActionsLayout(
+      dividerThickness: _dividerThickness,
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderAlertDialogActionsLayout renderObject) {
-    renderObject.dividerThickness = _dividerThickness;
+    renderObject
+      ..dividerThickness = _dividerThickness
+      ..textDirection = Directionality.of(context);
   }
 }
 
 class _RenderAlertDialogActionsLayout extends RenderFlex {
-  _RenderAlertDialogActionsLayout({List<RenderBox>? children, required double dividerThickness})
-    : _dividerThickness = dividerThickness,
-      super(
-        direction: Axis.vertical,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-      ) {
+  _RenderAlertDialogActionsLayout({
+    List<RenderBox>? children,
+    required double dividerThickness,
+    super.textDirection,
+  }) : _dividerThickness = dividerThickness,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
     addAll(children);
   }
 
@@ -2399,12 +2413,17 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double height = getMinIntrinsicHeight(overallWidth);
     size = Size(overallWidth, height);
 
+    final bool ltr = textDirection == TextDirection.ltr;
     RenderBox slot = firstChild!;
-    double x = 0;
+    double x = ltr ? 0 : (overallWidth - slotWidth);
     while (true) {
       slot.layout(BoxConstraints.tight(Size(slotWidth, height)), parentUsesSize: true);
       (slot.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += slot.size.width;
+      if (ltr) {
+        x += slot.size.width;
+      } else {
+        x -= slot.size.width;
+      }
 
       final RenderBox? divider = childAfter(slot);
       if (divider == null) {
@@ -2412,8 +2431,11 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       }
       divider.layout(BoxConstraints.tight(Size(dividerThickness, height)));
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += dividerThickness;
-
+      if (ltr) {
+        x += dividerThickness;
+      } else {
+        x -= dividerThickness;
+      }
       slot = childAfter(divider)!;
     }
   }

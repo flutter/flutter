@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include "display_list/dl_sampling_options.h"
+#include "display_list/dl_types.h"
+#include "display_list/effects/dl_color_filter.h"
+#include "display_list/effects/image_filters/dl_matrix_image_filter.h"
+#include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
@@ -246,6 +250,71 @@ TEST_P(AiksTest, DlAtlasGeometrySkip) {
                        texture_coordinates.data(), colors.data(),
                        transforms.size(), BlendMode::kClear, {}, std::nullopt);
   EXPECT_TRUE(geom.ShouldSkip());
+}
+
+TEST_P(AiksTest, DrawImageRectWithBlendColorFilter) {
+  sk_sp<DlImageImpeller> texture =
+      DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
+
+  DisplayListBuilder builder;
+  DlPaint paint = DlPaint().setColorFilter(DlColorFilter::MakeBlend(
+      DlColor::kRed().withAlphaF(0.4), DlBlendMode::kSrcOver));
+
+  DlMatrix filter_matrix = DlMatrix();
+  auto filter = flutter::DlMatrixImageFilter(filter_matrix,
+                                             flutter::DlImageSampling::kLinear);
+  DlPaint paint_with_filter = paint;
+  paint_with_filter.setImageFilter(&filter);
+
+  // Compare porter-duff blend modes.
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  // Uses image filter to disable atlas conversion.
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {},
+                        &paint_with_filter);
+
+  // Uses atlas conversion.
+  builder.Translate(600, 0);
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {}, &paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
+  sk_sp<DlImageImpeller> texture =
+      DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
+
+  DisplayListBuilder builder;
+  static const constexpr ColorMatrix kColorInversion = {
+      .array = {
+          -1.0, 0,    0,    1.0, 0,  //
+          0,    -1.0, 0,    1.0, 0,  //
+          0,    0,    -1.0, 1.0, 0,  //
+          1.0,  1.0,  1.0,  1.0, 0   //
+      }};
+  DlPaint paint = DlPaint().setColorFilter(
+      DlColorFilter::MakeMatrix(kColorInversion.array));
+
+  DlMatrix filter_matrix = DlMatrix();
+  auto filter = flutter::DlMatrixImageFilter(filter_matrix,
+                                             flutter::DlImageSampling::kLinear);
+  DlPaint paint_with_filter = paint;
+  paint_with_filter.setImageFilter(&filter);
+
+  // Compare inverting color matrix filter.
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  // Uses image filter to disable atlas conversion.
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {},
+                        &paint_with_filter);
+
+  // Uses atlas conversion.
+  builder.Translate(600, 0);
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {}, &paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing

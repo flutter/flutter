@@ -323,11 +323,7 @@ typedef struct MouseState {
   if (FlutterSharedApplication.isAvailable) {
     [self setUpApplicationLifecycleNotifications:center];
   } else {
-    if (@available(iOS 13.0, *)) {
-      [self setUpSceneLifecycleNotifications:center];
-    } else {
-      [self setUpApplicationLifecycleNotifications:center];
-    }
+    [self setUpSceneLifecycleNotifications:center];
   }
 
   [center addObserver:self
@@ -380,12 +376,10 @@ typedef struct MouseState {
                  name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification
                object:nil];
 
-  if (@available(iOS 13.0, *)) {
-    [center addObserver:self
-               selector:@selector(onAccessibilityStatusChanged:)
-                   name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
-                 object:nil];
-  }
+  [center addObserver:self
+             selector:@selector(onAccessibilityStatusChanged:)
+                 name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
+               object:nil];
 
   [center addObserver:self
              selector:@selector(onUserSettingsChanged:)
@@ -479,11 +473,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   auto placeholder = [[UIView alloc] init];
 
   placeholder.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  if (@available(iOS 13.0, *)) {
-    placeholder.backgroundColor = UIColor.systemBackgroundColor;
-  } else {
-    placeholder.backgroundColor = UIColor.whiteColor;
-  }
+  placeholder.backgroundColor = UIColor.systemBackgroundColor;
   placeholder.autoresizesSubviews = YES;
 
   // Only add the label when we know we have failed to enable tracing (and it was necessary).
@@ -728,31 +718,21 @@ static void SendFakeTouchEvent(UIScreen* screen,
 }
 
 - (BOOL)stateIsActive {
-  BOOL isActive = YES;
-
+  // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication) {
-    isActive = [self isApplicationStateMatching:UIApplicationStateActive
-                                withApplication:flutterApplication];
-  } else if (@available(iOS 13.0, *)) {
-    isActive = [self isSceneStateMatching:UISceneActivationStateForegroundActive];
-  }
+  BOOL isActive = flutterApplication
+                      ? [self isApplicationStateMatching:UIApplicationStateActive
+                                         withApplication:flutterApplication]
+                      : [self isSceneStateMatching:UISceneActivationStateForegroundActive];
   return isActive;
 }
 
 - (BOOL)stateIsBackground {
   // [UIApplication sharedApplication API is not available for app extension.
-  // Assume the app is not in the background if we're unable to get the state.
-  BOOL isBackground = NO;
-
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication) {
-    isBackground = [self isApplicationStateMatching:UIApplicationStateBackground
-                                    withApplication:flutterApplication];
-  } else if (@available(iOS 13.0, *)) {
-    isBackground = [self isSceneStateMatching:UISceneActivationStateBackground];
-  }
-  return isBackground;
+  return flutterApplication ? [self isApplicationStateMatching:UIApplicationStateBackground
+                                               withApplication:flutterApplication]
+                            : [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
 - (BOOL)isApplicationStateMatching:(UIApplicationState)match
@@ -1523,6 +1503,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
   FlutterKeyboardMode keyboardMode = [self calculateKeyboardAttachMode:notification];
   CGFloat calculatedInset = [self calculateKeyboardInset:keyboardFrame keyboardMode:keyboardMode];
+  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+
+  // If the software keyboard is displayed before displaying the PasswordManager prompt,
+  // UIKeyboardWillHideNotification will occur immediately after UIKeyboardWillShowNotification.
+  // The duration of the animation will be 0.0, and the calculated inset will be 0.0.
+  // In this case, it is necessary to cancel the animation and hide the keyboard immediately.
+  // https://github.com/flutter/flutter/pull/164884
+  if (keyboardMode == FlutterKeyboardModeHidden && calculatedInset == 0.0 && duration == 0.0) {
+    [self hideKeyboardImmediately];
+    return;
+  }
 
   // Avoid double triggering startKeyBoardAnimation.
   if (self.targetViewInsetBottom == calculatedInset) {
@@ -1530,7 +1521,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   self.targetViewInsetBottom = calculatedInset;
-  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 
   // Flag for simultaneous compounding animation calls.
   // This captures animation calls made while the keyboard animation is currently animating. If the
@@ -1582,20 +1572,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if ([self isKeyboardNotificationForDifferentView:notification]) {
     return YES;
   }
-
-  if (@available(iOS 13.0, *)) {
-    // noop
-  } else {
-    // If OS version is less than 13, ignore notification if the app is in the background
-    // or is transitioning from the background. In older versions, when switching between
-    // apps with the keyboard open in the secondary app, notifications are sent when
-    // the app is in the background/transitioning from background as if they belong
-    // to the app and as if the keyboard is showing even though it is not.
-    if (self.isKeyboardInOrTransitioningFromBackground) {
-      return YES;
-    }
-  }
-
   return NO;
 }
 
@@ -1773,6 +1749,21 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       }];
 }
 
+- (void)hideKeyboardImmediately {
+  [self invalidateKeyboardAnimationVSyncClient];
+  if (self.keyboardAnimationView) {
+    [self.keyboardAnimationView.layer removeAllAnimations];
+    [self removeKeyboardAnimationView];
+    self.keyboardAnimationView = nil;
+  }
+  if (self.keyboardSpringAnimation) {
+    self.keyboardSpringAnimation = nil;
+  }
+  // Reset targetViewInsetBottom to 0.0.
+  self.targetViewInsetBottom = 0.0;
+  [self ensureViewportMetricsIsCorrect];
+}
+
 - (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation {
   // If keyboard animation is null or not a spring animation, fallback to DisplayLink tracking.
   if (keyboardAnimation == nil || ![keyboardAnimation isKindOfClass:[CASpringAnimation class]]) {
@@ -1946,7 +1937,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesBegan:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1961,7 +1952,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesChanged:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1976,7 +1967,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesEnded:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1991,7 +1982,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesCancelled:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -2051,24 +2042,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       [self requestGeometryUpdateForWindowScenes:scenes];
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation = 0;
-      if (@available(iOS 13.0, *)) {
-        UIWindowScene* windowScene = self.flutterWindowSceneIfViewLoaded;
-        if (!windowScene) {
-          FML_LOG(WARNING)
-              << "Accessing the interface orientation when the window scene is unavailable.";
-          return;
-        }
-        currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
-      } else {
-        UIApplication* flutterApplication = FlutterSharedApplication.application;
-        if (flutterApplication) {
-          currentInterfaceOrientation = 1 << [flutterApplication statusBarOrientation];
-        } else {
-          FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
-                            "app extension. Orientation: "
-                         << currentInterfaceOrientation;
-        }
+      UIWindowScene* windowScene = self.flutterWindowSceneIfViewLoaded;
+      if (!windowScene) {
+        FML_LOG(WARNING)
+            << "Accessing the interface orientation when the window scene is unavailable.";
+        return;
       }
+      currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
       if (!(self.orientationPreferences & currentInterfaceOrientation)) {
         [UIViewController attemptRotationToDeviceOrientation];
         // Force orientation switch if the current orientation is not allowed
@@ -2175,11 +2155,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 + (BOOL)accessibilityIsOnOffSwitchLabelsEnabled {
-  if (@available(iOS 13, *)) {
-    return UIAccessibilityIsOnOffSwitchLabelsEnabled();
-  } else {
-    return NO;
-  }
+  return UIAccessibilityIsOnOffSwitchLabelsEnabled();
 }
 
 #pragma mark - Set user settings
@@ -2271,14 +2247,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 // is understood by the Flutter framework. See the settings
 // system channel for more information.
 - (NSString*)brightnessMode {
-  if (@available(iOS 13, *)) {
-    UIUserInterfaceStyle style = self.traitCollection.userInterfaceStyle;
+  UIUserInterfaceStyle style = self.traitCollection.userInterfaceStyle;
 
-    if (style == UIUserInterfaceStyleDark) {
-      return @"dark";
-    } else {
-      return @"light";
-    }
+  if (style == UIUserInterfaceStyleDark) {
+    return @"dark";
   } else {
     return @"light";
   }
@@ -2288,14 +2260,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 // understood by the Flutter framework. See the settings system channel for more
 // information.
 - (NSString*)contrastMode {
-  if (@available(iOS 13, *)) {
-    UIAccessibilityContrast contrast = self.traitCollection.accessibilityContrast;
+  UIAccessibilityContrast contrast = self.traitCollection.accessibilityContrast;
 
-    if (contrast == UIAccessibilityContrastHigh) {
-      return @"high";
-    } else {
-      return @"normal";
-    }
+  if (contrast == UIAccessibilityContrastHigh) {
+    return @"high";
   } else {
     return @"normal";
   }
@@ -2682,6 +2650,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (FlutterRestorationPlugin*)restorationPlugin {
   return self.engine.restorationPlugin;
+}
+
+- (FlutterTextInputPlugin*)textInputPlugin {
+  return self.engine.textInputPlugin;
 }
 
 @end

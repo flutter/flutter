@@ -33,6 +33,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'gradle_utils.dart' as gradle;
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -42,7 +43,7 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
 ///
-/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
+/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt
 ///
 /// The expected output from the task should be similar to:
 ///
@@ -286,11 +287,25 @@ class AndroidGradleBuilder implements AndroidBuilder {
     _OutputParser? outputParser,
   }) async {
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
+    final String? agpVersion = gradle.getAgpVersion(
+      project.android.hostAppGradleRoot,
+      globals.logger,
+    );
     if (usesAndroidX) {
-      _analytics.send(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle'));
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: 'app-using-android-x',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
     } else if (!usesAndroidX) {
       _analytics.send(
-        Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
+        Event.flutterBuildInfo(
+          label: 'app-not-using-android-x',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
       );
 
       _logger.printStatus(
@@ -394,7 +409,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
             if (exitCode == 0) {
               final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
               _analytics.send(
-                Event.flutterBuildInfo(label: successEventLabel, buildType: 'gradle'),
+                Event.flutterBuildInfo(
+                  label: successEventLabel,
+                  buildType: 'gradle',
+                  settings: 'androidGradlePluginVersion: $agpVersion',
+                ),
               );
               return exitCode;
             }
@@ -403,7 +422,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
         }
       }
       final String usageLabel = 'gradle-${detectedGradleError!.eventLabel}-failure';
-      _analytics.send(Event.flutterBuildInfo(label: usageLabel, buildType: 'gradle'));
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: usageLabel,
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
     }
 
     return exitCode;

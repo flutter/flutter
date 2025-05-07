@@ -49,6 +49,7 @@ Future<void> flutterPackagesRunner() async {
       // purposes of this test using old dependencies is fine. See
       // https://github.com/flutter/flutter/issues/129633
       '--downgrade',
+      '--base-branch=$packagesCommit',
       '--custom-analysis=script/configs/custom_analysis.yaml',
     ], workingDirectory: checkout.path);
   }

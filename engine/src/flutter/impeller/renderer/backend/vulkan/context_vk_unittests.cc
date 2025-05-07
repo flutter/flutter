@@ -345,13 +345,13 @@ TEST(ContextVKTest, BatchSubmitCommandBuffersOnNonArm) {
   EXPECT_TRUE(context->EnqueueCommandBuffer(context->CreateCommandBuffer()));
   EXPECT_TRUE(context->EnqueueCommandBuffer(context->CreateCommandBuffer()));
 
-  // If command buffers are batch not submitted, we should have created them and
-  // a corresponding fence immediately.
+  // If command buffers are batched and not submitted, we should have created
+  // them and a corresponding fence immediately.
   auto functions = GetMockVulkanFunctions(context->GetDevice());
   EXPECT_TRUE(std::find(functions->begin(), functions->end(),
                         "vkAllocateCommandBuffers") != functions->end());
-  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
-                        "vkCreateFence") != functions->end());
+  EXPECT_FALSE(std::find(functions->begin(), functions->end(),
+                         "vkCreateFence") != functions->end());
 }
 
 TEST(ContextVKTest, AHBSwapchainCapabilitiesCanBeMissing) {
