@@ -39,7 +39,7 @@ class SkwasmPicture extends SkwasmObjectWrapper<RawPicture> implements ScenePict
 }
 
 class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
-    implements ui.PictureRecorder {
+    implements ScenePictureRecorder {
   SkwasmPictureRecorder() : super(pictureRecorderCreate(), _registry);
 
   static final SkwasmFinalizationRegistry<RawPictureRecorder> _registry =
