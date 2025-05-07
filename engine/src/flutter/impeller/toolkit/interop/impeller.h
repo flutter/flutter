@@ -82,7 +82,7 @@ IMPELLER_EXTERN_C_BEGIN
 
 #define IMPELLER_VERSION_VARIANT 1
 #define IMPELLER_VERSION_MAJOR 1
-#define IMPELLER_VERSION_MINOR 3
+#define IMPELLER_VERSION_MINOR 4
 #define IMPELLER_VERSION_PATCH 0
 
 //------------------------------------------------------------------------------
@@ -912,6 +912,20 @@ void ImpellerPathRetain(ImpellerPath IMPELLER_NULLABLE path);
 ///
 IMPELLER_EXPORT
 void ImpellerPathRelease(ImpellerPath IMPELLER_NULLABLE path);
+
+//------------------------------------------------------------------------------
+/// @brief      Get the bounds of the path.
+///
+///             The bounds are conservative. That is, they may be larger than
+///             the actual shape of the path and could include the control
+///             points and isolated calls to move the cursor.
+///
+/// @param[in]  path        The path
+/// @param[out] out_bounds  The conservative bounds of the path.
+///
+IMPELLER_EXPORT
+void ImpellerPathGetBounds(ImpellerPath IMPELLER_NONNULL path,
+                           ImpellerRect* IMPELLER_NONNULL out_bounds);
 
 //------------------------------------------------------------------------------
 // Path Builder

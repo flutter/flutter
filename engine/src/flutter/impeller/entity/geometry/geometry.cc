@@ -61,7 +61,7 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {
-  return std::make_unique<FillPathGeometry>(flutter::DlPath(path), inner_rect);
+  return std::make_unique<FillPathGeometry>(path, inner_rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
@@ -73,9 +73,9 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_unique<StrokePathGeometry>(flutter::DlPath(path),
-                                              stroke_width, miter_limit,
-                                              stroke_cap, stroke_join);
+  StrokeParameters parameters{stroke_width, stroke_cap, stroke_join,
+                              miter_limit};
+  return std::make_unique<StrokePathGeometry>(path, parameters);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeCover() {
@@ -92,9 +92,8 @@ std::unique_ptr<Geometry> Geometry::MakeOval(const Rect& rect) {
 
 std::unique_ptr<Geometry> Geometry::MakeLine(const Point& p0,
                                              const Point& p1,
-                                             Scalar width,
-                                             Cap cap) {
-  return std::make_unique<LineGeometry>(p0, p1, width, cap);
+                                             const StrokeParameters& stroke) {
+  return std::make_unique<LineGeometry>(p0, p1, stroke);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeCircle(const Point& center,
