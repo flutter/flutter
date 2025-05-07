@@ -9,9 +9,7 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
-
 import androidx.annotation.RequiresApi;
-
 import io.flutter.Log;
 import io.flutter.view.TextureRegistry.ImageTextureEntry;
 
