@@ -325,6 +325,11 @@ void ImpellerPathRelease(ImpellerPath path) {
 }
 
 IMPELLER_EXTERN_C
+void ImpellerPathGetBounds(ImpellerPath path, ImpellerRect* out_bounds) {
+  *out_bounds = GetPeer(path)->GetBounds();
+}
+
+IMPELLER_EXTERN_C
 ImpellerPathBuilder ImpellerPathBuilderNew() {
   return Create<PathBuilder>().Leak();
 }

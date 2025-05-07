@@ -74,6 +74,8 @@ config("compiler") {
   # Platform-specific configs.
   if (is_ios) {
     configs += [ "//build/config/ios:compiler" ]
+  } else if (is_mac) {
+    configs += [ "//build/config/mac:compiler" ]
   }
 
   # In general, Windows is totally different, but all the other builds share

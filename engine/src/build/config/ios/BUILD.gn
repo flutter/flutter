@@ -1,4 +1,4 @@
-# Copyright 2014 The Chromium Authors. All rights reserved.
+# Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -49,7 +49,7 @@ config("compiler") {
   _swift_version = "5"
 
   # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
-  # Look up xcode_version in ios_sdk.gni/mac_sdk.gni.
+  # Look up xcode_version in apple_sdk.gni
   #
   # This is here so that all files get recompiled after an Xcode update.
   # (defines are passed via the command line, and build system rebuild things
