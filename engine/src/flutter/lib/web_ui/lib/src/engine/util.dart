@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -13,7 +14,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
-import 'safe_browser_api.dart';
 import 'services.dart';
 import 'vector_math.dart';
 
@@ -769,7 +769,7 @@ void drawEllipse(
   double endAngle,
   bool antiClockwise,
 ) {
-  _ellipseFeatureDetected ??= getJsProperty<Object?>(context, 'ellipse') != null;
+  _ellipseFeatureDetected ??= context['ellipse'] != null;
   if (_ellipseFeatureDetected!) {
     context.ellipse(
       centerX,

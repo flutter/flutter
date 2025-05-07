@@ -13,7 +13,7 @@ library canvaskit_api;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -1790,10 +1790,10 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   );
 
   bool RequiresClientICU() {
-    if (!js_util.hasProperty(this, 'RequiresClientICU')) {
+    if (!hasProperty('RequiresClientICU'.toJS).toDart) {
       return false;
     }
-    return js_util.callMethod(this, 'RequiresClientICU', const <Object>[]) as bool;
+    return callMethod<JSBoolean>('RequiresClientICU'.toJS).toDart;
   }
 }
 
