@@ -53,7 +53,10 @@ void testAll({
     );
 
     testWithoutContext('hot restart succeeds when removing a field from a const class', () async {
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       project.removeFieldFromConstClass();
       await flutter.hotRestart();
     });

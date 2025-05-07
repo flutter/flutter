@@ -49,7 +49,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         }
       });
       flutter.stdout.listen(printOnFailure);
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await onFirstLoad.future;
 
       project.uncommentHotReloadPrint();
@@ -76,7 +79,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         }
       });
       flutter.stdout.listen(printOnFailure);
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await onFirstLoad.future;
 
       project.uncommentHotReloadPrint();

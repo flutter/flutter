@@ -39,7 +39,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           completer.complete();
         }
       });
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       // Wait for run to finish.
       await completer.future;
       await subscription.cancel();

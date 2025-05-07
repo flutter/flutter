@@ -32,12 +32,18 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot reload works without error', () async {
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await flutter.hotReload();
     });
 
     testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       // Capture how many *real* hot reloads occur.
       int numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
@@ -89,7 +95,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           sawTick2.complete();
         }
       });
-      await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await sawTick1.future;
       project.uncommentHotReloadPrint();
       try {

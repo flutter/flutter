@@ -31,6 +31,9 @@ void main() {
   });
 
   testWithoutContext('flutter run works on web-server device with a unary main function', () async {
-    await flutter.run(device: WebServerDevice.kWebServerDeviceId, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(
+      device: WebServerDevice.kWebServerDeviceId,
+      additionalCommandArgs: <String>['--verbose'],
+    );
   });
 }

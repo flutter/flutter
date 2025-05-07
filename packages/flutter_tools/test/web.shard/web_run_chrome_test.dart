@@ -30,7 +30,10 @@ void main() {
     tryToDelete(tempDir);
   });
 
-    testWithoutContext('flutter run works on chrome devices with a unary main function', () async {
-    await flutter.run(device: GoogleChromeDevice.kChromeDeviceId, additionalCommandArgs: <String>['--verbose']);
+  testWithoutContext('flutter run works on chrome devices with a unary main function', () async {
+    await flutter.run(
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: <String>['--verbose'],
+    );
   });
 }
