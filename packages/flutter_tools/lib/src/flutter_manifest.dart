@@ -607,6 +607,19 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
+      case 'disable-swift-package-manager':
+        errors.add(
+          // ignore: missing_whitespace_between_adjacent_strings
+          'The "disable-swift-package-manager" configuration has moved. In your pubspec.yaml:\n'
+          '# Before\n'
+          'flutter:\n'
+          '  disable-swift-package-manager: true\n'
+          '\n'
+          '# After\n'
+          'flutter:\n'
+          '  config:\n'
+          '    enable-swift-package-manager: false\n',
+        );
       case 'default-flavor':
         if (yamlValue is! String) {
           errors.add(

@@ -1402,6 +1402,29 @@ name: test
     expect(flutterManifest!.dependencies, isEmpty);
   });
 
+  testWithoutContext(
+    'FlutterManifest provides a guided error to migrate disable-swift-package-manager',
+    () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  disable-swift-package-manager: true
+''';
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      );
+      expect(flutterManifest, isNull);
+      expect(
+        logger.errorText,
+        contains('The "disable-swift-package-manager" configuration has moved'),
+      );
+    },
+  );
+
   testWithoutContext('FlutterManifest can parse default flavor', () async {
     const String manifest = '''
 name: test
