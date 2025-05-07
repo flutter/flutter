@@ -714,7 +714,7 @@ Future<void> diagnoseXcodeBuildFailure(
   }
 }
 
-/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+/// `xcodebuild <buildaction>` parameter (see `man xcodebuild` for details).
 ///
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
