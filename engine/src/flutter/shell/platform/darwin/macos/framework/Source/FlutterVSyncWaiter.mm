@@ -78,17 +78,17 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
     TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
 
     [FlutterRunLoop.mainRunLoop
-        performBlock:^{
-          if (!_pendingBaton.has_value()) {
-            TRACE_VSYNC("DisplayLinkPaused", size_t(0));
-            _displayLink.paused = YES;
-            return;
-          }
-          TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
-          _block(minStart, targetTimestamp, *_pendingBaton);
-          _pendingBaton = std::nullopt;
-        }
-          afterDelay:remaining];
+        performAfterDelay:remaining
+                    block:^{
+                      if (!_pendingBaton.has_value()) {
+                        TRACE_VSYNC("DisplayLinkPaused", size_t(0));
+                        _displayLink.paused = YES;
+                        return;
+                      }
+                      TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
+                      _block(minStart, targetTimestamp, *_pendingBaton);
+                      _pendingBaton = std::nullopt;
+                    }];
   }
 }
 
@@ -138,13 +138,12 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
       delay = std::max(start - now - kTimerLatencyCompensation, 0.0);
     }
 
-    [FlutterRunLoop.mainRunLoop
-        performBlock:^{
-          CFTimeInterval targetTimestamp = start + tick_interval;
-          TRACE_VSYNC("SynthesizedInitialVSync", baton);
-          _block(start, targetTimestamp, baton);
-        }
-          afterDelay:delay];
+    [FlutterRunLoop.mainRunLoop performAfterDelay:delay
+                                            block:^{
+                                              CFTimeInterval targetTime = start + tick_interval;
+                                              TRACE_VSYNC("SynthesizedInitialVSync", baton);
+                                              _block(start, targetTime, baton);
+                                            }];
     _displayLink.paused = NO;
   } else {
     _pendingBaton = baton;
