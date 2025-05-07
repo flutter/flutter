@@ -4794,6 +4794,7 @@ targets:
 
   # mac mokey test
   - name: Mac_arm64_mokey native_assets_android
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/168467
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
