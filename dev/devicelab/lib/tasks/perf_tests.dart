@@ -1779,7 +1779,8 @@ class CompileTest {
         '--path',
         '$testDirectory/benchmarkResults.xcresult',
         '--format',
-        'json'
+        'json',
+        '--legacy'
       ]).then((ProcessResult results) {
         metricsJson = json.decode(results.stdout.toString());
       });
