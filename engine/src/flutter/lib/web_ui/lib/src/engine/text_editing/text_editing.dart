@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -14,7 +15,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
-import '../safe_browser_api.dart';
 import '../semantics.dart';
 import '../services.dart';
 import '../text/paragraph.dart';
@@ -1511,8 +1511,8 @@ abstract class DefaultTextEditingStrategy
     // have a baseOffset and extentOffset. If these are set inside of inferDeltaState
     // then the method will incorrectly report a deltaStart and deltaEnd for a non
     // text update delta.
-    final String? eventData = getJsProperty<void>(event, 'data') as String?;
-    final String? inputType = getJsProperty<void>(event, 'inputType') as String?;
+    final String? eventData = (event['data'] as JSString?)?.toDart;
+    final String? inputType = (event['inputType'] as JSString?)?.toDart;
 
     if (inputType != null) {
       final bool isSelectionInverted =

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop_unsafe';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../configuration.dart';
 import '../dom.dart';
 import '../platform_views/content_manager.dart';
-import '../safe_browser_api.dart';
 import 'style_manager.dart';
 
 /// Manages DOM elements and the DOM structure for a [ui.FlutterView].
@@ -206,10 +207,7 @@ class DomManager {
 }
 
 DomShadowRoot _attachShadowRoot(DomElement element) {
-  assert(
-    getJsProperty<Object?>(element, 'attachShadow') != null,
-    'ShadowDOM is not supported in this browser.',
-  );
+  assert(element['attachShadow'] != null, 'ShadowDOM is not supported in this browser.');
 
   return element.attachShadow(<String, dynamic>{
     'mode': 'open',
