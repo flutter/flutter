@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"

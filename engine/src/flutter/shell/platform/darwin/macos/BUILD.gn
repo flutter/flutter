@@ -223,6 +223,7 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/darwin/common:framework_common",
+    "//flutter/shell/platform/darwin/common:test_utils_swift",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
