@@ -107,6 +107,11 @@ config("framework_relative_headers") {
   include_dirs = [ "framework/Headers" ]
 }
 
+source_set("InternalFlutterSwiftCommon") {
+  configs += [ ":config" ]
+  sources = [ "framework/Source/Logger.swift" ]
+}
+
 # Framework code shared between iOS and macOS.
 source_set("framework_common") {
   cflags_objc = flutter_cflags_objc

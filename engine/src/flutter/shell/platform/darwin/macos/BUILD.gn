@@ -55,6 +55,7 @@ source_set("InternalFlutterSwift") {
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
 
   sources = [ "framework/Source/FlutterRunLoop.swift" ]
+  deps = [ "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon" ]
 }
 
 source_set("flutter_framework_source") {
