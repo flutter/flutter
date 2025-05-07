@@ -1774,8 +1774,8 @@ class CompileTest {
       await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
         'xcresulttool',
         'get',
-        'test-results',
-        'metrics',
+        // 'test-results',
+        // 'metrics',
         '--path',
         '$testDirectory/benchmarkResults.xcresult',
         '--format',
