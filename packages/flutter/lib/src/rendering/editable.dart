@@ -2925,11 +2925,11 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
     highlightPaint.color = color;
     final TextPainter textPainter = renderEditable._textPainter;
-    final List<TextBox> boxes = textPainter.getBoxesForSelection(
+    final Set<TextBox> boxes = textPainter.getBoxesForSelection(
       TextSelection(baseOffset: range.start, extentOffset: range.end),
       boxHeightStyle: selectionHeightStyle,
       boxWidthStyle: selectionWidthStyle,
-    );
+    ).toSet();
 
     for (final TextBox box in boxes) {
       canvas.drawRect(
