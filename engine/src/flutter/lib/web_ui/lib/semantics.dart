@@ -512,7 +512,7 @@ class SemanticsFlags {
   ]);
 
   List<String> toStrings() {
-    List<String> trueFlags = [];
+    final List<String> trueFlags = <String>[];
     if (hasCheckedState) {
       trueFlags.add('hasCheckedState');
     }

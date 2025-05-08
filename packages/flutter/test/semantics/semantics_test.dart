@@ -775,7 +775,7 @@ void main() {
       'Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), '
       '[1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], '
       'actions: [longPress, scrollUp, showOnScreen], '
-      'flags: [hasCheckedState, hasSelectedState, isSelected, isButton], '
+      'flags: [hasCheckedState, isSelected, isButton, hasSelectedState], '
       'label: "Use all the properties", textDirection: rtl)',
     );
 

@@ -1340,7 +1340,7 @@ class SemanticsFlags {
 
   /// Convert flags to a list of string.
   List<String> toStrings() {
-    List<String> trueFlags = [];
+    final List<String> trueFlags = <String>[];
     if (hasCheckedState) {
       trueFlags.add('hasCheckedState');
     }
