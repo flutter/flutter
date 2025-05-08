@@ -65,11 +65,20 @@ const double _kNavBarBottomPadding = 8.0;
 
 const double _kNavBarBackButtonTapWidth = 50.0;
 
+// The minimum text scale to apply to contents of the nav bar which can scale to
+// a size less than the default, such as the large title.
+//
+// Eyeballed on an iPhone 15 simulator running iOS 17.5.
 const double _kMinScaleFactor = 0.9;
 
+// The maximum text scale to apply to contents of the nav bar, except the large
+// title which can grow larger but is damped.
 const double _kMaxScaleFactor = 1.235;
 
-const double _kLargeTitleScaleFactor = 3.0;
+// The damping ratio applied to reduce the rate at which the large title scales.
+//
+// Eyeballed on an iPhone 15 simulator running iOS 17.5.
+const double _kLargeTitleScaleDampingRatio = 3.0;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
@@ -1203,7 +1212,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             ? _dampScaleFactor(
                   MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
                   _kNavBarLargeTitleHeightExtension,
-                  _kLargeTitleScaleFactor,
+                  _kLargeTitleScaleDampingRatio,
                 ) *
                 _kNavBarLargeTitleHeightExtension
             : 0.0;
@@ -2176,7 +2185,7 @@ class _NavigationBarStaticComponents {
             _dampScaleFactor(
               MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
               _kNavBarLargeTitleHeightExtension,
-              _kLargeTitleScaleFactor,
+              _kLargeTitleScaleDampingRatio,
             ),
           ),
         ),
