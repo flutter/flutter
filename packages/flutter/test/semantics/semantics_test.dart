@@ -763,7 +763,7 @@ void main() {
         '   merge boundary ⛔️\n'
         '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
         '   actions: longPress, scrollUp, showOnScreen\n'
-        '   flags: hasCheckedState, hasSelectedState, isSelected, isButton\n'
+        '   flags: hasCheckedState, isSelected, isButton, hasSelectedState\n'
         '   label: "Use all the properties"\n'
         '   textDirection: rtl\n'
         '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n',
