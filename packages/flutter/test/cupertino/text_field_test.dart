@@ -8,7 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, Color, SemanticsInputType;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color, SemanticsInputType;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -7904,6 +7904,7 @@ void main() {
                       style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
                       toolbarOptions: const ToolbarOptions(selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                      selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
                   ],
