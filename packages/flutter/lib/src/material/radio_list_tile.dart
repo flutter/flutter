@@ -597,6 +597,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
         control = ExcludeFocus(
           child: Radio<T>(
             value: radioValue,
+            groupValue: _radioRegistry.groupValue,
             toggleable: widget.toggleable,
             activeColor: widget.activeColor,
             materialTapTargetSize: widget.materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
@@ -614,6 +615,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
         control = ExcludeFocus(
           child: Radio<T>.adaptive(
             value: radioValue,
+            groupValue: _radioRegistry.groupValue,
             toggleable: widget.toggleable,
             activeColor: widget.activeColor,
             materialTapTargetSize: widget.materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
