@@ -1672,6 +1672,7 @@
 ../../../flutter/third_party/dart/sdk/lib/svg/dart2js
 ../../../flutter/third_party/dart/sdk/lib/vmservice_libraries.json
 ../../../flutter/third_party/dart/sdk/lib/vmservice_libraries.yaml
+../../../flutter/third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 ../../../flutter/third_party/dart/sdk/version
 ../../../flutter/third_party/dart/sdk_packages.yaml
 ../../../flutter/third_party/dart/tests
