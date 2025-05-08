@@ -506,6 +506,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode;
   bool get _enableFeedback =>
       widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
+  Animation<double>? _listenedRouteSecondaryAnimation;
 
   /// The plain text message for this tooltip.
   ///
@@ -794,6 +795,17 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _tooltipTheme = TooltipTheme.of(context);
   }
 
+  void _routeSecondaryAnimationStatusChange(AnimationStatus status) {
+    if (!status.isAnimating) {
+      setState(() {
+        _listenedRouteSecondaryAnimation?.removeStatusListener(
+          _routeSecondaryAnimationStatusChange,
+        );
+        _listenedRouteSecondaryAnimation = null;
+      });
+    }
+  }
+
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
     return switch (Theme.of(context).platform) {
@@ -906,6 +918,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer?.cancel();
     _backingController?.dispose();
     _backingOverlayAnimation?.dispose();
+    _listenedRouteSecondaryAnimation?.removeStatusListener(_routeSecondaryAnimationStatusChange);
     super.dispose();
   }
 
@@ -934,6 +947,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     final ModalRoute<dynamic>? route = ModalRoute.of(context);
     if (route?.secondaryAnimation != null && route!.secondaryAnimation!.isAnimating) {
       visible = false;
+      if (_listenedRouteSecondaryAnimation != route.secondaryAnimation) {
+        _listenedRouteSecondaryAnimation?.removeStatusListener(
+          _routeSecondaryAnimationStatusChange,
+        );
+        _listenedRouteSecondaryAnimation = route.secondaryAnimation;
+        _listenedRouteSecondaryAnimation!.addStatusListener(_routeSecondaryAnimationStatusChange);
+      }
     }
 
     // Only check for gestures if tooltip should be visible.
