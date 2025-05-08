@@ -26,6 +26,9 @@ INTERNAL NOTE
 -->
 ## Flutter 3.29 Changes
 
+### [3.29.4](https://github.com/flutter/flutter/releases/tag/3.29.4)
+- [flutter/163935](https://github.com/flutter/flutter/issues/163935) - Hot Restart on iOS with a Platform View on a Navigator push throws PlatformException "recreating_view"
+
 ### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
 - [flutter/165818](https://github.com/flutter/flutter/pull/165818) - Unset `GIT_DIR` to enable flutter tool calls in githooks.
 - [flutter/163421](https://github.com/flutter/flutter/issues/163421) - Impeller,

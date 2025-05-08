@@ -4455,6 +4455,82 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertEqual(flutterView.subviews.firstObject, someView);
 }
 
+- (void)testResetClearsPreviousCompositionOrder {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView"
+                                                     }]
+            result:result];
+  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
+      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  CGFloat screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  SkMatrix screenScaleMatrix = SkMatrix::Scale(screenScale, screenScale);
+  stack.PushTransform(screenScaleMatrix);
+  // Push a translate matrix
+  SkMatrix translateMatrix = SkMatrix::Translate(100, 100);
+  stack.PushTransform(translateMatrix);
+  SkMatrix finalMatrix;
+  finalMatrix.setConcat(screenScaleMatrix, translateMatrix);
+
+  auto embeddedViewParams =
+      std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+
+  // The above code should result in previousCompositionOrder having one viewId in it
+  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 1ul);
+
+  // reset should clear previousCompositionOrder
+  [flutterPlatformViewsController reset];
+
+  // previousCompositionOrder should now be empty
+  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 0ul);
+}
+
 - (void)testNilPlatformViewDoesntCrash {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
