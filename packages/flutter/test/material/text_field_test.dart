@@ -14,7 +14,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, SemanticsInputType;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -1352,6 +1352,7 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                      selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
                   ],
