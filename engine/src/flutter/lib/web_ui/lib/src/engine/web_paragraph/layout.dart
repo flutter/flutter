@@ -89,6 +89,8 @@ class TextLayout {
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     double blockStart = 0.0;
+    //layoutContext.direction =
+    //    paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
       final String text = paragraph.text!.substring(
         styledBlock.textRange.start,
@@ -97,7 +99,6 @@ class TextLayout {
       layoutContext.font =
           '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
-      double blockWidth = 0.0;
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
           cluster.begin,
@@ -127,7 +128,7 @@ class TextLayout {
           cluster.end + styledBlock.textRange.start,
         );
         WebParagraphDebug.log(
-          'Cluster[${textClusters.length}]: "$clusterText" [${cluster.begin}:${cluster.end}) ${bounds.left}:${bounds.right} ${rects.first.left}:${rects.first.right}',
+          'Cluster[${textClusters.length}]: "$clusterText" [${cluster.begin + styledBlock.textRange.start}:${cluster.end + styledBlock.textRange.start}) ${bounds.left}:${bounds.right} ${rects.first.left}:${rects.first.right}',
         );
         textClusters.add(
           ExtendedTextCluster(
@@ -143,18 +144,14 @@ class TextLayout {
             blockTextMetrics,
           ),
         );
-        blockWidth += rects.first.width;
       }
-      blockStart += blockWidth;
+      blockStart += blockTextMetrics.width!;
     }
     textToClusterMap[paragraph.text!.length] = textClusters.length;
     textClusters.add(ExtendedTextCluster.empty());
   }
 
   ClusterRange convertTextToClusterRange(int start, int end) {
-    WebParagraphDebug.log(
-      'convertTextToClusterRange($start, $end)=[${textToClusterMap[start]!}:${textToClusterMap[end]!})',
-    );
     return ClusterRange(start: textToClusterMap[start]!, end: textToClusterMap[end]!);
   }
 
@@ -164,7 +161,10 @@ class TextLayout {
     final ExtendedTextCluster end =
         textClusters[math.min(clusterRange.end, textClusters.length - 1)];
     if (start.cluster != null && end.cluster != null && start.start != end.start) {
-      return paragraph.text!.substring(start.start, end.start);
+      return paragraph.text!.substring(
+        math.min(start.start, end.start),
+        math.max(start.start, end.start),
+      );
     } else {
       return '';
     }
@@ -291,11 +291,11 @@ class TextLayout {
           lineRunClusterRange,
           bidiRun.bidiLevel,
           lineRunTextMetrics.width!,
-          shiftInsideLine - firstVisualClusterInRun.cluster!.x,
+          shiftInsideLine - firstVisualClusterInRun.shift - firstVisualClusterInRun.cluster!.x,
         ),
       );
       WebParagraphDebug.log(
-        'Run: [${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) [${lineRunClusterRange.start}:${lineRunClusterRange.end}) bidi=${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.cluster!.x}',
+        'Run: [${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) [${lineRunClusterRange.start}:${lineRunClusterRange.end}) bidi=${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.shift}-${firstVisualClusterInRun.cluster!.x}',
       );
       shiftInsideLine += lineRunTextMetrics.width!;
     }

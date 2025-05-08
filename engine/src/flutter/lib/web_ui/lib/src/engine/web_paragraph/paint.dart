@@ -64,7 +64,10 @@ class TextPaint {
         paintCluster(
           canvas,
           clusterText,
-          ui.Offset(line.formattingShift + run.shiftInsideLine, line.bounds.top),
+          ui.Offset(
+            line.formattingShift + run.shiftInsideLine + clusterText.shift,
+            line.bounds.top,
+          ),
           ui.Offset(x, y),
           run.bidiLevel.isEven,
         );
@@ -111,11 +114,14 @@ class TextPaint {
     if (textStyle.background != null) {
       // Draw the background color
       final ui.Rect backgroundRect = ui.Rect.fromLTWH(
-        targetRect.left,
-        targetRect.top,
-        targetRect.width,
-        targetRect.height,
-      );
+            0,
+            0,
+            rects.first.width.ceilToDouble(),
+            rects.first.height,
+          )
+          .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
+          .translate(lineOffset.dx, lineOffset.dy)
+          .translate(-shift, 0);
       canvas.drawRect(backgroundRect, textStyle.background!);
     }
 
@@ -124,11 +130,8 @@ class TextPaint {
       webTextCluster.textRange.end,
     );
 
-    //final ui.Paint transparent = ui.Paint()..color = ui.Color(ltr ? 0xFFFF0000 : 0xFF0000FF);
-    //canvas.saveLayer(const ui.Rect.fromLTWH(0, 0, 500, 500), transparent);
-
     WebParagraphDebug.log(
-      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} pos $pos shift $shift ',
+      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} ${targetRect.top}:${targetRect.bottom} pos $pos shift $shift ',
     );
 
     paintContext.fillStyle = textStyle.foreground?.color.toCssString();
@@ -156,7 +159,6 @@ class TextPaint {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
-    //canvas.restore();
   }
 
   void printTextCluster(ExtendedTextCluster webTextCluster) {

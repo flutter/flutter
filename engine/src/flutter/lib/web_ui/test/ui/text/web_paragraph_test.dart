@@ -46,6 +46,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
 */
+
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -258,23 +259,25 @@ Future<void> testMain() async {
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
-    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+    final Paint greyPaint1 = Paint()..color = const Color(0xFF666666);
+    final Paint greyPaint2 = Paint()..color = const Color(0xFF888888);
+    final Paint greyPaint3 = Paint()..color = const Color(0xFFAAAAAA);
 
     final WebParagraphStyle blackStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
-      foreground: whitePaint,
-      background: blackPaint,
+      foreground: blackPaint,
+      background: greyPaint3,
     );
     final WebTextStyle blueStyle = WebTextStyle(
-      foreground: whitePaint,
-      background: bluePaint,
+      foreground: bluePaint,
+      background: greyPaint2,
       fontSize: 20,
       fontFamily: 'Roboto',
     );
     final WebTextStyle redStyle = WebTextStyle(
-      foreground: whitePaint,
-      background: redPaint,
+      foreground: redPaint,
+      background: greyPaint1,
       fontSize: 20,
       fontFamily: 'Roboto',
     );
