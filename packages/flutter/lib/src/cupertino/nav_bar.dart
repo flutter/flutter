@@ -67,11 +67,9 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 
 const double _kMinScaleFactor = 0.9;
 
+const double _kMaxScaleFactor = 1.235;
+
 const double _kLargeTitleScaleFactor = 3.0;
-
-const double _kSearchFieldScaleFactor = 1.2;
-
-const double _kPersistentHeightMaxScaleFactor = 1.235;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
@@ -245,11 +243,11 @@ Widget _wrapWithBackground({
   );
 }
 
-double _computeScaleFactor(BuildContext context, double value, double gradient) {
-  final double scaleFactor = MediaQuery.textScalerOf(context).scale(value) / value;
+double _dampScaleFactor(double scaledFontSize, double unscaledFontSize, double dampingRatio) {
+  final double scaleFactor = scaledFontSize / unscaledFontSize;
   return scaleFactor < 1.0
       ? math.max(_kMinScaleFactor, scaleFactor)
-      : 1.0 + ((scaleFactor - 1.0) / gradient);
+      : 1.0 + ((scaleFactor - 1.0) / dampingRatio);
 }
 
 // Whether the current route supports nav bar hero transitions from or to.
@@ -1194,12 +1192,16 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
     scaledSearchFieldHeight =
-        _computeScaleFactor(context, _kSearchFieldHeight, _kSearchFieldScaleFactor) *
+        _dampScaleFactor(
+          MediaQuery.textScalerOf(context).scale(_kSearchFieldHeight),
+          _kSearchFieldHeight,
+          _kMaxScaleFactor,
+        ) *
         _kSearchFieldHeight;
     scaledLargeTitleHeight =
         isPortrait
-            ? _computeScaleFactor(
-                  context,
+            ? _dampScaleFactor(
+                  MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
                   _kNavBarLargeTitleHeightExtension,
                   _kLargeTitleScaleFactor,
                 ) *
@@ -1999,7 +2001,7 @@ class _NavigationBarStaticComponents {
           data: MediaQueryData(
             textScaler: MediaQuery.textScalerOf(
               context,
-            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
           ),
           child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: leadingContent),
         ),
@@ -2029,7 +2031,7 @@ class _NavigationBarStaticComponents {
         data: MediaQueryData(
           textScaler: MediaQuery.textScalerOf(
             context,
-          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
         ),
         child: const _BackChevron(),
       ),
@@ -2061,7 +2063,7 @@ class _NavigationBarStaticComponents {
         data: MediaQueryData(
           textScaler: MediaQuery.textScalerOf(
             context,
-          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
         ),
         child: _BackLabel(specifiedPreviousTitle: previousPageTitle, route: route),
       ),
@@ -2108,7 +2110,7 @@ class _NavigationBarStaticComponents {
         data: MediaQueryData(
           textScaler: MediaQuery.textScalerOf(
             context,
-          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
         ),
         child: middleContent,
       ),
@@ -2134,7 +2136,7 @@ class _NavigationBarStaticComponents {
           data: MediaQueryData(
             textScaler: MediaQuery.textScalerOf(
               context,
-            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kPersistentHeightMaxScaleFactor),
+            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
           ),
           child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: userTrailing),
         ),
@@ -2171,8 +2173,8 @@ class _NavigationBarStaticComponents {
       child: MediaQuery(
         data: MediaQueryData(
           textScaler: TextScaler.linear(
-            _computeScaleFactor(
-              context,
+            _dampScaleFactor(
+              MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
               _kNavBarLargeTitleHeightExtension,
               _kLargeTitleScaleFactor,
             ),
@@ -2430,9 +2432,9 @@ class _InactiveSearchableBottom extends StatelessWidget {
   const _InactiveSearchableBottom({
     required this.animationController,
     required this.searchField,
-    required this.onSearchFieldTap,
     required this.animation,
     required this.searchFieldHeight,
+    required this.onSearchFieldTap,
   });
 
   final AnimationController animationController;
@@ -2496,8 +2498,8 @@ class _ActiveSearchableBottom extends StatelessWidget {
     required this.animationController,
     required this.searchField,
     required this.animation,
-    required this.onSearchFieldTap,
     required this.searchFieldHeight,
+    required this.onSearchFieldTap,
   });
 
   final AnimationController animationController;
@@ -3143,10 +3145,7 @@ class _NavigationBarComponentsTransition {
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (!searchable) {
-      child = FadeTransition(
-        opacity: fadeOutBy(0.8, curve: animationCurve),
-        child: ClipRect(child: child),
-      );
+      child = FadeTransition(opacity: fadeOutBy(0.8, curve: animationCurve), child: child);
     }
 
     return PositionedTransition(
@@ -3156,7 +3155,7 @@ class _NavigationBarComponentsTransition {
               ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
 
-      child: child,
+      child: ClipRect(child: child),
     );
   }
 
@@ -3466,10 +3465,7 @@ class _NavigationBarComponentsTransition {
     // Fade in only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
     if (!searchable) {
-      child = FadeTransition(
-        opacity: fadeInFrom(0.0, curve: animationCurve),
-        child: ClipRect(child: child),
-      );
+      child = FadeTransition(opacity: fadeInFrom(0.0, curve: animationCurve), child: child);
     }
 
     return PositionedTransition(
@@ -3478,7 +3474,7 @@ class _NavigationBarComponentsTransition {
           userGestureInProgress
               ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
-      child: child,
+      child: ClipRect(child: child),
     );
   }
 }
