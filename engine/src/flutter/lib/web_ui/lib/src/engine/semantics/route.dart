@@ -99,7 +99,7 @@ class SemanticRouteBase extends SemanticRole {
 ///   * [RouteName], which provides a description for this route in the absence
 ///     of an explicit route label set on the route itself.
 class SemanticRoute extends SemanticRouteBase {
-  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object) {}
+  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object);
 }
 
 /// Indicates the container as a pop dialog.
