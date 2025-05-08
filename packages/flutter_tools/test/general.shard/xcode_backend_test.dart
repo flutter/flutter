@@ -634,7 +634,8 @@ void main() {
     );
     nativeAssetsDir.createSync(recursive: true);
     const String ffiPackageName = 'package_a';
-    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')..createSync();
+    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
+      ..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
     const String infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
@@ -755,7 +756,8 @@ void main() {
     );
     nativeAssetsDir.createSync(recursive: true);
     const String ffiPackageName = 'package_a';
-    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')..createSync();
+    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
+      ..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
     const String infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
