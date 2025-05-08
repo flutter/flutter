@@ -34,7 +34,6 @@ import 'search_view_theme.dart';
 import 'text_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 const int _kOpenViewMilliseconds = 600;
 const Duration _kOpenViewDuration = Duration(milliseconds: _kOpenViewMilliseconds);

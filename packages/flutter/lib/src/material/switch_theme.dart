@@ -13,7 +13,6 @@ import 'package:flutter/widgets.dart';
 
 import 'material_state.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
 // late BuildContext context;
