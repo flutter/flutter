@@ -67,7 +67,7 @@ class Visibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
-    this.maintainFocusability = true,
+    this.maintainFocusability = false,
   }) : assert(
          maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
@@ -220,7 +220,7 @@ class Visibility extends StatelessWidget {
 
   /// Wether to allow the widget to receive focus when hidden.
   ///
-  /// Defaults to true.
+  /// Defaults to false.
   final bool maintainFocusability;
 
   /// Tells the visibility state of an element in the tree based off its

@@ -403,7 +403,6 @@ void main() {
       await tester.pumpWidget(
         Visibility(
           visible: visible,
-          maintainFocusability: false,
           child: const Focus(child: Text('child', textDirection: TextDirection.ltr)),
         ),
       );
@@ -458,7 +457,6 @@ void main() {
         await tester.pumpWidget(
           Visibility(
             visible: visible,
-            maintainFocusability: false,
             maintainState: true,
             maintainAnimation: true,
             maintainInteractivity: true,
