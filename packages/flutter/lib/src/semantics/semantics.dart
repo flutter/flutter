@@ -776,7 +776,7 @@ class SemanticsData with Diagnosticable {
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   @Deprecated(
-    'Use flagsCollection instead.'
+    'Use flagsCollection instead. '
     'This feature was deprecated after v3.29.0-0.3.pre.',
   )
   int get flags => _toBitMask(flagsCollection);
@@ -2847,7 +2847,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node is tagged with `tag`.
   bool isTagged(SemanticsTag tag) => tags != null && tags!.contains(tag);
 
-  SemanticsFlags _flags = SemanticsFlags();
+  SemanticsFlags _flags = SemanticsFlags.kNone;
 
   /// Semantics flags.
   SemanticsFlags get flagsCollection => _flags;
@@ -2856,7 +2856,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// Whether this node currently has a given [SemanticsFlag].
   @Deprecated(
-    'Use flagsCollection instead.'
+    'Use flagsCollection instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
   bool hasFlag(SemanticsFlag flag) => (_flagsBitMask & flag.index) != 0;
@@ -5469,7 +5469,7 @@ class SemanticsConfiguration {
   bool? get isCheckStateMixed => _flags.hasCheckedState ? _flags.isCheckStateMixed : null;
   set isCheckStateMixed(bool? value) {
     assert(value != true || isChecked != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isCheckStateMixed: value!);
+    _flags = _flags.copyWith(hasCheckedState: true, isCheckStateMixed: value);
     _hasBeenAnnotated = true;
   }
 
@@ -6169,73 +6169,98 @@ int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
 /// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 int _toBitMask(SemanticsFlags flags) {
   int bitmask = 0;
-  if (flags.hasCheckedState) bitmask |= (1 << 0);
-  if (flags.isChecked) bitmask |= (1 << 1);
-  if (flags.isSelected) bitmask |= (1 << 2);
-  if (flags.isButton) bitmask |= (1 << 3);
-  if (flags.isTextField) bitmask |= (1 << 4);
-  if (flags.isFocused) bitmask |= (1 << 5);
-  if (flags.hasEnabledState) bitmask |= (1 << 6);
-  if (flags.isEnabled) bitmask |= (1 << 7);
-  if (flags.isInMutuallyExclusiveGroup) bitmask |= (1 << 8);
-  if (flags.isHeader) bitmask |= (1 << 9);
-  if (flags.isObscured) bitmask |= (1 << 10);
-  if (flags.scopesRoute) bitmask |= (1 << 11);
-  if (flags.namesRoute) bitmask |= (1 << 12);
-  if (flags.isHidden) bitmask |= (1 << 13);
-  if (flags.isImage) bitmask |= (1 << 14);
-  if (flags.isLiveRegion) bitmask |= (1 << 15);
-  if (flags.hasToggledState) bitmask |= (1 << 16);
-  if (flags.isToggled) bitmask |= (1 << 17);
-  if (flags.hasImplicitScrolling) bitmask |= (1 << 18);
-  if (flags.isMultiline) bitmask |= (1 << 19);
-  if (flags.isReadOnly) bitmask |= (1 << 20);
-  if (flags.isFocusable) bitmask |= (1 << 21);
-  if (flags.isLink) bitmask |= (1 << 22);
-  if (flags.isSlider) bitmask |= (1 << 23);
-  if (flags.isKeyboardKey) bitmask |= (1 << 24);
-  if (flags.isCheckStateMixed) bitmask |= (1 << 25);
-  if (flags.hasExpandedState) bitmask |= (1 << 26);
-  if (flags.isExpanded) bitmask |= (1 << 27);
-  if (flags.hasSelectedState) bitmask |= (1 << 28);
-  if (flags.hasRequiredState) bitmask |= (1 << 29);
-  if (flags.isRequired) bitmask |= (1 << 30);
+  if (flags.hasCheckedState) {
+    bitmask |= 1 << 0;
+  }
+  if (flags.isChecked) {
+    bitmask |= 1 << 1;
+  }
+  if (flags.isSelected) {
+    bitmask |= 1 << 2;
+  }
+  if (flags.isButton) {
+    bitmask |= 1 << 3;
+  }
+  if (flags.isTextField) {
+    bitmask |= 1 << 4;
+  }
+  if (flags.isFocused) {
+    bitmask |= 1 << 5;
+  }
+  if (flags.hasEnabledState) {
+    bitmask |= 1 << 6;
+  }
+  if (flags.isEnabled) {
+    bitmask |= 1 << 7;
+  }
+  if (flags.isInMutuallyExclusiveGroup) {
+    bitmask |= 1 << 8;
+  }
+  if (flags.isHeader) {
+    bitmask |= 1 << 9;
+  }
+  if (flags.isObscured) {
+    bitmask |= 1 << 10;
+  }
+  if (flags.scopesRoute) {
+    bitmask |= 1 << 11;
+  }
+  if (flags.namesRoute) {
+    bitmask |= 1 << 12;
+  }
+  if (flags.isHidden) {
+    bitmask |= 1 << 13;
+  }
+  if (flags.isImage) {
+    bitmask |= 1 << 14;
+  }
+  if (flags.isLiveRegion) {
+    bitmask |= 1 << 15;
+  }
+  if (flags.hasToggledState) {
+    bitmask |= 1 << 16;
+  }
+  if (flags.isToggled) {
+    bitmask |= 1 << 17;
+  }
+  if (flags.hasImplicitScrolling) {
+    bitmask |= 1 << 18;
+  }
+  if (flags.isMultiline) {
+    bitmask |= 1 << 19;
+  }
+  if (flags.isReadOnly) {
+    bitmask |= 1 << 20;
+  }
+  if (flags.isFocusable) {
+    bitmask |= 1 << 21;
+  }
+  if (flags.isLink) {
+    bitmask |= 1 << 22;
+  }
+  if (flags.isSlider) {
+    bitmask |= 1 << 23;
+  }
+  if (flags.isKeyboardKey) {
+    bitmask |= 1 << 24;
+  }
+  if (flags.isCheckStateMixed) {
+    bitmask |= 1 << 25;
+  }
+  if (flags.hasExpandedState) {
+    bitmask |= 1 << 26;
+  }
+  if (flags.isExpanded) {
+    bitmask |= 1 << 27;
+  }
+  if (flags.hasSelectedState) {
+    bitmask |= 1 << 28;
+  }
+  if (flags.hasRequiredState) {
+    bitmask |= 1 << 29;
+  }
+  if (flags.isRequired) {
+    bitmask |= 1 << 30;
+  }
   return bitmask;
-}
-
-/// This is just to support flag 0-30, new flags don't need to be in the bitmask.
-SemanticsFlags _fromBitMask(int bitmask) {
-  return SemanticsFlags(
-    hasCheckedState: (bitmask & (1 << 0)) != 0,
-    isChecked: (bitmask & (1 << 1)) != 0,
-    isSelected: (bitmask & (1 << 2)) != 0,
-    isButton: (bitmask & (1 << 3)) != 0,
-    isTextField: (bitmask & (1 << 4)) != 0,
-    isFocused: (bitmask & (1 << 5)) != 0,
-    hasEnabledState: (bitmask & (1 << 6)) != 0,
-    isEnabled: (bitmask & (1 << 7)) != 0,
-    isInMutuallyExclusiveGroup: (bitmask & (1 << 8)) != 0,
-    isHeader: (bitmask & (1 << 9)) != 0,
-    isObscured: (bitmask & (1 << 10)) != 0,
-    scopesRoute: (bitmask & (1 << 11)) != 0,
-    namesRoute: (bitmask & (1 << 12)) != 0,
-    isHidden: (bitmask & (1 << 13)) != 0,
-    isImage: (bitmask & (1 << 14)) != 0,
-    isLiveRegion: (bitmask & (1 << 15)) != 0,
-    hasToggledState: (bitmask & (1 << 16)) != 0,
-    isToggled: (bitmask & (1 << 17)) != 0,
-    hasImplicitScrolling: (bitmask & (1 << 18)) != 0,
-    isMultiline: (bitmask & (1 << 19)) != 0,
-    isReadOnly: (bitmask & (1 << 20)) != 0,
-    isFocusable: (bitmask & (1 << 21)) != 0,
-    isLink: (bitmask & (1 << 22)) != 0,
-    isSlider: (bitmask & (1 << 23)) != 0,
-    isKeyboardKey: (bitmask & (1 << 24)) != 0,
-    isCheckStateMixed: (bitmask & (1 << 25)) != 0,
-    hasExpandedState: (bitmask & (1 << 26)) != 0,
-    isExpanded: (bitmask & (1 << 27)) != 0,
-    hasSelectedState: (bitmask & (1 << 28)) != 0,
-    hasRequiredState: (bitmask & (1 << 29)) != 0,
-    isRequired: (bitmask & (1 << 30)) != 0,
-  );
 }
