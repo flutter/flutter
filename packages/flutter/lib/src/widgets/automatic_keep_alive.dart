@@ -360,6 +360,7 @@ class KeepAliveHandle extends ChangeNotifier {
     super.dispose();
   }
 }
+
 /// A mixin with convenience methods for clients of [AutomaticKeepAlive]. Used
 /// with [State] subclasses to manage keep-alive behavior in lazily built lists.
 ///
