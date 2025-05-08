@@ -7,7 +7,7 @@ library;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/web/web_device.dart' show WebServerDevice, kWebServerDeviceId;
+import 'package:flutter_tools/src/web/web_device.dart' show WebServerDevice;
 
 import '../integration.shard/test_data/basic_project.dart';
 import '../integration.shard/test_driver.dart';
