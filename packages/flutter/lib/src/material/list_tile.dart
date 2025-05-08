@@ -871,7 +871,9 @@ class ListTile extends StatelessWidget {
         );
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
     final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
-      style: IconButton.styleFrom(foregroundColor: effectiveIconColor),
+      style: IconButtonTheme.of(
+        context,
+      ).style?.merge(IconButton.styleFrom(foregroundColor: effectiveIconColor)),
     );
 
     TextStyle? leadingAndTrailingStyle;
@@ -983,7 +985,7 @@ class ListTile extends StatelessWidget {
             minimum: resolvedContentPadding,
             child: IconTheme.merge(
               data: iconThemeData,
-              child: IconButtonTheme.merge(
+              child: IconButtonTheme(
                 data: iconButtonThemeData,
                 child: _ListTile(
                   leading: leadingIcon,

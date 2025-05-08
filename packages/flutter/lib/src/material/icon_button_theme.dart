@@ -72,16 +72,6 @@ class IconButtonThemeData with Diagnosticable {
     return other is IconButtonThemeData && other.style == style;
   }
 
-  /// icon button theme is null, returns this IconButtonThemeData.
-  /// The [style] of this theme will be merged with [other.style]
-  /// via [ButtonStyle.merge].
-  IconButtonThemeData merge(IconButtonThemeData? other) {
-    if (other == null) {
-      return this;
-    }
-    return IconButtonThemeData(style: style?.merge(other.style));
-  }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -101,26 +91,6 @@ class IconButtonThemeData with Diagnosticable {
 class IconButtonTheme extends InheritedTheme {
   /// Create a [IconButtonTheme].
   const IconButtonTheme({super.key, required this.data, required super.child});
-
-  /// Creates an icon button theme that controls the properties of
-  /// descendant widgets, and merges in the current icon button theme, if any.
-  static Widget merge({Key? key, required IconButtonThemeData data, required Widget child}) {
-    return Builder(
-      builder: (BuildContext context) {
-        return IconButtonTheme(
-          key: key,
-          data: _getInheritedIconButtonThemeData(context).merge(data),
-          child: child,
-        );
-      },
-    );
-  }
-
-  static IconButtonThemeData _getInheritedIconButtonThemeData(BuildContext context) {
-    final IconButtonTheme? iconButtonTheme =
-        context.dependOnInheritedWidgetOfExactType<IconButtonTheme>();
-    return iconButtonTheme?.data ?? Theme.of(context).iconButtonTheme;
-  }
 
   /// The configuration of this theme.
   final IconButtonThemeData data;
