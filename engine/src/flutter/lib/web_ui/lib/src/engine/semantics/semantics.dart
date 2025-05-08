@@ -2485,10 +2485,7 @@ class EngineSemantics {
     final PlatformConfiguration newConfiguration = EnginePlatformDispatcher.instance.configuration
         .copyWith(accessibilityFeatures: original.copyWith(accessibleNavigation: value));
     EnginePlatformDispatcher.instance.configuration = newConfiguration;
-    Future.microtask(() {
-      // Avoid executing MediaQuery._updateData during build time
-      EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
-    });
+    EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
 
     _semanticsEnabled = value;
 
