@@ -80,27 +80,23 @@ ui.Offset _computeOffsetForInputs(
   DomEventTarget eventTarget,
   EditableTextGeometry inputGeometry,
 ) {
-  final DomElement? eventTargetElement = event.target as DomElement?;
-  final DomElement actualTargetElement = eventTarget as DomElement;
   final DomHTMLElement domElement = textEditing.strategy.activeDomElement;
+  assert(eventTarget == domElement, 'The targeted input element must be the active input element');
 
+  final DomElement? originalTarget = event.target as DomElement?;
   final double offsetX;
   final double offsetY;
 
-  if (eventTargetElement != null && eventTargetElement != actualTargetElement) {
-    final actualTargetElementBounds = actualTargetElement.getBoundingClientRect();
-    final eventTargetElementBounds = eventTargetElement.getBoundingClientRect();
-    offsetX = event.offsetX + (eventTargetElementBounds.left - actualTargetElementBounds.left);
-    offsetY = event.offsetY + (eventTargetElementBounds.top - actualTargetElementBounds.top);
+  if (originalTarget != null && originalTarget != eventTarget) {
+    final eventTargetBounds = (eventTarget as DomElement).getBoundingClientRect();
+    final originalTargetBounds = originalTarget.getBoundingClientRect();
+    offsetX = event.offsetX + (originalTargetBounds.left - eventTargetBounds.left);
+    offsetY = event.offsetY + (originalTargetBounds.top - eventTargetBounds.top);
   } else {
     offsetX = event.offsetX;
     offsetY = event.offsetY;
   }
 
-  assert(
-    actualTargetElement == domElement,
-    'The targeted input element must be the active input element',
-  );
   final Float32List transformValues = inputGeometry.globalTransform;
   assert(transformValues.length == 16);
   final Matrix4 transform = Matrix4.fromFloat32List(transformValues);
