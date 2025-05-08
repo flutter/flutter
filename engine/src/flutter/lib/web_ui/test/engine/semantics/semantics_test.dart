@@ -3491,7 +3491,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a route label"><sem></sem></sem>
+      <sem aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3528,9 +3528,8 @@ void _testRoute() {
       'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled route, but it is missing the label. A route should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
     ]);
 
-    // But still sets the dialog role.
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label=""><sem></sem></sem>
+      <sem aria-label=""><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3561,7 +3560,7 @@ void _testRoute() {
       tester.apply();
 
       expectSemanticsTree(owner(), '''
-        <sem role="dialog" aria-describedby="flt-semantic-node-2">
+        <sem aria-describedby="flt-semantic-node-2">
             <sem>
                 <sem><span>$label</span></sem>
             </sem>
@@ -3583,7 +3582,7 @@ void _testRoute() {
     semantics().semanticsEnabled = false;
   });
 
-  test('scopesRoute alone sets the SemanticRoute role and "dialog" ARIA role with no label', () {
+  test('scopesRoute alone sets the SemanticRoute role and with no label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3593,7 +3592,7 @@ void _testRoute() {
     tester.apply();
 
     expectSemanticsTree(owner(), '''
-      <sem role="dialog"></sem>
+      <sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
