@@ -713,8 +713,7 @@ class SemanticsData with Diagnosticable {
   ///
   /// If [label] is not empty, then [textDirection] must also not be null.
   SemanticsData({
-    int? flags,
-    SemanticsFlags? flagsCollection,
+    required this.flagsCollection,
     required this.actions,
     required this.identifier,
     required this.attributedLabel,
@@ -770,11 +769,8 @@ class SemanticsData with Diagnosticable {
          'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.',
        ),
        assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6'),
-       assert(flags != null || flagsCollection != null),
-       this.flagsCollection = flagsCollection ?? _fromBitMask(flags!),
        assert(
-         linkUrl == null ||
-             (flagsCollection?.isLink ?? ((flags! & SemanticsFlag.isLink.index) != 0)),
+         linkUrl == null || flagsCollection.isLink,
          'A SemanticsData object with a linkUrl must have the isLink flag set to true',
        );
 
