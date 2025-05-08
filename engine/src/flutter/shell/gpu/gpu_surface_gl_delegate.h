@@ -11,7 +11,12 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkMatrix.h"
+
+#if !SLIMPELLER
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
+#else
+struct GrGLInterface;
+#endif  // !SLIMPELLER
 
 namespace flutter {
 

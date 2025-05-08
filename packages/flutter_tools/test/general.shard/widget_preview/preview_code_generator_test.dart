@@ -47,16 +47,23 @@ void main() {
             ],
             (path: '', uri: Uri(path: 'src/bar.dart')): <PreviewDetails>[
               PreviewDetails(functionName: 'barPreview1', isBuilder: false),
-              PreviewDetails(functionName: 'barPreview2', isBuilder: false),
+              PreviewDetails.test(
+                functionName: 'barPreview2',
+                isBuilder: false,
+                brightness: 'brightnessConstant',
+                brightnessLibraryUri: 'brightness.dart',
+              ),
               PreviewDetails.test(
                 functionName: 'barPreview3',
                 isBuilder: true,
                 name: 'Foo',
-                width: '123',
-                height: '456',
+                size: 'Size(height: 123, width: 456)',
                 textScaleFactor: '50',
                 wrapper: 'wrapper',
                 wrapperLibraryUri: 'wrapper.dart',
+                brightness: 'Brightness.dark',
+                theme: 'myThemeCallback',
+                themeLibraryUri: 'theme.dart',
               ),
             ],
           },
@@ -65,7 +72,8 @@ void main() {
 
         // Check that the generated file contains:
         // - An import of the widget preview library
-        // - Prefixed imports for both 'foo.dart' and 'src/bar.dart'
+        // - Prefixed imports for 'foo.dart', 'src/bar.dart', 'wrapper.dart',
+        //   'brightness.dart', and 'theme.dart'
         // - A top-level function 'List<WidgetPreview> previews()'
         // - A returned list containing function calls to 'preview()' from 'foo.dart' and
         //   'barPreview1()', 'barPreview2()', and 'barPreview3()' from 'src/bar.dart'
@@ -73,7 +81,7 @@ void main() {
         // The generated file is unfortunately unformatted.
         const String expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'widget_preview.dart' as _i1;import 'foo.dart' as _i2;import 'src/bar.dart' as _i3;import 'wrapper.dart' as _i4;import 'package:flutter/widgets.dart' as _i5;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(builder: () => _i2.preview()), _i1.WidgetPreview(builder: () => _i3.barPreview1()), _i1.WidgetPreview(builder: () => _i3.barPreview2()), _i1.WidgetPreview(name: Foo, height: 456.0, width: 123.0, textScaleFactor: 50.0, builder: () => _i4.wrapper(_i5.Builder(builder: _i3.barPreview3())), ), ];''';
+import 'widget_preview.dart' as _i1;import 'foo.dart' as _i2;import 'src/bar.dart' as _i3;import 'brightness.dart' as _i4;import 'dart:ui' as _i5;import 'theme.dart' as _i6;import '' as _i7;import 'wrapper.dart' as _i8;import 'package:flutter/widgets.dart' as _i9;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(builder: () => _i2.preview()), _i1.WidgetPreview(builder: () => _i3.barPreview1()), _i1.WidgetPreview(brightness: _i4.brightnessConstant, builder: () => _i3.barPreview2(), ), _i1.WidgetPreview(name: Foo, size: _i5.Size(height: 123, width: 456), textScaleFactor: 50.0, theme: _i6.myThemeCallback(), brightness: _i7.Brightness.dark, builder: () => _i8.wrapper(_i9.Builder(builder: _i3.barPreview3())), ), ];''';
         expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
 
         // Regenerate the generated file with no previews.

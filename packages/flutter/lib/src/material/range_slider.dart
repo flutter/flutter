@@ -26,6 +26,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
+import 'range_slider_parts.dart';
 import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
 import 'theme.dart';
@@ -165,6 +166,7 @@ class RangeSlider extends StatefulWidget {
     this.overlayColor,
     this.mouseCursor,
     this.semanticFormatterCallback,
+    this.padding,
   }) : assert(min <= max),
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
@@ -388,6 +390,14 @@ class RangeSlider extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SemanticFormatterCallback? semanticFormatterCallback;
+
+  /// Determines the padding around the [RangeSlider].
+  ///
+  /// If specified, this padding overrides the vertical padding and the
+  /// horizontal padding of the [RangeSlider]. By default, the vertical padding
+  /// is the height of the overlay shape, and the horizontal padding is the
+  /// larger size between the width of the thumb shape and overlay shape.
+  final EdgeInsetsGeometry? padding;
 
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
@@ -701,6 +711,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.onPrimary),
       minThumbSeparation: sliderTheme.minThumbSeparation ?? defaultMinThumbSeparation,
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
+      padding: widget.padding ?? sliderTheme.padding,
     );
     final MouseCursor effectiveMouseCursor =
         widget.mouseCursor?.resolve(states) ??
@@ -717,28 +728,35 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
 
+    Widget result = CompositedTransformTarget(
+      link: _layerLink,
+      child: _RangeSliderRenderObjectWidget(
+        values: _unlerpRangeValues(widget.values),
+        divisions: widget.divisions,
+        labels: widget.labels,
+        sliderTheme: sliderTheme,
+        textScaleFactor: effectiveTextScale,
+        screenSize: screenSize(),
+        onChanged: _enabled && (widget.max > widget.min) ? _handleChanged : null,
+        onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+        onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+        state: this,
+        semanticFormatterCallback: widget.semanticFormatterCallback,
+        hovering: _hovering,
+      ),
+    );
+
+    final EdgeInsetsGeometry? padding = widget.padding ?? sliderTheme.padding;
+    if (padding != null) {
+      result = Padding(padding: padding, child: result);
+    }
+
     return FocusableActionDetector(
       enabled: _enabled,
       onShowHoverHighlight: _handleHoverChanged,
       includeFocusSemantics: false,
       mouseCursor: effectiveMouseCursor,
-      child: CompositedTransformTarget(
-        link: _layerLink,
-        child: _RangeSliderRenderObjectWidget(
-          values: _unlerpRangeValues(widget.values),
-          divisions: widget.divisions,
-          labels: widget.labels,
-          sliderTheme: sliderTheme,
-          textScaleFactor: effectiveTextScale,
-          screenSize: screenSize(),
-          onChanged: _enabled && (widget.max > widget.min) ? _handleChanged : null,
-          onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-          onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
-          state: this,
-          semanticFormatterCallback: widget.semanticFormatterCallback,
-          hovering: _hovering,
-        ),
-      ),
+      child: result,
     );
   }
 
@@ -917,8 +935,15 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
   double get _maxSliderPartHeight =>
       _sliderPartSizes.map((Size size) => size.height).reduce(math.max);
+  double get _thumbSizeHeight =>
+      _sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete).height;
+  double get _overlayHeight =>
+      _sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).height;
   List<Size> get _sliderPartSizes => <Size>[
-    _sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete),
+    Size(
+      _sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width,
+      _sliderTheme.padding != null ? _thumbSizeHeight : _overlayHeight,
+    ),
     _sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete),
     _sliderTheme.rangeTickMarkShape!.getPreferredSize(
       isEnabled: isEnabled,
@@ -1467,8 +1492,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final double padding =
-        isDiscrete || _sliderTheme.rangeTrackShape!.isRounded ? trackRect.height : 0.0;
+    final double padding = _sliderTheme.rangeTrackShape!.isRounded ? trackRect.height : 0.0;
     final double thumbYOffset = trackRect.center.dy;
     final double startThumbPosition =
         isDiscrete
@@ -1517,8 +1541,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       isEnabled: isEnabled,
     );
 
-    final bool startThumbSelected = _lastThumbSelection == Thumb.start;
-    final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+    final bool startThumbSelected = _lastThumbSelection == Thumb.start && !hoveringEndThumb;
+    final bool endThumbSelected = _lastThumbSelection == Thumb.end && !hoveringStartThumb;
     final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (!_overlayAnimation.isDismissed) {
@@ -1561,8 +1585,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           _sliderTheme.rangeTickMarkShape!
               .getPreferredSize(isEnabled: isEnabled, sliderTheme: _sliderTheme)
               .width;
-      final double padding = trackRect.height;
-      final double adjustedTrackWidth = trackRect.width - padding;
+      final double discreteTrackPadding = trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - discreteTrackPadding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions! >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1570,7 +1594,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           final double value = i / divisions!;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + padding / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + discreteTrackPadding / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.rangeTickMarkShape!.paint(
             context,

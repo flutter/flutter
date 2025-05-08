@@ -269,11 +269,6 @@ $_simpleLoaderScript
               if (script.id == null) continue;
               var src = _currentDirectory + script.src.toString();
               var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
-              // Only compare the search parameters which contain the cache
-              // busting portion of the uri. The path might be different if the
-              // script is loaded from a different application on the page.
-              if (window.\$dartLoader.moduleIdToUrl.has(script.id) &&
-                  new URL(oldSrc).search == new URL(src).search) continue;
 
               // We might actually load from a different uri, delete the old one
               // just to be sure.
@@ -668,15 +663,19 @@ String generateTestBootstrapFileContents(String mainUri, String requireUrl, Stri
 ''';
 }
 
-String generateDefaultFlutterBootstrapScript() {
-  return '''
-{{flutter_js}}
-{{flutter_build_config}}
-
-_flutter.loader.load({
+String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
+  final String serviceWorkerSettings =
+      includeServiceWorkerSettings
+          ? '''
+{
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}}
   }
-});
+}'''
+          : '';
+  return '''
+{{flutter_js}}
+{{flutter_build_config}}
+_flutter.loader.load($serviceWorkerSettings);
 ''';
 }

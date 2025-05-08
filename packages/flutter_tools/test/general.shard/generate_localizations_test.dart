@@ -76,7 +76,6 @@ void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
   late Artifacts artifacts;
-  late ProcessManager processManager;
   late String defaultL10nPathString;
   late String syntheticPackagePath;
   late String syntheticL10nPackagePath;
@@ -152,7 +151,6 @@ void main() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    processManager = FakeProcessManager.empty();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
@@ -757,7 +755,7 @@ flutter:
         projectDir: projectDir,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
     });
 
@@ -780,7 +778,7 @@ flutter:
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
     });
 
@@ -809,7 +807,7 @@ flutter:
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
@@ -880,7 +878,7 @@ flutter:
             projectDir: fs.currentDirectory,
             dependenciesDir: fs.currentDirectory,
             artifacts: artifacts,
-            processManager: processManager,
+            processManager: FakeProcessManager.any(),
           ),
           throwsToolExit(
             message:
@@ -916,7 +914,7 @@ flutter:\r
           projectDir: fs.currentDirectory,
           dependenciesDir: fs.currentDirectory,
           artifacts: artifacts,
-          processManager: processManager,
+          processManager: FakeProcessManager.any(),
         );
         final String content = getInPackageGeneratedFileContent(locale: 'en');
         expect(content, contains('\r\n'));
@@ -940,7 +938,7 @@ flutter:\r
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -973,7 +971,7 @@ class AppLocalizationsEn extends AppLocalizations {
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -1689,6 +1687,50 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           expect(content, contains("String get helloWorld => 'Hello {name}'"));
         },
       );
+
+      // Regression test for https://github.com/flutter/flutter/issues/163627
+      //
+      // If placeholders have no explicit type (like `int` or `String`) set
+      // their type can be inferred.
+      //
+      // Later in the pipeline it is ensured that each locales placeholder types
+      // matches the definitions in the template.
+      //
+      // If only the types of the template had been inferred,
+      // and not for the translation there would be a mismatch:
+      // in this case `num` for count and `null` (the default), which is incompatible
+      // and `getSyntheticGeneratedFileContent` would throw an exception.
+      //
+      // This test ensures that both template and locale can be equally partially defined
+      // in the arb.
+      testWithoutContext(
+        'translation placeholder type definitions can be inferred for plurals',
+        () {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "helloWorld": "{count, plural, one{Hello World!} other{Hello Worlds!}}",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''',
+            'de': '''
+{
+  "helloWorld": "{count, plural, one{Hallo Welt!} other{Hallo Welten!}}",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''',
+          });
+          expect(getSyntheticGeneratedFileContent(locale: 'en'), isA<String>());
+        },
+      );
     });
 
     group('DateTime tests', () {
@@ -1735,6 +1777,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "springBegins"'),
+                contains('locale "en"'),
                 contains('asdf'),
                 contains('springStartDate'),
                 contains('does not have a corresponding DateFormat'),
@@ -1869,9 +1913,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "loggedIn"'),
+                contains('locale "en"'),
                 contains('"foo+bar+baz"'),
                 contains('lastLoginDate'),
-                contains('contains at least one invalid date format.'),
+                contains('contains at least one invalid date format'),
               ),
             ),
           ),
@@ -1901,9 +1947,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "loggedIn"'),
+                contains('locale "en"'),
                 contains('"yMd+Hm+"'),
                 contains('lastLoginDate'),
-                contains('contains at least one invalid date format.'),
+                contains('contains at least one invalid date format'),
               ),
             ),
           ),
@@ -1932,7 +1980,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             isA<L10nException>().having(
               (L10nException e) => e.message,
               'message',
-              contains('the "format" attribute needs to be set'),
+              allOf(
+                contains('message "springBegins"'),
+                contains('locale "en"'),
+                contains('the "format" attribute needs to be set'),
+              ),
             ),
           ),
         );
@@ -2119,8 +2171,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             isA<L10nException>().having(
               (L10nException e) => e.message,
               'message',
-              contains(
-                'The placeholder, springStartDate, has its "type" resource attribute set to the "String" type in locale "ja", but it is "DateTime" in the template placeholder.',
+              allOf(
+                contains('placeholder "springStartDate"'),
+                contains('locale "ja"'),
+                contains(
+                  '"type" resource attribute set to the type "String" in locale "ja", but it is "DateTime" in the template placeholder.',
+                ),
               ),
             ),
           ),
@@ -2166,8 +2222,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               isA<L10nException>().having(
                 (L10nException e) => e.message,
                 'message',
-                contains(
-                  'The placeholder, springStartDate, has its "type" resource attribute set to the "null" type in locale "ja", but it is "DateTime" in the template placeholder.',
+                allOf(
+                  contains('placeholder "springStartDate"'),
+                  contains('locale "ja"'),
+                  contains(
+                    'has its "type" resource attribute set to the type "Object" in locale "ja", but it is "DateTime" in the template placeholder.',
+                  ),
                 ),
               ),
             ),
@@ -2322,6 +2382,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "courseCompletion"'),
+                contains('locale "en"'),
                 contains('asdf'),
                 contains('progress'),
                 contains('does not have a corresponding NumberFormat'),
@@ -2425,6 +2487,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 allOf(
+                  contains('message "helloWorlds"'),
                   contains('is not properly formatted'),
                   contains('Ensure that it is a map with string valued keys'),
                 ),
@@ -2475,6 +2538,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 allOf(
+                  contains('message "genderSelect"'),
                   contains('is not properly formatted'),
                   contains('Ensure that it is a map with string valued keys'),
                 ),
@@ -2588,8 +2652,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         } on L10nException {
           expect(
             logger.errorText,
-            contains(
-              'Date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor',
+            allOf(
+              contains('message "datetime"'),
+              contains('locale "en"'),
+              contains(
+                'date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor',
+              ),
             ),
           );
         }
@@ -3427,6 +3495,35 @@ String helloName({required String name}) {
       containsIgnoringWhitespace(r'''
 String helloNameAndAge({required String name, required int age}) {
   '''),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/165794.
+  testWithoutContext('handles missing placeholders gracefully', () async {
+    const String en = r'''
+    {
+      "test": "No placeholder in here"
+    }''';
+
+    const String da = r'''
+    {
+      "test": "Placeholder in here {value}",
+      "@test": {
+        "placeholders": {
+          "value": {
+            "type": "String"
+          }
+        }
+      }
+    }
+    ''';
+
+    setupLocalizations(<String, String>{'en': en, 'da': da});
+
+    final String localizationsFile = getSyntheticGeneratedFileContent(locale: 'en');
+    expect(
+      localizationsFile,
+      containsIgnoringWhitespace(r'''String get test => 'No placeholder in here'''),
     );
   });
 }

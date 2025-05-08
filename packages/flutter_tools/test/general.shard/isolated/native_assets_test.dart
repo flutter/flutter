@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -13,7 +14,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -60,14 +60,8 @@ void main() {
       final File directSoFile = environment.projectDir.childFile('direct.so');
       directSoFile.writeAsBytesSync(<int>[]);
 
-      CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) => CodeAsset(
-        package: 'bar',
-        name: name,
-        linkMode: linkMode,
-        os: OS.linux,
-        architecture: Architecture.x64,
-        file: file,
-      );
+      CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) =>
+          CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
       final Map<String, String> environmentDefines = <String, String>{
         kBuildMode: BuildMode.release.cliName,
@@ -84,7 +78,7 @@ void main() {
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         ),
       );
@@ -217,14 +211,8 @@ void main() {
       final File linkedSoFile = environment.projectDir.childFile('linked.so');
       linkedSoFile.writeAsBytesSync(<int>[]);
 
-      CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) => CodeAsset(
-        package: 'bar',
-        name: name,
-        linkMode: linkMode,
-        os: OS.linux,
-        architecture: Architecture.x64,
-        file: file,
-      );
+      CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) =>
+          CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
       final DartBuildResult result = await runFlutterSpecificDartBuild(
         environmentDefines: <String, String>{
@@ -248,16 +236,16 @@ void main() {
           ),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: <CodeAsset>[
-              makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
               makeCodeAsset('linked', linkedSoFile.uri, DynamicLoadingBundled()),
             ],
           ),
         ),
       );
-      expect(result.codeAssets.map((CodeAsset c) => c.file!.toString()).toList()..sort(), <String>[
-        directSoFile.uri.toString(),
-        linkedSoFile.uri.toString(),
-      ]);
+      expect(
+        result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList()
+          ..sort(),
+        <String>[directSoFile.uri.toString(), linkedSoFile.uri.toString()],
+      );
     },
   );
 }

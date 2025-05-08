@@ -609,7 +609,7 @@ static std::optional<Entity> PipelineBlend(
 
     if (foreground_color.has_value()) {
       auto contents = std::make_shared<SolidColorContents>();
-      RectGeometry geom(Rect::MakeSize(pass.GetRenderTargetSize()));
+      FillRectGeometry geom(Rect::MakeSize(pass.GetRenderTargetSize()));
       contents->SetGeometry(&geom);
       contents->SetColor(foreground_color.value());
 

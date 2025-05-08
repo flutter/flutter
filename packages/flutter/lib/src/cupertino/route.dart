@@ -345,7 +345,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition =>
-      this.fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
+      fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 
@@ -1410,6 +1410,7 @@ Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   String? barrierLabel,
+  Color? barrierColor,
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
@@ -1422,7 +1423,7 @@ Future<T?> showCupertinoDialog<T>({
       context: context,
       barrierDismissible: barrierDismissible,
       barrierLabel: barrierLabel,
-      barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
+      barrierColor: barrierColor,
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,

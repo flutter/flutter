@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -495,6 +496,7 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
+    expect(editableText.hintLocales, isNull);
   });
 
   testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (
@@ -1271,6 +1273,39 @@ void main() {
       tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'],
       enableIMEPersonalizedLearning,
     );
+  });
+
+  testWidgets('hintLocales is sent to the engine', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              hintLocales: hintLocales,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+
+    // hintLocales is sent to the engine as a list of language tags.
+    final List<String> localesLanguageTags =
+        hintLocales.map((Locale locale) => locale.toLanguageTag()).toList();
+    expect(tester.testTextInput.setClientArgs!['hintLocales'], localesLanguageTags);
   });
 
   group('smartDashesType and smartQuotesType', () {
@@ -3013,6 +3048,62 @@ void main() {
     }
   });
 
+  testWidgets(
+    'Read-only fields can be traversed on all platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
+      final TextEditingController controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
+      final FocusNode focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
+      final FocusNode focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: <Widget>[
+              EditableText(
+                focusNode: focusNode1,
+                autofocus: true,
+                controller: controller1,
+                backgroundCursorColor: Colors.grey,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+              EditableText(
+                readOnly: true,
+                focusNode: focusNode2,
+                controller: controller2,
+                backgroundCursorColor: Colors.grey,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(focusNode1.hasPrimaryFocus, true);
+      expect(focusNode2.hasPrimaryFocus, false);
+
+      // Change focus to the readonly EditableText.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+      expect(focusNode1.hasPrimaryFocus, false);
+      expect(focusNode2.hasPrimaryFocus, true);
+
+      // Change focus back to the first EditableText.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+      expect(focusNode1.hasPrimaryFocus, true);
+      expect(focusNode2.hasPrimaryFocus, false);
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
+  );
+
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
@@ -3747,6 +3838,87 @@ void main() {
     },
   );
 
+  testWidgets(
+    'iOS autocorrect value is inferred from AutofillHints - username',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.username],
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+      expect(editableText.autocorrect, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'iOS autocorrect value is inferred from AutofillHints - password',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.password],
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+      expect(editableText.autocorrect, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'iOS autocorrect value is inferred from AutofillHints - newPassword',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              autofillHints: const <String>[AutofillHints.newPassword],
+            ),
+          ),
+        ),
+      );
+
+      final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+      expect(editableText.autocorrect, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
+  );
+
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController(text: 'Wibble');
     addTearDown(controller1.dispose);
@@ -4079,8 +4251,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
@@ -4185,8 +4357,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test for words').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
@@ -4300,8 +4472,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
@@ -4417,8 +4589,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test for words').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
@@ -4539,6 +4711,7 @@ void main() {
                             SemanticsFlag.isObscured,
                           ],
                           value: expectedValue,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4595,6 +4768,7 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isTextField],
                           value: originalText,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4654,6 +4828,7 @@ void main() {
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
                           value: expectedValue,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                           // Focusing a single-line field on web selects it.
                           textSelection:
@@ -4876,7 +5051,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-      const int expectedNodeId = 5;
+      const int expectedNodeId = 4;
 
       expect(
         semantics,
@@ -4909,6 +5084,7 @@ void main() {
                               SemanticsAction.paste,
                             ],
                             value: 'test',
+                            inputType: SemanticsInputType.text,
                             textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
                           ),
@@ -4960,7 +5136,8 @@ void main() {
         await tester.pump();
 
         final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-        const int expectedNodeId = 5;
+        final SemanticsNode node = find.semantics.byValue('ABCDEFG').evaluate().first;
+        final int expectedNodeId = node.id;
 
         expect(controller.value.selection.isCollapsed, isTrue);
 
@@ -5028,6 +5205,7 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                           ],
+                          inputType: SemanticsInputType.text,
                           textSelection: TextSelection.collapsed(offset: controller.text.length),
                           textDirection: TextDirection.ltr,
                         ),
@@ -8676,6 +8854,82 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
+  );
+
+  testWidgets(
+    'single-line field cannot be scrolled with touch on iOS',
+    (WidgetTester tester) async {
+      controller.text = 'This is a long string that should overflow the TextField.';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, initialScrollOffset);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'multi-line field can scroll with touch on iOS',
+    (WidgetTester tester) async {
+      // 3 lines of text, where the last line overflows and requires scrolling.
+      controller.text = 'XXXXX\nXXXXX\nXXXXX';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                maxLines: 2,
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {

@@ -7,7 +7,7 @@
 
 #include <fuchsia/math/cpp/fidl.h>
 #include <fuchsia/scenic/scheduling/cpp/fidl.h>
-#include <fuchsia/sysmem/cpp/fidl.h>
+#include <fuchsia/sysmem2/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl_test_base.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
@@ -175,7 +175,7 @@ class FakeFlatland
 
   struct BufferCollectionBinding {
     fuchsia::ui::composition::BufferCollectionExportToken export_token;
-    fuchsia::sysmem::BufferCollectionTokenHandle sysmem_token;
+    fuchsia::sysmem2::BufferCollectionTokenHandle sysmem_token;
 
     fuchsia::ui::composition::RegisterBufferCollectionUsage usage;
   };

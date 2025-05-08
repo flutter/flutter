@@ -1,35 +1,29 @@
 PODS:
-  - connectivity_macos (0.0.1):
-    - FlutterMacOS
-    - Reachability
   - FlutterMacOS (1.0.0)
-  - Reachability (3.2)
   - url_launcher_macos (0.0.1):
+    - FlutterMacOS
+  - video_player_avfoundation (0.0.1):
+    - Flutter
     - FlutterMacOS
 
 DEPENDENCIES:
-  - connectivity_macos (from `Flutter/ephemeral/.symlinks/plugins/connectivity_macos/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
-
-SPEC REPOS:
-  trunk:
-    - Reachability
+  - video_player_avfoundation (from `Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin`)
 
 EXTERNAL SOURCES:
-  connectivity_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/connectivity_macos/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
+  video_player_avfoundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin
 
 SPEC CHECKSUMS:
-  connectivity_macos: 5dae6ee11d320fac7c05f0d08bd08fc32b5514d9
-  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
+  video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
 
-PODFILE CHECKSUM: 2e6060c123c393d6beb3ee5b7beaf789de4d2e47
+PODFILE CHECKSUM: 0d2aa2ee21a465e119c42a843a56ee9fa0036f8c
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.16.2

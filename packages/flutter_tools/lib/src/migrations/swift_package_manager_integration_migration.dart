@@ -173,21 +173,22 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       await _xcodeProjectInterpreter.getInfo(_xcodeProject.hostAppRoot.path);
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
-      // TODO(vashworth): Add link to instructions on how to manually integrate
-      // once available on website.
       throwToolExit(
         'An error occurred when adding Swift Package Manager integration:\n'
         '  $e\n\n'
         'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-        '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
+        '  https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
         'Consider including a copy of the following files in your bug report:\n'
         '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
         '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
         '(or the scheme for the flavor used)\n\n'
-        'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
+        'To add Swift Package Manager integration manually, please use the following instructions:\n'
+        'https://docs.flutter.dev/to/add-swift-package-manager-manually\n\n'
+        'Alternatively, to avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
         'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n'
-        'Alternatively, disable Flutter Swift Package Manager integration globally with the\n'
+        '  config:\n'
+        '    enable-swift-package-manager: false\n'
+        'Or disable Flutter Swift Package Manager integration globally with the\n'
         'following command:\n'
         '  "flutter config --no-enable-swift-package-manager"\n',
       );

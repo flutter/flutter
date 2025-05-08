@@ -291,6 +291,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    featureFlags: featureFlags,
   );
   if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
@@ -977,7 +978,8 @@ Future<bool> _handleIssues(
         'to learn more about understanding Podlock dependency tree. \n\n'
         'You can also disable Swift Package Manager for the project by adding the '
         'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n',
+        '  config:'
+        '    enable-swift-package-manager: false\n',
       );
     }
   } else if (missingModules.isNotEmpty) {
