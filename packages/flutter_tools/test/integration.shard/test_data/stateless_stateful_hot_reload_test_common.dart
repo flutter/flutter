@@ -45,9 +45,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           additionalCommandArgs: additionalCommandArgs,
         );
       } else {
-        await flutter.run(
-          additionalCommandArgs: additionalCommandArgs,
-        );
+        await flutter.run(additionalCommandArgs: additionalCommandArgs);
       }
       // Wait for run to finish.
       await completer.future;
