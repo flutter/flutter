@@ -6,7 +6,6 @@ package io.flutter.plugin.platform;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.MutableContextWrapper;
@@ -21,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
@@ -592,7 +592,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // Configures the view for Texture Layer Hybrid Composition mode, returning the associated
   // texture ID.
-  @TargetApi(API_LEVELS.API_23)
+  @RequiresApi(API_LEVELS.API_23)
   @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   public long configureForTextureLayerComposition(
       @NonNull PlatformView platformView,

@@ -3,14 +3,13 @@ package io.flutter.plugin.platform;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.Surface;
+import androidx.annotation.RequiresApi;
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 
-@TargetApi(API_LEVELS.API_26)
 public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRenderTarget {
   private static final String TAG = "SurfaceTexturePlatformViewRenderTarget";
 
@@ -101,6 +100,7 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
     }
   }
 
+  @RequiresApi(API_LEVELS.API_26)
   public Surface getSurface() {
     recreateSurfaceIfNeeded();
     if (surfaceTexture == null || surfaceTexture.isReleased()) {

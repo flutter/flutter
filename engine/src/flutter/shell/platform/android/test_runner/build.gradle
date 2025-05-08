@@ -4,7 +4,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath "com.android.tools.build:gradle:8.7.2"
+    classpath "com.android.tools.build:gradle:8.9.1"
   }
 }
 
@@ -33,7 +33,7 @@ println "=========================================="
 
 android {
   namespace 'io.flutter.app.test'
-  compileSdk 35
+  compileSdk 36
 
   defaultConfig {
     minSdkVersion 21

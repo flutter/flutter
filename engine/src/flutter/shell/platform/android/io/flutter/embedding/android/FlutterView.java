@@ -7,7 +7,6 @@ package io.flutter.embedding.android;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -537,7 +536,7 @@ public class FlutterView extends FrameLayout
    * Refresh {@link androidx.window.layout.WindowInfoTracker} and {@link android.view.DisplayCutout}
    * display features. Fold, hinge and cutout areas are populated here.
    */
-  @TargetApi(API_LEVELS.API_28)
+  @RequiresApi(API_LEVELS.API_28)
   protected void setWindowInfoListenerDisplayFeatures(WindowLayoutInfo layoutInfo) {
     List<DisplayFeature> newDisplayFeatures = layoutInfo.getDisplayFeatures();
     List<FlutterRenderer.DisplayFeature> flutterDisplayFeatures = new ArrayList<>();
@@ -1048,7 +1047,6 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Mouse -------
   @Override
-  @TargetApi(API_LEVELS.API_24)
   @RequiresApi(API_LEVELS.API_24)
   @NonNull
   public PointerIcon getSystemPointerIcon(int type) {
