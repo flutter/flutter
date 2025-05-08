@@ -785,9 +785,9 @@ void main() {
   });
 
   testWidgets('Should not call pop invoked if onPopPage veto', (WidgetTester tester) async {
-    GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     bool called = false;
-    final List<Page<void>> pages = [
+    final List<Page<void>> pages = <Page<void>>[
       const MaterialPage<void>(child: Text('Page 1')),
       MaterialPage<void>(
         child: PopScope(
