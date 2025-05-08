@@ -5825,9 +5825,7 @@ class SemanticsConfiguration {
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if (
-      _flags.hasRepeatedFlags (other._flags)
-    ) {
+    if (_flags.hasRepeatedFlags(other._flags)) {
       return false;
     }
     if (_platformViewId != null && other._platformViewId != null) {
@@ -5876,7 +5874,7 @@ class SemanticsConfiguration {
     }
     _actionsAsBits |= child._effectiveActionsAsBits;
     _customSemanticsActions.addAll(child._customSemanticsActions);
-    _flags.merge(child._flags);
+    _flags = _flags.merge(child._flags);
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
     _scrollExtentMax ??= child._scrollExtentMax;
@@ -6209,6 +6207,7 @@ int _toBitMask(SemanticsFlags flags) {
   return bitmask;
 }
 
+/// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 SemanticsFlags _fromBitMask(int bitmask) {
   return SemanticsFlags(
     hasCheckedState: (bitmask & (1 << 0)) != 0,
