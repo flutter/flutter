@@ -73,7 +73,7 @@ config("compiler") {
 
   # Platform-specific configs.
   if (is_ios || is_mac) {
-    configs += [ "//build/config/apple:compiler" ]
+    configs += [ "//build/config/darwin:compiler" ]
   }
 
   # In general, Windows is totally different, but all the other builds share

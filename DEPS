@@ -993,7 +993,7 @@ hooks = [
     'condition': 'host_os == "mac"',
     'action': [
       'python3',
-      'engine/src/build/mac/apple_sdk.py',
+      'engine/src/build/mac/darwin_sdk.py',
       '--as-gclient-hook'
     ]
   },

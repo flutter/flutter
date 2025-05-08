@@ -4,7 +4,7 @@
 
 assert(is_mac || is_ios)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 
 config("compiler") {
   # swiftc -sdk flag.
