@@ -59,7 +59,6 @@ class Context {
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
-        embedFlutterFrameworks(platform);
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks(platform);
@@ -257,6 +256,12 @@ class Context {
 
     final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
 
+    final bool codesign =
+        platform == TargetPlatform.macos &&
+        expandedCodeSignIdentity != null &&
+        expandedCodeSignIdentity.isNotEmpty &&
+        environment['CODE_SIGNING_REQUIRED'] != 'NO';
+
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type specific build.
     switch (platform) {
@@ -269,9 +274,7 @@ class Context {
           '$xcodeFrameworksDir/',
         );
 
-        if (expandedCodeSignIdentity != null &&
-            expandedCodeSignIdentity.isNotEmpty &&
-            environment['CODE_SIGNING_REQUIRED'] != 'NO') {
+        if (codesign) {
           _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
           _codesignFramework(
             expandedCodeSignIdentity,
@@ -294,19 +297,21 @@ class Context {
       if (verbose) {
         print('♦ Copying native assets from $nativeAssetsPath.');
       }
-      runRsync(
-        extraArgs: <String>['--filter', '- native_assets.yaml', '--filter', '- native_assets.json'],
-        nativeAssetsPath,
-        xcodeFrameworksDir,
-      );
-      if (platform == TargetPlatform.macos &&
-          expandedCodeSignIdentity != null &&
-          expandedCodeSignIdentity.isNotEmpty &&
-          environment['CODE_SIGNING_REQUIRED'] != 'NO') {
-        for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
-          if (entity is Directory) {
-            final String? frameworkName = parseFrameworkNameFromDirectory(entity);
-            if (frameworkName != null) {
+      for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
+        if (entity is Directory) {
+          final String? frameworkName = parseFrameworkNameFromDirectory(entity);
+          if (frameworkName != null) {
+            runRsync(
+              extraArgs: <String>[
+                '--filter',
+                '- native_assets.yaml',
+                '--filter',
+                '- native_assets.json',
+              ],
+              entity.path,
+              xcodeFrameworksDir,
+            );
+            if (codesign) {
               _codesignFramework(
                 expandedCodeSignIdentity,
                 '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
@@ -335,6 +340,10 @@ class Context {
     ]);
   }
 
+  /// Parse the [dir]'s path to get the framework name. For example,
+  /// `/path/to/framework_name.framework/` would parse to `framework_name`.
+  ///
+  /// Returns null if [dir] is not a `.framework`.
   static String? parseFrameworkNameFromDirectory(Directory dir) {
     final List<String> pathSegments = dir.uri.pathSegments;
     if (pathSegments.isEmpty) {

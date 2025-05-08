@@ -633,7 +633,8 @@ void main() {
       '/path/to/my_flutter_app/$flutterBuildDir/native_assets/ios/',
     );
     nativeAssetsDir.createSync(recursive: true);
-    nativeAssetsDir.childDirectory('plugin_a.framework').createSync();
+    const String ffiPackageName = 'package_a';
+    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
     const String infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
@@ -697,7 +698,7 @@ void main() {
             '- native_assets.yaml',
             '--filter',
             '- native_assets.json',
-            nativeAssetsDir.path,
+            ffiPackageDir.path,
             targetBuildDir.childDirectory(frameworksFolderPath).path,
           ],
         ),
@@ -753,7 +754,8 @@ void main() {
       '/path/to/my_flutter_app/$flutterBuildDir/native_assets/macos/',
     );
     nativeAssetsDir.createSync(recursive: true);
-    nativeAssetsDir.childDirectory('plugin_a.framework').createSync();
+    const String ffiPackageName = 'package_a';
+    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
     const String infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
@@ -847,7 +849,7 @@ void main() {
             '- native_assets.yaml',
             '--filter',
             '- native_assets.json',
-            nativeAssetsDir.path,
+            ffiPackageDir.path,
             targetBuildDir.childDirectory(frameworksFolderPath).path,
           ],
         ),
@@ -861,7 +863,7 @@ void main() {
             '--',
             targetBuildDir
                 .childDirectory(frameworksFolderPath)
-                .childFile('plugin_a.framework/plugin_a')
+                .childFile('$ffiPackageName.framework/$ffiPackageName')
                 .path,
           ],
         ),
