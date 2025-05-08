@@ -975,11 +975,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
 
+    Log.e("HI GRAY", "in createAccessibilityNodeInfo");
     for (SemanticsNode child : semanticsNode.childrenInTraversalOrder) {
       if (child.hasFlag(Flag.IS_HIDDEN)) {
         continue;
       }
       if (child.platformViewId != -1) {
+        Log.e("HI GRAY", "we have a child pv");
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(child.platformViewId);
 
@@ -991,6 +993,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
+          Log.e("HI GRAY", "adding as a child");
           result.addChild(embeddedView);
           continue;
         }

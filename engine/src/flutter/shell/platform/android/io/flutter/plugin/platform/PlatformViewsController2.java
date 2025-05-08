@@ -115,6 +115,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
+    Log.e("HI GRAY", "view id is " + request.viewId);
     maybeInvokeOnFlutterViewAttached(platformView);
     return platformView;
   }
