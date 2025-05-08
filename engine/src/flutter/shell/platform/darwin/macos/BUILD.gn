@@ -4,7 +4,7 @@
 
 assert(is_mac)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
