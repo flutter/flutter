@@ -1021,7 +1021,7 @@ class SemanticsData with Diagnosticable {
 
   /// Whether [flags] contains the given flag.
   @Deprecated(
-    'Use flagsCollection instead.'
+    'Use flagsCollection instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
@@ -5788,7 +5788,7 @@ class SemanticsConfiguration {
 
   // INTERNAL FLAG MANAGEMENT
 
-  SemanticsFlags _flags = SemanticsFlags();
+  SemanticsFlags _flags = SemanticsFlags.kNone;
 
   bool get _hasExplicitRole {
     if (_role != SemanticsRole.none) {
