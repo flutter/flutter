@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-const allFlags = SemanticsFlags(
+const SemanticsFlags allFlags = SemanticsFlags(
   hasCheckedState: true,
   isChecked: true,
   isSelected: true,
