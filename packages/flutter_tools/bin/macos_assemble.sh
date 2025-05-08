@@ -3,6 +3,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `xcode_backend.sh` script (used for iOS projects) in the same directory.
+#
+# -------------------------------------------------------------------------- #
+
 # exit on error, or usage of unset var
 set -euo pipefail
 
@@ -28,7 +35,7 @@ DART="$FLUTTER_ROOT/bin/dart"
 
 # Main entry point.
 if [[ $# == 0 ]]; then
-  "$DART" "$BIN_DIR/xcode_backend.dart" "build"
+  "$DART" "$BIN_DIR/xcode_backend.dart" "build" "macos"
 else
-  "$DART" "$BIN_DIR/xcode_backend.dart" "$@"
+  "$DART" "$BIN_DIR/xcode_backend.dart" "$@" "macos"
 fi

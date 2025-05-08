@@ -32,33 +32,69 @@ class Context {
   final List<String> arguments;
   RandomAccessFile? scriptOutputStream;
 
+  static const String incompatibleErrorMessage =
+      'Your Xcode project is incompatible with this version of Flutter. '
+      'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
+
   void run() {
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
-      stderr.write(
-        'error: Your Xcode project is incompatible with this version of Flutter. '
-        'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n',
-      );
+      echoXcodeError(incompatibleErrorMessage);
       exit(-1);
     }
 
-    final String subCommand = arguments.first;
+    final String? subCommand = validateCommand(arguments[0]);
+    if (subCommand == null) {
+      echoXcodeError(incompatibleErrorMessage);
+      exit(-1);
+    }
+    final String? platformName = arguments.length < 2 ? null : arguments[1];
+    final TargetPlatform platform = parsePlatform(platformName);
     switch (subCommand) {
       case 'build':
-        buildApp();
+        buildApp(platform);
       case 'prepare':
-        prepare();
+        prepare(platform);
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
-        embedFlutterFrameworks();
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
-        embedFlutterFrameworks();
+        embedFlutterFrameworks(platform);
       case 'test_vm_service_bonjour_service':
         // Exposed for integration testing only.
         addVmServiceBonjourService();
+    }
+  }
+
+  /// Validates the command argument matches one of the possible commands.
+  /// Returns null if not.
+  String? validateCommand(String command) {
+    switch (command) {
+      case 'build':
+      case 'prepare':
+      case 'thin':
+      case 'embed':
+      case 'embed_and_thin':
+      case 'test_vm_service_bonjour_service':
+        return command;
+      default:
+        return null;
+    }
+  }
+
+  /// Converts the [platformName] argument to a [TargetPlatform]. If there is
+  /// not a match, prints a warning and defaults to [TargetPlatform.ios].
+  TargetPlatform parsePlatform(String? platformName) {
+    switch (platformName) {
+      case 'macos':
+        return TargetPlatform.macos;
+      case 'ios':
+        return TargetPlatform.ios;
+      default:
+        echoXcodeWarning('Unrecognized platform: $platformName. Defaulting to iOS.');
+        return TargetPlatform.ios;
     }
   }
 
@@ -107,9 +143,14 @@ class Context {
     stderr.writeln(message);
   }
 
+  /// Log message to stderr.
+  void echoXcodeError(String message) {
+    stderr.writeln('error: $message');
+  }
+
   /// Log message appended with `warning:` to stderr.
   /// This will display with a yellow warning icon in Xcode.
-  void echoWarning(String message) {
+  void echoXcodeWarning(String message) {
     stderr.writeln('warning: $message');
   }
 
@@ -145,7 +186,7 @@ class Context {
   /// Uses `FLUTTER_BUILD_MODE` (uncommon) if set, otherwise uses `CONFIGURATION`.
   /// The `CONFIGURATION` may not match exactly since it can be named by the developer.
   /// If the `FLUTTER_BUILD_MODE` and `CONFIGURATION` do not contain either
-  /// debug, profile, or release, print an error and exit the build.
+  /// debug, profile, or release, prints an error and exits the build.
   String parseFlutterBuildMode() {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
@@ -179,45 +220,16 @@ class Context {
     exitApp(-1);
   }
 
-  /// Determines if the platform is [TargetPlatform.ios] or [TargetPlatform.macos]
-  /// by checking the `PROJECT_DIR` or `PLATFORM_NAME`.
-  ///
-  /// If unable to determine the platform, defaults to [TargetPlatform.ios].
-  TargetPlatform getPlatform() {
-    final String? projectDirectory = environment['PROJECT_DIR'];
-    if (projectDirectory != null) {
-      if (projectDirectory.endsWith('/ios')) {
-        return TargetPlatform.ios;
-      } else if (projectDirectory.endsWith('/macos')) {
-        return TargetPlatform.macos;
-      }
-    }
-    final String? platformName = environment['PLATFORM_NAME'];
-    if (platformName == 'macosx') {
-      return TargetPlatform.macos;
-    } else if (platformName == 'iphonesimulator' || platformName == 'iphoneos') {
-      return TargetPlatform.ios;
-    }
-
-    echoWarning('Unrecognized platform: $platformName. Defaulting to iOS.');
-    return TargetPlatform.ios;
-  }
-
   /// Copies all files from [source] to [destination].
   ///
   /// Does not copy `.DS_Store`.
   ///
   /// If [delete], delete extraneous files from [destination].
-  void runRsync(
-    String source,
-    String destination, {
-    List<String> extraArgs = const <String>[],
-    bool delete = false,
-  }) {
+  void runRsync(String source, String destination, {List<String> extraArgs = const <String>[]}) {
     runSync('rsync', <String>[
       '-8', // Avoid mangling filenames with encodings that do not match the current locale.
       '-av',
-      if (delete) '--delete',
+      '--delete',
       '--filter',
       '- .DS_Store',
       ...extraArgs,
@@ -234,19 +246,13 @@ class Context {
   /// is not passed in the build settings during the `build` phase for macOS.
   ///
   /// On iOS, also injects local network permissions into the app's Info.plist.
-  void embedFlutterFrameworks() {
-    final TargetPlatform platform = getPlatform();
-
+  void embedFlutterFrameworks(TargetPlatform platform) {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
     final String xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
-    runRsync(
-      delete: true,
-      '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
-      xcodeFrameworksDir,
-    );
+    runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
 
     final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
 
@@ -254,14 +260,9 @@ class Context {
     // which could be a local build or an arch/type specific build.
     switch (platform) {
       case TargetPlatform.ios:
-        runRsync(
-          delete: true,
-          '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-          '$xcodeFrameworksDir/',
-        );
+        runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
       case TargetPlatform.macos:
         runRsync(
-          delete: true,
           extraArgs: <String>['--filter', '- Headers', '--filter', '- Modules'],
           '${environment['BUILT_PRODUCTS_DIR']}/FlutterMacOS.framework',
           '$xcodeFrameworksDir/',
@@ -434,7 +435,7 @@ class Context {
   }
 
   /// Calls `flutter assemble [buildMode]_unpack_[platform]` (e.g. `debug_unpack_ios`, `debug_unpack_macos`)
-  void prepare() {
+  void prepare(TargetPlatform platform) {
     // The "prepare" command runs in a pre-action script, which also runs when
     // using the Xcode/xcodebuild clean command. Skip if cleaning.
     if (environment['ACTION'] == 'clean') {
@@ -446,8 +447,6 @@ class Context {
 
     final String buildMode = parseFlutterBuildMode();
 
-    final TargetPlatform platform = getPlatform();
-
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: 'prepare',
       buildMode: buildMode,
@@ -456,14 +455,9 @@ class Context {
       verbose: verbose,
     );
 
-    switch (platform) {
-      case TargetPlatform.ios:
-        // The "prepare" command only targets the UnpackIOS target, which copies the
-        // Flutter framework to the BUILT_PRODUCTS_DIR.
-        flutterArgs.add('${buildMode}_unpack_ios');
-      case TargetPlatform.macos:
-        flutterArgs.add('${buildMode}_unpack_macos');
-    }
+    // The "prepare" command only targets the UnpackIOS/UnpackMacOS target, which copies the
+    // Flutter framework to the BUILT_PRODUCTS_DIR.
+    flutterArgs.add('${buildMode}_unpack_${platform.name}');
 
     final ProcessResult result = runSync(
       '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
@@ -481,13 +475,12 @@ class Context {
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
   /// (e.g. `debug_ios_bundle_flutter_assets`, `debug_macos_bundle_flutter_assets`)
-  void buildApp() {
+  void buildApp(TargetPlatform platform) {
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
     final String buildMode = parseFlutterBuildMode();
-    final TargetPlatform platform = getPlatform();
 
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: 'build',
@@ -497,13 +490,7 @@ class Context {
       verbose: verbose,
     );
 
-    switch (platform) {
-      case TargetPlatform.ios:
-        flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
-      case TargetPlatform.macos:
-        flutterArgs.add('${buildMode}_macos_bundle_flutter_assets');
-    }
-
+    flutterArgs.add('${buildMode}_${platform.name}_bundle_flutter_assets');
     final ProcessResult result = runSync(
       '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
       flutterArgs,
@@ -538,7 +525,7 @@ class Context {
     // Warn the user if not archiving (ACTION=install) in release mode.
     final String? action = environment['ACTION'];
     if (action == 'install' && buildMode != 'release') {
-      echoWarning(
+      echoXcodeWarning(
         'Flutter archive not built in Release mode. Ensure '
         'FLUTTER_BUILD_MODE is set to release or run "flutter build ios '
         '--release", then re-run Archive from Xcode.',

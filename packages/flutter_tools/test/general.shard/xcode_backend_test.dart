@@ -74,13 +74,12 @@ void main() {
         final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
           ..createSync(recursive: true);
         final TestContext context = TestContext(
-          <String>['build'],
+          <String>['build', platformName],
           <String, String>{
             'ACTION': 'build',
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[],
           fileSystem: fileSystem,
@@ -99,13 +98,12 @@ void main() {
         const String buildMode = 'Debug';
 
         final TestContext context = TestContext(
-          <String>['build'],
+          <String>['build', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -173,7 +171,7 @@ void main() {
         const String iOSVersion = '18.3.1';
         const String devDependenciesEnabled = 'true';
         final TestContext context = TestContext(
-          <String>['build'],
+          <String>['build', platformName],
           <String, String>{
             'ACTION': 'install',
             'ARCHS': archs,
@@ -196,7 +194,6 @@ void main() {
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
             'FLUTTER_DEV_DEPENDENCIES_ENABLED': devDependenciesEnabled,
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -253,7 +250,6 @@ void main() {
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDir.path,
           'INFOPLIST_PATH': 'Info.plist',
-          'PROJECT_DIR': '/path/to/my_flutter_app/ios',
         },
         commands: <FakeCommand>[],
         fileSystem: fileSystem,
@@ -279,13 +275,12 @@ void main() {
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
         const String buildMode = 'Debug';
         final TestContext context = TestContext(
-          <String>['prepare'],
+          <String>['prepare', platformName],
           <String, String>{
             'ACTION': 'build',
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -331,13 +326,12 @@ void main() {
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
         const String buildMode = 'Debug';
         final TestContext context = TestContext(
-          <String>['prepare'],
+          <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -397,7 +391,7 @@ void main() {
         const String iOSVersion = '18.3.1';
         const String devDependenciesEnabled = 'true';
         final TestContext context = TestContext(
-          <String>['prepare'],
+          <String>['prepare', platformName],
           <String, String>{
             'ACTION': 'install',
             'ARCHS': archs,
@@ -420,7 +414,6 @@ void main() {
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
             'FLUTTER_DEV_DEPENDENCIES_ENABLED': devDependenciesEnabled,
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -470,7 +463,7 @@ void main() {
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
         const String buildMode = 'Debug';
         final TestContext context = TestContext(
-          <String>['prepare'],
+          <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
@@ -479,7 +472,6 @@ void main() {
             'ARCHS': 'arm64 x86_64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'arm64e',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -526,7 +518,7 @@ void main() {
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
         const String buildMode = 'Debug';
         final TestContext context = TestContext(
-          <String>['prepare'],
+          <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
@@ -535,7 +527,6 @@ void main() {
             'ARCHS': 'arm64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'x86_64',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -582,7 +573,7 @@ void main() {
         final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
         const String buildMode = 'Debug';
         final TestContext context = TestContext(
-          <String>['prepare'],
+          <String>['prepare', platformName],
           <String, String>{
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'CONFIGURATION': buildMode,
@@ -590,7 +581,6 @@ void main() {
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64 x86_64',
             'NATIVE_ARCH': 'arm64e',
-            'PROJECT_DIR': '/path/to/my_flutter_app/$platformName',
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -650,12 +640,11 @@ void main() {
     infoPlist.createSync(recursive: true);
     const String buildMode = 'Debug';
     final TestContext testContext = TestContext(
-      <String>['embed_and_thin'],
+      <String>['embed_and_thin', 'ios'],
       <String, String>{
         'BUILT_PRODUCTS_DIR': buildDir.path,
         'CONFIGURATION': buildMode,
         'INFOPLIST_PATH': infoPlistPath,
-        'PROJECT_DIR': platformDirPath,
         'SOURCE_ROOT': platformDirPath,
         'FLUTTER_APPLICATION_PATH': appPath,
         'FLUTTER_BUILD_DIR': flutterBuildDir,
@@ -701,6 +690,7 @@ void main() {
             'rsync',
             '-8',
             '-av',
+            '--delete',
             '--filter',
             '- .DS_Store',
             '--filter',
@@ -771,12 +761,11 @@ void main() {
     const String buildMode = 'Debug';
     const String codesignIdentity = '12312313';
     final TestContext testContext = TestContext(
-      <String>['embed_and_thin'],
+      <String>['embed_and_thin', 'macos'],
       <String, String>{
         'BUILT_PRODUCTS_DIR': buildDir.path,
         'CONFIGURATION': buildMode,
         'INFOPLIST_PATH': infoPlistPath,
-        'PROJECT_DIR': platformDirPath,
         'SOURCE_ROOT': platformDirPath,
         'FLUTTER_APPLICATION_PATH': appPath,
         'FLUTTER_BUILD_DIR': flutterBuildDir,
@@ -851,6 +840,7 @@ void main() {
             'rsync',
             '-8',
             '-av',
+            '--delete',
             '--filter',
             '- .DS_Store',
             '--filter',
@@ -952,7 +942,12 @@ class TestContext extends Context {
   }
 
   @override
-  void echoWarning(String message) {
+  void echoXcodeError(String message) {
+    stderr += 'error: $message';
+  }
+
+  @override
+  void echoXcodeWarning(String message) {
     stderr += 'warning: $message\n';
   }
 

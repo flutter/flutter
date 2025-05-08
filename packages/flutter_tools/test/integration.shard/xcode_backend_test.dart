@@ -67,10 +67,10 @@ void main() {
   test('Xcode backend warns when unable to determine platform', () async {
     final ProcessResult result = await Process.run(
       xcodeBackendPath,
-      <String>['build'],
+      <String>['build', 'asdf'],
       environment: <String, String>{'CONFIGURATION': 'Debug', 'ACTION': 'install'},
     );
-    expect(result.stderr, contains('warning: Unrecognized platform: null. Defaulting to iOS.'));
+    expect(result.stderr, contains('warning: Unrecognized platform: asdf. Defaulting to iOS.'));
     expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
