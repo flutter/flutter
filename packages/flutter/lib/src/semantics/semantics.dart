@@ -3359,7 +3359,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
         }
-        for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
+        for (final CustomSemanticsAction action in node._customSemanticsActions.keys) {
           customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         if (node.hintOverrides != null) {
