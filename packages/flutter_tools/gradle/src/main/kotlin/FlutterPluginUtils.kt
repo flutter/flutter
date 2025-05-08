@@ -166,7 +166,8 @@ object FlutterPluginUtils {
             )
         }
         val parentSettingsGradle = File(projectDirectory.parentFile.parentFile, "settings.gradle")
-        val parentSettingsGradleKts = File(projectDirectory.parentFile.parentFile, "settings.gradle.kts")
+        val parentSettingsGradleKts =
+            File(projectDirectory.parentFile.parentFile, "settings.gradle.kts")
         if (parentSettingsGradle.exists() && parentSettingsGradleKts.exists()) {
             logger.error(
                 """
@@ -176,8 +177,10 @@ object FlutterPluginUtils {
             )
         }
 
-        val possibleLocations = listOf(parentSettingsGradle, parentSettingsGradleKts, settingsGradle, settingsGradleKts)
-        return possibleLocations.firstOrNull { it.exists() } ?: throw FileNotFoundException("no settings.gradle[.kts] found at ${possibleLocations.joinToString { it.absolutePath }}")
+        val possibleLocations =
+            listOf(parentSettingsGradle, parentSettingsGradleKts, settingsGradle, settingsGradleKts)
+        return possibleLocations.firstOrNull { it.exists() }
+            ?: throw FileNotFoundException("no settings.gradle[.kts] found at ${possibleLocations.joinToString { it.absolutePath }}")
     }
 
     /**

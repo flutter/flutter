@@ -122,7 +122,9 @@ class FlutterPlugin : Plugin<Project> {
             if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
                 val file = if (hasSettings) settingsFile else settingsKtsFile
                 // TODO(rekire): Ensure that this url is live before merging
-                project.logger.warn("w: You should migrate your ${file.name}. See https://docs.flutter.dev/release/breaking-changes/gradle-settings-migration")
+                project.logger.warn(
+                    "w: You should migrate your ${file.name}. See https://docs.flutter.dev/release/breaking-changes/gradle-settings-migration",
+                )
             }
         }
 
@@ -136,8 +138,8 @@ class FlutterPlugin : Plugin<Project> {
                     "src",
                     "main",
                     "scripts",
-                    "native_plugin_loader.gradle.kts"
-                )
+                    "native_plugin_loader.gradle.kts",
+                ),
             )
         }
 
@@ -217,7 +219,7 @@ class FlutterPlugin : Plugin<Project> {
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
                             "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
+                            e,
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -235,7 +237,7 @@ class FlutterPlugin : Plugin<Project> {
                     "packages",
                     "flutter_tools",
                     "gradle",
-                    "flutter_proguard_rules.pro"
+                    "flutter_proguard_rules.pro",
                 ).toString()
         // TODO(gmackall): reconsider getting the android extension every time
         FlutterPluginUtils.getAndroidExtension(project).buildTypes {
@@ -264,7 +266,7 @@ class FlutterPlugin : Plugin<Project> {
                             .getAndroidExtension(project)
                             .getDefaultProguardFile("proguard-android-optimize.txt"),
                         flutterProguardRules,
-                        "proguard-rules.pro"
+                        "proguard-rules.pro",
                     )
                 }
             }
@@ -299,7 +301,7 @@ class FlutterPlugin : Plugin<Project> {
             project!!,
             buildType,
             getPluginHandler(project!!),
-            engineVersion!!
+            engineVersion!!,
         )
     }
 
@@ -311,9 +313,10 @@ class FlutterPlugin : Plugin<Project> {
         if (localProperties == null) {
             val projectProperties = File(project!!.projectDir.parentFile, "local.properties")
             val rootProperties = File(project!!.rootDir, "local.properties")
-            localProperties = readPropertiesIfExist(
-                if (projectProperties.exists()) projectProperties else rootProperties
-            )
+            localProperties =
+                readPropertiesIfExist(
+                    if (projectProperties.exists()) projectProperties else rootProperties,
+                )
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,

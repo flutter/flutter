@@ -179,9 +179,11 @@ class PluginHandler(
         /**
          * Flutter Docs Website URLs for help messages.
          */
-        private const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
+        private const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG =
+            "https://flutter.dev/to/review-gradle-config"
 
-        @VisibleForTesting internal val legacyFlutterPluginsWarning =
+        @VisibleForTesting
+        internal val legacyFlutterPluginsWarning =
             """
             Warning: This project is still reading the deprecated '.flutter-plugins. file.
             In an upcoming stable release support for this file will be completely removed and your build will fail.
@@ -270,7 +272,11 @@ class PluginHandler(
             //
             // See https://issuetracker.google.com/139821726, and
             // https://github.com/flutter/flutter/issues/72185 for more details.
-            addApiDependencies(pluginProject, buildType.name, "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
+            addApiDependencies(
+                pluginProject,
+                buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion",
+            )
         }
 
         /**
@@ -314,7 +320,8 @@ class PluginHandler(
                     }
 
                     val dependencyProject =
-                        project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
+                        project.rootProject.findProject(":$pluginDependencyName")
+                            ?: return@innerForEach
                     pluginProject.afterEvaluate {
                         // this.dependencies.add("implementation", dependencyProject)
                         pluginProject.dependencies.add("implementation", dependencyProject)
