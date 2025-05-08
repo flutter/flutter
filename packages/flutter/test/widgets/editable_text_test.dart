@@ -8907,51 +8907,42 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
-  testWidgets(
-    'default text selection height style',
-    (WidgetTester tester) async {
-      controller.text = 'a b c d e f g';
+  testWidgets('default text selection height style', (WidgetTester tester) async {
+    controller.text = 'a b c d e f g';
 
-      final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
-        fontFamily: 'Roboto',
-        fontSize: 14.0, // default.
-        height: 5.0,
-      );
+    final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
+      fontFamily: 'Roboto',
+      fontSize: 14.0, // default.
+    );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              child: EditableText(
-                showSelectionHandles: true,
-                controller: controller,
-                focusNode: focusNode,
-                style: style,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                selectionControls: materialTextSelectionControls,
-                keyboardType: TextInputType.text,
-              ),
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: focusNode,
+            style: style,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
           ),
         ),
-      );
+      ),
+    );
 
-      controller.selection = const TextSelection(
-        baseOffset: 0,
-        extentOffset: 13,
-      ); // select the entire text.
-      await tester.pumpAndSettle();
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 13,
+    ); // select the entire text.
+    await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('editable_text_golden.TextSelectionStyle.1.png'),
-      );
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('editable_text_golden.TextSelectionStyle.1.png'),
+    );
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets(
     'multi-line field can scroll with touch on iOS',
