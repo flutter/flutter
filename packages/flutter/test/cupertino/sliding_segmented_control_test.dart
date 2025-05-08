@@ -2173,13 +2173,20 @@ void main() {
     );
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
-    await gesture.moveBy(const Offset(10, 0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 206));
     final Finder scaleTransition = find.ancestor(
       of: find.text('A'),
       matching: find.byType(ScaleTransition),
     );
-    final double scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 206));
+    double scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
     expect(scale, greaterThan(1.0));
+
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+    scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
+    // Spring animations approach but don't exactly reach normal scale.
+    expect(scale, moreOrLessEquals(1.0, epsilon: 0.01));
   });
 }

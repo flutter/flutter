@@ -493,15 +493,18 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
 
-  /// Determines whether segments in the segmented control show selected state.
+  /// Determines whether segments provide only momentary feedback when pressed
+  /// rather than maintaining a persistent selected state.
   ///
-  /// If true, segments in the control don’t show selected state and
-  /// don’t update the value of selectedSegmentIndex after tracking ends.
+  /// When true, segments behave more like buttons that trigger actions rather
+  /// than options that can be selected and remain in that state.
   ///
   /// Defaults to false.
   ///
   /// {@tool dartpad}
-  /// This example shows a [CupertinoSlidingSegmentedControl] with [isMomentary] set to true.
+  /// This example shows a [CupertinoSlidingSegmentedControl] with [isMomentary] set
+  /// to true, providing feedback to the user when the segment is selected with a
+  /// text scaling effect.
   ///
   /// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.1.dart **
   /// {@end-tool}
