@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 // //dev/devicelab/lib/tasks/keyboard_hot_restart_test.dart
 const bool forceKeyboard = true;
 
-bool? keyboardVisible = null;
+bool? keyboardVisible;
 
 void main() {
   runApp(const MyApp());
@@ -54,8 +54,6 @@ class MyHomePage extends StatelessWidget {
 
     keyboardVisible = insets.bottom > 0;
 
-    return const Scaffold(
-      body: Center(child: TextField(autofocus: forceKeyboard)),
-    );
+    return const Scaffold(body: Center(child: TextField(autofocus: forceKeyboard)));
   }
 }
