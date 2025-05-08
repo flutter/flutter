@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': '43ae814d2d955afdde782e9022546f6802290027',
+  'skia_revision': 'efccaeb08b8d4febfa3901b9d13335a1b64524cf',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -574,7 +574,7 @@ deps = {
       {
         # See tools/gradle/README.md for update instructions.
         # Version here means the CIPD tag.
-        'version': 'version:8.9',
+        'version': 'version:8.11.1',
         'package': 'flutter/gradle'
       }
     ],
@@ -614,7 +614,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',
-        'version': 'version:35v1'
+        'version': 'version:36v1'
        }
      ],
      'condition': 'download_android_deps',

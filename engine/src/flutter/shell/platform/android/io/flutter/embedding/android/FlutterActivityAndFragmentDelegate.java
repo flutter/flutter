@@ -7,7 +7,6 @@ package io.flutter.embedding.android;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_INITIAL_ROUTE;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -821,7 +820,6 @@ import java.util.List;
    *
    * @param backEvent The BackEvent object containing information about the touch.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void startBackGesture(@NonNull BackEvent backEvent) {
     ensureAlive();
@@ -844,7 +842,6 @@ import java.util.List;
    *
    * @param backEvent An BackEvent object describing the progress event.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void updateBackGestureProgress(@NonNull BackEvent backEvent) {
     ensureAlive();
@@ -869,7 +866,6 @@ import java.util.List;
    * navigation, including finalizing animations and updating the UI to reflect the navigation
    * outcome.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void commitBackGesture() {
     ensureAlive();
@@ -891,7 +887,6 @@ import java.util.List;
    * in response to the back gesture. This includes resetting UI elements to their state prior to
    * the gesture's start.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void cancelBackGesture() {
     ensureAlive();
