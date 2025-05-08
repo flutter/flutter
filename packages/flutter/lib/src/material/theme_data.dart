@@ -320,8 +320,7 @@ class ThemeData with Diagnosticable {
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
-    // TODO(huycozy): Change the parameter type to BottomAppBarThemeData
-    Object? bottomAppBarTheme,
+    BottomAppBarThemeData? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
@@ -527,16 +526,7 @@ class ThemeData with Diagnosticable {
     appBarTheme ??= const AppBarTheme();
     badgeTheme ??= const BadgeThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
-    // TODO(huycozy): Clean this up once the type of `bottomAppBarTheme` is changed to `BottomAppBarThemeData`
-    if (bottomAppBarTheme != null) {
-      if (bottomAppBarTheme is BottomAppBarTheme) {
-        bottomAppBarTheme = bottomAppBarTheme.data;
-      } else if (bottomAppBarTheme is! BottomAppBarThemeData) {
-        throw ArgumentError(
-          'bottomAppBarTheme must be either a BottomAppBarThemeData or a BottomAppBarTheme',
-        );
-      }
-    }
+    bottomAppBarTheme ??= const BottomAppBarThemeData();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     cardTheme ??= const CardThemeData();
@@ -630,9 +620,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme,
       badgeTheme: badgeTheme,
       bannerTheme: bannerTheme,
-      // TODO(huycozy): Remove this type cast when bottomAppBarTheme is explicitly set to BottomAppBarThemeData
-      bottomAppBarTheme:
-          (bottomAppBarTheme as BottomAppBarThemeData?) ?? const BottomAppBarThemeData(),
+      bottomAppBarTheme: bottomAppBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       buttonTheme: buttonTheme,
@@ -1531,8 +1519,7 @@ class ThemeData with Diagnosticable {
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
-    // TODO(huycozy): Change the parameter type to BottomAppBarThemeData
-    Object? bottomAppBarTheme,
+    BottomAppBarThemeData? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
@@ -1651,19 +1638,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme ?? this.appBarTheme,
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
-      // TODO(huycozy): Remove these checks when bottomAppBarTheme is a BottomAppBarThemeData
-      bottomAppBarTheme: () {
-        if (bottomAppBarTheme != null) {
-          if (bottomAppBarTheme is BottomAppBarTheme) {
-            return bottomAppBarTheme.data;
-          } else if (bottomAppBarTheme is! BottomAppBarThemeData) {
-            throw ArgumentError(
-              'bottomAppBarTheme must be either a BottomAppBarThemeData or a BottomAppBarTheme',
-            );
-          }
-        }
-        return bottomAppBarTheme as BottomAppBarThemeData? ?? this.bottomAppBarTheme;
-      }(),
+      bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       buttonTheme: buttonTheme ?? this.buttonTheme,
@@ -2061,6 +2036,7 @@ class ThemeData with Diagnosticable {
         // order in every place that they are separated by section comments (e.g.
         // GENERAL CONFIGURATION). Each section except for deprecations should be
         // alphabetical by symbol name.
+        // GENERAL CONFIGURATION
         mapEquals(other.adaptationMap, adaptationMap) &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
