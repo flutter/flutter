@@ -7,19 +7,17 @@
 
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/geometry/path_source.h"
+#include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
 
-/// @brief A geometry that is created from a stroked path object.
-class StrokePathGeometry final : public Geometry {
+/// @brief An abstract Geometry base class that produces fillable vertices
+///        representing the stroked outline from any |PathSource| provided
+///        by the type-specific subclass.
+class StrokePathSourceGeometry : public Geometry {
  public:
-  StrokePathGeometry(const flutter::DlPath& path,
-                     Scalar stroke_width,
-                     Scalar miter_limit,
-                     Cap stroke_cap,
-                     Join stroke_join);
-
-  ~StrokePathGeometry() override;
+  ~StrokePathSourceGeometry() override;
 
   Scalar GetStrokeWidth() const;
 
@@ -30,6 +28,13 @@ class StrokePathGeometry final : public Geometry {
   Join GetStrokeJoin() const;
 
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
+
+ protected:
+  explicit StrokePathSourceGeometry(const StrokeParameters& parameters);
+
+  /// The PathSource object that will be iterated to produce the stroked
+  /// outline vertices.
+  virtual const PathSource& GetSource() const = 0;
 
  private:
   // |Geometry|
@@ -46,10 +51,7 @@ class StrokePathGeometry final : public Geometry {
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
       const PathSource& source,
-      Scalar stroke_width,
-      Scalar miter_limit,
-      Join stroke_join,
-      Cap stroke_cap,
+      const StrokeParameters& stroke,
       Scalar scale);
 
   friend class ImpellerBenchmarkAccessor;
@@ -57,15 +59,29 @@ class StrokePathGeometry final : public Geometry {
 
   bool SkipRendering() const;
 
-  flutter::DlPath path_;
-  Scalar stroke_width_;
-  Scalar miter_limit_;
-  Cap stroke_cap_;
-  Join stroke_join_;
+  const StrokeParameters stroke_;
 
-  StrokePathGeometry(const StrokePathGeometry&) = delete;
+  StrokePathSourceGeometry(const StrokePathSourceGeometry&) = delete;
 
-  StrokePathGeometry& operator=(const StrokePathGeometry&) = delete;
+  StrokePathSourceGeometry& operator=(const StrokePathSourceGeometry&) = delete;
+};
+
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a |DlPath| or |impeller::Path| object using
+///        the |StrokePathSourceGeometry| base class and a |DlPath| object
+///        to perform path iteration.
+class StrokePathGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokePathGeometry(const Path& path, const StrokeParameters& parameters);
+
+  StrokePathGeometry(const flutter::DlPath& path,
+                     const StrokeParameters& parameters);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const flutter::DlPath path_;
 };
 
 }  // namespace impeller
