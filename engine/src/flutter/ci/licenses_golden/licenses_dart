@@ -1,4 +1,4 @@
-Signature: c96f6439e1d3cadfbb6adc790efdcc37
+Signature: e41496825525b0b25bd65a5a8e93c81a
 
 ====================================================================================================
 LIBRARY: dart
@@ -842,7 +842,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/isolate/isolate.dart + ../../.
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/math/math.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/math/random.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/builtin.cc
@@ -1191,7 +1190,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/isolate/isolate.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/math/math.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/math/random.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
@@ -1507,7 +1505,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/message.dart + ../..
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/message_router.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/running_isolate.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/vmservice/running_isolates.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/utils/compiler/create_snapshot_entry.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/eventhandler_win.cc
@@ -1792,7 +1789,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/message.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/message_router.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/running_isolate.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/vmservice/running_isolates.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../flutter/third_party/dart/utils/compiler/create_snapshot_entry.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2013, the Dart project authors.  Please see the AUTHORS file
