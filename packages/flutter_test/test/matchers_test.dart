@@ -465,12 +465,13 @@ void main() {
 
     test('differently constructed rects match', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath = Path()
-        ..moveTo(5.0, 5.0)
-        ..lineTo(5.0, 6.0)
-        ..lineTo(6.0, 6.0)
-        ..lineTo(6.0, 5.0)
-        ..close();
+      final Path linePath =
+          Path()
+            ..moveTo(5.0, 5.0)
+            ..lineTo(5.0, 6.0)
+            ..lineTo(6.0, 6.0)
+            ..lineTo(6.0, 5.0)
+            ..close();
       expect(
         linePath,
         coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)),
@@ -479,12 +480,13 @@ void main() {
 
     test('partially overlapping paths', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath = Path()
-        ..moveTo(5.0, 5.0)
-        ..lineTo(5.0, 6.0)
-        ..lineTo(6.0, 6.0)
-        ..lineTo(6.0, 5.5)
-        ..close();
+      final Path linePath =
+          Path()
+            ..moveTo(5.0, 5.0)
+            ..lineTo(5.0, 6.0)
+            ..lineTo(6.0, 6.0)
+            ..lineTo(6.0, 5.5)
+            ..close();
       expect(
         linePath,
         isNot(coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))),
@@ -892,30 +894,30 @@ void main() {
 
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(
-            tester.getSemantics(find.byKey(key)),
-            matchesSemantics(
-              // Adding the explicit `false` for test readability
-              // ignore: avoid_redundant_argument_values
-              namesRoute: false,
-              label: 'foo',
-              hint: 'bar',
-              value: 'baz',
-              increasedValue: 'a',
-              decreasedValue: 'b',
-              textDirection: TextDirection.rtl,
-              hasTapAction: true,
-              hasLongPressAction: true,
-              isButton: true,
-              isLink: true,
-              isHeader: true,
-              onTapHint: 'scan',
-              onLongPressHint: 'fill',
-              customActions: <CustomSemanticsAction>[
-                const CustomSemanticsAction(label: 'foo'),
-                const CustomSemanticsAction(label: 'bar'),
-              ],
-            ),
-          );
+        tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
+          // Adding the explicit `false` for test readability
+          // ignore: avoid_redundant_argument_values
+          namesRoute: false,
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
       handle.dispose();
@@ -1431,28 +1433,28 @@ void main() {
 
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(
-            tester.getSemantics(find.byKey(key)),
-            containsSemantics(
-              label: 'foo',
-              hint: 'bar',
-              value: 'baz',
-              increasedValue: 'a',
-              decreasedValue: 'b',
-              textDirection: TextDirection.rtl,
-              hasTapAction: true,
-              hasLongPressAction: true,
-              isButton: true,
-              isLink: true,
-              isHeader: true,
-              namesRoute: false,
-              onTapHint: 'scan',
-              onLongPressHint: 'fill',
-              customActions: <CustomSemanticsAction>[
-                const CustomSemanticsAction(label: 'foo'),
-                const CustomSemanticsAction(label: 'bar'),
-              ],
-            ),
-          );
+        tester.getSemantics(find.byKey(key)),
+        containsSemantics(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isLink: true,
+          isHeader: true,
+          namesRoute: false,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar'),
+          ],
+        ),
+      );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
       handle.dispose();
