@@ -20,8 +20,14 @@ Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
   /*
+  // This is no a correct paragraph paint implementation and only serve a purpose to compare
+  // the results with the normal paint. It does not do the paragraph positioning right but
+  // it does not matter.
   test('Draw WebParagraph on Canvas2D', () async {
-    final engine.DomCanvasElement canvas = engine.createDomCanvasElement(width: 500, height: 500);
+    final engine.DomHTMLCanvasElement canvas = engine.createDomCanvasElement(
+      width: 500,
+      height: 500,
+    );
     engine.domDocument.body!.append(canvas);
     final engine.DomCanvasRenderingContext2D context = canvas.context2D;
 
@@ -39,23 +45,25 @@ Future<void> testMain() async {
     context.fillRect(250, 0, 100, 200);
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
-
+*/
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
 
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 100), redPaint);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 200), bluePaint);
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
-    canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), bluePaint);
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 100));
+    canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), redPaint);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_ltr_1.png', region: region);
   });
@@ -63,6 +71,7 @@ Future<void> testMain() async {
   test('Draw WebParagraph LTR text with multiple lines', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
@@ -81,17 +90,14 @@ Future<void> testMain() async {
     final Canvas canvas = Canvas(recorder, region);
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
-    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
-    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 100), redPaint);
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('عالم');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
-    canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), bluePaint);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_rtl_1.png', region: region);
   });
@@ -99,6 +105,7 @@ Future<void> testMain() async {
   test('Draw WebParagraph RTL with multiple lines', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
@@ -107,26 +114,43 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_rtl_multilined.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
-    builder.addText('ABC لم def');
+
+    builder.addText('لABC لم def لل لم def');
+    //builder.addText('لم d');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    /*
+    final engine.DomHTMLCanvasElement canvas1 = engine.createDomCanvasElement(
+      width: 500,
+      height: 500,
+    );
+    engine.domDocument.body!.append(canvas1);
+    final context = canvas1.contextBitmapRenderer;
+    canvas1.style
+      ..position = 'absolute'
+      ..left = '100px'
+      ..top = '200px';
+    context.transferFromImageBitmap(textCanvas.transferToImageBitmap());
+    */
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_mix1_multilined.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
       textDirection: TextDirection.ltr,
@@ -142,12 +166,13 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_mix_multilined_ltr.png', region: region);
   });
-*/
+
   test('Draw WebParagraph LTR/RTL multi Line with RTL by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
       textDirection: TextDirection.rtl,
@@ -163,6 +188,147 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_mix_multilined_rtl.png', region: region);
+  });
+
+  test('Draw WebParagraph multicolored text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+
+    final WebParagraphStyle blackStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+    final WebTextStyle blueStyle = WebTextStyle(
+      foreground: bluePaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle redStyle = WebTextStyle(
+      foreground: redPaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
+
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multicolored.png', region: region);
+  });
+
+  test('Draw WebParagraph multicolored background text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final WebParagraphStyle blackStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: whitePaint,
+      background: blackPaint,
+    );
+    final WebTextStyle blueStyle = WebTextStyle(
+      foreground: whitePaint,
+      background: bluePaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle redStyle = WebTextStyle(
+      foreground: whitePaint,
+      background: redPaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
+
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
+  });
+
+  test('Draw WebParagraph One line text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    //final Paint greyPaint = Paint()..color = const Color(0xFF444444);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: bluePaint,
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText('Red color Blue color Black color Red color Blue color ');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    //canvas.drawRect(const Rect.fromLTWH(0, 0, 500, 50), greyPaint);
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_text.png', region: region);
   });
 }

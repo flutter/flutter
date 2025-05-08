@@ -67,7 +67,7 @@ class TextWrapper {
     for (int index = 0; index < _layout.textClusters.length - 1; index++) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
       // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
-      double widthCluster = cluster.bounds.width;
+      double widthCluster = cluster.advance.width;
       hardLineBreak = isHardLineBreak(cluster);
 
       if (hardLineBreak) {
@@ -129,7 +129,9 @@ class TextWrapper {
 
       // Check if we exceeded the line width
       if (_widthText + _widthWhitespaces + _widthLetters + widthCluster > width) {
-        WebParagraphDebug.log('exceeded: $index');
+        WebParagraphDebug.log(
+          'exceeded: $index $_widthText + $_widthWhitespaces + $_widthLetters + $widthCluster = ${_widthText + _widthWhitespaces + _widthLetters + widthCluster} ',
+        );
         if (_whitespaces.start != _startLine) {
           // There was at least one possible line break so we can use it to break the text
         } else if (index > _startLine) {
@@ -175,6 +177,9 @@ class TextWrapper {
       }
 
       // This is just a regular cluster, keep track of it
+      WebParagraphDebug.log(
+        '**** $_widthLetters + $widthCluster = ${_widthLetters + widthCluster}',
+      );
       _widthLetters += widthCluster;
     }
 

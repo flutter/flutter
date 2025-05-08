@@ -50,19 +50,21 @@ class TextPaint {
     // TODO(jlavrova): We need to traverse clusters in the order of visual bidi runs
     // (by line, then by reordered visual runs)
     WebParagraphDebug.log(
-      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
+      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.formattingShift}->${line.bounds.width}x${line.bounds.height}',
     );
-    for (final BidiRun run in line.visualRuns) {
+    for (final LineRun run in line.visualRuns) {
       final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
       final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
       final int step = run.bidiLevel.isEven ? 1 : -1;
-      WebParagraphDebug.log('run.shift: ${run.shift} line.shift: ${line.shift}');
+      WebParagraphDebug.log(
+        'run.shiftInsideLine: ${run.shiftInsideLine} line.formattingShift: ${line.formattingShift}',
+      );
       for (int i = start; i != end; i += step) {
         final clusterText = layout.textClusters[i];
         paintCluster(
           canvas,
           clusterText,
-          ui.Offset(line.shift + run.shift, line.bounds.top),
+          ui.Offset(line.formattingShift + run.shiftInsideLine, line.bounds.top),
           ui.Offset(x, y),
           run.bidiLevel.isEven,
         );
@@ -100,6 +102,7 @@ class TextPaint {
 
     final double left = clusterOffset.dx + webTextCluster.cluster!.x + lineOffset.dx;
     final double shift = left - left.floorToDouble();
+    // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
         .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
         .translate(lineOffset.dx, lineOffset.dy)
@@ -120,14 +123,6 @@ class TextPaint {
       webTextCluster.textRange.start,
       webTextCluster.textRange.end,
     );
-
-    String diff = '';
-    if (rects.first.left > webTextCluster.bounds.left) {
-      diff += ' left: ${rects.first.left - webTextCluster.bounds.left}';
-    }
-    if (rects.first.right < webTextCluster.bounds.right) {
-      diff += ' right: ${rects.first.right - webTextCluster.bounds.right}';
-    }
 
     //final ui.Paint transparent = ui.Paint()..color = ui.Color(ltr ? 0xFFFF0000 : 0xFF0000FF);
     //canvas.saveLayer(const ui.Rect.fromLTWH(0, 0, 500, 500), transparent);

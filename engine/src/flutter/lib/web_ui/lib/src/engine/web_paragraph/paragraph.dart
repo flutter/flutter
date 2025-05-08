@@ -95,7 +95,7 @@ class WebTextStyle implements ui.TextStyle {
       originalFontFamily: fontFamily ?? 'Arial',
       fontSize: fontSize ?? 14.0,
       foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
-      background: background ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
+      background: background, // ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
     );
   }
 

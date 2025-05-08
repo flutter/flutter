@@ -109,6 +109,12 @@ class TextLayout {
           cluster.end,
         );
         final ui.Rect bounds = ui.Rect.fromLTWH(box.left, box.top, box.width, box.height);
+        final ui.Rect advance = ui.Rect.fromLTWH(
+          rects.first.left,
+          rects.first.top,
+          rects.first.width,
+          rects.first.height,
+        );
         for (
           int i = cluster.begin + styledBlock.textRange.start;
           i < cluster.end + styledBlock.textRange.start;
@@ -121,7 +127,7 @@ class TextLayout {
           cluster.end + styledBlock.textRange.start,
         );
         WebParagraphDebug.log(
-          '"$clusterText": [${cluster.begin}:${cluster.end}) ${bounds.left}:${bounds.right} x ${bounds.top}:${box.bottom} ${rects.first.left}:${rects.first.right} x ${rects.first.top}:${rects.first.bottom}',
+          'Cluster[${textClusters.length}]: "$clusterText" [${cluster.begin}:${cluster.end}) ${bounds.left}:${bounds.right} ${rects.first.left}:${rects.first.right}',
         );
         textClusters.add(
           ExtendedTextCluster(
@@ -132,6 +138,7 @@ class TextLayout {
             ),
             styledBlock.textStyle,
             bounds,
+            advance,
             blockStart,
             blockTextMetrics,
           ),
@@ -145,6 +152,9 @@ class TextLayout {
   }
 
   ClusterRange convertTextToClusterRange(int start, int end) {
+    WebParagraphDebug.log(
+      'convertTextToClusterRange($start, $end)=[${textToClusterMap[start]!}:${textToClusterMap[end]!})',
+    );
     return ClusterRange(start: textToClusterMap[start]!, end: textToClusterMap[end]!);
   }
 
@@ -213,26 +223,8 @@ class TextLayout {
     return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
   }
 
-  double getLeft(BidiRun run, ClusterRange textRange) {
-    final ClusterRange intesect = intersect(textRange, run.clusterRange);
-    return run.bidiLevel.isEven
-        ? textClusters[intesect.start].cluster!.x
-        : textClusters[intesect.end - 1].cluster!.x;
-  }
-
-  double runWidth(BidiRun run, double shift) {
-    double width = 0.0;
-    for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
-      final ExtendedTextCluster cluster = textClusters[i];
-      width += cluster.bounds.width;
-    }
-    final double left =
-        run.bidiLevel.isEven
-            ? textClusters[run.clusterRange.start].cluster!.x
-            : textClusters[run.clusterRange.end - 1].cluster!.x;
-    WebParagraphDebug.log('runWidth: $width $shift-$left=${shift - left}');
-    run.shift = shift - left;
-    return width;
+  String text(ClusterRange r) {
+    return paragraph.text!.substring(r.start, r.end);
   }
 
   double addLine(
@@ -253,7 +245,7 @@ class TextLayout {
       hardLineBreak,
     );
     WebParagraphDebug.log(
-      'line [${textRange.start}:${textRange.end}) + [${whitespaces.start}:${whitespaces.end})',
+      'line [${textRange.start}:${textRange.end}) + [${whitespaces.start}:${whitespaces.end}) $textWidth $whitespacesWidth',
     );
     // Get visual runs
     final List<int> logicalLevels = <int>[];
@@ -279,28 +271,33 @@ class TextLayout {
 
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
     // and shift all runs for this line so this first cluster starts from 0
-    final double lineLeftX = getLeft(bidiRuns[visuals.first.index + firstRunIndex], textRange);
     WebParagraphDebug.log(
-      'Line: [${textRange.start}:${textRange.end}) ${visuals.first.index}+$firstRunIndex=${visuals.first.index + firstRunIndex} ${line.shift}',
+      'Line: [${textRange.start}:${textRange.end}) ${visuals.first.index}+$firstRunIndex=${visuals.first.index + firstRunIndex} ${line.formattingShift}',
     );
-    for (final BidiIndex visual in visuals) {
-      final BidiRun run = bidiRuns[visual.index + firstRunIndex];
-      final ClusterRange runPart = intersect(run.clusterRange, textRange);
-      line.visualRuns.add(BidiRun(intersect(run.clusterRange, textRange), run.bidiLevel));
-      WebParagraphDebug.log(
-        'ReorderVisuals[${line.visualRuns.length}]: ${visual.index + firstRunIndex} [${run.clusterRange.start}:${run.clusterRange.end}) => [${runPart.start}:${runPart.end})',
-      );
-    }
 
-    // We need to take the VISUALLY first cluster (in case of LTR/RTL it could be anywhere)
-    // and start placing all the runs in visual order next to each other starting from 0
-    double shift = 0;
-    for (final BidiRun run in line.visualRuns) {
-      final double oldShift = shift;
-      shift += runWidth(run, shift);
-      WebParagraphDebug.log(
-        'run: [${run.clusterRange.start}:${run.clusterRange.end}) ${run.bidiLevel} $oldShift ${run.shift} $shift',
+    double shiftInsideLine = 0.0;
+    for (final BidiIndex visual in visuals) {
+      final BidiRun bidiRun = bidiRuns[visual.index + firstRunIndex];
+      final ClusterRange lineRunClusterRange = intersect(bidiRun.clusterRange, textRange);
+      final String lineRunText = text(lineRunClusterRange);
+      final DomTextMetrics lineRunTextMetrics = layoutContext.measureText(lineRunText);
+      final ExtendedTextCluster firstVisualClusterInRun =
+          bidiRun.bidiLevel.isEven
+              ? textClusters[lineRunClusterRange.start]
+              : textClusters[lineRunClusterRange.end - 1];
+
+      line.visualRuns.add(
+        LineRun(
+          lineRunClusterRange,
+          bidiRun.bidiLevel,
+          lineRunTextMetrics.width!,
+          shiftInsideLine - firstVisualClusterInRun.cluster!.x,
+        ),
       );
+      WebParagraphDebug.log(
+        'Run: [${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) [${lineRunClusterRange.start}:${lineRunClusterRange.end}) bidi=${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.cluster!.x}',
+      );
+      shiftInsideLine += lineRunTextMetrics.width!;
     }
 
     // At this point we are agnostic of any fonts participating in text shaping
@@ -354,12 +351,12 @@ class TextLayout {
       if (effectiveAlign == ui.TextAlign.justify) {
         // TODO(jlavrova): implement justify
       } else if (effectiveAlign == ui.TextAlign.right) {
-        line.shift = delta;
+        line.formattingShift = delta;
       } else if (effectiveAlign == ui.TextAlign.center) {
-        line.shift = delta / 2;
+        line.formattingShift = delta / 2;
       }
 
-      WebParagraphDebug.log('formatLines($width): $effectiveAlign $delta ${line.shift}');
+      WebParagraphDebug.log('formatLines($width): $effectiveAlign $delta ${line.formattingShift}');
     }
   }
 }
@@ -370,6 +367,7 @@ class ExtendedTextCluster {
     this.textRange,
     this.textStyle,
     this.bounds,
+    this.advance,
     this.shift,
     this.textMetrics,
   ) {
@@ -380,6 +378,7 @@ class ExtendedTextCluster {
   ExtendedTextCluster.empty()
     : shift = 0.0,
       bounds = ui.Rect.zero,
+      advance = ui.Rect.zero,
       textRange = ClusterRange(start: 0, end: 0);
 
   WebTextCluster? cluster;
@@ -387,6 +386,7 @@ class ExtendedTextCluster {
   int start = 0;
   int end = 0;
   ui.Rect bounds;
+  ui.Rect advance;
   double shift;
   WebTextStyle? textStyle;
 
@@ -397,10 +397,14 @@ class ExtendedTextCluster {
 
 class BidiRun {
   BidiRun(this.clusterRange, this.bidiLevel);
-
   final int bidiLevel;
   final ClusterRange clusterRange;
-  double shift = 0.0;
+}
+
+class LineRun extends BidiRun {
+  LineRun(super.clusterRange, super.bidiLevel, this.width, this.shiftInsideLine);
+  final double width;
+  final double shiftInsideLine;
 }
 
 class TextLine {
@@ -424,6 +428,6 @@ class TextLine {
   ui.Rect bounds = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
-  List<BidiRun> visualRuns = <BidiRun>[];
-  double shift = 0.0;
+  List<LineRun> visualRuns = <LineRun>[];
+  double formattingShift = 0.0;
 }
