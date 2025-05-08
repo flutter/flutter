@@ -4,7 +4,7 @@
 
 assert(is_mac || is_ios)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 import("framework_common.gni")

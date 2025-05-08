@@ -73,7 +73,7 @@ config("compiler") {
 
   # Platform-specific configs.
   if (is_ios || is_mac) {
-    configs += [ "//build/config/apple:compiler" ]
+    configs += [ "//build/config/darwin:compiler" ]
   }
 
   # In general, Windows is totally different, but all the other builds share
@@ -583,7 +583,7 @@ config("runtime_library") {
       "m",
     ]
 
-    lib_dirs += [ "${android_toolchain_root}/lib/clang/17/lib/linux/" ]
+    lib_dirs += [ "${android_toolchain_root}/lib/clang/18/lib/linux/" ]
     current_android_cpu = current_cpu
     if (current_cpu == "arm64") {
       current_android_cpu = "aarch64"
