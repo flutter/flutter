@@ -59,6 +59,7 @@ class Context {
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
+        embedFlutterFrameworks(platform);
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks(platform);
@@ -224,7 +225,7 @@ class Context {
   ///
   /// Does not copy `.DS_Store`.
   ///
-  /// If [delete], delete extraneous files from [destination].
+  /// Deletes extraneous files from [destination].
   void runRsync(String source, String destination, {List<String> extraArgs = const <String>[]}) {
     runSync('rsync', <String>[
       '-8', // Avoid mangling filenames with encodings that do not match the current locale.
