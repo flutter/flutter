@@ -4279,6 +4279,28 @@ void main() {
       expect(iconButton, findsNothing);
     },
   );
+
+  testWidgets('The controller provided to DropdownMenu should be able to call dispose.', (WidgetTester tester) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    Future<void> pumpDropdownMenu(TextEditingController? controller) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              controller: controller,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+    }
+    await pumpDropdownMenu(controller1);
+    await pumpDropdownMenu(controller2);
+    controller1.dispose();
+    controller2.dispose();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 enum TestMenu {
