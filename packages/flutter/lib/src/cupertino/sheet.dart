@@ -332,7 +332,12 @@ class CupertinoSheetTransition extends StatefulWidget {
   State<CupertinoSheetTransition> createState() => _CupertinoSheetTransitionState();
 }
 
-class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
+class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  // late Animation<Offset> _positionAnimation;
+  late Animation<double> _paddingAnimation;
+
   // The offset animation when this page is being covered by another sheet.
   late Animation<Offset> _secondaryPositionAnimation;
 
@@ -348,6 +353,12 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(microseconds: 1),
+      reverseDuration: const Duration(milliseconds: 180),
+      vsync: this,
+    );
+    _paddingAnimation = _controller.drive(Tween<double>(begin: _kTopGapRatio, end: 0.072));
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarBrightness: Brightness.dark,
@@ -369,6 +380,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 
   @override
   void dispose() {
+    _controller.dispose();
     _disposeCurve();
     super.dispose();
   }
@@ -434,17 +446,45 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: _coverSheetSecondaryTransition(
-        widget.secondaryRouteAnimation,
-        _coverSheetPrimaryTransition(
-          context,
-          widget.primaryRouteAnimation,
-          widget.linearTransition,
-          widget.child,
+    return _AnimationControllerProvider(
+      controller: _controller,
+      child: SizedBox.expand(
+        child: AnimatedBuilder(
+          animation: _paddingAnimation,
+          builder: (BuildContext context, Widget? child) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.sizeOf(context).height * _paddingAnimation.value,
+              ),
+              child: _coverSheetSecondaryTransition(
+                widget.secondaryRouteAnimation,
+                _coverSheetPrimaryTransition(
+                  context,
+                  widget.primaryRouteAnimation,
+                  widget.linearTransition,
+                  widget.child,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
+  }
+}
+
+class _AnimationControllerProvider extends InheritedWidget {
+  const _AnimationControllerProvider({required this.controller, required super.child});
+
+  final AnimationController controller;
+
+  static _AnimationControllerProvider? of(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_AnimationControllerProvider>();
+  }
+
+  @override
+  bool updateShouldNotify(_AnimationControllerProvider oldWidget) {
+    return false;
   }
 }
 
@@ -492,18 +532,14 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    final double topPadding = MediaQuery.heightOf(context) * _kTopGapRatio;
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: Padding(
-        padding: EdgeInsets.only(top: topPadding),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: CupertinoUserInterfaceLevel(
-            data: CupertinoUserInterfaceLevelData.elevated,
-            child: _CupertinoSheetScope(child: builder(context)),
-          ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        child: CupertinoUserInterfaceLevel(
+          data: CupertinoUserInterfaceLevelData.elevated,
+          child: _CupertinoSheetScope(child: builder(context)),
         ),
       ),
     );
@@ -691,16 +727,23 @@ class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_downGestureController != null);
+    final _AnimationControllerProvider? provider = _AnimationControllerProvider.of(context);
     _downGestureController!.dragUpdate(
       // Divide by size of the sheet.
       details.primaryDelta! / (context.size!.height - (context.size!.height * _kTopGapRatio)),
+      details.primaryDelta! / (context.size!.height * 0.008),
+      provider!.controller,
     );
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_downGestureController != null);
-    _downGestureController!.dragEnd(details.velocity.pixelsPerSecond.dy / context.size!.height);
+    final _AnimationControllerProvider? provider = _AnimationControllerProvider.of(context);
+    _downGestureController!.dragEnd(
+      details.velocity.pixelsPerSecond.dy / context.size!.height,
+      provider!.controller,
+    );
     _downGestureController = null;
   }
 
@@ -708,7 +751,8 @@ class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureD
     assert(mounted);
     // This can be called even if start is not called, paired with the "down" event
     // that we don't consider here.
-    _downGestureController?.dragEnd(0.0);
+    final _AnimationControllerProvider? provider = _AnimationControllerProvider.of(context);
+    _downGestureController?.dragEnd(0.0, provider!.controller);
     _downGestureController = null;
   }
 
@@ -746,13 +790,17 @@ class _CupertinoDownGestureController<T> {
 
   /// The drag gesture has changed by [delta]. The total range of the drag
   /// should be 0.0 to 1.0.
-  void dragUpdate(double delta) {
-    controller.value -= delta;
+  void dragUpdate(double delta, double paddingDelta, AnimationController paddingController) {
+    if (controller.value == 1.0 && delta < 0) {
+      paddingController.value -= paddingDelta;
+    } else {
+      controller.value -= delta;
+    }
   }
 
   /// The drag gesture has ended with a vertical motion of [velocity] as a
   /// fraction of screen height per second.
-  void dragEnd(double velocity) {
+  void dragEnd(double velocity, AnimationController paddingController) {
     // Fling in the appropriate direction.
     //
     // This curve has been determined through rigorously eyeballing native iOS
@@ -760,6 +808,7 @@ class _CupertinoDownGestureController<T> {
     const Curve animationCurve = Curves.easeOut;
     final bool isCurrent = getIsCurrent();
     final bool animateForward;
+    paddingController.reverse();
 
     if (!isCurrent) {
       // If the page has already been navigated away from, then the animation
