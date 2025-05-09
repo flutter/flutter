@@ -977,7 +977,7 @@ void main() {
         expect((state.lastIntent! as ExtendSelectionToLineBreakIntent).continuesAtWrap, false);
     }
 
-    // Press home + shift
+    // Press home + shift.
     state.lastIntent = null;
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.home, shift: true));
     switch (defaultTargetPlatform) {
