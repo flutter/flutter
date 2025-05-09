@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['flutter-test-driver'])
-library;
-
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../integration.shard/test_data/basic_project.dart';
-import '../integration.shard/test_data/tests_project.dart';
-import '../integration.shard/test_driver.dart';
-import '../integration.shard/test_utils.dart';
-import '../src/common.dart';
+import '../../integration.shard/test_data/basic_project.dart';
+import '../../integration.shard/test_data/tests_project.dart';
+import '../../integration.shard/test_driver.dart';
+import '../../integration.shard/test_utils.dart';
+import '../../src/common.dart';
 
-void main() {
-  // Created here as multiple groups use it.
-  final RegExp stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get current');
+// Created here as multiple groups use it.
+final RegExp stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get current');
 
+Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   group('Flutter run for web', () {
     final BasicProject project = BasicProject();
     late Directory tempDir;
@@ -45,7 +42,10 @@ void main() {
         withDebugger: true,
         chrome: true,
         expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>[
+          '--verbose',
+          if (useDDCLibraryBundleFormat) '--web-experimental-hot-reload',
+        ],
       );
     }
 
