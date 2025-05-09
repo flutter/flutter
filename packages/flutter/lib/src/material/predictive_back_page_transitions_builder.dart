@@ -311,12 +311,6 @@ class _PredictiveBackSharedElementPageTransitionState
   static const double _kMargin = 8.0;
   static const double _kYPositionFactor = 0.1;
 
-  // Ideally this would match the curvature of the physical Android device being
-  // used, but that is not yet supported. Instead, this value is a best guess at
-  // a value that looks reasonable on most devices.
-  // See https://github.com/flutter/flutter/issues/97349.
-  static const double _kDeviceBorderRadius = 32.0;
-
   // The duration of the commit transition.
   //
   // This is not the same as PredictiveBackpageTransitionsBuilder's duration,
@@ -330,6 +324,12 @@ class _PredictiveBackSharedElementPageTransitionState
     _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.transitionMilliseconds,
     curve: _curve,
   );
+
+  // Ideally this would match the curvature of the physical Android device being
+  // used, but that is not yet supported. Instead, this value is a best guess at
+  // a value that looks reasonable on most devices.
+  // See https://github.com/flutter/flutter/issues/97349.
+  static const double _kDeviceBorderRadius = 32.0;
 
   // Since we don't know the device border radius, this provides a smooth
   // transition between the default radius and the actual radius.
@@ -350,9 +350,6 @@ class _PredictiveBackSharedElementPageTransitionState
   // commit goes from zero to one.
   final ProxyAnimation _commitAnimation = ProxyAnimation();
 
-  // TODO(justinmc): Naming and clean up many animations.
-  // TODO(justinmc): Should this include an easeOut curve? I think so.
-  // TODO(justinmc): Maybe this should be shorter after commit? _kCommitMilliseconds.
   // An animation that goes from zero to a maximum of one during a predictive
   // back gesture, and then at commit, it goes from its current value to zero.
   // Used for animations that follow the gesture and then animate back to their
