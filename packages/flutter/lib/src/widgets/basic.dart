@@ -4024,10 +4024,7 @@ class SliverSemantics extends SingleChildRenderObjectWidget {
            customSemanticsActions: customSemanticsActions,
            hintOverrides:
                onTapHint != null || onLongPressHint != null
-                   ? SemanticsHintOverrides(
-                     onTapHint: onTapHint,
-                     onLongPressHint: onLongPressHint,
-                   )
+                   ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
                    : null,
            role: role,
            controlsNodes: controlsNodes,
