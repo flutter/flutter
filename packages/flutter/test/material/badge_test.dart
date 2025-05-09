@@ -440,7 +440,6 @@ void main() {
   });
 
   testWidgets('Badge ThemeData.badgeTheme', (WidgetTester tester) async {
-
     final ThemeData theme = ThemeData(
       badgeTheme: const BadgeThemeData(
         backgroundColor: Color(0xFF000001),
@@ -479,7 +478,10 @@ void main() {
     expect(textStyle.fontSize, 21);
 
     // alignment, offset, padding
-    expect(badge, paints..rrect(rrect: RRect.fromLTRBR(13.0, -5.5, 66.0, 47.5, const Radius.circular(26.5))));
+    expect(
+      badge,
+      paints..rrect(rrect: RRect.fromLTRBR(13.0, -5.5, 66.0, 47.5, const Radius.circular(26.5))),
+    );
 
     // largeSize
     await tester.pumpWidget(
@@ -503,7 +505,6 @@ void main() {
   });
 
   testWidgets('Badge BadgeThemeData Overrides ThemeData.badgeTheme', (WidgetTester tester) async {
-
     final ThemeData theme = ThemeData(
       badgeTheme: const BadgeThemeData(
         backgroundColor: Color(0xFF000001),
@@ -552,7 +553,10 @@ void main() {
     expect(textStyle.fontSize, 22);
 
     // alignment, offset, padding
-    expect(badge, paints..rrect(rrect: RRect.fromLTRBR(14.0, -6, 70.0, 50.0, const Radius.circular(28.0))));
+    expect(
+      badge,
+      paints..rrect(rrect: RRect.fromLTRBR(14.0, -6, 70.0, 50.0, const Radius.circular(28.0))),
+    );
 
     // largeSize
     await tester.pumpWidget(
@@ -578,7 +582,6 @@ void main() {
   });
 
   testWidgets('Badge Overrides Theme', (WidgetTester tester) async {
-
     final ThemeData theme = ThemeData(
       badgeTheme: const BadgeThemeData(
         backgroundColor: Color(0xFF000001),
@@ -642,7 +645,10 @@ void main() {
     expect(textStyle.fontSize, 23);
 
     // alignment, offset, padding
-    expect(badge, paints..rrect(rrect: RRect.fromLTRBR(15.0, -6.5, 74.0, 52.5, const Radius.circular(29.5))));
+    expect(
+      badge,
+      paints..rrect(rrect: RRect.fromLTRBR(15.0, -6.5, 74.0, 52.5, const Radius.circular(29.5))),
+    );
 
     // largeSize
     await tester.pumpWidget(
@@ -660,7 +666,7 @@ void main() {
       buildFrame(
         theme: ThemeData(badgeTheme: const BadgeThemeData(smallSize: 42.0)),
         badgeTheme: const BadgeThemeData(smallSize: 43.0),
-        badge: const Badge(smallSize: 44.0,),
+        badge: const Badge(smallSize: 44.0),
       ),
     );
     final Size smallSize = tester.getSize(find.byType(Badge));
