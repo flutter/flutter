@@ -21,7 +21,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
-
 import io.flutter.Build;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
