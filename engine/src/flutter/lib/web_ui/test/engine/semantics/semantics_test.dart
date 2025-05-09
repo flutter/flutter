@@ -300,10 +300,11 @@ void _testEngineAccessibilityBuilder() {
   });
 
   test('announce', () {
-    expect(features.announce, isFalse);
-    builder.announce = true;
-    features = builder.build();
+    // By default this starts off true, see EngineAccessibilityFeatures.announce
     expect(features.announce, isTrue);
+    builder.announce = false;
+    features = builder.build();
+    expect(features.announce, isFalse);
   });
 
   test('reduce motion', () {
@@ -406,7 +407,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.announce, false);
+    // By default this starts off true, see EngineAccessibilityFeatures.announce
+    expect(copy.announce, true);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(boldText: true);
