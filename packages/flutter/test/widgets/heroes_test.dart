@@ -450,6 +450,7 @@ Future<void> main() async {
       ),
     ];
     final HeroController controller = HeroController();
+    addTearDown(controller.dispose);
     Widget buildWidget() {
       return MaterialApp(
         home: HeroControllerScope(
