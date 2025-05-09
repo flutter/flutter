@@ -399,7 +399,9 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0);
+    // Announce is an inverted check, see EngineAccessibilityFeatures.announce.
+    // Therefore, we need to flip the _kNoAnnounceIndex bit (1 << 7).
+    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0 | 1 << 7);
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
     expect(copy.boldText, false);
@@ -407,8 +409,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    // By default this starts off true, see EngineAccessibilityFeatures.announce
-    expect(copy.announce, true);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(boldText: true);
