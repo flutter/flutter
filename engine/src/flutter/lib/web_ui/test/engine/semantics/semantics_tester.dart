@@ -88,8 +88,8 @@ class SemanticsTester {
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
-    double? minValue,
-    double? maxValue,
+    String? minValue,
+    String? maxValue,
   }) {
     // Actions
     if (hasTap ?? false) {

@@ -7399,8 +7399,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     Set<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     ui.SemanticsInputType? inputType,
-    double? minValue,
-    double? maxValue,
+    String? minValue,
+    String? maxValue,
   }) : this.fromProperties(
          key: key,
          child: child,
