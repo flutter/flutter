@@ -18,8 +18,12 @@ const Map<String, String> targetAliases = <String, String>{
   'web_sdk': 'flutter/web_sdk',
   'canvaskit': 'flutter/third_party/canvaskit:canvaskit_group',
   'canvaskit_chromium': 'flutter/third_party/canvaskit:canvaskit_chromium_group',
+  'canvaskit_webparagraph':
+      'flutter/third_party/canvaskit:canvaskit_experimental_webparagraph_group',
   'skwasm': 'flutter/third_party/canvaskit:skwasm_group',
   'skwasm_st': 'flutter/third_party/canvaskit:skwasm_st_group',
+  'skwasm_heavy': 'flutter/third_party/canvaskit:skwasm_heavy_group',
+  'skwasm_heavy_st': 'flutter/third_party/canvaskit:skwasm_heavy_st_group',
   'archive': 'flutter/web_sdk:flutter_web_sdk_archive',
 };
 

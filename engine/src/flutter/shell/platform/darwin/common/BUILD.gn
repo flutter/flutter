@@ -4,9 +4,43 @@
 
 assert(is_mac || is_ios)
 
+import("//build/config/darwin/darwin_sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 import("framework_common.gni")
+
+config("config") {
+  include_dirs = [ target_gen_dir ]
+  if (is_ios) {
+    lib_dirs = ios_swift_lib_paths
+  } else if (is_mac) {
+    lib_dirs = mac_swift_lib_paths
+  }
+
+  # Allow use of @testable imports in debug builds and when tests are enabled.
+  if ((is_ios && enable_ios_unittests) || (is_mac && enable_unittests)) {
+    swiftflags = [ "-enable-testing" ]
+  }
+}
+
+config("test_config") {
+  configs = [ ":config" ]
+
+  # Add platform frameworks directory to search path for test frameworks.
+  # Add platform lib to search path for test libraries/Swift modules.
+  cflags = [ "-fvisibility=default" ]
+
+  if (is_ios) {
+    _platform_path = ios_platform_path
+  } else if (is_mac) {
+    _platform_path = mac_platform_path
+  }
+  cflags += [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  swiftflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
+  include_dirs = [ "$_platform_path/Developer/usr/lib" ]
+  framework_dirs = [ "$_platform_path/Developer/Library/Frameworks" ]
+  lib_dirs = [ "$_platform_path/Developer/usr/lib" ]
+}
 
 source_set("common") {
   cflags_objc = flutter_cflags_objc

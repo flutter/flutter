@@ -4,9 +4,10 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
@@ -89,6 +90,10 @@ class FlutterCodeAsset {
 
   final CodeAsset codeAsset;
   final Target target;
+
+  @override
+  String toString() =>
+      'FlutterCodeAsset(codeAsset: ${codeAsset.id} ${codeAsset.file}, target: $target)';
 }
 
 /// Invokes the build of all transitive Dart packages and prepares code assets
@@ -174,7 +179,7 @@ Future<void> installCodeAssets({
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
 ///
-/// It enables mocking `package:native_assets_builder` package.
+/// It enables mocking `package:hooks_runner` package.
 /// It also enables mocking native toolchain discovery via [cCompilerConfig].
 abstract interface class FlutterNativeAssetsBuildRunner {
   /// All packages in the transitive dependencies that have a `build.dart`.
@@ -199,7 +204,7 @@ abstract interface class FlutterNativeAssetsBuildRunner {
   Future<CCompilerConfig?> get ndkCCompilerConfig;
 }
 
-/// Uses `package:native_assets_builder` for its implementation.
+/// Uses `package:hooks_runner` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
     this.packageConfigPath,
@@ -207,8 +212,10 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.runPackageName,
+    this.pubspecPath,
   );
 
+  final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
@@ -252,6 +259,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
     packageLayout: packageLayout,
+    userDefines: UserDefines(workspacePubspec: Uri.file(pubspecPath)),
   );
 
   @override
@@ -610,9 +618,8 @@ Future<DartBuildResult> _runDartBuild({
       _throwNativeAssetsBuildFailed();
     }
     dependencies.addAll(buildResult.dependencies);
-    if (!linkingEnabled) {
-      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
-    } else {
+    codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
+    if (linkingEnabled) {
       final LinkResult? linkResult = await buildRunner.link(
         extensions: <ProtocolExtension>[
           CodeAssetExtension(

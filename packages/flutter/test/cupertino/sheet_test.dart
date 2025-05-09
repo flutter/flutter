@@ -1212,6 +1212,98 @@ void main() {
       expect(finalPosition, equals(middlePosition));
       expect(finalPosition, equals(initialPosition));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/163572.
+    testWidgets('showCupertinoSheet shows snackbar at bottom of screen', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+
+      void showSheet(BuildContext context) {
+        showCupertinoSheet<void>(
+          context: context,
+          pageBuilder: (BuildContext context) {
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  const Text('Cupertino Sheet'),
+                  CupertinoButton(
+                    onPressed: () {
+                      scaffoldKey.currentState?.showSnackBar(
+                        const SnackBar(content: Text('SnackBar'), backgroundColor: Colors.red),
+                      );
+                    },
+                    child: const Text('Show SnackBar'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          scaffoldMessengerKey: scaffoldKey,
+          home: Scaffold(
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  Builder(
+                    builder: (BuildContext context) {
+                      return CupertinoButton(
+                        onPressed: () {
+                          showSheet(context);
+                        },
+                        child: const Text('Show Cupertino Sheet'),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Page 1'), findsOneWidget);
+
+      await tester.tap(find.text('Show Cupertino Sheet'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .getTopLeft(
+              find.ancestor(of: find.text('Cupertino Sheet'), matching: find.byType(Scaffold)),
+            )
+            .dy,
+        greaterThan(0.0),
+      );
+
+      await tester.tap(find.text('Show SnackBar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsAtLeast(1));
+      expect(
+        tester.getBottomLeft(find.byType(Scaffold).first).dy,
+        equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
+      );
+
+      final TestGesture gesture = await tester.startGesture(const Offset(200, 400));
+      await tester.pump();
+      expect(
+        tester.getBottomLeft(find.byType(Scaffold).first).dy,
+        equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        tester.getBottomLeft(find.byType(Scaffold).first).dy,
+        equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
+      );
+    });
   });
 
   testWidgets('CupertinoSheetTransition handles SystemUiOverlayStyle changes', (
@@ -1247,4 +1339,86 @@ void main() {
     expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
     expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
   });
+
+  testWidgets(
+    'content placed in safe area of showCupertinoSheet is rendered within the safe area bounds',
+    (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      Widget sheetScaffoldContent(BuildContext context) {
+        return const SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              SizedBox(height: 80, width: double.infinity, child: Text('Top container')),
+              SizedBox(height: 80, width: double.infinity, child: Text('Bottom container')),
+            ],
+          ),
+        );
+      }
+
+      const double bottomPadding = 50;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+                viewPadding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+              ),
+              child: CupertinoApp(
+                home: CupertinoPageScaffold(
+                  key: scaffoldKey,
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 1'),
+                        CupertinoButton(
+                          onPressed: () {
+                            showCupertinoSheet<void>(
+                              context: scaffoldKey.currentContext!,
+                              pageBuilder: (BuildContext context) {
+                                return CupertinoPageScaffold(child: sheetScaffoldContent(context));
+                              },
+                            );
+                          },
+                          child: const Text('Push Page 2'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.text('Page 1'), findsOneWidget);
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final double pageHeight =
+          tester
+              .getRect(
+                find.ancestor(
+                  of: find.text('Top container'),
+                  matching: find.byType(CupertinoPageScaffold),
+                ),
+              )
+              .bottom;
+      expect(
+        pageHeight -
+            tester
+                .getBottomLeft(
+                  find
+                      .ancestor(of: find.text('Bottom container'), matching: find.byType(SizedBox))
+                      .first,
+                )
+                .dy,
+        bottomPadding,
+      );
+    },
+  );
 }

@@ -1456,6 +1456,31 @@ flutter:
       );
 
       testUsingContext(
+        'Injecting does not overwrite unchanged registrant files',
+        () async {
+          createFakePlugin(fs);
+
+          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+
+          final File registrantHeader = linuxProject.managedDirectory.childFile(
+            'generated_plugin_registrant.h',
+          );
+          final DateTime headerLastModified = registrantHeader.lastModifiedSync();
+
+          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+
+          // Check that the last modified date is the same.
+          expect(registrantHeader.lastModifiedSync(), headerLastModified);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: enableExplicitPackageDependencies,
+          Pub: FakePubWithPrimedDeps.new,
+        },
+      );
+
+      testUsingContext(
         'Injecting creates generated macos registrant, but does not include Dart-only plugins',
         () async {
           flutterProject.isModule = true;
@@ -2815,6 +2840,82 @@ flutter:
           Pub: () => fakePubWithTestPluginDevDependency,
         },
       );
+    });
+
+    group('flutterPluginsListHasDevDependencies', () {
+      testWithoutContext('throws if file does not exist', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        expect(
+          () => flutterPluginsListHasDevDependencies(pluginsFile),
+          throwsA(isA<FileSystemException>()),
+        );
+      });
+
+      testWithoutContext('throws if file is malformed', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('This is not JSON');
+
+        expect(
+          () => flutterPluginsListHasDevDependencies(pluginsFile),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      testWithoutContext('Returns false if has no dependencies', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('''
+{
+  "plugins": {}
+}
+''');
+        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
+      });
+
+      testWithoutContext('Returns false if has no dev dependencies', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": false
+      }
+    ]
+  }
+}
+''');
+
+        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
+      });
+
+      testWithoutContext('Returns true if has dev dependencies', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": true
+      }
+    ]
+  }
+}
+''');
+
+        expect(flutterPluginsListHasDevDependencies(pluginsFile), isTrue);
+      });
     });
   });
 

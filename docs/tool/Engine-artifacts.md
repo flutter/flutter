@@ -1,5 +1,7 @@
 # How `flutter` fetches engine artifacts
 
+[flutter.dev/to/engine-artifacts](https://flutter.dev/to/engine-artifacts)
+
 While in the same repository, the `flutter` (tool), which is used to run and
 test the framework, needs to know how to download the engine artifacts for the
 current platform and target device. Engine artifacts include `dart` (the
@@ -49,6 +51,30 @@ stateDiagram-v2
     UseMergeBase --> [*]: Done
 ```
 
+## Flutter CI/CD Testing
+
+On Cocoon (Flutter's internal CI/CD) we _often_ set
+`FLUTTER_PREBUILT_ENGINE_VERSION` to the following:
+
+| Branch                    | Presubmit    | Merge Queue        | Postsubmit         |
+| ------------------------- | ------------ | ------------------ | ------------------ |
+| `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_ |
+| `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | `commit.sha`       |
+
+> IMPORTANT: `engine.version` is intentionally ignored in release candidate
+> post-submit builds.
+>
+> To generate a new `engine.version`:
+>
+> ```sh
+> ./bin/internal/last_engine_commit.sh > ./bin/internal/engine.version
+> ```
+>
+> At the moment this needs to be manually done, and manually verified, before
+> making a release. See [#168273](https://github.com/flutter/flutter/issues/168273).
+
+[^1]: Release candidates do not use a merge queue.
+
 ## References
 
 The script(s) that compute (and test the computation of) the engine version:
@@ -56,6 +82,12 @@ The script(s) that compute (and test the computation of) the engine version:
 - [`bin/internal/update_engine_version.sh`](../../bin/internal/update_engine_version.sh)
 - [`bin/internal/update_engine_version.ps1`](../../bin/internal/update_engine_version.ps1)
 - [`dev/tools/test/update_engine_version_test.dart`](../../dev/tools/test/update_engine_version_test.dart)
+- [`bin/internal/last_engine_commit.sh`](../../bin/internal/last_engine_commit.sh)
+- [`bin/internal/last_engine_commit.ps1`](../../bin/internal/last_engine_commit.ps1)
+- [`dev/tools/test/last_engine_commit_test.dart`](../../dev/tools/test/last_engine_commit_test.dart)
+- [`bin/internal/content_aware_hash.sh`](../../bin/internal/content_aware_hash.sh)
+- [`bin/internal/content_aware_hash.ps1`](../../bin/internal/content_aware_hash.ps1)
+- [`dev/tools/test/content_aware_hash_test.dart`](../../dev/tools/test/content_aware_hash_test.dart)
 
 The tool uses the engine version in the following locations:
 

@@ -2391,8 +2391,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     if (has_ui_thread_message_loop) {
       fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
     }
+    return fml::TaskQueueId::Invalid();
   };
-  settings.task_observer_remove = [has_ui_thread_message_loop](intptr_t key) {
+  settings.task_observer_remove = [has_ui_thread_message_loop](
+                                      fml::TaskQueueId queue_id, intptr_t key) {
     if (has_ui_thread_message_loop) {
       fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
     }

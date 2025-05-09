@@ -466,7 +466,7 @@ class _PredictiveBackSharedElementPageTransitionState
               // TODO(justinmc): _lastDrag, an Offset?
               _ => Offset(
                 _lastXDrag = _positionAnimation.value.dx,
-                _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
+                _lastYDrag = _getYPosition(MediaQuery.heightOf(context)),
               ),
             },
             child: Opacity(
@@ -525,7 +525,9 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _weightPostCommit = 1 - _weightPreCommit;
   static const double _screenWidthDivisionFactor = 20.0;
   static const double _xShiftAdjustment = 8.0;
-  static const Duration _kCommitDuration = Duration(milliseconds: _PredictiveBackSharedElementPageTransitionState._kCommitMilliseconds);
+  static const Duration _kCommitDuration = Duration(
+    milliseconds: _PredictiveBackSharedElementPageTransitionState._kCommitMilliseconds,
+  );
 
   final Animatable<double> _primaryOpacityTween = Tween<double>(
     begin: _opacityStartTransition,
@@ -578,7 +580,7 @@ class _PredictiveBackFullscreenPageTransitionState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double screenWidth = MediaQuery.widthOf(context);
     final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
     _primaryPositionTween = TweenSequence<Offset>(<TweenSequenceItem<Offset>>[
       TweenSequenceItem<Offset>(

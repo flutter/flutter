@@ -212,8 +212,8 @@ TEST_P(AiksTest, CanRenderImageRect) {
   DisplayListBuilder builder;
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
-  DlISize image_half_size = DlISize(image->dimensions().fWidth * 0.5f,
-                                    image->dimensions().fHeight * 0.5f);
+  DlISize image_half_size =
+      DlISize(image->GetSize().width * 0.5f, image->GetSize().height * 0.5f);
 
   // Render the bottom right quarter of the source image in a stretched rect.
   auto source_rect = DlRect::MakeSize(image_half_size);
@@ -232,8 +232,8 @@ TEST_P(AiksTest, DrawImageRectSrcOutsideBounds) {
 
   // Use a source rect that is partially outside the bounds of the image.
   auto source_rect = DlRect::MakeXYWH(
-      image->dimensions().fWidth * 0.25f, image->dimensions().fHeight * 0.4f,
-      image->dimensions().fWidth, image->dimensions().fHeight);
+      image->GetSize().width * 0.25f, image->GetSize().height * 0.4f,
+      image->GetSize().width, image->GetSize().height);
 
   auto dest_rect = DlRect::MakeXYWH(100, 100, 600, 600);
 
@@ -421,6 +421,141 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
   builder.Scale(0.2, 0.2);
   builder.DrawPaint(DlPaint().setColor(medium_turquoise));
   builder.DrawPaint(DlPaint().setColor(orange_red.modulateOpacity(0.5f)));
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedRectsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kPurple());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(20.0f);
+
+  DlPaint thin_paint = paint;
+  thin_paint.setColor(DlColor::kYellow());
+  thin_paint.setStrokeWidth(0.0f);
+
+  DlRect rect = DlRect::MakeLTRB(10, 10, 90, 90);
+  DlRect thin_tall_rect = DlRect::MakeLTRB(120, 10, 120, 90);
+  DlRect thin_wide_rect = DlRect::MakeLTRB(10, 120, 90, 120);
+  DlRect empty_rect = DlRect::MakeLTRB(120, 120, 120, 120);
+
+  // We draw the following sets of rectangles:
+  //
+  //      A     E     X
+  //                  X
+  //      B     F     X
+  //                  X
+  //      C  D  G  H  X
+  //
+  // Purple A,B,C,D are all drawn with stroke width 20 (non-overflowing).
+  // Each of those sets has 4 rectangles of dimension 80x80, 80x0, 0x80,
+  // and 0,0 to demonstrate the basic behavior and also the behavior of
+  // empty dimensions.
+  //
+  // Blue E,F,G,H are the same 80x80 rectangles, but with an overflowing
+  // stroke width of 120 to show the behavior with degenerately large
+  // stroke widths.
+  //
+  // A,E are drawn with Bevel joins.
+  // B,F are drawn with Round joins.
+  // C,G are drawn with Miter joins and a large enough miter limit.
+  // D,H are drawn with Miter joins and a too small miter limit (== Bevel).
+  //
+  // All orange X rectangles are drawn with round joins and increasing stroke
+  // widths to demonstrate fidelity of the rounding code at various arc sizes.
+  // These X rectangles also help test that the variable sizing estimates in
+  // the round join code are accurate.
+
+  // rects (A)
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawRect(rect.Shift({100, 100}), paint);
+  builder.DrawRect(rect.Shift({100, 100}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 100}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 100}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 100}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 100}), thin_paint);
+  builder.DrawRect(empty_rect.Shift({100, 100}), paint);
+  builder.DrawRect(empty_rect.Shift({100, 100}), thin_paint);
+
+  // rects (B)
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawRect(rect.Shift({100, 300}), paint);
+  builder.DrawRect(rect.Shift({100, 300}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 300}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 300}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 300}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 300}), thin_paint);
+  builder.DrawRect(empty_rect.Shift({100, 300}), paint);
+  builder.DrawRect(empty_rect.Shift({100, 300}), thin_paint);
+
+  // rects (C)
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 + flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({100, 500}), paint);
+  builder.DrawRect(rect.Shift({100, 500}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 500}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 500}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 500}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 500}), thin_paint);
+  builder.DrawRect(empty_rect.Shift({100, 500}), paint);
+  builder.DrawRect(empty_rect.Shift({100, 500}), thin_paint);
+
+  // rects (D)
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 - flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({300, 500}), paint);
+  builder.DrawRect(rect.Shift({300, 500}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({300, 500}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({300, 500}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({300, 500}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({300, 500}), thin_paint);
+  builder.DrawRect(empty_rect.Shift({300, 500}), paint);
+  builder.DrawRect(empty_rect.Shift({300, 500}), thin_paint);
+
+  paint.setStrokeWidth(120.0f);
+  paint.setColor(DlColor::kBlue());
+  rect = rect.Expand(-20);
+
+  // rect (E)
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  builder.DrawRect(rect.Shift({500, 100}), paint);
+  builder.DrawRect(rect.Shift({500, 100}), thin_paint);
+
+  // rect (F)
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.DrawRect(rect.Shift({500, 300}), paint);
+  builder.DrawRect(rect.Shift({500, 300}), thin_paint);
+
+  // rect (G)
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 + flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({500, 500}), paint);
+  builder.DrawRect(rect.Shift({500, 500}), thin_paint);
+
+  // rect (H)
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  paint.setStrokeMiter(kSqrt2 - flutter::kEhCloseEnough);
+  builder.DrawRect(rect.Shift({700, 500}), paint);
+  builder.DrawRect(rect.Shift({700, 500}), thin_paint);
+
+  DlPaint round_mock_paint;
+  round_mock_paint.setColor(DlColor::kGreen());
+  round_mock_paint.setDrawStyle(DlDrawStyle::kFill);
+
+  // array of rects (X)
+  Scalar x = 900;
+  Scalar y = 50;
+  for (int i = 0; i < 15; i++) {
+    paint.setStrokeWidth(i);
+    paint.setColor(DlColor::kOrange());
+    paint.setStrokeJoin(DlStrokeJoin::kRound);
+    builder.DrawRect(DlRect::MakeXYWH(x, y, 30, 30), paint);
+    y += 32 + i;
+  }
+
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -880,8 +1015,7 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
         auto image =
             DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
         auto position =
-            -DlPoint(image->dimensions().fWidth, image->dimensions().fHeight) *
-            0.5;
+            -DlPoint(image->GetSize().width, image->GetSize().height) * 0.5;
         builder.DrawImage(image, position, {});
       }
       builder.Restore();  // Restore oval intersect clip.
@@ -938,6 +1072,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
 
   // Scale
   {
+    builder.Save();
     builder.Translate(100, 0);
     builder.Scale(100, 100);
     DlPaint paint;
@@ -948,6 +1083,23 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
         DlImageSampling::kNearestNeighbor, &matrix));
 
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), paint);
+    builder.Restore();
+  }
+
+  // Perspective
+  {
+    builder.Save();
+    builder.Translate(150, 150);
+    DlPaint paint;
+
+    DlMatrix matrix =
+        DlMatrix::MakePerspective(Radians{0.5}, ISize{200, 200}, 0.05, 1);
+    paint.setColorSource(DlColorSource::MakeImage(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 200, 200), paint);
+    builder.Restore();
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

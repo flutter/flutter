@@ -557,21 +557,36 @@ class DragScrollActivity extends ScrollActivity {
   }
 }
 
-/// An activity that animates a scroll view based on a physics [Simulation].
+/// The activity a scroll view performs after being set into motion.
 ///
-/// A [BallisticScrollActivity] is typically used when the user lifts their
-/// finger off the screen to continue the scrolling gesture with the current velocity.
+/// For example, a [BallisticScrollActivity] is used when the user
+/// lifts their finger off the screen after a [DragScrollActivity],
+/// to continue the scrolling motion starting from the current velocity.
 ///
 /// [BallisticScrollActivity] is also used to restore a scroll view to a valid
 /// scroll offset when the geometry of the scroll view changes. In these
 /// situations, the [Simulation] typically starts with a zero velocity.
 ///
+/// The scrolling will be driven by the given [Simulation]. If a
+/// [BallisticScrollActivity] is in progress when the scroll metrics change,
+/// then the activity will be replaced with a new ballistic activity starting
+/// from the current velocity (see [ScrollPhysics.createBallisticSimulation]).
+/// To ensure the user perceives smooth motion across such a change,
+/// the simulation should typically be the result
+/// of [ScrollPhysics.createBallisticSimulation]
+/// for the scroll physics of the scroll view.
+///
 /// See also:
 ///
-///  * [DrivenScrollActivity], which animates a scroll view based on a set of
-///    animation parameters.
+///  * [DrivenScrollActivity], which drives a scroll view through
+///    a given animation, without resetting to a ballistic simulation
+///    when scroll metrics change.
 class BallisticScrollActivity extends ScrollActivity {
-  /// Creates an activity that animates a scroll view based on a [simulation].
+  /// Creates an activity that sets into motion a scroll view.
+  ///
+  /// The simulation should typically be the result
+  /// of [ScrollPhysics.createBallisticSimulation]
+  /// for the scroll physics of the scroll view.
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,
@@ -662,18 +677,24 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 }
 
-/// An activity that animates a scroll view based on animation parameters.
+/// An activity that drives a scroll view through a given animation.
 ///
 /// For example, a [DrivenScrollActivity] is used to implement
 /// [ScrollController.animateTo].
 ///
+/// The scrolling will be driven by the given animation parameters
+/// or the given [Simulation].
+///
+/// Unlike a [BallisticScrollActivity], if a [DrivenScrollActivity] is
+/// in progress when the scroll metrics change, the activity will continue
+/// with its original animation.
+///
 /// See also:
 ///
-///  * [BallisticScrollActivity], which animates a scroll view based on a
-///    physics [Simulation].
+///  * [BallisticScrollActivity], which sets into motion a scroll view.
 class DrivenScrollActivity extends ScrollActivity {
-  /// Creates an activity that animates a scroll view based on animation
-  /// parameters.
+  /// Creates an activity that drives a scroll view through an animation
+  /// given by animation parameters.
   DrivenScrollActivity(
     super.delegate, {
     required double from,
@@ -697,6 +718,25 @@ class DrivenScrollActivity extends ScrollActivity {
           ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
+  /// Creates an activity that drives a scroll view through an animation
+  /// given by a [Simulation].
+  DrivenScrollActivity.simulation(
+    super.delegate,
+    Simulation simulation, {
+    required TickerProvider vsync,
+  }) {
+    _completer = Completer<void>();
+    _controller =
+        AnimationController.unbounded(
+            debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
+            vsync: vsync,
+          )
+          ..addListener(_tick)
+          ..animateWith(
+            simulation,
+          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+  }
+
   late final Completer<void> _completer;
   late final AnimationController _controller;
 
@@ -708,9 +748,21 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0) {
+    if (!applyMoveTo(_controller.value)) {
       delegate.goIdle();
     }
+  }
+
+  /// Move the position to the given location.
+  ///
+  /// If the new position was fully applied, returns true. If there was any
+  /// overflow, returns false.
+  ///
+  /// The default implementation calls [ScrollActivityDelegate.setPixels]
+  /// and returns true if the overflow was zero.
+  @protected
+  bool applyMoveTo(double value) {
+    return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
 
   void _end() {
