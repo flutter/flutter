@@ -33,7 +33,7 @@ abstract final class SemanticsService {
   /// Currently, this is only supported by the web engine and has no effect on
   /// other platforms. The default mode is [Assertiveness.polite].
   ///
-  /// Not all platforms support announcements. CHeck to see if it is supported using
+  /// Not all platforms support announcements. Check to see if it is supported using
   /// [MediaQuery.announceOf] before calling this method.
   ///
   /// ### Android
