@@ -696,8 +696,16 @@ class TextSelectionOverlay {
   // The initial selection when a selection handle drag has started.
   TextSelection? _dragStartSelection;
 
+  bool _blockEndHandleDrag = false;
+  bool _blockStartHandleDrag = false;
+
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
+      return;
+    }
+    if (_selectionOverlay._isDraggingStartHandle && (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS)) {
+      _blockEndHandleDrag = true;
       return;
     }
 
@@ -716,7 +724,10 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(details.globalPosition.dx, centerOfLineGlobal),
     );
-    _dragStartSelection ??= _selection;
+    _dragStartSelection =
+        defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS
+            ? _selection
+            : null;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -753,10 +764,9 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    if (!renderObject.attached) {
+    if (!renderObject.attached || _blockEndHandleDrag) {
       return;
     }
-    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -776,25 +786,25 @@ class TextSelectionOverlay {
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_dragStartSelection!.isCollapsed) {
-      _selectionOverlay.updateMagnifier(
-        _buildMagnifier(
-          currentTextPosition: position,
-          globalGesturePosition: details.globalPosition,
-          renderEditable: renderObject,
-        ),
-      );
-
-      final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection);
-      return;
-    }
-
     final TextSelection newSelection;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        assert(_dragStartSelection != null);
+        if (_dragStartSelection!.isCollapsed) {
+          _selectionOverlay.updateMagnifier(
+            _buildMagnifier(
+              currentTextPosition: position,
+              globalGesturePosition: details.globalPosition,
+              renderEditable: renderObject,
+            ),
+          );
+
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
+          _handleSelectionHandleChanged(currentSelection);
+          return;
+        }
         // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
         // always returns true for a TextSelection.
         final bool dragStartSelectionNormalized =
@@ -810,6 +820,19 @@ class TextSelectionOverlay {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        if (_selection.isCollapsed) {
+          _selectionOverlay.updateMagnifier(
+            _buildMagnifier(
+              currentTextPosition: position,
+              globalGesturePosition: details.globalPosition,
+              renderEditable: renderObject,
+            ),
+          );
+
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
+          _handleSelectionHandleChanged(currentSelection);
+          return;
+        }
         newSelection = TextSelection(
           baseOffset: _selection.baseOffset,
           extentOffset: position.offset,
@@ -842,6 +865,11 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    if (_selectionOverlay._isDraggingStartHandle && (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS)) {
+      _blockStartHandleDrag = true;
+      return;
+    }
 
     _startHandleDragPosition = details.globalPosition.dy;
 
@@ -858,7 +886,10 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(details.globalPosition.dx, centerOfLineGlobal),
     );
-    _dragStartSelection ??= _selection;
+    _dragStartSelection =
+        defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS
+            ? _selection
+            : null;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -870,10 +901,9 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    if (!renderObject.attached) {
+    if (!renderObject.attached || _blockStartHandleDrag) {
       return;
     }
-    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -890,25 +920,25 @@ class TextSelectionOverlay {
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_dragStartSelection!.isCollapsed) {
-      _selectionOverlay.updateMagnifier(
-        _buildMagnifier(
-          currentTextPosition: position,
-          globalGesturePosition: details.globalPosition,
-          renderEditable: renderObject,
-        ),
-      );
-
-      final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection);
-      return;
-    }
-
     final TextSelection newSelection;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        assert(_dragStartSelection != null);
+        if (_dragStartSelection!.isCollapsed) {
+          _selectionOverlay.updateMagnifier(
+            _buildMagnifier(
+              currentTextPosition: position,
+              globalGesturePosition: details.globalPosition,
+              renderEditable: renderObject,
+            ),
+          );
+
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
+          _handleSelectionHandleChanged(currentSelection);
+          return;
+        }
         // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
         // always returns true for a TextSelection.
         final bool dragStartSelectionNormalized =
@@ -924,6 +954,19 @@ class TextSelectionOverlay {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+        if (_selection.isCollapsed) {
+          _selectionOverlay.updateMagnifier(
+            _buildMagnifier(
+              currentTextPosition: position,
+              globalGesturePosition: details.globalPosition,
+              renderEditable: renderObject,
+            ),
+          );
+
+          final TextSelection currentSelection = TextSelection.fromPosition(position);
+          _handleSelectionHandleChanged(currentSelection);
+          return;
+        }
         newSelection = TextSelection(
           baseOffset: position.offset,
           extentOffset: _selection.extentOffset,
@@ -951,16 +994,23 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
+    if (_blockStartHandleDrag || _blockEndHandleDrag) {
+      _blockStartHandleDrag = false;
+      _blockEndHandleDrag = false;
+      return;
+    }
     _dragStartSelection = null;
+    final bool draggingHandles =
+        _selectionOverlay._isDraggingStartHandle || _selectionOverlay._isDraggingEndHandle;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
-      if (!_selection.isCollapsed) {
+      if (!_selection.isCollapsed && !draggingHandles) {
         _selectionOverlay.showToolbar();
       }
       return;
     }
     _selectionOverlay.hideMagnifier();
-    if (!_selection.isCollapsed) {
+    if (!_selection.isCollapsed && !draggingHandles) {
       _selectionOverlay.showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
     }
   }
