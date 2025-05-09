@@ -22,7 +22,6 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.INITIAL_
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.NORMAL_THEME_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.deepLinkEnabled;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +53,7 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -697,7 +697,6 @@ public class FlutterActivity extends Activity
   }
 
   @NonNull
-  @TargetApi(API_LEVELS.API_33)
   @RequiresApi(API_LEVELS.API_33)
   private OnBackInvokedCallback createOnBackInvokedCallback() {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
@@ -808,6 +807,12 @@ public class FlutterActivity extends Activity
         /*shouldDelayFirstAndroidViewDraw=*/ getRenderMode() == RenderMode.surface);
   }
 
+  /**
+   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, which is
+   *     deprecated in Android 15 and above. Consider using the new WindowInsetsController or other
+   *     Android 15+ APIs for system UI styling.
+   */
+  @Deprecated
   private void configureStatusBarForFullscreenFlutterExperience() {
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -935,7 +940,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void startBackGesture(@NonNull BackEvent backEvent) {
     if (stillAttachedForEvent("startBackGesture")) {
@@ -943,7 +947,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void updateBackGestureProgress(@NonNull BackEvent backEvent) {
     if (stillAttachedForEvent("updateBackGestureProgress")) {
@@ -951,7 +954,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void commitBackGesture() {
     if (stillAttachedForEvent("commitBackGesture")) {
@@ -959,7 +961,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void cancelBackGesture() {
     if (stillAttachedForEvent("cancelBackGesture")) {
@@ -1317,6 +1318,14 @@ public class FlutterActivity extends Activity
   public PlatformPlugin providePlatformPlugin(
       @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
     return new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel(), this);
+  }
+
+  @Nullable
+  @Override
+  public SensitiveContentPlugin provideSensitiveContentPlugin(
+      @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
+    return new SensitiveContentPlugin(
+        FLUTTER_VIEW_ID, activity, flutterEngine.getSensitiveContentChannel());
   }
 
   /**
