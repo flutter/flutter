@@ -34,6 +34,9 @@
                                           project:[[FlutterDartProject alloc] init]
                            allowHeadlessExecution:YES
                                restorationEnabled:YES];
+    // Run engine with default values like initialRoute. Specifying these in
+    // the FlutterViewController was not supported so it's safe to use the
+    // defaults.
     [_engine run];
   }
   return _engine;
