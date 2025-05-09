@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -2299,6 +2300,50 @@ void main() {
       expect(getIconStyle(tester, trailingIcon.icon!)?.color, listTileIconColor);
     },
   );
+
+  testWidgets('ListTile respects and combines parent IconButtonThemeData style', (
+    WidgetTester tester,
+  ) async {
+    const Color customIconColor = Colors.green;
+    const Icon leadingIcon = Icon(Icons.favorite);
+    const Icon trailingIcon = Icon(Icons.close);
+    const OutlinedBorder customShape = RoundedRectangleBorder(side: BorderSide());
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(shape: customShape)),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: ListTile(
+              iconColor: customIconColor,
+              leading: IconButton(icon: leadingIcon, onPressed: () {}),
+              trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    // Verify that the merged theme retains the parent shape
+    final BuildContext tileContext = tester.element(find.byType(ListTile));
+    final IconButtonThemeData mergedTheme = IconButtonTheme.of(tileContext);
+    expect(mergedTheme.style?.shape?.resolve(<MaterialState>{}), customShape);
+
+    // Verify that ListTile's iconColor overrides the inherited color
+    Color? getIconColor(IconData iconData) {
+      final RichText richText = tester.widget<RichText>(
+        find.descendant(of: find.byIcon(iconData), matching: find.byType(RichText)),
+      );
+      return richText.text.style?.color;
+    }
+
+    expect(getIconColor(leadingIcon.icon!), customIconColor);
+    expect(getIconColor(trailingIcon.icon!), customIconColor);
+  });
 
   testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/116908
