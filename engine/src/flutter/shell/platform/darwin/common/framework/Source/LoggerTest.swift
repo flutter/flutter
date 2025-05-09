@@ -25,6 +25,7 @@ final class StringOutputWriter: OutputWriter {
   }
 }
 
+// DO NOT SUBMIT: Move to XCTest first.
 @objc public class LoggerTest: NSObject {
 
   @objc public func runAllTests() {
