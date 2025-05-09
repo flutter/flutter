@@ -172,8 +172,8 @@ struct SemanticsNode {
   double scrollExtentMin = std::nan("");
   double elevation = 0.0;
   double thickness = 0.0;
-  double minValue = 0.0;
-  double maxValue = 0.0;
+  std::string minValue;
+  std::string maxValue;
   std::string identifier;
   std::string label;
   StringAttributes labelAttributes;

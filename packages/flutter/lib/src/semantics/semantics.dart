@@ -1012,10 +1012,10 @@ class SemanticsData with Diagnosticable {
   final SemanticsInputType inputType;
 
   /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  final double? maxValue;
+  final String? maxValue;
 
   /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  final double? minValue;
+  final String? minValue;
 
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
@@ -1089,8 +1089,8 @@ class SemanticsData with Diagnosticable {
         ),
       );
     }
-    properties.add(DoubleProperty('minValue', minValue, defaultValue: null));
-    properties.add(DoubleProperty('maxValue', maxValue, defaultValue: null));
+    properties.add(StringProperty('minValue', minValue, defaultValue: null));
+    properties.add(StringProperty('maxValue', maxValue, defaultValue: null));
   }
 
   @override
@@ -2198,18 +2198,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@template flutter.semantics.SemanticsProperties.maxValue}
   /// The maximum value of the node.
   ///
-  /// {@endtemplate}
+  /// Used in conjunction with [value] to define the current value and range
+  /// of a node. A typical usage is for progress indicators, where [value]
+  /// represents the current progress and [maxValue] defines the maximum
+  /// possible value.
   ///
-  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  final double? maxValue;
+  /// {@endtemplate}
+  final String? maxValue;
 
   /// {@template flutter.semantics.SemanticsProperties.minValue}
   /// The minimum value of the node.
   ///
-  /// {@endtemplate}
+  /// Used in conjunction with [value] to define the current value and range
+  /// of a node. A typical usage is for progress indicators, where [value]
+  /// represents the current progress and [minValue] defines the minimum
+  /// possible value.
   ///
-  /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  final double? minValue;
+  /// {@endtemplate}
+  final String? minValue;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3188,12 +3194,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
   /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  double? get minValue => _minValue;
-  double? _minValue;
+  String? get minValue => _minValue;
+  String? _minValue;
 
   /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  double? get maxValue => _maxValue;
-  double? _maxValue;
+  String? get maxValue => _maxValue;
+  String? _maxValue;
 
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
@@ -3334,8 +3340,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
     SemanticsInputType inputType = _inputType;
-    double? minValue = _minValue;
-    double? maxValue = _maxValue;
+    String? minValue = _minValue;
+    String? maxValue = _maxValue;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3584,8 +3590,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
       inputType: data.inputType,
-      minValue: data.minValue ?? -1,
-      maxValue: data.maxValue ?? -1,
+      minValue: data.minValue ?? '0.0',
+      maxValue: data.maxValue ?? '1.0',
     );
     _dirty = false;
   }
@@ -3786,8 +3792,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
     }
-    properties.add(DoubleProperty('minValue', _minValue, defaultValue: null));
-    properties.add(DoubleProperty('maxValue', _maxValue, defaultValue: null));
+    properties.add(StringProperty('minValue', _minValue, defaultValue: null));
+    properties.add(StringProperty('maxValue', _maxValue, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -5778,17 +5784,17 @@ class SemanticsConfiguration {
   }
 
   /// {@macro flutter.semantics.SemanticsProperties.maxValue}
-  double? get maxValue => _maxValue;
-  double? _maxValue;
-  set maxValue(double? value) {
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+  set maxValue(String? value) {
     _maxValue = value;
     _hasBeenAnnotated = true;
   }
 
   /// {@macro flutter.semantics.SemanticsProperties.minValue}
-  double? get minValue => _minValue;
-  double? _minValue;
-  set minValue(double? value) {
+  String? get minValue => _minValue;
+  String? _minValue;
+  set minValue(String? value) {
     _minValue = value;
     _hasBeenAnnotated = true;
   }

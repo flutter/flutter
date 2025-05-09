@@ -18,13 +18,13 @@ class SemanticsProgressBar extends SemanticRole {
       ) {
     setAriaRole('progressbar');
 
-    // Get the min and max values from semantics object.
-    final double minValue = semanticsObject.minValue ?? 0.0;
-    final double maxValue = semanticsObject.maxValue ?? 100.0;
-
     // Set ARIA attributes for min, max and current value.
-    setAttribute('aria-valuemin', minValue.toStringAsFixed(2));
-    setAttribute('aria-valuemax', maxValue.toStringAsFixed(2));
+    if (semanticsObject.minValue != null) {
+      setAttribute('aria-valuemin', semanticsObject.minValue!);
+    }
+    if (semanticsObject.maxValue != null) {
+      setAttribute('aria-valuemax', semanticsObject.maxValue!);
+    }
 
     if (semanticsObject.value != null) {
       setAttribute('aria-valuenow', semanticsObject.value!);
@@ -35,15 +35,12 @@ class SemanticsProgressBar extends SemanticRole {
   void update() {
     super.update();
 
-    final double minValue = semanticsObject.minValue ?? 0.0;
-    final double maxValue = semanticsObject.maxValue ?? 100.0;
-
-    if (semanticsObject.isMinValueDirty) {
-      setAttribute('aria-valuemin', minValue.toStringAsFixed(2));
+    if (semanticsObject.minValue != null) {
+      setAttribute('aria-valuemin', semanticsObject.minValue!);
     }
 
-    if (semanticsObject.isMaxValueDirty) {
-      setAttribute('aria-valuemax', maxValue.toStringAsFixed(2));
+    if (semanticsObject.maxValue != null) {
+      setAttribute('aria-valuemax', semanticsObject.maxValue!);
     }
 
     if (semanticsObject.value != null) {

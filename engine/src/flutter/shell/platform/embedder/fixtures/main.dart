@@ -200,8 +200,8 @@ Future<void> a11y_main() async {
           additionalActions: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
-          minValue: 0.0,
-          maxValue: 0.0,
+          minValue: '0.0',
+          maxValue: '0.0',
         )
         ..updateNode(
           id: 84,
@@ -239,8 +239,8 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
-          minValue: 0.0,
-          maxValue: 0.0,
+          minValue: '0.0',
+          maxValue: '0.0',
         )
         ..updateNode(
           id: 96,
@@ -278,8 +278,8 @@ Future<void> a11y_main() async {
           additionalActions: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
-          minValue: 0.0,
-          maxValue: 0.0,
+          minValue: '0.0',
+          maxValue: '0.0',
         )
         ..updateNode(
           id: 128,
@@ -317,8 +317,8 @@ Future<void> a11y_main() async {
           childrenInTraversalOrder: Int32List(0),
           controlsNodes: null,
           inputType: SemanticsInputType.none,
-          minValue: 0.0,
-          maxValue: 0.0,
+          minValue: '0.0',
+          maxValue: '0.0',
         )
         ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -408,8 +408,8 @@ Future<void> a11y_string_attributes() async {
         additionalActions: Int32List(0),
         controlsNodes: null,
         inputType: SemanticsInputType.none,
-        minValue: 0.0,
-        maxValue: 0.0,
+        minValue: '0.0',
+        maxValue: '0.0',
       );
 
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
@@ -1708,8 +1708,8 @@ Future<void> a11y_main_multi_view() async {
       additionalActions: Int32List(0),
       controlsNodes: null,
       inputType: SemanticsInputType.none,
-      minValue: 0.0,
-      maxValue: 0.0,
+      minValue: '0.0',
+      maxValue: '0.0',
     );
   }
 
