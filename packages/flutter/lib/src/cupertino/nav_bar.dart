@@ -1194,6 +1194,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   void initState() {
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
+    _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
+    _searchAnimation = CurvedAnimation(parent: _animationController, curve: _kNavBarSearchCurve);
   }
 
   @override
@@ -1244,8 +1246,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   void _setupSearchableAnimation() {
-    _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
-    _searchAnimation = CurvedAnimation(parent: _animationController, curve: _kNavBarSearchCurve);
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
       end: 0.0,
