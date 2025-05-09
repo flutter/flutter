@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@testable import InternalFlutterSwiftCommon
 import Foundation
+
+@testable import InternalFlutterSwiftCommon
 
 /// An `OutputWriter` that stores the most recently logged output in a string.
 final class StringOutputWriter: OutputWriter {
@@ -84,4 +85,3 @@ final class StringOutputWriter: OutputWriter {
   }
 
 }
-

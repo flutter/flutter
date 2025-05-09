@@ -48,14 +48,14 @@ import Foundation
   }
 
   private override convenience init() {
-#if os(iOS)
-    // On iOS, the user has no access to stdout.
-    // Output can be read from the log by the user or the `flutter` tool.
-    self.init(outputWriter: SyslogOutputWriter())
-#elseif os(macOS)
-    // On macOS, both the user and the tool read from stdout.
-    self.init(outputWriter: StdoutOutputWriter())
-#endif
+    #if os(iOS)
+      // On iOS, the user has no access to stdout.
+      // Output can be read from the log by the user or the `flutter` tool.
+      self.init(outputWriter: SyslogOutputWriter())
+    #elseif os(macOS)
+      // On macOS, both the user and the tool read from stdout.
+      self.init(outputWriter: StdoutOutputWriter())
+    #endif
   }
 
   func log(level: LogLevel, _ message: String) {
