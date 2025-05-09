@@ -199,21 +199,3 @@ extension type ImageTrack(JSObject _) implements JSObject {
   external double get repetitionCount;
   external double get frameCount;
 }
-
-/// Compiled and cached gl program.
-class GlProgram {
-  GlProgram(this.program);
-  final Object program;
-}
-
-/// Polyfill for DomOffscreenCanvas that is not supported on some browsers.
-class OffScreenCanvas {
-  static bool? _supported;
-
-  /// Feature detects OffscreenCanvas.
-  static bool get supported =>
-      _supported ??=
-          // Safari 16.4 implements OffscreenCanvas, but without WebGL support. So
-          // it's not really supported in a way that is useful to us.
-          !ui_web.browser.isSafari && domWindow.has('OffscreenCanvas');
-}
