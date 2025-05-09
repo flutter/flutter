@@ -392,10 +392,10 @@ class SemanticsNodeUpdate {
   final ui.Locale? locale;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final double minValue;
+  final String minValue;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final double maxValue;
+  final String maxValue;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -1482,8 +1482,8 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  double? get minValue => _minValue;
-  double? _minValue;
+  String? get minValue => _minValue;
+  String? _minValue;
 
   static const int _minValueIndex = 1 << 28;
 
@@ -1495,8 +1495,8 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  double? get maxValue => _maxValue;
-  double? _maxValue;
+  String? get maxValue => _maxValue;
+  String? _maxValue;
 
   static const int _maxValueIndex = 1 << 29;
 
