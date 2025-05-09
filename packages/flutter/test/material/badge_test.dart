@@ -438,4 +438,232 @@ void main() {
     // Badge should scale with content
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -7, 30 + 8, 23, badgeRadius)));
   });
+
+  testWidgets('Badge ThemeData.badgeTheme', (WidgetTester tester) async {
+
+    final ThemeData theme = ThemeData(
+      badgeTheme: const BadgeThemeData(
+        backgroundColor: Color(0xFF000001),
+        textColor: Color(0xFF000002),
+        textStyle: TextStyle(fontSize: 21),
+        padding: EdgeInsets.all(16),
+        alignment: Alignment.topLeft,
+        offset: Offset(13, 13),
+      ),
+    );
+
+    Widget buildFrame({ThemeData? theme, BadgeThemeData? badgeTheme, Widget? badge}) {
+      final Widget badgeWidget = badge ?? const Badge(label: Text('0'), child: SizedBox());
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: theme,
+        home: Align(
+          alignment: Alignment.topLeft,
+          child:
+              badgeTheme != null ? BadgeTheme(data: badgeTheme, child: badgeWidget) : badgeWidget,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(theme: theme));
+    final RenderObject badge = tester.renderObject(find.byType(Badge));
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text('0')).text.style!;
+
+    // backgroundColor
+    expect(badge, paints..rrect(color: const Color(0xFF000001)));
+
+    // textColor
+    expect(textStyle.color, const Color(0xFF000002));
+
+    // textStyle
+    expect(textStyle.fontSize, 21);
+
+    // alignment, offset, padding
+    expect(badge, paints..rrect(rrect: RRect.fromLTRBR(13.0, -5.5, 66.0, 47.5, const Radius.circular(26.5))));
+
+    // largeSize
+    await tester.pumpWidget(
+      buildFrame(
+        theme: ThemeData(badgeTheme: const BadgeThemeData(largeSize: 52.0)),
+        badge: const Badge(label: SizedBox(height: 20, child: Text('0'))),
+      ),
+    );
+    final Size largeSize = tester.getSize(find.byType(Badge));
+    expect(largeSize.height, equals(52.0));
+
+    // smallSize
+    await tester.pumpWidget(
+      buildFrame(
+        theme: ThemeData(badgeTheme: const BadgeThemeData(smallSize: 42.0)),
+        badge: const Badge(),
+      ),
+    );
+    final Size smallSize = tester.getSize(find.byType(Badge));
+    expect(smallSize.height, equals(42.0));
+  });
+
+  testWidgets('Badge BadgeThemeData Overrides ThemeData.badgeTheme', (WidgetTester tester) async {
+
+    final ThemeData theme = ThemeData(
+      badgeTheme: const BadgeThemeData(
+        backgroundColor: Color(0xFF000001),
+        textColor: Color(0xFF000002),
+        textStyle: TextStyle(fontSize: 21),
+        padding: EdgeInsets.all(16),
+        alignment: Alignment.topCenter,
+        offset: Offset(13, 13),
+      ),
+    );
+
+    const BadgeThemeData badgeThemeData = BadgeThemeData(
+      backgroundColor: Color(0xFF000003),
+      textColor: Color(0xFF000004),
+      textStyle: TextStyle(fontSize: 22),
+      padding: EdgeInsets.all(17),
+      alignment: Alignment.topLeft,
+      offset: Offset(14, 14),
+    );
+
+    Widget buildFrame({ThemeData? theme, BadgeThemeData? badgeTheme, Widget? badge}) {
+      final Widget badgeWidget = badge ?? const Badge(label: Text('0'), child: SizedBox());
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: theme,
+        home: Align(
+          alignment: Alignment.topLeft,
+          child:
+              badgeTheme != null ? BadgeTheme(data: badgeTheme, child: badgeWidget) : badgeWidget,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(theme: theme, badgeTheme: badgeThemeData));
+
+    final RenderObject badge = tester.renderObject(find.byType(Badge));
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text('0')).text.style!;
+
+    // backgroundColor
+    expect(badge, paints..rrect(color: const Color(0xFF000003)));
+
+    // textColor
+    expect(textStyle.color, const Color(0xFF000004));
+
+    // textStyle
+    expect(textStyle.fontSize, 22);
+
+    // alignment, offset, padding
+    expect(badge, paints..rrect(rrect: RRect.fromLTRBR(14.0, -6, 70.0, 50.0, const Radius.circular(28.0))));
+
+    // largeSize
+    await tester.pumpWidget(
+      buildFrame(
+        theme: ThemeData(badgeTheme: const BadgeThemeData(largeSize: 52.0)),
+        badgeTheme: const BadgeThemeData(largeSize: 53.0),
+        badge: const Badge(label: SizedBox(height: 20, child: Text('0'))),
+      ),
+    );
+    final Size largeSize = tester.getSize(find.byType(Badge));
+    expect(largeSize.height, equals(53.0));
+
+    // smallSize
+    await tester.pumpWidget(
+      buildFrame(
+        theme: ThemeData(badgeTheme: const BadgeThemeData(smallSize: 42.0)),
+        badgeTheme: const BadgeThemeData(smallSize: 43.0),
+        badge: const Badge(),
+      ),
+    );
+    final Size smallSize = tester.getSize(find.byType(Badge));
+    expect(smallSize.height, equals(43.0));
+  });
+
+  testWidgets('Badge Overrides Theme', (WidgetTester tester) async {
+
+    final ThemeData theme = ThemeData(
+      badgeTheme: const BadgeThemeData(
+        backgroundColor: Color(0xFF000001),
+        textColor: Color(0xFF000002),
+        textStyle: TextStyle(fontSize: 21),
+        padding: EdgeInsets.all(16),
+        alignment: Alignment.topCenter,
+        offset: Offset(13, 13),
+      ),
+    );
+
+    const BadgeThemeData badgeThemeData = BadgeThemeData(
+      backgroundColor: Color(0xFF000003),
+      textColor: Color(0xFF000004),
+      textStyle: TextStyle(fontSize: 22),
+      padding: EdgeInsets.all(17),
+      alignment: Alignment.topCenter,
+      offset: Offset(14, 14),
+    );
+
+    Widget buildFrame({ThemeData? theme, BadgeThemeData? badgeTheme, Widget? badge}) {
+      final Widget badgeWidget = badge ?? const Badge(label: Text('0'), child: SizedBox());
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: theme,
+        home: Align(
+          alignment: Alignment.topLeft,
+          child:
+              badgeTheme != null ? BadgeTheme(data: badgeTheme, child: badgeWidget) : badgeWidget,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildFrame(
+        theme: theme,
+        badgeTheme: badgeThemeData,
+        badge: const Badge(
+          label: Text('0'),
+          backgroundColor: Color(0xFF000005),
+          textColor: Color(0xFF000006),
+          textStyle: TextStyle(fontSize: 23),
+          padding: EdgeInsets.all(18),
+          alignment: Alignment.topLeft,
+          offset: Offset(15, 15),
+          child: SizedBox(),
+        ),
+      ),
+    );
+
+    final RenderObject badge = tester.renderObject(find.byType(Badge));
+    final TextStyle textStyle = tester.renderObject<RenderParagraph>(find.text('0')).text.style!;
+
+    // backgroundColor
+    expect(badge, paints..rrect(color: const Color(0xFF000005)));
+
+    // textColor
+    expect(textStyle.color, const Color(0xFF000006));
+
+    // textStyle
+    expect(textStyle.fontSize, 23);
+
+    // alignment, offset, padding
+    expect(badge, paints..rrect(rrect: RRect.fromLTRBR(15.0, -6.5, 74.0, 52.5, const Radius.circular(29.5))));
+
+    // largeSize
+    await tester.pumpWidget(
+      buildFrame(
+        theme: ThemeData(badgeTheme: const BadgeThemeData(largeSize: 52.0)),
+        badgeTheme: const BadgeThemeData(largeSize: 53.0),
+        badge: const Badge(largeSize: 54.0, label: SizedBox(height: 20, child: Text('0'))),
+      ),
+    );
+    final Size largeSize = tester.getSize(find.byType(Badge));
+    expect(largeSize.height, equals(54.0));
+
+    // smallSize
+    await tester.pumpWidget(
+      buildFrame(
+        theme: ThemeData(badgeTheme: const BadgeThemeData(smallSize: 42.0)),
+        badgeTheme: const BadgeThemeData(smallSize: 43.0),
+        badge: const Badge(smallSize: 44.0,),
+      ),
+    );
+    final Size smallSize = tester.getSize(find.byType(Badge));
+    expect(smallSize.height, equals(44.0));
+  });
 }
