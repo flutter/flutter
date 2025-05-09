@@ -403,9 +403,8 @@ void _testEngineSemanticsOwner() {
 
     // Announce is an inverted check, see EngineAccessibilityFeatures.announce.
     // Therefore, we need to ensure that the original copy starts with false.
-    EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.announce, true);
-    copy = original.copyWith(announce: false);
+    EngineAccessibilityFeatures copy = original.copyWith(announce: false);
 
     copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
