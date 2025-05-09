@@ -696,16 +696,8 @@ class TextSelectionOverlay {
   // The initial selection when a selection handle drag has started.
   TextSelection? _dragStartSelection;
 
-  bool _blockEndHandleDrag = false;
-  bool _blockStartHandleDrag = false;
-
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
-      return;
-    }
-    if (_selectionOverlay._isDraggingStartHandle && (defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
-      _blockEndHandleDrag = true;
       return;
     }
 
@@ -764,7 +756,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
-    if (!renderObject.attached || _blockEndHandleDrag) {
+    if (!renderObject.attached) {
       return;
     }
 
@@ -865,11 +857,6 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
-    if (_selectionOverlay._isDraggingStartHandle && (defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS)) {
-      _blockStartHandleDrag = true;
-      return;
-    }
 
     _startHandleDragPosition = details.globalPosition.dy;
 
@@ -901,7 +888,7 @@ class TextSelectionOverlay {
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
-    if (!renderObject.attached || _blockStartHandleDrag) {
+    if (!renderObject.attached) {
       return;
     }
 
@@ -992,11 +979,6 @@ class TextSelectionOverlay {
 
   void _handleAnyDragEnd(DragEndDetails details) {
     if (!context.mounted) {
-      return;
-    }
-    if (_blockStartHandleDrag || _blockEndHandleDrag) {
-      _blockStartHandleDrag = false;
-      _blockEndHandleDrag = false;
       return;
     }
     _dragStartSelection = null;
@@ -1206,6 +1188,7 @@ class SelectionOverlay {
   }
 
   bool _isDraggingStartHandle = false;
+  bool _blockStartHandleDrag = false;
 
   /// Whether the start handle is visible.
   ///
@@ -1226,6 +1209,13 @@ class SelectionOverlay {
       _isDraggingStartHandle = false;
       return;
     }
+    if (_isDraggingEndHandle &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
+      // On Apple platforms only one selection handle can be dragged at a time.
+      _blockStartHandleDrag = true;
+      return;
+    }
     _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
     onStartHandleDragStart?.call(details);
   }
@@ -1235,6 +1225,9 @@ class SelectionOverlay {
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
       _isDraggingStartHandle = false;
+      return;
+    }
+    if (_blockStartHandleDrag) {
       return;
     }
     onStartHandleDragUpdate?.call(details);
@@ -1252,6 +1245,10 @@ class SelectionOverlay {
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
+      return;
+    }
+    if (_blockStartHandleDrag) {
+      _blockStartHandleDrag = false;
       return;
     }
     onStartHandleDragEnd?.call(details);
@@ -1286,6 +1283,7 @@ class SelectionOverlay {
   }
 
   bool _isDraggingEndHandle = false;
+  bool _blockEndHandleDrag = false;
 
   /// Whether the end handle is visible.
   ///
@@ -1306,6 +1304,13 @@ class SelectionOverlay {
       _isDraggingEndHandle = false;
       return;
     }
+    if (_isDraggingStartHandle &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
+      // On Apple platforms only one selection handle can be dragged at a time.
+      _blockEndHandleDrag = true;
+      return;
+    }
     _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
     onEndHandleDragStart?.call(details);
   }
@@ -1315,6 +1320,9 @@ class SelectionOverlay {
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
       _isDraggingEndHandle = false;
+      return;
+    }
+    if (_blockEndHandleDrag) {
       return;
     }
     onEndHandleDragUpdate?.call(details);
@@ -1332,6 +1340,10 @@ class SelectionOverlay {
     // Calling OverlayEntry.remove may not happen until the following frame, so
     // it's possible for the handles to receive a gesture after calling remove.
     if (_handles == null) {
+      return;
+    }
+    if (_blockEndHandleDrag) {
+      _blockEndHandleDrag = false;
       return;
     }
     onEndHandleDragEnd?.call(details);
