@@ -69,8 +69,8 @@ class SemanticsUpdateBuilder
       int role,
       const std::vector<std::string>& controlsNodes,
       int validationResult,
-      double minValue,
-      double maxValue);
+      std::string minValue,
+      std::string maxValue);
 
   void updateCustomAction(int id,
                           std::string label,
