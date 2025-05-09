@@ -546,21 +546,24 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final Widget child = Builder(
       builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
     );
-    return Transform(
-      transform: transform,
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: ConstrainedBox(
-          constraints: BoxConstraints.tight(optionsViewBoundingBox),
-          child: Align(
-            alignment: switch (widget.optionsViewOpenDirection) {
-              OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-              OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-            },
-            child: TextFieldTapRegion(
-              child: AutocompleteHighlightedOption(
-                highlightIndexNotifier: _highlightedOptionIndex,
-                child: child,
+    return Semantics(
+      label: 'OverlayPortal',
+      child: Transform(
+        transform: transform,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tight(optionsViewBoundingBox),
+            child: Align(
+              alignment: switch (widget.optionsViewOpenDirection) {
+                OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
+                OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
+              },
+              child: TextFieldTapRegion(
+                child: AutocompleteHighlightedOption(
+                  highlightIndexNotifier: _highlightedOptionIndex,
+                  child: child,
+                ),
               ),
             ),
           ),

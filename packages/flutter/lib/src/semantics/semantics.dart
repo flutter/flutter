@@ -3457,6 +3457,36 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
+  List<SemanticsNode> reorderWithTargetsFirst(Set<SemanticsNode> targets) {
+    // For fast lookup of non-targets.
+    // final Set<int> targetSet = targetIds.toSet();
+
+    // Pre-allocate the result buffer.
+    // final result = Int32List(_children!.length);
+    final List<SemanticsNode> reversedChildren = _children!.reversed.toList();
+    final List<SemanticsNode> hitTestOrder = <SemanticsNode>[];
+    int writeIndex = 0;
+
+    // 1. Place all target elements (including duplicates) up front,
+    //    in the exact sequence of targetIds.
+    for (final target in targets) {
+      for (final child in reversedChildren) {
+        if (target.id == child.id) {
+          hitTestOrder.add(target);
+        }
+      }
+    }
+
+    // 2. Then append every other element, preserving their original order.
+    for (final child in reversedChildren) {
+      if (!targets.contains(child)) {
+        hitTestOrder.add(child);
+      }
+    }
+
+    return hitTestOrder;
+  }
+
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
@@ -3468,7 +3498,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return true;
     }());
     final Int32List childrenInTraversalOrder;
-    final Int32List childrenInHitTestOrder;
+    Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
@@ -3481,10 +3511,55 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
       // _children is sorted in paint order, so we invert it to get the hit test
       // order.
+      // childrenInHitTestOrder = Int32List(childCount);
+      // for (int i = childCount - 1; i >= 0; i -= 1) {
+      //   childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
+      // }
+
+      final List<SemanticsNode> childrenInHitTestOrderList = _childrenInHitTestOrder();
       childrenInHitTestOrder = Int32List(childCount);
-      for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
+      for (int i = 0; i < childCount; i += 1) {
+        childrenInHitTestOrder[i] = childrenInHitTestOrderList[i].id;
       }
+
+      // final Set<int> overlayPortalIds = <int>{};
+      // for (int i = 0; i < childCount; i++) {
+      //   // print('child id: ${_children![i].id}, label: ${_children![i].label}');
+      //   if (_children![i].label == 'OverlayPortal') {
+      //     overlayPortalIds.add(_children![i].id);
+      //   }
+      // }
+
+      // childrenInHitTestOrder = reorderWithTargetsFirst(childrenInHitTestOrder, overlayPortalIds);
+
+      // int currentOverlayPortalIndex = 0;
+      // int currentLeadingHitTestIndex = 0;
+      // while (currentOverlayPortalIndex < childCount) {
+      //   if (overlayPortalIds.contains(_children![currentOverlayPortalIndex].id)) {
+      //     final int tempValue = childrenInHitTestOrder[currentOverlayPortalIndex];
+      //     childrenInHitTestOrder[currentOverlayPortalIndex] =
+      //         childrenInHitTestOrder[currentLeadingHitTestIndex];
+      //     childrenInHitTestOrder[currentLeadingHitTestIndex] = tempValue;
+      //   }
+      //   currentLeadingHitTestIndex++;
+      //   currentOverlayPortalIndex++;
+      // }
+      // // print('overlayPortalIds: $overlayPortalIds');
+
+      // // put label with 'OverlayPortal' in the end of the list.
+      // // childrenInHitTestOrder.sort((int a, int b) {
+      // //   final SemanticsNode nodeA = _children![a];
+      // //   final SemanticsNode nodeB = _children![b];
+      // //   if (nodeA.label == 'OverlayPortal' && nodeB.label != 'OverlayPortal') {
+      // //     return 1;
+      // //   } else if (nodeA.label != 'OverlayPortal' && nodeB.label == 'OverlayPortal') {
+      // //     return -1;
+      // //   }
+      // //   return 0;
+      // // });
+      // print('overlayPortalIds: $overlayPortalIds');
+      print('children id: ${_children!.map((e) => e.id).toList()}');
+      print('>>>>>>>>>>>>> childrenInHitTestOrder: $childrenInHitTestOrder <<<<<<<<<<<<');
     }
     Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
@@ -3536,6 +3611,19 @@ class SemanticsNode with DiagnosticableTreeMixin {
       inputType: data.inputType,
     );
     _dirty = false;
+  }
+
+  List<SemanticsNode> _childrenInHitTestOrder() {
+    final Set<SemanticsNode> overlayPortalNode = <SemanticsNode>{};
+    // final Set<int> overlayPortalIds = <int>{};
+    for (final SemanticsNode child in _children!) {
+      // print('child id: ${_children![i].id}, label: ${_children![i].label}');
+      if (child.label == 'OverlayPortal') {
+        overlayPortalNode.add(child);
+      }
+    }
+
+    return reorderWithTargetsFirst(overlayPortalNode);
   }
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
@@ -3788,7 +3876,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     return switch (childOrder) {
-      DebugSemanticsDumpOrder.inverseHitTest => _children!,
+      DebugSemanticsDumpOrder.inverseHitTest => _childrenInHitTestOrder().reversed.toList(),
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
     };
   }
@@ -4199,7 +4287,10 @@ class SemanticsOwner extends ChangeNotifier {
           _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
+      // print('localDirtyNodes: ${localDirtyNodes.map((toElement) => toElement.id)}');
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+      // print('After sorting, localDirtyNodes: ${localDirtyNodes.map((toElement) => toElement.id)}');
+      // print('visitedNodes: ${visitedNodes.map((toElement) => toElement.id)}');
       visitedNodes.addAll(localDirtyNodes);
       for (final SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
@@ -4215,6 +4306,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+    // print('After sorting: visitedNodes: ${visitedNodes.map((toElement) => toElement.id)}');
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
@@ -4229,6 +4321,7 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached) {
+        // print('Dirty node: ${node.id}');
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
