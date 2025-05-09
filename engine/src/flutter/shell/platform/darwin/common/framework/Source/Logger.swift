@@ -34,53 +34,17 @@ import Foundation
 /// **Usage:**
 /// ```swift
 /// Logger.logInfo("Application has started.")
-/// Logger.instance.logLevel = .warning // Only show warnings and above
+/// Logger.setLogLevel = .warning // Only show warnings and above
 /// Logger.logError("Failed to load asset: \(assetKey)")
 /// ```
 @objc(FlutterLogger) public final class Logger: NSObject {
-  /// The shared singleton instance of the logger.
-  @objc public static let instance = Logger()
-
-  /// Logs a message at `LogLevel.info`.
-  @objc public static func logInfo(_ message: String) {
-    instance.log(level: .info, message)
-  }
-
-  /// Logs a message at `LogLevel.important`.
-  @objc public static func logImportant(_ message: String) {
-    instance.log(level: .important, message)
-  }
-
-  /// Logs a message at `LogLevel.warning`.
-  @objc public static func logWarning(_ message: String) {
-    instance.log(level: .warning, message)
-  }
-
-  /// Logs a message at `LogLevel.error`.
-  @objc public static func logError(_ message: String) {
-    instance.log(level: .error, message)
-  }
-
-  /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
-  @objc public static func logFatal(_ message: String) {
-    instance.log(level: .fatal, message)
-    abort()
-  }
-
-  /// Logs a message unconditionally.
-  @objc public static func logDirect(_ message: String) {
-    instance.outputWriter.writeLine(message)
-  }
-
-  /// Sets the minimum log level.
-  @objc public static func setLogLevel(_ level: LogLevel) {
-    instance.logLevel = level
-  }
-
-  var logLevel = LogLevel.info
-  let outputWriter: OutputWriter
+  private static let shared = Logger()
+  private let outputWriter: OutputWriter
+  private var logLevel = LogLevel.info
 
   private override init() {
+    // On iOS, the user has no access to stdout. Output can be read from the log by the user, or the
+    // `flutter` tool. On macOS, both the user and the tool can read from stdout.
 #if os(iOS)
     outputWriter = SyslogOutputWriter()
 #elseif os(macOS)
@@ -92,6 +56,44 @@ import Foundation
     if level.rawValue >= logLevel.rawValue {
       outputWriter.writeLine(message)
     }
+  }
+}
+
+extension Logger {
+  /// Sets the minimum log level.
+  @objc public static func setLogLevel(_ level: LogLevel) {
+    shared.logLevel = level
+  }
+
+  /// Logs a message at `LogLevel.info`.
+  @objc public static func logInfo(_ message: String) {
+    shared.log(level: .info, message)
+  }
+
+  /// Logs a message at `LogLevel.important`.
+  @objc public static func logImportant(_ message: String) {
+    shared.log(level: .important, message)
+  }
+
+  /// Logs a message at `LogLevel.warning`.
+  @objc public static func logWarning(_ message: String) {
+    shared.log(level: .warning, message)
+  }
+
+  /// Logs a message at `LogLevel.error`.
+  @objc public static func logError(_ message: String) {
+    shared.log(level: .error, message)
+  }
+
+  /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
+  @objc public static func logFatal(_ message: String) {
+    shared.log(level: .fatal, message)
+    abort()
+  }
+
+  /// Logs a message unconditionally.
+  @objc public static func logDirect(_ message: String) {
+    shared.outputWriter.writeLine(message)
   }
 }
 
