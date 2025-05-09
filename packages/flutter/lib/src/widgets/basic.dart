@@ -3845,7 +3845,37 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A sliver that annotates its subtree with a description of the meaning of
+/// the slivers.
+///
+/// Used by assistive technologies, search engines, and other semantic analysis
+/// software to determine the meaning of the application.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=NvtMt_DtFrQ}
+///
+/// See also:
+///
+///  * [SemanticsProperties], which contains a complete documentation for each
+///    of the constructor parameters that belongs to semantics properties.
+///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
+///    through which the [SliverSemantics] widget is actually implemented.
+///  * [SemanticsNode], the object used by the rendering library to represent
+///    semantics in the semantics tree.
+///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
+///    be enabled using [WidgetsApp.showSemanticsDebugger],
+///    [MaterialApp.showSemanticsDebugger], or [CupertinoApp.showSemanticsDebugger].
 class SliverSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a semantic annotation.
+  ///
+  /// To create a `const` instance of [SliverSemantics], use the
+  /// [SliverSemantics.fromProperties] constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsProperties], which contains a complete documentation for each
+  ///    of the constructor parameters that belongs to semantics properties.
+  ///  * [SemanticsSortKey] for a class that determines accessibility traversal
+  ///    order.
   SliverSemantics({
     Key? key,
     Widget? sliver,
@@ -4076,13 +4106,16 @@ class SliverSemantics extends SingleChildRenderObjectWidget {
   /// void _myLongPress() { }
   ///
   /// Widget build(BuildContext context) {
-  ///   return Semantics(
-  ///     onTap: _myTap,
-  ///     child: Semantics(
-  ///       blockUserActions: true,
-  ///       onLongPress: _myLongPress,
-  ///       child: const Text('label'),
-  ///     ),
+  ///   return CustomScrollView(
+  ///     slivers: <Widget>[
+  ///       SliverSemantics(
+  ///         onTap: _myTap,
+  ///         child: SliverSemantics(
+  ///           blockUserActions: true,
+  ///           onLongPress: _myLongPress,
+  ///           child: const Text('label'),
+  ///       ),
+  ///     ],
   ///   );
   /// }
   /// ```
