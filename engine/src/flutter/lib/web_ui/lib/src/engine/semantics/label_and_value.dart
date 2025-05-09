@@ -453,7 +453,7 @@ class LabelAndValue extends SemanticBehavior {
       test.setAttribute('aria-description', 'test');
       _supportsAriaDescription = test.getAttribute('aria-description') == 'test';
     }
-    return false;
+    return _supportsAriaDescription!;
   }
 
   String? _describedById;
