@@ -2557,11 +2557,7 @@ class _NavigationBarTransition extends StatelessWidget {
       if (componentsTransition.topNavBarBottom != null) componentsTransition.topNavBarBottom!,
     ];
 
-    // The actual outer box is big enough to contain both the bottom and top
-    // navigation bars. It's not a direct Rect lerp because some components
-    // can actually be outside the linearly lerp'ed Rect in the middle of
-    // the animation, such as the topLargeTitle. The text scaling is disabled to
-    // avoid odd transitions between pages.
+    // The text scaling is disabled to avoid odd transitions between pages.
     return MediaQuery.withNoTextScaling(
       child: SizedBox(
         height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
