@@ -405,7 +405,7 @@ void main() {
     Widget builder() {
       return MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(),
+          data: const MediaQueryData(announce: true),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(

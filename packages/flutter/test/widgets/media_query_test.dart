@@ -154,7 +154,8 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.onOffSwitchLabels, false);
-    expect(data.announce, false);
+    // Announce is an inverted check (see EngineAccessibilityFeatures.announce).
+    expect(data.announce, true);
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
@@ -1201,6 +1202,7 @@ void main() {
     late bool outsideAnnounce;
     late bool insideAnnounce;
 
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {

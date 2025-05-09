@@ -979,6 +979,8 @@ class AccessibilityFeatures {
   /// announcements are generally supported without discouragement.
   ///
   /// Use this flag to conditionally avoid making announcements on Android.
+  // This is an inverted check on _index since there are many more platforms
+  // that support announce whereas don't.
   bool get announce => _kNoAnnounceIndex & _index == 0;
 
   @override
