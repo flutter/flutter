@@ -761,8 +761,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
-        minValue: 0.0,
-        maxValue: 100.0,
+        minValue: '0.0',
+        maxValue: '100.0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1064,8 +1064,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
-        minValue: 0.0,
-        maxValue: 100.0,
+        minValue: '0.0',
+        maxValue: '100.0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1166,8 +1166,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
-        minValue: 0.0,
-        maxValue: 100.0,
+        minValue: '0.0',
+        maxValue: '100.0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1273,8 +1273,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
-        minValue: 0.0,
-        maxValue: 100.0,
+        minValue: '0.0',
+        maxValue: '100.0',
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1308,8 +1308,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
-        minValue: 0.0,
-        maxValue: 100.0,
+        minValue: '0.0',
+        maxValue: '100.0',
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1399,8 +1399,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
-        minValue: 0.0,
-        maxValue: 100.0,
+        minValue: '0.0',
+        maxValue: '100.0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
