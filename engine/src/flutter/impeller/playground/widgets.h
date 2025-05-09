@@ -14,6 +14,10 @@
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {
+// A point on the screen that can be dragged.
+//
+// Instances of this class should be preserved between frames, such as being
+// static variables.
 struct PlaygroundPoint {
   PlaygroundPoint(Point default_position, Scalar p_radius, Color p_color)
       : position(default_position),
