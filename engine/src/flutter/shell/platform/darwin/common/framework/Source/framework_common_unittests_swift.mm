@@ -12,6 +12,6 @@ FLUTTER_ASSERT_ARC
 
 TEST(FrameworkCommonUnittestsSwift, Logger) {
   ASSERT_FALSE(FLTThrowsObjcException(^{
-    [[LoggerTest alloc] testLogsWithNewline];
+    [[LoggerTest alloc] runAllTests];
   }));
 }

@@ -5,26 +5,83 @@
 @testable import InternalFlutterSwiftCommon
 import Foundation
 
-class StringOutputWriter: OutputWriter {
-  var content = ""
+/// An `OutputWriter` that stores the most recently logged output in a string.
+final class StringOutputWriter: OutputWriter {
+  var didLog = false
+  var lastLevel: LogLevel!
+  var lastLine: String!
 
-  func writeLine(_ message: String) {
-    content += "\(message)\n"
+  func writeLine(level: LogLevel, _ message: String) {
+    didLog = true
+    lastLevel = level
+    lastLine = message
   }
 
   func reset() {
-    content = ""
+    didLog = false
+    lastLevel = nil
+    lastLine = nil
   }
 }
 
 @objc public class LoggerTest: NSObject {
-  @objc public func testLogsWithNewline() {
+
+  @objc public func runAllTests() {
+    testDefaultLogLevelIsInfo()
+    testDoesNotLogMessageBelowLogLevel()
+    testLogsMessageAtLogLevel()
+    testLogsMessageAboveLevel()
+    testLogsImportant()
+  }
+
+  func testDefaultLogLevelIsInfo() {
     let writer = StringOutputWriter()
     let logger = Logger(outputWriter: writer)
-    Logger.logInfo("Hello world")
-    if (writer.content != "Hello world") {
-      fatalError("Wrong content")
-    }
+    assert(logger.logLevel == .info)
   }
+
+  func testDoesNotLogMessageBelowLogLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer)
+
+    logger.logLevel = .warning
+    logger.log(level: .info, "Hello world")
+    assert(!writer.didLog)
+  }
+
+  func testLogsMessageAtLogLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer)
+
+    logger.logLevel = .info
+    logger.log(level: .info, "Hello world")
+    assert(writer.didLog)
+    assert(writer.lastLevel == .info)
+    assert(writer.lastLine == "Hello world")
+  }
+
+  func testLogsMessageAboveLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer)
+
+    logger.logLevel = .info
+    logger.log(level: .warning, "Hello world")
+    assert(writer.didLog)
+    assert(writer.lastLevel == .warning)
+    assert(writer.lastLine == "Hello world")
+  }
+
+  // Verify that important messages are logged, even if log level is set to error.
+  func testLogsImportant() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer)
+
+    logger.logLevel = .error
+    logger.log(level: .important, "Hello world")
+    assert(writer.didLog)
+    assert(writer.lastLevel == .important)
+    assert(writer.lastLine == "Hello world")
+  }
+
 }
 

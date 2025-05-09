@@ -13,14 +13,15 @@ import Foundation
   /// Informational messages that are helpful for tracing application flow.
   case info = 0
 
-  /// Messages that highlight significant progress or state changes in the application.
-  case important
-
   /// Messages indicating a potential issue or an unexpected situation that isn't critical.
   case warning
 
   /// Messages indicating a runtime error from which the application can potentially recover.
   case error
+
+  /// Messages that, while not an error, highlight significant progress or state changes in the
+  /// application, and must be logged.
+  case important
 
   /// Messages indicating a critical condition. Causes the application to immediately terminate.
   case fatal
@@ -34,13 +35,13 @@ import Foundation
 /// **Usage:**
 /// ```swift
 /// Logger.logInfo("Application has started.")
-/// Logger.setLogLevel = .warning // Only show warnings and above
+/// Logger.logLevel = .warning  // Only show warnings and above
 /// Logger.logError("Failed to load asset: \(assetKey)")
 /// ```
 @objc(FlutterLogger) public final class Logger: NSObject {
   private static let shared = Logger()
   private let outputWriter: OutputWriter
-  private var logLevel = LogLevel.info
+  var logLevel = LogLevel.info
 
   init(outputWriter: OutputWriter) {
     self.outputWriter = outputWriter
@@ -57,17 +58,18 @@ import Foundation
 #endif
   }
 
-  private func log(level: LogLevel, _ message: String) {
+  func log(level: LogLevel, _ message: String) {
     if level.rawValue >= logLevel.rawValue {
-      outputWriter.writeLine(message)
+      outputWriter.writeLine(level: level, message)
     }
   }
 }
 
 extension Logger {
   /// Sets the minimum log level.
-  @objc public static func setLogLevel(_ level: LogLevel) {
-    shared.logLevel = level
+  @objc public static var logLevel: LogLevel {
+    get { return shared.logLevel }
+    set(level) { shared.logLevel = level }
   }
 
   /// Logs a message at `LogLevel.info`.
@@ -98,16 +100,16 @@ extension Logger {
 
   /// Logs a message unconditionally.
   @objc public static func logDirect(_ message: String) {
-    shared.outputWriter.writeLine(message)
+    shared.outputWriter.writeLine(level: .important, message)
   }
 }
 
 protocol OutputWriter {
-  func writeLine(_ message: String)
+  func writeLine(level: LogLevel, _ message: String)
 }
 
 final class SyslogOutputWriter: OutputWriter {
-  func writeLine(_ message: String) {
+  func writeLine(level: LogLevel, _ message: String) {
     // TODO(cbracken): replace this with os_log-based approach.
     // https://github.com/flutter/flutter/issues/44030
     message.withCString { vsyslog(LOG_ALERT, "%s", getVaList([$0])) }
@@ -115,7 +117,7 @@ final class SyslogOutputWriter: OutputWriter {
 }
 
 final class StdoutOutputWriter: OutputWriter {
-  func writeLine(_ message: String) {
+  func writeLine(level: LogLevel, _ message: String) {
     fputs(message, stdout)
     fputs("\n", stdout)
     fflush(stdout)
