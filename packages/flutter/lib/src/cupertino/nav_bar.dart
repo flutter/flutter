@@ -1202,24 +1202,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   void didChangeDependencies() {
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
-    scaledSearchFieldHeight =
-        _dampScaleFactor(
-          MediaQuery.textScalerOf(context).scale(_kSearchFieldHeight),
-          _kSearchFieldHeight,
-          _kMaxScaleFactor,
-        ) *
-        _kSearchFieldHeight;
-    scaledLargeTitleHeight =
-        isPortrait
-            ? _dampScaleFactor(
-                  MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
-                  _kNavBarLargeTitleHeightExtension,
-                  _kLargeTitleScaleDampingRatio,
-                ) *
-                _kNavBarLargeTitleHeightExtension
-            : 0.0;
-    _setupSearchableAnimation();
     effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
+    _computeScaledHeights();
+    _setupSearchableAnimation();
     _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     _scrollableState = Scrollable.maybeOf(context);
     _scrollableState?.position.isScrollingNotifier.addListener(_handleScrollChange);
@@ -1230,8 +1215,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     if (_scrollableState?.position != null) {
       _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     }
-    _animationController.dispose();
     _searchAnimation.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -1243,6 +1228,26 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       return widget.bottom!.preferredSize.height;
     }
     return 0.0;
+  }
+
+  void _computeScaledHeights() {
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    scaledSearchFieldHeight =
+        _kSearchFieldHeight *
+        _dampScaleFactor(
+          textScaler.scale(_kSearchFieldHeight),
+          _kSearchFieldHeight,
+          _kMaxScaleFactor,
+        );
+    scaledLargeTitleHeight =
+        isPortrait
+            ? _kNavBarLargeTitleHeightExtension *
+                _dampScaleFactor(
+                  textScaler.scale(_kNavBarLargeTitleHeightExtension),
+                  _kNavBarLargeTitleHeightExtension,
+                  _kLargeTitleScaleDampingRatio,
+                )
+            : 0.0;
   }
 
   void _setupSearchableAnimation() {
