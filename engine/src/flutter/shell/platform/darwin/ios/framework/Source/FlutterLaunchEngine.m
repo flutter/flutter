@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 
 @interface FlutterLaunchEngine () {
-  BOOL _did_make_engine;
+  BOOL _didGrabEngine;
   FlutterEngine* _engine;
 }
 @end
@@ -15,13 +15,13 @@
 - (instancetype)init {
   self = [super init];
   if (self) {
-    self->_did_make_engine = NO;
+    self->_didGrabEngine = NO;
   }
   return self;
 }
 
 - (FlutterEngine*)engine {
-  if (!_did_make_engine && !_engine) {
+  if (!_didGrabEngine && !_engine) {
     // `allowHeadlessExecution` is set to `YES` since that has always been the
     // default behavior. Technically, someone could have set it to `NO` in their
     // nib and it would be ignored here. There is no documented usage of this
@@ -43,9 +43,9 @@
 }
 
 - (nullable FlutterEngine*)grabEngine {
-  FlutterEngine* result = self.engine;
+  FlutterEngine* result = _engine;
   _engine = nil;
-  _did_make_engine = YES;
+  _didGrabEngine = YES;
   return result;
 }
 
