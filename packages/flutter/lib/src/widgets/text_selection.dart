@@ -1211,8 +1211,9 @@ class SelectionOverlay {
     }
     if (_isDraggingEndHandle &&
         (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.macOS)) {
-      // On Apple platforms only one selection handle can be dragged at a time.
+            defaultTargetPlatform == TargetPlatform.macOS ||
+            kIsWeb)) {
+      // On Apple and web platforms only one selection handle can be dragged at a time.
       _blockStartHandleDrag = true;
       return;
     }
@@ -1306,8 +1307,9 @@ class SelectionOverlay {
     }
     if (_isDraggingStartHandle &&
         (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.macOS)) {
-      // On Apple platforms only one selection handle can be dragged at a time.
+            defaultTargetPlatform == TargetPlatform.macOS ||
+            kIsWeb)) {
+      // On Apple and web platforms only one selection handle can be dragged at a time.
       _blockEndHandleDrag = true;
       return;
     }
