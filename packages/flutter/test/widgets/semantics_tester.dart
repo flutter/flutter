@@ -681,8 +681,8 @@ class SemanticsTester {
     double? scrollExtentMin,
     int? currentValueLength,
     int? maxValueLength,
-    double? maxValue,
-    double? minValue,
+    String? maxValue,
+    String? minValue,
     SemanticsNode? ancestor,
     SemanticsInputType? inputType,
   }) {
@@ -1129,8 +1129,8 @@ class _IncludesNodeWith extends Matcher {
   final int? currentValueLength;
   final int? maxValueLength;
   final SemanticsInputType? inputType;
-  final double? minValue;
-  final double? maxValue;
+  final String? minValue;
+  final String? maxValue;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -1224,8 +1224,8 @@ Matcher includesNodeWith({
   int? maxValueLength,
   int? currentValueLength,
   SemanticsInputType? inputType,
-  double? minValue,
-  double? maxValue,
+  String? minValue,
+  String? maxValue,
 }) {
   return _IncludesNodeWith(
     label: label,

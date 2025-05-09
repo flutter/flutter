@@ -72,8 +72,8 @@ class SemanticsUpdateBuilder
       int hitTestBehavior,
       int inputType,
       std::string locale,
-      double minValue,
-      double maxValue);
+      std::string minValue,
+      std::string maxValue);
 
   void updateCustomAction(int id,
                           std::string label,

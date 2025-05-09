@@ -6064,8 +6064,8 @@ void updateNode(
   ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   ui.Locale? locale,
-  double minValue = 0.0,
-  double maxValue = 0.0,
+  String minValue = '0.0',
+  String maxValue = '0.0',
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);

@@ -73,8 +73,8 @@ void SemanticsUpdateBuilder::updateNode(
     int hitTestBehavior,
     int inputType,
     std::string locale,
-    double minValue,
-    double maxValue) {
+    std::string minValue,
+    std::string maxValue) {
   FML_CHECK(scrollChildren == 0 ||
             (scrollChildren > 0 && childrenInHitTestOrder.data()))
       << "Semantics update contained scrollChildren but did not have "

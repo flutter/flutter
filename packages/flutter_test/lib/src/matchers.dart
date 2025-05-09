@@ -685,8 +685,8 @@ Matcher matchesSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
-  double? maxValue,
-  double? minValue,
+  String? maxValue,
+  String? minValue,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -885,8 +885,8 @@ Matcher containsSemantics({
   int? currentValueLength,
   SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
-  double? maxValue,
-  double? minValue,
+  String? maxValue,
+  String? minValue,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -2549,8 +2549,8 @@ class _MatchesSemanticsData extends Matcher {
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult? validationResult;
-  final double? maxValue;
-  final double? minValue;
+  final String? maxValue;
+  final String? minValue;
 
   /// There are three possible states for these two maps:
   ///

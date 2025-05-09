@@ -90,8 +90,8 @@ class SemanticsTester {
     ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
     ui.Locale? locale,
-    double? minValue,
-    double? maxValue,
+    String? minValue,
+    String? maxValue,
   }) {
     // Actions
     if (hasTap ?? false) {
