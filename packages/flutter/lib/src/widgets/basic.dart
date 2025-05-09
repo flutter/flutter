@@ -4107,10 +4107,11 @@ class SliverSemantics extends SingleChildRenderObjectWidget {
   ///     slivers: <Widget>[
   ///       SliverSemantics(
   ///         onTap: _myTap,
-  ///         child: SliverSemantics(
+  ///         sliver: SliverSemantics(
   ///           blockUserActions: true,
   ///           onLongPress: _myLongPress,
   ///           child: const Text('label'),
+  ///         ),
   ///       ),
   ///     ],
   ///   );
