@@ -907,11 +907,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
-/// [CupertinoSliverNavigationBar] by default disables text scaling to match the
-/// native iOS behavior. To override this behavior, wrap each of the
-/// [CupertinoSliverNavigationBar]'s components inside a [MediaQuery] with the
-/// desired [TextScaler].
-///
 /// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
 /// user scrolls, but it will also stretch when the user over-scrolls if the
