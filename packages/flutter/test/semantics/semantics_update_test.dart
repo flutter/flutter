@@ -232,8 +232,8 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required ui.SemanticsInputType inputType,
-    required double minValue,
-    required double maxValue,
+    required String minValue,
+    required String maxValue,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
