@@ -266,6 +266,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterFakeKeyEvents.h",
       "framework/Source/FlutterFakeKeyEvents.mm",
       "framework/Source/FlutterKeyboardManagerTest.mm",
+      "framework/Source/FlutterLaunchEngineTest.mm",
       "framework/Source/FlutterMetalLayerTest.mm",
       "framework/Source/FlutterPlatformPluginTest.mm",
       "framework/Source/FlutterPlatformViewsTest.mm",
