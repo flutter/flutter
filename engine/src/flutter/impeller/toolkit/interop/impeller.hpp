@@ -327,7 +327,7 @@ IMPELLER_HPP_DEFINE_TRAITS(ImpellerVulkanSwapchain);
 
 #undef IMPELLER_HPP_DEFINE_TRAITS
 
-class Mapping final {
+class Mapping {
  public:
   Mapping(const uint8_t* mapping,
           size_t size,
@@ -349,7 +349,7 @@ class Mapping final {
 //------------------------------------------------------------------------------
 /// @see      ImpellerContext
 ///
-class Context final : public Object<ImpellerContext, ImpellerContextTraits> {
+class Context : public Object<ImpellerContext, ImpellerContextTraits> {
  public:
   Context(ImpellerContext context, AdoptTag tag) : Object(context, tag) {}
 
@@ -386,7 +386,7 @@ class Context final : public Object<ImpellerContext, ImpellerContextTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerTexture
 ///
-class Texture final : public Object<ImpellerTexture, ImpellerTextureTraits> {
+class Texture : public Object<ImpellerTexture, ImpellerTextureTraits> {
  public:
   Texture(ImpellerTexture texture, AdoptTag adopt) : Object(texture, adopt) {}
 
@@ -437,7 +437,7 @@ class Texture final : public Object<ImpellerTexture, ImpellerTextureTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerColorFilter
 ///
-class ColorFilter final
+class ColorFilter
     : public Object<ImpellerColorFilter, ImpellerColorFilterTraits> {
  public:
   ColorFilter(ImpellerColorFilter filter, AdoptTag tag) : Object(filter, tag) {}
@@ -464,7 +464,7 @@ class ColorFilter final
 //------------------------------------------------------------------------------
 /// @see      ImpellerColorSource
 ///
-class ColorSource final
+class ColorSource
     : public Object<ImpellerColorSource, ImpellerColorSourceTraits> {
  public:
   ColorSource(ImpellerColorSource source, AdoptTag tag) : Object(source, tag) {}
@@ -593,7 +593,7 @@ class ColorSource final
 //------------------------------------------------------------------------------
 /// @see      ImpellerImageFilter
 ///
-class ImageFilter final
+class ImageFilter
     : public Object<ImpellerImageFilter, ImpellerImageFilterTraits> {
  public:
   ImageFilter(ImpellerImageFilter filter, AdoptTag tag) : Object(filter, tag) {}
@@ -651,8 +651,7 @@ class ImageFilter final
 //------------------------------------------------------------------------------
 /// @see      ImpellerMaskFilter
 ///
-class MaskFilter final
-    : public Object<ImpellerMaskFilter, ImpellerMaskFilterTraits> {
+class MaskFilter : public Object<ImpellerMaskFilter, ImpellerMaskFilterTraits> {
  public:
   MaskFilter(ImpellerMaskFilter filter, AdoptTag tag) : Object(filter, tag) {}
 
@@ -669,8 +668,7 @@ class MaskFilter final
 //------------------------------------------------------------------------------
 /// @see      ImpellerGlyphInfo
 ///
-class GlyphInfo final
-    : public Object<ImpellerGlyphInfo, ImpellerGlyphInfoTraits> {
+class GlyphInfo : public Object<ImpellerGlyphInfo, ImpellerGlyphInfoTraits> {
  public:
   GlyphInfo(ImpellerGlyphInfo info, AdoptTag tag) : Object(info, tag) {}
 
@@ -694,7 +692,9 @@ class GlyphInfo final
   /// @see      ImpellerGlyphInfoGetGraphemeClusterBounds
   ///
   ImpellerRect GetGraphemeClusterBounds() const {
-    return gGlobalProcTable.ImpellerGlyphInfoGetGraphemeClusterBounds(Get());
+    ImpellerRect rect = {};
+    gGlobalProcTable.ImpellerGlyphInfoGetGraphemeClusterBounds(Get(), &rect);
+    return rect;
   }
 
   //----------------------------------------------------------------------------
@@ -715,7 +715,7 @@ class GlyphInfo final
 //------------------------------------------------------------------------------
 /// @see      ImpellerLineMetrics
 ///
-class LineMetrics final
+class LineMetrics
     : public Object<ImpellerLineMetrics, ImpellerLineMetricsTraits> {
  public:
   LineMetrics(ImpellerLineMetrics metrics, AdoptTag tag)
@@ -812,8 +812,7 @@ class LineMetrics final
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraph
 ///
-class Paragraph final
-    : public Object<ImpellerParagraph, ImpellerParagraphTraits> {
+class Paragraph : public Object<ImpellerParagraph, ImpellerParagraphTraits> {
  public:
   Paragraph(ImpellerParagraph paragraph, AdoptTag tag)
       : Object(paragraph, AdoptTag::kAdopt) {}
@@ -911,15 +910,17 @@ class Paragraph final
   /// @see      ImpellerParagraphGetWordBoundary
   ///
   ImpellerRange GetWordBoundary(size_t code_unit_index) {
-    return gGlobalProcTable.ImpellerParagraphGetWordBoundary(Get(),
-                                                             code_unit_index);
+    ImpellerRange range = {};
+    gGlobalProcTable.ImpellerParagraphGetWordBoundary(Get(), code_unit_index,
+                                                      &range);
+    return range;
   }
 };
 
 //------------------------------------------------------------------------------
 /// @see      ImpellerPaint
 ///
-class Paint final : public Object<ImpellerPaint, ImpellerPaintTraits> {
+class Paint : public Object<ImpellerPaint, ImpellerPaintTraits> {
  public:
   Paint() : Object(gGlobalProcTable.ImpellerPaintNew(), AdoptTag::kAdopt) {}
 
@@ -1015,7 +1016,7 @@ class Paint final : public Object<ImpellerPaint, ImpellerPaintTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraphStyle
 ///
-class ParagraphStyle final
+class ParagraphStyle
     : public Object<ImpellerParagraphStyle, ImpellerParagraphStyleTraits> {
  public:
   ParagraphStyle()
@@ -1114,8 +1115,8 @@ class ParagraphStyle final
 //------------------------------------------------------------------------------
 /// @see      ImpellerTypographyContext
 ///
-class TypographyContext final : public Object<ImpellerTypographyContext,
-                                              ImpellerTypographyContextTraits> {
+class TypographyContext : public Object<ImpellerTypographyContext,
+                                        ImpellerTypographyContextTraits> {
  public:
   TypographyContext()
       : Object(gGlobalProcTable.ImpellerTypographyContextNew(),
@@ -1147,7 +1148,7 @@ class TypographyContext final : public Object<ImpellerTypographyContext,
 //------------------------------------------------------------------------------
 /// @see      ImpellerParagraphBuilder
 ///
-class ParagraphBuilder final
+class ParagraphBuilder
     : public Object<ImpellerParagraphBuilder, ImpellerParagraphBuilderTraits> {
  public:
   explicit ParagraphBuilder(const TypographyContext& context)
@@ -1209,7 +1210,7 @@ class ParagraphBuilder final
 //------------------------------------------------------------------------------
 /// @see      ImpellerPath
 ///
-class Path final : public Object<ImpellerPath, ImpellerPathTraits> {
+class Path : public Object<ImpellerPath, ImpellerPathTraits> {
  public:
   Path(ImpellerPath path, AdoptTag tag) : Object(path, tag) {}
 
@@ -1223,7 +1224,7 @@ class Path final : public Object<ImpellerPath, ImpellerPathTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerPathBuilder
 ///
-class PathBuilder final
+class PathBuilder
     : public Object<ImpellerPathBuilder, ImpellerPathBuilderTraits> {
  public:
   PathBuilder()
@@ -1336,7 +1337,7 @@ class PathBuilder final
 //------------------------------------------------------------------------------
 /// @see      ImpellerDisplayList
 ///
-class DisplayList final
+class DisplayList
     : public Object<ImpellerDisplayList, ImpellerDisplayListTraits> {
  public:
   DisplayList(ImpellerDisplayList display_list, AdoptTag tag)
@@ -1346,7 +1347,7 @@ class DisplayList final
 //------------------------------------------------------------------------------
 /// @see      ImpellerSurface
 ///
-class Surface final : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
+class Surface : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
  public:
   explicit Surface(ImpellerSurface surface) : Object(surface) {}
 
@@ -1398,7 +1399,7 @@ class Surface final : public Object<ImpellerSurface, ImpellerSurfaceTraits> {
 //------------------------------------------------------------------------------
 /// @see      ImpellerVulkanSwapchain
 ///
-class VulkanSwapchain final
+class VulkanSwapchain
     : public Object<ImpellerVulkanSwapchain, ImpellerVulkanSwapchainTraits> {
  public:
   VulkanSwapchain(ImpellerVulkanSwapchain swapchain, AdoptTag tag)
@@ -1427,9 +1428,8 @@ class VulkanSwapchain final
 //------------------------------------------------------------------------------
 /// @see      ImpellerDisplayListBuilder
 ///
-class DisplayListBuilder final
-    : public Object<ImpellerDisplayListBuilder,
-                    ImpellerDisplayListBuilderTraits> {
+class DisplayListBuilder : public Object<ImpellerDisplayListBuilder,
+                                         ImpellerDisplayListBuilderTraits> {
  public:
   //----------------------------------------------------------------------------
   /// @see      ImpellerDisplayListBuilderNew

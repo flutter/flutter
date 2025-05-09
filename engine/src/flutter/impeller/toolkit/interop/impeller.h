@@ -2652,13 +2652,13 @@ uint32_t ImpellerParagraphGetLineCount(
 ///
 /// @param[in]  paragraph        The paragraph
 /// @param[in]  code_unit_index  The code unit index
-///
-/// @return     The impeller range.
+/// @param[out]  code_unit_index The range.
 ///
 IMPELLER_EXPORT
-ImpellerRange ImpellerParagraphGetWordBoundary(
+void ImpellerParagraphGetWordBoundary(
     ImpellerParagraph IMPELLER_NONNULL paragraph,
-    size_t code_unit_index);
+    size_t code_unit_index,
+    ImpellerRange* IMPELLER_NONNULL out_range);
 
 //------------------------------------------------------------------------------
 /// @brief      Get the line metrics of this laid out paragraph. Calculating the
@@ -2948,12 +2948,12 @@ size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd(
 ///             coordinate space of the paragraph.
 ///
 /// @param[in]  glyph_info  The glyph information.
-///
-/// @return     The grapheme cluster bounds.
+/// @param[out] out_bounds  The grapheme cluster bounds.
 ///
 IMPELLER_EXPORT
-ImpellerRect ImpellerGlyphInfoGetGraphemeClusterBounds(
-    ImpellerGlyphInfo IMPELLER_NONNULL glyph_info);
+void ImpellerGlyphInfoGetGraphemeClusterBounds(
+    ImpellerGlyphInfo IMPELLER_NONNULL glyph_info,
+    ImpellerRect* IMPELLER_NONNULL out_bounds);
 
 //------------------------------------------------------------------------------
 /// @param[in]  glyph_info  The glyph information.
