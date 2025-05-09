@@ -30,4 +30,8 @@
 - (void)applicationWillTerminate:(UIApplication*)application {
 }
 
+- (FlutterEngine*)grabLaunchEngine {
+  return _launchEngine;
+}
+
 @end
