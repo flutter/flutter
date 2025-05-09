@@ -983,7 +983,7 @@ class TextSelectionOverlay {
     }
     _dragStartSelection = null;
     final bool draggingHandles =
-        _selectionOverlay._isDraggingStartHandle || _selectionOverlay._isDraggingEndHandle;
+        _selectionOverlay.isDraggingStartHandle || _selectionOverlay.isDraggingEndHandle;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
       if (!_selection.isCollapsed && !draggingHandles) {
@@ -1187,7 +1187,10 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  /// Whether the selection start handle is currently being dragged.
+  bool get isDraggingStartHandle => _isDraggingStartHandle;
   bool _isDraggingStartHandle = false;
+
   bool _blockStartHandleDrag = false;
 
   /// Whether the start handle is visible.
@@ -1283,7 +1286,10 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  /// Whether the selection end handle is currently being dragged.
+  bool get isDraggingEndHandle => _isDraggingEndHandle;
   bool _isDraggingEndHandle = false;
+
   bool _blockEndHandleDrag = false;
 
   /// Whether the end handle is visible.
