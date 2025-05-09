@@ -144,6 +144,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -154,8 +155,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.onOffSwitchLabels, false);
-    // Announce is an inverted check (see EngineAccessibilityFeatures.announce).
-    expect(data.announce, true);
+    expect(data.announce, false);
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
