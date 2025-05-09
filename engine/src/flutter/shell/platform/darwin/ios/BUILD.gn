@@ -4,7 +4,7 @@
 
 assert(is_ios)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
