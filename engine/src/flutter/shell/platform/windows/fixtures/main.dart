@@ -468,8 +468,8 @@ Future<void> sendSemanticsTreeInfo() async {
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
-      minValue: 0.0,
-      maxValue: 100.0,
+      minValue: '0.0',
+      maxValue: '100.0',
     );
     return builder.build();
   }
