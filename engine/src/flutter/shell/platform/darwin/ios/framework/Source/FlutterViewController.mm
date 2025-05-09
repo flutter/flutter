@@ -254,12 +254,6 @@ typedef struct MouseState {
 
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
                   initialRoute:(nullable NSString*)initialRoute {
-  // Need the project to get settings for the view. Initializing it here means
-  // the Engine class won't initialize it later.
-  if (!project) {
-    project = [[FlutterDartProject alloc] init];
-  }
-
   id appDelegate = FlutterSharedApplication.application.delegate;
   FlutterEngine* engine;
   if ([appDelegate respondsToSelector:@selector(grabLaunchEngine)]) {
@@ -276,6 +270,12 @@ typedef struct MouseState {
     }
   }
   if (!engine) {
+    // Need the project to get settings for the view. Initializing it here means
+    // the Engine class won't initialize it later.
+    if (!project) {
+      project = [[FlutterDartProject alloc] init];
+    }
+
     engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
                                          project:project
                           allowHeadlessExecution:self.engineAllowHeadlessExecution
@@ -289,7 +289,7 @@ typedef struct MouseState {
   _engine = engine;
   _flutterView = [[FlutterView alloc] initWithDelegate:_engine
                                                 opaque:_viewOpaque
-                                       enableWideGamut:project.isWideGamutEnabled];
+                                       enableWideGamut:engine.project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
   _engineNeedsLaunch = YES;
   _ongoingTouches = [[NSMutableSet alloc] init];
