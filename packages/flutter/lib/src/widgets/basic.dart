@@ -4111,8 +4111,8 @@ class SliverSemantics extends SingleChildRenderObjectWidget {
   ///         sliver: SliverSemantics(
   ///           blockUserActions: true,
   ///           onLongPress: _myLongPress,
-  ///           sliver: SliverToBoxAdapter(
-  ///             child:const Text('label'),
+  ///           sliver: const SliverToBoxAdapter(
+  ///             child: Text('label'),
   ///           ),
   ///         ),
   ///       ),
