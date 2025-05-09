@@ -22,11 +22,17 @@
 
 - (FlutterEngine*)engine {
   if (!_did_make_engine && !_engine) {
-    // A FlutterViewController without restoration have a nil restorationIdentifier
-    // leading no restoration data being saved.
+    // `allowHeadlessExecution` is set to `YES` since that has always been the
+    // default behavior. Technically, someone could have set it to `NO` in their
+    // nib and it would be ignored here. There is no documented usage of this
+    // though.
+    // `restorationEnabled` is set to `YES` since a FlutterViewController
+    // without restoration will have a nil restorationIdentifier leading no
+    // restoration data being saved. So, it is safe to turn this on in the event
+    // that someone does not want it.
     _engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
                                           project:[[FlutterDartProject alloc] init]
-                           allowHeadlessExecution:YES  // TODO(gaaclarke): decide what to do here.
+                           allowHeadlessExecution:YES
                                restorationEnabled:YES];
     [_engine run];
   }

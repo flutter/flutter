@@ -269,9 +269,9 @@ typedef struct MouseState {
       // routes so it's safe to take it.
       engine = [appDelegate grabLaunchEngine];
     } else {
-      // If we registered plugins without a xib, throw away the engine that was
-      // registered through the FlutterAppDelegate.  That's not a valid usage
-      // of the API.
+      // If we registered plugins with a FlutterAppDelegate without a xib, throw
+      // away the engine that was registered through the FlutterAppDelegate.
+      // That's not a valid usage of the API.
       [appDelegate grabLaunchEngine];
     }
   }
