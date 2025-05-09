@@ -1167,7 +1167,7 @@ class _Bar extends StatelessWidget {
       alignedChild = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
-        child: SizedBox(width: MediaQuery.sizeOf(context).height, child: child),
+        child: SizedBox(width: MediaQuery.heightOf(context), child: child),
       );
     }
     return Material(elevation: elevation, color: color, child: alignedChild);

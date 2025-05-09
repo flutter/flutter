@@ -23,8 +23,7 @@ class WidgetPreview {
   const WidgetPreview({
     required this.builder,
     this.name,
-    this.width,
-    this.height,
+    this.size,
     this.textScaleFactor,
     this.brightness,
     this.theme,
@@ -38,17 +37,14 @@ class WidgetPreview {
   /// A callback to build the [Widget] to be rendered in the preview.
   final Widget Function() builder;
 
-  /// Artificial width constraint to be applied to the [Widget] returned by [builder].
+  /// Artificial constraints to be applied to the previewed widget.
   ///
-  /// If not provided, the previewed widget will attempt to set its own width
-  /// constraints and may result in an unbounded constraint error.
-  final double? width;
-
-  /// Artificial height constraint to be applied to the [Widget] returned by [builder].
+  /// If not provided, the previewed widget will attempt to set its own
+  /// constraints.
   ///
-  /// If not provided, the previewed widget will attempt to set its own height
-  /// constraints and may result in an unbounded constraint error.
-  final double? height;
+  /// If a dimension has a value of `double.infinity`, the previewed widget
+  /// will attempt to set its own constraints in the relevant dimension.
+  final Size? size;
 
   /// Applies font scaling to text within the [Widget] returned by [builder].
   ///

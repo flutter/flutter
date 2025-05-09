@@ -14,14 +14,11 @@ namespace impeller {
 
 class ImpellerBenchmarkAccessor {
  public:
-  static std::vector<Point> GenerateSolidStrokeVertices(const PathSource& path,
-                                                        Scalar stroke_width,
-                                                        Scalar miter_limit,
-                                                        Join stroke_join,
-                                                        Cap stroke_cap,
-                                                        Scalar scale) {
-    return StrokePathGeometry::GenerateSolidStrokeVertices(
-        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+  static std::vector<Point> GenerateSolidStrokeVertices(
+      const PathSource& path,
+      const StrokeParameters& stroke,
+      Scalar scale) {
+    return StrokePathGeometry::GenerateSolidStrokeVertices(path, stroke, scale);
   }
 };
 
@@ -68,22 +65,26 @@ template <class... Args>
 static void BM_StrokePath(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
   auto raw_path = flutter::DlPath(std::get<Path>(args_tuple));
-  auto cap = std::get<Cap>(args_tuple);
-  auto join = std::get<Join>(args_tuple);
+
+  StrokeParameters stroke{
+      .width = 5.0f,
+      .cap = std::get<Cap>(args_tuple),
+      .join = std::get<Join>(args_tuple),
+      .miter_limit = 10.0f,
+  };
+
   // Production code uses ui.Path which generates a path using an SkPath,
   // so we simulate that work flow by making sure the path used inside the
   // benchmark loop came from an SkPath.
   auto path = flutter::DlPath(raw_path.GetSkPath());
 
-  const Scalar stroke_width = 5.0f;
-  const Scalar miter_limit = 10.0f;
   const Scalar scale = 1.0f;
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   while (state.KeepRunning()) {
     auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
-        path, stroke_width, miter_limit, join, cap, scale);
+        path, stroke, scale);
     single_point_count = vertices.size();
     point_count += single_point_count;
   }

@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
@@ -56,14 +57,11 @@ namespace impeller {
 
 class ImpellerEntityUnitTestAccessor {
  public:
-  static std::vector<Point> GenerateSolidStrokeVertices(const PathSource& path,
-                                                        Scalar stroke_width,
-                                                        Scalar miter_limit,
-                                                        Join stroke_join,
-                                                        Cap stroke_cap,
-                                                        Scalar scale) {
-    return StrokePathGeometry::GenerateSolidStrokeVertices(
-        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+  static std::vector<Point> GenerateSolidStrokeVertices(
+      const PathSource& path,
+      const StrokeParameters& stroke,
+      Scalar scale) {
+    return StrokePathGeometry::GenerateSolidStrokeVertices(path, stroke, scale);
   }
 };
 
@@ -96,27 +94,57 @@ TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
   ASSERT_FALSE(geometry->CoversArea({}, Rect()));
 }
 
+TEST(EntityGeometryTest, FillRoundRectGeometryCoversArea) {
+  Rect bounds = Rect::MakeLTRB(100, 100, 200, 200);
+  RoundRect round_rect =
+      RoundRect::MakeRectRadii(bounds, RoundingRadii{
+                                           .top_left = Size(1, 11),
+                                           .top_right = Size(2, 12),
+                                           .bottom_left = Size(3, 13),
+                                           .bottom_right = Size(4, 14),
+                                       });
+  FillRoundRectGeometry geom(round_rect);
+
+  // Tall middle rect should barely be covered.
+  EXPECT_TRUE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(102, 100, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 99, 196, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 197, 200)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(103, 100, 196, 201)));
+
+  // Wide middle rect should barely be covered.
+  EXPECT_TRUE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(99, 112, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 111, 200, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 201, 186)));
+  EXPECT_FALSE(geom.CoversArea({}, Rect::MakeLTRB(100, 112, 200, 187)));
+}
+
 TEST(EntityGeometryTest, LineGeometryCoverage) {
   {
-    auto geometry = Geometry::MakeLine({10, 10}, {20, 10}, 2, Cap::kButt);
+    auto geometry = Geometry::MakeLine(  //
+        {10, 10}, {20, 10}, {.width = 2, .cap = Cap::kButt});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(10, 9, 20, 11));
     EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(10, 9, 20, 11)));
   }
 
   {
-    auto geometry = Geometry::MakeLine({10, 10}, {20, 10}, 2, Cap::kSquare);
+    auto geometry = Geometry::MakeLine(  //
+        {10, 10}, {20, 10}, {.width = 2, .cap = Cap::kSquare});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(9, 9, 21, 11));
     EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(9, 9, 21, 11)));
   }
 
   {
-    auto geometry = Geometry::MakeLine({10, 10}, {10, 20}, 2, Cap::kButt);
+    auto geometry = Geometry::MakeLine(  //
+        {10, 10}, {10, 20}, {.width = 2, .cap = Cap::kButt});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(9, 10, 11, 20));
     EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(9, 10, 11, 20)));
   }
 
   {
-    auto geometry = Geometry::MakeLine({10, 10}, {10, 20}, 2, Cap::kSquare);
+    auto geometry = Geometry::MakeLine(  //
+        {10, 10}, {10, 20}, {.width = 2, .cap = Cap::kSquare});
     EXPECT_EQ(geometry->GetCoverage({}), Rect::MakeLTRB(9, 9, 11, 21));
     EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(9, 9, 11, 21)));
   }
@@ -163,7 +191,14 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesButtCap) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -197,7 +232,14 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesRoundCap) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kBevel, Cap::kRound, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kRound,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   size_t count = points.size();
   ASSERT_TRUE((count & 0x1) == 0x0);  // Should always be even
@@ -278,7 +320,14 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesSquareCap) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kSquare,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   // clang-format off
   std::vector<Point> expected = {
@@ -321,7 +370,14 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -348,7 +404,14 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -375,7 +438,14 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesMiterJoin) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kMiter,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -405,7 +475,14 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kMiter,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -434,7 +511,14 @@ TEST(EntityGeometryTest, TinyQuadGeneratesCaps) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 4.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+      path,
+      {
+          .width = 4.0f,
+          .cap = Cap::kSquare,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the opening square cap
@@ -464,7 +548,14 @@ TEST(EntityGeometryTest, TinyConicGeneratesCaps) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 4.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+      path,
+      {
+          .width = 4.0f,
+          .cap = Cap::kSquare,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the opening square cap
@@ -494,7 +585,14 @@ TEST(EntityGeometryTest, TinyCubicGeneratesCaps) {
   flutter::DlPath path(path_builder);
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-      path, 4.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+      path,
+      {
+          .width = 4.0f,
+          .cap = Cap::kSquare,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
 
   std::vector<Point> expected = {
       // The points for the opening square cap
@@ -549,7 +647,14 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
       // Miter limit too small (99% of required) to allow a miter
       auto points1 =
           ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-              path, width, limit * 0.99f, Join::kMiter, Cap::kButt, 1.0f);
+              path,
+              {
+                  .width = static_cast<Scalar>(width),
+                  .cap = Cap::kButt,
+                  .join = Join::kMiter,
+                  .miter_limit = limit * 0.99f,
+              },
+              1.0f);
       EXPECT_EQ(points1.size(), 8u)
           << "degrees: " << degrees << ", width: " << width << ", "
           << points1[4];
@@ -557,7 +662,14 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
       // Miter limit large enough (101% of required) to allow a miter
       auto points2 =
           ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-              path, width, limit * 1.01f, Join::kMiter, Cap::kButt, 1.0f);
+              path,
+              {
+                  .width = static_cast<Scalar>(width),
+                  .cap = Cap::kButt,
+                  .join = Join::kMiter,
+                  .miter_limit = limit * 1.01f,
+              },
+              1.0f);
       EXPECT_EQ(points2.size(), 9u)
           << "degrees: " << degrees << ", width: " << width;
       EXPECT_LE(points2[4].GetDistance({30, 20}), width * limit * 1.05f)
@@ -577,19 +689,40 @@ TEST(EntityGeometryTest, TwoLineSegments180DegreeJoins) {
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates no join - because it is a bevel join
   EXPECT_EQ(points_bevel.size(), 8u);
 
   auto points_miter =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kMiter,
+              .miter_limit = 400.0f,
+          },
+          1.0f);
   // Generates no join - even with a very large miter limit
   EXPECT_EQ(points_miter.size(), 8u);
 
   auto points_round =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kRound,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates lots of join points - to round off the 180 degree bend
   EXPECT_EQ(points_round.size(), 19u);
 }
@@ -604,7 +737,14 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
 
   auto points_bevel_reference =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path_reference,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates no joins because the curve is smooth
   EXPECT_EQ(points_bevel_reference.size(), 74u);
 
@@ -616,19 +756,40 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_bevel.size(), points_bevel_reference.size());
 
   auto points_miter =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kMiter,
+              .miter_limit = 400.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_miter.size(), points_bevel_reference.size());
 
   auto points_round =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kRound,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_bevel_reference.size());
 }
@@ -643,7 +804,14 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
 
   auto points_bevel_reference =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path_reference,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates no joins because the curve is smooth
   EXPECT_EQ(points_bevel_reference.size(), 78u);
 
@@ -655,19 +823,40 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_bevel.size(), points_bevel_reference.size());
 
   auto points_miter =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kMiter,
+              .miter_limit = 400.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_miter.size(), points_bevel_reference.size());
 
   auto points_round =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kRound,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_bevel_reference.size());
 }
@@ -683,7 +872,14 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
 
   auto points_reference =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path_reference,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates no joins because the curve is smooth
   EXPECT_EQ(points_reference.size(), 80u);
 
@@ -695,19 +891,40 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kBevel,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_bevel.size(), points_reference.size());
 
   auto points_miter =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kMiter,
+              .miter_limit = 400.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_miter.size(), points_reference.size());
 
   auto points_round =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
-          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+          path,
+          {
+              .width = 20.0f,
+              .cap = Cap::kButt,
+              .join = Join::kRound,
+              .miter_limit = 4.0f,
+          },
+          1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_reference.size());
 }

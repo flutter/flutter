@@ -51,7 +51,7 @@ class Tessellator {
     size_t inline size() const { return trigs_.size(); }
     std::vector<Trig>::iterator inline begin() const { return trigs_.begin(); }
     std::vector<Trig>::iterator inline end() const { return trigs_.end(); }
-    Trig inline operator[](size_t index) const { return trigs_[index]; }
+    const inline Trig& operator[](size_t index) const { return trigs_[index]; }
 
    private:
     friend class Tessellator;

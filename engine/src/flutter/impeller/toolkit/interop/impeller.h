@@ -82,7 +82,7 @@ IMPELLER_EXTERN_C_BEGIN
 
 #define IMPELLER_VERSION_VARIANT 1
 #define IMPELLER_VERSION_MAJOR 1
-#define IMPELLER_VERSION_MINOR 3
+#define IMPELLER_VERSION_MINOR 4
 #define IMPELLER_VERSION_PATCH 0
 
 //------------------------------------------------------------------------------
@@ -912,6 +912,20 @@ void ImpellerPathRetain(ImpellerPath IMPELLER_NULLABLE path);
 ///
 IMPELLER_EXPORT
 void ImpellerPathRelease(ImpellerPath IMPELLER_NULLABLE path);
+
+//------------------------------------------------------------------------------
+/// @brief      Get the bounds of the path.
+///
+///             The bounds are conservative. That is, they may be larger than
+///             the actual shape of the path and could include the control
+///             points and isolated calls to move the cursor.
+///
+/// @param[in]  path        The path
+/// @param[out] out_bounds  The conservative bounds of the path.
+///
+IMPELLER_EXPORT
+void ImpellerPathGetBounds(ImpellerPath IMPELLER_NONNULL path,
+                           ImpellerRect* IMPELLER_NONNULL out_bounds);
 
 //------------------------------------------------------------------------------
 // Path Builder
@@ -2638,13 +2652,13 @@ uint32_t ImpellerParagraphGetLineCount(
 ///
 /// @param[in]  paragraph        The paragraph
 /// @param[in]  code_unit_index  The code unit index
-///
-/// @return     The impeller range.
+/// @param[out]  code_unit_index The range.
 ///
 IMPELLER_EXPORT
-ImpellerRange ImpellerParagraphGetWordBoundary(
+void ImpellerParagraphGetWordBoundary(
     ImpellerParagraph IMPELLER_NONNULL paragraph,
-    size_t code_unit_index);
+    size_t code_unit_index,
+    ImpellerRange* IMPELLER_NONNULL out_range);
 
 //------------------------------------------------------------------------------
 /// @brief      Get the line metrics of this laid out paragraph. Calculating the
@@ -2934,12 +2948,12 @@ size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd(
 ///             coordinate space of the paragraph.
 ///
 /// @param[in]  glyph_info  The glyph information.
-///
-/// @return     The grapheme cluster bounds.
+/// @param[out] out_bounds  The grapheme cluster bounds.
 ///
 IMPELLER_EXPORT
-ImpellerRect ImpellerGlyphInfoGetGraphemeClusterBounds(
-    ImpellerGlyphInfo IMPELLER_NONNULL glyph_info);
+void ImpellerGlyphInfoGetGraphemeClusterBounds(
+    ImpellerGlyphInfo IMPELLER_NONNULL glyph_info,
+    ImpellerRect* IMPELLER_NONNULL out_bounds);
 
 //------------------------------------------------------------------------------
 /// @param[in]  glyph_info  The glyph information.

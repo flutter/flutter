@@ -1339,4 +1339,86 @@ void main() {
     expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
     expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
   });
+
+  testWidgets(
+    'content placed in safe area of showCupertinoSheet is rendered within the safe area bounds',
+    (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      Widget sheetScaffoldContent(BuildContext context) {
+        return const SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              SizedBox(height: 80, width: double.infinity, child: Text('Top container')),
+              SizedBox(height: 80, width: double.infinity, child: Text('Bottom container')),
+            ],
+          ),
+        );
+      }
+
+      const double bottomPadding = 50;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+                viewPadding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+              ),
+              child: CupertinoApp(
+                home: CupertinoPageScaffold(
+                  key: scaffoldKey,
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 1'),
+                        CupertinoButton(
+                          onPressed: () {
+                            showCupertinoSheet<void>(
+                              context: scaffoldKey.currentContext!,
+                              pageBuilder: (BuildContext context) {
+                                return CupertinoPageScaffold(child: sheetScaffoldContent(context));
+                              },
+                            );
+                          },
+                          child: const Text('Push Page 2'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.text('Page 1'), findsOneWidget);
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final double pageHeight =
+          tester
+              .getRect(
+                find.ancestor(
+                  of: find.text('Top container'),
+                  matching: find.byType(CupertinoPageScaffold),
+                ),
+              )
+              .bottom;
+      expect(
+        pageHeight -
+            tester
+                .getBottomLeft(
+                  find
+                      .ancestor(of: find.text('Bottom container'), matching: find.byType(SizedBox))
+                      .first,
+                )
+                .dy,
+        bottomPadding,
+      );
+    },
+  );
 }

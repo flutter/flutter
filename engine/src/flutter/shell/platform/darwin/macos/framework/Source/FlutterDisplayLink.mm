@@ -1,13 +1,13 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
-
-#include "flutter/fml/logging.h"
 
 #include <algorithm>
 #include <mutex>
 #include <optional>
 #include <thread>
 #include <vector>
+
+#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 
 @class _FlutterDisplayLinkView;
 

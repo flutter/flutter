@@ -8,6 +8,8 @@
 /// @docImport 'list_tile.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -633,16 +635,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             leadingWidth: widget.delegate.leadingWidth,
             automaticallyImplyLeading: widget.delegate.automaticallyImplyLeading ?? true,
             leading: widget.delegate.buildLeading(context),
-            title: TextField(
-              controller: widget.delegate._queryTextController,
-              focusNode: focusNode,
-              style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
-              textInputAction: widget.delegate.textInputAction,
-              autocorrect: widget.delegate.autocorrect,
-              enableSuggestions: widget.delegate.enableSuggestions,
-              keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) => widget.delegate.showResults(context),
-              decoration: InputDecoration(hintText: searchFieldLabel),
+            title: Semantics(
+              inputType: SemanticsInputType.search,
+              child: TextField(
+                controller: widget.delegate._queryTextController,
+                focusNode: focusNode,
+                style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
+                textInputAction: widget.delegate.textInputAction,
+                autocorrect: widget.delegate.autocorrect,
+                enableSuggestions: widget.delegate.enableSuggestions,
+                keyboardType: widget.delegate.keyboardType,
+                onSubmitted: (String _) => widget.delegate.showResults(context),
+                decoration: InputDecoration(hintText: searchFieldLabel),
+              ),
             ),
             flexibleSpace: widget.delegate.buildFlexibleSpace(context),
             actions: widget.delegate.buildActions(context),

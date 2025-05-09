@@ -2660,6 +2660,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',
+  'bin/internal/last_engine_commit.sh',
   'bin/internal/update_dart_sdk.sh',
   'bin/internal/update_engine_version.sh',
   'bin/internal/content_aware_hash.sh',

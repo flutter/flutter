@@ -25,7 +25,6 @@ import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
 import 'theme.dart';
-import 'theme_data.dart' show MaterialTapTargetSize;
 
 // Examples can assume:
 // late BuildContext context;

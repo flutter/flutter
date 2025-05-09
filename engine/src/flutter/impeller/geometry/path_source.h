@@ -53,6 +53,54 @@ class PathSource {
   virtual void Dispatch(PathReceiver& receiver) const = 0;
 };
 
+/// @brief A PathSource object that provides path iteration for any TRect.
+class RectPathSource : public PathSource {
+ public:
+  template <class T>
+  explicit RectPathSource(const TRect<T>& r) : rect_(r) {}
+
+  ~RectPathSource();
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const Rect rect_;
+};
+
+/// @brief A PathSource object that provides path iteration for any ellipse
+///        inscribed within a Rect bounds.
+class EllipsePathSource : public PathSource {
+ public:
+  explicit EllipsePathSource(const Rect& bounds);
+
+  ~EllipsePathSource();
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const Rect bounds_;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_

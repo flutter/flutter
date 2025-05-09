@@ -65,8 +65,7 @@ final class PreviewDetails {
     required this.functionName,
     required this.isBuilder,
     String? name,
-    String? width,
-    String? height,
+    String? size,
     String? textScaleFactor,
     String? wrapper,
     String? wrapperLibraryUri = '',
@@ -75,8 +74,7 @@ final class PreviewDetails {
     String? brightness,
     String? brightnessLibraryUri = '',
   }) : _name = name,
-       _width = width,
-       _height = height,
+       _size = size,
        _textScaleFactor = textScaleFactor,
        _wrapper = wrapper,
        _wrapperLibraryUri = wrapperLibraryUri,
@@ -90,8 +88,7 @@ final class PreviewDetails {
     String? functionName,
     bool? isBuilder,
     String? name,
-    String? width,
-    String? height,
+    String? size,
     String? textScaleFactor,
     String? wrapper,
     String? wrapperLibraryUri,
@@ -104,8 +101,7 @@ final class PreviewDetails {
       functionName: functionName ?? this.functionName,
       isBuilder: isBuilder ?? this.isBuilder,
       name: name ?? this.name,
-      width: width ?? this.width,
-      height: height ?? this.height,
+      size: size ?? this.size,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       wrapper: wrapper ?? this.wrapper,
       wrapperLibraryUri: wrapperLibraryUri ?? this.wrapperLibraryUri,
@@ -117,8 +113,8 @@ final class PreviewDetails {
   }
 
   static const String kName = 'name';
-  static const String kWidth = 'width';
-  static const String kHeight = 'height';
+  static const String kSize = 'size';
+  static const String kSizeLibraryUri = 'sizeLibraryUrl';
   static const String kTextScaleFactor = 'textScaleFactor';
   static const String kWrapper = 'wrapper';
   static const String kWrapperLibraryUri = 'wrapperLibraryUrl';
@@ -140,19 +136,15 @@ final class PreviewDetails {
   String? get name => _name;
   String? _name;
 
-  /// Artificial width constraint to be applied to the [child].
+  /// Artificial constraints to be applied to the [child].
   ///
-  /// If not provided, the previewed widget will attempt to set its own width
+  /// If not provided, the previewed widget will attempt to set its own
   /// constraints and may result in an unbounded constraint error.
-  String? get width => _width;
-  String? _width;
+  String? get size => _size;
+  String? _size;
 
-  /// Artificial height constraint to be applied to the [child].
-  ///
-  /// If not provided, the previewed widget will attempt to set its own height
-  /// constraints and may result in an unbounded constraint error.
-  String? get height => _height;
-  String? _height;
+  String? get sizeLibraryUri => _sizeLibraryUri;
+  String? _sizeLibraryUri;
 
   /// Applies font scaling to text within the [child].
   ///
@@ -196,10 +188,9 @@ final class PreviewDetails {
     switch (key) {
       case kName:
         _name = source;
-      case kWidth:
-        _width = source;
-      case kHeight:
-        _height = source;
+      case kSize:
+        _size = source;
+        _sizeLibraryUri = libraryUri;
       case kTextScaleFactor:
         _textScaleFactor = source;
       case kWrapper:
@@ -226,8 +217,8 @@ final class PreviewDetails {
         other is PreviewDetails &&
         other.functionName == functionName &&
         other.isBuilder == isBuilder &&
-        other.height == height &&
-        other.width == width &&
+        other.size == size &&
+        other.sizeLibraryUri == sizeLibraryUri &&
         other.textScaleFactor == textScaleFactor &&
         other.wrapper == wrapper &&
         other.wrapperLibraryUri == wrapperLibraryUri &&
@@ -240,17 +231,18 @@ final class PreviewDetails {
   @override
   String toString() =>
       'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
-      '$kWidth: $width $kHeight: $height $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kWrapperLibraryUri: $wrapperLibraryUri $kTheme: $theme $kThemeLibraryUri: $themeLibraryUri '
-      '$kBrightness: $_brightness $kBrightnessLibraryUri: $_brightnessLibraryUri)';
+      '$kSize: $size $kSizeLibraryUri: $sizeLibraryUri $kTextScaleFactor: $textScaleFactor '
+      '$kWrapper: $wrapper $kWrapperLibraryUri: $wrapperLibraryUri $kTheme: $theme '
+      '$kThemeLibraryUri: $themeLibraryUri $kBrightness: $_brightness '
+      '$kBrightnessLibraryUri: $_brightnessLibraryUri)';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => Object.hashAll(<Object?>[
     functionName,
     isBuilder,
-    height,
-    width,
+    size,
+    sizeLibraryUri,
     textScaleFactor,
     wrapper,
     wrapperLibraryUri,
