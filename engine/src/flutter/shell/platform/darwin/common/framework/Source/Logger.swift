@@ -42,13 +42,18 @@ import Foundation
   private let outputWriter: OutputWriter
   private var logLevel = LogLevel.info
 
-  private override init() {
-    // On iOS, the user has no access to stdout. Output can be read from the log by the user, or the
-    // `flutter` tool. On macOS, both the user and the tool can read from stdout.
+  init(outputWriter: OutputWriter) {
+    self.outputWriter = outputWriter
+  }
+
+  private override convenience init() {
 #if os(iOS)
-    outputWriter = SyslogOutputWriter()
+    // On iOS, the user has no access to stdout.
+    // Output can be read from the log by the user or the `flutter` tool.
+    self.init(outputWriter: SyslogOutputWriter())
 #elseif os(macOS)
-    outputWriter = StdoutOutputWriter()
+    // On macOS, both the user and the tool read from stdout.
+    self.init(outputWriter: StdoutOutputWriter())
 #endif
   }
 
