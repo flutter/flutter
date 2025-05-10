@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['flutter-test-driver'])
-library;
-
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../integration.shard/test_data/basic_project.dart';
-import '../integration.shard/test_data/tests_project.dart';
-import '../integration.shard/test_driver.dart';
-import '../integration.shard/test_utils.dart';
-import '../src/common.dart';
+import '../../integration.shard/test_data/basic_project.dart';
+import '../../integration.shard/test_data/tests_project.dart';
+import '../../integration.shard/test_driver.dart';
+import '../../integration.shard/test_utils.dart';
+import '../../src/common.dart';
 
-void main() {
+// Created here as multiple groups use it.
+final RegExp stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get current');
+
+Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   group('Flutter run for web', () {
     final BasicProject project = BasicProject();
     late Directory tempDir;
@@ -42,7 +42,10 @@ void main() {
         withDebugger: true,
         chrome: true,
         expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>[
+          '--verbose',
+          if (useDDCLibraryBundleFormat) '--web-experimental-hot-reload',
+        ],
       );
     }
 
@@ -113,6 +116,27 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
     });
+
+    testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+      // Test that the call comes from some Dart getter called `current` (the
+      // location of which will be compiler-specific) and that the lines and
+      // file name of the current location is correct and reports a Dart path.
+      await evaluateStackTraceCurrent(flutter, (String stackTrace) {
+        final Iterable<RegExpMatch> matches = stackTraceCurrentRegexp.allMatches(stackTrace);
+        if (matches.length != 1) {
+          return false;
+        }
+        int end = matches.first.end;
+        end = stackTrace.indexOf('package:test/main.dart 24:5', end);
+        if (end == -1) {
+          return false;
+        }
+        end = stackTrace.indexOf('package:test/main.dart 15:7', end);
+        return end != -1;
+      });
+    });
   });
 
   group('Flutter test for web', () {
@@ -181,6 +205,20 @@ void main() {
       await startPaused(expressionEvaluation: true);
       await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
     });
+
+    testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
+      await startPaused(expressionEvaluation: true);
+      await breakInMethod(flutter);
+      await evaluateStackTraceCurrent(flutter, (String stackTrace) {
+        final Iterable<RegExpMatch> matches = stackTraceCurrentRegexp.allMatches(stackTrace);
+        if (matches.length != 1) {
+          return false;
+        }
+        int end = matches.first.end;
+        end = stackTrace.indexOf('test.dart 6:9', end);
+        return end != -1;
+      });
+    });
   });
 }
 
@@ -246,6 +284,15 @@ Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver
   expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
+Future<void> evaluateStackTraceCurrent(
+  FlutterTestDriver flutter,
+  bool Function(String) matchStackTraces,
+) async {
+  final LibraryRef library = await getRootLibrary(flutter);
+  final ObjRef res = await flutter.evaluate(library.id!, 'StackTrace.current.toString()');
+  expectInstance(res, InstanceKind.kString, predicate(matchStackTraces));
+}
+
 Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   // `isolate.rootLib` returns incorrect library, so find the
   // entrypoint manually here instead.
@@ -255,12 +302,12 @@ Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   return isolate.libraries!.firstWhere((LibraryRef l) => l.uri!.contains('org-dartlang-app'));
 }
 
-void expectInstance(ObjRef result, String kind, String message) {
+void expectInstance(ObjRef result, String kind, Object matcher) {
   expect(
     result,
     const TypeMatcher<InstanceRef>()
         .having((InstanceRef instance) => instance.kind, 'kind', kind)
-        .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message),
+        .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', matcher),
   );
 }
 
