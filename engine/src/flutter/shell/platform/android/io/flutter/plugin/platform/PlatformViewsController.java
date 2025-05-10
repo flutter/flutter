@@ -172,6 +172,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
+        @RequiresApi(API_LEVELS.API_23)
         public long createForTextureLayer(
             @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
           ensureValidRequest(request);
@@ -232,6 +233,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
+        @RequiresApi(API_LEVELS.API_23)
         public void dispose(int viewId) {
           final PlatformView platformView = platformViews.get(viewId);
           if (platformView == null) {
@@ -294,6 +296,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
+        @RequiresApi(API_LEVELS.API_23)
         public void offset(int viewId, double top, double left) {
           if (usesVirtualDisplay(viewId)) {
             // Virtual displays don't need an accessibility offset.
@@ -321,6 +324,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
+        @RequiresApi(API_LEVELS.API_23)
         public void resize(
             @NonNull PlatformViewsChannel.PlatformViewResizeRequest request,
             @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
