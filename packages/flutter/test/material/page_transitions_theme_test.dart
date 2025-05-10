@@ -1227,4 +1227,80 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets(
+    'Can interact with incoming route during FadeForwards back navigation',
+    (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/b');
+                },
+              ),
+            ),
+        '/b':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('go back'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              },
+            ),
+            colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink),
+          ),
+          routes: routes,
+        ),
+      );
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('go back'), findsNothing);
+
+      // Go to the second route. The duration of the FadeForwardsPageTransition
+      // is 800ms.
+      await tester.tap(find.text('push'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 801));
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('go back'), findsOneWidget);
+
+      // Tap to go back to the first route.
+      await tester.tap(find.text('go back'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('go back'), findsOneWidget);
+
+      // In the middle of the transition, tap to go back to the second route.
+      await tester.tap(find.text('push'));
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 401));
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('go back'), findsOneWidget);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('go back'), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 }

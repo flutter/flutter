@@ -10,6 +10,12 @@ import 'package:flutter/cupertino.dart' show CupertinoThemeData;
 import 'package:flutter/material.dart' show Brightness, ThemeData;
 import 'package:flutter/widgets.dart';
 
+/// Signature for callbacks that build theming data used when creating a [Preview].
+typedef PreviewTheme = PreviewThemeData Function();
+
+/// Signature for callbacks that wrap a [Widget] with another [Widget] when creating a [Preview].
+typedef WidgetWrapper = Widget Function(Widget);
+
 /// Annotation used to mark functions that return a widget preview.
 ///
 /// NOTE: this interface is not stable and **will change**.
@@ -57,8 +63,7 @@ base class Preview {
   /// Annotation used to mark functions that return widget previews.
   const Preview({
     this.name,
-    this.width,
-    this.height,
+    this.size,
     this.textScaleFactor,
     this.wrapper,
     this.theme,
@@ -70,17 +75,17 @@ base class Preview {
   /// If not provided, no name will be associated with the preview.
   final String? name;
 
-  /// Artificial width constraint to be applied to the previewed widget.
+  /// Artificial constraints to be applied to the previewed widget.
   ///
-  /// If not provided, the previewed widget will attempt to set its own width
-  /// constraints and may result in an unbounded constraint error.
-  final double? width;
-
-  /// Artificial height constraint to be applied to the previewed widget.
+  /// If not provided, the previewed widget will attempt to set its own
+  /// constraints.
   ///
-  /// If not provided, the previewed widget will attempt to set its own height
-  /// constraints and may result in an unbounded constraint error.
-  final double? height;
+  /// If a dimension has a value of `double.infinity`, the previewed widget
+  /// will attempt to set its own constraints in the relevant dimension.
+  ///
+  /// To set a single dimension and allow the other to set its own constraints, use
+  /// [Size.fromHeight] or [Size.fromWidth].
+  final Size? size;
 
   /// Applies font scaling to text within the previewed widget.
   ///
@@ -96,14 +101,14 @@ base class Preview {
   /// Note: this must be a reference to a static, public function defined as
   /// either a top-level function or static member in a class.
   // TODO(bkonyi): provide an example.
-  final Widget Function(Widget)? wrapper;
+  final WidgetWrapper? wrapper;
 
   /// A callback to return Material and Cupertino theming data to be applied
   /// to the previewed [Widget].
   ///
   /// Note: this must be a reference to a static, public function defined as
   /// either a top-level function or static member in a class.
-  final PreviewThemeData Function()? theme;
+  final PreviewTheme? theme;
 
   /// Sets the initial theme brightness.
   ///
