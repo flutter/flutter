@@ -12,12 +12,13 @@ import 'package:path/path.dart' as path;
 const int _kChar_A = 65;
 const int _kChar_a = 97;
 
-final ArgParser argParser = ArgParser()
-  ..addFlag(
-    'check',
-    help: 'Check mode does not write anything to disk. '
-        'It just checks if the generated files are still in sync or not.',
-  );
+final ArgParser argParser =
+    ArgParser()..addFlag(
+      'check',
+      help:
+          'Check mode does not write anything to disk. '
+          'It just checks if the generated files are still in sync or not.',
+    );
 
 /// A map of properties that could safely be normalized into other properties.
 ///
@@ -126,8 +127,7 @@ abstract class PropertiesSyncer {
 
   Future<void> perform() async {
     final List<String> lines = await File(_src).readAsLines();
-    final PropertyCollection data =
-        PropertyCollection.fromLines(lines, defaultProperty);
+    final PropertyCollection data = PropertyCollection.fromLines(lines, defaultProperty);
 
     final String output = template(data);
 
@@ -211,14 +211,13 @@ const ${prefix}CharProperty default${prefix}CharProperty = ${prefix}CharProperty
 /// Syncs Unicode's word break properties.
 class WordBreakPropertiesSyncer extends PropertiesSyncer {
   WordBreakPropertiesSyncer({required bool isCheck})
-      : super(wordProperties, wordBreakCodegen, isCheck: isCheck);
+    : super(wordProperties, wordBreakCodegen, isCheck: isCheck);
 
   @override
   final String prefix = 'Word';
 
   @override
-  final String enumDocLink =
-      'http://unicode.org/reports/tr29/#Table_Word_Break_Property_Values';
+  final String enumDocLink = 'http://unicode.org/reports/tr29/#Table_Word_Break_Property_Values';
 
   @override
   final String defaultProperty = 'Unknown';
@@ -227,7 +226,7 @@ class WordBreakPropertiesSyncer extends PropertiesSyncer {
 /// Syncs Unicode's line break properties.
 class LineBreakPropertiesSyncer extends PropertiesSyncer {
   LineBreakPropertiesSyncer({required bool isCheck})
-      : super(lineProperties, lineBreakCodegen, isCheck: isCheck);
+    : super(lineProperties, lineBreakCodegen, isCheck: isCheck);
 
   @override
   final String prefix = 'Line';
@@ -243,11 +242,12 @@ class LineBreakPropertiesSyncer extends PropertiesSyncer {
 /// Holds the collection of properties parsed from the unicode spec file.
 class PropertyCollection {
   PropertyCollection.fromLines(List<String> lines, String defaultProperty) {
-    final List<UnicodeRange> unprocessedRanges = lines
-        .map(removeCommentFromLine)
-        .where((String line) => line.isNotEmpty)
-        .map(parseLineIntoUnicodeRange)
-        .toList();
+    final List<UnicodeRange> unprocessedRanges =
+        lines
+            .map(removeCommentFromLine)
+            .where((String line) => line.isNotEmpty)
+            .map(parseLineIntoUnicodeRange)
+            .toList();
     // Insert the default property if it doesn't exist.
     final EnumValue? found = enumCollection.values.cast<EnumValue?>().firstWhere(
       (EnumValue? property) => property!.name == defaultProperty,
@@ -279,15 +279,12 @@ class PropertyCollection {
     final String rangeStr = split[0].trim();
     final String propertyStr = split[1].trim();
 
-    final EnumValue property = normalizationTable.containsKey(propertyStr)
-        ? enumCollection.add(normalizationTable[propertyStr]!, propertyStr)
-        : enumCollection.add(propertyStr);
+    final EnumValue property =
+        normalizationTable.containsKey(propertyStr)
+            ? enumCollection.add(normalizationTable[propertyStr]!, propertyStr)
+            : enumCollection.add(propertyStr);
 
-    return UnicodeRange(
-      getRangeStart(rangeStr),
-      getRangeEnd(rangeStr),
-      property,
-    );
+    return UnicodeRange(getRangeStart(rangeStr), getRangeEnd(rangeStr), property);
   }
 }
 
@@ -296,8 +293,7 @@ class EnumCollection {
   final List<EnumValue> values = <EnumValue>[];
 
   EnumValue add(String name, [String? normalizedFrom]) {
-    final int index =
-        values.indexWhere((EnumValue value) => value.name == name);
+    final int index = values.indexWhere((EnumValue value) => value.name == name);
     EnumValue value;
     if (index == -1) {
       value = EnumValue(values.length, name);
@@ -353,15 +349,11 @@ class EnumValue {
 
 /// Sorts ranges and combines adjacent ranges that have the same property and
 /// can be merged.
-Iterable<UnicodeRange> processRanges(
-  List<UnicodeRange> data,
-  String defaultProperty,
-) {
+Iterable<UnicodeRange> processRanges(List<UnicodeRange> data, String defaultProperty) {
   data.sort(
     // Ranges don't overlap so it's safe to sort based on the start of each
     // range.
-    (UnicodeRange range1, UnicodeRange range2) =>
-        range1.start.compareTo(range2.start),
+    (UnicodeRange range1, UnicodeRange range2) => range1.start.compareTo(range2.start),
   );
   verifyNoOverlappingRanges(data);
   return combineAdjacentRanges(data, defaultProperty);
@@ -380,18 +372,14 @@ Iterable<UnicodeRange> processRanges(
 /// ```none
 /// 0x01C4..0x02AF; ALetter
 /// ```
-List<UnicodeRange> combineAdjacentRanges(
-  List<UnicodeRange> data,
-  String defaultProperty,
-) {
+List<UnicodeRange> combineAdjacentRanges(List<UnicodeRange> data, String defaultProperty) {
   final List<UnicodeRange> result = <UnicodeRange>[data.first];
   for (int i = 1; i < data.length; i++) {
     final UnicodeRange prev = result.last;
     final UnicodeRange next = data[i];
     if (prev.isAdjacent(next)) {
       result.last = prev.extendRange(next);
-    } else if (prev.property == next.property &&
-        prev.property.name == defaultProperty) {
+    } else if (prev.property == next.property && prev.property.name == defaultProperty) {
       // When there's a gap between two ranges, but they both have the default
       // property, it's safe to combine them.
       result.last = prev.extendRange(next);
