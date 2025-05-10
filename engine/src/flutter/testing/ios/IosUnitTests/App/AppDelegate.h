@@ -7,9 +7,14 @@
 
 #import <UIKit/UIKit.h>
 
+@class FlutterEngine;
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property(strong, nonatomic) UIWindow* window;
+@property(strong, nonatomic) FlutterEngine* launchEngine;
+
+- (FlutterEngine*)grabLaunchEngine;
 
 @end
 
