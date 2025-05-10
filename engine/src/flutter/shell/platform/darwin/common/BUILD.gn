@@ -107,6 +107,11 @@ config("framework_relative_headers") {
   include_dirs = [ "framework/Headers" ]
 }
 
+source_set("InternalFlutterSwiftCommon") {
+  configs += [ ":config" ]
+  sources = [ "framework/Source/Logger.swift" ]
+}
+
 # Framework code shared between iOS and macOS.
 source_set("framework_common") {
   cflags_objc = flutter_cflags_objc
@@ -135,16 +140,26 @@ source_set("framework_common") {
     ":framework_relative_headers",
   ]
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    ":InternalFlutterSwiftCommon",
+    "//flutter/fml",
+  ]
 }
 
 test_fixtures("framework_common_fixtures") {
   fixtures = []
 }
 
+source_set("framework_common_unittests_swift") {
+  configs += [ ":test_config" ]
+  sources = [ "framework/Source/LoggerTest.swift" ]
+  deps = [ ":InternalFlutterSwiftCommon" ]
+}
+
 # Unit tests for channels.
 executable("framework_common_unittests") {
   testonly = true
+  configs += [ ":test_config" ]
   cflags_objc = flutter_cflags_objc
   cflags_objcc = flutter_cflags_objcc
   ldflags = [ "-ObjC" ]
@@ -154,11 +169,13 @@ executable("framework_common_unittests") {
     "framework/Source/FlutterTestUtils.mm",
     "framework/Source/flutter_codecs_unittest.mm",
     "framework/Source/flutter_standard_codec_unittest.mm",
+    "framework/Source/framework_common_unittests_swift.mm",
   ]
 
   deps = [
     ":framework_common",
     ":framework_common_fixtures",
+    ":framework_common_unittests_swift",
     "$dart_src/runtime:libdart_jit",
     "//flutter/testing",
     "//flutter/third_party/ocmock:ocmock",
