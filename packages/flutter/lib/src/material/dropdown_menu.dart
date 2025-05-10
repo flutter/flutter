@@ -192,6 +192,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.maxLines = 1,
     this.textInputAction,
     this.restorationId,
+    this.onMenuOpen,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -335,6 +336,8 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null. If null, only the text field is updated.
   final ValueChanged<T?>? onSelected;
+
+  final ValueChanged<bool>? onMenuOpen;
 
   /// Defines the keyboard focus for this widget.
   ///
@@ -904,6 +907,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _internalFocudeNode.requestFocus();
       }
     }
+    widget.onMenuOpen?.call(controller.isOpen);
     setState(() {});
   }
 
