@@ -3151,9 +3151,21 @@ class Menu extends StatefulWidget {
     this.useRootOverlay = false,
     this.consumeOutsideTaps = false,
     this.overlayBuilder,
-    this.onOpenRequested,
-    this.onCloseRequested,
+    this.onOpenRequested = _defaultOnOpenRequested,
+    this.onCloseRequested = _defaultOnCloseRequested,
   });
+
+  static void _defaultOnOpenRequested(
+    Offset? position,
+    RawMenuAnchorShowOverlayCallback showOverlay,
+  ) {
+    showOverlay(position: position);
+  }
+
+  static void _defaultOnCloseRequested(RawMenuAnchorHideOverlayCallback hideOverlay) {
+    hideOverlay();
+  }
+
   final Widget? menuPanel;
   final Widget? child;
   final bool useRootOverlay;
@@ -3162,8 +3174,8 @@ class Menu extends StatefulWidget {
   final FocusNode? focusNode;
   final RawMenuAnchorChildBuilder? builder;
   final RawMenuAnchorOverlayBuilder? overlayBuilder;
-  final RawMenuAnchorOpenRequestedCallback? onOpenRequested;
-  final RawMenuAnchorCloseRequestedCallback? onCloseRequested;
+  final RawMenuAnchorOpenRequestedCallback onOpenRequested;
+  final RawMenuAnchorCloseRequestedCallback onCloseRequested;
   final MenuController? controller;
   final bool consumeOutsideTaps;
 
