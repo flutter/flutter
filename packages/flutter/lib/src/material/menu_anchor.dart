@@ -310,6 +310,44 @@ class MenuAnchor extends StatefulWidget {
   /// to rebuild this child when those change.
   final Widget? child;
 
+  /// Returns the [MenuController] from the closest [MenuAnchor] ancestor.
+  ///
+  /// If there is no ancestor [MenuAnchor] widget in the tree, this will throw a
+  /// [FlutterError].
+  ///
+  /// See also:
+  ///
+  ///  * [maybeOf], which is similar to this method, but returns null if
+  ///    no [MenuAnchor] ancestor is found.
+  static MenuController of(BuildContext context) {
+    final MenuController? result = MenuAnchor.maybeOf(context);
+    assert(() {
+      if (result == null) {
+        throw FlutterError(
+          'MenuAnchor.of() was called with a context that does not contain a MenuAnchor widget.\n'
+          'No MenuAnchor widget ancestor could be found starting from the context that was passed to '
+          'MenuAnchor.of().\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return result!;
+  }
+
+  /// Returns the [MenuController] from the closest [MenuAnchor] ancestor,
+  /// or null if there is no ancestor [MenuAnchor] widget in the tree.
+  ///
+  /// See also:
+  ///
+  ///  * [of], which is similar to this method, but throws if
+  ///    no [MenuAnchor] ancestor is found.
+  static MenuController? maybeOf(BuildContext context) {
+    final _MenuAnchorState? result = _MenuAnchorState._maybeOf(context);
+    return result?._menuController;
+  }
+
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
 

@@ -4947,6 +4947,36 @@ void main() {
       expect(find.byIcon(disabledIcon), findsOneWidget);
     });
   });
+
+  testWidgets('MenuAnchor.of gives nearest MenuAnchor ancestor', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(
+              controller: controller,
+              menuChildren: const <Widget>[MenuItemButton(child: Text('menu item'))],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return FilledButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: Text(controller.isOpen ? 'close' : 'open'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(MenuAnchor.of(tester.element(find.byType(FilledButton))), equals(controller));
+  });
 }
 
 List<Widget> createTestMenus({
