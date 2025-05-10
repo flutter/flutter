@@ -1245,6 +1245,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     }
   }
 
+  /// Returns true if there are any nodes that need to be painted.
+  bool get needsPaint => _nodesNeedingPaint.isNotEmpty;
+
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
 
   /// The [RenderObject]s which need to be painted in the next [flushPaint] pass.
