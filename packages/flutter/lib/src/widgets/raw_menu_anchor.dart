@@ -769,10 +769,10 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   void handleCloseRequest() {
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
-    // closing sequence (i.e. handleCloseRequest -> onCloseRequested ->
-    // hideOverlay) will throw an error, since we're scheduling a build during a
-    // build. We avoid this by checking if we're in a build, and if so, we
-    // schedule the close for the next frame.
+    // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
+    // will throw an error, since we'd be scheduling a build during a build. We
+    // avoid this by checking if we're in a build, and if so, we schedule the
+    // close for the next frame.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       widget.onCloseRequested(close);
     } else {
