@@ -42,6 +42,8 @@ class ParagraphStyle final
 
   void SetTextDirection(txt::TextDirection direction);
 
+  void SetTextDecoration(const ImpellerTextDecoration& decoration);
+
   void SetMaxLines(size_t max_lines);
 
   void SetLocale(std::string locale);
@@ -54,6 +56,7 @@ class ParagraphStyle final
   txt::ParagraphStyle style_;
   ScopedObject<Paint> foreground_;
   ScopedObject<Paint> background_;
+  std::optional<ImpellerTextDecoration> decoration_;
 };
 
 }  // namespace impeller::interop

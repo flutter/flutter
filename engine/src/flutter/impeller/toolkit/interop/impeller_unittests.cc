@@ -292,6 +292,32 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, CanCreateDecorations) {
+  hpp::TypographyContext context;
+  auto para =
+      hpp::ParagraphBuilder(context)
+          .PushStyle(
+              hpp::ParagraphStyle{}
+                  .SetForeground(hpp::Paint{}.SetColor({1.0, 0.0, 0.0, 1.0}))
+                  .SetFontSize(150.0f)
+                  .SetTextDecoration(ImpellerTextDecoration{
+                      .types = kImpellerTextDecorationTypeLineThrough |
+                               kImpellerTextDecorationTypeUnderline,
+                      .color = ImpellerColor{0.0, 1.0, 0.0, 0.75},
+                      .style = kImpellerTextDecorationStyleWavy,
+                      .thickness_multiplier = 1.5,
+                  }))
+          .AddText(std::string{"Holy text decorations Batman!"})
+          .Build(900);
+  auto dl = hpp::DisplayListBuilder{}.DrawParagraph(para, {100, 100}).Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
 TEST_P(InteropPlaygroundTest, CanCreateShapes) {
   hpp::DisplayListBuilder builder;
 
