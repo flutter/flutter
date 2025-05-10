@@ -369,6 +369,18 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   @Nullable private FlutterFragment flutterFragment;
 
+  /**
+   * Returns the ID of the {@code FlutterView} created by the instance of the {@code
+   * FlutterFragment} that belongs to this {@code FlutterFragmentActivity} instance.
+   *
+   * <p>May return null if the {@code flutterViewId} has not yet been initialized, which is done
+   * when the {@code FlutterView} is created.
+   */
+  @Nullable
+  public int getFlutterFragmentViewId() {
+    return flutterFragment.flutterViewId;
+  }
+
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     switchLaunchThemeForNormalTheme();

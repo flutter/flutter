@@ -215,12 +215,20 @@ public class FlutterActivity extends Activity
   @VisibleForTesting boolean hasRegisteredBackCallback = false;
 
   /**
+   * @deprecated - use {@link flutterViewId} instead.
+   *     <p>The ID of the {@code FlutterView} created by this activity.
+   *     <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For
+   *     more, see {@link android.view.View#findViewById}.
+   */
+  @Deprecated public static final int FLUTTER_VIEW_ID = View.generateViewId();
+
+  /**
    * The ID of the {@code FlutterView} created by this activity.
    *
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  public static final int FLUTTER_VIEW_ID = View.generateViewId();
+  public Integer flutterViewId;
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which creates a {@link
@@ -602,6 +610,20 @@ public class FlutterActivity extends Activity
     lifecycle = new LifecycleRegistry(this);
   }
 
+  void setFlutterViewIdIfNeeded() {
+    if (flutterViewId != null) {
+      return;
+    }
+
+    // TODO(camsim99): reduce getActivity(), activity weirdness when sensitive content plugin PR
+    // lands + add tests if needed.
+    if (this.findViewById(FLUTTER_VIEW_ID) == null) {
+      flutterViewId = FLUTTER_VIEW_ID;
+    } else {
+      flutterViewId = View.generateViewId();
+    }
+  }
+
   /**
    * This method exists so that JVM tests can ensure that a delegate exists without putting this
    * Activity through any lifecycle events, because JVM tests cannot handle executing any lifecycle
@@ -648,6 +670,8 @@ public class FlutterActivity extends Activity
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
 
     configureWindowForTransparency();
+
+    setFlutterViewIdIfNeeded();
 
     setContentView(createFlutterView());
 
@@ -803,7 +827,7 @@ public class FlutterActivity extends Activity
         /* inflater=*/ null,
         /* container=*/ null,
         /* savedInstanceState=*/ null,
-        /*flutterViewId=*/ FLUTTER_VIEW_ID,
+        /*flutterViewId=*/ flutterViewId,
         /*shouldDelayFirstAndroidViewDraw=*/ getRenderMode() == RenderMode.surface);
   }
 

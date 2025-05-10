@@ -99,13 +99,22 @@ public class FlutterFragment extends Fragment
     implements FlutterActivityAndFragmentDelegate.Host,
         ComponentCallbacks2,
         FlutterActivityAndFragmentDelegate.DelegateFactory {
+
   /**
-   * The ID of the {@code FlutterView} created by this activity.
+   * @deprecated - Use {@link flutterViewId} instead.
+   *     <p>The ID of the {@code FlutterView} created by this activity.
+   *     <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For
+   *     more, see {@link android.view.View#findViewById}.
+   */
+  @Deprecated public static final int FLUTTER_VIEW_ID = View.generateViewId();
+
+  /**
+   * The ID of the {@code FlutterView} created by this Fragment's attached activity.
    *
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
    * see {@link android.view.View#findViewById}.
    */
-  public static final int FLUTTER_VIEW_ID = View.generateViewId();
+  public Integer flutterViewId;
 
   private static final String TAG = "FlutterFragment";
 
@@ -1025,6 +1034,18 @@ public class FlutterFragment extends Fragment
     setArguments(new Bundle());
   }
 
+  void setFlutterViewIdIfNeeded() {
+    if (flutterViewId != null) {
+      return;
+    }
+
+    if (getActivity().findViewById(FLUTTER_VIEW_ID) == null) {
+      flutterViewId = FLUTTER_VIEW_ID;
+    } else {
+      flutterViewId = View.generateViewId();
+    }
+  }
+
   /**
    * This method exists so that JVM tests can ensure that a delegate exists without putting this
    * Fragment through any lifecycle events, because JVM tests cannot handle executing any lifecycle
@@ -1080,6 +1101,8 @@ public class FlutterFragment extends Fragment
       onBackPressedCallback.setEnabled(frameworkHandlesBack);
     }
     delegate.onRestoreInstanceState(savedInstanceState);
+
+    setFlutterViewIdIfNeeded();
   }
 
   @Nullable
@@ -1090,7 +1113,7 @@ public class FlutterFragment extends Fragment
         inflater,
         container,
         savedInstanceState,
-        /*flutterViewId=*/ FLUTTER_VIEW_ID,
+        /*flutterViewId=*/ flutterViewId,
         shouldDelayFirstAndroidViewDraw());
   }
 
