@@ -58,7 +58,7 @@ class FlutterPlugin : Plugin<Project> {
             resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
-                        "local.properties file or with a FLUTTER_ROOT environment variable."
+                            "local.properties file or with a FLUTTER_ROOT environment variable."
                 )
 
         flutterRoot = project.file(flutterRootPath)
@@ -115,9 +115,12 @@ class FlutterPlugin : Plugin<Project> {
             val hasSettings = settingsFile.exists()
             val hasSettingsKts = settingsKtsFile.exists()
             val hasPubspec = Paths.get(project.rootDir.absolutePath, "pubspec.yaml").exists()
-            val hasParentSettings = Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle").exists()
-            val hasParentSettingsKts = Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle.kts").exists()
-            val hasParentPubspec = Paths.get(project.rootDir.parentFile.absolutePath, "pubspec.yaml").exists()
+            val hasParentSettings =
+                Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle").exists()
+            val hasParentSettingsKts =
+                Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle.kts").exists()
+            val hasParentPubspec =
+                Paths.get(project.rootDir.parentFile.absolutePath, "pubspec.yaml").exists()
 
             if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
                 val file = if (hasSettings) settingsFile else settingsKtsFile
@@ -204,10 +207,10 @@ class FlutterPlugin : Plugin<Project> {
         // supported range.
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"] as? Boolean
-                        ?: false
-                )
+                    (
+                            project.properties["skipDependencyChecks"] as? Boolean
+                                ?: false
+                            )
         if (!shouldSkipDependencyChecks) {
             try {
                 DependencyVersionChecker.checkDependencyVersions(project)
@@ -218,8 +221,8 @@ class FlutterPlugin : Plugin<Project> {
                     // Possible bug in dependency checking code - warn and do not block build.
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e,
+                                "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                                e,
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -382,7 +385,8 @@ class FlutterPlugin : Plugin<Project> {
                 // TODO(gmackall): Migrate to AGPs variant api.
                 //    https://github.com/flutter/flutter/issues/166550
                 @Suppress("DEPRECATION")
-                val variantOutput: com.android.build.gradle.api.BaseVariantOutput = variant.outputs.first()
+                val variantOutput: com.android.build.gradle.api.BaseVariantOutput =
+                    variant.outputs.first()
                 val processResources: ProcessAndroidResources =
                     try {
                         variantOutput.processResourcesProvider.get()
@@ -524,7 +528,13 @@ class FlutterPlugin : Plugin<Project> {
                     val mergeAssets =
                         projectToAddTasksTo
                             .tasks
-                            .findByPath(":$hostAppProjectName:merge${FlutterPluginUtils.capitalize(appProjectVariant.name)}Assets")
+                            .findByPath(
+                                ":$hostAppProjectName:merge${
+                                    FlutterPluginUtils.capitalize(
+                                        appProjectVariant.name
+                                    )
+                                }Assets"
+                            )
                     check(mergeAssets != null)
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }
@@ -608,7 +618,8 @@ class FlutterPlugin : Plugin<Project> {
             val deferredComponentsValue: Boolean =
                 project.findProperty("deferred-components")?.toString()?.toBoolean() ?: false
             val validateDeferredComponentsValue: Boolean =
-                project.findProperty("validate-deferred-components")?.toString()?.toBoolean() ?: true
+                project.findProperty("validate-deferred-components")?.toString()?.toBoolean()
+                    ?: true
 
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 variant.outputs.forEach { output ->
@@ -777,7 +788,8 @@ class FlutterPlugin : Plugin<Project> {
                 // TODO(gmackall): Migrate to AGPs variant api.
                 //    https://github.com/flutter/flutter/issues/166550
                 @Suppress("DEPRECATION")
-                val variantOutput: com.android.build.gradle.api.BaseVariantOutput = variant.outputs.first()
+                val variantOutput: com.android.build.gradle.api.BaseVariantOutput =
+                    variant.outputs.first()
                 val processResources =
                     try {
                         variantOutput.processResourcesProvider.get()

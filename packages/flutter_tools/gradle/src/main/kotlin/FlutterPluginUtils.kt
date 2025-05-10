@@ -49,7 +49,7 @@ object FlutterPluginUtils {
             return ""
         }
         return parts[0] +
-            parts.drop(1).joinToString("") { capitalize(it) }
+                parts.drop(1).joinToString("") { capitalize(it) }
     }
 
     // Kotlin's capitalize function is deprecated, but the suggested replacement uses syntax that
@@ -113,7 +113,8 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("formatPlatformString")
-    fun formatPlatformString(platform: String): String = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]!!.replace("-", "_")
+    fun formatPlatformString(platform: String): String =
+        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]!!.replace("-", "_")
 
     @JvmStatic
     @JvmName("readPropertiesIfExist")
@@ -219,11 +220,13 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("shouldProjectUseLocalEngine")
-    internal fun shouldProjectUseLocalEngine(project: Project): Boolean = project.hasProperty(PROP_LOCAL_ENGINE_REPO)
+    internal fun shouldProjectUseLocalEngine(project: Project): Boolean =
+        project.hasProperty(PROP_LOCAL_ENGINE_REPO)
 
     @JvmStatic
     @JvmName("isProjectVerbose")
-    internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
+    internal fun isProjectVerbose(project: Project): Boolean =
+        project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
     /** Whether to build the debug app in "fast-start" mode. */
     @JvmStatic
@@ -294,7 +297,8 @@ object FlutterPluginUtils {
         return false
     }
 
-    private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? = project.extensions.findByType(FlutterExtension::class.java)
+    private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? =
+        project.extensions.findByType(FlutterExtension::class.java)
 
     /**
      * Gets the directory that contains the Flutter source code.
@@ -428,7 +432,8 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): String =
+        getAndroidExtension(project).compileSdkVersion!!.substring(8)
 
     /**
      * Returns:
@@ -664,7 +669,8 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
-    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
+    internal fun isFlutterAppProject(project: Project): Boolean =
+        project.extensions.findByType(AbstractAppExtension::class.java) != null
 
     /**
      * Ensures that the dependencies required by the Flutter project are available.
@@ -687,7 +693,7 @@ object FlutterPluginUtils {
         if (!supportsBuildMode(project, flutterBuildMode)) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: $flutterBuildMode, " +
-                    "skipping adding Flutter dependencies"
+                        "skipping adding Flutter dependencies"
             )
             return
         }
@@ -736,7 +742,7 @@ object FlutterPluginUtils {
     internal fun addTaskForJavaVersion(project: Project) {
         project.tasks.register("javaVersion") {
             description = "Print the current java version used by gradle. see: " +
-                "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
+                    "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
             doLast {
                 println(VersionFetcher.getJavaVersion())
             }

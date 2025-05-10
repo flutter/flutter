@@ -117,11 +117,11 @@ class PluginHandler(
         } catch (ignored: FileNotFoundException) {
             throw GradleException(
                 "settings.gradle/settings.gradle.kts does not exist: " +
-                    FlutterPluginUtils
-                        .getSettingsGradleFileFromProjectDir(
-                            project.projectDir,
-                            project.logger
-                        ).absolutePath
+                        FlutterPluginUtils
+                            .getSettingsGradleFileFromProjectDir(
+                                project.projectDir,
+                                project.logger
+                            ).absolutePath
             )
         }
         // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
