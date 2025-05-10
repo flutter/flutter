@@ -878,6 +878,7 @@ void main() {
         backgroundColor = DialogTheme.selectOf(
           context,
           (DialogThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

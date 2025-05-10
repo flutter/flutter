@@ -8,52 +8,6 @@ library;
 import 'framework.dart';
 import 'inherited_model.dart';
 
-/// A generic selector interface for theme data.
-///
-/// This interface allows for selecting specific aspects of theme data without
-/// coupling to specific theme implementations like Material or Cupertino.
-///
-/// The type parameter [T] represents the type of the theme data object
-/// (e.g., `ThemeData`, `CupertinoThemeData`).
-/// The type parameter [V] represents the type of the value being selected
-/// from the theme data (e.g., `Color`, `TextStyle`).
-abstract interface class ThemeSelector<T, V> {
-  /// Creates a [ThemeSelector] from a function.
-  ///
-  /// This factory constructor allows for creating a selector using a lambda syntax.
-  factory ThemeSelector.from(V Function(T) selector) = _FunctionThemeSelector<T, V>;
-
-  /// Selects a value of type [V] from the theme data of type [T].
-  ///
-  /// The actual theme data type is determined by the implementation.
-  V selectFrom(T themeData);
-}
-
-/// A [ThemeSelector] implementation that wraps a function.
-@immutable
-class _FunctionThemeSelector<T, V> implements ThemeSelector<T, V> {
-  const _FunctionThemeSelector(this._selector);
-
-  final V Function(T) _selector;
-
-  @override
-  V selectFrom(T themeData) => _selector(themeData);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is _FunctionThemeSelector<T, V> && identical(other._selector, _selector);
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, _selector);
-}
-
 // Examples can assume:
 // TooltipThemeData data = const TooltipThemeData();
 
@@ -80,7 +34,7 @@ class _FunctionThemeSelector<T, V> implements ThemeSelector<T, V> {
 ///
 /// ** See code in examples/api/lib/widgets/inherited_theme/inherited_theme.0.dart **
 /// {@end-tool}
-abstract class InheritedTheme<T> extends InheritedModel<ThemeSelector<T, Object?>> {
+abstract class InheritedTheme<T> extends InheritedModel<ModelSelector<T, Object?>> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
 
@@ -183,9 +137,9 @@ abstract class InheritedTheme<T> extends InheritedModel<ThemeSelector<T, Object?
   @override
   bool updateShouldNotifyDependent(
     covariant InheritedTheme<T> oldWidget,
-    Set<ThemeSelector<T, Object?>> dependencies,
+    Set<ModelSelector<T, Object?>> dependencies,
   ) {
-    for (final ThemeSelector<T, Object?> selector in dependencies) {
+    for (final ModelSelector<T, Object?> selector in dependencies) {
       final Object? oldValue = selector.selectFrom(oldWidget.themeData);
       final Object? newValue = selector.selectFrom(themeData);
       if (oldValue != newValue) {

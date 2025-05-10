@@ -262,6 +262,7 @@ class SearchViewTheme extends InheritedTheme<SearchViewThemeData> {
   /// final Color? backgroundColor = SearchViewTheme.selectOf(
   ///   context,
   ///   (SearchViewThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -281,9 +282,13 @@ class SearchViewTheme extends InheritedTheme<SearchViewThemeData> {
   ///
   /// If there is no [SearchViewTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.searchViewTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(SearchViewThemeData) selector) {
-    final ThemeSelector<SearchViewThemeData, T> themeSelector =
-        ThemeSelector<SearchViewThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(SearchViewThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<SearchViewThemeData, T> themeSelector =
+        ModelSelector<SearchViewThemeData, T>.from(selector: selector, id: id);
     final SearchViewThemeData theme =
         InheritedModel.inheritFrom<SearchViewTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

@@ -246,6 +246,7 @@ void main() {
         backButtonIconBuilder = ActionIconTheme.selectOf(
           context,
           (ActionIconThemeData theme) => theme.backButtonIconBuilder,
+          id: 'backButtonIconBuilder',
         );
         return const Placeholder();
       },

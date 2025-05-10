@@ -290,6 +290,7 @@ class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData> {
   /// final Color? backgroundColor = NavigationBarTheme.selectOf(
   ///   context,
   ///   (NavigationBarThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -309,9 +310,13 @@ class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData> {
   ///
   /// If there is no [NavigationBarTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.navigationBarTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(NavigationBarThemeData) selector) {
-    final ThemeSelector<NavigationBarThemeData, T> themeSelector =
-        ThemeSelector<NavigationBarThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(NavigationBarThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<NavigationBarThemeData, T> themeSelector =
+        ModelSelector<NavigationBarThemeData, T>.from(selector: selector, id: id);
     final NavigationBarThemeData theme =
         InheritedModel.inheritFrom<NavigationBarTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

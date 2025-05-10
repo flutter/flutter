@@ -784,6 +784,7 @@ void main() {
         thumbColor = ScrollbarTheme.selectOf(
           context,
           (ScrollbarThemeData theme) => theme.thumbColor,
+          id: 'thumbColor',
         );
         return const Placeholder();
       },

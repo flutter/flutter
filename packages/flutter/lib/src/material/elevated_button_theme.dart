@@ -112,6 +112,7 @@ class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData> {
   /// final WidgetStateProperty<Color?>? backgroundColor = ElevatedButtonTheme.selectOf(
   ///   context,
   ///   (ElevatedButtonThemeData data) => data.style?.backgroundColor,
+  ///   id: 'data.style?.backgroundColor',
   /// );
   /// ```
   ///
@@ -126,14 +127,18 @@ class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData> {
     return buttonTheme?.data ?? Theme.of(context).elevatedButtonTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ElevatedButtonTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ElevatedButtonThemeData) selector) {
-    final ThemeSelector<ElevatedButtonThemeData, T> themeSelector =
-        ThemeSelector<ElevatedButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ElevatedButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ElevatedButtonThemeData, T> themeSelector =
+        ModelSelector<ElevatedButtonThemeData, T>.from(selector: selector, id: id);
     final ElevatedButtonThemeData theme =
         InheritedModel.inheritFrom<ElevatedButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

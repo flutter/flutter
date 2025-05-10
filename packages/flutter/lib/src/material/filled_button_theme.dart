@@ -108,6 +108,7 @@ class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData> {
   /// final WidgetStateProperty<Color?>? backgroundColor = FilledButtonTheme.selectOf(
   ///   context,
   ///   (FilledButtonThemeData data) => data.style?.backgroundColor,
+  ///   id: 'data.style?.backgroundColor',
   /// );
   /// ```
   ///
@@ -122,14 +123,18 @@ class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData> {
     return buttonTheme?.data ?? Theme.of(context).filledButtonTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [FilledButtonTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(FilledButtonThemeData) selector) {
-    final ThemeSelector<FilledButtonThemeData, T> themeSelector =
-        ThemeSelector<FilledButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(FilledButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<FilledButtonThemeData, T> themeSelector =
+        ModelSelector<FilledButtonThemeData, T>.from(selector: selector, id: id);
     final FilledButtonThemeData theme =
         InheritedModel.inheritFrom<FilledButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

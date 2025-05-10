@@ -369,6 +369,7 @@ void main() {
         cursorColor = TextSelectionTheme.selectOf(
           context,
           (TextSelectionThemeData theme) => theme.cursorColor,
+          id: 'cursorColor',
         );
         return const Placeholder();
       },

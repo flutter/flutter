@@ -149,9 +149,14 @@ class MenuTheme extends InheritedTheme<MenuThemeData> {
   ///
   /// If there is no [MenuTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.menuTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(MenuThemeData) selector) {
-    final ThemeSelector<MenuThemeData, T> themeSelector = ThemeSelector<MenuThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(MenuThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<MenuThemeData, T> themeSelector = ModelSelector<MenuThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final MenuThemeData theme =
         InheritedModel.inheritFrom<MenuTheme>(context, aspect: themeSelector)!.data;

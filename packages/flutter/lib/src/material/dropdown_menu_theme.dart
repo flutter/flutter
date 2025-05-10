@@ -130,6 +130,7 @@ class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData> {
   /// final TextStyle? textStyle = DropdownMenuTheme.selectOf(
   ///   context,
   ///   (DropdownMenuThemeData data) => data.textStyle,
+  ///   id: 'data.textStyle',
   /// );
   /// ```
   ///
@@ -175,14 +176,18 @@ class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData> {
     return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [DropdownMenuTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DropdownMenuThemeData) selector) {
-    final ThemeSelector<DropdownMenuThemeData, T> themeSelector =
-        ThemeSelector<DropdownMenuThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DropdownMenuThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DropdownMenuThemeData, T> themeSelector =
+        ModelSelector<DropdownMenuThemeData, T>.from(selector: selector, id: id);
     final DropdownMenuThemeData theme =
         InheritedModel.inheritFrom<DropdownMenuTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

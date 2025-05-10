@@ -987,6 +987,7 @@ class DatePickerTheme extends InheritedTheme<DatePickerThemeData> {
   /// final Color? backgroundColor = DatePickerTheme.selectOf(
   ///   context,
   ///   (DatePickerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -1053,14 +1054,18 @@ class DatePickerTheme extends InheritedTheme<DatePickerThemeData> {
         : _DatePickerDefaultsM2(context);
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [DatePickerTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DatePickerThemeData) selector) {
-    final ThemeSelector<DatePickerThemeData, T> themeSelector =
-        ThemeSelector<DatePickerThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DatePickerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DatePickerThemeData, T> themeSelector =
+        ModelSelector<DatePickerThemeData, T>.from(selector: selector, id: id);
     final DatePickerThemeData theme =
         InheritedModel.inheritFrom<DatePickerTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

@@ -497,6 +497,7 @@ void main() {
         style = OutlinedButtonTheme.selectOf(
           context,
           (OutlinedButtonThemeData theme) => theme.style,
+          id: 'style',
         );
         return const Placeholder();
       },

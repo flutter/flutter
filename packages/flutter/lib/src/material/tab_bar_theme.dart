@@ -315,9 +315,14 @@ class TabBarTheme extends InheritedTheme<TabBarThemeData> with Diagnosticable {
   ///
   /// If there is no [TabBarTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.tabBarTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(TabBarThemeData) selector) {
-    final ThemeSelector<TabBarThemeData, T> themeSelector = ThemeSelector<TabBarThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TabBarThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TabBarThemeData, T> themeSelector = ModelSelector<TabBarThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final TabBarThemeData theme =
         InheritedModel.inheritFrom<TabBarTheme>(context, aspect: themeSelector)!.data;
@@ -332,9 +337,9 @@ class TabBarTheme extends InheritedTheme<TabBarThemeData> with Diagnosticable {
   @override
   bool updateShouldNotifyDependent(
     TabBarTheme oldWidget,
-    Set<ThemeSelector<TabBarThemeData, Object?>> dependencies,
+    Set<ModelSelector<TabBarThemeData, Object?>> dependencies,
   ) {
-    for (final ThemeSelector<TabBarThemeData, Object?> selector in dependencies) {
+    for (final ModelSelector<TabBarThemeData, Object?> selector in dependencies) {
       final Object? oldValue = selector.selectFrom(oldWidget.data);
       final Object? newValue = selector.selectFrom(data);
       if (oldValue != newValue) {

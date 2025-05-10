@@ -183,6 +183,7 @@ class DefaultTextStyle extends InheritedTheme<DefaultTextStyle> {
   /// final TextStyle? style = DefaultTextStyle.selectOf(
   ///   context,
   ///   (DefaultTextStyle data) => data.style,
+  ///   id: 'data.style',
   /// );
   /// ```
   ///
@@ -196,14 +197,18 @@ class DefaultTextStyle extends InheritedTheme<DefaultTextStyle> {
         const DefaultTextStyle.fallback();
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using data provided by the
+  /// Evaluates [ModelSelector.selectFrom] using data provided by the
   /// nearest ancestor [DefaultTextStyle] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DefaultTextStyle) selector) {
-    final ThemeSelector<DefaultTextStyle, T> themeSelector =
-        ThemeSelector<DefaultTextStyle, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DefaultTextStyle) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DefaultTextStyle, T> themeSelector =
+        ModelSelector<DefaultTextStyle, T>.from(selector: selector, id: id);
     final DefaultTextStyle theme =
         InheritedModel.inheritFrom<DefaultTextStyle>(context, aspect: themeSelector)!;
     return themeSelector.selectFrom(theme);

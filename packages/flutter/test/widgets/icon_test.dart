@@ -412,7 +412,7 @@ void main() {
     final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext context) {
         buildCount++;
-        size = IconTheme.selectOf(context, (IconThemeData theme) => theme.size!);
+        size = IconTheme.selectOf(context, (IconThemeData theme) => theme.size!, id: 'size');
 
         return const Placeholder();
       },

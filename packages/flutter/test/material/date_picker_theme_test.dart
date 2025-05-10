@@ -1407,6 +1407,7 @@ void main() {
         backgroundColor = DatePickerTheme.selectOf(
           context,
           (DatePickerThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

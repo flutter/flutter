@@ -1714,6 +1714,7 @@ void main() {
         fontSize = DefaultTextStyle.selectOf(
           context,
           (DefaultTextStyle theme) => theme.style.fontSize!,
+          id: 'fontSize',
         );
         return const Placeholder();
       },

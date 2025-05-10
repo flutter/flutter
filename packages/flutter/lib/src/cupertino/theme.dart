@@ -117,14 +117,18 @@ class CupertinoTheme extends StatelessWidget {
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [CupertinoTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(CupertinoThemeData) selector) {
-    final ThemeSelector<CupertinoThemeData, T> themeSelector =
-        ThemeSelector<CupertinoThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(CupertinoThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<CupertinoThemeData, T> themeSelector =
+        ModelSelector<CupertinoThemeData, T>.from(selector: selector, id: id);
     final InheritedCupertinoTheme? inheritedTheme =
         InheritedModel.inheritFrom<InheritedCupertinoTheme>(context, aspect: themeSelector);
     return themeSelector.selectFrom(inheritedTheme?.theme.data ?? const CupertinoThemeData());

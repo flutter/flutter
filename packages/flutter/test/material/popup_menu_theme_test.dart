@@ -767,7 +767,11 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the textStyle property.
-        textStyle = PopupMenuTheme.selectOf(context, (PopupMenuThemeData theme) => theme.textStyle);
+        textStyle = PopupMenuTheme.selectOf(
+          context,
+          (PopupMenuThemeData theme) => theme.textStyle,
+          id: 'textStyle',
+        );
         return const Placeholder();
       },
     );

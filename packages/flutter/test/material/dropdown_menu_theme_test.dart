@@ -431,6 +431,7 @@ void main() {
         textStyle = DropdownMenuTheme.selectOf(
           context,
           (DropdownMenuThemeData theme) => theme.textStyle,
+          id: 'textStyle',
         );
         return const Placeholder();
       },

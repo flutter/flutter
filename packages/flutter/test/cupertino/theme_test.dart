@@ -308,6 +308,7 @@ void main() {
         primaryColor = CupertinoTheme.selectOf(
           context,
           (CupertinoThemeData theme) => theme.primaryColor,
+          id: 'primaryColor',
         );
         return const Placeholder();
       },

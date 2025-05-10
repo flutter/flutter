@@ -593,6 +593,7 @@ void main() {
         style = SegmentedButtonTheme.selectOf(
           context,
           (SegmentedButtonThemeData theme) => theme.style,
+          id: 'style',
         );
         return const Placeholder();
       },

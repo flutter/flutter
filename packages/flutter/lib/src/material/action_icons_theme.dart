@@ -171,7 +171,8 @@ class ActionIconTheme extends InheritedTheme<ActionIconThemeData> {
   /// ```dart
   /// final Widget Function(BuildContext)? closeButtonIconBuilder = ActionIconTheme.selectOf(
   ///   context,
-  ///   (ActionIconThemeData data) => data.closeButtonIconBuilder
+  ///   (ActionIconThemeData data) => data.closeButtonIconBuilder,
+  ///   id: 'data.closeButtonIconBuilder',
   /// );
   /// ```
   ///
@@ -186,14 +187,18 @@ class ActionIconTheme extends InheritedTheme<ActionIconThemeData> {
     return actionIconTheme?.data ?? Theme.of(context).actionIconTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ActionIconTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ActionIconThemeData) selector) {
-    final ThemeSelector<ActionIconThemeData, T> themeSelector =
-        ThemeSelector<ActionIconThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ActionIconThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ActionIconThemeData, T> themeSelector =
+        ModelSelector<ActionIconThemeData, T>.from(selector: selector, id: id);
     final ActionIconThemeData theme =
         InheritedModel.inheritFrom<ActionIconTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

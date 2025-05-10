@@ -319,6 +319,7 @@ void main() {
         backgroundColor = NavigationRailTheme.selectOf(
           context,
           (NavigationRailThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

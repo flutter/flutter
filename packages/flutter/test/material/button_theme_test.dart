@@ -165,7 +165,11 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the minWidth property.
-        minWidth = ButtonTheme.selectOf(context, (ButtonThemeData theme) => theme.minWidth);
+        minWidth = ButtonTheme.selectOf(
+          context,
+          (ButtonThemeData theme) => theme.minWidth,
+          id: 'minWidth',
+        );
         return const Placeholder();
       },
     );

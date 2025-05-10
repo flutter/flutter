@@ -142,13 +142,16 @@ class Theme extends StatelessWidget {
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [Theme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ThemeData) selector) {
-    final ThemeSelector<ThemeData, T> themeSelector = ThemeSelector<ThemeData, T>.from(selector);
+  static T selectOf<T>(BuildContext context, T Function(ThemeData) selector, {required Object id}) {
+    final ModelSelector<ThemeData, T> themeSelector = ModelSelector<ThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
     final ThemeData theme =
         InheritedModel.inheritFrom<_InheritedTheme>(context, aspect: themeSelector)!.theme.data;
     return themeSelector.selectFrom(theme);

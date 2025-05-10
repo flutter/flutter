@@ -1148,7 +1148,11 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the primaryColor property.
-        primaryColor = Theme.selectOf(context, (ThemeData theme) => theme.primaryColor);
+        primaryColor = Theme.selectOf(
+          context,
+          (ThemeData theme) => theme.primaryColor,
+          id: 'primaryColor',
+        );
         return const Placeholder();
       },
     );

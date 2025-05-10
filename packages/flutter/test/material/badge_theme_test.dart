@@ -173,6 +173,7 @@ void main() {
         backgroundColor = BadgeTheme.selectOf(
           context,
           (BadgeThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

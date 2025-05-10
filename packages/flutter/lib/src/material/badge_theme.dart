@@ -182,6 +182,7 @@ class BadgeTheme extends InheritedTheme<BadgeThemeData> {
   /// final Color? backgroundColor = BadgeTheme.selectOf(
   ///   context,
   ///   (BadgeThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -195,14 +196,19 @@ class BadgeTheme extends InheritedTheme<BadgeThemeData> {
     return badgeTheme?.data ?? Theme.of(context).badgeTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [BadgeTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(BadgeThemeData) selector) {
-    final ThemeSelector<BadgeThemeData, T> themeSelector = ThemeSelector<BadgeThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(BadgeThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<BadgeThemeData, T> themeSelector = ModelSelector<BadgeThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final BadgeThemeData theme =
         InheritedModel.inheritFrom<BadgeTheme>(context, aspect: themeSelector)!.data;

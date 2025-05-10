@@ -274,6 +274,7 @@ class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData> {
   /// final Color? backgroundColor = ExpansionTileTheme.selectOf(
   ///   context,
   ///   (ExpansionTileThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -288,14 +289,18 @@ class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData> {
     return inheritedTheme?.data ?? Theme.of(context).expansionTileTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ExpansionTileTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ExpansionTileThemeData) selector) {
-    final ThemeSelector<ExpansionTileThemeData, T> themeSelector =
-        ThemeSelector<ExpansionTileThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ExpansionTileThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ExpansionTileThemeData, T> themeSelector =
+        ModelSelector<ExpansionTileThemeData, T>.from(selector: selector, id: id);
     final ExpansionTileThemeData theme =
         InheritedModel.inheritFrom<ExpansionTileTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

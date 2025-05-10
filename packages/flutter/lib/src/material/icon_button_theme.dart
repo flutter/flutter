@@ -106,6 +106,7 @@ class IconButtonTheme extends InheritedTheme<IconButtonThemeData> {
   /// final ButtonStyle? style = IconButtonTheme.selectOf(
   ///   context,
   ///   (IconButtonThemeData data) => data.style,
+  ///   id: 'data.style',
   /// );
   /// ```
   ///
@@ -120,14 +121,18 @@ class IconButtonTheme extends InheritedTheme<IconButtonThemeData> {
     return buttonTheme?.data ?? Theme.of(context).iconButtonTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [IconButtonTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(IconButtonThemeData) selector) {
-    final ThemeSelector<IconButtonThemeData, T> themeSelector =
-        ThemeSelector<IconButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(IconButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<IconButtonThemeData, T> themeSelector =
+        ModelSelector<IconButtonThemeData, T>.from(selector: selector, id: id);
     final IconButtonThemeData theme =
         InheritedModel.inheritFrom<IconButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

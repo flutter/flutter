@@ -465,6 +465,7 @@ void main() {
         backgroundColor = ExpansionTileTheme.selectOf(
           context,
           (ExpansionTileThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

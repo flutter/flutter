@@ -3490,6 +3490,7 @@ void main() {
         activeTrackColor = SliderTheme.selectOf(
           context,
           (SliderThemeData theme) => theme.activeTrackColor,
+          id: 'activeTrackColor',
         );
         return const Placeholder();
       },

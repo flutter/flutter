@@ -576,6 +576,7 @@ void main() {
         color = ProgressIndicatorTheme.selectOf(
           context,
           (ProgressIndicatorThemeData theme) => theme.color,
+          id: 'color',
         );
         return const Placeholder();
       },

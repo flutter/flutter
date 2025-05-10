@@ -121,6 +121,7 @@ class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData> {
   /// final WidgetStateProperty<Color?>? backgroundColor = MenuButtonTheme.selectOf(
   ///   context,
   ///   (MenuButtonThemeData data) => data.style?.backgroundColor,
+  ///   id: 'data.style?.backgroundColor',
   /// );
   /// ```
   ///
@@ -140,9 +141,13 @@ class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData> {
   ///
   /// If there is no [MenuButtonTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.menuButtonTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(MenuButtonThemeData) selector) {
-    final ThemeSelector<MenuButtonThemeData, T> themeSelector =
-        ThemeSelector<MenuButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(MenuButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<MenuButtonThemeData, T> themeSelector =
+        ModelSelector<MenuButtonThemeData, T>.from(selector: selector, id: id);
     final MenuButtonThemeData theme =
         InheritedModel.inheritFrom<MenuButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

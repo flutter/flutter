@@ -1009,6 +1009,7 @@ void main() {
         backgroundColor = TimePickerTheme.selectOf(
           context,
           (TimePickerThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

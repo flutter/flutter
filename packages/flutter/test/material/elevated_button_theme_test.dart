@@ -493,6 +493,7 @@ void main() {
         style = ElevatedButtonTheme.selectOf(
           context,
           (ElevatedButtonThemeData theme) => theme.style,
+          id: 'style',
         );
         return const Placeholder();
       },

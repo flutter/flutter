@@ -336,6 +336,7 @@ void main() {
         backgroundColor = DrawerTheme.selectOf(
           context,
           (DrawerThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

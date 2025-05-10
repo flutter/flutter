@@ -305,6 +305,7 @@ void main() {
         backgroundColor = SearchViewTheme.selectOf(
           context,
           (SearchViewThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

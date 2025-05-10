@@ -322,6 +322,7 @@ class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData> {
   /// final Color? backgroundColor = NavigationRailTheme.selectOf(
   ///   context,
   ///   (NavigationRailThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -341,9 +342,13 @@ class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData> {
   ///
   /// If there is no [NavigationRailTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.navigationRailTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(NavigationRailThemeData) selector) {
-    final ThemeSelector<NavigationRailThemeData, T> themeSelector =
-        ThemeSelector<NavigationRailThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(NavigationRailThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<NavigationRailThemeData, T> themeSelector =
+        ModelSelector<NavigationRailThemeData, T>.from(selector: selector, id: id);
     final NavigationRailThemeData theme =
         InheritedModel.inheritFrom<NavigationRailTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

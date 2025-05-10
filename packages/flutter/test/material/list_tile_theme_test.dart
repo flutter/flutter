@@ -1333,7 +1333,11 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the tileColor property.
-        tileColor = ListTileTheme.selectOf(context, (ListTileThemeData theme) => theme.tileColor);
+        tileColor = ListTileTheme.selectOf(
+          context,
+          (ListTileThemeData theme) => theme.tileColor,
+          id: 'tileColor',
+        );
         return const Placeholder();
       },
     );

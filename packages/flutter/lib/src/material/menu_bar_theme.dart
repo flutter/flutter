@@ -107,14 +107,18 @@ class MenuBarTheme extends InheritedTheme<MenuBarThemeData> {
     return menuBarTheme?.data ?? Theme.of(context).menuBarTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [MenuBarTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(MenuBarThemeData) selector) {
-    final ThemeSelector<MenuBarThemeData, T> themeSelector =
-        ThemeSelector<MenuBarThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(MenuBarThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<MenuBarThemeData, T> themeSelector =
+        ModelSelector<MenuBarThemeData, T>.from(selector: selector, id: id);
     final MenuBarThemeData theme =
         InheritedModel.inheritFrom<MenuBarTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

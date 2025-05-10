@@ -319,6 +319,7 @@ class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData> {
   /// final Radius? radius = ScrollbarTheme.selectOf(
   ///   context,
   ///   (ScrollbarThemeData data) => data.radius,
+  ///   id: 'data.radius',
   /// );
   /// ```
   ///
@@ -338,9 +339,13 @@ class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData> {
   ///
   /// If there is no [ScrollbarTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.scrollbarTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(ScrollbarThemeData) selector) {
-    final ThemeSelector<ScrollbarThemeData, T> themeSelector =
-        ThemeSelector<ScrollbarThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ScrollbarThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ScrollbarThemeData, T> themeSelector =
+        ModelSelector<ScrollbarThemeData, T>.from(selector: selector, id: id);
     final ScrollbarThemeData theme =
         InheritedModel.inheritFrom<ScrollbarTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

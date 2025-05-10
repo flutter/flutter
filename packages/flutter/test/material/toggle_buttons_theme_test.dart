@@ -600,7 +600,11 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the color property
-        color = ToggleButtonsTheme.selectOf(context, (ToggleButtonsThemeData theme) => theme.color);
+        color = ToggleButtonsTheme.selectOf(
+          context,
+          (ToggleButtonsThemeData theme) => theme.color,
+          id: 'color',
+        );
         return const Placeholder();
       },
     );

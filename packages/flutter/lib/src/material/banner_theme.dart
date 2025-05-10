@@ -191,6 +191,7 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData> {
   /// final Color? backgroundColor = MaterialBannerTheme.selectOf(
   ///   context,
   ///   (MaterialBannerThemeData data) => data.backgroundColor!,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -205,14 +206,18 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData> {
     return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [MaterialBannerTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T? selectOf<T>(BuildContext context, T Function(MaterialBannerThemeData) selector) {
-    final ThemeSelector<MaterialBannerThemeData, T> themeSelector =
-        ThemeSelector<MaterialBannerThemeData, T>.from(selector);
+  static T? selectOf<T>(
+    BuildContext context,
+    T Function(MaterialBannerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<MaterialBannerThemeData, T> themeSelector =
+        ModelSelector<MaterialBannerThemeData, T>.from(selector: selector, id: id);
     final MaterialBannerThemeData? theme =
         InheritedModel.inheritFrom<MaterialBannerTheme>(context, aspect: themeSelector)?.data;
     return theme == null ? null : themeSelector.selectFrom(theme);
@@ -229,9 +234,9 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData> {
   @override
   bool updateShouldNotifyDependent(
     MaterialBannerTheme oldWidget,
-    Set<ThemeSelector<MaterialBannerThemeData, Object?>> dependencies,
+    Set<ModelSelector<MaterialBannerThemeData, Object?>> dependencies,
   ) {
-    for (final ThemeSelector<MaterialBannerThemeData, Object?> selector in dependencies) {
+    for (final ModelSelector<MaterialBannerThemeData, Object?> selector in dependencies) {
       final Object? oldValue = oldWidget.data == null ? null : selector.selectFrom(oldWidget.data!);
       final Object? newValue = data == null ? null : selector.selectFrom(data!);
       if (oldValue != newValue) {

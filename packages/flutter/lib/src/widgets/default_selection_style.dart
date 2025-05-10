@@ -108,6 +108,7 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle> {
   /// final Color? cursorColor = DefaultSelectionStyle.selectOf(
   ///   context,
   ///   (DefaultSelectionStyle data) => data.cursorColor,
+  ///   id: 'data.cursorColor',
   /// );
   /// ```
   ///
@@ -121,14 +122,18 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle> {
         const DefaultSelectionStyle.fallback();
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using data provided by the
+  /// Evaluates [ModelSelector.selectFrom] using data provided by the
   /// nearest ancestor [DefaultSelectionStyle] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DefaultSelectionStyle) selector) {
-    final ThemeSelector<DefaultSelectionStyle, T> themeSelector =
-        ThemeSelector<DefaultSelectionStyle, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DefaultSelectionStyle) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DefaultSelectionStyle, T> themeSelector =
+        ModelSelector<DefaultSelectionStyle, T>.from(selector: selector, id: id);
     final DefaultSelectionStyle theme =
         InheritedModel.inheritFrom<DefaultSelectionStyle>(context, aspect: themeSelector)!;
     return themeSelector.selectFrom(theme);
@@ -154,9 +159,9 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle> {
   @override
   bool updateShouldNotifyDependent(
     DefaultSelectionStyle oldWidget,
-    Set<ThemeSelector<DefaultSelectionStyle, Object?>> dependencies,
+    Set<ModelSelector<DefaultSelectionStyle, Object?>> dependencies,
   ) {
-    for (final ThemeSelector<DefaultSelectionStyle, Object?> selector in dependencies) {
+    for (final ModelSelector<DefaultSelectionStyle, Object?> selector in dependencies) {
       final Object? oldValue = selector.selectFrom(oldWidget);
       final Object? newValue = selector.selectFrom(this);
       if (oldValue != newValue) {

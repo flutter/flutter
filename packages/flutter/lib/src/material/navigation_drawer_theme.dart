@@ -254,6 +254,7 @@ class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData> {
   /// final Color? backgroundColor = NavigationDrawerTheme.selectOf(
   ///   context,
   ///   (NavigationDrawerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   static NavigationDrawerThemeData of(BuildContext context) {
@@ -267,9 +268,13 @@ class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData> {
   ///
   /// If there is no [NavigationDrawerTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.navigationDrawerTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(NavigationDrawerThemeData) selector) {
-    final ThemeSelector<NavigationDrawerThemeData, T> themeSelector =
-        ThemeSelector<NavigationDrawerThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(NavigationDrawerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<NavigationDrawerThemeData, T> themeSelector =
+        ModelSelector<NavigationDrawerThemeData, T>.from(selector: selector, id: id);
     final NavigationDrawerThemeData theme =
         InheritedModel.inheritFrom<NavigationDrawerTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

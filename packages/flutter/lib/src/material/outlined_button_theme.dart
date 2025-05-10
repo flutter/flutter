@@ -112,6 +112,7 @@ class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData> {
   /// final ButtonStyle? style = OutlinedButtonTheme.selectOf(
   ///   context,
   ///   (OutlinedButtonThemeData data) => data.style,
+  ///   id: 'data.style',
   /// );
   /// ```
   ///
@@ -131,9 +132,13 @@ class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData> {
   ///
   /// If there is no [OutlinedButtonTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.outlinedButtonTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(OutlinedButtonThemeData) selector) {
-    final ThemeSelector<OutlinedButtonThemeData, T> themeSelector =
-        ThemeSelector<OutlinedButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(OutlinedButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<OutlinedButtonThemeData, T> themeSelector =
+        ModelSelector<OutlinedButtonThemeData, T>.from(selector: selector, id: id);
     final OutlinedButtonThemeData theme =
         InheritedModel.inheritFrom<OutlinedButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

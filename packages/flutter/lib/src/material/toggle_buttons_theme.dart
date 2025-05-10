@@ -274,6 +274,7 @@ class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData> {
   /// final Color? color = ToggleButtonsTheme.selectOf(
   ///   context,
   ///   (ToggleButtonsThemeData data) => data.color,
+  ///   id: 'data.color',
   /// );
   /// ```
   ///
@@ -288,14 +289,18 @@ class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData> {
     return toggleButtonsTheme?.data ?? Theme.of(context).toggleButtonsTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ToggleButtonsTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ToggleButtonsThemeData) selector) {
-    final ThemeSelector<ToggleButtonsThemeData, T> themeSelector =
-        ThemeSelector<ToggleButtonsThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ToggleButtonsThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ToggleButtonsThemeData, T> themeSelector =
+        ModelSelector<ToggleButtonsThemeData, T>.from(selector: selector, id: id);
     final ToggleButtonsThemeData theme =
         InheritedModel.inheritFrom<ToggleButtonsTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

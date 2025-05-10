@@ -247,23 +247,30 @@ void main() {
 
   test('ThemeSelector selects from theme data', () {
     const double size = 32;
-    final ThemeSelector<IconThemeData, double> selector = ThemeSelector<IconThemeData, double>.from(
-      (IconThemeData data) => data.size!,
+    final ModelSelector<IconThemeData, double> selector = ModelSelector<IconThemeData, double>.from(
+      selector: (IconThemeData data) => data.size!,
+      id: 'data.size',
     );
     expect(selector.selectFrom(const IconThemeData(size: size)), equals(size));
     expect(selector.selectFrom(const IconThemeData(size: 48)), equals(48));
     expect(() => selector.selectFrom(const IconThemeData()), throwsA(isA<TypeError>()));
 
     // Test multiple selectors with the same theme data.
-    final ThemeSelector<IconThemeData, Color?> colorSelector =
-        ThemeSelector<IconThemeData, Color?>.from((IconThemeData data) => data.color);
+    final ModelSelector<IconThemeData, Color?> colorSelector =
+        ModelSelector<IconThemeData, Color?>.from(
+          selector: (IconThemeData data) => data.color,
+          id: 'data.color',
+        );
     const Color iconColor = Color(0xFF0000FF);
     const IconThemeData themeData = IconThemeData(size: size, color: iconColor);
     expect(selector.selectFrom(themeData), equals(size));
     expect(colorSelector.selectFrom(themeData), equals(iconColor));
 
-    final ThemeSelector<IconThemeData, double> selectorCopy =
-        ThemeSelector<IconThemeData, double>.from((IconThemeData data) => data.size!);
+    final ModelSelector<IconThemeData, double> selectorCopy =
+        ModelSelector<IconThemeData, double>.from(
+          selector: (IconThemeData data) => data.size!,
+          id: 'data.size',
+        );
     expect(identical(selector, selectorCopy), isFalse);
   });
 
@@ -275,23 +282,29 @@ void main() {
       color: Color(0xFF0000FF),
     );
 
-    final ThemeSelector<IconThemeData, double?> sizeSelector =
-        ThemeSelector<IconThemeData, double?>.from((IconThemeData data) => data.size);
-    final ThemeSelector<IconThemeData, Color?> colorSelector =
-        ThemeSelector<IconThemeData, Color?>.from((IconThemeData data) => data.color);
+    final ModelSelector<IconThemeData, double?> sizeSelector =
+        ModelSelector<IconThemeData, double?>.from(
+          selector: (IconThemeData data) => data.size,
+          id: 'data.size',
+        );
+    final ModelSelector<IconThemeData, Color?> colorSelector =
+        ModelSelector<IconThemeData, Color?>.from(
+          selector: (IconThemeData data) => data.color,
+          id: 'data.color',
+        );
 
-    final Set<ThemeSelector<IconThemeData, Object?>> sizeOnlyDependencies =
-        <ThemeSelector<IconThemeData, Object?>>{
-          sizeSelector as ThemeSelector<IconThemeData, Object?>,
+    final Set<ModelSelector<IconThemeData, Object?>> sizeOnlyDependencies =
+        <ModelSelector<IconThemeData, Object?>>{
+          sizeSelector as ModelSelector<IconThemeData, Object?>,
         };
-    final Set<ThemeSelector<IconThemeData, Object?>> colorOnlyDependencies =
-        <ThemeSelector<IconThemeData, Object?>>{
-          colorSelector as ThemeSelector<IconThemeData, Object?>,
+    final Set<ModelSelector<IconThemeData, Object?>> colorOnlyDependencies =
+        <ModelSelector<IconThemeData, Object?>>{
+          colorSelector as ModelSelector<IconThemeData, Object?>,
         };
-    final Set<ThemeSelector<IconThemeData, Object?>> bothDependencies =
-        <ThemeSelector<IconThemeData, Object?>>{
-          sizeSelector as ThemeSelector<IconThemeData, Object?>,
-          colorSelector as ThemeSelector<IconThemeData, Object?>,
+    final Set<ModelSelector<IconThemeData, Object?>> bothDependencies =
+        <ModelSelector<IconThemeData, Object?>>{
+          sizeSelector as ModelSelector<IconThemeData, Object?>,
+          colorSelector as ModelSelector<IconThemeData, Object?>,
         };
 
     const _TestInheritedTheme oldWidget = _TestInheritedTheme(themeData: oldThemeData);

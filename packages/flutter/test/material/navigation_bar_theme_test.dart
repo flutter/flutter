@@ -356,6 +356,7 @@ void main() {
         backgroundColor = NavigationBarTheme.selectOf(
           context,
           (NavigationBarThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

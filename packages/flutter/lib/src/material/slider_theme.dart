@@ -111,9 +111,14 @@ class SliderTheme extends InheritedTheme<SliderThemeData> {
   ///
   /// If there is no [SliderTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.sliderTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(SliderThemeData) selector) {
-    final ThemeSelector<SliderThemeData, T> themeSelector = ThemeSelector<SliderThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(SliderThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<SliderThemeData, T> themeSelector = ModelSelector<SliderThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final SliderThemeData theme =
         InheritedModel.inheritFrom<SliderTheme>(context, aspect: themeSelector)!.data;

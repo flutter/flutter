@@ -275,6 +275,7 @@ class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData> {
   /// final Color? color = PopupMenuTheme.selectOf(
   ///   context,
   ///   (PopupMenuThemeData data) => data.color,
+  ///   id: 'data.color',
   /// );
   /// ```
   ///
@@ -294,9 +295,13 @@ class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData> {
   ///
   /// If there is no [PopupMenuTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.popupMenuTheme] is used.
-  static T selectOf<T>(BuildContext context, T Function(PopupMenuThemeData) selector) {
-    final ThemeSelector<PopupMenuThemeData, T> themeSelector =
-        ThemeSelector<PopupMenuThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(PopupMenuThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<PopupMenuThemeData, T> themeSelector =
+        ModelSelector<PopupMenuThemeData, T>.from(selector: selector, id: id);
     final PopupMenuThemeData theme =
         InheritedModel.inheritFrom<PopupMenuTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

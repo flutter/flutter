@@ -579,6 +579,7 @@ void main() {
         backgroundColor = MaterialBannerTheme.selectOf(
           context,
           (MaterialBannerThemeData theme) => theme.backgroundColor!,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

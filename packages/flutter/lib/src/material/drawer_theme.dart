@@ -199,6 +199,7 @@ class DrawerTheme extends InheritedTheme<DrawerThemeData> {
   /// final Color? backgroundColor = DrawerTheme.selectOf(
   ///   context,
   ///   (DrawerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -212,14 +213,19 @@ class DrawerTheme extends InheritedTheme<DrawerThemeData> {
     return drawerTheme?.data ?? Theme.of(context).drawerTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [DrawerTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DrawerThemeData) selector) {
-    final ThemeSelector<DrawerThemeData, T> themeSelector = ThemeSelector<DrawerThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DrawerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DrawerThemeData, T> themeSelector = ModelSelector<DrawerThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final DrawerThemeData theme =
         InheritedModel.inheritFrom<DrawerTheme>(context, aspect: themeSelector)!.data;

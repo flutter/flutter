@@ -95,14 +95,19 @@ class ChipTheme extends InheritedTheme<ChipThemeData> {
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ChipTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ChipThemeData) selector) {
-    final ThemeSelector<ChipThemeData, T> themeSelector = ThemeSelector<ChipThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ChipThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ChipThemeData, T> themeSelector = ModelSelector<ChipThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final ChipThemeData theme =
         InheritedModel.inheritFrom<ChipTheme>(context, aspect: themeSelector)!.data;

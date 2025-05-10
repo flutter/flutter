@@ -150,6 +150,7 @@ class DividerTheme extends InheritedTheme<DividerThemeData> {
   /// final Color? color = DividerTheme.selectOf(
   ///   context,
   ///   (DividerThemeData data) => data.color,
+  ///   id: 'data.color',
   /// );
   /// ```
   ///
@@ -163,14 +164,18 @@ class DividerTheme extends InheritedTheme<DividerThemeData> {
     return dividerTheme?.data ?? Theme.of(context).dividerTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [DividerTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DividerThemeData) selector) {
-    final ThemeSelector<DividerThemeData, T> themeSelector =
-        ThemeSelector<DividerThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DividerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DividerThemeData, T> themeSelector =
+        ModelSelector<DividerThemeData, T>.from(selector: selector, id: id);
     final DividerThemeData theme =
         InheritedModel.inheritFrom<DividerTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

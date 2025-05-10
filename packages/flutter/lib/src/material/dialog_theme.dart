@@ -201,14 +201,19 @@ class DialogTheme extends InheritedTheme<DialogThemeData> with Diagnosticable {
     return dialogTheme?.data ?? Theme.of(context).dialogTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [DialogTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(DialogThemeData) selector) {
-    final ThemeSelector<DialogThemeData, T> themeSelector = ThemeSelector<DialogThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DialogThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DialogThemeData, T> themeSelector = ModelSelector<DialogThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final DialogThemeData theme =
         InheritedModel.inheritFrom<DialogTheme>(context, aspect: themeSelector)!.data;

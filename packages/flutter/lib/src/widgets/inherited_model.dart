@@ -231,6 +231,11 @@ class InheritedModelElement<T> extends InheritedElement {
       setDependencies(dependent, HashSet<T>());
     } else {
       assert(aspect is T);
+      // If the aspect is a function, then we need to remove it from the
+      // dependencies list, such that it can update.
+      if (aspect is _FunctionModelSelector) {
+        dependencies?.remove(aspect);
+      }
       setDependencies(dependent, (dependencies ?? HashSet<T>())..add(aspect as T));
     }
   }
@@ -246,4 +251,51 @@ class InheritedModelElement<T> extends InheritedElement {
       dependent.didChangeDependencies();
     }
   }
+}
+
+/// A generic selector interface for model data.
+///
+/// This interface allows for selecting specific aspects of model data without
+/// coupling to specific implementations.
+///
+/// The type parameter [T] represents the type of the model data object.
+/// The type parameter [V] represents the type of the value being selected
+/// from the model data.
+abstract interface class ModelSelector<T, V> {
+  /// Creates a [ModelSelector] from a function.
+  ///
+  /// This factory constructor allows for creating a selector using a lambda syntax.
+  factory ModelSelector.from({required V Function(T) selector, required Object id}) =
+      _FunctionModelSelector<T, V>;
+
+  /// Selects a value of type [V] from the model data of type [T].
+  ///
+  /// The actual model data type is determined by the implementation.
+  V selectFrom(T modelData);
+}
+
+/// A [ModelSelector] implementation that wraps a function.
+@immutable
+class _FunctionModelSelector<T, V> implements ModelSelector<T, V> {
+  const _FunctionModelSelector({required this.id, required this.selector});
+
+  final V Function(T) selector;
+  final Object id;
+
+  @override
+  V selectFrom(T modelData) => selector(modelData);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _FunctionModelSelector<T, V> && other.id == id;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, id);
 }

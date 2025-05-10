@@ -146,6 +146,7 @@ class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData> {
   /// final Widget? selectedIcon = SegmentedButtonTheme.selectOf(
   ///   context,
   ///   (SegmentedButtonThemeData data) => data.selectedIcon,
+  ///   id: 'data.selectedIcon',
   /// );
   /// ```
   ///
@@ -166,14 +167,18 @@ class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData> {
     return context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>()?.data;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [SegmentedButtonTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(SegmentedButtonThemeData) selector) {
-    final ThemeSelector<SegmentedButtonThemeData, T> themeSelector =
-        ThemeSelector<SegmentedButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(SegmentedButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<SegmentedButtonThemeData, T> themeSelector =
+        ModelSelector<SegmentedButtonThemeData, T>.from(selector: selector, id: id);
     final SegmentedButtonThemeData theme =
         InheritedModel.inheritFrom<SegmentedButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

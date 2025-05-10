@@ -108,6 +108,7 @@ class TextButtonTheme extends InheritedTheme<TextButtonThemeData> {
   /// final ButtonStyle? style = TextButtonTheme.selectOf(
   ///   context,
   ///   (TextButtonThemeData data) => data.style,
+  ///   id: 'data.style',
   /// );
   /// ```
   ///
@@ -122,14 +123,18 @@ class TextButtonTheme extends InheritedTheme<TextButtonThemeData> {
     return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [TextButtonTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(TextButtonThemeData) selector) {
-    final ThemeSelector<TextButtonThemeData, T> themeSelector =
-        ThemeSelector<TextButtonThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TextButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TextButtonThemeData, T> themeSelector =
+        ModelSelector<TextButtonThemeData, T>.from(selector: selector, id: id);
     final TextButtonThemeData theme =
         InheritedModel.inheritFrom<TextButtonTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

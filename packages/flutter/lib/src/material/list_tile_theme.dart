@@ -554,6 +554,7 @@ class ListTileTheme extends InheritedTheme<ListTileThemeData> {
   /// final Color? tileColor = ListTileTheme.selectOf(
   ///   context,
   ///   (ListTileThemeData data) => data.tileColor,
+  ///   id: 'data.tileColor',
   /// );
   /// ```
   ///
@@ -567,14 +568,18 @@ class ListTileTheme extends InheritedTheme<ListTileThemeData> {
     return result?.data ?? Theme.of(context).listTileTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ListTileTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ListTileThemeData) selector) {
-    final ThemeSelector<ListTileThemeData, T> themeSelector =
-        ThemeSelector<ListTileThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ListTileThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ListTileThemeData, T> themeSelector =
+        ModelSelector<ListTileThemeData, T>.from(selector: selector, id: id);
     final ListTileThemeData theme =
         InheritedModel.inheritFrom<ListTileTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

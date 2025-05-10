@@ -130,6 +130,7 @@ class ButtonTheme extends InheritedTheme<ButtonThemeData> {
   /// ```dart
   /// final double height = ButtonTheme.selectOf(
   ///   context, (ButtonThemeData data) => data.height,
+  ///   id: 'data.height',
   /// );
   /// ```
   ///
@@ -156,14 +157,19 @@ class ButtonTheme extends InheritedTheme<ButtonThemeData> {
     return buttonTheme!;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [ButtonTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(ButtonThemeData) selector) {
-    final ThemeSelector<ButtonThemeData, T> themeSelector = ThemeSelector<ButtonThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ButtonThemeData, T> themeSelector = ModelSelector<ButtonThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final ButtonThemeData theme =
         InheritedModel.inheritFrom<ButtonTheme>(context, aspect: themeSelector)!.data;

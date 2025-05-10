@@ -352,6 +352,7 @@ class TooltipTheme extends InheritedTheme<TooltipThemeData> {
   /// final double? height = TooltipTheme.selectOf(
   ///   context,
   ///   (TooltipThemeData data) => data.height,
+  ///   id: 'data.height',
   /// );
   /// ```
   ///
@@ -365,14 +366,18 @@ class TooltipTheme extends InheritedTheme<TooltipThemeData> {
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [TooltipTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(TooltipThemeData) selector) {
-    final ThemeSelector<TooltipThemeData, T> themeSelector =
-        ThemeSelector<TooltipThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TooltipThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TooltipThemeData, T> themeSelector =
+        ModelSelector<TooltipThemeData, T>.from(selector: selector, id: id);
     final TooltipThemeData theme =
         InheritedModel.inheritFrom<TooltipTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

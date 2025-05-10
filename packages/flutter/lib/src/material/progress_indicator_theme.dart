@@ -342,11 +342,16 @@ class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData> 
   /// final Color? color = ProgressIndicatorTheme.selectOf(
   ///   context,
   ///   (ProgressIndicatorThemeData data) => data.color,
+  ///   id: 'data.color',
   /// );
   /// ```
-  static T selectOf<T>(BuildContext context, T Function(ProgressIndicatorThemeData) selector) {
-    final ThemeSelector<ProgressIndicatorThemeData, T> themeSelector =
-        ThemeSelector<ProgressIndicatorThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ProgressIndicatorThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ProgressIndicatorThemeData, T> themeSelector =
+        ModelSelector<ProgressIndicatorThemeData, T>.from(selector: selector, id: id);
     final ProgressIndicatorThemeData theme =
         InheritedModel.inheritFrom<ProgressIndicatorTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

@@ -171,14 +171,18 @@ class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData> {
     return inheritedTheme?.data ?? Theme.of(context).carouselViewTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [CarouselViewTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(CarouselViewThemeData) selector) {
-    final ThemeSelector<CarouselViewThemeData, T> themeSelector =
-        ThemeSelector<CarouselViewThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(CarouselViewThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<CarouselViewThemeData, T> themeSelector =
+        ModelSelector<CarouselViewThemeData, T>.from(selector: selector, id: id);
     final CarouselViewThemeData theme =
         InheritedModel.inheritFrom<CarouselViewTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

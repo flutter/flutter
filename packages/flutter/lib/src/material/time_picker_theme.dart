@@ -577,6 +577,7 @@ class TimePickerTheme extends InheritedTheme<TimePickerThemeData> {
   /// final Color? backgroundColor = TimePickerTheme.selectOf(
   ///   context,
   ///   (TimePickerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
   /// );
   /// ```
   ///
@@ -591,14 +592,18 @@ class TimePickerTheme extends InheritedTheme<TimePickerThemeData> {
     return timePickerTheme?.data ?? Theme.of(context).timePickerTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [TimePickerTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(TimePickerThemeData) selector) {
-    final ThemeSelector<TimePickerThemeData, T> themeSelector =
-        ThemeSelector<TimePickerThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TimePickerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TimePickerThemeData, T> themeSelector =
+        ModelSelector<TimePickerThemeData, T>.from(selector: selector, id: id);
     final TimePickerThemeData theme =
         InheritedModel.inheritFrom<TimePickerTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);

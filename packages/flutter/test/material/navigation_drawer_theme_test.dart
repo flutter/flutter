@@ -286,6 +286,7 @@ void main() {
         backgroundColor = NavigationDrawerTheme.selectOf(
           context,
           (NavigationDrawerThemeData theme) => theme.backgroundColor,
+          id: 'backgroundColor',
         );
         return const Placeholder();
       },

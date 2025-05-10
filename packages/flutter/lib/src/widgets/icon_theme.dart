@@ -63,6 +63,7 @@ class IconTheme extends InheritedTheme<IconThemeData> {
   /// final Color? color = IconTheme.selectOf(
   ///   context,
   ///   (IconThemeData data) => data.color,
+  ///   id: 'data.color',
   /// );
   /// ```
   ///
@@ -94,14 +95,19 @@ class IconTheme extends InheritedTheme<IconThemeData> {
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [IconTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(IconThemeData) selector) {
-    final ThemeSelector<IconThemeData, T> themeSelector = ThemeSelector<IconThemeData, T>.from(
-      selector,
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(IconThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<IconThemeData, T> themeSelector = ModelSelector<IconThemeData, T>.from(
+      selector: selector,
+      id: id,
     );
     final IconThemeData theme =
         InheritedModel.inheritFrom<IconTheme>(context, aspect: themeSelector)!.data;

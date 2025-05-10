@@ -177,6 +177,7 @@ class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData> {
   /// final Color? cursorColor = TextSelectionTheme.selectOf(
   ///   context,
   ///   (TextSelectionThemeData data) => data.cursorColor,
+  ///   id: 'data.cursorColor',
   /// );
   /// ```
   ///
@@ -191,14 +192,18 @@ class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData> {
     return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
   }
 
-  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [TextSelectionTheme] widget, and returns the result.
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T selectOf<T>(BuildContext context, T Function(TextSelectionThemeData) selector) {
-    final ThemeSelector<TextSelectionThemeData, T> themeSelector =
-        ThemeSelector<TextSelectionThemeData, T>.from(selector);
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TextSelectionThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TextSelectionThemeData, T> themeSelector =
+        ModelSelector<TextSelectionThemeData, T>.from(selector: selector, id: id);
     final TextSelectionThemeData theme =
         InheritedModel.inheritFrom<TextSelectionTheme>(context, aspect: themeSelector)!.data;
     return themeSelector.selectFrom(theme);
