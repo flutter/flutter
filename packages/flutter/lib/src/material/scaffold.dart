@@ -1806,15 +1806,10 @@ class Scaffold extends StatefulWidget {
   /// Defaults to [AlignmentDirectional.centerEnd].
   final AlignmentDirectional persistentFooterAlignment;
 
-  /// Decoration to customize the persistent footer buttons container.
+  /// Decoration for the container that holds the [persistentFooterButtons].
   ///
-  /// By default, the persistent footer buttons container has a border at the top
-  /// created using [Divider.createBorderSide].
-  ///
-  /// This property can be used to customize the decoration of the container,
-  /// such as adding different borders, shadows, or background colors.
-  ///
-  /// If null, the default decoration with a top border will be used.
+  /// By default, this container has a top border with a width of 1.0, created by
+  /// [Divider.createBorderSide].
   ///
   /// See also:
   ///
