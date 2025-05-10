@@ -2509,6 +2509,35 @@ void main() {
         moreOrLessEquals(xLocationIntervalTwelve, epsilon: 0.1),
       );
     });
+
+    testWidgets('ModalRoute.isFirstOf only rebuilds when first route state changes', (
+      WidgetTester tester,
+    ) async {
+      int buildCount = 0;
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+
+      Widget buildCounter(BuildContext context) {
+        buildCount++;
+        final bool isFirst = ModalRoute.isFirstOf(context) ?? false;
+        return Text('isFirst: $isFirst');
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+      );
+
+      expect(buildCount, 1);
+      expect(find.text('isFirst: true'), findsOneWidget);
+
+      // Push a new route - first route should remain first
+      navigator.currentState!.push<void>(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('New Route')),
+      );
+      await tester.pumpAndSettle();
+
+      // Should not rebuild because isFirst hasn't changed
+      expect(buildCount, 1);
+    });
   });
 
   testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
