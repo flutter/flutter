@@ -85,6 +85,7 @@ void main(List<String> args) {
   // Update the pubspec.
   String pubspec = _file(out, 'pubspec.yaml').readAsStringSync();
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
+  pubspec = pubspec.replaceAll('resolution: workspace', '');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
   // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.

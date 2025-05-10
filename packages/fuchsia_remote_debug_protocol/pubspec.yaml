@@ -6,6 +6,8 @@ homepage: https://flutter.dev
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   process: 5.0.3
   vm_service: 15.0.0

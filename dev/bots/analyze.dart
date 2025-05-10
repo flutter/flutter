@@ -2336,7 +2336,7 @@ Future<void> _checkConsumerDependencies() async {
       dependencies.add(currentPackage['name']! as String);
 
       final List<String> currentDependencies =
-          (currentPackage['dependencies']! as List<Object?>).cast<String>();
+          (currentPackage['directDependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
         // Don't add dependencies we've already seen or we will get stuck
         // forever if there are any circular references.

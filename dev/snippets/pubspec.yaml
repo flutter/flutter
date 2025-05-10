@@ -4,6 +4,8 @@ description: A package for parsing and manipulating code samples in Flutter repo
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   analyzer: 7.4.5
   args: 2.7.0

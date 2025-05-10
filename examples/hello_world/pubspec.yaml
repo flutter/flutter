@@ -3,6 +3,8 @@ name: hello_world
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter
