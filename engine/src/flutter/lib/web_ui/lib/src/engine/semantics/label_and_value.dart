@@ -446,64 +446,102 @@ class LabelAndValue extends SemanticBehavior {
   /// instead.
   LabelRepresentation preferredRepresentation;
 
+  static bool? _supportsAriaDescription;
+  static bool get supportsAriaDescription {
+    if (_supportsAriaDescription == null) {
+      final test = domDocument.createElement('div');
+      test.setAttribute('aria-description', 'test');
+      _supportsAriaDescription = test.getAttribute('aria-description') == 'test';
+    }
+    return _supportsAriaDescription!;
+  }
+
+  String? _describedById;
+  DomElement? _describedBySpan;
+
   @override
   void update() {
-    final String? computedLabel = _computeLabel();
-
-    if (computedLabel == null) {
-      _cleanUpDom();
-      return;
+    // 1. Always set aria-label to label (if present)
+    if (semanticsObject.hasLabel) {
+      owner.setAttribute('aria-label', semanticsObject.label!);
+    } else {
+      owner.removeAttribute('aria-label');
     }
 
-    _getEffectiveRepresentation().update(computedLabel);
-  }
-
-  LabelRepresentationBehavior? _representation;
-
-  /// Return the representation that should be used based on the current
-  /// parameters of the semantic node.
-  ///
-  /// If the node has children always use an `aria-label`. Using extra child
-  /// nodes to represent the label will cause layout shifts and confuse the
-  /// screen reader. If the are no children, use the representation preferred
-  /// by the role.
-  LabelRepresentationBehavior _getEffectiveRepresentation() {
-    final LabelRepresentation effectiveRepresentation =
-        semanticsObject.hasChildren ? LabelRepresentation.ariaLabel : preferredRepresentation;
-
-    LabelRepresentationBehavior? representation = _representation;
-    if (representation == null || representation.kind != effectiveRepresentation) {
-      representation?.cleanUp();
-      _representation = representation = effectiveRepresentation.createBehavior(owner);
+    // 2. Handle hint and tooltip
+    final String? description = _combineHintAndTooltip();
+    if (description != null && description.trim().isNotEmpty) {
+      if (supportsAriaDescription) {
+        owner.setAttribute('aria-description', description);
+        _removeDescribedBy();
+      } else {
+        _ensureDescribedBy(description);
+        owner.setAttribute('aria-describedby', _describedById!);
+        owner.removeAttribute('aria-description');
+      }
+    } else {
+      owner.removeAttribute('aria-description');
+      _removeDescribedBy();
     }
-    return representation;
+
+    // 3. Handle value for non-incrementable widgets only
+    if (!semanticsObject.isIncrementable && semanticsObject.hasValue) {
+      final value = semanticsObject.value!;
+      if (num.tryParse(value) != null) {
+        owner.setAttribute('aria-valuenow', value);
+        owner.removeAttribute('aria-valuetext');
+      } else {
+        owner.setAttribute('aria-valuetext', value);
+        owner.removeAttribute('aria-valuenow');
+      }
+    } else {
+      owner.removeAttribute('aria-valuenow');
+      owner.removeAttribute('aria-valuetext');
+    }
   }
 
-  /// Computes the final label to be assigned to the node.
-  ///
-  /// The label is a concatenation of tooltip, label, hint, and value, whichever
-  /// combination is present.
-  String? _computeLabel() {
-    // If the node is incrementable the value is reported to the browser via
-    // the respective role. We do not need to also render it again here.
-    final bool shouldDisplayValue = !semanticsObject.isIncrementable && semanticsObject.hasValue;
-
-    return computeDomSemanticsLabel(
-      tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
-      label: semanticsObject.hasLabel ? semanticsObject.label : null,
-      hint: semanticsObject.hint,
-      value: shouldDisplayValue ? semanticsObject.value : null,
-    );
+  String? _combineHintAndTooltip() {
+    final hint = semanticsObject.hint;
+    final tooltip = semanticsObject.hasTooltip ? semanticsObject.tooltip : null;
+    if (hint != null && tooltip != null && hint.trim().isNotEmpty && tooltip.trim().isNotEmpty) {
+      return '$hint $tooltip';
+    }
+    if (hint != null && hint.trim().isNotEmpty) return hint;
+    if (tooltip != null && tooltip.trim().isNotEmpty) return tooltip;
+    return null;
   }
 
-  void _cleanUpDom() {
-    _representation?.cleanUp();
+  void _ensureDescribedBy(String description) {
+    if (_describedById == null) {
+      _describedById = 'flt-hint-${semanticsObject.id}';
+    }
+    if (_describedBySpan == null) {
+      _describedBySpan = domDocument.createElement('span');
+      _describedBySpan!.id = _describedById!;
+      _describedBySpan!.setAttribute('hidden', '');
+    }
+    _describedBySpan!.text = description;
+    // Attach as a child of the semantics element, not document.body
+    if (_describedBySpan!.parentNode != owner.element) {
+      owner.element.append(_describedBySpan!);
+    }
+  }
+
+  void _removeDescribedBy() {
+    if (_describedBySpan != null) {
+      _describedBySpan!.remove();
+      _describedBySpan = null;
+    }
+    if (_describedById != null) {
+      owner.removeAttribute('aria-describedby');
+      _describedById = null;
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    _cleanUpDom();
+    _removeDescribedBy();
   }
 
   /// Moves the focus to the element that carries the semantic label.
@@ -514,39 +552,9 @@ class LabelAndValue extends SemanticBehavior {
   /// such as the title of a dialog. This method handles that situation.
   /// Different label representations use different DOM structures, so the
   /// actual work is delegated to [LabelRepresentationBehavior].
+  @override
   void focusAsRouteDefault() {
-    _getEffectiveRepresentation().focusAsRouteDefault();
+    // Focus the main element directly, since all ARIA attributes are on it.
+    owner.element.focusWithoutScroll();
   }
-}
-
-String? computeDomSemanticsLabel({String? tooltip, String? label, String? hint, String? value}) {
-  final String? labelHintValue = _computeLabelHintValue(label: label, hint: hint, value: value);
-
-  if (tooltip == null && labelHintValue == null) {
-    return null;
-  }
-
-  final StringBuffer combinedValue = StringBuffer();
-  if (tooltip != null) {
-    combinedValue.write(tooltip);
-
-    // Separate the tooltip from the rest via a line-break (if the rest exists).
-    if (labelHintValue != null) {
-      combinedValue.writeln();
-    }
-  }
-
-  if (labelHintValue != null) {
-    combinedValue.write(labelHintValue);
-  }
-
-  return combinedValue.isNotEmpty ? combinedValue.toString() : null;
-}
-
-String? _computeLabelHintValue({String? label, String? hint, String? value}) {
-  final String combinedValue = <String?>[label, hint, value]
-      .whereType<String>() // poor man's null filter
-      .where((String element) => element.trim().isNotEmpty)
-      .join(' ');
-  return combinedValue.isNotEmpty ? combinedValue : null;
 }
