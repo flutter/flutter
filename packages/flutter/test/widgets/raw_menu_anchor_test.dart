@@ -1729,43 +1729,26 @@ void main() {
     );
   });
 
-  testWidgets('Menu closes on view size change', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
-    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
-
+   testWidgets('Menu closes on view size change', (WidgetTester tester) async {
     bool opened = false;
     bool closed = false;
 
-    Widget build(Size size) {
-      return MediaQuery(
-        data: mediaQueryData.copyWith(size: size),
-        child: App(
-          SingleChildScrollView(
-            controller: scrollController,
-            child: Container(
-              height: 1000,
-              alignment: Alignment.center,
-              child: Menu(
-                onOpen: () {
-                  opened = true;
-                  closed = false;
-                },
-                onClose: () {
-                  opened = false;
-                  closed = true;
-                },
-                controller: controller,
-                menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
-                child: const AnchorButton(Tag.anchor),
-              ),
-            ),
-          ),
+    await tester.pumpWidget(App(
+        Menu(
+          onOpen: () {
+            opened = controller.isOpen;
+            closed = !controller.isOpen;
+          },
+          onClose: () {
+            opened = controller.isOpen;
+            closed = !controller.isOpen;
+          },
+          controller: controller,
+          menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+          child: const AnchorButton(Tag.anchor),
         ),
-      );
-    }
+      ),);
 
-    await tester.pumpWidget(build(mediaQueryData.size));
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
@@ -1774,7 +1757,6 @@ void main() {
 
     const Size smallSize = Size(200, 200);
     await changeSurfaceSize(tester, smallSize);
-    await tester.pumpWidget(build(smallSize));
 
     expect(opened, isFalse);
     expect(closed, isTrue);

@@ -9,15 +9,14 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
-import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
@@ -285,7 +284,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   final List<_RawMenuAnchorBaseMixin> _anchorChildren = <_RawMenuAnchorBaseMixin>[];
   _RawMenuAnchorBaseMixin? _parent;
   ScrollPosition? _scrollPosition;
-  Size? _viewSize;
 
   /// Whether this [_RawMenuAnchorBaseMixin] is the top node of the menu tree.
   @protected
@@ -334,12 +332,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
     _scrollPosition = Scrollable.maybeOf(context)?.position;
     _scrollPosition?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.sizeOf(context);
-    if (_viewSize != null && newSize != _viewSize) {
-      // Close the menus if the view changes size.
-      root.close();
-    }
-    _viewSize = newSize;
   }
 
   @override
@@ -383,17 +375,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 
   void _childChangedOpenState() {
     _parent?._childChangedOpenState();
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      setState(() {
-        // Mark dirty now, but only if not in a build.
-      });
-    } else {
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-        setState(() {
-          // Mark dirty
-        });
-      });
-    }
+    setState(() {
+      // Mark dirty to rebuild on child updates.
+    });
   }
 
   /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
@@ -453,11 +437,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   String toString({DiagnosticLevel? minLevel}) => describeIdentity(this);
 }
 
-class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMixin<RawMenuAnchor> {
-  // This is the global key that is used later to determine the bounding rect
-  // for the anchor's region that the CustomSingleChildLayout's delegate
-  // uses to determine where to place the menu on the screen and to avoid the
-  // view's edges.
+class _RawMenuAnchorState extends State<RawMenuAnchor>
+    with _RawMenuAnchorBaseMixin<RawMenuAnchor>, WidgetsBindingObserver {
+  // The global key used to determine the bounding rect for the anchor.
   final GlobalKey _anchorKey = GlobalKey<_RawMenuAnchorState>(
     debugLabel: kReleaseMode ? null : 'MenuAnchor',
   );
@@ -486,12 +468,33 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   MenuController get menuController => widget.controller;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void didUpdateWidget(RawMenuAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller._detach(this);
       widget.controller._attach(this);
     }
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    // Close the root menu if the screen size changes
+    if (isRoot) {
+      root.close();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -524,11 +527,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
 
     widget.onOpen?.call();
-    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      setState(() {
-        // Mark dirty to notify MenuController dependents.
-      });
-    }
+    setState(() {
+      // Mark dirty to notify MenuController dependents.
+    });
   }
 
   // Close the menu.
@@ -543,26 +544,16 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
 
     closeChildren(inDispose: inDispose);
-    // Don't hide if we're in the middle of a build.
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      _overlayController.hide();
-    } else if (!inDispose) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _overlayController.hide();
-      }, debugLabel: 'MenuAnchor.hide');
-    }
+    _overlayController.hide();
 
     if (!inDispose) {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.
       _parent?._childChangedOpenState();
       widget.onClose?.call();
-      if (mounted &&
-          SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        setState(() {
-          // Mark dirty, but only if mounted and not in a build.
-        });
-      }
+      setState(() {
+        // Mark dirty to notify MenuController dependents.
+      });
     }
   }
 
@@ -705,7 +696,7 @@ class RawMenuAnchorGroup extends StatefulWidget {
 }
 
 class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
-    with _RawMenuAnchorBaseMixin<RawMenuAnchorGroup> {
+    with _RawMenuAnchorBaseMixin<RawMenuAnchorGroup>, WidgetsBindingObserver {
   @override
   bool get isOpen => _anchorChildren.any((_RawMenuAnchorBaseMixin child) => child.isOpen);
 
@@ -722,27 +713,33 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    // Close the root menu if the screen size changes
+    if (isRoot) {
+      root.close();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   void close({bool inDispose = false}) {
     if (!isOpen) {
       return;
     }
 
     closeChildren(inDispose: inDispose);
-    if (!inDispose) {
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        setState(() {
-          // Mark dirty, but only if mounted and not in a build.
-        });
-      } else {
-        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-          if (mounted) {
-            setState(() {
-              // Mark dirty.
-            });
-          }
-        });
-      }
-    }
   }
 
   @override
