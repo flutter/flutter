@@ -5,18 +5,17 @@
 #include "flutter/lib/ui/painting/paint.h"
 
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
-#include "third_party/skia/include/core/SkString.h"
-#include "third_party/tonic/typed_data/dart_byte_data.h"
-#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
@@ -61,9 +60,10 @@ constexpr float kStrokeMiterLimitDefault = 4.0f;
 enum MaskFilterType { kNull, kBlur };
 
 namespace {
-DlColor ReadColor(const tonic::DartByteData& byte_data) {
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
+DlColor ReadColor(const std::vector<uint8_t>& byte_data) {
+  const uint32_t* uint_data =
+      reinterpret_cast<const uint32_t*>(byte_data.data());
+  const float* float_data = reinterpret_cast<const float*>(byte_data.data());
 
   float red = float_data[kColorRedIndex];
   float green = float_data[kColorGreenIndex];
@@ -79,48 +79,38 @@ DlColor ReadColor(const tonic::DartByteData& byte_data) {
 }
 }  // namespace
 
-Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data)
-    : paint_objects_(paint_objects), paint_data_(paint_data) {}
-
-const DlPaint* Paint::paint(DlPaint& paint,
-                            const DisplayListAttributeFlags& flags,
-                            DlTileMode tile_mode) const {
-  if (isNull()) {
+DlPaint* CreatePaint(DlPaint& paint,
+                     const DisplayListAttributeFlags& flags,
+                     DlTileMode tile_mode,
+                     Dart_Handle paint_objects,
+                     bool has_paint_objects,
+                     std::vector<uint8_t>& paint_data) {
+  if (paint_data.empty()) {
     return nullptr;
   }
-  tonic::DartByteData byte_data(paint_data_);
-  FML_CHECK(byte_data.length_in_bytes() == kDataByteCount);
 
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
+  FML_CHECK(paint_data.size() == kDataByteCount);
 
-  Dart_Handle values[kObjectCount];
-  if (Dart_IsNull(paint_objects_)) {
-    if (flags.applies_shader()) {
-      paint.setColorSource(nullptr);
-    }
-    if (flags.applies_color_filter()) {
-      paint.setColorFilter(nullptr);
-    }
-    if (flags.applies_image_filter()) {
-      paint.setImageFilter(nullptr);
-    }
-  } else {
-    FML_DCHECK(Dart_IsList(paint_objects_));
+  const uint32_t* uint_data =
+      reinterpret_cast<const uint32_t*>(paint_data.data());
+  const float* float_data = reinterpret_cast<const float*>(paint_data.data());
+
+  if (has_paint_objects) {
+    Dart_Handle values[kObjectCount];
+
+    FML_DCHECK(Dart_IsList(paint_objects));
     intptr_t length = 0;
-    Dart_ListLength(paint_objects_, &length);
+    Dart_ListLength(paint_objects, &length);
 
     FML_CHECK(length == kObjectCount);
     if (Dart_IsError(
-            Dart_ListGetRange(paint_objects_, 0, kObjectCount, values))) {
+            Dart_ListGetRange(paint_objects, 0, kObjectCount, values))) {
       return nullptr;
     }
 
     if (flags.applies_shader()) {
       Dart_Handle shader = values[kShaderIndex];
-      if (Dart_IsNull(shader)) {
-        paint.setColorSource(nullptr);
-      } else {
+      if (!Dart_IsNull(shader)) {
         if (Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader)) {
           auto sampling =
               ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
@@ -133,9 +123,7 @@ const DlPaint* Paint::paint(DlPaint& paint,
 
     if (flags.applies_color_filter()) {
       Dart_Handle color_filter = values[kColorFilterIndex];
-      if (Dart_IsNull(color_filter)) {
-        paint.setColorFilter(nullptr);
-      } else {
+      if (!Dart_IsNull(color_filter)) {
         ColorFilter* decoded =
             tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
         paint.setColorFilter(decoded->filter());
@@ -144,9 +132,7 @@ const DlPaint* Paint::paint(DlPaint& paint,
 
     if (flags.applies_image_filter()) {
       Dart_Handle image_filter = values[kImageFilterIndex];
-      if (Dart_IsNull(image_filter)) {
-        paint.setImageFilter(nullptr);
-      } else {
+      if (!Dart_IsNull(image_filter)) {
         ImageFilter* decoded =
             tonic::DartConverter<ImageFilter*>::FromDart(image_filter);
         paint.setImageFilter(decoded->filter(tile_mode));
@@ -159,7 +145,7 @@ const DlPaint* Paint::paint(DlPaint& paint,
   }
 
   if (flags.applies_alpha_or_color()) {
-    paint.setColor(ReadColor(byte_data));
+    paint.setColor(ReadColor(paint_data));
   }
 
   if (flags.applies_blend()) {
@@ -193,9 +179,6 @@ const DlPaint* Paint::paint(DlPaint& paint,
 
   if (flags.applies_mask_filter()) {
     switch (uint_data[kMaskFilterIndex]) {
-      case kNull:
-        paint.setMaskFilter(nullptr);
-        break;
       case kBlur:
         DlBlurStyle blur_style =
             static_cast<DlBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
@@ -209,120 +192,4 @@ const DlPaint* Paint::paint(DlPaint& paint,
   return &paint;
 }
 
-void Paint::toDlPaint(DlPaint& paint, DlTileMode tile_mode) const {
-  if (isNull()) {
-    return;
-  }
-  FML_DCHECK(paint == DlPaint());
-
-  tonic::DartByteData byte_data(paint_data_);
-  FML_CHECK(byte_data.length_in_bytes() == kDataByteCount);
-
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
-
-  Dart_Handle values[kObjectCount];
-  if (!Dart_IsNull(paint_objects_)) {
-    FML_DCHECK(Dart_IsList(paint_objects_));
-    intptr_t length = 0;
-    Dart_ListLength(paint_objects_, &length);
-
-    FML_CHECK(length == kObjectCount);
-    if (Dart_IsError(
-            Dart_ListGetRange(paint_objects_, 0, kObjectCount, values))) {
-      return;
-    }
-
-    Dart_Handle shader = values[kShaderIndex];
-    if (!Dart_IsNull(shader)) {
-      if (Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader)) {
-        auto sampling =
-            ImageFilter::SamplingFromIndex(uint_data[kFilterQualityIndex]);
-        paint.setColorSource(decoded->shader(sampling));
-      }
-    }
-
-    Dart_Handle color_filter = values[kColorFilterIndex];
-    if (!Dart_IsNull(color_filter)) {
-      ColorFilter* decoded =
-          tonic::DartConverter<ColorFilter*>::FromDart(color_filter);
-      paint.setColorFilter(decoded->filter());
-    }
-
-    Dart_Handle image_filter = values[kImageFilterIndex];
-    if (!Dart_IsNull(image_filter)) {
-      ImageFilter* decoded =
-          tonic::DartConverter<ImageFilter*>::FromDart(image_filter);
-      paint.setImageFilter(decoded->filter(tile_mode));
-    }
-  }
-
-  paint.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
-
-  paint.setColor(ReadColor(byte_data));
-
-  uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
-  uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
-  paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
-
-  uint32_t style = uint_data[kStyleIndex];
-  paint.setDrawStyle(static_cast<DlDrawStyle>(style));
-
-  float stroke_width = float_data[kStrokeWidthIndex];
-  paint.setStrokeWidth(stroke_width);
-
-  float stroke_miter_limit = float_data[kStrokeMiterLimitIndex];
-  paint.setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
-
-  uint32_t stroke_cap = uint_data[kStrokeCapIndex];
-  paint.setStrokeCap(static_cast<DlStrokeCap>(stroke_cap));
-
-  uint32_t stroke_join = uint_data[kStrokeJoinIndex];
-  paint.setStrokeJoin(static_cast<DlStrokeJoin>(stroke_join));
-
-  paint.setInvertColors(uint_data[kInvertColorIndex] != 0);
-
-  switch (uint_data[kMaskFilterIndex]) {
-    case kNull:
-      break;
-    case kBlur:
-      DlBlurStyle blur_style =
-          static_cast<DlBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
-      float sigma = SafeNarrow(float_data[kMaskFilterSigmaIndex]);
-      // Make could return a nullptr here if the values are NOP or
-      // do not make sense. We could interpret that as if there was
-      // no value passed from Dart at all (i.e. don't change the
-      // setting in the paint object as in the kNull branch right
-      // above here), but the maskfilter flag was actually set
-      // indicating that the developer "tried" to set a mask, so we
-      // should set the null value rather than do nothing.
-      paint.setMaskFilter(DlBlurMaskFilter::Make(blur_style, sigma));
-      break;
-  }
-}
-
 }  // namespace flutter
-
-namespace tonic {
-
-flutter::Paint DartConverter<flutter::Paint>::FromArguments(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  Dart_Handle paint_objects = Dart_GetNativeArgument(args, index);
-  FML_DCHECK(!CheckAndHandleError(paint_objects));
-
-  Dart_Handle paint_data = Dart_GetNativeArgument(args, index + 1);
-  FML_DCHECK(!CheckAndHandleError(paint_data));
-
-  return flutter::Paint(paint_objects, paint_data);
-}
-
-flutter::PaintData DartConverter<flutter::PaintData>::FromArguments(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  return flutter::PaintData();
-}
-
-}  // namespace tonic

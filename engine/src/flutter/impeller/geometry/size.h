@@ -53,6 +53,10 @@ struct TSize {
     return {width * scale, height * scale};
   }
 
+  constexpr TSize Scale(Scalar scale_width, Scalar scale_height) const {
+    return {width * scale_width, height * scale_height};
+  }
+
   template <class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
   inline TSize operator*=(U scale) {
     width *= static_cast<Type>(scale);

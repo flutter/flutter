@@ -485,6 +485,18 @@ struct TRect {
     FML_UNREACHABLE();
   }
 
+  /// @brief  Creates a new bounding box that contains this transformed
+  ///          rectangle.
+  ///
+  /// [transform] must be a translate-scale only matrix.
+  [[nodiscard]] constexpr TRect TransformBoundsTranslateScale(
+      const Matrix& transform) const {
+    return TRect::MakeOriginSize(
+        GetOrigin() + TPoint<float>(transform.m[12], transform.m[13]),  //
+        GetSize().Scale(transform.m[0], transform.m[5])                 //
+    );
+  }
+
   /// @brief  Constructs a Matrix that will map all points in the coordinate
   ///         space of the rectangle into a new normalized coordinate space
   ///         where the upper left corner of the rectangle maps to (0, 0)
@@ -541,6 +553,15 @@ struct TRect {
     } else {
       return std::nullopt;
     }
+  }
+
+  [[nodiscard]] constexpr TRect FastIntersection(const TRect& o) const {
+    return TRect{
+        std::max(left_, o.left_),
+        std::max(top_, o.top_),
+        std::min(right_, o.right_),
+        std::min(bottom_, o.bottom_),
+    };
   }
 
   [[nodiscard]] constexpr TRect IntersectionOrEmpty(const TRect& o) const {
