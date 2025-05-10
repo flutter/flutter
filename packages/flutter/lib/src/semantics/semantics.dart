@@ -1303,6 +1303,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.controlsNodes,
     this.inputType,
     this.validationResult = SemanticsValidationResult.none,
+    this.isOverlayPortal,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -2179,6 +2180,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsInputType? inputType;
 
+  final bool? isOverlayPortal;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -2187,6 +2190,9 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<bool>('isOverlayPortal', isOverlayPortal, defaultValue: null),
+    );
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
@@ -5717,6 +5723,12 @@ class SemanticsConfiguration {
   set isRequired(bool? value) {
     _setFlag(SemanticsFlag.hasRequiredState, true);
     _setFlag(SemanticsFlag.isRequired, value!);
+  }
+
+  bool? get isOverlayPortal => _isOverlayPortal;
+  bool? _isOverlayPortal = false;
+  set isOverlayPortal(bool? value) {
+    _isOverlayPortal = value;
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts

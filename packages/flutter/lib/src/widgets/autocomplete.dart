@@ -547,7 +547,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
     );
     return Semantics(
-      label: 'OverlayPortal',
+      isOverlayPortal: true,
       child: Transform(
         transform: transform,
         child: Align(
