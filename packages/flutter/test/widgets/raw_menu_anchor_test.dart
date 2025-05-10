@@ -1734,7 +1734,8 @@ void main() {
     bool opened = false;
     bool closed = false;
 
-    await tester.pumpWidget(App(
+    await tester.pumpWidget(
+      App(
         Menu(
           onOpen: () {
             opened = controller.isOpen;
@@ -1755,7 +1756,8 @@ void main() {
           menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
           child: const AnchorButton(Tag.anchor),
         ),
-      ),);
+      ),
+    );
 
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
