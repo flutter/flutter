@@ -78,8 +78,17 @@ mixin CompositionAwareMixin {
       return editingState;
     }
 
-    final int composingBase = editingState.extentOffset - composingText!.length;
+    final int textLength = editingState.extentOffset - editingState.baseOffset;
+    final int composingTextLength = composingText!.length;
+    if (textLength < composingTextLength) {
+      // A workaround for Japanese IME. The case where the selected text is partially selected.
+      return editingState.copyWith(
+        composingBaseOffset: editingState.baseOffset,
+        composingExtentOffset: editingState.extentOffset,
+      );
+    }
 
+    final int composingBase = editingState.extentOffset - composingText!.length;
     if (composingBase < 0) {
       return editingState;
     }

@@ -2864,4 +2864,116 @@ void main() {
       );
     });
   }, skip: !kIsWeb); // [intended] specific tests target web.
+
+  group(
+    'Web does not accept',
+    () {
+      testWidgets('character modifier + arrowLeft in compposing', (WidgetTester tester) async {
+        const SingleActivator arrowLeft = SingleActivator(
+          LogicalKeyboardKey.arrowLeft,
+          shift: true,
+        );
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowLeft);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowLeft.toString(),
+        );
+      });
+
+      testWidgets('character modifier + arrowRight in compposing', (WidgetTester tester) async {
+        const SingleActivator arrowRight = SingleActivator(
+          LogicalKeyboardKey.arrowLeft,
+          shift: true,
+        );
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowRight);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowRight.toString(),
+        );
+      });
+
+      testWidgets('character modifier + arrowUp in compposing', (WidgetTester tester) async {
+        const SingleActivator arrowUp = SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowUp);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowUp.toString(),
+        );
+      });
+
+      testWidgets('character modifier + arrowDown in compposing', (WidgetTester tester) async {
+        const SingleActivator arrowDown = SingleActivator(
+          LogicalKeyboardKey.arrowDown,
+          shift: true,
+        );
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, arrowDown);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: arrowDown.toString(),
+        );
+      });
+    },
+
+    skip: !kIsWeb, // [intended] specific tests target web.
+  );
 }
