@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart'
     show
         DragStartBehavior,
         PointerDeviceKind,
+        debugPrintGestureArenaDiagnostics,
         kDoubleTapTimeout,
         kLongPressTimeout,
         kSecondaryMouseButton;
@@ -4880,6 +4881,134 @@ void main() {
       expect(controller.selection.extentOffset, 2);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'Can only drag one handle at a time on iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              style: const TextStyle(fontSize: 10.0),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on 'e' to select 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 7);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Drag the end handle to the end of the text.
+      final Offset endHandlePos = endpoints[1].point;
+      Offset newHandlePos = textOffsetToPosition(tester, 11); // Position of 'i'.
+      final TestGesture endHandleGesture = await tester.startGesture(endHandlePos, pointer: 7);
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+
+      // Attempt to drag the start handle to the start of the text.
+      final Offset startHandlePos = endpoints[0].point;
+      newHandlePos = textOffsetToPosition(tester, 0);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos, pointer: 8);
+      await tester.pump();
+      await startHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await startHandleGesture.up();
+      await endHandleGesture.up();
+      await tester.pump();
+
+      // The start handle does not cause the selection to change.
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'Can drag both selection handles at a time on Android',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              style: const TextStyle(fontSize: 10.0),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on 'e' to select 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Drag the end handle to the end of the text.
+      final Offset endHandlePos = endpoints[1].point;
+      Offset newHandlePos = textOffsetToPosition(tester, 11); // Position of 'i'.
+      final TestGesture endHandleGesture = await tester.startGesture(endHandlePos, pointer: 7);
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+
+      // Attempt to drag the start handle to the start of the text.
+      final Offset startHandlePos = endpoints[0].point;
+      newHandlePos = textOffsetToPosition(tester, 0);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos, pointer: 8);
+      await tester.pump();
+      await startHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await startHandleGesture.up();
+      await endHandleGesture.up();
+      await tester.pump();
+
+      // Moving the start handle changes the selection.
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
   testWidgets(
