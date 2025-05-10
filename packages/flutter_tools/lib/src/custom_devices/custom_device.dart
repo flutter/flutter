@@ -682,7 +682,7 @@ class CustomDevice extends Device {
 
   @override
   FutureOr<bool> supportsRuntimeMode(BuildMode buildMode) {
-    return buildMode == BuildMode.debug;
+    return true;
   }
 
   @override
@@ -714,7 +714,7 @@ class CustomDevice extends Device {
     };
 
     if (!prebuiltApplication) {
-      final String assetBundleDir = getAssetBuildDirectory();
+      final String outputDirPath = getBuildDirectory();
 
       bundleBuilder ??= BundleBuilder();
 
@@ -724,7 +724,8 @@ class CustomDevice extends Device {
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
-        assetDirPath: assetBundleDir,
+        outputDirPath: outputDirPath,
+        buildAOTAssets: true,
       );
 
       // if we have a post build step (needed for some embedders), execute it
@@ -735,7 +736,7 @@ class CustomDevice extends Device {
         }
         await _tryPostBuild(
           appName: packageName,
-          localPath: assetBundleDir,
+          localPath: outputDirPath,
           additionalReplacementValues: additionalReplacementValues,
         );
       }
