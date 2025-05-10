@@ -4835,6 +4835,7 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/168048
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
