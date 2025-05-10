@@ -70,8 +70,10 @@ On Cocoon (Flutter's internal CI/CD) we _often_ set
 > ./bin/internal/last_engine_commit.sh > ./bin/internal/engine.version
 > ```
 >
-> At the moment this needs to be manually done, and manually verified, before
-> making a release. See [#168273](https://github.com/flutter/flutter/issues/168273).
+> For release candidates that branch from [`flutter/recipes`](https://flutter.googlesource.com/recipes)
+> as of [`b0ccfb53801abc9b0aa93e7cca3a3841513c3086`](https://flutter.googlesource.com/recipes/+/b0ccfb53801abc9b0aa93e7cca3a3841513c3086) (May 6 2025), the packaging release process will refuse to let you publish a
+> release with an out of date `engine.version`. For older releases, validation
+> must be done manually.
 
 [^1]: Release candidates do not use a merge queue.
 
