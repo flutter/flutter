@@ -188,6 +188,16 @@ TaskFunction dartDefinesTask() {
   ).call;
 }
 
+TaskFunction featureFlagsTask() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/feature_flags.dart',
+    // TODO(loic-sharma): Turn on a framework feature flag once one exists.
+    // https://github.com/flutter/flutter/issues/167668
+    environment: const <String, String>{},
+  ).call;
+}
+
 TaskFunction createEndToEndIntegrationTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
