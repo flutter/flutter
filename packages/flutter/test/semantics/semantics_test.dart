@@ -733,7 +733,9 @@ void main() {
       '   indexInParent: null\n'
       '   elevation: 0.0\n'
       '   thickness: 0.0\n'
-      '   headingLevel: 0\n',
+      '   headingLevel: 0\n'
+      '   minValue: null\n'
+      '   maxValue: null\n',
     );
 
     final SemanticsConfiguration config =
@@ -869,7 +871,9 @@ void main() {
       '   indexInParent: null\n'
       '   elevation: 0.0\n'
       '   thickness: 0.0\n'
-      '   headingLevel: 0\n',
+      '   headingLevel: 0\n'
+      '   minValue: null\n'
+      '   maxValue: null\n',
     );
   });
 
