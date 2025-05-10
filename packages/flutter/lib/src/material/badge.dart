@@ -174,10 +174,15 @@ class Badge extends StatelessWidget {
       return child ?? const SizedBox();
     }
 
+    final ThemeData theme = Theme.of(context);
     final BadgeThemeData badgeTheme = BadgeTheme.of(context);
     final BadgeThemeData defaults = _BadgeDefaultsM3(context);
     final Decoration effectiveDecoration = ShapeDecoration(
-      color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
+      color:
+          backgroundColor ??
+          badgeTheme.backgroundColor ??
+          theme.badgeTheme.backgroundColor ??
+          defaults.backgroundColor!,
       shape: const StadiumBorder(),
     );
     final double effectiveWidthOffset;
@@ -185,17 +190,29 @@ class Badge extends StatelessWidget {
     final bool hasLabel = label != null;
     if (hasLabel) {
       final double minSize =
-          effectiveWidthOffset = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
+          effectiveWidthOffset =
+              largeSize ??
+              badgeTheme.largeSize ??
+              theme.badgeTheme.largeSize ??
+              defaults.largeSize!;
       badge = DefaultTextStyle(
-        style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
-          color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
-        ),
+        style: (textStyle ??
+                badgeTheme.textStyle ??
+                theme.badgeTheme.textStyle ??
+                defaults.textStyle!)
+            .copyWith(
+              color:
+                  textColor ??
+                  badgeTheme.textColor ??
+                  theme.badgeTheme.textColor ??
+                  defaults.textColor!,
+            ),
         child: _IntrinsicHorizontalStadium(
           minSize: minSize,
           child: Container(
             clipBehavior: Clip.antiAlias,
             decoration: effectiveDecoration,
-            padding: padding ?? badgeTheme.padding ?? defaults.padding!,
+            padding: padding ?? badgeTheme.padding ?? theme.badgeTheme.padding ?? defaults.padding!,
             alignment: Alignment.center,
             child: label,
           ),
@@ -203,7 +220,11 @@ class Badge extends StatelessWidget {
       );
     } else {
       final double effectiveSmallSize =
-          effectiveWidthOffset = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
+          effectiveWidthOffset =
+              smallSize ??
+              badgeTheme.smallSize ??
+              theme.badgeTheme.smallSize ??
+              defaults.smallSize!;
       badge = Container(
         width: effectiveSmallSize,
         height: effectiveSmallSize,
@@ -217,7 +238,7 @@ class Badge extends StatelessWidget {
     }
 
     final AlignmentGeometry effectiveAlignment =
-        alignment ?? badgeTheme.alignment ?? defaults.alignment!;
+        alignment ?? badgeTheme.alignment ?? theme.badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
     final Offset defaultOffset =
         textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
@@ -225,7 +246,8 @@ class Badge extends StatelessWidget {
     // the offset calculation changes.
     // See https://github.com/flutter/flutter/pull/146853.
     final Offset effectiveOffset =
-        (offset ?? badgeTheme.offset ?? defaultOffset) + const Offset(0, 8);
+        (offset ?? badgeTheme.offset ?? theme.badgeTheme.offset ?? defaultOffset) +
+        const Offset(0, 8);
 
     return Stack(
       clipBehavior: Clip.none,
