@@ -865,9 +865,6 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
-
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false) &&
         (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
