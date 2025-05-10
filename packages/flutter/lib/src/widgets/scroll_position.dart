@@ -30,6 +30,7 @@ import 'scroll_context.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'scrollable.dart';
 
 export 'scroll_activity.dart' show ScrollHoldController;
 
@@ -805,6 +806,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// [RenderObject.paintBounds]) will be as visible as possible. If
   /// `targetRenderObject` is provided, it must be a descendant of the object.
   ///
+  /// When encountering multiple layers of ScrollViews and calling `ensureVisible`
+  /// from the innermost to the outermost (e.g., `Scrollable.ensureVisible`),
+  /// `previousScrollable` represents the `ScrollableState` of the previously
+  /// invoked Scrollable. `NestedScrollView` uses `previousScrollable` to ensure
+  /// that its `ensureVisible` can obtain the correct position.
+  ///
   /// See also:
   ///
   ///  * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
@@ -816,6 +823,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
   }) async {
     assert(object.attached);
     final RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(object);
