@@ -563,6 +563,7 @@ void main() {
     await tester.tap(find.text('Push Page 2'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
 
@@ -579,13 +580,16 @@ void main() {
     await tester.tap(find.text('Push Page 3'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
     expect(find.text('Page 3'), findsOneWidget);
 
     // Simulate a system back gesture.
     await simulateSystemBack();
     await tester.pumpAndSettle();
 
-    // Go back to the first page within the sheet.
+    // Went back to the first page within the sheet (Page 2).
+    expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
 
@@ -604,6 +608,8 @@ void main() {
 
     // The first page would correctly transition back and sit at the top of the screen.
     expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 3'), findsNothing);
     expect(
       tester
           .getTopLeft(
@@ -612,7 +618,6 @@ void main() {
           .dy,
       equals(0.0),
     );
-    expect(find.text('Page 2'), findsNothing);
   });
 
   testWidgets('sheet has route settings', (WidgetTester tester) async {

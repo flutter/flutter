@@ -143,37 +143,30 @@ Future<T?> showCupertinoSheet<T>({
   bool enableDrag = true,
 }) {
   final WidgetBuilder builder;
-  final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
     builder = pageBuilder;
   } else {
     builder = (BuildContext context) {
-      return NavigatorPopHandler(
-        onPopWithResult: (T? result) {
-          nestedNavigatorKey.currentState!.maybePop();
+      return Navigator(
+        initialRoute: '/',
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
+          return <Route<void>>[
+            CupertinoPageRoute<void>(
+              builder: (BuildContext context) {
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (didPop) {
+                      return;
+                    }
+                    Navigator.of(context, rootNavigator: true).pop(result);
+                  },
+                  child: pageBuilder(context),
+                );
+              },
+            ),
+          ];
         },
-        child: Navigator(
-          key: nestedNavigatorKey,
-          initialRoute: '/',
-          onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
-            return <Route<void>>[
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return PopScope(
-                    canPop: false,
-                    onPopInvokedWithResult: (bool didPop, Object? result) {
-                      if (didPop) {
-                        return;
-                      }
-                      Navigator.of(context, rootNavigator: true).pop(result);
-                    },
-                    child: pageBuilder(context),
-                  );
-                },
-              ),
-            ];
-          },
-        ),
       );
     };
   }
