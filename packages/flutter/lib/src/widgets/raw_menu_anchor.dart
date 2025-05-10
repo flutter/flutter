@@ -577,7 +577,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// Unless the menu needs to be closed immediately, [handleCloseRequest] should be
   /// called instead of [close]. Doing so allows subclasses to control how the
-  /// menu is opened.
+  /// menu is closed.
   @protected
   void close({bool inDispose = false});
 
