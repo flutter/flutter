@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../localizations/gen_l10n.dart';
+library;
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -183,7 +186,7 @@ abstract class Pub {
 
   /// Runs pub in 'interactive' mode.
   ///
-  /// This will run the pub process with StdioInherited (unless [_stdio] is set
+  /// This will run the pub process with StdioInherited (unless `stdio` is set
   /// for testing).
   ///
   /// The pub process will be run in current working directory, so `--directory`
@@ -399,11 +402,11 @@ class _DefaultPub implements Pub {
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
-  /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
+  /// Uses [ProcessStartMode.normal] and [_stdio] if [Pub.test] constructor
   /// was used.
   ///
   /// Prints the stdout and stderr of the whole run, unless silenced using
-  /// [printProgress].
+  /// [outputMode].
   ///
   /// Sends an analytics event.
   Future<void> _runWithStdioInherited(
@@ -667,10 +670,10 @@ class _DefaultPub implements Pub {
     return null;
   }
 
-  /// Load any package-files stored in FLUTTER_ROOT/.pub-preload-cache into the
-  /// pub cache if it exists.
+  /// Load any package-files stored in `FLUTTER_ROOT/.pub-preload-cache` into
+  /// the pub cache if it exists.
   ///
-  /// Deletes the [preloadCacheDir].
+  /// Deletes the `.pub-preload-cache` directory.
   void _preloadPubCache() {
     final String flutterRootPath = Cache.flutterRoot!;
     final Directory flutterRoot = _fileSystem.directory(flutterRootPath);
@@ -712,8 +715,8 @@ class _DefaultPub implements Pub {
   /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
   ///
-  /// Calls [_updatePackageConfig] for [project] and [project.example] (if it
-  /// exists).
+  /// Calls [_updatePackageConfig] for [project] and [FlutterProject.example]
+  /// (if it exists).
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
@@ -756,7 +759,7 @@ class _DefaultPub implements Pub {
   /// pubspec.yaml
   ///
   /// For more information, see:
-  ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
+  ///   * [generateLocalizations]
   Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,

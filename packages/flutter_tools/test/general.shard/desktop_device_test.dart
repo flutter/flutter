@@ -431,10 +431,10 @@ class FakeDesktopDevice extends DesktopDevice {
          operatingSystemUtils: operatingSystemUtils,
        );
 
-  /// The [mainPath] last passed to [buildForDevice].
+  /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;
 
-  /// The [buildInfo] last passed to [buildForDevice].
+  /// The `buildInfo` last passed to [buildForDevice].
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;

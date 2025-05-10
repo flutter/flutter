@@ -173,7 +173,7 @@ abstract class FlutterVersion {
   /// The _exception_ is the _engine artifacts_, which are downloaded separately as [engineRevision].
   String get frameworkRevision;
 
-  /// The shorter Git commit SHA of [frameworkRevion].
+  /// The shorter Git commit SHA of [frameworkRevision].
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
   String get frameworkVersion;
 
@@ -305,9 +305,10 @@ abstract class FlutterVersion {
   /// Gets the release date of the latest available Flutter version.
   ///
   /// This method sends a server request if it's been more than
-  /// [checkAgeConsideredUpToDate] since the last version check.
+  /// [VersionFreshnessValidator.checkAgeConsideredUpToDate] since
+  /// the last version check.
   ///
-  /// Returns null if the cached version is out-of-date or missing, and we are
+  /// Returns `null` if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
   Future<DateTime?> _getLatestAvailableFlutterDate() async {
     globals.cache.checkLockAcquired();
