@@ -1289,6 +1289,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
+    this.emptyBuilder,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1364,6 +1365,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
+    this.emptyBuilder,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
@@ -1455,6 +1457,7 @@ class ListView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
+    this.emptyBuilder,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
@@ -1514,6 +1517,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.prototypeItem,
     this.itemExtentBuilder,
+    this.emptyBuilder,
     required this.childrenDelegate,
     super.cacheExtent,
     super.semanticChildCount,
@@ -1609,8 +1613,31 @@ class ListView extends BoxScrollView {
   /// respectively.
   final SliverChildDelegate childrenDelegate;
 
+  /// A builder that provides a widget to be displayed when the [ListView] is empty.
+  ///
+  /// If the list contains no items (`itemCount == 0` or `children` is empty),
+  /// this builder will be used to render a placeholder widget instead of an empty space.
+  ///
+  /// If `emptyBuilder` is `null`, an empty list will be rendered without any placeholder.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// ListView(
+  ///   children: [],
+  ///   emptyBuilder: (context) => SizedBox(height: MediaQuery.of(context).size.height, child: Center(child: Text("No items found."))),
+  /// );
+  /// ```
+  final WidgetBuilder? emptyBuilder;
+
   @override
   Widget buildChildLayout(BuildContext context) {
+    final delegate = childrenDelegate;
+    final int itemCount = _getItemCount(delegate);
+
+    if (itemCount == 0 && emptyBuilder != null) {
+      return SliverToBoxAdapter(child: emptyBuilder!(context));
+    }
+
     if (itemExtent != null) {
       return SliverFixedExtentList(delegate: childrenDelegate, itemExtent: itemExtent!);
     } else if (itemExtentBuilder != null) {
@@ -1633,6 +1660,22 @@ class ListView extends BoxScrollView {
   // Helper method to compute the actual child count for the separated constructor.
   static int _computeActualChildCount(int itemCount) {
     return math.max(0, itemCount * 2 - 1);
+  }
+
+  /// Returns the number of items in the given [SliverChildDelegate].
+  ///
+  /// - If the delegate is a [SliverChildListDelegate], it returns the length of the children list.
+  /// - If the delegate is a [SliverChildBuilderDelegate], it returns the estimated child count,
+  ///   or 0 if it is not specified.
+  /// - If the delegate type is unknown, it defaults to 0.
+  int _getItemCount(SliverChildDelegate delegate) {
+    if (delegate is SliverChildListDelegate) {
+      return delegate.children.length;
+    }
+    if (delegate is SliverChildBuilderDelegate) {
+      return delegate.estimatedChildCount ?? 0;
+    }
+    return 0;
   }
 }
 
