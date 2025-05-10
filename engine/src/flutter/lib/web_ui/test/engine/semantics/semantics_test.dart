@@ -410,7 +410,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
-    expect(copy.announce, true);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(boldText: true);
