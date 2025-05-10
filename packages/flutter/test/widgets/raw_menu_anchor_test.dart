@@ -1729,7 +1729,8 @@ void main() {
     );
   });
 
-   testWidgets('Menu closes on view size change', (WidgetTester tester) async {
+  testWidgets('Menu closes on view size change', (WidgetTester tester) async {
+    /// Regression test for https://github.com/flutter/flutter/pull/168623
     bool opened = false;
     bool closed = false;
 
@@ -1740,6 +1741,13 @@ void main() {
             closed = !controller.isOpen;
           },
           onClose: () {
+            // Because controller.isOpen is a getter to
+            // OverlayController.isShowing, the value of controller.isOpen does
+            // not reflect whether the menu is open at time onClose() is called.
+            // The means that, if the menu is closed after a post-frame
+            // callback, our test could report that controller.isOpen is true
+            // despite it reporting false during onClose(). As a result, we
+            // store the value of controller.isOpen in a local variable.
             opened = controller.isOpen;
             closed = !controller.isOpen;
           },
