@@ -823,6 +823,33 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
+  testWidgets('Persistent bottom buttons can apply decoration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              child: Container(color: Colors.amber[500], height: 5000.0, child: const Text('body')),
+            ),
+            persistentFooterDecoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: Colors.red)),
+            ),
+            persistentFooterButtons: const <Widget>[Placeholder()],
+          ),
+        ),
+      ),
+    );
+
+    final Finder persistentFooter =
+        find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
+    final Decoration decoration = tester.widget<Container>(persistentFooter).decoration!;
+
+    expect(decoration, isA<BoxDecoration>());
+    expect((decoration as BoxDecoration).border!.top.color, Colors.red);
+  });
+
   group('back arrow', () {
     Future<void> expectBackIcon(WidgetTester tester, IconData expectedIcon) async {
       final GlobalKey rootKey = GlobalKey();
