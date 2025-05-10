@@ -828,6 +828,15 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
     }
   }
 
+  int _activeChildrenCount(TreeSliverNode<T> node) {
+    int activeChildrenCountRecursive = 0;
+    for (final TreeSliverNode<T> childNode in node.children) {
+      activeChildrenCountRecursive +=
+        _activeNodes.contains(childNode) ? 1 + _activeChildrenCount(childNode) : 0;
+    }
+    return activeChildrenCountRecursive;
+  }
+
   void _updateActiveAnimations() {
     // The indexes of various child node animations can change constantly based
     // on more nodes being expanded or collapsed. Compile the indexes and their
@@ -838,7 +847,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
       final int leadingChildIndex = _activeNodes.indexOf(node) + 1;
       final TreeSliverNodesAnimation animatingChildren = (
         fromIndex: leadingChildIndex,
-        toIndex: leadingChildIndex + node.children.length - 1,
+        toIndex: leadingChildIndex + _activeChildrenCount(node) - 1,
         value: animationRecord.animation.value,
       );
       _activeAnimations[animationRecord.key] = animatingChildren;
