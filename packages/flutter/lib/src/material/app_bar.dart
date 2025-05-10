@@ -896,11 +896,7 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
-    final bool useCloseButton = switch (parentRoute) {
-      final PageRoute<dynamic> pageRoute => pageRoute.fullscreenDialog,
-      final RawDialogRoute<dynamic> rawDialogRoute => rawDialogRoute.fullscreenDialog,
-      _ => false,
-    };
+    final bool useCloseButton = parentRoute?.shouldUseAppBarClose ?? false;
 
     final double toolbarHeight =
         widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
