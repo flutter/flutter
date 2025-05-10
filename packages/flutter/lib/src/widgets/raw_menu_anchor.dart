@@ -117,14 +117,71 @@ typedef RawMenuAnchorOverlayBuilder =
 typedef RawMenuAnchorChildBuilder =
     Widget Function(BuildContext context, MenuController controller, Widget? child);
 
+/// Signature for a callback that shows the menu overlay of a [RawMenuAnchor].
+///
+/// This callback will add the menu overlay to the widget tree, and should be
+/// called when the menu should be visible.
+///
+/// If a `position` argument is given, it will be passed to
+/// [RawMenuAnchor.overlayBuilder] using the `info` parameter.
+/// [RawMenuAnchor.overlayBuilder] should use the `position` to offset the menu
+/// relative to the anchor.
+///
+/// This signature is used by the `showOverlay` argument in
+/// [RawMenuAnchorOpenRequestedCallback].
+typedef RawMenuAnchorShowOverlayCallback = void Function({Offset? position});
+
+/// Signature for a callback that hides the menu overlay of a [RawMenuAnchor].
+///
+/// This callback will remove the menu overlay to the widget tree, and should be
+/// called when the menu should not be visible.
+///
+/// This signature is used by the `hideOverlay` parameter in
+/// [RawMenuAnchorCloseRequestedCallback].
+typedef RawMenuAnchorHideOverlayCallback = VoidCallback;
+
 /// Signature for the callback used by [RawMenuAnchor.onOpenRequested] to
-/// respond to a request to open a menu.
+/// respond to a request to open the menu.
+///
+/// {@template flutter.widgets.RawMenuAnchor.onOpenRequested}
+/// Typically, [RawMenuAnchor.onOpenRequested] is triggered when
+/// [MenuController.open] is called in response to a user action, such as a tap
+/// or a keyboard shortcut.
+///
+/// If [MenuController.open] is called with a `position` argument, the argument
+/// will be passed to this callback through the `position` parameter. This value
+/// represents the expected position of the menu overlay in the coordinate space
+/// of the [RawMenuAnchor].
+///
+/// The `showOverlay` callback will add the menu overlay to the widget tree. If
+/// a `position` argument is supplied to `showOverlay`, it will be passed to
+/// [RawMenuAnchor.overlayBuilder] through the `info` parameter.
+/// [RawMenuAnchor.overlayBuilder] should use this `position` to place the menu
+/// in the coordinate space of the [RawMenuAnchor] that this controller is
+/// attached to.
+///
+/// When animating the menu open, `showOverlay` should be called before any
+/// animation begins. This will make the menu immediately interactive, which
+/// allows screen readers to announce the menu items immediately and allows
+/// keyboard focus to be set on the menu items.
+///
+/// On the other hand, if a delay is added before the menu is shown,
+/// `showOverlay` should be called after the delay completes.
+/// {@endtemplate}
 typedef RawMenuAnchorOpenRequestedCallback =
-    void Function(Offset? position, void Function({Offset? position}) showOverlay);
+    void Function(Offset? position, RawMenuAnchorShowOverlayCallback showOverlay);
 
 /// Signature for the callback used by [RawMenuAnchor.onCloseRequested] to
-/// respond to a request to close a menu.
-typedef RawMenuAnchorCloseRequestedCallback = void Function(VoidCallback hideOverlay);
+/// respond to a request to close the menu.
+///
+/// The `hideOverlay` callback will remove the menu overlay from the widget
+/// tree, and should be called when the menu is ready to be hidden.
+///
+/// When animating the menu closed, `hideOverlay` should be called after the
+/// closing animation ends. Otherwise, the menu won't be visible during the
+/// animation.
+typedef RawMenuAnchorCloseRequestedCallback =
+    void Function(RawMenuAnchorHideOverlayCallback hideOverlay);
 
 // An [InheritedWidget] used to notify anchor descendants when a menu opens
 // and closes, and to pass the anchor's controller to descendants.
@@ -198,8 +255,8 @@ class RawMenuAnchor extends StatefulWidget {
     this.consumeOutsideTaps = false,
     this.onOpen,
     this.onClose,
-    this.onOpenRequested,
-    this.onCloseRequested,
+    this.onOpenRequested = _defaultOnOpenRequested,
+    this.onCloseRequested = _defaultOnCloseRequested,
     this.useRootOverlay = false,
     this.builder,
     required this.controller,
@@ -342,6 +399,17 @@ class RawMenuAnchor extends StatefulWidget {
   /// A [MenuController] that allows opening and closing of the menu from other
   /// widgets.
   final MenuController controller;
+
+  static void _defaultOnOpenRequested(
+    Offset? position,
+    RawMenuAnchorShowOverlayCallback showOverlay,
+  ) {
+    showOverlay(position: position);
+  }
+
+  static void _defaultOnCloseRequested(RawMenuAnchorHideOverlayCallback hideOverlay) {
+    hideOverlay();
+  }
 
   @override
   State<RawMenuAnchor> createState() => _RawMenuAnchorState();
@@ -688,16 +756,18 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
-    if (widget.onCloseRequested != null) {
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        widget.onCloseRequested!(close);
-      } else {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          widget.onCloseRequested!(close);
-        }, debugLabel: 'MenuAnchor.handleCloseRequest');
-      }
+    // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
+    // didChangeDependencies. When this happens, calling setState during the
+    // closing sequence (i.e. handleCloseRequest -> onCloseRequested ->
+    // hideOverlay) will throw an error, since we're scheduling a build during a
+    // build. We avoid this by checking if we're in a build, and if so, we
+    // schedule the close for the next frame.
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      widget.onCloseRequested!(close);
     } else {
-      close();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        widget.onCloseRequested!(close);
+      }, debugLabel: 'MenuAnchor.handleCloseRequest');
     }
   }
 
@@ -886,7 +956,6 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
     // Menu nodes are always open, so this is a no-op.
     return;
   }
-
 
   @override
   void handleCloseRequest() {
