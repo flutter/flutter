@@ -100,7 +100,7 @@ class SegmentedButtonThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [SegmentedButton] properties that are not
 /// given an explicit non-null value.
-class SegmentedButtonTheme extends InheritedTheme {
+class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData> {
   /// Creates a [SegmentedButtonTheme] that controls visual parameters for
   /// descendent [SegmentedButton]s.
   const SegmentedButtonTheme({super.key, required this.data, required super.child});
@@ -140,6 +140,16 @@ class SegmentedButtonTheme extends InheritedTheme {
   /// If there is no [SegmentedButtonTheme] in scope, then this function will
   /// return null.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Widget? selectedIcon = SegmentedButtonTheme.selectOf(
+  ///   context,
+  ///   (SegmentedButtonThemeData data) => data.selectedIcon,
+  ///   id: 'data.selectedIcon',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -157,11 +167,28 @@ class SegmentedButtonTheme extends InheritedTheme {
     return context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>()?.data;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [SegmentedButtonTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(SegmentedButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<SegmentedButtonThemeData, T> themeSelector =
+        ModelSelector<SegmentedButtonThemeData, T>.from(selector: selector, id: id);
+    final SegmentedButtonThemeData theme =
+        InheritedModel.inheritFrom<SegmentedButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return SegmentedButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(SegmentedButtonTheme oldWidget) => data != oldWidget.data;
+  SegmentedButtonThemeData get themeData => data;
 }

@@ -330,7 +330,7 @@ class TooltipThemeData with Diagnosticable {
 ///  * [TooltipThemeData], which describes the actual configuration of a
 ///    tooltip theme.
 ///  * [TooltipVisibility], which can be used to visually disable descendant [Tooltip]s.
-class TooltipTheme extends InheritedTheme {
+class TooltipTheme extends InheritedTheme<TooltipThemeData> {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
   const TooltipTheme({super.key, required this.data, required super.child});
@@ -346,6 +346,16 @@ class TooltipTheme extends InheritedTheme {
   /// When a widget uses this method, it is automatically rebuilt if the
   /// tooltip theme later changes, so that the changes can be applied.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final double? height = TooltipTheme.selectOf(
+  ///   context,
+  ///   (TooltipThemeData data) => data.height,
+  ///   id: 'data.height',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -356,13 +366,30 @@ class TooltipTheme extends InheritedTheme {
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [TooltipTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TooltipThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TooltipThemeData, T> themeSelector =
+        ModelSelector<TooltipThemeData, T>.from(selector: selector, id: id);
+    final TooltipThemeData theme =
+        InheritedModel.inheritFrom<TooltipTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TooltipTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
+  TooltipThemeData get themeData => data;
 }
 
 /// The method of interaction that will trigger a tooltip.

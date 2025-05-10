@@ -141,7 +141,7 @@ class TextSelectionThemeData with Diagnosticable {
 ///
 /// This widget also creates a [DefaultSelectionStyle] for its subtree with
 /// [data].
-class TextSelectionTheme extends InheritedTheme {
+class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData> {
   /// Creates a text selection theme widget that specifies the text
   /// selection properties for all widgets below it in the widget tree.
   const TextSelectionTheme({super.key, required this.data, required Widget child})
@@ -171,6 +171,16 @@ class TextSelectionTheme extends InheritedTheme {
   /// there is no ancestor, it returns [ThemeData.textSelectionTheme].
   /// Applications can assume that the returned value will not be null.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? cursorColor = TextSelectionTheme.selectOf(
+  ///   context,
+  ///   (TextSelectionThemeData data) => data.cursorColor,
+  ///   id: 'data.cursorColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -182,13 +192,30 @@ class TextSelectionTheme extends InheritedTheme {
     return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [TextSelectionTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TextSelectionThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TextSelectionThemeData, T> themeSelector =
+        ModelSelector<TextSelectionThemeData, T>.from(selector: selector, id: id);
+    final TextSelectionThemeData theme =
+        InheritedModel.inheritFrom<TextSelectionTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TextSelectionTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TextSelectionTheme oldWidget) => data != oldWidget.data;
+  TextSelectionThemeData get themeData => data;
 }
 
 class _NullWidget extends Widget {

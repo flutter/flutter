@@ -255,7 +255,7 @@ class ToggleButtonsThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [ToggleButtons] properties that are not
 /// given an explicit non-null value.
-class ToggleButtonsTheme extends InheritedTheme {
+class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData> {
   /// Creates a toggle buttons theme that controls the color and border
   /// parameters for [ToggleButtons].
   const ToggleButtonsTheme({super.key, required this.data, required super.child});
@@ -268,6 +268,16 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// If there is no enclosing [ToggleButtonsTheme] widget, then
   /// [ThemeData.toggleButtonsTheme] is used.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? color = ToggleButtonsTheme.selectOf(
+  ///   context,
+  ///   (ToggleButtonsThemeData data) => data.color,
+  ///   id: 'data.color',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -279,11 +289,28 @@ class ToggleButtonsTheme extends InheritedTheme {
     return toggleButtonsTheme?.data ?? Theme.of(context).toggleButtonsTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ToggleButtonsTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ToggleButtonsThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ToggleButtonsThemeData, T> themeSelector =
+        ModelSelector<ToggleButtonsThemeData, T>.from(selector: selector, id: id);
+    final ToggleButtonsThemeData theme =
+        InheritedModel.inheritFrom<ToggleButtonsTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ToggleButtonsTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ToggleButtonsTheme oldWidget) => data != oldWidget.data;
+  ToggleButtonsThemeData get themeData => data;
 }

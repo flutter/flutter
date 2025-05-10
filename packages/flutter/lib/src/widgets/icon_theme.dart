@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'icon_theme_data.dart';
+import 'inherited_model.dart';
 import 'inherited_theme.dart';
 
 // Examples can assume:
@@ -21,7 +22,7 @@ import 'inherited_theme.dart';
 /// Controls the default properties of icons in a widget subtree.
 ///
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.
-class IconTheme extends InheritedTheme {
+class IconTheme extends InheritedTheme<IconThemeData> {
   /// Creates an icon theme that controls properties of descendant widgets.
   const IconTheme({super.key, required this.data, required super.child});
 
@@ -56,6 +57,16 @@ class IconTheme extends InheritedTheme {
   /// application, this will typically default to the icon theme from the
   /// ambient [Theme].
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? color = IconTheme.selectOf(
+  ///   context,
+  ///   (IconThemeData data) => data.color,
+  ///   id: 'data.color',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -84,8 +95,24 @@ class IconTheme extends InheritedTheme {
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
-  @override
-  bool updateShouldNotify(IconTheme oldWidget) => data != oldWidget.data;
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [IconTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(IconThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<IconThemeData, T> themeSelector = ModelSelector<IconThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final IconThemeData theme =
+        InheritedModel.inheritFrom<IconTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
@@ -97,4 +124,7 @@ class IconTheme extends InheritedTheme {
     super.debugFillProperties(properties);
     data.debugFillProperties(properties);
   }
+
+  @override
+  IconThemeData get themeData => data;
 }

@@ -94,7 +94,7 @@ class OutlinedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [OutlinedButton]'s defaults.
 ///  * [ThemeData.outlinedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].
-class OutlinedButtonTheme extends InheritedTheme {
+class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData> {
   /// Create a [OutlinedButtonTheme].
   const OutlinedButtonTheme({super.key, required this.data, required super.child});
 
@@ -105,6 +105,16 @@ class OutlinedButtonTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [OutlinedButtonTheme] widget, then
   /// [ThemeData.outlinedButtonTheme] is used.
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final ButtonStyle? style = OutlinedButtonTheme.selectOf(
+  ///   context,
+  ///   (OutlinedButtonThemeData data) => data.style,
+  ///   id: 'data.style',
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -117,11 +127,28 @@ class OutlinedButtonTheme extends InheritedTheme {
     return buttonTheme?.data ?? Theme.of(context).outlinedButtonTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [OutlinedButtonThemeData]
+  /// in the closest [OutlinedButtonTheme] ancestor of the given [context].
+  ///
+  /// If there is no [OutlinedButtonTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.outlinedButtonTheme] is used.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(OutlinedButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<OutlinedButtonThemeData, T> themeSelector =
+        ModelSelector<OutlinedButtonThemeData, T>.from(selector: selector, id: id);
+    final OutlinedButtonThemeData theme =
+        InheritedModel.inheritFrom<OutlinedButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return OutlinedButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(OutlinedButtonTheme oldWidget) => data != oldWidget.data;
+  OutlinedButtonThemeData get themeData => data;
 }

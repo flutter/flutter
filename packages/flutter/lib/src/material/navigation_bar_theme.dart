@@ -270,7 +270,7 @@ class NavigationBarThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationBarTheme], which describes the
 ///    [NavigationBarThemeData] in the overall theme for the application.
-class NavigationBarTheme extends InheritedTheme {
+class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationBarThemeData] properties for a [NavigationBar].
   const NavigationBarTheme({super.key, required this.data, required super.child});
@@ -284,6 +284,16 @@ class NavigationBarTheme extends InheritedTheme {
   /// If there is no enclosing [NavigationBarTheme] widget, then
   /// [ThemeData.navigationBarTheme] is used.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = NavigationBarTheme.selectOf(
+  ///   context,
+  ///   (NavigationBarThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -295,11 +305,28 @@ class NavigationBarTheme extends InheritedTheme {
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [NavigationBarThemeData]
+  /// in the closest [NavigationBarTheme] ancestor of the given [context].
+  ///
+  /// If there is no [NavigationBarTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.navigationBarTheme] is used.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(NavigationBarThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<NavigationBarThemeData, T> themeSelector =
+        ModelSelector<NavigationBarThemeData, T>.from(selector: selector, id: id);
+    final NavigationBarThemeData theme =
+        InheritedModel.inheritFrom<NavigationBarTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return NavigationBarTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
+  NavigationBarThemeData get themeData => data;
 }

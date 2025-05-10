@@ -28,7 +28,7 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
-class DialogTheme extends InheritedTheme with Diagnosticable {
+class DialogTheme extends InheritedTheme<DialogThemeData> with Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
   const DialogTheme({
     super.key,
@@ -193,18 +193,37 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
   }
 
   /// The [ThemeData.dialogTheme] property of the ambient [Theme].
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes.
   static DialogThemeData of(BuildContext context) {
     final DialogTheme? dialogTheme = context.dependOnInheritedWidgetOfExactType<DialogTheme>();
     return dialogTheme?.data ?? Theme.of(context).dialogTheme;
+  }
+
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [DialogTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DialogThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DialogThemeData, T> themeSelector = ModelSelector<DialogThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final DialogThemeData theme =
+        InheritedModel.inheritFrom<DialogTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
     return DialogTheme(data: data, child: child);
   }
-
-  @override
-  bool updateShouldNotify(DialogTheme oldWidget) => data != oldWidget.data;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -297,6 +316,9 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
     );
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
+
+  @override
+  DialogThemeData get themeData => data;
 }
 
 /// Defines default property values for descendant [Dialog] widgets.

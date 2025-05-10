@@ -966,7 +966,7 @@ class DatePickerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [DatePickerDialog] properties that are not
 /// given an explicit non-null value.
-class DatePickerTheme extends InheritedTheme {
+class DatePickerTheme extends InheritedTheme<DatePickerThemeData> {
   /// Creates a [DatePickerTheme] that controls visual parameters for
   /// descendent [DatePickerDialog]s.
   const DatePickerTheme({super.key, required this.data, required super.child});
@@ -980,6 +980,16 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// If there is no [DatePickerTheme] in scope, this will return
   /// [ThemeData.datePickerTheme] from the ambient [Theme].
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = DatePickerTheme.selectOf(
+  ///   context,
+  ///   (DatePickerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -1044,13 +1054,30 @@ class DatePickerTheme extends InheritedTheme {
         : _DatePickerDefaultsM2(context);
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [DatePickerTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DatePickerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DatePickerThemeData, T> themeSelector =
+        ModelSelector<DatePickerThemeData, T>.from(selector: selector, id: id);
+    final DatePickerThemeData theme =
+        InheritedModel.inheritFrom<DatePickerTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return DatePickerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DatePickerTheme oldWidget) => data != oldWidget.data;
+  DatePickerThemeData get themeData => data;
 }
 
 // Hand coded defaults based on Material Design 2.

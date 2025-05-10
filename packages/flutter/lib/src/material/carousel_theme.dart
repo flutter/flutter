@@ -155,7 +155,7 @@ class CarouselViewThemeData with Diagnosticable {
 ///  * [CarouselViewThemeData], which describes the actual configuration of a carousel
 ///    theme.
 ///  * [Theme], which controls the overall theme inheritance.
-class CarouselViewTheme extends InheritedTheme {
+class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData> {
   /// Creates a carousel theme that configures all descendant [CarouselView] widgets.
   const CarouselViewTheme({super.key, required this.data, required super.child});
 
@@ -171,13 +171,29 @@ class CarouselViewTheme extends InheritedTheme {
     return inheritedTheme?.data ?? Theme.of(context).carouselViewTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [CarouselViewTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(CarouselViewThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<CarouselViewThemeData, T> themeSelector =
+        ModelSelector<CarouselViewThemeData, T>.from(selector: selector, id: id);
+    final CarouselViewThemeData theme =
+        InheritedModel.inheritFrom<CarouselViewTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   /// Wraps the given [child] with a [CarouselViewTheme] containing the [data].
   @override
   Widget wrap(BuildContext context, Widget child) {
     return CarouselViewTheme(data: data, child: child);
   }
 
-  /// Returns true if the [data] fields of the two themes are different.
   @override
-  bool updateShouldNotify(CarouselViewTheme oldWidget) => data != oldWidget.data;
+  CarouselViewThemeData get themeData => data;
 }

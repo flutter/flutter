@@ -558,7 +558,7 @@ class TimePickerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for time picker properties that are not
 /// given an explicit non-null value.
-class TimePickerTheme extends InheritedTheme {
+class TimePickerTheme extends InheritedTheme<TimePickerThemeData> {
   /// Creates a time picker theme that controls the configurations for
   /// time pickers displayed in its widget subtree.
   const TimePickerTheme({super.key, required this.data, required super.child});
@@ -571,6 +571,16 @@ class TimePickerTheme extends InheritedTheme {
   /// If there is no ancestor, it returns [ThemeData.timePickerTheme].
   /// Applications can assume that the returned value will not be null.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = TimePickerTheme.selectOf(
+  ///   context,
+  ///   (TimePickerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -582,11 +592,28 @@ class TimePickerTheme extends InheritedTheme {
     return timePickerTheme?.data ?? Theme.of(context).timePickerTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [TimePickerTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TimePickerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TimePickerThemeData, T> themeSelector =
+        ModelSelector<TimePickerThemeData, T>.from(selector: selector, id: id);
+    final TimePickerThemeData theme =
+        InheritedModel.inheritFrom<TimePickerTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TimePickerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TimePickerTheme oldWidget) => data != oldWidget.data;
+  TimePickerThemeData get themeData => data;
 }

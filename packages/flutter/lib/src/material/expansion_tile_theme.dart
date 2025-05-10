@@ -254,7 +254,7 @@ class ExpansionTileThemeData with Diagnosticable {
 ///  * [ExpansionTileThemeData], which is used to configure this theme.
 ///  * [ThemeData.expansionTileTheme], which can be used to override the default
 ///    [ExpansionTileTheme] for [ExpansionTile]s below the overall [Theme].
-class ExpansionTileTheme extends InheritedTheme {
+class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData> {
   /// Applies the given theme [data] to [child].
   const ExpansionTileTheme({super.key, required this.data, required super.child});
 
@@ -267,6 +267,17 @@ class ExpansionTileTheme extends InheritedTheme {
   /// If there is no enclosing [ExpansionTileTheme] widget, then
   /// [ThemeData.expansionTileTheme] is used.
   ///
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = ExpansionTileTheme.selectOf(
+  ///   context,
+  ///   (ExpansionTileThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -278,11 +289,28 @@ class ExpansionTileTheme extends InheritedTheme {
     return inheritedTheme?.data ?? Theme.of(context).expansionTileTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ExpansionTileTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ExpansionTileThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ExpansionTileThemeData, T> themeSelector =
+        ModelSelector<ExpansionTileThemeData, T>.from(selector: selector, id: id);
+    final ExpansionTileThemeData theme =
+        InheritedModel.inheritFrom<ExpansionTileTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ExpansionTileTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ExpansionTileTheme oldWidget) => data != oldWidget.data;
+  ExpansionTileThemeData get themeData => data;
 }

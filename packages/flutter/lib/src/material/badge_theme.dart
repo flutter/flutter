@@ -163,7 +163,7 @@ class BadgeThemeData with Diagnosticable {
 ///
 /// Values specified here override the defaults for [Badge] properties which
 /// are not given an explicit non-null value.
-class BadgeTheme extends InheritedTheme {
+class BadgeTheme extends InheritedTheme<BadgeThemeData> {
   /// Creates a theme that overrides the default color parameters for [Badge]s
   /// in this widget's subtree.
   const BadgeTheme({super.key, required this.data, required super.child});
@@ -176,6 +176,16 @@ class BadgeTheme extends InheritedTheme {
   /// If there is no enclosing [BadgeTheme] widget, then
   /// [ThemeData.badgeTheme] is used.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = BadgeTheme.selectOf(
+  ///   context,
+  ///   (BadgeThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -186,11 +196,30 @@ class BadgeTheme extends InheritedTheme {
     return badgeTheme?.data ?? Theme.of(context).badgeTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [BadgeTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(BadgeThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<BadgeThemeData, T> themeSelector = ModelSelector<BadgeThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final BadgeThemeData theme =
+        InheritedModel.inheritFrom<BadgeTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return BadgeTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(BadgeTheme oldWidget) => data != oldWidget.data;
+  BadgeThemeData get themeData => data;
 }

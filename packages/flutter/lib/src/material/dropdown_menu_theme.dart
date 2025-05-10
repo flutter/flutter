@@ -110,7 +110,7 @@ class DropdownMenuThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [DropdownMenu] properties that are not
 /// given an explicit non-null value.
-class DropdownMenuTheme extends InheritedTheme {
+class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData> {
   /// Creates a [DropdownMenuTheme] that controls visual parameters for
   /// descendant [DropdownMenu]s.
   const DropdownMenuTheme({super.key, required this.data, required super.child});
@@ -123,6 +123,16 @@ class DropdownMenuTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [DropdownMenuTheme] widget, then
   /// [ThemeData.dropdownMenuTheme] is used.
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final TextStyle? textStyle = DropdownMenuTheme.selectOf(
+  ///   context,
+  ///   (DropdownMenuThemeData data) => data.textStyle,
+  ///   id: 'data.textStyle',
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -166,11 +176,28 @@ class DropdownMenuTheme extends InheritedTheme {
     return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [DropdownMenuTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DropdownMenuThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DropdownMenuThemeData, T> themeSelector =
+        ModelSelector<DropdownMenuThemeData, T>.from(selector: selector, id: id);
+    final DropdownMenuThemeData theme =
+        InheritedModel.inheritFrom<DropdownMenuTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return DropdownMenuTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DropdownMenuTheme oldWidget) => data != oldWidget.data;
+  DropdownMenuThemeData get themeData => data;
 }
