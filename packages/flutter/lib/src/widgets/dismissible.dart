@@ -593,7 +593,7 @@ class _DismissibleState extends State<Dismissible>
       setState(() {
         _sizePriorToCollapse = context.size;
         _resizeAnimation = _resizeController!
-            .drive(CurveTween(curve: _kResizeTimeCurve))
+            .drive(CurveTween(_kResizeTimeCurve))
             .drive(Tween<double>(begin: 1.0, end: 0.0));
       });
     }

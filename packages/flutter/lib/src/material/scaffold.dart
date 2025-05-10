@@ -1426,7 +1426,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   static final Animatable<double> _entranceTurnTween = Tween<double>(
     begin: 1.0 - kFloatingActionButtonTurnInterval,
     end: 1.0,
-  ).chain(CurveTween(curve: Curves.easeIn));
+  ).chain(CurveTween(Curves.easeIn));
 
   void _disposeAnimations() {
     _previousRotationAnimation.dispose();
@@ -1494,7 +1494,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     }
 
     _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(
-      CurveTween(curve: const Interval(0.0, 0.1)),
+      CurveTween(const Interval(0.0, 0.1)),
     );
     _currentScaleAnimation.addListener(_onProgressChanged);
     _previousScaleAnimation.addListener(_onProgressChanged);

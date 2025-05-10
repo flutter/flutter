@@ -1281,7 +1281,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
           state.thumbAnimatable = RectTween(
             begin: startingRect,
             end: newThumbRect,
-          ).chain(CurveTween(curve: Interval(state.thumbController.value, 1)));
+          ).chain(CurveTween(Interval(state.thumbController.value, 1)));
         }
       } else {
         state.thumbAnimatable = null;

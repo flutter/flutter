@@ -57,7 +57,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
         ).toList();
     destinationFaders[selectedIndex].value = 1.0;
 
-    final CurveTween tween = CurveTween(curve: Curves.fastOutSlowIn);
+    final CurveTween tween = CurveTween(Curves.fastOutSlowIn);
     destinationViews =
         allDestinations.map<Widget>((Destination destination) {
           return FadeTransition(

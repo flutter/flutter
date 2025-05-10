@@ -2734,20 +2734,18 @@ class _NavigationBarComponentsTransition {
 
     return _FixedSizeSlidingTransition(
       isLTR: isLTR,
-      offsetAnimation: animation
-          .drive(CurveTween(curve: curve))
-          .drive(anchorMovementInTransitionBox),
+      offsetAnimation: animation.drive(CurveTween(curve)).drive(anchorMovementInTransitionBox),
       size: fromBox.size,
       child: child,
     );
   }
 
   Animation<double> fadeInFrom(double t, {Curve curve = Curves.easeIn}) {
-    return animation.drive(fadeIn.chain(CurveTween(curve: Interval(t, 1.0, curve: curve))));
+    return animation.drive(fadeIn.chain(CurveTween(Interval(t, 1.0, curve: curve))));
   }
 
   Animation<double> fadeOutBy(double t, {Curve curve = Curves.easeOut}) {
-    return animation.drive(fadeOut.chain(CurveTween(curve: Interval(0.0, t, curve: curve))));
+    return animation.drive(fadeOut.chain(CurveTween(Interval(0.0, t, curve: curve))));
   }
 
   // The parent of the hero animation, which is the route animation.
@@ -2767,7 +2765,7 @@ class _NavigationBarComponentsTransition {
             : Curves.fastEaseInToSlowEaseOut.flipped;
 
     final Animation<double> pageTransitionAnimation = routeAnimation.drive(
-      CurveTween(curve: userGestureInProgress ? Curves.linear : animationCurve),
+      CurveTween(userGestureInProgress ? Curves.linear : animationCurve),
     );
 
     final RelativeRect from = positionInTransitionBox(
@@ -3023,8 +3021,8 @@ class _NavigationBarComponentsTransition {
       rect:
           // The bottom widget animates linearly during a backswipe by a user gesture.
           userGestureInProgress
-              ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
-              : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+              ? routeAnimation.drive(CurveTween(Curves.linear)).drive(positionTween)
+              : animation.drive(CurveTween(animationCurve)).drive(positionTween),
 
       child: child,
     );
@@ -3040,7 +3038,7 @@ class _NavigationBarComponentsTransition {
             : Curves.fastEaseInToSlowEaseOut.flipped;
 
     final Animation<double> pageTransitionAnimation = routeAnimation.drive(
-      CurveTween(curve: userGestureInProgress ? Curves.linear : animationCurve),
+      CurveTween(userGestureInProgress ? Curves.linear : animationCurve),
     );
 
     final RelativeRect to = positionInTransitionBox(topComponents.navBarBoxKey, from: topNavBarBox);
@@ -3115,7 +3113,7 @@ class _NavigationBarComponentsTransition {
           topComponents.backChevronKey.currentContext!.findRenderObject()! as RenderBox;
       from = to.shift(Offset(forwardDirection * topBackChevronBox.size.width * 2.0, 0.0));
       child = ScaleTransition(
-        scale: routeAnimation.drive(CurveTween(curve: effectiveScaleCurve)),
+        scale: routeAnimation.drive(CurveTween(effectiveScaleCurve)),
         child: child,
       );
     }
@@ -3123,11 +3121,11 @@ class _NavigationBarComponentsTransition {
     final RelativeRectTween positionTween = RelativeRectTween(begin: from, end: to);
 
     return PositionedTransition(
-      rect: routeAnimation.drive(CurveTween(curve: effectivePositionCurve)).drive(positionTween),
+      rect: routeAnimation.drive(CurveTween(effectivePositionCurve)).drive(positionTween),
       child: FadeTransition(
         opacity: routeAnimation.drive(
           CurveTween(
-            curve: Interval(
+            Interval(
               // Fades faster going back from the first page with a back chevron.
               bottomBackChevron == null && animation.status != AnimationStatus.forward ? 0.9 : 0.4,
               1.0,
@@ -3294,8 +3292,8 @@ class _NavigationBarComponentsTransition {
       rect:
           // The large title animates linearly during a backswipe by a user gesture.
           userGestureInProgress
-              ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
-              : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+              ? routeAnimation.drive(CurveTween(Curves.linear)).drive(positionTween)
+              : animation.drive(CurveTween(animationCurve)).drive(positionTween),
       child: FadeTransition(
         opacity: fadeInFrom(0.0, curve: animationCurve),
         child: DefaultTextStyle(
@@ -3350,8 +3348,8 @@ class _NavigationBarComponentsTransition {
       rect:
           // The bottom widget animates linearly during a backswipe by a user gesture.
           userGestureInProgress
-              ? routeAnimation.drive(CurveTween(curve: Curves.linear)).drive(positionTween)
-              : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
+              ? routeAnimation.drive(CurveTween(Curves.linear)).drive(positionTween)
+              : animation.drive(CurveTween(animationCurve)).drive(positionTween),
       child: child,
     );
   }

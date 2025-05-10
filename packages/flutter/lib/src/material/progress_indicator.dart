@@ -878,15 +878,13 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
   static final Animatable<double> _strokeHeadTween = CurveTween(
-    curve: const Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
-  ).chain(CurveTween(curve: const SawTooth(_pathCount)));
+    const Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
+  ).chain(CurveTween(const SawTooth(_pathCount)));
   static final Animatable<double> _strokeTailTween = CurveTween(
-    curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-  ).chain(CurveTween(curve: const SawTooth(_pathCount)));
-  static final Animatable<double> _offsetTween = CurveTween(curve: const SawTooth(_pathCount));
-  static final Animatable<double> _rotationTween = CurveTween(
-    curve: const SawTooth(_rotationCount),
-  );
+    const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+  ).chain(CurveTween(const SawTooth(_pathCount)));
+  static final Animatable<double> _offsetTween = CurveTween(const SawTooth(_pathCount));
+  static final Animatable<double> _rotationTween = CurveTween(const SawTooth(_rotationCount));
 
   late AnimationController _controller;
 
@@ -1159,7 +1157,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   static const double _strokeHeadInterval = 0.33;
 
   late final Animatable<double> _convertTween = CurveTween(
-    curve: const Interval(0.1, _strokeHeadInterval),
+    const Interval(0.1, _strokeHeadInterval),
   );
 
   late final Animatable<double> _additionalRotationTween = TweenSequence<double>(

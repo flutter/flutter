@@ -419,23 +419,15 @@ FlutterError
 
     final Animation<double> animation = TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-        tween: Tween<double>(
-          begin: 5.0,
-          end: 10.0,
-        ).chain(CurveTween(curve: const Interval(0.5, 1.0))),
+        tween: Tween<double>(begin: 5.0, end: 10.0).chain(CurveTween(const Interval(0.5, 1.0))),
         weight: 4.0,
       ),
       TweenSequenceItem<double>(
-        tween: ConstantTween<double>(
-          10.0,
-        ).chain(CurveTween(curve: Curves.linear)), // linear is a no-op
+        tween: ConstantTween<double>(10.0).chain(CurveTween(Curves.linear)), // linear is a no-op
         weight: 2.0,
       ),
       TweenSequenceItem<double>(
-        tween: Tween<double>(
-          begin: 10.0,
-          end: 5.0,
-        ).chain(CurveTween(curve: const Interval(0.0, 0.5))),
+        tween: Tween<double>(begin: 10.0, end: 5.0).chain(CurveTween(const Interval(0.0, 0.5))),
         weight: 4.0,
       ),
     ]).animate(controller);

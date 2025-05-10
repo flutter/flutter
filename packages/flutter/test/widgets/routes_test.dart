@@ -1712,7 +1712,7 @@ void main() {
         ),
       );
 
-      final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
+      final CurveTween defaultBarrierTween = CurveTween(Curves.ease);
       int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }
@@ -1777,7 +1777,7 @@ void main() {
         ),
       );
 
-      final CurveTween customBarrierTween = CurveTween(curve: Curves.linear);
+      final CurveTween customBarrierTween = CurveTween(Curves.linear);
       int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(customBarrierTween.transform(t));
       }
@@ -1842,7 +1842,7 @@ void main() {
         ),
       );
 
-      final CurveTween defaultBarrierTween = CurveTween(curve: Curves.ease);
+      final CurveTween defaultBarrierTween = CurveTween(Curves.ease);
       int getExpectedBarrierTweenAlphaValue(double t) {
         return Color.getAlphaFromOpacity(defaultBarrierTween.transform(t));
       }

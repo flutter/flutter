@@ -1578,14 +1578,14 @@ class _SwitchPainter extends ToggleablePainter {
             tween: Tween<Size>(
               begin: inactiveThumbSize,
               end: transitionalThumbSize,
-            ).chain(CurveTween(curve: const Cubic(0.31, 0.00, 0.56, 1.00))),
+            ).chain(CurveTween(const Cubic(0.31, 0.00, 0.56, 1.00))),
             weight: 11,
           ),
           TweenSequenceItem<Size>(
             tween: Tween<Size>(
               begin: transitionalThumbSize,
               end: activeThumbSize,
-            ).chain(CurveTween(curve: const Cubic(0.20, 0.00, 0.00, 1.00))),
+            ).chain(CurveTween(const Cubic(0.20, 0.00, 0.00, 1.00))),
             weight: 72,
           ),
           TweenSequenceItem<Size>(tween: ConstantTween<Size>(activeThumbSize), weight: 17),
@@ -1597,14 +1597,14 @@ class _SwitchPainter extends ToggleablePainter {
             tween: Tween<Size>(
               begin: inactiveThumbSize,
               end: transitionalThumbSize,
-            ).chain(CurveTween(curve: const Cubic(0.20, 0.00, 0.00, 1.00).flipped)),
+            ).chain(CurveTween(const Cubic(0.20, 0.00, 0.00, 1.00).flipped)),
             weight: 72,
           ),
           TweenSequenceItem<Size>(
             tween: Tween<Size>(
               begin: transitionalThumbSize,
               end: activeThumbSize,
-            ).chain(CurveTween(curve: const Cubic(0.31, 0.00, 0.56, 1.00).flipped)),
+            ).chain(CurveTween(const Cubic(0.31, 0.00, 0.56, 1.00).flipped)),
             weight: 11,
           ),
         ];

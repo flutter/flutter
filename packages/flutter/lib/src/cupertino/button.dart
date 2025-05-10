@@ -336,7 +336,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       vsync: this,
     );
     _opacityAnimation = _animationController
-        .drive(CurveTween(curve: Curves.decelerate))
+        .drive(CurveTween(Curves.decelerate))
         .drive(_opacityTween);
     _setTween();
   }
