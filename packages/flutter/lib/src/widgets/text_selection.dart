@@ -2062,6 +2062,10 @@ class TextSelectionGestureDetectorBuilder {
 
   // Hides the magnifier on supported platforms, currently only Android and iOS.
   void _hideMagnifierIfSupportedByPlatform() {
+    if (!_isEditableTextMounted) {
+      return;
+    }
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -2179,6 +2183,12 @@ class TextSelectionGestureDetectorBuilder {
   /// provide a [TextSelectionGestureDetector].
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
+
+  /// Returns `true` if a widget with the global key [delegate.editableTextKey]
+  /// is in the tree and the widget is mounted.
+  ///
+  /// Otherwise returns `false`.
+  bool get _isEditableTextMounted => delegate.editableTextKey.currentContext?.mounted ?? false;
 
   /// Whether the Shift key was pressed when the most recent [PointerDownEvent]
   /// was tracked by the [BaseTapAndDragGestureRecognizer].
@@ -2663,22 +2673,23 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
-    _hideMagnifierIfSupportedByPlatform();
+    _onSingleLongTapEndOrCancel();
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
-    _longPressStartedWithoutFocus = false;
-    _dragStartViewportOffset = 0.0;
-    _dragStartScrollOffset = 0.0;
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
-        delegate.selectionEnabled &&
-        editableText.textEditingValue.selection.isCollapsed) {
-      // Update the floating cursor.
-      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-        state: FloatingCursorDragState.End,
-      );
-      editableText.updateFloatingCursor(cursorPoint);
-    }
+  }
+
+  /// Handler for [TextSelectionGestureDetector.onSingleLongTapCancel].
+  ///
+  /// By default, it hides the magnifier and the floating cursor if necessary.
+  ///
+  /// See also:
+  ///
+  /// * [TextSelectionGestureDetector.onSingleLongTapCancel], which triggers
+  ///   this callback.
+  @protected
+  void onSingleLongTapCancel() {
+    _onSingleLongTapEndOrCancel();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -2745,6 +2756,22 @@ class TextSelectionGestureDetectorBuilder {
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
       }
+    }
+  }
+
+  void _onSingleLongTapEndOrCancel(){
+    _hideMagnifierIfSupportedByPlatform();
+    _longPressStartedWithoutFocus = false;
+    _dragStartViewportOffset = 0.0;
+    _dragStartScrollOffset = 0.0;
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        delegate.selectionEnabled &&
+        editableText.textEditingValue.selection.isCollapsed) {
+      // Update the floating cursor.
+      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+        state: FloatingCursorDragState.End,
+      );
+      editableText.updateFloatingCursor(cursorPoint);
     }
   }
 
@@ -3187,6 +3214,7 @@ class TextSelectionGestureDetectorBuilder {
       onSingleLongTapStart: onSingleLongTapStart,
       onSingleLongTapMoveUpdate: onSingleLongTapMoveUpdate,
       onSingleLongTapEnd: onSingleLongTapEnd,
+      onSingleLongTapCancel: onSingleLongTapCancel,
       onDoubleTapDown: onDoubleTapDown,
       onTripleTapDown: onTripleTapDown,
       onDragSelectionStart: onDragSelectionStart,
@@ -3230,6 +3258,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleLongTapStart,
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
+    this.onSingleLongTapCancel,
     this.onDoubleTapDown,
     this.onTripleTapDown,
     this.onDragSelectionStart,
@@ -3303,6 +3332,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Called after [onSingleLongTapStart] when the pointer is lifted.
   final GestureLongPressEndCallback? onSingleLongTapEnd;
+
+  /// Called after [onSingleLongTapStart] when the pointer is canceled.
+  final GestureLongPressCancelCallback? onSingleLongTapCancel;
 
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
@@ -3434,21 +3466,19 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    if (widget.onSingleLongTapStart != null) {
-      widget.onSingleLongTapStart!(details);
-    }
+    widget.onSingleLongTapStart?.call(details);
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (widget.onSingleLongTapMoveUpdate != null) {
-      widget.onSingleLongTapMoveUpdate!(details);
-    }
+    widget.onSingleLongTapMoveUpdate?.call(details);
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    if (widget.onSingleLongTapEnd != null) {
-      widget.onSingleLongTapEnd!(details);
-    }
+    widget.onSingleLongTapEnd?.call(details);
+  }
+
+  void _handleLongPressCancel() {
+    widget.onSingleLongTapCancel?.call();
   }
 
   @override
@@ -3466,7 +3496,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
     if (widget.onSingleLongTapStart != null ||
         widget.onSingleLongTapMoveUpdate != null ||
-        widget.onSingleLongTapEnd != null) {
+        widget.onSingleLongTapEnd != null ||
+        widget.onSingleLongTapCancel != null) {
       gestures[LongPressGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
             () => LongPressGestureRecognizer(
@@ -3477,7 +3508,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
               instance
                 ..onLongPressStart = _handleLongPressStart
                 ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-                ..onLongPressEnd = _handleLongPressEnd;
+                ..onLongPressEnd = _handleLongPressEnd
+                ..onLongPressCancel = _handleLongPressCancel;
             },
           );
     }
