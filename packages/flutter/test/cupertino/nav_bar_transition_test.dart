@@ -1754,27 +1754,26 @@ void main() {
   });
 
   testWidgets('Back label is not clipped mid-transition', (WidgetTester tester) async {
+    const String label = 'backbackback';
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
       toTitle: 'Page 2',
       from: const CupertinoNavigationBar(),
-      to: const CupertinoNavigationBar(previousPageTitle: 'backbackback'),
+      to: const CupertinoNavigationBar(previousPageTitle: label),
     );
 
     await tester.pump(const Duration(milliseconds: 500));
 
-    final Finder positionedFinder = find.ancestor(
-      of: find.text('backbackback'),
-      matching: find.byWidgetPredicate(
-        (Widget widget) => widget is Positioned && widget.width != null,
-      ),
-    );
-    expect(positionedFinder, findsOne);
+    // The variant in transition and the static variant.
+    expect(find.text(label), findsNWidgets(2));
 
-    // A smaller width clips the back label.
-    final Positioned positionedWidget = tester.widget<Positioned>(positionedFinder);
-    expect(positionedWidget.width, moreOrLessEquals(800.0, epsilon: 0.01));
+    // At the end of the transition, the label in transition and the static
+    // label both have the same fully extended width.
+    expect(
+      tester.getTopRight(find.text(label).first).dx,
+      tester.getTopRight(find.text(label).last).dx,
+    );
 
     // End the transition.
     await tester.pumpAndSettle();
