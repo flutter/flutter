@@ -2907,7 +2907,7 @@ void main() {
     expect(tester.getSize(find.byType(SizedBox)).width, 560);
   });
 
-    testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
+  testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     // no back button in app bar for RawDialogRoute with full screen dialog set to true
     await tester.pumpWidget(
       MaterialApp(
@@ -2971,7 +2971,12 @@ class _RestorableDialogTestWidget extends StatelessWidget {
           child: const Text('X'),
         ),
       ),
+    );
   }
+}
+
+class DialogObserver extends NavigatorObserver {
+  int dialogCount = 0;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
