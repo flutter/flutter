@@ -259,25 +259,25 @@ class RawMenuAnchor extends StatefulWidget {
     this.child,
   });
 
-  /// Called when the menu overlay is shown
+  /// Called when the menu overlay is shown.
   ///
-  /// This callback is triggered when the menu overlay is added to the widget
-  /// tree, typically at the start of any associated opening animations. This
-  /// callback can be used to respond when the menu first becomes interactive.
-  /// Repositioning the menu will trigger this callback.
+  /// This callback is triggered when the menu overlay is inserted into the widget
+  /// tree, typically before any opening animations begin. [onOpen] can be used to
+  /// respond when the menu first becomes interactive, such as by setting focus to
+  /// a menu item.
   ///
-  /// If an [onOpenRequested] callback is provided, [onOpen] will be called
-  /// after `showOverlay` is called.
+  /// This callback is not called when an already open menu is repositioned.
   final VoidCallback? onOpen;
 
   /// Called when the menu overlay is hidden.
   ///
-  /// This callback is triggered after the menu is fully closed and any
-  /// transition animations have completed. It is typically used by
-  /// applications to respond when the menu has been dismissed.
+  /// This callback is triggered when the menu overlay is removed from the
+  /// widget tree, typically after any closing animations have completed. It is
+  /// typically used by applications to respond when the menu has been
+  /// dismissed, such as by restoring focus to a previously active element.
   ///
-  /// If an [onCloseRequested] callback is provided, [onClose] will be called
-  /// in response to `hideOverlay`, assuming the menu is not already closed.
+  /// If a callback is provided for [onCloseRequested], this callback will not
+  /// be called until after `hideOverlay` is called.
   final VoidCallback? onClose;
 
   /// Called when a request is made to open the menu.
@@ -1012,7 +1012,8 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 final class MenuController {
   // The anchor that this controller controls.
   //
-  // This is set automatically when a [MenuController] is given to an anchor.
+  // This is set automatically when this `MenuController` is attached to an
+  // anchor.
   _RawMenuAnchorBaseMixin? _anchor;
 
   /// Whether or not the menu associated with this [MenuController] is open.
