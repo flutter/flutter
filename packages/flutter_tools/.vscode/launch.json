@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "flutter_tools",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/bin/flutter_tools.dart",
+            "args": [
+                // "run",
+                // "-d",
+                // "build",
+                // "macos",
+                // "--debug",
+                "assemble",
+                "--output",
+                ".dart_tool/assemble_out/",
+                "-dTargetPlatform=darwin",
+                "-dBuildMode=debug",
+                "debug_macos_bundle_flutter_assets",
+            ],
+            "cwd": "/Users/Matej/Projects/flutter/test1",
+        }
+    ]
+}

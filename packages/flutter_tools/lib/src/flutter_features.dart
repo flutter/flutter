@@ -72,6 +72,9 @@ interface class FlutterFeatureFlags with FlutterFeatureFlagsIsEnabled implements
   final Platform platform;
 
   @override
+  bool get isWindowingEnabled => isEnabled(windowing);
+
+  @override
   bool isEnabled(Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);

@@ -23,6 +23,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'clock',
   'collection',
   'fake_async',
+  'ffi',
   'file',
   'flutter',
   'flutter_driver',
