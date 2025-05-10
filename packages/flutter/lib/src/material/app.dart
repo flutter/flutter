@@ -29,7 +29,6 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Examples can assume:
@@ -936,12 +935,12 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget _exitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     required GlobalKey key,
   }) {
     return _MaterialInspectorButton.filled(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       icon: Icons.close,
       isDarkTheme: _isDarkTheme(context),
       buttonKey: key,
@@ -951,12 +950,12 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget _moveExitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     bool isLeftAligned = true,
   }) {
     return _MaterialInspectorButton.iconOnly(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
       isDarkTheme: _isDarkTheme(context),
     );
@@ -965,12 +964,12 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     required bool selectionOnTapEnabled,
   }) {
     return _MaterialInspectorButton.toggle(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       // This icon is also used for the Cupertino-styled button and for DevTools.
       // It should be updated in all 3 places if changed.
       icon: CupertinoIcons.cursor_rays,
@@ -1172,7 +1171,7 @@ class _MaterialAppState extends State<MaterialApp> {
 class _MaterialInspectorButton extends InspectorButton {
   const _MaterialInspectorButton.filled({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     required this.isDarkTheme,
     super.buttonKey,
@@ -1180,7 +1179,7 @@ class _MaterialInspectorButton extends InspectorButton {
 
   const _MaterialInspectorButton.toggle({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     required this.isDarkTheme,
     super.toggledOn,
@@ -1188,7 +1187,7 @@ class _MaterialInspectorButton extends InspectorButton {
 
   const _MaterialInspectorButton.iconOnly({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     required this.isDarkTheme,
   }) : super.iconOnly();
@@ -1210,7 +1209,7 @@ class _MaterialInspectorButton extends InspectorButton {
       padding: _buttonPadding,
       constraints: _buttonConstraints,
       style: _selectionButtonsIconStyle(context),
-      icon: Icon(icon, semanticLabel: semanticLabel),
+      icon: Icon(icon, semanticLabel: semanticsLabel),
     );
   }
 
@@ -1221,12 +1220,19 @@ class _MaterialInspectorButton extends InspectorButton {
     return IconButton.styleFrom(
       foregroundColor: foreground,
       backgroundColor: background,
-      side:
-          variant == InspectorButtonVariant.toggle && !toggledOn!
-              ? BorderSide(color: foreground)
-              : null,
+      side: _borderSide(color: foreground),
       tapTargetSize: MaterialTapTargetSize.padded,
     );
+  }
+
+  BorderSide? _borderSide({required Color color}) {
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.iconOnly:
+        return null;
+      case InspectorButtonVariant.toggle:
+        return toggledOn == false ? BorderSide(color: color) : null;
+    }
   }
 
   @override

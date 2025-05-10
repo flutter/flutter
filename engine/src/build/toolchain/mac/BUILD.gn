@@ -4,7 +4,7 @@
 
 assert(host_os == "mac")
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//build/config/sysroot.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
@@ -43,13 +43,13 @@ if (swift_whole_module_optimization == -1) {
 # but it will cause edges to be marked as dirty if the ninja files are
 # regenerated. See https://crbug.com/619083 for details. A proper fix
 # would be to have inputs to tools (https://crbug.com/621119).
-get_tool_mtime = rebase_path("//build/toolchain/apple/get_tool_mtime.py")
+get_tool_mtime = rebase_path("//build/toolchain/darwin/get_tool_mtime.py")
 tool_versions = exec_script(
         get_tool_mtime, # "get_tool_mtime.py",
         rebase_path(
             [
-              "//build/toolchain/apple/swift_const_gather_protocols.json",
-              "//build/toolchain/apple/swiftc.py",
+              "//build/toolchain/darwin/swift_const_gather_protocols.json",
+              "//build/toolchain/darwin/swiftc.py",
             ],
             root_build_dir),
         "trim scope")
@@ -194,7 +194,7 @@ template("mac_toolchain") {
     }
 
     tool("swift") {
-      _tool = rebase_path("//build/toolchain/apple/swiftc.py", root_build_dir)
+      _tool = rebase_path("//build/toolchain/darwin/swiftc.py", root_build_dir)
 
       depfile = "{{target_out_dir}}/{{module_name}}.d"
       depsformat = "gcc"
@@ -306,7 +306,7 @@ template("mac_toolchain") {
       _src_dir = rebase_path("//", root_build_dir)
       _gen_dir = rebase_path(root_gen_dir, root_build_dir)
       _const_gather_protocols_file = rebase_path(
-              "//build/toolchain/apple/swift_const_gather_protocols.json",
+              "//build/toolchain/darwin/swift_const_gather_protocols.json",
               root_build_dir)
 
       command =

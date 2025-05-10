@@ -1351,7 +1351,6 @@ Could not compile build file '…/example/android/build.gradle'.
           testLogger.statusText,
           contains('Gradle version is incompatible with the Java version'),
         );
-        expect(testLogger.statusText, contains('flutter.dev/to/java-gradle-incompatibility'));
         expect(testLogger.statusText, contains('gradle-wrapper.properties'));
         expect(
           testLogger.statusText,

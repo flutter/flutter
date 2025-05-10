@@ -22,7 +22,6 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.INITIAL_
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.NORMAL_THEME_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.deepLinkEnabled;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -698,7 +697,6 @@ public class FlutterActivity extends Activity
   }
 
   @NonNull
-  @TargetApi(API_LEVELS.API_33)
   @RequiresApi(API_LEVELS.API_33)
   private OnBackInvokedCallback createOnBackInvokedCallback() {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
@@ -942,7 +940,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void startBackGesture(@NonNull BackEvent backEvent) {
     if (stillAttachedForEvent("startBackGesture")) {
@@ -950,7 +947,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void updateBackGestureProgress(@NonNull BackEvent backEvent) {
     if (stillAttachedForEvent("updateBackGestureProgress")) {
@@ -958,7 +954,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void commitBackGesture() {
     if (stillAttachedForEvent("commitBackGesture")) {
@@ -966,7 +961,6 @@ public class FlutterActivity extends Activity
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void cancelBackGesture() {
     if (stillAttachedForEvent("cancelBackGesture")) {

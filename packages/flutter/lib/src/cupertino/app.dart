@@ -535,12 +535,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _exitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     required GlobalKey key,
   }) {
     return _CupertinoInspectorButton.filled(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       icon: CupertinoIcons.xmark,
       buttonKey: key,
     );
@@ -549,12 +549,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _moveExitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     bool isLeftAligned = true,
   }) {
     return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
     );
   }
@@ -562,12 +562,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     required bool selectionOnTapEnabled,
   }) {
     return _CupertinoInspectorButton.toggle(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       // This icon is also used for the Material-styled button and for DevTools.
       // It should be updated in all 3 places if changed.
       icon: CupertinoIcons.cursor_rays,
@@ -685,21 +685,21 @@ class _CupertinoAppState extends State<CupertinoApp> {
 class _CupertinoInspectorButton extends InspectorButton {
   const _CupertinoInspectorButton.filled({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     super.buttonKey,
   }) : super.filled();
 
   const _CupertinoInspectorButton.toggle({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     super.toggledOn,
   }) : super.toggle();
 
   const _CupertinoInspectorButton.iconOnly({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
   }) : super.iconOnly();
 
@@ -707,7 +707,7 @@ class _CupertinoInspectorButton extends InspectorButton {
   Widget build(BuildContext context) {
     final Icon buttonIcon = Icon(
       icon,
-      semanticLabel: semanticLabel,
+      semanticLabel: semanticsLabel,
       size: iconSizeForVariant,
       color: foregroundColor(context),
     );

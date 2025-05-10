@@ -6,7 +6,6 @@ package io.flutter.embedding.engine.renderer;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -23,6 +22,7 @@ import android.view.Surface;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -408,7 +408,6 @@ public class FlutterRenderer implements TextureRegistry {
   // When we acquire the next image, close any ImageReaders that don't have any
   // more pending images.
   @Keep
-  @TargetApi(API_LEVELS.API_29)
   final class ImageReaderSurfaceProducer
       implements TextureRegistry.SurfaceProducer,
           TextureRegistry.ImageConsumer,
@@ -741,7 +740,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -844,7 +843,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       PerImage r = dequeueImage();
       if (r == null) {
@@ -883,7 +882,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private ImageReader createImageReader33() {
       final ImageReader.Builder builder = new ImageReader.Builder(requestedWidth, requestedHeight);
       // Allow for double buffering.
@@ -900,7 +899,7 @@ public class FlutterRenderer implements TextureRegistry {
       return builder.build();
     }
 
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     private ImageReader createImageReader29() {
       return ImageReader.newInstance(
           requestedWidth,
@@ -1008,7 +1007,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -1018,7 +1017,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     private void maybeWaitOnFence(Image image) {
       if (image == null) {
         return;
@@ -1037,7 +1036,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       Image r;
       synchronized (this) {

@@ -4,7 +4,7 @@
 
 assert(is_mac)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
@@ -16,31 +16,6 @@ shell_gpu_configuration("macos_gpu_configuration") {
   enable_gl = true
   enable_vulkan = false
   enable_metal = true
-}
-
-config("config_macos") {
-  include_dirs = [ target_gen_dir ]
-  lib_dirs = mac_swift_lib_paths
-
-  # Allow use of @testable imports in debug builds and when tests are enabled.
-  if (enable_unittests) {
-    swiftflags = [ "-enable-testing" ]
-  }
-}
-
-config("config_macos_test") {
-  configs = [ ":config_macos" ]
-
-  # Add platform frameworks directory to search path for test frameworks.
-  # Add platform lib to search path for test libraries/Swift modules.
-  cflags = [
-    "-fvisibility=default",
-    "-F$mac_platform_path/Developer/Library/Frameworks",
-  ]
-  swiftflags = [ "-F$mac_platform_path/Developer/Library/Frameworks" ]
-  include_dirs = [ "$mac_platform_path/Developer/usr/lib" ]
-  framework_dirs = [ "$mac_platform_path/Developer/Library/Frameworks" ]
-  lib_dirs = [ "$mac_platform_path/Developer/usr/lib" ]
 }
 
 group("macos") {
@@ -77,7 +52,7 @@ _flutter_framework_headers_copy_dir =
 
 source_set("InternalFlutterSwift") {
   visibility = [ ":*" ]
-  configs += [ ":config_macos" ]
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
 
   sources = [ "framework/Source/FlutterRunLoop.swift" ]
 }

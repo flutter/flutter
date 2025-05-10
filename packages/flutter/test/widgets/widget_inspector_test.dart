@@ -375,7 +375,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Widget exitWidgetSelectionButtonBuilder(
         BuildContext context, {
         required VoidCallback onPressed,
-        required String semanticLabel,
+        required String semanticsLabel,
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
@@ -553,7 +553,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Widget exitWidgetSelectionButtonBuilder(
         BuildContext context, {
         required VoidCallback onPressed,
-        required String semanticLabel,
+        required String semanticsLabel,
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
@@ -807,7 +807,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         return (
           BuildContext context, {
           required VoidCallback onPressed,
-          required String semanticLabel,
+          required String semanticsLabel,
           required GlobalKey key,
         }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
@@ -898,7 +898,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Widget exitWidgetSelectionButtonBuilder(
           BuildContext context, {
           required VoidCallback onPressed,
-          required String semanticLabel,
+          required String semanticsLabel,
           required GlobalKey key,
         }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
@@ -960,7 +960,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Widget exitWidgetSelectionButtonBuilder(
           BuildContext context, {
           required VoidCallback onPressed,
-          required String semanticLabel,
+          required String semanticsLabel,
           required GlobalKey key,
         }) {
           return Material(
@@ -975,7 +975,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Widget moveWidgetSelectionButtonBuilder(
           BuildContext context, {
           required VoidCallback onPressed,
-          required String semanticLabel,
+          required String semanticsLabel,
           bool isLeftAligned = true,
         }) {
           return Material(
@@ -1041,7 +1041,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Widget exitWidgetSelectionButtonBuilder(
           BuildContext context, {
           required VoidCallback onPressed,
-          required String semanticLabel,
+          required String semanticsLabel,
           required GlobalKey key,
         }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
@@ -1050,7 +1050,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Widget tapBehaviorButtonBuilder(
           BuildContext context, {
           required VoidCallback onPressed,
-          required String semanticLabel,
+          required String semanticsLabel,
           required bool selectionOnTapEnabled,
         }) {
           return Material(
