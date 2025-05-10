@@ -1337,6 +1337,141 @@ class SemanticsFlags {
     hasRequiredState,
     isRequired,
   ]);
+
+  /// Convert flags to a list of string.
+  List<String> toStrings() {
+    final List<String> trueFlags = <String>[];
+    if (hasCheckedState) {
+      trueFlags.add('hasCheckedState');
+    }
+    if (isChecked) {
+      trueFlags.add('isChecked');
+    }
+    if (isSelected) {
+      trueFlags.add('isSelected');
+    }
+    if (isButton) {
+      trueFlags.add('isButton');
+    }
+    if (isTextField) {
+      trueFlags.add('isTextField');
+    }
+    if (isFocused) {
+      trueFlags.add('isFocused');
+    }
+    if (hasEnabledState) {
+      trueFlags.add('hasEnabledState');
+    }
+    if (isEnabled) {
+      trueFlags.add('isEnabled');
+    }
+    if (isInMutuallyExclusiveGroup) {
+      trueFlags.add('isInMutuallyExclusiveGroup');
+    }
+    if (isHeader) {
+      trueFlags.add('isHeader');
+    }
+    if (isObscured) {
+      trueFlags.add('isObscured');
+    }
+    if (scopesRoute) {
+      trueFlags.add('scopesRoute');
+    }
+    if (namesRoute) {
+      trueFlags.add('namesRoute');
+    }
+    if (isHidden) {
+      trueFlags.add('isHidden');
+    }
+    if (isImage) {
+      trueFlags.add('isImage');
+    }
+    if (isLiveRegion) {
+      trueFlags.add('isLiveRegion');
+    }
+    if (hasToggledState) {
+      trueFlags.add('hasToggledState');
+    }
+    if (isToggled) {
+      trueFlags.add('isToggled');
+    }
+    if (hasImplicitScrolling) {
+      trueFlags.add('hasImplicitScrolling');
+    }
+    if (isMultiline) {
+      trueFlags.add('isMultiline');
+    }
+    if (isReadOnly) {
+      trueFlags.add('isReadOnly');
+    }
+    if (isFocusable) {
+      trueFlags.add('isFocusable');
+    }
+    if (isLink) {
+      trueFlags.add('isLink');
+    }
+    if (isSlider) {
+      trueFlags.add('isSlider');
+    }
+    if (isKeyboardKey) {
+      trueFlags.add('isKeyboardKey');
+    }
+    if (isCheckStateMixed) {
+      trueFlags.add('isCheckStateMixed');
+    }
+    if (hasExpandedState) {
+      trueFlags.add('hasExpandedState');
+    }
+    if (isExpanded) {
+      trueFlags.add('isExpanded');
+    }
+    if (hasSelectedState) {
+      trueFlags.add('hasSelectedState');
+    }
+    if (hasRequiredState) {
+      trueFlags.add('hasRequiredState');
+    }
+    if (isRequired) {
+      trueFlags.add('isRequired');
+    }
+    return trueFlags;
+  }
+
+  /// Checks if any of the boolean semantic flags are set to true
+  /// in both this instance and the [other] instance.
+  bool hasRepeatedFlags(SemanticsFlags other) {
+    return (hasCheckedState && other.hasCheckedState) ||
+        (isChecked && other.isChecked) ||
+        (isSelected && other.isSelected) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isFocused && other.isFocused) ||
+        (hasEnabledState && other.hasEnabledState) ||
+        (isEnabled && other.isEnabled) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasToggledState && other.hasToggledState) ||
+        (isToggled && other.isToggled) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isFocusable && other.isFocusable) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isCheckStateMixed && other.isCheckStateMixed) ||
+        (hasExpandedState && other.hasExpandedState) ||
+        (isExpanded && other.isExpanded) ||
+        (hasSelectedState && other.hasSelectedState) ||
+        (hasRequiredState && other.hasRequiredState) ||
+        (isRequired && other.isRequired);
+  }
 }
 
 /// The validation result of a form field.
