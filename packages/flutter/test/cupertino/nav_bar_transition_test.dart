@@ -639,6 +639,77 @@ void main() {
     checkBackgroundBoxOffset(tester, 2, const Offset(846.12, 44.0));
   });
 
+  testWidgets('Extended large title removes bottom nav bar transition background box ', (
+    WidgetTester tester,
+  ) async {
+    setWindowToPortrait(tester);
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(largeTitle: Text('Page 1')),
+              SliverToBoxAdapter(child: SizedBox(height: 1200.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            title: 'Page 2',
+            builder:
+                (BuildContext context) =>
+                    scaffoldForNavBar(
+                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
+                    )!,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('nav_bar_transition.large_title.expanded.png'),
+    );
+
+    await tester.pumpAndSettle();
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            title: 'Page 2',
+            builder:
+                (BuildContext context) =>
+                    scaffoldForNavBar(
+                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
+                    )!,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('nav_bar_transition.large_title.collapsed.png'),
+    );
+  });
+
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
