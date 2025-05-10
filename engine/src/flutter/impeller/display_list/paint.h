@@ -20,6 +20,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
 
@@ -76,10 +77,7 @@ struct Paint {
   const flutter::DlColorFilter* color_filter = nullptr;
   const flutter::DlImageFilter* image_filter = nullptr;
 
-  Scalar stroke_width = 0.0;
-  Cap stroke_cap = Cap::kButt;
-  Join stroke_join = Join::kMiter;
-  Scalar stroke_miter = 4.0;
+  StrokeParameters stroke;
   Style style = Style::kFill;
   BlendMode blend_mode = BlendMode::kSrcOver;
   bool invert_colors = false;
