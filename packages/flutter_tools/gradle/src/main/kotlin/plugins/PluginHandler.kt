@@ -117,11 +117,11 @@ class PluginHandler(
         } catch (ignored: FileNotFoundException) {
             throw GradleException(
                 "settings.gradle/settings.gradle.kts does not exist: " +
-                        FlutterPluginUtils
-                            .getSettingsGradleFileFromProjectDir(
-                                project.projectDir,
-                                project.logger
-                            ).absolutePath
+                    FlutterPluginUtils
+                        .getSettingsGradleFileFromProjectDir(
+                            project.projectDir,
+                            project.logger
+                        ).absolutePath
             )
         }
         // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
@@ -275,7 +275,7 @@ class PluginHandler(
             addApiDependencies(
                 pluginProject,
                 buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion",
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
         }
 
@@ -320,8 +320,7 @@ class PluginHandler(
                     }
 
                     val dependencyProject =
-                        project.rootProject.findProject(":$pluginDependencyName")
-                            ?: return@innerForEach
+                        project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
                     pluginProject.afterEvaluate {
                         // this.dependencies.add("implementation", dependencyProject)
                         pluginProject.dependencies.add("implementation", dependencyProject)
