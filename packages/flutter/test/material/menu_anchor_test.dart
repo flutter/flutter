@@ -4958,16 +4958,7 @@ void main() {
               controller: controller,
               menuChildren: const <Widget>[MenuItemButton(child: Text('menu item'))],
               builder: (BuildContext context, MenuController controller, Widget? child) {
-                return FilledButton(
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  child: Text(controller.isOpen ? 'close' : 'open'),
-                );
+                return FilledButton(onPressed: () {}, child: const Text('Button'));
               },
             ),
           ),
@@ -4987,7 +4978,18 @@ void main() {
 
     expect(
       () => MenuAnchor.of(tester.element(find.byType(FilledButton))),
-      throwsA(isA<FlutterError>()),
+      throwsA(
+        isA<FlutterError>().having(
+          (FlutterError error) => error.message,
+          'message',
+          contains(
+            'MenuAnchor.of() was called with a context that does not contain a MenuAnchor widget.\n'
+            'No MenuAnchor widget ancestor could be found starting from the context that was passed to '
+            'MenuAnchor.of().\n'
+            'The context used was:\n',
+          ),
+        ),
+      ),
     );
   });
 
@@ -5013,16 +5015,7 @@ void main() {
               controller: controller,
               menuChildren: const <Widget>[MenuItemButton(child: Text('menu item'))],
               builder: (BuildContext context, MenuController controller, Widget? child) {
-                return FilledButton(
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  child: Text(controller.isOpen ? 'close' : 'open'),
-                );
+                return FilledButton(onPressed: () {}, child: const Text('Button'));
               },
             ),
           ),
