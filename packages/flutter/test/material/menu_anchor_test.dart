@@ -4948,7 +4948,7 @@ void main() {
     });
   });
 
-  testWidgets('MenuAnchor.of gives nearest MenuAnchor ancestor', (WidgetTester tester) async {
+  testWidgets('MenuAnchor.of can return the nearest MenuController', (WidgetTester tester) async {
     final MenuController controller = MenuController();
     await tester.pumpWidget(
       MaterialApp(
@@ -4976,6 +4976,61 @@ void main() {
     );
 
     expect(MenuAnchor.of(tester.element(find.byType(FilledButton))), equals(controller));
+  });
+
+  testWidgets('MenuAnchor.of should throw if there is no MenuController', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: FilledButton(onPressed: () {}, child: const Text('open')))),
+    );
+
+    expect(
+      () => MenuAnchor.of(tester.element(find.byType(FilledButton))),
+      throwsA(isA<FlutterError>()),
+    );
+  });
+
+  testWidgets('MenuAnchor.maybeOf should return null if there is no MenuController', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: FilledButton(onPressed: () {}, child: const Text('open')))),
+    );
+
+    expect(MenuAnchor.maybeOf(tester.element(find.byType(FilledButton))), isNull);
+  });
+
+  testWidgets('MenuAnchor.maybeOf should return the nearest MenuController', (
+    WidgetTester tester,
+  ) async {
+    final MenuController controller = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(
+              controller: controller,
+              menuChildren: const <Widget>[MenuItemButton(child: Text('menu item'))],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return FilledButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: Text(controller.isOpen ? 'close' : 'open'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(MenuAnchor.maybeOf(tester.element(find.byType(FilledButton))), equals(controller));
   });
 }
 
