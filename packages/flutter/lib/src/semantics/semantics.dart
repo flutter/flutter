@@ -3624,7 +3624,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // final Set<int> overlayPortalIds = <int>{};
     for (final SemanticsNode child in _children!) {
       // print('child id: ${_children![i].id}, label: ${_children![i].label}');
-      if (child.label == 'OverlayPortal') {
+      if (child.hasFlag(SemanticsFlag.isOverlayPortal)) {
         overlayPortalNode.add(child);
       }
     }
@@ -5725,10 +5725,9 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isRequired, value!);
   }
 
-  bool? get isOverlayPortal => _isOverlayPortal;
-  bool? _isOverlayPortal = false;
+  bool? get isOverlayPortal => _hasFlag(SemanticsFlag.isOverlayPortal);
   set isOverlayPortal(bool? value) {
-    _isOverlayPortal = value;
+    _setFlag(SemanticsFlag.isOverlayPortal, value!);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts

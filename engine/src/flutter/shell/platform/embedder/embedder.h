@@ -256,6 +256,7 @@ typedef enum {
   ///
   /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
   kFlutterSemanticsFlagIsRequired = 1 << 30,
+  kFlutterSemanticsFlagIsOverlayPortal = 1 << 31,
 } FlutterSemanticsFlag;
 
 typedef enum {

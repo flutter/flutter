@@ -575,6 +575,7 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  static const int _kIsOverlayPortal = 1 << 31;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
   // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
@@ -973,6 +974,11 @@ class SemanticsFlag {
   /// {@endtemplate}
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
 
+  static const SemanticsFlag isOverlayPortal = SemanticsFlag._(
+    _kIsOverlayPortal,
+    'isOverlayPortal',
+  );
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -1008,6 +1014,7 @@ class SemanticsFlag {
     _kIsExpandedIndex: isExpanded,
     _kHasRequiredStateIndex: hasRequiredState,
     _kIsRequiredIndex: isRequired,
+    _kIsOverlayPortal: isOverlayPortal,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.

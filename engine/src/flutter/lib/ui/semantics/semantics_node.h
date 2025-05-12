@@ -143,6 +143,7 @@ struct SemanticsFlags {
   bool hasSelectedState = false;
   bool hasRequiredState = false;
   bool isRequired = false;
+  bool isOverlayPortal = false;
 };
 
 struct SemanticsNode {
