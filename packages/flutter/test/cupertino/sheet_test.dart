@@ -1306,38 +1306,54 @@ void main() {
     });
   });
 
-  testWidgets('CupertinoSheetTransition handles SystemUiOverlayStyle changes', (
+  testWidgets('CupertinoSheet causes SystemUiOverlayStyle changes', (
     WidgetTester tester,
   ) async {
-    final AnimationController controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      vsync: const TestVSync(),
-    );
-    addTearDown(controller.dispose);
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
 
-    final Animation<double> secondaryAnimation = Tween<double>(
-      begin: 1,
-      end: 0,
-    ).animate(controller);
+    final GlobalKey scaffoldKey = GlobalKey();
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: AnimatedBuilder(
-          animation: controller,
-          builder: (BuildContext context, Widget? child) {
-            return CupertinoSheetTransition(
-              primaryRouteAnimation: controller,
-              secondaryRouteAnimation: secondaryAnimation,
-              linearTransition: false,
-              child: const SizedBox(),
-            );
-          },
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Text('Page 2'));
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
 
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
     expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
     expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
+
+    // Returning to the previous page reverts the system UI.
+    Navigator.of(scaffoldKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
   });
 
   testWidgets(
