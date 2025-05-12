@@ -44,6 +44,7 @@ import 'router.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 import 'widget_inspector.dart';
+import 'window.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
@@ -459,6 +460,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
+    _windowingOwner = createWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1437,6 +1439,21 @@ mixin WidgetsBinding
   /// `supportedLocales`.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
+  }
+
+  /// The [WindowingOwner] is responsible for creating and managing [WindowController]s.
+  /// Default [WindowingOwner] supports standard Flutter desktop embedders.
+  ///
+  /// Custom [WindowingOwner] can be provided by overriding [createWindowingOwner].
+  WindowingOwner get windowingOwner => _windowingOwner;
+  late WindowingOwner _windowingOwner;
+
+  /// Creates the [WindowingOwner] instance available via [windowingOwner].
+  /// Can be overriden in subclasses to create embedder-specific [WindowingOwner]
+  /// implementation.
+  @protected
+  WindowingOwner createWindowingOwner() {
+    return WindowingOwner.createDefaultOwner();
   }
 }
 
