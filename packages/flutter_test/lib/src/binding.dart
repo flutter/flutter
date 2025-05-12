@@ -35,6 +35,7 @@ import 'test_default_binary_messenger.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
 import 'window.dart';
+import 'windowing.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -202,6 +203,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
+  }
+
+  @override
+  WindowingOwner createWindowingOwner() {
+    return TestWindowingOwner();
   }
 
   /// Deprecated. Will be removed in a future version of Flutter.
