@@ -39,7 +39,7 @@ struct RoundRect {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
-  constexpr static RoundRect MakeNinePatch(const Rect& rect,
+  inline static RoundRect MakeNinePatch(const Rect& rect,
                                            Scalar left,
                                            Scalar top,
                                            Scalar right,
