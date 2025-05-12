@@ -35,6 +35,7 @@
 ../../../flutter/display_list/effects/dl_image_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_mask_filter_unittests.cc
 ../../../flutter/display_list/geometry/dl_geometry_types_unittests.cc
+../../../flutter/display_list/geometry/dl_path_builder_unittests.cc
 ../../../flutter/display_list/geometry/dl_path_unittests.cc
 ../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
@@ -174,7 +175,6 @@
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_source_unittests.cc
-../../../flutter/impeller/geometry/path_unittests.cc
 ../../../flutter/impeller/geometry/rational_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc

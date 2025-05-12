@@ -72,8 +72,6 @@ class StrokePathSourceGeometry : public Geometry {
 ///        to perform path iteration.
 class StrokePathGeometry final : public StrokePathSourceGeometry {
  public:
-  StrokePathGeometry(const Path& path, const StrokeParameters& parameters);
-
   StrokePathGeometry(const flutter::DlPath& path,
                      const StrokeParameters& parameters);
 

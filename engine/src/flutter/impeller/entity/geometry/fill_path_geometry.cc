@@ -90,10 +90,6 @@ bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
   return coverage.Contains(rect);
 }
 
-FillPathGeometry::FillPathGeometry(const Path& path,
-                                   std::optional<Rect> inner_rect)
-    : FillPathSourceGeometry(inner_rect), path_(path) {}
-
 FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
                                    std::optional<Rect> inner_rect)
     : FillPathSourceGeometry(inner_rect), path_(path) {}

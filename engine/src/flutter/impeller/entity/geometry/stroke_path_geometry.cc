@@ -11,8 +11,6 @@
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/constants.h"
-#include "impeller/geometry/path_builder.h"
-#include "impeller/geometry/path_component.h"
 #include "impeller/geometry/separated_vector.h"
 #include "impeller/geometry/wangs_formula.h"
 #include "impeller/tessellator/path_tessellator.h"
@@ -807,10 +805,6 @@ std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
   max_radius *= std::max(stroke_.width, min_size);
   return path_bounds.Expand(max_radius).TransformBounds(transform);
 }
-
-StrokePathGeometry::StrokePathGeometry(const Path& path,
-                                       const StrokeParameters& parameters)
-    : StrokePathSourceGeometry(parameters), path_(path) {}
 
 StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
                                        const StrokeParameters& parameters)

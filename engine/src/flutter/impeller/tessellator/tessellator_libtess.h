@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 
-#include "impeller/geometry/path.h"
+#include "flutter/impeller/geometry/path_source.h"
 
 struct TESStesselator;
 
@@ -60,7 +60,7 @@ class TessellatorLibtess {
   ///
   /// @return The result status of the tessellation.
   ///
-  TessellatorLibtess::Result Tessellate(const Path& path,
+  TessellatorLibtess::Result Tessellate(const PathSource& path,
                                         Scalar tolerance,
                                         const BuilderCallback& callback);
 

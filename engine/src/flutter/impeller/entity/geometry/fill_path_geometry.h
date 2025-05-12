@@ -49,14 +49,11 @@ class FillPathSourceGeometry : public Geometry {
   FillPathSourceGeometry& operator=(const FillPathSourceGeometry&) = delete;
 };
 
-/// @brief A Geometry that produces fillable vertices from a |DlPath| or
-///        |impeller::Path| object using the |FillPathSourceGeometry|
-///        base class and a |DlPath| object to perform path iteration.
+/// @brief A Geometry that produces fillable vertices from a |DlPath| object
+///        using the |FillPathSourceGeometry| base class and the inherent
+///        ability for a |DlPath| object to perform path iteration.
 class FillPathGeometry final : public FillPathSourceGeometry {
  public:
-  explicit FillPathGeometry(const Path& path,
-                            std::optional<Rect> inner_rect = std::nullopt);
-
   explicit FillPathGeometry(const flutter::DlPath& path,
                             std::optional<Rect> inner_rect = std::nullopt);
 

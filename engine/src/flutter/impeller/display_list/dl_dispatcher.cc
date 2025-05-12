@@ -12,6 +12,7 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
@@ -32,8 +33,6 @@
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -563,7 +562,7 @@ void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
   // apart
   if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
     Point delta = (p1 - p0) / length;  // length > 0 already tested
-    PathBuilder builder;
+    flutter::DlPathBuilder builder;
 
     Scalar consumed = 0.0f;
     while (consumed < length) {
@@ -584,7 +583,7 @@ void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
 
     Paint stroke_paint = paint_;
     stroke_paint.style = Paint::Style::kStroke;
-    GetCanvas().DrawPath(DlPath(builder), stroke_paint);
+    GetCanvas().DrawPath(builder.TakePath(), stroke_paint);
   } else {
     drawLine(p0, p1);
   }
@@ -623,11 +622,11 @@ void DlDispatcherBase::drawDiffRoundRect(const DlRoundRect& outer,
                                          const DlRoundRect& inner) {
   AUTO_DEPTH_WATCHER(1u);
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
+  builder.SetFillType(flutter::DlPathFillType::kOdd);
   builder.AddRoundRect(outer);
   builder.AddRoundRect(inner);
-  builder.SetBounds(outer.GetBounds().Union(inner.GetBounds()));
-  GetCanvas().DrawPath(DlPath(builder, FillType::kOdd), paint_);
+  GetCanvas().DrawPath(builder.TakePath(), paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -690,19 +689,19 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
     // you are effectively drawing a sector of a circle.
     // https://github.com/flutter/flutter/issues/158567
     DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke.width / 2));
-    PathBuilder builder;
+    flutter::DlPathBuilder builder;
     Paint fill_paint = paint_;
     fill_paint.style = Paint::Style::kFill;
     fill_paint.stroke.width = 1;
     builder.AddArc(expanded_rect, Degrees(start_degrees),
                    Degrees(sweep_degrees),
                    /*use_center=*/true);
-    GetCanvas().DrawPath(DlPath(builder), fill_paint);
+    GetCanvas().DrawPath(builder.TakePath(), fill_paint);
   } else {
-    PathBuilder builder;
+    flutter::DlPathBuilder builder;
     builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
                    use_center);
-    GetCanvas().DrawPath(DlPath(builder), paint_);
+    GetCanvas().DrawPath(builder.TakePath(), paint_);
   }
 }
 

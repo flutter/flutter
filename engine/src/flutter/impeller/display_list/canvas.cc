@@ -14,7 +14,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -49,7 +49,6 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/rstransform.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -654,10 +653,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
     return;
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
+  auto path = flutter::DlPathBuilder{}  //
                   .AddRoundSuperellipse(rse)
-                  .SetBounds(rse.GetBounds())
                   .TakePath();
   DrawPath(flutter::DlPath(path), paint);
 }
