@@ -14,6 +14,7 @@
 enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
+  - ios-experimental
 
 platform_properties:
   staging_build_linux:
