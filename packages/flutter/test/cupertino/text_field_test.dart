@@ -8929,7 +8929,9 @@ void main() {
         // Selection handles are not hidden.
         final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
           find.descendant(
-            of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
             matching: find.byType(CustomPaint),
           ),
         );
