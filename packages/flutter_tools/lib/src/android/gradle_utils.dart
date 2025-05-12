@@ -52,7 +52,7 @@ const String templateKotlinGradlePluginVersion = '2.1.0';
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '36';
 const String minSdkVersion = '21';
-const String targetSdkVersion = '35';
+const String targetSdkVersion = '36';
 const String ndkVersion = '27.0.12077973';
 
 // Update these when new major versions of Java are supported by new Gradle
