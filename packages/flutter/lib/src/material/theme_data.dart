@@ -1651,8 +1651,19 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme ?? this.appBarTheme,
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
-      // TODO(huycozy): Remove this cast when bottomAppBarTheme is a BottomAppBarThemeData
-      bottomAppBarTheme: bottomAppBarTheme as BottomAppBarThemeData? ?? this.bottomAppBarTheme,
+      // TODO(huycozy): Remove these checks when bottomAppBarTheme is a BottomAppBarThemeData
+      bottomAppBarTheme: () {
+        if (bottomAppBarTheme != null) {
+          if (bottomAppBarTheme is BottomAppBarTheme) {
+            return bottomAppBarTheme.data;
+          } else if (bottomAppBarTheme is! BottomAppBarThemeData) {
+            throw ArgumentError(
+              'bottomAppBarTheme must be either a BottomAppBarThemeData or a BottomAppBarTheme',
+            );
+          }
+        }
+        return bottomAppBarTheme as BottomAppBarThemeData? ?? this.bottomAppBarTheme;
+      }(),
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       buttonTheme: buttonTheme ?? this.buttonTheme,

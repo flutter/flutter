@@ -492,11 +492,10 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    final double topPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+    final double topPadding = MediaQuery.heightOf(context) * _kTopGapRatio;
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      removeBottom: true,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding),
         child: ClipRRect(

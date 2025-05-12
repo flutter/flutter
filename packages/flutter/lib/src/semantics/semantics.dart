@@ -126,7 +126,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.row => _semanticsRow,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
-    SemanticsRole.menu => _noCheckRequired,
+    SemanticsRole.menu => _semanticsMenu,
     SemanticsRole.menuBar => _semanticsMenuBar,
     SemanticsRole.menuItem => _semanticsMenuItem,
     SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
@@ -257,6 +257,14 @@ sealed class _DebugSemanticsRoleChecks {
 
     node.visitChildren(validateRadioGroupChildren);
     return error;
+  }
+
+  static FlutterError? _semanticsMenu(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu cannot be empty');
+    }
+
+    return null;
   }
 
   static FlutterError? _semanticsMenuBar(SemanticsNode node) {
@@ -3351,7 +3359,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
         }
-        for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
+        for (final CustomSemanticsAction action in node._customSemanticsActions.keys) {
           customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         if (node.hintOverrides != null) {
