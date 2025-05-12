@@ -2986,8 +2986,8 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
 
   @override
   CupertinoThemeData resolveFrom(BuildContext context) {
-    // Only the cupertino override theme part will be resolved, except for the
-    // text theme.
+    // Only the cupertino override theme part will be resolved, as well as the
+    // default text theme.
     // If the color comes from the material theme it's not resolved.
     final NoDefaultCupertinoThemeData cupertinoOverrideThemeWithTextTheme = _cupertinoOverrideTheme
         .copyWith(textTheme: textTheme);
