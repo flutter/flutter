@@ -74,11 +74,15 @@ group("flutter") {
   testonly = true
 
   # Compile the engine.
-  public_deps = [
-    ":unittests",
-    "//flutter/shell/platform/embedder:flutter_engine",
-    "//flutter/sky",
-  ]
+  public_deps = []
+
+  if (!is_qnx) {
+    public_deps = [
+      ":unittests",
+      "//flutter/shell/platform/embedder:flutter_engine",
+      "//flutter/sky",
+    ]
+  }
 
   # Ensure the example for a sample embedder compiles.
   if (build_embedder_examples) {
@@ -93,7 +97,7 @@ group("flutter") {
   }
 
   # If enabled, compile the SDK / snapshot.
-  if (!is_fuchsia) {
+  if (!is_fuchsia && !is_qnx) {
     public_deps += [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
     if (build_engine_artifacts) {
@@ -154,7 +158,7 @@ group("flutter") {
   }
 
   # Build the standalone Impeller library.
-  if (is_mac || is_linux || is_win || is_android) {
+  if (is_mac || is_linux || is_win || is_android || is_qnx) {
     public_deps += [ "//flutter/impeller/toolkit/interop:sdk" ]
   }
 

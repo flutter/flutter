@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/logging.h"
 

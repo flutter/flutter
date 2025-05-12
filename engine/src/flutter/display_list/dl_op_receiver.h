@@ -7,15 +7,18 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
-#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/dl_vertices.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/impeller/typographer/text_frame.h"
+#include "flutter/third_party/skia/include/core/SkTextBlob.h"
 
 namespace flutter {
 
