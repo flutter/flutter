@@ -557,6 +557,17 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.impeller_antialiased_lines =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
 
+#if FML_OS_MACOSX || FML_OS_LINUX || FML_OS_WIN
+  // Process the EnableWindowing switch on macOS, Linux, and Windows.
+  {
+    std::string enable_windowing_value;
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::EnableWindowing),
+                                    &enable_windowing_value)) {
+      settings.enable_windowing = "true" == enable_windowing_value;
+    }
+  }
+#endif  // FML_OS_MACOSX || FML_OS_LINUX || FML_OS_WIN
+
   return settings;
 }
 

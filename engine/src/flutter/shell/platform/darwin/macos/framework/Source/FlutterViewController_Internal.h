@@ -53,6 +53,14 @@
  */
 - (void)updateSemantics:(nonnull const FlutterSemanticsUpdate2*)update;
 
+/**
+ * Removes this controller from the engine. The controller is removed from the engine
+ * on dealloc, however in multi-window scenario the controller needs to be unregistered
+ * from the engine eagerly - because the FlutterView needs to be removed from the
+ * Flutter isolate before destroying the controller and window.
+ */
+- (void)dispose;
+
 @end
 
 // Private methods made visible for testing

@@ -93,3 +93,11 @@ external void notifyEngineId(int? engineId);
 void testEngineId() {
   notifyEngineId(PlatformDispatcher.instance.engineId);
 }
+
+@pragma('vm:entry-point')
+void testWindowController() {
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+void testWindowControllerRetainCycle() {}
