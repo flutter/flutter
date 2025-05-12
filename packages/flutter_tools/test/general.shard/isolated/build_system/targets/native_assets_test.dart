@@ -73,7 +73,7 @@ void main() {
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
-    writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     iosEnvironment.defines.remove(kIosArchs);
 
@@ -90,7 +90,7 @@ void main() {
     'NativeAssets throws error if missing sdk root',
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <String>['foo'],
@@ -116,7 +116,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: isNativeAssetsEnabled),
       },
       () async {
-        writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
         await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
@@ -186,7 +186,7 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final List<CodeAsset> codeAssets = <CodeAsset>[
         CodeAsset(
@@ -249,7 +249,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       },
       () async {
-        writePackageConfigFile(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
         await fileSystem.file('libfoo.so').create();
 
         final List<CodeAsset> codeAssets = <CodeAsset>[
