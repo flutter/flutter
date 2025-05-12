@@ -756,10 +756,10 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   final Color? backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
-  static const int transitionMilliseconds = 800;
+  static const int kTransitionMilliseconds = 800;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: transitionMilliseconds);
+  Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition =>

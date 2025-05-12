@@ -46,7 +46,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Duration get transitionDuration =>
-      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.transitionMilliseconds);
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds);
 
   @override
   Widget buildTransitions<T>(
@@ -318,11 +318,11 @@ class _PredictiveBackSharedElementPageTransitionState
   //
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kCommitMilliseconds = 400;
-  static const Curve _curve = Curves.easeInOutCubicEmphasized;
-  static const Interval _commitInterval = Interval(
+  static const Curve _kCurve = Curves.easeInOutCubicEmphasized;
+  static const Interval _kCommitInterval = Interval(
     0.0,
-    _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.transitionMilliseconds,
-    curve: _curve,
+    _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds,
+    curve: _kCurve,
   );
 
   // Ideally this would match the curvature of the physical Android device being
@@ -388,7 +388,7 @@ class _PredictiveBackSharedElementPageTransitionState
     _animation.parent = switch (widget.phase) {
       _PredictiveBackPhase.commit => CurvedAnimation(
         parent: ReverseAnimation(widget.animation),
-        curve: _commitInterval,
+        curve: _kCommitInterval,
       ),
       _ => widget.animation,
     };
@@ -397,7 +397,7 @@ class _PredictiveBackSharedElementPageTransitionState
       _PredictiveBackPhase.commit => Tween<double>(
         begin: 0.0,
         end: _lastBounceAnimationValue,
-      ).animate(CurvedAnimation(parent: widget.animation, curve: _commitInterval)),
+      ).animate(CurvedAnimation(parent: widget.animation, curve: _kCommitInterval)),
       _ => ReverseAnimation(widget.animation),
     };
 
@@ -506,61 +506,60 @@ class _PredictiveBackFullscreenPageTransitionState
   // These values were eyeballed to match the Android spec for the Full Screen
   // page transition:
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
-  // TODO(justinmc): These should start with k.
-  static const double _scaleStart = 1.0;
-  static const double _scaleCommit = 0.95;
-  static const double _opacityFullyOpened = 1.0;
-  static const double _opacityStartTransition = 0.95;
-  static const double _commitAt = 0.65;
-  static const double _weightPreCommit = _commitAt;
-  static const double _weightPostCommit = 1 - _weightPreCommit;
-  static const double _screenWidthDivisionFactor = 20.0;
-  static const double _xShiftAdjustment = 8.0;
+  static const double _kScaleStart = 1.0;
+  static const double _kScaleCommit = 0.95;
+  static const double _kOpacityFullyOpened = 1.0;
+  static const double _kOpacityStartTransition = 0.95;
+  static const double _kCommitAt = 0.65;
+  static const double _kWeightPreCommit = _kCommitAt;
+  static const double _kWeightPostCommit = 1 - _kWeightPreCommit;
+  static const double _kScreenWidthDivisionFactor = 20.0;
+  static const double _kXShiftAdjustment = 8.0;
   static const Duration _kCommitDuration = Duration(
     milliseconds: _PredictiveBackSharedElementPageTransitionState._kCommitMilliseconds,
   );
 
   final Animatable<double> _primaryOpacityTween = Tween<double>(
-    begin: _opacityStartTransition,
-    end: _opacityFullyOpened,
+    begin: _kOpacityStartTransition,
+    end: _kOpacityFullyOpened,
   );
 
   final Animatable<double> _primaryScaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
-      tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
-      weight: _weightPreCommit,
+      tween: Tween<double>(begin: _kScaleStart, end: _kScaleStart),
+      weight: _kWeightPreCommit,
     ),
     TweenSequenceItem<double>(
-      tween: Tween<double>(begin: _scaleCommit, end: _scaleStart),
-      weight: _weightPostCommit,
+      tween: Tween<double>(begin: _kScaleCommit, end: _kScaleStart),
+      weight: _kWeightPostCommit,
     ),
   ]);
 
-  final ConstantTween<double> _secondaryScaleTweenCurrent = ConstantTween<double>(_scaleStart);
+  final ConstantTween<double> _secondaryScaleTweenCurrent = ConstantTween<double>(_kScaleStart);
   final TweenSequence<double> _secondaryTweenScale =
       TweenSequence<double>(<TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _scaleCommit, end: _scaleStart),
-          weight: _weightPreCommit,
+          tween: Tween<double>(begin: _kScaleCommit, end: _kScaleStart),
+          weight: _kWeightPreCommit,
         ),
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
-          weight: _weightPostCommit,
+          tween: Tween<double>(begin: _kScaleStart, end: _kScaleStart),
+          weight: _kWeightPostCommit,
         ),
       ]);
 
   final ConstantTween<double> _secondaryOpacityTweenCurrent = ConstantTween<double>(
-    _opacityFullyOpened,
+    _kOpacityFullyOpened,
   );
   final TweenSequence<double> _secondaryOpacityTween =
       TweenSequence<double>(<TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityStartTransition),
-          weight: _weightPreCommit,
+          tween: Tween<double>(begin: _kOpacityFullyOpened, end: _kOpacityStartTransition),
+          weight: _kWeightPreCommit,
         ),
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityFullyOpened),
-          weight: _weightPostCommit,
+          tween: Tween<double>(begin: _kOpacityFullyOpened, end: _kOpacityFullyOpened),
+          weight: _kWeightPostCommit,
         ),
       ]);
 
@@ -572,15 +571,15 @@ class _PredictiveBackFullscreenPageTransitionState
   void didChangeDependencies() {
     super.didChangeDependencies();
     final double screenWidth = MediaQuery.widthOf(context);
-    final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
+    final double xShift = (screenWidth / _kScreenWidthDivisionFactor) - _kXShiftAdjustment;
     _primaryPositionTween = TweenSequence<Offset>(<TweenSequenceItem<Offset>>[
       TweenSequenceItem<Offset>(
         tween: Tween<Offset>(begin: Offset.zero, end: Offset.zero),
-        weight: _weightPreCommit,
+        weight: _kWeightPreCommit,
       ),
       TweenSequenceItem<Offset>(
         tween: Tween<Offset>(begin: Offset(xShift, 0.0), end: Offset.zero),
-        weight: _weightPostCommit,
+        weight: _kWeightPostCommit,
       ),
     ]);
 
@@ -623,7 +622,7 @@ class _PredictiveBackFullscreenPageTransitionState
           // A sudden fadeout at the commit point, driven by time and not the
           // gesture.
           child: AnimatedOpacity(
-            opacity: widget.animation.value < _commitAt ? 0.0 : 1.0,
+            opacity: widget.animation.value < _kCommitAt ? 0.0 : 1.0,
             duration: _kCommitDuration,
             child: child,
           ),
