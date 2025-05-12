@@ -202,13 +202,6 @@ platform-windows:
       - '**/*.expect'
       - '**/*test_fixes*'
 
-team:
-  - changed-files:
-    - any-glob-to-any-file:
-      - docs/about/**/*
-      - docs/contributing/**/*
-      - docs/postmortems/**/*
-
 team-android:
   - changed-files:
     - any-glob-to-any-file:
