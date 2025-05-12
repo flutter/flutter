@@ -147,7 +147,8 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
   const _FixedSizeSlidingTransition({
     required this.isLTR,
     required this.offsetAnimation,
-    required this.size,
+    required this.width,
+    required this.height,
     required this.child,
   }) : super(listenable: offsetAnimation);
 
@@ -155,8 +156,11 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
   // left-to-right.
   final bool isLTR;
 
-  // The fixed size to impose on `child`.
-  final Size size;
+  // The fixed width to impose on `child`.
+  final double width;
+
+  // The fixed height to impose on `child`.
+  final double height;
 
   // The animated offset from the top-leading corner of the stack.
   //
@@ -178,8 +182,8 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
       top: offsetAnimation.value.dy,
       left: isLTR ? offsetAnimation.value.dx : null,
       right: isLTR ? null : offsetAnimation.value.dx,
-      width: size.width,
-      height: size.height,
+      width: width,
+      height: height,
       child: child,
     );
   }
@@ -2744,7 +2748,8 @@ class _NavigationBarComponentsTransition {
       offsetAnimation: animation
           .drive(CurveTween(curve: curve))
           .drive(anchorMovementInTransitionBox),
-      size: fromBox.size,
+      width: fromNavBarBox.size.width,
+      height: fromBox.size.height,
       child: child,
     );
   }
@@ -3247,7 +3252,8 @@ class _NavigationBarComponentsTransition {
     return _FixedSizeSlidingTransition(
       isLTR: isLTR,
       offsetAnimation: animation.drive(anchorMovementInTransitionBox),
-      size: toBox.size,
+      width: toBox.size.width,
+      height: toBox.size.height,
       child: FadeTransition(
         opacity: fadeInFrom(0.25),
         child: DefaultTextStyle(style: topTitleTextStyle, child: topMiddle.child),
