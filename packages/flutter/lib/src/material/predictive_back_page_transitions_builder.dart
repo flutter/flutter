@@ -18,7 +18,7 @@ import 'page_transitions_theme.dart';
 ///
 /// Predictive back is only supported on Android U and above, and if this
 /// [PageTransitionsBuilder] is used by any other platform, it will fall back to
-/// [ZoomPageTransitionsBuilder].
+/// [FadeForwardsPageTransitionsBuilder].
 ///
 /// When used on Android U and above, animates along with the back gesture to
 /// reveal the destination route. Can be canceled by dragging back towards the
@@ -28,12 +28,14 @@ import 'page_transitions_theme.dart';
 ///
 ///  * [PredictiveBackFullscreenPageTransitionsBuilder], which is another
 ///    variant of Android's predictive back page transitition.
+///  * [FadeForwardsPageTransitionsBuilder], which defines the default page transition
+///    that's similar to the one provided in Android 16.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
+///    that's similar to the one provided in Android 10.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
+///    that's similar to the one provided by Android 9.
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
+///    that's similar to the one provided by Android 8.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition,
@@ -66,7 +68,8 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
       ) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
-        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
+        // programmatic navigation, fall back to
+        // FadeForwardsPageTransitionsBuilder.
         if (route.popGestureInProgress) {
           return _PredictiveBackSharedElementPageTransition(
             isDelegatedTransition: true,
@@ -96,7 +99,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 /// Predictive back is only supported on Android U and above, and if this
 /// [PageTransitionsBuilder] is used by any other platform, it will fall back to
-/// [ZoomPageTransitionsBuilder].
+/// [FadeForwardsPageTransitionsBuilder].
 ///
 /// When used on Android U and above, animates along with the back gesture to
 /// reveal the destination route. Can be canceled by dragging back towards the
@@ -106,12 +109,14 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 ///  * [PredictiveBackPageTransitionsBuilder], which is the default Android
 ///    predictive back page transition.
+///  * [FadeForwardsPageTransitionsBuilder], which defines the default page
+///  transition that's similar to the one provided in Android 16.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
+///    that's similar to the one provided in Android 10.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
+///    that's similar to the one provided by Android 9.
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
+///    that's similar to the one provided by Android 8.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces,
