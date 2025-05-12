@@ -1340,101 +1340,39 @@ class SemanticsFlags {
 
   /// Convert flags to a list of string.
   List<String> toStrings() {
-    final List<String> trueFlags = <String>[];
-    if (hasCheckedState) {
-      trueFlags.add('hasCheckedState');
-    }
-    if (isChecked) {
-      trueFlags.add('isChecked');
-    }
-    if (isSelected) {
-      trueFlags.add('isSelected');
-    }
-    if (isButton) {
-      trueFlags.add('isButton');
-    }
-    if (isTextField) {
-      trueFlags.add('isTextField');
-    }
-    if (isFocused) {
-      trueFlags.add('isFocused');
-    }
-    if (hasEnabledState) {
-      trueFlags.add('hasEnabledState');
-    }
-    if (isEnabled) {
-      trueFlags.add('isEnabled');
-    }
-    if (isInMutuallyExclusiveGroup) {
-      trueFlags.add('isInMutuallyExclusiveGroup');
-    }
-    if (isHeader) {
-      trueFlags.add('isHeader');
-    }
-    if (isObscured) {
-      trueFlags.add('isObscured');
-    }
-    if (scopesRoute) {
-      trueFlags.add('scopesRoute');
-    }
-    if (namesRoute) {
-      trueFlags.add('namesRoute');
-    }
-    if (isHidden) {
-      trueFlags.add('isHidden');
-    }
-    if (isImage) {
-      trueFlags.add('isImage');
-    }
-    if (isLiveRegion) {
-      trueFlags.add('isLiveRegion');
-    }
-    if (hasToggledState) {
-      trueFlags.add('hasToggledState');
-    }
-    if (isToggled) {
-      trueFlags.add('isToggled');
-    }
-    if (hasImplicitScrolling) {
-      trueFlags.add('hasImplicitScrolling');
-    }
-    if (isMultiline) {
-      trueFlags.add('isMultiline');
-    }
-    if (isReadOnly) {
-      trueFlags.add('isReadOnly');
-    }
-    if (isFocusable) {
-      trueFlags.add('isFocusable');
-    }
-    if (isLink) {
-      trueFlags.add('isLink');
-    }
-    if (isSlider) {
-      trueFlags.add('isSlider');
-    }
-    if (isKeyboardKey) {
-      trueFlags.add('isKeyboardKey');
-    }
-    if (isCheckStateMixed) {
-      trueFlags.add('isCheckStateMixed');
-    }
-    if (hasExpandedState) {
-      trueFlags.add('hasExpandedState');
-    }
-    if (isExpanded) {
-      trueFlags.add('isExpanded');
-    }
-    if (hasSelectedState) {
-      trueFlags.add('hasSelectedState');
-    }
-    if (hasRequiredState) {
-      trueFlags.add('hasRequiredState');
-    }
-    if (isRequired) {
-      trueFlags.add('isRequired');
-    }
-    return trueFlags;
+    return <String>[
+      if (hasCheckedState) 'hasCheckedState',
+      if (isChecked) 'isChecked',
+      if (isSelected) 'isSelected',
+      if (isButton) 'isButton',
+      if (isTextField) 'isTextField',
+      if (isFocused) 'isFocused',
+      if (hasEnabledState) 'hasEnabledState',
+      if (isEnabled) 'isEnabled',
+      if (isInMutuallyExclusiveGroup) 'isInMutuallyExclusiveGroup',
+      if (isHeader) 'isHeader',
+      if (isObscured) 'isObscured',
+      if (scopesRoute) 'scopesRoute',
+      if (namesRoute) 'namesRoute',
+      if (isHidden) 'isHidden',
+      if (isImage) 'isImage',
+      if (isLiveRegion) 'isLiveRegion',
+      if (hasToggledState) 'hasToggledState',
+      if (isToggled) 'isToggled',
+      if (hasImplicitScrolling) 'hasImplicitScrolling',
+      if (isMultiline) 'isMultiline',
+      if (isReadOnly) 'isReadOnly',
+      if (isFocusable) 'isFocusable',
+      if (isLink) 'isLink',
+      if (isSlider) 'isSlider',
+      if (isKeyboardKey) 'isKeyboardKey',
+      if (isCheckStateMixed) 'isCheckStateMixed',
+      if (hasExpandedState) 'hasExpandedState',
+      if (isExpanded) 'isExpanded',
+      if (hasSelectedState) 'hasSelectedState',
+      if (hasRequiredState) 'hasRequiredState',
+      if (isRequired) 'isRequired',
+    ];
   }
 
   /// Checks if any of the boolean semantic flags are set to true
