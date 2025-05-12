@@ -13,10 +13,6 @@ import '../../src/common.dart';
 
 import 'hot_reload_index_html_samples.dart';
 
-void main() async {
-  await testAll(useDDCLibraryBundleFormat: false);
-}
-
 Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   await _testProject(
     HotReloadProject(),
