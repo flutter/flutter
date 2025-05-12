@@ -174,7 +174,27 @@ typedef _PredictiveBackGestureDetectorWidgetBuilder =
       PredictiveBackEvent? currentBackEvent,
     );
 
-enum _PredictiveBackPhase { idle, start, update, commit, cancel }
+/// The phases of a predictive back gesture.
+enum _PredictiveBackPhase {
+  /// There is no active predictive back gesture in progress.
+  idle,
+
+  /// The user pointer has contacted the screen.
+  start,
+
+  /// The user pointer has moved.
+  update,
+
+  /// The user pointer has released in a position in which Android has
+  /// determined that the back gesture is successful and the current route
+  /// should be popped.
+  commit,
+
+  /// The user pointer has released in a position in which Android has
+  /// determined that the back gesture should be canceled and the original route
+  /// should be shown.
+  cancel,
+}
 
 class _PredictiveBackGestureDetector extends StatefulWidget {
   const _PredictiveBackGestureDetector({required this.route, required this.builder});
