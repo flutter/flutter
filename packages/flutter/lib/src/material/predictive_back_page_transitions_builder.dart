@@ -301,7 +301,11 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 }
 
 /// Android's predictive back page shared element transition.
-/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
+///
+/// See also:
+///
+///  * <https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition>,
+///    which is the Android spec for this transition.
 class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
   const _PredictiveBackSharedElementPageTransition({
     required this.isDelegatedTransition,
@@ -393,7 +397,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
-  double _getYPosition(double screenHeight) {
+  double _getYShiftPosition(double screenHeight) {
     final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
     final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
 
@@ -439,9 +443,9 @@ class _PredictiveBackSharedElementPageTransitionState
       ),
       _ => Tween<Offset>(
         begin: switch (widget.currentBackEvent?.swipeEdge) {
-          SwipeEdge.left => Offset(xShift, _getYPosition(screenSize.height)),
-          SwipeEdge.right => Offset(-xShift, _getYPosition(screenSize.height)),
-          null => Offset(xShift, _getYPosition(screenSize.height)),
+          SwipeEdge.left => Offset(xShift, _getYShiftPosition(screenSize.height)),
+          SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
+          null => Offset(xShift, _getYShiftPosition(screenSize.height)),
         },
         // The y position before commit is given by the vertical drag, not by an
         // animation.
@@ -483,7 +487,7 @@ class _PredictiveBackSharedElementPageTransitionState
               _ =>
                 _lastDrag = Offset(
                   _positionAnimation.value.dx,
-                  _getYPosition(MediaQuery.heightOf(context)),
+                  _getYShiftPosition(MediaQuery.heightOf(context)),
                 ),
             },
             child: Opacity(
@@ -507,7 +511,11 @@ class _PredictiveBackSharedElementPageTransitionState
 }
 
 /// Android's predictive back page transition for full screen surfaces.
-/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
+///
+/// See also:
+///
+///  * <https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces>,
+///    which is the Android spec for this transition.
 class _PredictiveBackFullscreenPageTransition extends StatefulWidget {
   const _PredictiveBackFullscreenPageTransition({
     required this.animation,
