@@ -4,6 +4,8 @@ description: A benchmark for platform views, using hybrid composition on android
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter

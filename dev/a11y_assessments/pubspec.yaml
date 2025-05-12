@@ -5,6 +5,8 @@ version: 5.0.0+5
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter

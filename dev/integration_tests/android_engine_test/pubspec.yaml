@@ -4,6 +4,8 @@ publish_to: none
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   android_driver_extensions:
     path: ../../tools/android_driver_extensions

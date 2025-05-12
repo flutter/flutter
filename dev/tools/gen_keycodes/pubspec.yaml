@@ -4,6 +4,8 @@ description: Generates keycode source files from various resources.
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   args: 2.7.0
   http: 1.4.0

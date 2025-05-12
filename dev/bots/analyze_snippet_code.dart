@@ -989,7 +989,10 @@ class _SnippetChecker {
       if (!sourcePubSpec.existsSync()) {
         throw 'Cannot find pubspec.yaml at ${sourcePubSpec.path}, which is also used to analyze code snippets.';
       }
-      sourcePubSpec.copySync(targetPubSpec.path);
+      targetPubSpec.createSync(recursive: true);
+      String sourcePubSpecContents = sourcePubSpec.readAsStringSync();
+      sourcePubSpecContents = sourcePubSpecContents.replaceAll('resolution: workspace', '');
+      targetPubSpec.writeAsStringSync(sourcePubSpecContents);
     }
     final File targetAnalysisOptions = File(
       path.join(_tempDirectory.path, 'analysis_options.yaml'),
