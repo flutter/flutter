@@ -857,6 +857,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             hasUserMiddle: widget.middle != null,
             largeExpanded: widget.largeTitle != null,
             searchable: false,
+            automaticBackgroundVisibility: widget.automaticBackgroundVisibility,
             child: navBar,
           ),
         );
@@ -1592,6 +1593,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
         searchable: searchable,
+        automaticBackgroundVisibility: automaticBackgroundVisibility,
         child: navBar,
       ),
     );
@@ -2569,6 +2571,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.hasUserMiddle,
     required this.largeExpanded,
     required this.searchable,
+    required this.automaticBackgroundVisibility,
     required this.child,
   }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
@@ -2582,6 +2585,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final bool hasUserMiddle;
   final bool largeExpanded;
   final bool searchable;
+  final bool automaticBackgroundVisibility;
   final Widget child;
 
   RenderBox get renderBox {
@@ -2694,11 +2698,7 @@ class _NavigationBarTransition extends StatelessWidget {
       if (componentsTransition.topNavBarBottom != null) componentsTransition.topNavBarBottom!,
     ];
 
-    // The actual outer box is big enough to contain both the bottom and top
-    // navigation bars. It's not a direct Rect lerp because some components
-    // can actually be outside the linearly lerp'ed Rect in the middle of
-    // the animation, such as the topLargeTitle. The text scaling is disabled to
-    // avoid odd transitions between pages.
+    // The text scaling is disabled to avoid odd transitions between pages.
     return MediaQuery.withNoTextScaling(
       child: SizedBox(
         height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
@@ -2755,6 +2755,7 @@ class _NavigationBarComponentsTransition {
        topBackgroundColor = topNavBar.backgroundColor,
        bottomBorder = bottomNavBar.border,
        topBorder = topNavBar.border,
+       bottomAutomaticBackgroundVisibility = bottomNavBar.automaticBackgroundVisibility,
        userGestureInProgress =
            topNavBar.userGestureInProgress || bottomNavBar.userGestureInProgress,
        searchable = topNavBar.searchable && bottomNavBar.searchable,
@@ -2789,6 +2790,7 @@ class _NavigationBarComponentsTransition {
   final bool topLargeExpanded;
   final bool userGestureInProgress;
   final bool searchable;
+  final bool bottomAutomaticBackgroundVisibility;
 
   final Color? bottomBackgroundColor;
   final Color? topBackgroundColor;
@@ -2901,7 +2903,8 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget? get bottomNavBarBackground {
-    if (bottomBackgroundColor == null) {
+    if (bottomBackgroundColor == null ||
+        (bottomLargeExpanded && bottomAutomaticBackgroundVisibility)) {
       return null;
     }
     final Curve animationCurve =
