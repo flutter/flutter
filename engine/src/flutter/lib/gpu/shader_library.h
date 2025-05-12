@@ -79,6 +79,11 @@ extern Dart_Handle InternalFlutterGpu_ShaderLibrary_GetShader(
     Dart_Handle shader_name,
     Dart_Handle shader_wrapper);
 
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_ShaderLibrary_InitializeWithBytes(
+    Dart_Handle wrapper,
+    uint32_t bufferLength,
+    uint8_t* buffer);
 }  // extern "C"
 
 #endif  // FLUTTER_LIB_GPU_SHADER_LIBRARY_H_
