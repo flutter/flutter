@@ -43,11 +43,7 @@ class Context {
       exit(-1);
     }
 
-    final String? subCommand = validateCommand(arguments[0]);
-    if (subCommand == null) {
-      echoXcodeError(incompatibleErrorMessage);
-      exit(-1);
-    }
+    final String subCommand = validateCommand(arguments[0]);
     final String? platformName = arguments.length < 2 ? null : arguments[1];
     final TargetPlatform platform = parsePlatform(platformName);
     switch (subCommand) {
@@ -70,7 +66,7 @@ class Context {
 
   /// Validates the command argument matches one of the possible commands.
   /// Returns null if not.
-  String? validateCommand(String command) {
+  String validateCommand(String command) {
     switch (command) {
       case 'build':
       case 'prepare':
@@ -80,7 +76,8 @@ class Context {
       case 'test_vm_service_bonjour_service':
         return command;
       default:
-        return null;
+        echoXcodeError(incompatibleErrorMessage);
+        exit(-1);
     }
   }
 
@@ -283,6 +280,24 @@ class Context {
         }
     }
 
+    _embedNativeAssets(
+      platform,
+      xcodeFrameworksDir: xcodeFrameworksDir,
+      codesign: codesign,
+      expandedCodeSignIdentity: expandedCodeSignIdentity,
+    );
+
+    if (platform == TargetPlatform.ios) {
+      addVmServiceBonjourService();
+    }
+  }
+
+  void _embedNativeAssets(
+    TargetPlatform platform, {
+    required String xcodeFrameworksDir,
+    required bool codesign,
+    String? expandedCodeSignIdentity,
+  }) {
     // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     String projectPath = '$sourceRoot/..';
@@ -293,39 +308,38 @@ class Context {
     final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
-    if (nativeAssetsDir.existsSync()) {
+    if (!nativeAssetsDir.existsSync()) {
       if (verbose) {
-        print('♦ Copying native assets from $nativeAssetsPath.');
+        print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
       }
-      for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
-        if (entity is Directory) {
-          final String? frameworkName = parseFrameworkNameFromDirectory(entity);
-          if (frameworkName != null) {
-            runRsync(
-              extraArgs: <String>[
-                '--filter',
-                '- native_assets.yaml',
-                '--filter',
-                '- native_assets.json',
-              ],
-              entity.path,
-              xcodeFrameworksDir,
+      return;
+    }
+
+    if (verbose) {
+      print('♦ Copying native assets from $nativeAssetsPath.');
+    }
+    for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
+      if (entity is Directory) {
+        final String? frameworkName = parseFrameworkNameFromDirectory(entity);
+        if (frameworkName != null) {
+          runRsync(
+            extraArgs: <String>[
+              '--filter',
+              '- native_assets.yaml',
+              '--filter',
+              '- native_assets.json',
+            ],
+            entity.path,
+            xcodeFrameworksDir,
+          );
+          if (codesign && expandedCodeSignIdentity != null) {
+            _codesignFramework(
+              expandedCodeSignIdentity,
+              '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
             );
-            if (codesign) {
-              _codesignFramework(
-                expandedCodeSignIdentity,
-                '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
-              );
-            }
           }
         }
       }
-    } else if (verbose) {
-      print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
-    }
-
-    if (platform == TargetPlatform.ios) {
-      addVmServiceBonjourService();
     }
   }
 
