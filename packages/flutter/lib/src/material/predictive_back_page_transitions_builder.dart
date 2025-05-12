@@ -449,8 +449,6 @@ class _PredictiveBackSharedElementPageTransitionState
     return AnimatedBuilder(
       animation: widget.animation,
       builder: (BuildContext context, Widget? child) {
-        // TODO(justinmc): You could even split out things like Transform.scale into their own widgets, if there's not a lot of overlap in initState and didUpdateWidget.
-        // TODO(justinmc): Any better way to get this?
         _lastBounceAnimationValue = _bounceAnimation.value;
         return Transform.scale(
           scale: _scaleTween.evaluate(_bounceAnimation),
@@ -468,7 +466,6 @@ class _PredictiveBackSharedElementPageTransitionState
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: _paddingTween.evaluate(_bounceAnimation)),
                 child: ClipRRect(
-                  // TODO(justinmc): There is no radius for the incoming route when a route is pushed, should there be?
                   borderRadius: BorderRadius.circular(
                     _borderRadiusTween.evaluate(_bounceAnimation),
                   ),
