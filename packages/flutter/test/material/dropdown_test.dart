@@ -4449,4 +4449,67 @@ void main() {
     // The dropdown should still be open, i.e., there should be one widget with 'second' text.
     expect(find.text('second'), findsOneWidget);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/70294.
+  testWidgets(
+    'The previous selected item should be highlighted when reopening dropdown on mobile',
+    (WidgetTester tester) async {
+      final Color selectedColor = Colors.black.withValues(alpha: 0.12);
+      String currentValue = 'one';
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(focusColor: selectedColor),
+          home: Scaffold(
+            body: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return DropdownButton<String>(
+                    value: currentValue,
+                    items:
+                        menuItems
+                            .map(
+                              (String item) =>
+                                  DropdownMenuItem<String>(value: item, child: Text(item)),
+                            )
+                            .toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        currentValue = newValue!;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Make sure the current value of dropdown is the first one of items list menuItems.
+      expect(find.text('one'), findsOne);
+
+      // Tap to open the dropdown.
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+
+      // Select the second item from the dropdown list.
+      await tester.tap(find.text('two'));
+      await tester.pumpAndSettle();
+
+      // Make sure the current item of dropdown is the second item of items list menuItems.
+      expect(find.text('two'), findsOneWidget);
+
+      // Tap to reopen the dropdown.
+      await tester.tap(find.text('two'));
+      await tester.pumpAndSettle();
+
+      // Make sure the current selected item is highlighted with selectedColor.
+      final Ink selectedItemInk = tester.widget<Ink>(
+        find.ancestor(of: find.text('two'), matching: find.byType(Ink)).first,
+      );
+      final BoxDecoration decoration = selectedItemInk.decoration! as BoxDecoration;
+      expect(decoration.color, selectedColor);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
 }

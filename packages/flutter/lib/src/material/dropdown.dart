@@ -23,6 +23,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'input_decorator.dart';
 import 'material.dart';
@@ -217,14 +218,22 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       child = Padding(padding: padding, child: child);
     }
     child = SizedBox(height: widget.route.itemHeight, child: child);
+
+    final bool isSelected = widget.itemIndex == widget.route.selectedIndex;
+    final FocusHighlightMode highlightMode = FocusManager.instance.highlightMode;
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
-        autofocus: widget.itemIndex == widget.route.selectedIndex,
+        autofocus: isSelected,
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-        child: child,
+        // When highlightMode is traditional, the InkWell draws the selected item background color.
+        // When highlightMode is touch, insert an Ink to force the selected item background color.
+        child:
+            highlightMode == FocusHighlightMode.touch
+                ? Ink(color: isSelected ? Theme.of(context).focusColor : null, child: child)
+                : child,
       );
     }
     child = FadeTransition(opacity: _opacityAnimation, child: child);
