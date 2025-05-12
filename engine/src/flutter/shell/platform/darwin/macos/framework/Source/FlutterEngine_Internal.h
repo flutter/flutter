@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterWindowController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -223,6 +224,25 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  */
 @property(nonatomic, readonly) FlutterTextInputPlugin* textInputPlugin;
 
+@property(nonatomic, readonly) FlutterWindowController* windowController;
+
+/**
+ * Toggles multi-view support. Called by [FlutterWindowController] before
+ * creating a new window. This allows registering multiple view controllers
+ * with the engine.
+ */
+- (void)enableMultiView;
+
+/**
+ * Notifies the engine that window with the given identifier has been made key.
+ */
+- (void)windowDidBecomeKey:(FlutterViewIdentifier)viewIdentifier;
+
+/**
+ * Notifies the engine that window with the given identifier has resigned being key.
+ */
+- (void)windowDidResignKey:(FlutterViewIdentifier)viewIdentifier;
+
 /**
  * Returns an array of screen objects representing all of the screens available on the system.
  */
@@ -238,6 +258,7 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+
 @end
 
 NS_ASSUME_NONNULL_END

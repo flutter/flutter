@@ -57,6 +57,16 @@ source_set("common_cpp_input") {
   deps = [ "//flutter/fml:fml" ]
 }
 
+source_set("common_cpp_isolate_scope") {
+  public = [ "isolate_scope.h" ]
+  sources = [ "isolate_scope.cc" ]
+
+  deps = [
+    "$dart_src/runtime:dart_api",
+    "//flutter/fml:fml",
+  ]
+}
+
 source_set("common_cpp_enums") {
   public = [
     "app_lifecycle_state.h",
@@ -142,11 +152,14 @@ source_set("common_cpp_core") {
   public = [
     "geometry.h",
     "path_utils.h",
+    "windowing.h",
   ]
 
   sources = [ "path_utils.cc" ]
 
   public_configs = [ "//flutter:config" ]
+
+  deps = [ "//flutter/fml:fml" ]
 }
 
 if (enable_unittests) {
