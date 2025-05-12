@@ -82,7 +82,6 @@ void main() {
             margin: const EdgeInsets.all(150.0),
             color: Colors.yellow[200],
             child: PhysicalModel(
-              elevation: 9.0,
               color: Colors.blue[900]!,
               child: const SizedBox(height: 100.0, width: 100.0),
             ),
