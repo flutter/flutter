@@ -373,6 +373,29 @@ void main() {
       );
       expect(checkFlags.isExplicitPackageDependenciesEnabled, isTrue);
     });
+
+    test('Windowing availability and default enabled', () {
+      expect(windowing.master.enabledByDefault, false);
+      expect(windowing.master.available, true);
+      expect(windowing.beta.enabledByDefault, false);
+      expect(windowing.beta.available, true);
+      expect(windowing.stable.enabledByDefault, false);
+      expect(windowing.stable.available, true);
+    });
+
+    for (final String channel in <String>['master', 'beta', 'stable']) {
+      testWithoutContext('Windowing can be enabled with flag on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        testConfig.setValue('enable-windowing', true);
+        expect(featureFlags.isWindowingEnabled, true);
+      });
+
+      testWithoutContext('Windowing can be enabled with environment variable on $channel', () {
+        final FeatureFlags featureFlags = createFlags(channel);
+        platform.environment = <String, String>{'FLUTTER_WINDOWING': 'true'};
+        expect(featureFlags.isWindowingEnabled, true);
+      });
+    }
   });
 }
 

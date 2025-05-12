@@ -56,6 +56,9 @@ abstract class FeatureFlags {
   /// Whether explicit package dependency management is enabled.
   bool get isExplicitPackageDependenciesEnabled => false;
 
+  /// Whether multi-window support is enabled.
+  bool get isWindowingEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -76,6 +79,7 @@ const List<Feature> allFeatures = <Feature>[
   nativeAssets,
   swiftPackageManager,
   explicitPackageDependencies,
+  windowing,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -180,6 +184,16 @@ const Feature explicitPackageDependencies = Feature.fullyEnabled(
       'See also:\n'
       '* https://flutter.dev/to/flutter-plugins-configuration.\n'
       '* https://flutter.dev/to/flutter-gen-deprecation.',
+);
+
+/// Enable multi-window support.
+const Feature windowing = Feature(
+  name: 'support for multiple windows',
+  configSetting: 'enable-windowing',
+  environmentOverride: 'FLUTTER_WINDOWING',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

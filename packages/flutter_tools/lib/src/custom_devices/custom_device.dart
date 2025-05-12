@@ -306,6 +306,7 @@ class CustomDeviceAppSession {
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
       ],
+      if (debuggingOptions.enableWindowing) 'enable-windowing=true',
     ];
   }
 
