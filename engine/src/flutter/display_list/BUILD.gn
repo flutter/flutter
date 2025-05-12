@@ -306,7 +306,7 @@ if (enable_unittests) {
   }
 }
 
-if (is_ios) {
+if (is_ios && enable_unittests) {
   shared_library("ios_display_list_benchmarks") {
     testonly = true
     visibility = [ ":*" ]
