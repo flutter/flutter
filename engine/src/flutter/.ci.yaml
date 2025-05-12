@@ -9,6 +9,7 @@ enabled_branches:
   - master
   - flutter-\d+\.\d+-candidate\.\d+
   - fuchsia_f\d+[a-z]*
+  - ios-experimental
 
 platform_properties:
   linux:
