@@ -790,27 +790,23 @@ void main() {
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openEndDrawer();
 
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     // Check that the drawer open.
     expect(find.byType(Drawer), findsExactly(1));
 
     // Close the drawer programmatically.
     state.closeEndDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsExactly(0));
 
-    // Open it again, this time we'll try tapping on the modal barrier.
+    // Open it again, and make sure the drawer is available.
     state.openEndDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsExactly(1));
 
-    // Tap on the modal barrier.
     // Find the ModalBarrier.
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
@@ -858,27 +854,23 @@ void main() {
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openEndDrawer();
 
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     // Check that the drawer is open.
     expect(find.byType(Drawer), findsExactly(1));
 
     // Close the drawer programmatically.
     state.closeEndDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsExactly(0));
 
-    // Open it again, this time we'll try tapping on the modal barrier.
+    // Open it again, and make sure the drawer is available.
     state.openEndDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsExactly(1));
 
-    // Tap on the modal barrier.
     // Find the ModalBarrier.
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
@@ -894,7 +886,7 @@ void main() {
     await tester.tapAt(tapPosition);
     await tester.pumpAndSettle();
 
-    // Make sure the drawer is still present, and by tapping on the modal barrier
+    // Make sure the drawer is still present, and that tapping on the modal barrier
     // didn't dismiss it, since the drawerBarrierDismissible property is set to false.
     expect(find.byType(Drawer), findsExactly(1));
   });
