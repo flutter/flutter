@@ -32,24 +32,20 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot reload works without error', () async {
-      await flutter.run(
-        device: GoogleChromeDevice.kChromeDeviceId,
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
         additionalCommandArgs: additionalCommandArgs,
       );
       await flutter.hotReload();
     });
 
     testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-      if (chrome) {
-        await flutter.run(
-          device: GoogleChromeDevice.kChromeDeviceId,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      } else {
-        await flutter.run(
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      }
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       // Capture how many *real* hot reloads occur.
       int numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
@@ -101,16 +97,11 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           sawTick2.complete();
         }
       });
-      if (chrome) {
-        await flutter.run(
-          device: GoogleChromeDevice.kChromeDeviceId,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      } else {
-        await flutter.run(
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      }
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await sawTick1.future;
       project.uncommentHotReloadPrint();
       try {
@@ -123,18 +114,12 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot restart works without error', () async {
-      if (chrome) {
-        await flutter.run(
-          verbose: true,
-          device: GoogleChromeDevice.kChromeDeviceId,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      } else {
-        await flutter.run(
-          verbose: true,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      }
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        verbose: true,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await flutter.hotRestart();
     });
 
@@ -152,20 +137,13 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           sawDebuggerPausedMessage.complete();
         }
       });
-      if (chrome) {
-        await flutter.run(
-          withDebugger: true,
-          startPaused: true,
-          device: GoogleChromeDevice.kChromeDeviceId,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      } else {
-        await flutter.run(
-          withDebugger: true,
-          startPaused: true,
-          additionalCommandArgs: additionalCommandArgs,
-        );
-      }
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        withDebugger: true,
+        startPaused: true,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await flutter
           .resume(); // we start paused so we can set up our TICK 1 listener before the app starts
       unawaited(
@@ -238,18 +216,12 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
             sawDebuggerPausedMessage2.complete();
           }
         });
-        if (chrome) {
-          await flutter.run(
-            withDebugger: true,
-            device: GoogleChromeDevice.kChromeDeviceId,
-            additionalCommandArgs: additionalCommandArgs,
-          );
-        } else {
-          await flutter.run(
-            withDebugger: true,
-            additionalCommandArgs: additionalCommandArgs,
-          );
-        }
+        await runFlutterWithDevice(
+          flutter,
+          chrome: chrome,
+          withDebugger: true,
+          additionalCommandArgs: additionalCommandArgs,
+        );
         await Future<void>.delayed(const Duration(seconds: 1));
         await sawTick1.future;
         await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
@@ -284,4 +256,31 @@ bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {
       event['params'] != null &&
       (event['params']! as Map<String, Object?>)['progressId'] == 'hot.reload' &&
       (event['params']! as Map<String, Object?>)['finished'] == true;
+}
+
+// Helper to run flutter with or without device param based on chrome flag.
+Future<void> runFlutterWithDevice(
+  FlutterRunTestDriver flutter, {
+  required bool chrome,
+  bool verbose = false,
+  bool withDebugger = false,
+  bool startPaused = false,
+  List<String> additionalCommandArgs = const <String>[],
+}) async {
+  if (chrome) {
+    await flutter.run(
+      verbose: verbose,
+      withDebugger: withDebugger,
+      startPaused: startPaused,
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: additionalCommandArgs,
+    );
+  } else {
+    await flutter.run(
+      verbose: verbose,
+      withDebugger: withDebugger,
+      startPaused: startPaused,
+      additionalCommandArgs: additionalCommandArgs,
+    );
+  }
 }
