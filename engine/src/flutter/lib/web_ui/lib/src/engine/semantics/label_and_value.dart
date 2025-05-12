@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -446,7 +447,21 @@ class LabelAndValue extends SemanticBehavior {
   /// instead.
   LabelRepresentation preferredRepresentation;
 
+  /// Whether the current browser supports the `aria-description` attribute.
+  ///
+  /// `aria-description` is a newer ARIA attribute intended to provide additional
+  /// description information separate from `aria-label`.
+  ///
+  /// Some older browsers and screen readers do not recognize it. In those cases,
+  /// we fallback to using `aria-describedby` with a hidden element instead.
+  ///
+  /// This check is run only once and cached for performance.
+  /// It works by setting and immediately reading back an `aria-description`
+  /// attribute on a dummy DOM element.
+  ///
+  /// See: https://w3c.github.io/aria/#aria-description
   static bool? _supportsAriaDescription;
+
   static bool get supportsAriaDescription {
     if (_supportsAriaDescription == null) {
       final test = domDocument.createElement('div');
@@ -455,6 +470,18 @@ class LabelAndValue extends SemanticBehavior {
     }
     return _supportsAriaDescription!;
   }
+
+  /// Allows tests to override the `supportsAriaDescription` value.
+  ///
+  /// This is only exposed for testing and should not be used in production code.
+  @visibleForTesting
+  static set supportsAriaDescriptionForTest(bool? value) {
+    _supportsAriaDescription = value;
+  }
+
+  /// For testing only: overrides isIncrementable value.
+  @visibleForTesting
+  static bool? testIsIncrementableOverride;
 
   String? _describedById;
   DomElement? _describedBySpan;
@@ -485,7 +512,8 @@ class LabelAndValue extends SemanticBehavior {
     }
 
     // 3. Handle value for non-incrementable widgets only
-    if (!semanticsObject.isIncrementable && semanticsObject.hasValue) {
+    final isIncrementable = testIsIncrementableOverride ?? semanticsObject.isIncrementable;
+    if (!isIncrementable && semanticsObject.hasValue) {
       final value = semanticsObject.value!;
       if (num.tryParse(value) != null) {
         owner.setAttribute('aria-valuenow', value);
@@ -506,20 +534,20 @@ class LabelAndValue extends SemanticBehavior {
     if (hint != null && tooltip != null && hint.trim().isNotEmpty && tooltip.trim().isNotEmpty) {
       return '$hint $tooltip';
     }
-    if (hint != null && hint.trim().isNotEmpty) return hint;
-    if (tooltip != null && tooltip.trim().isNotEmpty) return tooltip;
+    if (hint != null && hint.trim().isNotEmpty) {
+      return hint;
+    }
+    if (tooltip != null && tooltip.trim().isNotEmpty) {
+      return tooltip;
+    }
     return null;
   }
 
   void _ensureDescribedBy(String description) {
-    if (_describedById == null) {
-      _describedById = 'flt-hint-${semanticsObject.id}';
-    }
-    if (_describedBySpan == null) {
-      _describedBySpan = domDocument.createElement('span');
-      _describedBySpan!.id = _describedById!;
-      _describedBySpan!.setAttribute('hidden', '');
-    }
+    _describedById ??= 'flt-hint-${semanticsObject.id}';
+    _describedBySpan ??= domDocument.createElement('span');
+    _describedBySpan!.id = _describedById!;
+    _describedBySpan!.setAttribute('hidden', '');
     _describedBySpan!.text = description;
     // Attach as a child of the semantics element, not document.body
     if (_describedBySpan!.parentNode != owner.element) {
@@ -552,7 +580,6 @@ class LabelAndValue extends SemanticBehavior {
   /// such as the title of a dialog. This method handles that situation.
   /// Different label representations use different DOM structures, so the
   /// actual work is delegated to [LabelRepresentationBehavior].
-  @override
   void focusAsRouteDefault() {
     // Focus the main element directly, since all ARIA attributes are on it.
     owner.element.focusWithoutScroll();
