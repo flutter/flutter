@@ -377,7 +377,8 @@ class _PredictiveBackSharedElementPageTransitionState
 
     final double rawYShift = currentTouchY - startTouchY;
     final double easedYShift =
-        _curve.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
+        // This curve was eyeballed on a Pixel 9 running Android 16.
+        Curves.easeOut.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
         rawYShift.sign *
         yShiftMax;
 
@@ -452,9 +453,6 @@ class _PredictiveBackSharedElementPageTransitionState
         // TODO(justinmc): You could even split out things like Transform.scale into their own widgets, if there's not a lot of overlap in initState and didUpdateWidget.
         // TODO(justinmc): Any better way to get this?
         _lastBounceAnimationValue = _bounceAnimation.value;
-        print(
-          'justin _commitAnimation2 = ${_commitAnimation.value}, widget.animation = ${widget.animation.value}.',
-        );
         return Transform.scale(
           scale: _scaleTween.evaluate(_bounceAnimation),
           child: Transform.translate(
