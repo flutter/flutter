@@ -364,8 +364,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   late Animation<Offset> _positionAnimation;
 
-  double _lastXDrag = 0.0;
-  double _lastYDrag = 0.0;
+  Offset _lastDrag = Offset.zero;
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
@@ -410,7 +409,7 @@ class _PredictiveBackSharedElementPageTransitionState
     final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
     _positionAnimation = _animation.drive(switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<Offset>(
-        begin: Offset(_lastXDrag, _lastYDrag),
+        begin: _lastDrag,
         end: Offset(screenSize.height * _kYPositionFactor, 0.0),
       ),
       _ => Tween<Offset>(
@@ -458,11 +457,11 @@ class _PredictiveBackSharedElementPageTransitionState
           child: Transform.translate(
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _positionAnimation.value,
-              // TODO(justinmc): _lastDrag, an Offset?
-              _ => Offset(
-                _lastXDrag = _positionAnimation.value.dx,
-                _lastYDrag = _getYPosition(MediaQuery.heightOf(context)),
-              ),
+              _ =>
+                _lastDrag = Offset(
+                  _positionAnimation.value.dx,
+                  _getYPosition(MediaQuery.heightOf(context)),
+                ),
             },
             child: Opacity(
               opacity: _opacityTween.evaluate(_commitAnimation),
