@@ -1823,4 +1823,31 @@ void main() {
     // Back to page 2.
     expect(find.text('Page 2'), findsOneWidget);
   });
+
+  testWidgets('Back label is not clipped mid-transition', (WidgetTester tester) async {
+    const String label = 'backbackback';
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+      from: const CupertinoNavigationBar(),
+      to: const CupertinoNavigationBar(previousPageTitle: label),
+    );
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // The variant in transition and the static variant.
+    expect(find.text(label), findsNWidgets(2));
+
+    // At the end of the transition, the label in transition and the static
+    // label both have the same fully extended width.
+    expect(
+      tester.getTopRight(find.text(label).first).dx,
+      tester.getTopRight(find.text(label).last).dx,
+    );
+
+    // End the transition.
+    await tester.pumpAndSettle();
+    expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
+  });
 }
