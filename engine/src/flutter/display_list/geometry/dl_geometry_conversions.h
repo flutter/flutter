@@ -78,7 +78,7 @@ inline const DlRoundRect ToDlRoundRect(const SkRRect& rrect) {
       });
 }
 
-inline  DlMatrix ToDlMatrix(const SkMatrix& matrix) {
+inline DlMatrix ToDlMatrix(const SkMatrix& matrix) {
   // clang-format off
   return DlMatrix::MakeColumn(
       matrix[SkMatrix::kMScaleX], matrix[SkMatrix::kMSkewY],  0.0f, matrix[SkMatrix::kMPersp0],
@@ -89,7 +89,7 @@ inline  DlMatrix ToDlMatrix(const SkMatrix& matrix) {
   // clang-format on
 }
 
-inline  DlMatrix ToDlMatrix(const SkM44& matrix) {
+inline DlMatrix ToDlMatrix(const SkM44& matrix) {
   DlMatrix dl_matrix;
   matrix.getColMajor(dl_matrix.m);
   return dl_matrix;
@@ -172,8 +172,7 @@ inline const SkRRect ToSkRRect(const DlRoundRect& round_rect) {
 //
 // Skia does not support rounded superellipses directly, so rendering
 // `DlRoundSuperellipses` on Skia requires falling back to RRect.
-inline  const SkRRect ToApproximateSkRRect(
-    const DlRoundSuperellipse& rse) {
+inline const SkRRect ToApproximateSkRRect(const DlRoundSuperellipse& rse) {
   return ToSkRRect(rse.ToApproximateRoundRect());
 };
 

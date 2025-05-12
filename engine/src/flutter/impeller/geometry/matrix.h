@@ -573,9 +573,9 @@ struct Matrix {
   }
 
   static inline Matrix MakePerspective(Radians fov_y,
-                                          Scalar aspect_ratio,
-                                          Scalar z_near,
-                                          Scalar z_far) {
+                                       Scalar aspect_ratio,
+                                       Scalar z_near,
+                                       Scalar z_far) {
     Scalar height = std::tan(fov_y.radians * 0.5f);
     Scalar width = height * aspect_ratio;
 
@@ -599,8 +599,8 @@ struct Matrix {
   }
 
   static inline Matrix MakeLookAt(Vector3 position,
-                                     Vector3 target,
-                                     Vector3 up) {
+                                  Vector3 target,
+                                  Vector3 up) {
     Vector3 forward = (target - position).Normalize();
     Vector3 right = up.Cross(forward);
     up = forward.Cross(right);

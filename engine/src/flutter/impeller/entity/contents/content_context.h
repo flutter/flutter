@@ -322,7 +322,7 @@ class ContentContext {
 
     struct Equal {
       bool operator()(const RuntimeEffectPipelineKey& lhs,
-                                const RuntimeEffectPipelineKey& rhs) const {
+                      const RuntimeEffectPipelineKey& rhs) const {
         return lhs.unique_entrypoint_name == rhs.unique_entrypoint_name &&
                lhs.options.ToKey() == rhs.options.ToKey();
       }

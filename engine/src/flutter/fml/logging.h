@@ -7,9 +7,9 @@
 
 #include <sstream>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/log_level.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/build_config.h"
 
 namespace fml {
 
@@ -75,9 +75,9 @@ constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
     KillProcess();
   }
 #if defined(_MSC_VER) && !defined(__clang__)
-    __assume(false);
+  __assume(false);
 #else
-    __builtin_unreachable();
+  __builtin_unreachable();
 #endif
 }
 
@@ -128,7 +128,7 @@ constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
 #define FML_UNREACHABLE()                          \
   {                                                \
     FML_LOG(ERROR) << "Reached unreachable code."; \
-    ::fml::KillProcess2(true);             \
+    ::fml::KillProcess2(true);                     \
   }
 
 #endif  // FLUTTER_FML_LOGGING_H_

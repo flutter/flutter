@@ -931,7 +931,9 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win', 'qnx']
+      '--target-os',
+      type=str,
+      choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win', 'qnx']
   )
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(

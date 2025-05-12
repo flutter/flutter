@@ -190,9 +190,7 @@ source_set("fml") {
   }
 
   if (is_qnx) {
-    sources += [
-      "platform/qnx/paths_qnx.cc"
-    ]
+    sources += [ "platform/qnx/paths_qnx.cc" ]
   }
 
   if (is_fuchsia) {

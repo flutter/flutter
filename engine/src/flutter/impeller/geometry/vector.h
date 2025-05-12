@@ -55,9 +55,7 @@ struct Vector3 {
     return ((x * other.x) + (y * other.y) + (z * other.z));
   }
 
-  Vector3 Abs() const {
-    return {std::fabs(x), std::fabs(y), std::fabs(z)};
-  }
+  Vector3 Abs() const { return {std::fabs(x), std::fabs(y), std::fabs(z)}; }
 
   constexpr Vector3 Cross(const Vector3& other) const {
     return {
@@ -79,9 +77,7 @@ struct Vector3 {
     return {std::floor(x), std::floor(y), std::floor(z)};
   }
 
-  Vector3 Ceil() const {
-    return {std::ceil(x), std::ceil(y), std::ceil(z)};
-  }
+  Vector3 Ceil() const { return {std::ceil(x), std::ceil(y), std::ceil(z)}; }
 
   Vector3 Round() const {
     return {std::round(x), std::round(y), std::round(z)};

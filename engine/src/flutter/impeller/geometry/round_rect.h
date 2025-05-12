@@ -29,8 +29,8 @@ struct RoundRect {
   }
 
   static RoundRect MakeRectXY(const Rect& rect,
-                                        Scalar x_radius,
-                                        Scalar y_radius) {
+                              Scalar x_radius,
+                              Scalar y_radius) {
     return MakeRectRadii(rect,
                          RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
   }
@@ -40,10 +40,10 @@ struct RoundRect {
   }
 
   inline static RoundRect MakeNinePatch(const Rect& rect,
-                                           Scalar left,
-                                           Scalar top,
-                                           Scalar right,
-                                           Scalar bottom) {
+                                        Scalar left,
+                                        Scalar top,
+                                        Scalar right,
+                                        Scalar bottom) {
     return MakeRectRadii(
         rect, RoundingRadii::MakeNinePatch(left, top, right, bottom));
   }
@@ -96,9 +96,9 @@ struct RoundRect {
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
   [[nodiscard]] RoundRect Expand(Scalar left,
-                                           Scalar top,
-                                           Scalar right,
-                                           Scalar bottom) const {
+                                 Scalar top,
+                                 Scalar right,
+                                 Scalar bottom) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -107,8 +107,7 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] RoundRect Expand(Scalar horizontal,
-                                           Scalar vertical) const {
+  [[nodiscard]] RoundRect Expand(Scalar horizontal, Scalar vertical) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
