@@ -1574,6 +1574,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
+    final Widget effectiveSuffixIcon = IconTheme(
+      data: IconThemeData(color: _iconColor, size: widget.iconSize),
+      child: widget.icon ?? widget._inputDecoration?.suffixIcon ?? defaultIcon,
+    );
 
     Widget result = DefaultTextStyle(
       style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
@@ -1586,10 +1590,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
-              IconTheme(
-                data: IconThemeData(color: _iconColor, size: widget.iconSize),
-                child: widget.icon ?? defaultIcon,
-              ),
+              if (widget._inputDecoration == null) effectiveSuffixIcon,
             ],
           ),
         ),
@@ -1632,7 +1633,27 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // visible only for filled dropdown button, see:
     // https://m2.material.io/components/menus#dropdown-menu
     if (widget._inputDecoration != null) {
-      InputDecoration effectiveDecoration = widget._inputDecoration!;
+      final bool filled =
+          widget._inputDecoration?.filled ?? Theme.of(context).inputDecorationTheme.filled;
+      final bool oulined =
+          widget._inputDecoration?.border?.isOutline ??
+          Theme.of(context).inputDecorationTheme.border?.isOutline ??
+          false;
+
+      final double suffixIconEndMargin = (filled || oulined) ? 12.0 : 0.0;
+      InputDecoration effectiveDecoration = widget._inputDecoration!.copyWith(
+        // Override the suffix icon constraints to allow the
+        // icon alignment to match the regular dropdown button.
+        suffixIconConstraints: BoxConstraints(
+          minWidth: widget.iconSize + suffixIconEndMargin,
+          minHeight: widget.iconSize,
+        ),
+        // suffixIconGap: 0.0,
+        suffixIcon: Padding(
+          padding: EdgeInsetsGeometry.directional(end: suffixIconEndMargin),
+          child: effectiveSuffixIcon,
+        ),
+      );
       if (_hasPrimaryFocus) {
         final Color? focusColor = widget.focusColor ?? effectiveDecoration.focusColor;
         // For compatibility, override the fill color when focusColor is set.
