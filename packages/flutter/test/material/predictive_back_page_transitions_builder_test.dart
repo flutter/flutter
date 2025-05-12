@@ -47,7 +47,7 @@ void main() {
         expect(find.text('push'), findsOneWidget);
         expect(find.text('page b'), findsNothing);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         await tester.tap(find.text('push'));
         await tester.pumpAndSettle();
@@ -55,7 +55,7 @@ void main() {
         expect(find.text('push'), findsNothing);
         expect(find.text('page b'), findsOneWidget);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         // Only Android supports backGesture channel methods. Other platforms will
         // do nothing.
@@ -80,7 +80,7 @@ void main() {
         await tester.pump();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
-        expect(_findFallbackPageTransition(), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
         final Offset startPageBOffset = tester.getTopLeft(find.text('page b'));
         expect(startPageBOffset.dx, 0.0);
 
@@ -101,7 +101,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-        expect(_findFallbackPageTransition(), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
         final Offset updatePageBOffset = tester.getTopLeft(find.text('page b'));
         expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
@@ -118,7 +118,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
         expect(find.text('push'), findsOneWidget);
         expect(find.text('page b'), findsNothing);
       },
@@ -158,7 +158,7 @@ void main() {
         expect(find.text('push'), findsOneWidget);
         expect(find.text('page b'), findsNothing);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         await tester.tap(find.text('push'));
         await tester.pumpAndSettle();
@@ -166,7 +166,7 @@ void main() {
         expect(find.text('push'), findsNothing);
         expect(find.text('page b'), findsOneWidget);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         // Only Android supports backGesture channel methods. Other platforms will
         // do nothing.
@@ -191,7 +191,7 @@ void main() {
         await tester.pump();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
-        expect(_findFallbackPageTransition(), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
         final Offset startPageBOffset = tester.getTopLeft(find.text('page b'));
         expect(startPageBOffset.dx, 0.0);
 
@@ -211,7 +211,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-        expect(_findFallbackPageTransition(), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
         final Offset updatePageBOffset = tester.getTopLeft(find.text('page b'));
         expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
@@ -230,7 +230,7 @@ void main() {
         expect(find.text('push'), findsNothing);
         expect(find.text('page b'), findsOneWidget);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
       },
       variant: TargetPlatformVariant.all(),
     );
@@ -314,7 +314,7 @@ void main() {
         expect(find.text('page b'), findsNothing);
         expect(find.text('Nested route inside of page b'), findsNothing);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         await tester.tap(find.text('push'));
         await tester.pumpAndSettle();
@@ -323,7 +323,7 @@ void main() {
         expect(find.text('page b'), findsOneWidget);
         expect(find.text('Nested route inside of page b'), findsNothing);
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         // Only Android supports backGesture channel methods. Other platforms will
         // do nothing.
@@ -348,7 +348,7 @@ void main() {
         await tester.pump();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
-        expect(_findFallbackPageTransition(), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
         final Offset startPageBOffset = tester.getTopLeft(find.text('page b'));
         expect(startPageBOffset.dx, 0.0);
 
@@ -368,7 +368,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-        expect(_findFallbackPageTransition(), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
         final Offset updatePageBOffset = tester.getTopLeft(find.text('page b'));
         expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
@@ -402,7 +402,7 @@ void main() {
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
         // Despite using a PredictiveBackPageTransitions, the new route has not
         // received a start event, so it is still using the fallback transition.
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
         final Offset update2PageBOffset = tester.getTopLeft(find.text('page b'));
         expect(update2PageBOffset.dx, greaterThan(updatePageBOffset.dx));
@@ -420,7 +420,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
         expect(find.text('push'), findsOneWidget);
         expect(find.text('page b'), findsNothing);
         expect(find.text('Nested route inside of page b'), findsNothing);
@@ -469,7 +469,7 @@ void main() {
       expect(find.text('push c'), findsNothing);
       expect(find.text('page c'), findsNothing);
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-      expect(_findFallbackPageTransition(), findsOneWidget);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
       await tester.tap(find.text('push b'));
       await tester.pumpAndSettle();
@@ -478,7 +478,7 @@ void main() {
       expect(find.text('push c'), findsOneWidget);
       expect(find.text('page c'), findsNothing);
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-      expect(_findFallbackPageTransition(), findsOneWidget);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
       await tester.tap(find.text('push c'));
       await tester.pumpAndSettle();
@@ -487,7 +487,7 @@ void main() {
       expect(find.text('push c'), findsNothing);
       expect(find.text('page c'), findsOneWidget);
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-      expect(_findFallbackPageTransition(), findsOneWidget);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
       // Only Android supports backGesture channel methods. Other platforms will
       // do nothing.
@@ -512,7 +512,7 @@ void main() {
       await tester.pump();
 
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
-      expect(_findFallbackPageTransition(), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
       // Drag the system back gesture far enough to commit.
       final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
@@ -531,7 +531,7 @@ void main() {
       await tester.pump();
 
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-      expect(_findFallbackPageTransition(), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
       // Commit the system back gesture.
       final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
@@ -547,7 +547,7 @@ void main() {
       // The predictive back page transitions still exist because the outgoing
       // animation has not yet finished.
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-      expect(_findFallbackPageTransition(), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
       expect(find.text('push'), findsNothing);
       expect(find.text('push c'), findsOneWidget);
@@ -570,7 +570,7 @@ void main() {
       await tester.pump();
 
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-      expect(_findFallbackPageTransition(), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
       // Drag the system back gesture far enough to commit.
       final ByteData updateMessage2 = const StandardMethodCodec().encodeMethodCall(
@@ -589,7 +589,7 @@ void main() {
       await tester.pump();
 
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(3));
-      expect(_findFallbackPageTransition(), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
 
       // Commit the system back gesture.
       final ByteData commitMessage2 = const StandardMethodCodec().encodeMethodCall(
@@ -603,7 +603,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-      expect(_findFallbackPageTransition(), findsOneWidget);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
       expect(find.text('push b'), findsOneWidget);
       expect(find.text('push c'), findsNothing);
@@ -629,9 +629,14 @@ Finder _findPredictiveBackPageTransition(PageTransitionsBuilder pageTransitionsB
   );
 }
 
-Finder _findFallbackPageTransition() {
+Finder _findFallbackPageTransition(PageTransitionsBuilder pageTransitionsBuilder) {
+  final String fallback = switch (pageTransitionsBuilder) {
+    final PredictiveBackPageTransitionsBuilder _ => '_FadeForwardsPageTransition',
+    final PredictiveBackFullscreenPageTransitionsBuilder _ => '_ZoomPageTransition',
+    _ => throw TypeError(),
+  };
   return find.descendant(
     of: find.byType(MaterialApp),
-    matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
+    matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == fallback),
   );
 }
