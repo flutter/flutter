@@ -16,26 +16,26 @@ namespace impeller {
 struct RoundRect {
   RoundRect() = default;
 
-  static RoundRect MakeRect(const Rect& rect) {
+  inline static RoundRect MakeRect(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii());
   }
 
-  static RoundRect MakeOval(const Rect& rect) {
+  inline static RoundRect MakeOval(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f));
   }
 
-  static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
+  inline static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
   }
 
-  static RoundRect MakeRectXY(const Rect& rect,
-                              Scalar x_radius,
-                              Scalar y_radius) {
+  inline static RoundRect MakeRectXY(const Rect& rect,
+                                     Scalar x_radius,
+                                     Scalar y_radius) {
     return MakeRectRadii(rect,
                          RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
   }
 
-  static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
+  inline static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
@@ -86,7 +86,7 @@ struct RoundRect {
   [[nodiscard]] bool Contains(const Point& p) const;
 
   /// @brief  Returns a new round rectangle translated by the given offset.
-  [[nodiscard]] RoundRect Shift(Scalar dx, Scalar dy) const {
+  [[nodiscard]] inline RoundRect Shift(Scalar dx, Scalar dy) const {
     // Just in case, use the factory rather than the internal constructor
     // as shifting the rectangle may increase/decrease its bit precision
     // so we should re-validate the radii to the newly located rectangle.
@@ -95,10 +95,10 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] RoundRect Expand(Scalar left,
-                                 Scalar top,
-                                 Scalar right,
-                                 Scalar bottom) const {
+  [[nodiscard]] inline RoundRect Expand(Scalar left,
+                                        Scalar top,
+                                        Scalar right,
+                                        Scalar bottom) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -107,7 +107,8 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] RoundRect Expand(Scalar horizontal, Scalar vertical) const {
+  [[nodiscard]] inline RoundRect Expand(Scalar horizontal,
+                                        Scalar vertical) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -116,7 +117,7 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] RoundRect Expand(Scalar amount) const {
+  [[nodiscard]] inline RoundRect Expand(Scalar amount) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.

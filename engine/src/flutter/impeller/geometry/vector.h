@@ -44,9 +44,9 @@ struct Vector3 {
    *
    *  @return the calculated length.
    */
-  Scalar GetLength() const { return sqrt(x * x + y * y + z * z); }
+  inline Scalar GetLength() const { return sqrt(x * x + y * y + z * z); }
 
-  Vector3 Normalize() const {
+  inline Vector3 Normalize() const {
     const auto len = GetLength();
     return {x / len, y / len, z / len};
   }
@@ -55,7 +55,9 @@ struct Vector3 {
     return ((x * other.x) + (y * other.y) + (z * other.z));
   }
 
-  Vector3 Abs() const { return {std::fabs(x), std::fabs(y), std::fabs(z)}; }
+  inline Vector3 Abs() const {
+    return {std::fabs(x), std::fabs(y), std::fabs(z)};
+  }
 
   constexpr Vector3 Cross(const Vector3& other) const {
     return {
@@ -65,21 +67,23 @@ struct Vector3 {
     };
   }
 
-  Vector3 Min(const Vector3& p) const {
+  inline Vector3 Min(const Vector3& p) const {
     return {std::min(x, p.x), std::min(y, p.y), std::min(z, p.z)};
   }
 
-  Vector3 Max(const Vector3& p) const {
+  inline Vector3 Max(const Vector3& p) const {
     return {std::max(x, p.x), std::max(y, p.y), std::max(z, p.z)};
   }
 
-  Vector3 Floor() const {
+  inline Vector3 Floor() const {
     return {std::floor(x), std::floor(y), std::floor(z)};
   }
 
-  Vector3 Ceil() const { return {std::ceil(x), std::ceil(y), std::ceil(z)}; }
+  inline Vector3 Ceil() const {
+    return {std::ceil(x), std::ceil(y), std::ceil(z)};
+  }
 
-  Vector3 Round() const {
+  inline Vector3 Round() const {
     return {std::round(x), std::round(y), std::round(z)};
   }
 
@@ -251,7 +255,7 @@ struct Vector4 {
   constexpr Vector4(std::array<Scalar, 4> values)
       : x(values[0]), y(values[1]), z(values[2]), w(values[3]) {}
 
-  bool IsFinite() const {
+  inline bool IsFinite() const {
     return std::isfinite(x) && std::isfinite(y) && std::isfinite(z) &&
            std::isfinite(w);
   }
@@ -295,15 +299,15 @@ struct Vector4 {
             std::max(w, p.w)};
   }
 
-  Vector4 Floor() const {
+  inline Vector4 Floor() const {
     return {std::floor(x), std::floor(y), std::floor(z), std::floor(w)};
   }
 
-  Vector4 Ceil() const {
+  inline Vector4 Ceil() const {
     return {std::ceil(x), std::ceil(y), std::ceil(z), std::ceil(w)};
   }
 
-  Vector4 Round() const {
+  inline Vector4 Round() const {
     return {std::round(x), std::round(y), std::round(z), std::round(w)};
   }
 
