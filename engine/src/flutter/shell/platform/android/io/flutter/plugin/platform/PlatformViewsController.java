@@ -27,6 +27,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
@@ -61,7 +62,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // required to call `View#invalidate()` to notify Flutter about the update.
   // This isn't ideal, but given all the other limitations it's a reasonable tradeoff.
   // Related issue: https://github.com/flutter/flutter/issues/103630
-  private static Class[] VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY = {SurfaceView.class};
+  private static Class[] VIEW_TYPES_REQUIRE_NON_TLHC = {SurfaceView.class};
 
   private final PlatformViewRegistryImpl registry;
 
@@ -72,6 +73,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // The View currently rendering the Flutter UI associated with these platform views.
   private FlutterView flutterView;
+
+  private FlutterJNI flutterJNI = null;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
   @Nullable private TextureRegistry textureRegistry;
@@ -163,6 +166,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // API level 19 is required for `android.graphics.ImageReader`.
           enforceMinimumAndroidApiVersion(19);
           ensureValidRequest(request);
+          throwIfHCPPEnabled();
 
           final PlatformView platformView = createPlatformView(request, false);
 
@@ -541,6 +545,15 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
     enforceMinimumAndroidApiVersion(19);
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
+    throwIfHCPPEnabled();
+  }
+
+  // Throws an exception if HC++ is enabled, as HC mode can not work in combination with HC++.
+  private void throwIfHCPPEnabled() {
+    if (flutterJNI.IsSurfaceControlEnabled()) {
+      throw new IllegalStateException(
+          "Trying to create a Hybrid Composition view with HC++ enabled.");
+    }
   }
 
   // Configures the view for Virtual Display mode, returning the associated texture ID.
@@ -953,6 +966,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       return null;
     }
     return platformView.getView();
+  }
+
+  public void setFlutterJNI(FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
   }
 
   @Override
