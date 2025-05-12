@@ -143,7 +143,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-15
+      os: Mac-14
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -285,7 +285,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.1
+      os: Mac-15
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
@@ -359,21 +359,10 @@ platform_properties:
       device_type: "mokey"
 
 targets:
-  - name: Mac channels_integration_test
+  - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
       tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: channels_integration_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
+        ["devicelab", "ios", "mac"]
+      task_name: channels_integration_test_ios
