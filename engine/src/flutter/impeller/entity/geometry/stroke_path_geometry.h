@@ -8,15 +8,9 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_source.h"
+#include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
-
-struct StrokeParameters {
-  Scalar stroke_width;
-  Scalar miter_limit;
-  Cap stroke_cap;
-  Join stroke_join;
-};
 
 /// @brief An abstract Geometry base class that produces fillable vertices
 ///        representing the stroked outline from any |PathSource| provided
@@ -57,7 +51,7 @@ class StrokePathSourceGeometry : public Geometry {
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
       const PathSource& source,
-      const StrokeParameters& parameters,
+      const StrokeParameters& stroke,
       Scalar scale);
 
   friend class ImpellerBenchmarkAccessor;
@@ -65,7 +59,7 @@ class StrokePathSourceGeometry : public Geometry {
 
   bool SkipRendering() const;
 
-  const StrokeParameters parameters_;
+  const StrokeParameters stroke_;
 
   StrokePathSourceGeometry(const StrokePathSourceGeometry&) = delete;
 
