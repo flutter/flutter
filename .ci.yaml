@@ -362,6 +362,10 @@ targets:
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
+    enabled_branches:
+      - master
+      - flutter-\d+\.\d+-candidate\.\d+
+      - ios-experimental
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
