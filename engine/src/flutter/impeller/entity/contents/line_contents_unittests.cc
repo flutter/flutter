@@ -35,7 +35,6 @@ float CalculateLine(const LineVertexShader::PerVertexData& per_vertex,
 }  // namespace
 
 TEST(LineContents, Create) {
-  Path path;
   Scalar width = 5.0f;
   auto geometry = std::make_unique<LineGeometry>(
       /*p0=*/Point{0, 0},      //
