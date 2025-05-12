@@ -6,6 +6,7 @@ package io.flutter.plugin.platform;
 
 import static io.flutter.Build.API_LEVELS;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.MutableContextWrapper;
@@ -175,8 +176,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // not applicable to fallback from TLHC to HC.
         }
 
+        @SuppressLint("NewApi")
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public long createForTextureLayer(
             @NonNull PlatformViewsChannel.PlatformViewCreationRequest request) {
           ensureValidRequest(request);
@@ -214,7 +215,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           //   view hierarchy via callbacks such as ViewParent#onDescendantInvalidated().
           // - The API level is <23, due to TLHC implementation API requirements.
           final boolean supportsTextureLayerMode =
-              !ViewUtils.hasChildViewOfType(embeddedView, VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY);
+              Build.VERSION.SDK_INT >= API_LEVELS.API_23
+                  && !ViewUtils.hasChildViewOfType(embeddedView, VIEW_TYPES_REQUIRE_NON_TLHC);
 
           // Fall back to Hybrid Composition or Virtual Display when necessary, depending on which
           // fallback mode is requested.
