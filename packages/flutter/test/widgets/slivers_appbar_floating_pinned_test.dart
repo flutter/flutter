@@ -97,11 +97,9 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  thickness: 0,
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'Hello',
-                      elevation: 0,
                       flags: <SemanticsFlag>[SemanticsFlag.isHeader, SemanticsFlag.namesRoute],
                       textDirection: TextDirection.ltr,
                     ),

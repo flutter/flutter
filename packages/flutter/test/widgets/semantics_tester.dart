@@ -48,8 +48,6 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     this.transform,
-    this.elevation,
-    this.thickness,
     this.textSelection,
     this.children = const <TestSemantics>[],
     this.scrollIndex,
@@ -100,8 +98,6 @@ class TestSemantics {
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        rect = TestSemantics.rootRect,
-       elevation = 0.0,
-       thickness = 0.0,
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -128,8 +124,6 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     Matrix4? transform,
-    this.elevation,
-    this.thickness,
     this.textSelection,
     this.children = const <TestSemantics>[],
     this.scrollIndex,
@@ -232,21 +226,6 @@ class TestSemantics {
   /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
   final Matrix4? transform;
-
-  /// The elevation of this node relative to the parent node.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.elevation] for a detailed discussion regarding
-  ///    elevation and semantics.
-  final double? elevation;
-
-  /// The extend that this node occupies in z-direction starting at [elevation].
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.thickness] for a more detailed definition.
-  final double? thickness;
 
   /// The index of the first visible semantic node within a scrollable.
   final int? scrollIndex;
@@ -419,16 +398,6 @@ class TestSemantics {
         'expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.',
       );
     }
-    if (elevation != null && elevation != nodeData.elevation) {
-      return fail(
-        'expected node id $id to have elevation $elevation but found elevation:\n${nodeData.elevation}.',
-      );
-    }
-    if (thickness != null && thickness != nodeData.thickness) {
-      return fail(
-        'expected node id $id to have thickness $thickness but found thickness:\n${nodeData.thickness}.',
-      );
-    }
     if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset ||
         textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
       return fail(
@@ -582,12 +551,6 @@ class TestSemantics {
       buf.writeln(
         '$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},',
       );
-    }
-    if (elevation != null) {
-      buf.writeln('$indent  elevation: $elevation,');
-    }
-    if (thickness != null) {
-      buf.writeln('$indent  thickness: $thickness,');
     }
     if (inputType != SemanticsInputType.none) {
       buf.writeln('$indent  inputType: $inputType,');

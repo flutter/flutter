@@ -596,8 +596,6 @@ AccessibilityBridge::FromFlutterSemanticsNode(
   result.scroll_position = flutter_node.scroll_position;
   result.scroll_extent_max = flutter_node.scroll_extent_max;
   result.scroll_extent_min = flutter_node.scroll_extent_min;
-  result.elevation = flutter_node.elevation;
-  result.thickness = flutter_node.thickness;
   if (flutter_node.label) {
     result.label = std::string(flutter_node.label);
   }

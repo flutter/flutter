@@ -731,8 +731,6 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   elevation: 0.0\n'
-      '   thickness: 0.0\n'
       '   headingLevel: 0\n',
     );
 
@@ -867,8 +865,6 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   elevation: 0.0\n'
-      '   thickness: 0.0\n'
       '   headingLevel: 0\n',
     );
   });

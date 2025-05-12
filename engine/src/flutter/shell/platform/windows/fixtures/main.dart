@@ -446,8 +446,6 @@ Future<void> sendSemanticsTreeInfo() async {
       scrollExtentMax: 0,
       scrollExtentMin: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
-      elevation: 0,
-      thickness: 0,
       identifier: 'identifier',
       label: 'label',
       labelAttributes: const <ui.StringAttribute>[],
