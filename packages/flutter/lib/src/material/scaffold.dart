@@ -3285,6 +3285,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   void dispose() {
+    widget.animationController.removeStatusListener(_handleStatusChange);
     widget.onDispose?.call();
     super.dispose();
   }

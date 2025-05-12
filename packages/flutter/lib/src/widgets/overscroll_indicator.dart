@@ -798,8 +798,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.sizeOf(context);
-    double mainAxisSize;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: AnimatedBuilder(
@@ -808,14 +806,15 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final double stretch = _stretchController.value;
           double x = 1.0;
           double y = 1.0;
+          final double mainAxisSize;
 
           switch (widget.axis) {
             case Axis.horizontal:
               x += stretch;
-              mainAxisSize = size.width;
+              mainAxisSize = MediaQuery.widthOf(context);
             case Axis.vertical:
               y += stretch;
-              mainAxisSize = size.height;
+              mainAxisSize = MediaQuery.heightOf(context);
           }
 
           final AlignmentGeometry alignment = _getAlignmentForAxisDirection(

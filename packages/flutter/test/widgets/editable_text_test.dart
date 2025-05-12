@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -4710,6 +4711,7 @@ void main() {
                             SemanticsFlag.isObscured,
                           ],
                           value: expectedValue,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4766,6 +4768,7 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isTextField],
                           value: originalText,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4825,6 +4828,7 @@ void main() {
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
                           value: expectedValue,
+                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                           // Focusing a single-line field on web selects it.
                           textSelection:
@@ -5080,6 +5084,7 @@ void main() {
                               SemanticsAction.paste,
                             ],
                             value: 'test',
+                            inputType: SemanticsInputType.text,
                             textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
                           ),
@@ -5200,6 +5205,7 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                           ],
+                          inputType: SemanticsInputType.text,
                           textSelection: TextSelection.collapsed(offset: controller.text.length),
                           textDirection: TextDirection.ltr,
                         ),
@@ -8848,6 +8854,82 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
+  );
+
+  testWidgets(
+    'single-line field cannot be scrolled with touch on iOS',
+    (WidgetTester tester) async {
+      controller.text = 'This is a long string that should overflow the TextField.';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, initialScrollOffset);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'multi-line field can scroll with touch on iOS',
+    (WidgetTester tester) async {
+      // 3 lines of text, where the last line overflows and requires scrolling.
+      controller.text = 'XXXXX\nXXXXX\nXXXXX';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              child: EditableText(
+                maxLines: 2,
+                showSelectionHandles: true,
+                controller: controller,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+      final double initialScrollOffset = scrollable.controller!.position.pixels;
+
+      await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
+      await tester.pumpAndSettle();
+
+      expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
@@ -16326,6 +16408,67 @@ void main() {
       },
       skip: !kIsWeb, // [intended]
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/163399.
+    testWidgets('when selectAllOnFocus is turned off', (WidgetTester tester) async {
+      controller.text = 'Text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            key: ValueKey<String>(controller.text),
+            controller: controller,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectAllOnFocus: false,
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      const TextSelection initialSelection = TextSelection.collapsed(offset: 1);
+      controller.selection = initialSelection;
+
+      // Tab to focus the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(controller.selection, initialSelection);
+    }, variant: TargetPlatformVariant.all());
+
+    // Regression test for https://github.com/flutter/flutter/issues/163399.
+    testWidgets('when selectAllOnFocus is turned on', (WidgetTester tester) async {
+      controller.text = 'Text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            key: ValueKey<String>(controller.text),
+            controller: controller,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectAllOnFocus: true,
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      const TextSelection initialSelection = TextSelection.collapsed(offset: 1);
+      controller.selection = initialSelection;
+
+      // Tab to focus the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(
+        controller.selection,
+        TextSelection(baseOffset: 0, extentOffset: controller.text.length),
+      );
+    }, variant: TargetPlatformVariant.all());
 
     // Regression test for https://github.com/flutter/flutter/issues/156078.
     testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {

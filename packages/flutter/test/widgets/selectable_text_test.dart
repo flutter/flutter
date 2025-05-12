@@ -8,7 +8,7 @@
 @TestOn('!chrome')
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1616,6 +1616,7 @@ void main() {
               id: 1,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
@@ -2165,6 +2166,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               actions: <SemanticsAction>[SemanticsAction.longPress],
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isReadOnly,
@@ -2194,6 +2196,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               textSelection: const TextSelection.collapsed(offset: 9),
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2227,6 +2230,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 4),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2262,6 +2266,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 0),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorForwardByCharacter,
@@ -2341,6 +2346,7 @@ void main() {
               id: 1,
               value: 'Guten Tag',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 // Absent the following because enableInteractiveSelection: false
@@ -2386,6 +2392,7 @@ void main() {
               id: 1,
               value: 'Hello',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
@@ -2417,6 +2424,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2450,6 +2458,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2526,6 +2535,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           actions: <SemanticsAction>[SemanticsAction.longPress],
+                          inputType: ui.SemanticsInputType.text,
                           children: <TestSemantics>[
                             TestSemantics(
                               children: <TestSemantics>[
@@ -2599,6 +2609,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2652,6 +2663,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2698,6 +2710,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
@@ -2724,6 +2737,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
@@ -5571,19 +5585,22 @@ void main() {
     testWidgets(
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
-        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
-            true;
-        _updateMediaQueryFromView(tester);
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         addTearDown(() {
-          TestWidgetsFlutterBinding.instance.platformDispatcher
-              .resetSupportsShowingSystemContextMenu();
-          _updateMediaQueryFromView(tester);
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+          ),
         );
 
         // No context menu shown.
@@ -5603,24 +5620,4 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   });
-}
-
-// Trigger MediaQuery to update itself based on the View, which is not
-// recreated between tests. This is necessary when changing something on
-// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
-// TODO(justinmc): This hack can be removed if
-// https://github.com/flutter/flutter/issues/165519 is fixed.
-void _updateMediaQueryFromView(WidgetTester tester) {
-  expect(find.byType(MediaQuery), findsOneWidget);
-  final WidgetsBindingObserver widgetsBindingObserver =
-      tester.state(
-            find.ancestor(
-              of: find.byType(MediaQuery),
-              matching: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
-              ),
-            ),
-          )
-          as WidgetsBindingObserver;
-  widgetsBindingObserver.didChangeMetrics();
 }

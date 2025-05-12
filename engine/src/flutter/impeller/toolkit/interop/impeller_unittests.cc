@@ -27,6 +27,9 @@ namespace impeller::interop::testing {
 using InteropPlaygroundTest = PlaygroundTest;
 INSTANTIATE_PLAYGROUND_SUITE(InteropPlaygroundTest);
 
+// Just ensures that context can be subclassed.
+class ContextSub : public hpp::Context {};
+
 TEST_P(InteropPlaygroundTest, CanCreateContext) {
   auto context = CreateContext();
   ASSERT_TRUE(context);
@@ -553,6 +556,11 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
     ASSERT_GT(bounds.height, 0.0);
     ASSERT_FALSE(glyph.IsEllipsis());
     ASSERT_EQ(glyph.GetTextDirection(), kImpellerTextDirectionLTR);
+
+    ImpellerRect bounds2 = {};
+    ImpellerGlyphInfoGetGraphemeClusterBounds(glyph.Get(), &bounds2);
+    ASSERT_EQ(bounds.width, bounds2.width);
+    ASSERT_EQ(bounds.height, bounds2.height);
   }
 
   // Glyph info by coordinates.
@@ -570,6 +578,11 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
     auto range =
         paragraph.GetWordBoundary(glyph.GetGraphemeClusterCodeUnitRangeEnd());
     ASSERT_GT(range.end, 0u);
+    ImpellerRange range2 = {};
+    ImpellerParagraphGetWordBoundary(
+        paragraph.Get(), glyph.GetGraphemeClusterCodeUnitRangeEnd(), &range2);
+    ASSERT_EQ(range.start, range2.start);
+    ASSERT_EQ(range.end, range2.end);
   }
 
   builder.DrawParagraph(paragraph, ImpellerPoint{100, 100});
@@ -580,6 +593,16 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
         window.Draw(dl);
         return true;
       }));
+}
+
+TEST_P(InteropPlaygroundTest, CanGetPathBounds) {
+  const auto path =
+      hpp::PathBuilder{}.MoveTo({100, 100}).LineTo({200, 200}).Build();
+  const auto bounds = path.GetBounds();
+  ASSERT_EQ(bounds.x, 100);
+  ASSERT_EQ(bounds.y, 100);
+  ASSERT_EQ(bounds.width, 100);
+  ASSERT_EQ(bounds.height, 100);
 }
 
 }  // namespace impeller::interop::testing

@@ -137,7 +137,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.listItem => _semanticsListItem,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
-    SemanticsRole.searchBox => _unimplemented,
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
@@ -1303,6 +1302,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.role,
     this.controlsNodes,
     this.inputType,
+    this.validationResult = SemanticsValidationResult.none,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1325,7 +1325,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
-    this.validationResult = SemanticsValidationResult.none,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -3360,7 +3359,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
           mergedTags ??= <SemanticsTag>{};
           mergedTags!.addAll(node.tags!);
         }
-        for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
+        for (final CustomSemanticsAction action in node._customSemanticsActions.keys) {
           customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         if (node.hintOverrides != null) {
