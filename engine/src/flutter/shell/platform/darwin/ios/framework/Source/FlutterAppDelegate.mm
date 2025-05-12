@@ -37,6 +37,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
     UIWindowScene* windowScene = (UIWindowScene*)scene;
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
     self.window.rootViewController = appDelegate.window.rootViewController;
+    appDelegate.window = self.window;
     [self.window makeKeyAndVisible];
   }
 }
