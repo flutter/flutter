@@ -832,7 +832,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
     int activeChildrenCountRecursive = 0;
     for (final TreeSliverNode<T> childNode in node.children) {
       activeChildrenCountRecursive +=
-        _activeNodes.contains(childNode) ? 1 + _activeChildrenCount(childNode) : 0;
+          _activeNodes.contains(childNode) ? 1 + _activeChildrenCount(childNode) : 0;
     }
     return activeChildrenCountRecursive;
   }
