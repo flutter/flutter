@@ -9,6 +9,7 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
@@ -70,8 +71,7 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeLine(const Point& p0,
                                             const Point& p1,
-                                            Scalar width,
-                                            Cap cap);
+                                            const StrokeParameters& stroke);
 
   static std::unique_ptr<Geometry> MakeCircle(const Point& center,
                                               Scalar radius);

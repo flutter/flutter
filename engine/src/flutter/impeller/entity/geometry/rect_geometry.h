@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_RECT_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
 
@@ -35,10 +36,7 @@ class FillRectGeometry final : public Geometry {
 
 class StrokeRectGeometry final : public Geometry {
  public:
-  explicit StrokeRectGeometry(Rect rect,
-                              Scalar stroke_width,
-                              Join stroke_join,
-                              Scalar miter_limit);
+  explicit StrokeRectGeometry(const Rect& rect, const StrokeParameters& stroke);
 
   ~StrokeRectGeometry() override;
 
@@ -55,7 +53,7 @@ class StrokeRectGeometry final : public Geometry {
   const Scalar stroke_width_;
   const Join stroke_join_;
 
-  static Join AdjustStrokeJoin(Join join, Scalar miter_limit);
+  static Join AdjustStrokeJoin(const StrokeParameters& stroke);
 
   static Point* AppendRoundCornerJoin(Point* buffer,
                                       Point corner,

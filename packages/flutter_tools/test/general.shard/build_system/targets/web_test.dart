@@ -200,6 +200,41 @@ name: foo
   );
 
   test(
+    'WebTemplatedFiles includes serviceWorkerSettings in flutter_bootstrap.js by default',
+    () => testbed.run(() async {
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      environment.defines[kServiceWorkerStrategy] = 'none';
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+      expect(
+        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+        contains('_flutter.loader.load();'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js when environment specifies',
+    () => testbed.run(() async {
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+      expect(
+        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+        stringContainsInOrder(<String>[
+          '_flutter.loader.load({',
+          'serviceWorkerSettings',
+          'serviceWorkerVersion',
+        ]),
+      );
+    }),
+  );
+
+  test(
     'null base href does not override existing base href in index.html',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
