@@ -1,0 +1,9 @@
+executable("licenses_cpp") {
+  testonly = true
+
+  sources = [ "src/main.cc" ]
+  deps = [
+    "//flutter/third_party/abseil-cpp/absl/status:statusor",
+    "//flutter/third_party/re2",
+  ]
+}
