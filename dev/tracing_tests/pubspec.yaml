@@ -4,6 +4,8 @@ description: Various tests for tracing in flutter/flutter
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter

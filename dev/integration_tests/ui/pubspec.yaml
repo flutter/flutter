@@ -4,6 +4,8 @@ description: Flutter non-plugin UI integration tests.
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter

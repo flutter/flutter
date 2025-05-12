@@ -4,6 +4,8 @@ publish_to: 'none'
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   args: 2.7.0
   file: 7.0.1
