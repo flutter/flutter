@@ -210,8 +210,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           //   view hierarchy via callbacks such as ViewParent#onDescendantInvalidated().
           // - The API level is <23, due to TLHC implementation API requirements.
           final boolean supportsTextureLayerMode =
-                  !ViewUtils.hasChildViewOfType(
-                      embeddedView, VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY);
+              !ViewUtils.hasChildViewOfType(embeddedView, VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY);
 
           // Fall back to Hybrid Composition or Virtual Display when necessary, depending on which
           // fallback mode is requested.
