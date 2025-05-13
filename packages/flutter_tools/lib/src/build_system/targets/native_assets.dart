@@ -14,7 +14,6 @@ import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
-import 'common.dart';
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
