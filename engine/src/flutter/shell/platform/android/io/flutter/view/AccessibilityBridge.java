@@ -656,7 +656,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // so it doesn't need to be mirrored.
     //
     // See the case down below for how hybrid composition is handled.
+    // Log.e("HI GRAY", "check if we should handle a pv in AccessiblityBridge");
     if (semanticsNode.platformViewId != -1) {
+      Log.e("HI GRAY", "check if we should handle a pv in AccessiblityBridge: we should");
       if (platformViewsAccessibilityDelegate.usesVirtualDisplay(semanticsNode.platformViewId)) {
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(semanticsNode.platformViewId);
@@ -975,13 +977,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
 
-    Log.e("HI GRAY", "in createAccessibilityNodeInfo");
+    // Log.e("HI GRAY", "in createAccessibilityNodeInfo");
     for (SemanticsNode child : semanticsNode.childrenInTraversalOrder) {
       if (child.hasFlag(Flag.IS_HIDDEN)) {
         continue;
       }
       if (child.platformViewId != -1) {
-        Log.e("HI GRAY", "we have a child pv");
+        Log.e("HI GRAY", "we have a child pv with id " + child.platformViewId);
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(child.platformViewId);
 
@@ -997,6 +999,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           result.addChild(embeddedView);
           continue;
         }
+      } else {
+        Log.e("HI GRAY", "we don't have a child pv");
       }
       result.addChild(rootAccessibilityView, child.id);
     }
