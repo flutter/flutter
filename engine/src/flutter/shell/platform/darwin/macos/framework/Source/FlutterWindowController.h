@@ -25,10 +25,10 @@
 @end
 
 struct FlutterWindowSizing {
-  bool hasSize;
+  bool has_size;
   double width;
   double height;
-  bool hasConstraints;
+  bool has_constraints;
   double min_width;
   double min_height;
   double max_width;

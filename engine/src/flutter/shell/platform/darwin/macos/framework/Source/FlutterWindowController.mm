@@ -39,10 +39,10 @@
 
 @implementation NSWindow (FlutterWindowSizing)
 - (void)flutterSetContentSize:(FlutterWindowSizing)contentSize {
-  if (contentSize.hasSize) {
+  if (contentSize.has_size) {
     [self setContentSize:NSMakeSize(contentSize.width, contentSize.height)];
   }
-  if (contentSize.hasConstraints) {
+  if (contentSize.has_constraints) {
     [self setContentMinSize:NSMakeSize(contentSize.min_width, contentSize.min_height)];
     if (contentSize.max_width > 0 && contentSize.max_height > 0) {
       [self setContentMaxSize:NSMakeSize(contentSize.max_width, contentSize.max_height)];

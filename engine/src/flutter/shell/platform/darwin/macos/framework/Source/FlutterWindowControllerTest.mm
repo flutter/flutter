@@ -57,7 +57,7 @@ class FlutterWindowControllerRetainTest : public ::testing::Test {};
 
 TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.hasSize = true, .width = 800, .height = 600},
+      .contentSize = {.has_size = true, .width = 800, .height = 600},
       .on_close = [] {},
       .on_size_change = [] {},
   };
@@ -80,7 +80,7 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
 
 TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.hasSize = true, .width = 800, .height = 600},
+      .contentSize = {.has_size = true, .width = 800, .height = 600},
       .on_close = [] {},
       .on_size_change = [] {},
   };
@@ -121,7 +121,7 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
 
 TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.hasSize = true, .width = 800, .height = 600},
+      .contentSize = {.has_size = true, .width = 800, .height = 600},
       .on_close = [] {},
       .on_size_change = [] {},
   };
@@ -140,7 +140,7 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
 
 TEST_F(FlutterWindowControllerTest, FlutterGetWindowHandle) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.hasSize = true, .width = 800, .height = 600},
+      .contentSize = {.has_size = true, .width = 800, .height = 600},
       .on_close = [] {},
       .on_size_change = [] {},
   };
@@ -158,7 +158,7 @@ TEST_F(FlutterWindowControllerTest, FlutterGetWindowHandle) {
 
 TEST_F(FlutterWindowControllerTest, FlutterSetWindowState) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.hasSize = true, .width = 800, .height = 600},
+      .contentSize = {.has_size = true, .width = 800, .height = 600},
       .on_close = [] {},
       .on_size_change = [] {},
   };
