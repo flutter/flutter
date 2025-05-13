@@ -12,7 +12,7 @@ import '../testing.dart';
 import 'platform_location.dart';
 
 UrlStrategy _realDefaultUrlStrategy =
-    debugEmulateFlutterTesterEnvironment
+    TestEnvironment.instance.defaultToTestUrlStrategy
         ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
         : const HashUrlStrategy();
 

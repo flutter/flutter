@@ -38,3 +38,59 @@ set debugEmulateFlutterTesterEnvironment(bool value) {
 }
 
 bool _debugEmulateFlutterTesterEnvironment = false;
+
+final class TestEnvironment {
+  const TestEnvironment({
+    this.ignorePlatformMessages = false,
+    this.forceTestFonts = false,
+    this.keepSemanticsDisabledOnUpdate = false,
+    this.defaultToTestUrlStrategy = false,
+  });
+
+  const TestEnvironment.framework()
+    : ignorePlatformMessages = true,
+      forceTestFonts = true,
+      keepSemanticsDisabledOnUpdate = true,
+      defaultToTestUrlStrategy = true;
+
+  const TestEnvironment.production()
+    : ignorePlatformMessages = false,
+      forceTestFonts = false,
+      keepSemanticsDisabledOnUpdate = false,
+      defaultToTestUrlStrategy = false;
+
+  static TestEnvironment? _instance;
+  static TestEnvironment get instance {
+    return _instance ??= const TestEnvironment.production();
+  }
+
+  static void setUp(TestEnvironment testEnvironment) {
+    if (!kDebugMode) {
+      throw UnsupportedError('`TestEnvironment.setUp` can only be used in debug mode.');
+    }
+    _instance = testEnvironment;
+  }
+
+  static void tearDown() {
+    if (!kDebugMode) {
+      throw UnsupportedError('`TestEnvironment.tearDown` can only be used in debug mode.');
+    }
+    _instance = null;
+  }
+
+  /// When true, the [ui.PlatformDispatcher] will ignore all platform messages.
+  final bool ignorePlatformMessages;
+
+  /// When true, all text will be laid out and rendered using test fonts.
+  ///
+  /// Only test fonts in [ui.TextStyle] and [ui.ParagraphStyle] will be respected. Any other fonts
+  /// will be ignored.
+  final bool forceTestFonts;
+
+  /// When true, semantics will NOT be automatically enabled when a semantics update is received by
+  /// [ui.FlutterView.updateSemantics].
+  final bool keepSemanticsDisabledOnUpdate;
+
+  /// When true, a [TestUrlStrategy] will be used instead of the default URL strategy.
+  final bool defaultToTestUrlStrategy;
+}

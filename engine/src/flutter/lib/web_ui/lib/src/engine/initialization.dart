@@ -212,7 +212,7 @@ void _setAssetManager(ui_web.AssetManager assetManager) {
 Future<void> _downloadAssetFonts() async {
   renderer.fontCollection.clear();
 
-  if (ui_web.debugEmulateFlutterTesterEnvironment) {
+  if (ui_web.TestEnvironment.instance.forceTestFonts) {
     // Load the embedded test font before loading fonts from the assets so that
     // the embedded test font is the default (first) font.
     await renderer.fontCollection.loadFontFromList(

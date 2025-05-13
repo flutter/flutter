@@ -83,10 +83,11 @@ void testMain() {
     });
 
     group('test fonts in flutterTester environment', () {
-      final bool resetValue = ui_web.debugEmulateFlutterTesterEnvironment;
-      ui_web.debugEmulateFlutterTesterEnvironment = true;
+      setUpAll(() {
+        ui_web.TestEnvironment.setUp(ui_web.TestEnvironment.framework());
+      });
       tearDownAll(() {
-        ui_web.debugEmulateFlutterTesterEnvironment = resetValue;
+        ui_web.TestEnvironment.tearDown();
       });
       const List<String> testFonts = <String>['FlutterTest', 'Ahem'];
 

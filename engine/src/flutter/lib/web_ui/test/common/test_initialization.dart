@@ -17,14 +17,12 @@ import 'rendering.dart';
 
 void setUpUnitTests({
   bool withImplicitView = false,
-  bool emulateTesterEnvironment = true,
   bool setUpTestViewDimensions = true,
+  ui_web.TestEnvironment testEnvironment = const ui_web.TestEnvironment.production(),
 }) {
   late final FakeAssetScope debugFontsScope;
   setUpAll(() async {
-    if (emulateTesterEnvironment) {
-      ui_web.debugEmulateFlutterTesterEnvironment = true;
-    }
+    ui_web.TestEnvironment.setUp(testEnvironment);
 
     debugFontsScope = configureDebugFontsAssetScope(fakeAssetManager);
     debugOnlyAssetManager = fakeAssetManager;
@@ -50,6 +48,7 @@ void setUpUnitTests({
 
   tearDownAll(() async {
     fakeAssetManager.popAssetScope(debugFontsScope);
+    ui_web.TestEnvironment.tearDown();
   });
 }
 

@@ -13,7 +13,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(emulateTesterEnvironment: false, setUpTestViewDimensions: false);
+  setUpUnitTests(setUpTestViewDimensions: false);
 
   test('blanks are equal to each other', () {
     final ui.StrutStyle a = ui.StrutStyle();

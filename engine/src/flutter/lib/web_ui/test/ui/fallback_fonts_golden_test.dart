@@ -22,11 +22,7 @@ const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 100);
 
 void testMain() {
   group('Font fallbacks', () {
-    setUpUnitTests(
-      withImplicitView: true,
-      emulateTesterEnvironment: false,
-      setUpTestViewDimensions: false,
-    );
+    setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
     setUp(() {
       debugDisableFontFallbacks = false;

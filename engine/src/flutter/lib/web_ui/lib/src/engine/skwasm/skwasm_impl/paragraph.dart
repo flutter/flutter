@@ -16,7 +16,7 @@ const int _kHardLineBreak = 100;
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
-  if (!ui_web.debugEmulateFlutterTesterEnvironment) {
+  if (!ui_web.TestEnvironment.instance.forceTestFonts) {
     return fontFamilies;
   }
   final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
