@@ -73,6 +73,8 @@ const double _kMinScaleFactor = 0.9;
 
 // The maximum text scale to apply to contents of the nav bar, except the large
 // title which can grow larger but is damped.
+//
+// Calculated on an iPhone 15 simulator running iOS 17.5.
 const double _kMaxScaleFactor = 1.235;
 
 // The damping ratio applied to reduce the rate at which the large title scales.

@@ -1659,6 +1659,7 @@ void main() {
   testWidgets('Nav bar contents text scale', (WidgetTester tester) async {
     setWindowToPortrait(tester);
     const double scaleFactor = 1.18;
+    const double dampingRatio = 3.0;
     const double iconSize = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
@@ -1705,7 +1706,7 @@ void main() {
       barItems.any(
         (RichText t) =>
             t.text.toPlainText() == 'Large Title' &&
-            t.textScaler == const TextScaler.linear(1.0 + ((scaleFactor - 1.0) / 3.0)),
+            t.textScaler == const TextScaler.linear(1.0 + ((scaleFactor - 1.0) / dampingRatio)),
       ),
       isTrue,
     );
