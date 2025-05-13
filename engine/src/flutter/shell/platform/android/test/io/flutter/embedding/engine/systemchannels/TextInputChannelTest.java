@@ -57,7 +57,9 @@ public class TextInputChannelTest {
     final TextInputChannel.Configuration configuration =
         TextInputChannel.Configuration.fromJson(arguments);
 
-    final Locale[] hintLocales = {new Locale("en"), new Locale("fr")};
+    final Locale[] hintLocales = {
+      new Locale.Builder().setLanguage("en").build(), new Locale.Builder().setLanguage("fr").build()
+    };
     assertEquals(configuration.hintLocales.length, hintLocales.length);
     assertEquals(configuration.hintLocales[0], hintLocales[0]);
     assertEquals(configuration.hintLocales[1], hintLocales[1]);

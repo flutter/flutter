@@ -178,7 +178,7 @@ Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
   // explicitly construct the JS object here.
   final JSUint8Array destination = JSUint8Array.withLength(size);
   final JSPromise<JSAny?> copyPromise = videoFrame.copyTo(destination);
-  await promiseToFuture<void>(copyPromise);
+  await copyPromise.toDart;
 
   // In dart2wasm, `toDart` incurs a copy here. On JS backends, this is a
   // no-op.

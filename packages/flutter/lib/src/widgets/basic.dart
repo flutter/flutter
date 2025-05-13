@@ -4265,7 +4265,13 @@ class _RawIndexedStack extends Stack {
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
-  }) : super(fit: sizing);
+  }) : assert(
+         index == null ||
+             (index == 0 && children.length == 0) ||
+             (index >= 0 && index < children.length),
+         'The index must be null or within the range of children.',
+       ),
+       super(fit: sizing);
 
   /// The index of the child to show.
   final int? index;
@@ -7572,10 +7578,16 @@ class Semantics extends SingleChildRenderObjectWidget {
     }
 
     final bool containsText =
-        properties.attributedLabel != null ||
         properties.label != null ||
+        properties.attributedLabel != null ||
         properties.value != null ||
+        properties.attributedValue != null ||
+        properties.increasedValue != null ||
+        properties.attributedIncreasedValue != null ||
+        properties.decreasedValue != null ||
+        properties.attributedDecreasedValue != null ||
         properties.hint != null ||
+        properties.attributedHint != null ||
         properties.tooltip != null;
 
     if (!containsText) {

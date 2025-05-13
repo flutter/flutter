@@ -75,6 +75,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
                             GL_RENDERBUFFER, depth_stencil);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
                             GL_RENDERBUFFER, depth_stencil);
+  glDeleteRenderbuffers(1, &depth_stencil);
 
   return provider;
 }

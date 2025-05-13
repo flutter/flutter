@@ -49,6 +49,12 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.size].
   size,
 
+  /// Specifies the aspect corresponding to the width of [MediaQueryData.size].
+  width,
+
+  /// Specifies the aspect corresponding to the height of [MediaQueryData.size].
+  height,
+
   /// Specifies the aspect corresponding to [MediaQueryData.orientation].
   orientation,
 
@@ -96,6 +102,9 @@ enum _MediaQueryAspect {
 
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
   boldText,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.announce].
+  announce,
 
   /// Specifies the aspect corresponding to [MediaQueryData.navigationMode].
   navigationMode,
@@ -204,6 +213,7 @@ class MediaQueryData {
     this.onOffSwitchLabels = false,
     this.disableAnimations = false,
     this.boldText = false,
+    this.announce = false,
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
@@ -289,6 +299,7 @@ class MediaQueryData {
           platformData?.disableAnimations ??
           view.platformDispatcher.accessibilityFeatures.disableAnimations,
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
+      announce = platformData?.announce ?? view.platformDispatcher.accessibilityFeatures.announce,
       highContrast =
           platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
       onOffSwitchLabels =
@@ -580,6 +591,23 @@ class MediaQueryData {
   ///    originates.
   final bool boldText;
 
+  /// Whether accessibility announcements (like [SemanticsService.announce])
+  /// are allowed on the current platform.
+  ///
+  /// Returns `false` on Android, where platform announcements are deprecated
+  /// by the underlying platform.
+  ///
+  /// Returns `true` on all other platforms (iOS, web, desktop) where such
+  /// announcements are generally supported without discouragement.
+  ///
+  /// Use this flag to conditionally avoid making announcements on Android.
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
+  final bool announce;
+
   /// Describes the navigation mode requested by the platform.
   ///
   /// Some user interfaces are better navigated using a directional pad (DPAD)
@@ -661,6 +689,7 @@ class MediaQueryData {
     bool? invertColors,
     bool? accessibleNavigation,
     bool? boldText,
+    bool? announce,
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
@@ -686,6 +715,7 @@ class MediaQueryData {
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
+      announce: announce ?? this.announce,
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
@@ -888,6 +918,7 @@ class MediaQueryData {
         other.invertColors == invertColors &&
         other.accessibleNavigation == accessibleNavigation &&
         other.boldText == boldText &&
+        other.announce == announce &&
         other.navigationMode == navigationMode &&
         other.gestureSettings == gestureSettings &&
         listEquals(other.displayFeatures, displayFeatures) &&
@@ -1306,6 +1337,49 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@endtemplate}
   static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.size)?.size;
 
+  /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the width of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double widthOf(BuildContext context) => _of(context, _MediaQueryAspect.width).size.width;
+
+  /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the width of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeWidthOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.width)?.size.width;
+
+  /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the height of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double heightOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.height).size.height;
+
+  /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the height of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeHeightOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.height)?.size.height;
+
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
   ///
@@ -1666,6 +1740,27 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeBoldTextOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
+  /// Returns the [MediaQueryData.announce] accessibility setting for the
+  /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool announceOf(BuildContext context) => maybeAnnounceOf(context) ?? false;
+
+  /// Returns the [MediaQueryData.announce] accessibility setting for the
+  /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybeAnnounceOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.announce)?.announce;
+
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
   ///
@@ -1776,6 +1871,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
           dependency is _MediaQueryAspect &&
           switch (dependency) {
             _MediaQueryAspect.size => data.size != oldWidget.data.size,
+            _MediaQueryAspect.width => data.size.width != oldWidget.data.size.width,
+            _MediaQueryAspect.height => data.size.height != oldWidget.data.size.height,
             _MediaQueryAspect.orientation => data.orientation != oldWidget.data.orientation,
             _MediaQueryAspect.devicePixelRatio =>
               data.devicePixelRatio != oldWidget.data.devicePixelRatio,
@@ -1794,6 +1891,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.disableAnimations =>
               data.disableAnimations != oldWidget.data.disableAnimations,
             _MediaQueryAspect.boldText => data.boldText != oldWidget.data.boldText,
+            _MediaQueryAspect.announce => data.announce != oldWidget.data.announce,
             _MediaQueryAspect.navigationMode =>
               data.navigationMode != oldWidget.data.navigationMode,
             _MediaQueryAspect.gestureSettings =>

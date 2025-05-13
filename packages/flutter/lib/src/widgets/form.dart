@@ -16,6 +16,7 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'navigator.dart';
 import 'pop_scope.dart';
 import 'restoration.dart';
@@ -369,7 +370,7 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty) {
+    if (errorMessage.isNotEmpty && MediaQuery.announceOf(context)) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(
@@ -466,6 +467,7 @@ class FormField<T> extends StatefulWidget {
     super.key,
     required this.builder,
     this.onSaved,
+    this.onReset,
     this.forceErrorText,
     this.validator,
     this.errorBuilder,
@@ -484,6 +486,10 @@ class FormField<T> extends StatefulWidget {
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
   final FormFieldSetter<T>? onSaved;
+
+  /// An optional method to call when the form field is reset via
+  /// [FormFieldState.reset].
+  final VoidCallback? onReset;
 
   /// An optional property that forces the [FormFieldState] into an error state
   /// by directly setting the [FormFieldState.errorText] property without
@@ -631,6 +637,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
+    widget.onReset?.call();
     Form.maybeOf(context)?._fieldDidChange();
   }
 
