@@ -276,8 +276,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// typically used by applications to respond when the menu has been
   /// dismissed, such as by restoring focus to a previously active element.
   ///
-  /// If a callback is provided for [onCloseRequested], this callback will not
-  /// be called until after `hideOverlay` is called.
+  /// If a callback is provided for [onCloseRequested], [onClose] will not be
+  /// called until after `hideOverlay` is called.
   final VoidCallback? onClose;
 
   /// Called when a request is made to open the menu.
