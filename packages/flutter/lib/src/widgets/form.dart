@@ -16,6 +16,7 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'navigator.dart';
 import 'pop_scope.dart';
 import 'restoration.dart';
@@ -369,7 +370,7 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty) {
+    if (errorMessage.isNotEmpty && MediaQuery.announceOf(context)) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(
