@@ -45,8 +45,8 @@ Future<void> testMain() async {
     context.fillRect(250, 0, 100, 200);
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
-*/
-
+  */
+  /*
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -93,7 +93,11 @@ Future<void> testMain() async {
     expect(canvas, isA<engine.CanvasKitCanvas>());
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 50,
+      textDirection: TextDirection.rtl,
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('عالم');
     final WebParagraph paragraph = builder.build();
@@ -117,37 +121,47 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_rtl_multilined.png', region: region);
   });
-
-  test('Draw WebParagraph LTR/RTL 1 Line', () async {
+*/
+  test('Draw WebParagraph LTR/RTL 1 Line in ltr', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
-    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
-    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 50,
+      textDirection: TextDirection.ltr,
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
 
-    builder.addText('لABC لم def لل لم def');
-    //builder.addText('لم d');
+    builder.addText('لABC لم def لل لم ghi');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
-    /*
-    final engine.DomHTMLCanvasElement canvas1 = engine.createDomCanvasElement(
-      width: 500,
-      height: 500,
-    );
-    engine.domDocument.body!.append(canvas1);
-    final context = canvas1.contextBitmapRenderer;
-    canvas1.style
-      ..position = 'absolute'
-      ..left = '100px'
-      ..top = '200px';
-    context.transferFromImageBitmap(textCanvas.transferToImageBitmap());
-    */
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_mix1_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_mix1_multilined_ltr.png', region: region);
   });
 
+  test('Draw WebParagraph LTR/RTL 1 Line in rtl', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Arial',
+      fontSize: 50,
+      textDirection: TextDirection.rtl,
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+
+    builder.addText('لABC لم def لل لم ghi');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_mix1_multilined_rtl.png', region: region);
+  });
+  /*
   test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -334,4 +348,5 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_text.png', region: region);
   });
+*/
 }

@@ -29,7 +29,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          background: background,
        ),
        _textDirection = textDirection ?? ui.TextDirection.ltr,
-       _textAlign = textAlign ?? ui.TextAlign.left;
+       _textAlign = textAlign ?? ui.TextAlign.start;
 
   final WebTextStyle _defaultTextStyle;
   final ui.TextDirection _textDirection;
@@ -159,6 +159,32 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
+class TextRange {
+  TextRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ClusterRange && other.start == start && other.end == end;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(start, end);
+  }
+
+  int get width => end - start;
+
+  bool get isEmpty => start == end;
+
+  static TextRange empty = TextRange(start: 0, end: 0);
+
+  int start;
+  int end;
+}
+
 class ClusterRange {
   ClusterRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
 
@@ -187,10 +213,10 @@ class ClusterRange {
 
 class StyledTextRange {
   StyledTextRange(int start, int end, this.textStyle) {
-    textRange = ClusterRange(start: start, end: end);
+    textRange = TextRange(start: start, end: end);
   }
 
-  ClusterRange textRange = ClusterRange(start: 0, end: 0);
+  TextRange textRange = TextRange(start: 0, end: 0);
   WebTextStyle textStyle;
 }
 

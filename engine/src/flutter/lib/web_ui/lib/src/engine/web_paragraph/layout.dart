@@ -42,6 +42,9 @@ class TextLayout {
     return codeUnitFlags[cluster.start].hasFlag(flag);
   }
 
+  bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
+  bool get isDefaultRtl => paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl;
+
   void performLayout(double width) {
     extractClusterTexts();
 
@@ -89,8 +92,7 @@ class TextLayout {
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     double blockStart = 0.0;
-    //layoutContext.direction =
-    //    paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
+    layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
       final String text = paragraph.text!.substring(
         styledBlock.textRange.start,
@@ -116,20 +118,9 @@ class TextLayout {
           rects.first.width,
           rects.first.height,
         );
-        for (
-          int i = cluster.begin + styledBlock.textRange.start;
-          i < cluster.end + styledBlock.textRange.start;
-          i += 1
-        ) {
-          textToClusterMap[i] = textClusters.length;
+        for (int i = cluster.begin; i < cluster.end; i += 1) {
+          textToClusterMap[i + styledBlock.textRange.start] = textClusters.length;
         }
-        final String clusterText = paragraph.text!.substring(
-          cluster.begin + styledBlock.textRange.start,
-          cluster.end + styledBlock.textRange.start,
-        );
-        WebParagraphDebug.log(
-          'Cluster[${textClusters.length}]: "$clusterText" [${cluster.begin + styledBlock.textRange.start}:${cluster.end + styledBlock.textRange.start}) ${bounds.left}:${bounds.right} ${rects.first.left}:${rects.first.right}',
-        );
         textClusters.add(
           ExtendedTextCluster(
             cluster,
@@ -149,13 +140,15 @@ class TextLayout {
     }
     textToClusterMap[paragraph.text!.length] = textClusters.length;
     textClusters.add(ExtendedTextCluster.empty());
+
+    printClusters();
   }
 
   ClusterRange convertTextToClusterRange(int start, int end) {
     return ClusterRange(start: textToClusterMap[start]!, end: textToClusterMap[end]!);
   }
 
-  String getTextFromClusterRange(ClusterRange clusterRange) {
+  String getTextFromMonodirectionalClusterRange(ClusterRange clusterRange) {
     final ExtendedTextCluster start =
         textClusters[math.min(clusterRange.start, textClusters.length - 1)];
     final ExtendedTextCluster end =
@@ -196,16 +189,15 @@ class TextLayout {
     WebParagraphDebug.log('Text Clusters: ${textClusters.length}');
     int runIndex = 0;
     for (final BidiRun run in bidiRuns) {
-      final String runText = getTextFromClusterRange(run.clusterRange);
-      WebParagraphDebug.log('');
+      final String runText = getTextFromMonodirectionalClusterRange(run.clusterRange);
       WebParagraphDebug.log(
-        'Run$runIndex[${run.clusterRange.start}:${run.clusterRange.end}): "$runText"',
+        'Run[$runIndex]: [${run.clusterRange.start}:${run.clusterRange.end}) "$runText"',
       );
       for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
         final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
         WebParagraphDebug.log(
-          '$i: [${cluster.start}:${cluster.end}) ${cluster.bounds.width} * ${cluster.bounds.height} "$clusterText"',
+          '$i: [${cluster.start}:${cluster.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
         );
       }
       runIndex += 1;
@@ -294,8 +286,9 @@ class TextLayout {
           shiftInsideLine - firstVisualClusterInRun.shift - firstVisualClusterInRun.cluster!.x,
         ),
       );
+      final String runText = getTextFromMonodirectionalClusterRange(bidiRun.clusterRange);
       WebParagraphDebug.log(
-        'Run: [${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) [${lineRunClusterRange.start}:${lineRunClusterRange.end}) bidi=${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.shift}-${firstVisualClusterInRun.cluster!.x}',
+        'Run: [${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) "$runText" [${lineRunClusterRange.start}:${lineRunClusterRange.end}) bidi=${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.shift}-${firstVisualClusterInRun.cluster!.x}',
       );
       shiftInsideLine += lineRunTextMetrics.width!;
     }
@@ -327,7 +320,7 @@ class TextLayout {
       line.fontBoundingBoxAscent + line.fontBoundingBoxDescent,
     );
     lines.add(line);
-    final String lineText = getTextFromClusterRange(line.textRange);
+    final String lineText = getTextFromMonodirectionalClusterRange(line.textRange);
     WebParagraphDebug.log(
       'Line [${line.textRange.start}:${line.textRange.end}) ${line.bounds.left},${line.bounds.top} ${line.bounds.width}x${line.bounds.height} "$lineText"',
     );
