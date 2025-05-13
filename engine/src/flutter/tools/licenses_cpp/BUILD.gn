@@ -3,7 +3,10 @@ source_set("licenses") {
     "src/license_checker.cc",
     "src/license_checker.h",
   ]
-  deps = [ "//flutter/third_party/abseil-cpp/absl/status:statusor" ]
+  deps = [
+    "//flutter/third_party/abseil-cpp/absl/status:statusor",
+    "//flutter/third_party/re2",
+  ]
 }
 
 executable("licenses_cpp") {
@@ -15,15 +18,12 @@ executable("licenses_cpp") {
     "//flutter/third_party/abseil-cpp/absl/flags:flag",
     "//flutter/third_party/abseil-cpp/absl/flags:parse",
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
-    "//flutter/third_party/re2",
   ]
 }
 
 executable("licenses_cpp_testrunner") {
   testonly = true
-  sources = [
-    "src/license_checker_unittests.cc",
-  ]
+  sources = [ "src/license_checker_unittests.cc" ]
   deps = [
     ":licenses",
     "//flutter/third_party/googletest:gtest",
