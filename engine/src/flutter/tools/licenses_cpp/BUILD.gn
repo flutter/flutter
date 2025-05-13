@@ -1,8 +1,19 @@
+source_set("licenses") {
+  sources = [ 
+    "src/license_checker.cc",
+    "src/license_checker.h",
+  ]
+  deps = [
+    "//flutter/third_party/abseil-cpp/absl/status:statusor",
+  ]
+}
+
 executable("licenses_cpp") {
   testonly = true
 
   sources = [ "src/main.cc" ]
   deps = [
+    ":licenses",
     "//flutter/third_party/abseil-cpp/absl/flags:flag",
     "//flutter/third_party/abseil-cpp/absl/flags:parse",
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
