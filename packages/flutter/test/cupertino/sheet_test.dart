@@ -1306,20 +1306,17 @@ void main() {
     });
   });
 
-  testWidgets('CupertinoSheet causes SystemUiOverlayStyle changes', (
-    WidgetTester tester,
-  ) async {
-    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
-    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
-
+  testWidgets('CupertinoSheet causes SystemUiOverlayStyle changes', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
           key: scaffoldKey,
+          navigationBar: const CupertinoNavigationBar(middle: Text('SystemUiOverlayStyle')),
           child: Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Text('Page 1'),
                 CupertinoButton(
@@ -1341,6 +1338,9 @@ void main() {
         ),
       ),
     );
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
 
     await tester.tap(find.text('Push Page 2'));
     await tester.pumpAndSettle();
