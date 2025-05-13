@@ -72,8 +72,19 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
             completer.complete(line);
           }
         });
-    final String entrypoint = await completer.future;
+    final StreamSubscription<String> stderrSub = process.stderr
+        .transform<String>(const Utf8Decoder())
+        .transform<String>(const LineSplitter())
+        .listen((String line) async {
+          print(line);
+        });
+    final Object result = await Future.any(<Future<Object>>[completer.future, process.exitCode]);
+    if (result is int) {
+      throw Exception('flutter run failed, exitCode=$result');
+    }
+    final String entrypoint = result as String;
     await stdoutSub.cancel();
+    await stderrSub.cancel();
     process.stdin.write('q');
     await process.stdin.flush();
     process.kill(ProcessSignal.sigint);

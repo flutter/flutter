@@ -479,6 +479,7 @@ class BrowserPlatform extends PlatformPlugin {
     return switch (suite.runConfig.variant) {
       CanvasKitVariant.full => 'full',
       CanvasKitVariant.chromium => 'chromium',
+      CanvasKitVariant.experimentalWebParagraph => 'experimentalWebParagraph',
       null => 'auto',
     };
   }
@@ -535,6 +536,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
+      wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
     },
   });
 </script>

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/synchronization/waitable_event.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 #import "flutter/testing/testing.h"
 

@@ -87,6 +87,7 @@ class Icon extends StatelessWidget {
     this.textDirection,
     this.applyTextScaling,
     this.blendMode,
+    this.fontWeight,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
@@ -253,6 +254,9 @@ class Icon extends StatelessWidget {
   /// Defaults to [BlendMode.srcOver]
   final BlendMode? blendMode;
 
+  /// The typeface thickness to use when painting the text (e.g., bold).
+  final FontWeight? fontWeight;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -310,6 +314,7 @@ class Icon extends StatelessWidget {
       color: iconColor,
       fontSize: iconSize,
       fontFamily: icon.fontFamily,
+      fontWeight: fontWeight,
       package: icon.fontPackage,
       fontFamilyFallback: icon.fontFamilyFallback,
       shadows: iconShadows,

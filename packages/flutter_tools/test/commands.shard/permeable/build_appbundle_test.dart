@@ -6,6 +6,8 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart'
+    show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -296,7 +298,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-not-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -336,7 +344,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
       },
       overrides: <Type, Generator>{

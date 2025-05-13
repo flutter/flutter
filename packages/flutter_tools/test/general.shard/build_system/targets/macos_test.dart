@@ -286,7 +286,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:',
+              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),

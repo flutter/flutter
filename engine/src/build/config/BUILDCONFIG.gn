@@ -570,7 +570,7 @@ if (custom_toolchain != "") {
   host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
   set_default_toolchain("//build/toolchain/mac:clang_$current_cpu")
 } else if (is_ios) {
-  import("//build/config/apple/apple_sdk.gni")  # For use_ios_simulator
+  import("//build/config/darwin/darwin_sdk.gni")  # For use_ios_simulator
   host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
   if (use_ios_simulator) {
     if (target_cpu == "arm64") {
