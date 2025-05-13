@@ -1065,7 +1065,6 @@
 ../../../flutter/third_party/boringssl/src/crypto/test
 ../../../flutter/third_party/boringssl/src/crypto/thread_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/trust_token/trust_token_test.cc
-../../../flutter/third_party/boringssl/src/crypto/x509/tab_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
