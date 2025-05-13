@@ -1289,7 +1289,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// An optional callback that's called when a [Tab]'s focus state in the
   /// [TabBar] changes.
   ///
-  /// Called when the node fo the [Tab] at `index` gains or loses focus.
+  /// Called when the node for the [Tab] at `index` gains or loses focus.
   ///
   /// The value passed to the callback is true if the node has gained focus for
   /// the [Tab] at `index` and false if focus has been lost.

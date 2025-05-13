@@ -62,11 +62,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  if (index == 0) {
-                    index = names.length - 1;
-                  } else {
-                    index -= 1;
-                  }
+                  index = (index - 1) % names.length;
                 });
               },
               child: const Icon(Icons.chevron_left, key: Key('gesture1')),
@@ -83,11 +79,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  if (index == names.length - 1) {
-                    index = 0;
-                  } else {
-                    index += 1;
-                  }
+                  index = (index + 1) % names.length;
                 });
               },
               child: const Icon(Icons.chevron_right, key: Key('gesture2')),

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -41,6 +41,21 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('SystemTextScaler', () {
+    testWidgets('equality', (WidgetTester tester) async {
+      addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+
+      tester.platformDispatcher.textScaleFactorTestValue = 123;
+      final TextScaler scaler1 = MediaQueryData.fromView(tester.view).textScaler;
+      tester.platformDispatcher.textScaleFactorTestValue = 345;
+      final TextScaler scaler2 = MediaQueryData.fromView(tester.view).textScaler;
+      tester.platformDispatcher.textScaleFactorTestValue = 123;
+      final TextScaler scaler3 = MediaQueryData.fromView(tester.view).textScaler;
+      expect(scaler1, scaler3);
+      expect(scaler1, isNot(scaler2));
     });
   });
 }
