@@ -1356,7 +1356,8 @@ abstract class FlutterCommand extends Command<void> {
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
+        boolArg(FlutterOptions.kWebExperimentalHotReload) &&
+        getBuildMode() == BuildMode.debug) {
       extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
     }
 
