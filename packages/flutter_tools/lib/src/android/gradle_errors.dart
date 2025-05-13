@@ -270,10 +270,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     }
     final String errorMessage =
         '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
-    final File buildGradle = project.directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
+    final File buildGradle = project.android.appGradleFile;
     if (productFlavors.isEmpty) {
       globals.printBox(
         '$errorMessage\n\n'
@@ -311,11 +308,7 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    final File gradleFile = project.directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
-
+    final File gradleFile = project.android.appGradleFile;
     final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
     assert(minSdkVersionMatch?.groupCount == 3);
 
@@ -352,10 +345,7 @@ final GradleHandledError transformInputIssueHandler = GradleHandledError(
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    final File gradleFile = project.directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
+    final File gradleFile = project.android.appGradleFile;
     final String textInBold = globals.logger.terminal.bolden(
       'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
       'android {\n'
@@ -385,7 +375,7 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    final File gradleFile = project.directory.childDirectory('android').childFile('build.gradle');
+    final File gradleFile = project.android.hostAppGradleFile;
     final String generatedGradleCommand =
         globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
@@ -411,7 +401,7 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    final File gradleFile = project.directory.childDirectory('android').childFile('build.gradle');
+    final File gradleFile = project.android.hostAppGradleFile;
     final File settingsFile = project.directory
         .childDirectory('android')
         .childFile('settings.gradle');
@@ -442,7 +432,7 @@ final GradleHandledError outdatedGradleHandler = GradleHandledError(
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    final File gradleFile = project.directory.childDirectory('android').childFile('build.gradle');
+    final File gradleFile = project.android.hostAppGradleFile;
     final File gradlePropertiesFile = project.directory
         .childDirectory('android')
         .childDirectory('gradle')
@@ -479,10 +469,7 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
     final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
     assert(minCompileSdkVersionMatch?.groupCount == 1);
 
-    final File gradleFile = project.directory
-        .childDirectory('android')
-        .childDirectory('app')
-        .childFile('build.gradle');
+    final File gradleFile = project.android.appGradleFile;
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
       'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
