@@ -472,6 +472,24 @@ targets:
       - os=Mac-14
       - cpu=x86
 
+  - name: Mac mac_ios_engine_ddm
+    recipe: engine_v2/engine_v2
+    timeout: 240
+    properties:
+      add_recipes_cq: "true"
+      release_build: "false"
+      backfill: "false"
+      config_name: mac_ios_engine_ddm
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Mac-14
+      - cpu=x86
+
   - name: Windows windows_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 120
