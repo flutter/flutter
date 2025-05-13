@@ -59,6 +59,8 @@ Future<Depfile> copyAssets(
     throw Exception('Failed to bundle asset files.');
   }
   final Pool pool = Pool(kMaxOpenFiles);
+  // A smaller pool only used by asset transformers.
+  final Pool transformerPool = Pool(4);
   final List<File> inputs = <File>[
     // An asset manifest with no assets would have zero inputs if not
     // for this pubspec file.
@@ -106,6 +108,7 @@ Future<Depfile> copyAssets(
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource resource = await pool.request();
+      PoolResource? transformerResource;
       try {
         // This will result in strange looking files, for example files with `/`
         // on Windows or files that end up getting URI encoded such as `#.ext`
@@ -124,6 +127,7 @@ Future<Depfile> copyAssets(
           switch (entry.value.kind) {
             case AssetKind.regular:
               if (entry.value.transformers.isNotEmpty) {
+                transformerResource = await transformerPool.request();
                 final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: content.file as File,
                   outputPath: file.path,
@@ -162,6 +166,7 @@ Future<Depfile> copyAssets(
         }
       } finally {
         resource.release();
+        transformerResource?.release();
       }
     }),
   );
