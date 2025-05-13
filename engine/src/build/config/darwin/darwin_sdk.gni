@@ -74,24 +74,24 @@ assert(defined(ios_use_simulator))
 assert(ios_deployment_target != "")
 assert(ios_testing_deployment_target != "")
 
-# Run apple_sdk.gni to determine SDK paths if necessary.
-_need_apple_sdk_run = false
+# Run darwin_sdk.py to determine SDK paths if necessary.
+_need_darwin_sdk_run = false
 if (mac_host_toolchain_path == "" ||  #
     mac_sdk_path == "" ||  #
     mac_platform_path == "") {
-  _need_apple_sdk_run = true
+  _need_darwin_sdk_run = true
 }
 if (is_ios) {
   if (use_ios_simulator &&
       (ios_simulator_platform_path == "" || ios_simulator_sdk_path == "")) {
-    _need_apple_sdk_run = true
+    _need_darwin_sdk_run = true
   }
   if (!use_ios_simulator &&
       (ios_device_platform_path == "" || ios_device_sdk_path == "")) {
-    _need_apple_sdk_run = true
+    _need_darwin_sdk_run = true
   }
 }
-if (_need_apple_sdk_run) {
+if (_need_darwin_sdk_run) {
   _args = [ "--print-paths" ]
   if (use_rbe && create_xcode_symlinks) {
     # RBE has a restriction that paths cannot come from outside the build root.
@@ -101,7 +101,7 @@ if (_need_apple_sdk_run) {
     ]
   }
   _sdk_result =
-      exec_script(rebase_path("//build/mac/apple_sdk.py"), _args, "scope")
+      exec_script(rebase_path("//build/mac/darwin_sdk.py"), _args, "scope")
 }
 
 # Set SDK paths.

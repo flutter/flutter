@@ -7,7 +7,6 @@ package io.flutter.view;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -491,6 +490,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.accessibilityManager.addTouchExplorationStateChangeListener(
         touchExplorationStateChangeListener);
 
+    accessibilityFeatureFlags |= AccessibilityFeature.NO_ANNOUNCE.value;
     // Tell Flutter whether animations should initially be enabled or disabled. Then register a
     // listener to be notified of changes in the future.
     animationScaleObserver.onChange(false);
@@ -564,7 +564,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  @TargetApi(API_LEVELS.API_31)
   @RequiresApi(API_LEVELS.API_31)
   private void setBoldTextFlag() {
     if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
@@ -1926,7 +1925,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
-  @TargetApi(API_LEVELS.API_28)
   @RequiresApi(API_LEVELS.API_28)
   private void setAccessibilityPaneTitle(String title) {
     rootAccessibilityView.setAccessibilityPaneTitle(title);
@@ -1975,7 +1973,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *
    * <p>The {@code layoutInDisplayCutoutMode} is added after API level 28.
    */
-  @TargetApi(API_LEVELS.API_28)
   @RequiresApi(API_LEVELS.API_28)
   private boolean doesLayoutInDisplayCutoutModeRequireLeftInset() {
     Context context = rootAccessibilityView.getContext();
@@ -2174,7 +2171,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     BOLD_TEXT(1 << 3), // NOT SUPPORTED
     REDUCE_MOTION(1 << 4), // NOT SUPPORTED
     HIGH_CONTRAST(1 << 5), // NOT SUPPORTED
-    ON_OFF_SWITCH_LABELS(1 << 6); // NOT SUPPORTED
+    ON_OFF_SWITCH_LABELS(1 << 6), // NOT SUPPORTED
+    NO_ANNOUNCE(1 << 7);
 
     final int value;
 

@@ -144,6 +144,7 @@ void main() {
   });
 
   testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -154,6 +155,7 @@ void main() {
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.onOffSwitchLabels, false);
+    expect(data.announce, false);
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
@@ -169,6 +171,7 @@ void main() {
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
+      announce: true,
       alwaysUse24HourFormat: true,
       navigationMode: NavigationMode.directional,
     );
@@ -202,6 +205,7 @@ void main() {
     expect(data.boldText, platformData.boldText);
     expect(data.highContrast, platformData.highContrast);
     expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
+    expect(data.announce, platformData.announce);
     expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
     expect(data.navigationMode, platformData.navigationMode);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -255,6 +259,7 @@ void main() {
         data.onOffSwitchLabels,
         tester.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
       );
+      expect(data.announce, tester.platformDispatcher.accessibilityFeatures.announce);
       expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
       expect(data.navigationMode, NavigationMode.traditional);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -274,6 +279,7 @@ void main() {
         boldText: true,
         highContrast: true,
         onOffSwitchLabels: true,
+        announce: true,
         alwaysUse24HourFormat: true,
         navigationMode: NavigationMode.directional,
       );
@@ -321,6 +327,7 @@ void main() {
       expect(data.boldText, platformData.boldText);
       expect(data.highContrast, platformData.highContrast);
       expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
+      expect(data.announce, platformData.announce);
       expect(data.alwaysUse24HourFormat, platformData.alwaysUse24HourFormat);
       expect(data.navigationMode, platformData.navigationMode);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -393,6 +400,7 @@ void main() {
         data.onOffSwitchLabels,
         tester.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
       );
+      expect(data.announce, tester.platformDispatcher.accessibilityFeatures.announce);
       expect(data.alwaysUse24HourFormat, tester.platformDispatcher.alwaysUse24HourFormat);
       expect(data.navigationMode, NavigationMode.traditional);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
@@ -577,6 +585,7 @@ void main() {
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.onOffSwitchLabels, data.onOffSwitchLabels);
+    expect(copied.announce, data.announce);
     expect(copied.platformBrightness, data.platformBrightness);
     expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
@@ -617,6 +626,7 @@ void main() {
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
+      announce: true,
       platformBrightness: Brightness.dark,
       navigationMode: NavigationMode.directional,
       gestureSettings: gestureSettings,
@@ -636,6 +646,7 @@ void main() {
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.onOffSwitchLabels, true);
+    expect(copied.announce, true);
     expect(copied.platformBrightness, Brightness.dark);
     expect(copied.navigationMode, NavigationMode.directional);
     expect(copied.gestureSettings, gestureSettings);
@@ -674,6 +685,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -710,6 +722,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.announce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -748,6 +761,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -781,6 +795,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.announce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -819,6 +834,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -855,6 +871,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.announce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -893,6 +910,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -926,6 +944,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.announce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -964,6 +983,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -1000,6 +1020,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.announce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -1038,6 +1059,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
         ),
@@ -1071,6 +1093,7 @@ void main() {
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
+    expect(unpadded.announce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
   });
@@ -1173,6 +1196,32 @@ void main() {
 
     expect(outsideOnOffSwitchLabels, false);
     expect(insideOnOffSwitchLabels, true);
+  });
+
+  testWidgets('MediaQuery.announce', (WidgetTester tester) async {
+    late bool outsideAnnounce;
+    late bool insideAnnounce;
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          outsideAnnounce = MediaQuery.announceOf(context);
+          return MediaQuery(
+            data: const MediaQueryData(announce: true),
+            child: Builder(
+              builder: (BuildContext context) {
+                insideAnnounce = MediaQuery.announceOf(context);
+                return Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideAnnounce, false);
+    expect(insideAnnounce, true);
   });
 
   testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
@@ -1305,6 +1354,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           displayFeatures: displayFeatures,
         ),
         child: Builder(
@@ -1336,6 +1386,7 @@ void main() {
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
+    expect(subScreenMediaQuery.announce, true);
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
@@ -1382,6 +1433,7 @@ void main() {
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
+          announce: true,
           displayFeatures: displayFeatures,
         ),
         child: Builder(
@@ -1419,6 +1471,7 @@ void main() {
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
+    expect(subScreenMediaQuery.announce, true);
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
@@ -1683,6 +1736,8 @@ void main() {
           MediaQuery.maybeOnOffSwitchLabelsOf,
           MediaQueryData(onOffSwitchLabels: true),
         ),
+        const _MediaQueryAspectCase(MediaQuery.announceOf, MediaQueryData(announce: true)),
+        const _MediaQueryAspectCase(MediaQuery.maybeAnnounceOf, MediaQueryData(announce: true)),
         const _MediaQueryAspectCase(
           MediaQuery.disableAnimationsOf,
           MediaQueryData(disableAnimations: true),

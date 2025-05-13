@@ -4,7 +4,7 @@
 
 assert(is_ios)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
@@ -20,31 +20,6 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_gl = false
   enable_vulkan = false
   enable_metal = true
-}
-
-config("config_ios") {
-  include_dirs = [ target_gen_dir ]
-  lib_dirs = ios_swift_lib_paths
-
-  # Allow use of @testable imports in debug builds and when tests are enabled.
-  if (enable_ios_unittests) {
-    swiftflags = [ "-enable-testing" ]
-  }
-}
-
-config("config_ios_test") {
-  configs = [ ":config_ios" ]
-
-  # Add platform frameworks directory to search path for test frameworks.
-  # Add platform lib to search path for test libraries/Swift modules.
-  cflags = [
-    "-fvisibility=default",
-    "-F$ios_platform_path/Developer/Library/Frameworks",
-  ]
-  swiftflags = [ "-F$ios_platform_path/Developer/Library/Frameworks" ]
-  include_dirs = [ "$ios_platform_path/Developer/usr/lib" ]
-  framework_dirs = [ "$ios_platform_path/Developer/Library/Frameworks" ]
-  lib_dirs = [ "$ios_platform_path/Developer/usr/lib" ]
 }
 
 # The headers that will be copied to the Flutter.framework and be accessed
@@ -66,7 +41,7 @@ _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
 source_set("InternalFlutterSwift") {
   visibility = [ ":*" ]
-  configs += [ ":config_ios" ]
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
 
   sources = [
     "framework/Source/ConnectionCollection.swift",
@@ -85,7 +60,7 @@ source_set("flutter_framework_source") {
     "//flutter:config",
   ]
   configs += [
-    ":config_ios",
+    "//flutter/shell/platform/darwin/common:config",
     "//build/config/ios:ios_application_extension",
   ]
 
@@ -224,7 +199,7 @@ if (enable_ios_unittests) {
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [ ":config_ios_test" ]
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     sources = [
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
@@ -247,11 +222,14 @@ if (enable_ios_unittests) {
     ldflags =
         [ "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib" ]
     frameworks = [ "XCTest.framework" ]
-    configs += [ ":config_ios_test" ]
+    include_dirs = [ target_gen_dir ]
+
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     configs -= [
       "//build/config/gcc:symbol_visibility_hidden",
       "//build/config:symbol_visibility_hidden",
     ]
+
     sources = [
       "framework/Source/FlutterAppDelegateTest.mm",
       "framework/Source/FlutterChannelKeyResponderTest.mm",
