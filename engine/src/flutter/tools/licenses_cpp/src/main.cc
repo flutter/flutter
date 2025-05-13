@@ -5,8 +5,8 @@
 #include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/parse.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/usage.h"
-#include "flutter/tools/licenses_cpp/src/license_checker.h"
 #include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "flutter/tools/licenses_cpp/src/license_checker.h"
 
 ABSL_FLAG(std::optional<std::string>,
           working_dir,
