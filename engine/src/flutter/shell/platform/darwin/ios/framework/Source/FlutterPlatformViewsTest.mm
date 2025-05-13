@@ -4516,7 +4516,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
+                                    grContext:nil];
 
   // The above code should result in previousCompositionOrder having one viewId in it
   XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 1ul);
