@@ -3463,20 +3463,20 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  List<SemanticsNode> reorderWithTargetsFirst(Set<SemanticsNode> targets) {
+  List<SemanticsNode> reorderWithOverlayPortalsFirst(Set<SemanticsNode> overlayPortalNodes) {
     final List<SemanticsNode> reversedChildren = _children!.reversed.toList();
     final List<SemanticsNode> hitTestOrder = <SemanticsNode>[];
 
-    for (final SemanticsNode target in targets) {
+    for (final SemanticsNode overlayPortal in overlayPortalNodes) {
       for (final SemanticsNode child in reversedChildren) {
-        if (target.id == child.id) {
-          hitTestOrder.add(target);
+        if (overlayPortal.id == child.id) {
+          hitTestOrder.add(overlayPortal);
         }
       }
     }
 
     for (final SemanticsNode child in reversedChildren) {
-      if (!targets.contains(child)) {
+      if (!overlayPortalNodes.contains(child)) {
         hitTestOrder.add(child);
       }
     }
@@ -3566,14 +3566,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   List<SemanticsNode> _childrenInHitTestOrder() {
-    final Set<SemanticsNode> overlayPortalNode = <SemanticsNode>{};
+    final Set<SemanticsNode> overlayPortalNodes = <SemanticsNode>{};
     for (final SemanticsNode child in _children!) {
       if (child.hasFlag(SemanticsFlag.isOverlayPortal)) {
-        overlayPortalNode.add(child);
+        overlayPortalNodes.add(child);
       }
     }
 
-    return reorderWithTargetsFirst(overlayPortalNode);
+    return reorderWithOverlayPortalsFirst(overlayPortalNodes);
   }
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
