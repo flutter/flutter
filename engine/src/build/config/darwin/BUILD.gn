@@ -38,15 +38,15 @@ config("compiler") {
   } else {
     _triplet_environment = ""
   }
-  # OS.
+  # Deployment target (OS and version).
   if (is_ios) {
-    _triplet_os = "apple-ios"
-  } else if (is_mac) {
-    _triplet_os = "apple-macos"
+    _triplet_os = "apple-ios$ios_deployment_target"
   } else {
-    assert(false, "unsupported Apple os")
+    assert(is_mac, "unsupported Apple os")
+    _triplet_os = "apple-macos$mac_deployment_target"
   }
-  _target_triplet = "$_triplet_cpu-$_triplet_os$mac_deployment_target$_triplet_environment"
+
+  _target_triplet = "$_triplet_cpu-$_triplet_os$_triplet_environment"
 
   # swiftc -swift-version flag.
   #
