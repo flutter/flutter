@@ -419,6 +419,7 @@ void main() {
     expect(childFocusNode.hasFocus, true);
 
     await pumpVisibility(false);
+    childFocusNode.requestFocus();
 
     expect(childFocusNode.hasFocus, false);
   });
@@ -478,6 +479,7 @@ void main() {
       expect(childFocusNode.hasFocus, true);
 
       await pumpVisibility(false);
+      childFocusNode.requestFocus();
 
       expect(childFocusNode.hasFocus, false);
     },
