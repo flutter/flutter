@@ -214,8 +214,7 @@ class _MenuControllerScope extends InheritedWidget {
 /// If [MenuController.open] is called with a `position` argument, it will be
 /// passed to the `info` argument of the `overlayBuilder` function.
 ///
-/// Developers are responsible for managing the positioning, semantics, and focus of
-/// the menu.
+/// The [RawMenuAnchor] does not manage semantics and focus of the menu.
 ///
 /// {@tool dartpad}
 ///
@@ -261,10 +260,10 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when the menu overlay is shown.
   ///
-  /// This callback is triggered when the menu overlay is inserted into the widget
-  /// tree, typically before any opening animations begin. [onOpen] can be used to
-  /// respond when the menu first becomes interactive, such as by setting focus to
-  /// a menu item.
+  /// This callback is triggered when the menu overlay is inserted into the
+  /// widget tree, typically before any opening animations begin. A typical
+  /// usage is to respond when the menu first becomes interactive, such as by
+  /// setting focus to a menu item.
   ///
   /// This callback is not called when an already open menu is repositioned.
   final VoidCallback? onOpen;
@@ -272,9 +271,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// Called when the menu overlay is hidden.
   ///
   /// This callback is triggered when the menu overlay is removed from the
-  /// widget tree, typically after any closing animations have completed. It is
-  /// typically used by applications to respond when the menu has been
-  /// dismissed, such as by restoring focus to a previously active element.
+  /// widget tree, typically after any closing animations have completed. A
+  /// typical usage is to restore focus to a previously active element.
   ///
   /// If a callback is provided for [onCloseRequested], [onClose] will not be
   /// called until after `hideOverlay` is called.
@@ -573,11 +571,14 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 
   /// Close the menu and all of its children.
   ///
-  /// If `inDispose` is true, the menu will close without rebuilding its parent.
+  /// If `inDispose` is true, this method call was triggered by the widget being
+  /// unmounted.
   ///
-  /// Unless the menu needs to be closed immediately, [handleCloseRequest] should be
-  /// called instead of [close]. Doing so allows subclasses to control how the
-  /// menu is closed.
+  /// The [close] method might be called by the base class
+  /// [_RawMenuAnchorBaseMixin] and its subclasses. [_RawMenuAnchorBaseMixin]
+  /// should only call [close] if the menu needs to be closed immediately;
+  /// otherwise, call [handleCloseRequest] to allow parent widgets to control
+  /// how the menu is closed.
   @protected
   void close({bool inDispose = false});
 
@@ -586,6 +587,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// This method should not be directly called by subclasses. Its call chain
   /// should eventually invoke [open].
+  @protected
   void handleOpenRequest({Offset? position});
 
   /// Implemented by subclasses to define what to do when [MenuController.close]
@@ -593,6 +595,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// This method should not be directly called by subclasses. Its call chain
   /// should eventually invoke [close].
+  @protected
   void handleCloseRequest();
 
   /// Request that the submenus of this menu be closed.
@@ -600,8 +603,8 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   /// By default, this method will call [handleCloseRequest] on each child of this
   /// menu, which will trigger the closing sequence of each child.
   ///
-  /// When `inDispose` is true, animations will be skipped and each child will
-  /// close without rebuilding its parent
+  /// If `inDispose` is true, this method was triggered by the widget being
+  /// unmounted.
   @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
