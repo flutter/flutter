@@ -26,7 +26,6 @@ class SwiftPackageManagerUtils {
           'Failed to enable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
@@ -45,7 +44,6 @@ class SwiftPackageManagerUtils {
           'Failed to disable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 

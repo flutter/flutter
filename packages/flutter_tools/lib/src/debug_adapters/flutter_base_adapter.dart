@@ -28,10 +28,7 @@ abstract class FlutterBaseDebugAdapter
     super.enableAuthCodes,
     super.logger,
     super.onError,
-  }) : flutterSdkRoot = Cache.flutterRoot!,
-       // Always disable in the DAP layer as it's handled in the spawned
-       // 'flutter' process.
-       super(enableDds: false) {
+  }) : flutterSdkRoot = Cache.flutterRoot! {
     configureOrgDartlangSdkMappings();
   }
 
