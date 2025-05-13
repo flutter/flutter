@@ -25,7 +25,7 @@
       },
       "gn": [
         "--target-dir",
-        "ci/ios_debug_sim_arm64",
+        "ci/ios_debug_sim_arm64_ddm",
         "--ios",
         "--runtime-mode",
         "debug",
@@ -37,15 +37,15 @@
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
-      "name": "ci/ios_debug_sim_arm64",
+      "name": "ci/ios_debug_sim_arm64_ddm",
       "description": "Produces debug mode artifacts to target the arm64 iOS simulator.",
       "ninja": {
-        "config": "ci/ios_debug_sim_arm64"
+        "config": "ci/ios_debug_sim_arm64_ddm"
       },
       "postsubmit_overrides": {
         "gn": [
           "--target-dir",
-          "ci/ios_debug_sim_arm64",
+          "ci/ios_debug_sim_arm64_ddm",
           "--ios",
           "--runtime-mode",
           "debug",
@@ -76,7 +76,7 @@
       },
       "gn": [
         "--target-dir",
-        "ci/ios_debug",
+        "ci/ios_debug_ddm",
         "--ios",
         "--runtime-mode",
         "debug",
@@ -85,10 +85,10 @@
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
-      "name": "ci/ios_debug",
+      "name": "ci/ios_debug_ddm",
       "description": "Produces debug mode artifacts to target iOS.",
       "ninja": {
-        "config": "ci/ios_debug",
+        "config": "ci/ios_debug_ddm",
         "targets": [
           "flutter/lib/snapshot:generate_snapshot_bins",
           "flutter/shell/platform/darwin/ios:flutter_framework"
@@ -97,7 +97,7 @@
       "postsubmit_overrides": {
         "gn": [
           "--target-dir",
-          "ci/ios_debug",
+          "ci/ios_debug_ddm",
           "--ios",
           "--runtime-mode",
           "debug",
@@ -125,7 +125,7 @@
       },
       "gn": [
         "--target-dir",
-        "ci/ios_profile",
+        "ci/ios_profile_ddm",
         "--ios",
         "--runtime-mode",
         "profile",
@@ -134,10 +134,10 @@
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
-      "name": "ci/ios_profile",
+      "name": "ci/ios_profile_ddm",
       "description": "Produces profile mode artifacts to target iOS.",
       "ninja": {
-        "config": "ci/ios_profile",
+        "config": "ci/ios_profile_ddm",
         "targets": [
           "flutter/lib/snapshot:generate_snapshot_bins",
           "flutter/shell/platform/darwin/ios:flutter_framework"
@@ -146,7 +146,7 @@
       "postsubmit_overrides": {
         "gn": [
           "--target-dir",
-          "ci/ios_profile",
+          "ci/ios_profile_ddm",
           "--ios",
           "--runtime-mode",
           "profile",
@@ -174,7 +174,7 @@
       },
       "gn": [
         "--target-dir",
-        "ci/ios_release",
+        "ci/ios_release_ddm",
         "--ios",
         "--runtime-mode",
         "release",
@@ -183,10 +183,10 @@
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
-      "name": "ci/ios_release",
+      "name": "ci/ios_releas_ddm",
       "description": "Produces release mode artifacts to target iOS.",
       "ninja": {
-        "config": "ci/ios_release",
+        "config": "ci/ios_release_ddm",
         "targets": [
           "flutter/lib/snapshot:generate_snapshot_bins",
           "flutter/shell/platform/darwin/ios:flutter_framework"
@@ -195,7 +195,7 @@
       "postsubmit_overrides": {
         "gn": [
           "--target-dir",
-          "ci/ios_release",
+          "ci/ios_release_ddm",
           "--ios",
           "--runtime-mode",
           "release",
@@ -217,13 +217,13 @@
         "name": "Debug-ios-Flutter.xcframework",
         "parameters": [
           "--dst",
-          "out/debug",
+          "out/debug_ddm",
           "--arm64-out-dir",
-          "out/ci/ios_debug",
+          "out/ci/ios_debug_ddm",
           "--simulator-x64-out-dir",
-          "out/ci/ios_debug_sim",
+          "out/ci/ios_debug_sim_ddm",
           "--simulator-arm64-out-dir",
-          "out/ci/ios_debug_sim_arm64"
+          "out/ci/ios_debug_sim_arm64_ddm"
         ],
         "script": "flutter/sky/tools/create_ios_framework.py",
         "language": "python3"
@@ -232,13 +232,13 @@
         "name": "Profile-ios-Flutter.xcframework",
         "parameters": [
           "--dst",
-          "out/profile",
+          "out/profile_ddm",
           "--arm64-out-dir",
-          "out/ci/ios_profile",
+          "out/ci/ios_profile_ddm",
           "--simulator-x64-out-dir",
-          "out/ci/ios_debug_sim",
+          "out/ci/ios_debug_sim_ddm",
           "--simulator-arm64-out-dir",
-          "out/ci/ios_debug_sim_arm64"
+          "out/ci/ios_debug_sim_arm64_ddm"
         ],
         "script": "flutter/sky/tools/create_ios_framework.py",
         "language": "python3"
@@ -247,13 +247,13 @@
         "name": "Release-ios-Flutter.xcframework",
         "parameters": [
           "--dst",
-          "out/release",
+          "out/release_ddm",
           "--arm64-out-dir",
-          "out/ci/ios_release",
+          "out/ci/ios_release_ddm",
           "--simulator-x64-out-dir",
-          "out/ci/ios_debug_sim",
+          "out/ci/ios_debug_sim_ddm",
           "--simulator-arm64-out-dir",
-          "out/ci/ios_debug_sim_arm64",
+          "out/ci/ios_debug_sim_arm64_ddm",
           "--dsym",
           "--strip"
         ],
