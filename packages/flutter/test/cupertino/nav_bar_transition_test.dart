@@ -804,11 +804,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
-    await tester.pumpAndSettle();
-
-    // Pop the pushed route to allow disposal.
-    tester.state<NavigatorState>(find.byType(Navigator)).pop();
-    await tester.pumpAndSettle();
   });
 
   testWidgets('First appearance of back chevron fades in from the right', (
@@ -1314,14 +1309,6 @@ void main() {
         find.byType(CupertinoApp),
         matchesGoldenFile('nav_bar_transition.search.top.png'),
       );
-      await tester.pumpAndSettle();
-
-      // Pop pushed routes to allow disposal.
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pumpAndSettle();
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pumpAndSettle();
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
       await tester.pumpAndSettle();
     },
   );
