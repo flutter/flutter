@@ -105,14 +105,17 @@ class DlPath : public impeller::PathSource {
       FML_DCHECK(!SkPathFillType_IsInverse(path.getFillType()));
     }
 
-    std::optional<SkPath> sk_path;
+    SkPath sk_path;
     uint32_t render_count = 0u;
   };
 
   std::shared_ptr<Data> data_;
 
-  static void DispatchFromSkiaPath(const SkPath& path,
-                                   DlPathReceiver& receiver);
+  static void ReduceConic(DlPathReceiver& receiver,
+                          const DlPoint& p1,
+                          const DlPoint& cp,
+                          const DlPoint& p2,
+                          DlScalar weight);
 };
 
 }  // namespace flutter

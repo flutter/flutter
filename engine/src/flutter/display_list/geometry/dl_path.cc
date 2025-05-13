@@ -114,30 +114,72 @@ DlPath DlPath::MakeArc(const DlRect& bounds,
 }
 
 const SkPath& DlPath::GetSkPath() const {
-  auto& sk_path = data_->sk_path;
-  if (sk_path.has_value()) {
-    return sk_path.value();
-  }
-  sk_path.emplace();
-  return sk_path.value();
+  return data_->sk_path;
 }
 
 void DlPath::Dispatch(DlPathReceiver& receiver) const {
-  auto& sk_path = data_->sk_path;
-  FML_DCHECK(sk_path.has_value());
-  if (sk_path.has_value()) {
-    DispatchFromSkiaPath(sk_path.value(), receiver);
+  const SkPath& path = data_->sk_path;
+  if (path.isEmpty()) {
+    receiver.PathEnd();
+    return;
   }
+
+  auto iterator = SkPath::Iter(path, false);
+
+  struct PathData {
+    union {
+      SkPoint points[4];
+    };
+  };
+
+  PathData data;
+
+  auto verb = SkPath::Verb::kDone_Verb;
+  do {
+    verb = iterator.next(data.points);
+    switch (verb) {
+      case SkPath::kMove_Verb:
+        receiver.MoveTo(ToDlPoint(data.points[0]), iterator.isClosedContour());
+        break;
+      case SkPath::kLine_Verb:
+        receiver.LineTo(ToDlPoint(data.points[1]));
+        break;
+      case SkPath::kQuad_Verb:
+        receiver.QuadTo(ToDlPoint(data.points[1]), ToDlPoint(data.points[2]));
+        break;
+      case SkPath::kConic_Verb:
+        if (!receiver.ConicTo(ToDlPoint(data.points[1]),
+                              ToDlPoint(data.points[2]),
+                              iterator.conicWeight())) {
+          ReduceConic(receiver,                   //
+                      ToDlPoint(data.points[0]),  //
+                      ToDlPoint(data.points[1]),  //
+                      ToDlPoint(data.points[2]),  //
+                      iterator.conicWeight());
+        }
+        break;
+      case SkPath::kCubic_Verb:
+        receiver.CubicTo(ToDlPoint(data.points[1]),  //
+                         ToDlPoint(data.points[2]),  //
+                         ToDlPoint(data.points[3]));
+        break;
+      case SkPath::kClose_Verb:
+        receiver.Close();
+        break;
+      case SkPath::kDone_Verb:
+        break;
+    }
+  } while (verb != SkPath::Verb::kDone_Verb);
+  receiver.PathEnd();
 }
 
 void DlPath::WillRenderSkPath() const {
-  if (data_->render_count >= kMaxVolatileUses) {
-    auto& sk_path = data_->sk_path;
-    if (sk_path.has_value()) {
-      sk_path.value().setIsVolatile(false);
+  uint32_t count = data_->render_count;
+  if (count <= kMaxVolatileUses) {
+    if (count == kMaxVolatileUses) {
+      data_->sk_path.setIsVolatile(false);
     }
-  } else {
-    data_->render_count++;
+    data_->render_count = ++count;
   }
 }
 
@@ -148,27 +190,19 @@ void DlPath::WillRenderSkPath() const {
   if (!offset.IsFinite()) {
     return DlPath();
   }
-  auto& sk_path = data_->sk_path;
-  if (sk_path.has_value()) {
-    SkPath path = sk_path.value();
-    path = path.offset(offset.x, offset.y);
-    return DlPath(path);
-  }
-  return *this;
+  SkPath path = data_->sk_path;
+  path = path.offset(offset.x, offset.y);
+  return DlPath(path);
 }
 
 [[nodiscard]] DlPath DlPath::WithFillType(DlPathFillType type) const {
-  auto& sk_path = data_->sk_path;
-  if (sk_path.has_value()) {
-    SkPathFillType sk_type = ToSkFillType(type);
-    if (sk_path.value().getFillType() == sk_type) {
-      return *this;
-    }
-    SkPath path = sk_path.value();
-    path.setFillType(sk_type);
-    return DlPath(path);
+  SkPathFillType sk_type = ToSkFillType(type);
+  if (data_->sk_path.getFillType() == sk_type) {
+    return *this;
   }
-  return *this;
+  SkPath path = data_->sk_path;
+  path.setFillType(sk_type);
+  return DlPath(path);
 }
 
 bool DlPath::IsEmpty() const {
@@ -223,9 +257,7 @@ bool DlPath::IsVolatile() const {
 }
 
 bool DlPath::IsConvex() const {
-  auto& sk_path = data_->sk_path;
-  FML_DCHECK(sk_path.has_value());
-  return sk_path.has_value() && sk_path->isConvex();
+  return data_->sk_path.isConvex();
 }
 
 DlPath DlPath::operator+(const DlPath& other) const {
@@ -234,11 +266,11 @@ DlPath DlPath::operator+(const DlPath& other) const {
   return DlPath(path);
 }
 
-static void ReduceConic(DlPathReceiver& receiver,
-                        const DlPoint& p1,
-                        const DlPoint& cp,
-                        const DlPoint& p2,
-                        DlScalar weight) {
+void DlPath::ReduceConic(DlPathReceiver& receiver,
+                         const DlPoint& p1,
+                         const DlPoint& cp,
+                         const DlPoint& p2,
+                         DlScalar weight) {
   // We might eventually have conic conversion math that deals with
   // degenerate conics gracefully (or have all receivers just handle
   // them directly). But, until then, we will just convert them to a
@@ -285,61 +317,6 @@ static void ReduceConic(DlPathReceiver& receiver,
   } else if (cp != p2) {
     receiver.LineTo(p2);
   }
-}
-
-void DlPath::DispatchFromSkiaPath(const SkPath& path,
-                                  DlPathReceiver& receiver) {
-  if (path.isEmpty()) {
-    return;
-  }
-
-  auto iterator = SkPath::Iter(path, false);
-
-  struct PathData {
-    union {
-      SkPoint points[4];
-    };
-  };
-
-  PathData data;
-
-  auto verb = SkPath::Verb::kDone_Verb;
-  do {
-    verb = iterator.next(data.points);
-    switch (verb) {
-      case SkPath::kMove_Verb:
-        receiver.MoveTo(ToDlPoint(data.points[0]), iterator.isClosedContour());
-        break;
-      case SkPath::kLine_Verb:
-        receiver.LineTo(ToDlPoint(data.points[1]));
-        break;
-      case SkPath::kQuad_Verb:
-        receiver.QuadTo(ToDlPoint(data.points[1]), ToDlPoint(data.points[2]));
-        break;
-      case SkPath::kConic_Verb:
-        if (!receiver.ConicTo(ToDlPoint(data.points[1]),
-                              ToDlPoint(data.points[2]),
-                              iterator.conicWeight())) {
-          ReduceConic(receiver,                   //
-                      ToDlPoint(data.points[0]),  //
-                      ToDlPoint(data.points[1]),  //
-                      ToDlPoint(data.points[2]),  //
-                      iterator.conicWeight());
-        }
-        break;
-      case SkPath::kCubic_Verb:
-        receiver.CubicTo(ToDlPoint(data.points[1]),  //
-                         ToDlPoint(data.points[2]),  //
-                         ToDlPoint(data.points[3]));
-        break;
-      case SkPath::kClose_Verb:
-        receiver.Close();
-        break;
-      case SkPath::kDone_Verb:
-        break;
-    }
-  } while (verb != SkPath::Verb::kDone_Verb);
-  receiver.PathEnd();
 }
 
 }  // namespace flutter
