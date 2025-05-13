@@ -122,10 +122,8 @@ typedef RawMenuAnchorChildBuilder =
 /// This callback will add the menu to the widget tree, and should be called
 /// before opening animations begin.
 ///
-/// If a `position` argument is given, it will be passed to
-/// [RawMenuAnchor.overlayBuilder] using the `info` parameter.
-/// [RawMenuAnchor.overlayBuilder] should use the `position` to offset the menu
-/// relative to the anchor.
+/// The `showOverlay` callback will add the menu overlay to the widget tree. Its
+/// `position` argument will be supplied to [RawMenuAnchor.overlayBuilder].
 ///
 /// This signature is used by the `showOverlay` argument in
 /// [RawMenuAnchorOpenRequestedCallback].
@@ -146,16 +144,11 @@ typedef RawMenuAnchorHideOverlayCallback = VoidCallback;
 /// Typically, [RawMenuAnchor.onOpenRequested] is called in response to a user
 /// action, such as a tap or a keyboard shortcut.
 ///
-/// If [MenuController.open] is called with a `position` argument, the argument
-/// will be passed to this callback through the `position` parameter. This value
-/// represents the expected position of the menu overlay in the coordinate space
-/// of the [RawMenuAnchor].
+/// The `position` argument is the same argument that `MenuController.open` was
+/// called with.
 ///
-/// The `showOverlay` callback will add the menu overlay to the widget tree. If
-/// a `position` argument is supplied to `showOverlay`, it will be passed to
-/// [RawMenuAnchor.overlayBuilder] through the `info` parameter.
-/// [RawMenuAnchor.overlayBuilder] should use this `position` to place the menu
-/// in the coordinate space of the [RawMenuAnchor].
+/// The `showOverlay` callback will add the menu overlay to the widget tree. Its
+/// `position` argument will be supplied to [RawMenuAnchor.overlayBuilder].
 ///
 /// When animating the menu open, `showOverlay` should be called before any
 /// animation begins. This will make the menu immediately interactive, which
@@ -355,6 +348,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// to rebuild this child when those change.
   final Widget? child;
 
+  /// Called to build and position the menu overlay.
+  ///
   /// The [overlayBuilder] function is passed a [RawMenuOverlayInfo] object that
   /// defines the anchor's [Rect], the [Size] of the overlay, the
   /// [TapRegion.groupId] for the menu system, and the position [Offset] passed
