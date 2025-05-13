@@ -3764,6 +3764,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.cpu.ctrl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpio/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.hrtimer/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
