@@ -182,6 +182,8 @@ class GoogleChromeDevice extends ChromiumDevice {
   final Platform _platform;
   final ProcessManager _processManager;
 
+  static const String kChromeDeviceId = 'chrome';
+
   @override
   String get name => 'Chrome';
 
@@ -235,6 +237,8 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
 
   // The first version of Edge with chromium support.
   static const int _kFirstChromiumEdgeMajorVersion = 79;
+
+  static const String kEdgeDeviceId = 'edge';
 
   @override
   String get name => 'Edge';

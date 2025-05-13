@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
 import '../test_driver.dart';
@@ -52,7 +53,10 @@ void testAll({
     );
 
     testWithoutContext('hot restart succeeds when removing a field from a const class', () async {
-      await flutter.run(chrome: true, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       project.removeFieldFromConstClass();
       await flutter.hotRestart();
     });
