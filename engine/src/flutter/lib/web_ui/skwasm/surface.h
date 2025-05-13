@@ -49,14 +49,15 @@ class Surface {
   using CallbackHandler = void(uint32_t, void*, SkwasmObject);
 
   // Main thread only
-  Surface();
+  Surface(SkwasmObject canvas);
 
   unsigned long getThreadId() { return _thread; }
 
   // Main thread only
   void dispose();
-  uint32_t renderPictures(SkPicture** picture, int count);
-  uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
+  void renderPictures(SkPicture** picture, int count, uint32_t callbackId);
+  void renderPictureDirect(SkPicture* picture, uint32_t callbackId);
+  void rasterizeImage(SkImage* image, ImageByteFormat format, uint32_t callbackId);
   void setCallbackHandler(CallbackHandler* callbackHandler);
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
   void onRasterizeComplete(uint32_t callbackId, SkData* data);
@@ -70,6 +71,9 @@ class Surface {
                               int pictureCount,
                               uint32_t callbackId,
                               double rasterStart);
+  void renderPictureDirectOnWorker(sk_sp<SkPicture> picture,
+                                   uint32_t callbackId,
+                                   double rasterStart);
   void rasterizeImageOnWorker(SkImage* image,
                               ImageByteFormat format,
                               uint32_t callbackId);
@@ -80,7 +84,6 @@ class Surface {
   void _recreateSurface();
 
   CallbackHandler* _callbackHandler = nullptr;
-  uint32_t _currentCallbackId = 0;
 
   int _canvasWidth = 0;
   int _canvasHeight = 0;

@@ -99,6 +99,14 @@ mergeInto(LibraryManager.library, {
               data.callbackId,
               skwasm_getCurrentTimestamp());
             return;
+          case 'renderPictureDirect':
+            _surface_renderPictureDirectOnWorker(
+              data.surface,
+              data.picture,
+              data.callbackId,
+              skwasm_getCurrentTimestamp(),
+            );
+            return;
           case 'onRenderComplete':
             _surface_onRenderComplete(
               data.surface,
@@ -153,8 +161,15 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, [], threadId);
     };
-    _skwasm_createOffscreenCanvas = function(width, height) {
-      const canvas = new OffscreenCanvas(width, height);
+    _skwasm_dispatchRenderPictureDirect = function(threadId, surfaceHandle, picture, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'renderPictureDirect',
+        surface: surfaceHandle,
+        picture,
+        callbackId,
+      }, [], threadId);
+    };
+    _skwasm_createOffscreenCanvas = function(canvas) {
       var contextAttributes = {
         majorVersion: 2,
         alpha: true,
@@ -188,10 +203,10 @@ mergeInto(LibraryManager.library, {
         skwasmMessage: 'onRenderComplete',
         surface: surfaceHandle,
         callbackId,
-        imageBitmaps,
+        imageBitmaps: imageBitmaps ?? [],
         rasterStart,
         rasterEnd,
-      }, [...imageBitmaps]);
+      }, imageBitmaps ? [...imageBitmaps] : []);
     };
     _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
       const glCtx = GL.currentContext.GLctx;
@@ -256,6 +271,8 @@ mergeInto(LibraryManager.library, {
   skwasm_connectThread__deps: ['$skwasm_support_setup', '$skwasm_registerMessageListener', '$skwasm_getCurrentTimestamp'],
   skwasm_dispatchRenderPictures: function() {},
   skwasm_dispatchRenderPictures__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchRenderPictureDirect: function() {},
+  skwasm_dispatchRenderPictureDirect__deps: ['$skwasm_support_setup'],
   skwasm_createOffscreenCanvas: function () {},
   skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
   skwasm_resizeCanvas: function () {},

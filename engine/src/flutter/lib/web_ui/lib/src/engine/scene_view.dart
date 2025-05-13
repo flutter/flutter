@@ -21,6 +21,9 @@ abstract class PictureRenderer {
   ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
 }
 
+
+typedef SurfaceFactory = SceneSurface Function(DomOffscreenCanvas canvas);
+
 class _SceneRender {
   _SceneRender(this.scene, this._completer, {this.recorder}) {
     scene.beginRender();
@@ -38,14 +41,15 @@ class _SceneRender {
 
 // This class builds a DOM tree that composites an `EngineScene`.
 class EngineSceneView {
-  factory EngineSceneView(PictureRenderer pictureRenderer, EngineFlutterView flutterView) {
+  factory EngineSceneView(PictureRenderer pictureRenderer, SurfaceFactory factory, EngineFlutterView flutterView) {
     final DomElement sceneElement = createDomElement('flt-scene');
-    return EngineSceneView._(pictureRenderer, flutterView, sceneElement);
+    return EngineSceneView._(pictureRenderer, factory, flutterView, sceneElement);
   }
 
-  EngineSceneView._(this.pictureRenderer, this.flutterView, this.sceneElement);
+  EngineSceneView._(this.pictureRenderer, this.factory, this.flutterView, this.sceneElement);
 
   final PictureRenderer pictureRenderer;
+  final SurfaceFactory factory;
   final DomElement sceneElement;
   final EngineFlutterView flutterView;
 
@@ -112,50 +116,48 @@ class EngineSceneView {
         picturesToRender.add(pictureRenderer.clipPicture(slice.picture, clippedRect));
       }
     }
-    final Map<ScenePicture, DomImageBitmap> renderMap;
-    if (picturesToRender.isNotEmpty) {
-      final RenderResult renderResult = await pictureRenderer.renderPictures(picturesToRender);
-      renderMap = <ScenePicture, DomImageBitmap>{
-        for (int i = 0; i < picturesToRender.length; i++)
-          originalPicturesToRender[i]: renderResult.imageBitmaps[i],
-      };
-      recorder?.recordRasterStart(renderResult.rasterStartMicros);
-      recorder?.recordRasterFinish(renderResult.rasterEndMicros);
-    } else {
-      renderMap = <ScenePicture, DomImageBitmap>{};
-      recorder?.recordRasterStart();
-      recorder?.recordRasterFinish();
-    }
-    recorder?.submitTimings();
+    // final Map<ScenePicture, DomImageBitmap> renderMap;
+    // if (picturesToRender.isNotEmpty) {
+    //   final RenderResult renderResult = await pictureRenderer.renderPictures(picturesToRender);
+    //   renderMap = <ScenePicture, DomImageBitmap>{
+    //     for (int i = 0; i < picturesToRender.length; i++)
+    //       originalPicturesToRender[i]: renderResult.imageBitmaps[i],
+    //   };
+    //   recorder?.recordRasterStart(renderResult.rasterStartMicros);
+    //   recorder?.recordRasterFinish(renderResult.rasterEndMicros);
+    // } else {
+    //   renderMap = <ScenePicture, DomImageBitmap>{};
+    //   recorder?.recordRasterStart();
+    //   recorder?.recordRasterFinish();
+    // }
+    // recorder?.submitTimings();
 
+    recorder?.recordRasterStart();
     final List<SliceContainer?> reusableContainers = List<SliceContainer?>.from(containers);
     final List<SliceContainer> newContainers = <SliceContainer>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
         continue;
       }
-      final DomImageBitmap? bitmap = renderMap[slice.picture];
-      if (bitmap != null) {
-        PictureSliceContainer? container;
-        for (int j = 0; j < reusableContainers.length; j++) {
-          final SliceContainer? candidate = reusableContainers[j];
-          if (candidate is PictureSliceContainer) {
-            container = candidate;
-            reusableContainers[j] = null;
-            break;
-          }
+      DirectPictureSliceContainer? container;
+      for (int j = 0; j < reusableContainers.length; j++) {
+        final SliceContainer? candidate = reusableContainers[j];
+        if (candidate is DirectPictureSliceContainer) {
+          container = candidate;
+          reusableContainers[j] = null;
+          break;
         }
-
-        final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
-        if (container != null) {
-          container.bounds = clippedBounds;
-        } else {
-          container = PictureSliceContainer(clippedBounds);
-        }
-        container.updateContents();
-        container.renderBitmap(bitmap);
-        newContainers.add(container);
       }
+
+      final ui.Rect clippedBounds = slice.picture.cullRect.intersect(screenBounds);
+      if (container != null) {
+        container.bounds = clippedBounds;
+      } else {
+        container = DirectPictureSliceContainer(clippedBounds, factory);
+      }
+      container.updateContents();
+      await container.renderPicture(slice.picture);
+      newContainers.add(container);
 
       for (final PlatformView view in slice.platformViews) {
         // Ensure the contents of the platform view are injected into the DOM.
@@ -178,6 +180,8 @@ class EngineSceneView {
         newContainers.add(container);
       }
     }
+    recorder?.recordRasterFinish();
+    recorder?.submitTimings();
 
     for (final SliceContainer? container in reusableContainers) {
       if (container != null) {
@@ -235,6 +239,66 @@ sealed class SliceContainer {
   DomElement get container;
 
   void updateContents();
+}
+
+final class DirectPictureSliceContainer extends SliceContainer {
+  factory DirectPictureSliceContainer(ui.Rect bounds, SurfaceFactory factory) {
+    final DomElement container = domDocument.createElement(kCanvasContainerTag);
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(
+      width: bounds.width.toInt(),
+      height: bounds.height.toInt(),
+    );
+    container.appendChild(canvas);
+    final DomOffscreenCanvas offscreenCanvas = canvas.transferControlToOffscreen();
+    return DirectPictureSliceContainer._(bounds, container, canvas, factory(offscreenCanvas));
+  }
+
+  DirectPictureSliceContainer._(this._bounds, this.container, this.canvas, this.surface);
+
+  ui.Rect _bounds;
+  bool _dirty = true;
+
+  ui.Rect get bounds => _bounds;
+  set bounds(ui.Rect bounds) {
+    if (_bounds != bounds) {
+      _bounds = bounds;
+      _dirty = true;
+    }
+  }
+
+  @override
+  void updateContents() {
+    if (_dirty) {
+      _dirty = false;
+
+      final ui.Rect roundedOutBounds = ui.Rect.fromLTRB(
+        bounds.left.floorToDouble(),
+        bounds.top.floorToDouble(),
+        bounds.right.ceilToDouble(),
+        bounds.bottom.ceilToDouble(),
+      );
+      final DomCSSStyleDeclaration style = canvas.style;
+      final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+      final double logicalWidth = roundedOutBounds.width / devicePixelRatio;
+      final double logicalHeight = roundedOutBounds.height / devicePixelRatio;
+      final double logicalLeft = roundedOutBounds.left / devicePixelRatio;
+      final double logicalTop = roundedOutBounds.top / devicePixelRatio;
+      style.width = '${logicalWidth}px';
+      style.height = '${logicalHeight}px';
+      style.position = 'absolute';
+      style.left = '${logicalLeft}px';
+      style.top = '${logicalTop}px';
+    }
+  }
+
+  Future<void> renderPicture(ScenePicture picture) async {
+    await surface.renderPicture(picture);
+  }
+
+  @override
+  final DomElement container;
+  final DomHTMLCanvasElement canvas;
+  final SceneSurface surface;
 }
 
 final class PictureSliceContainer extends SliceContainer {

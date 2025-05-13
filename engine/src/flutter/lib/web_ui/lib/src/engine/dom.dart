@@ -803,6 +803,8 @@ extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement {
 
   DomImageBitmapRenderingContext get contextBitmapRenderer =>
       getContext('bitmaprenderer')! as DomImageBitmapRenderingContext;
+
+  external DomOffscreenCanvas transferControlToOffscreen();
 }
 
 @visibleForTesting

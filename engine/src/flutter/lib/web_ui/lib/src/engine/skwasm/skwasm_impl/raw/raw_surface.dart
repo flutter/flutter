@@ -5,7 +5,9 @@
 @DefaultAsset('skwasm')
 library skwasm_impl;
 
+import 'dart:_wasm';
 import 'dart:ffi';
+import 'dart:js_interop';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
 final class RawSurface extends Opaque {}
@@ -18,8 +20,11 @@ typedef OnRenderCallbackHandle = Pointer<RawRenderCallback>;
 
 typedef CallbackId = int;
 
-@Native<SurfaceHandle Function()>(symbol: 'surface_create', isLeaf: true)
-external SurfaceHandle surfaceCreate();
+SurfaceHandle surfaceCreate(JSAny canvas) =>
+    SurfaceHandle.fromAddress(surfaceCreateImpl(externRefForJSAny(canvas)).toIntUnsigned());
+
+@pragma('wasm:import', 'skwasm.surface_create')
+external WasmI32 surfaceCreateImpl(WasmExternRef? canvas);
 
 @Native<UnsignedLong Function(SurfaceHandle)>(symbol: 'surface_getThreadId', isLeaf: true)
 external int surfaceGetThreadId(SurfaceHandle handle);
@@ -33,18 +38,34 @@ external void surfaceSetCallbackHandler(SurfaceHandle surface, OnRenderCallbackH
 @Native<Void Function(SurfaceHandle)>(symbol: 'surface_destroy', isLeaf: true)
 external void surfaceDestroy(SurfaceHandle surface);
 
-@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int)>(
+@Native<Void Function(SurfaceHandle, Pointer<PictureHandle>, Int, Int32)>(
   symbol: 'surface_renderPictures',
   isLeaf: true,
 )
-external CallbackId surfaceRenderPictures(
+external void surfaceRenderPictures(
   SurfaceHandle surface,
   Pointer<PictureHandle> picture,
   int count,
+  CallbackId callbackId,
 );
 
-@Native<Int32 Function(SurfaceHandle, ImageHandle, Int)>(
+@Native<Void Function(SurfaceHandle, PictureHandle, Int32)>(
+  symbol: 'surface_renderPictureDirect',
+  isLeaf: true,
+)
+external void surfaceRenderPictureDirect(
+  SurfaceHandle surface,
+  PictureHandle picture,
+  CallbackId callbackId,
+);
+
+@Native<Void Function(SurfaceHandle, ImageHandle, Int, Int32)>(
   symbol: 'surface_rasterizeImage',
   isLeaf: true,
 )
-external CallbackId surfaceRasterizeImage(SurfaceHandle handle, ImageHandle image, int format);
+external void surfaceRasterizeImage(
+  SurfaceHandle handle,
+  ImageHandle image,
+  int format,
+  CallbackId callbackId,
+);

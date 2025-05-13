@@ -46,12 +46,14 @@ class SkwasmCallbackHandler {
 
   final OnRenderCallbackHandle callbackPointer;
   final Map<CallbackId, Completer<JSAny>> _pendingCallbacks = <int, Completer<JSAny>>{};
+  int lastCallbackId = 0;
 
   // Returns a future that will resolve when Skwasm calls back with the given callbackID
-  Future<JSAny> registerCallback(int callbackId) {
+  (Future<JSAny>, CallbackId) registerCallback() {
+    final int callbackId = ++lastCallbackId;
     final Completer<JSAny> completer = Completer<JSAny>();
     _pendingCallbacks[callbackId] = completer;
-    return completer.future;
+    return (completer.future, callbackId);
   }
 
   void handleCallback(WasmI32 callbackId, WasmI32 context, WasmExternRef? jsContext) {
@@ -68,10 +70,10 @@ class SkwasmCallbackHandler {
   }
 }
 
-class SkwasmSurface {
-  factory SkwasmSurface() {
+class SkwasmSurface implements SceneSurface {
+  factory SkwasmSurface(DomOffscreenCanvas canvas) {
     final SurfaceHandle surfaceHandle = withStackScope((StackScope scope) {
-      return surfaceCreate();
+      return surfaceCreate(canvas);
     });
     final SkwasmSurface surface = SkwasmSurface._fromHandle(surfaceHandle);
     surface._initialize();
@@ -94,9 +96,9 @@ class SkwasmSurface {
         for (int i = 0; i < pictures.length; i++) {
           pictureHandles[i] = pictures[i].handle;
         }
-        final int callbackId = surfaceRenderPictures(handle, pictureHandles, pictures.length);
-        final RasterResult rasterResult =
-            (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
+        final (future, callbackId) = SkwasmCallbackHandler.instance.registerCallback();
+        surfaceRenderPictures(handle, pictureHandles, pictures.length, callbackId);
+        final RasterResult rasterResult = (await future) as RasterResult;
         final RenderResult result = (
           imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
           rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
@@ -105,10 +107,23 @@ class SkwasmSurface {
         return result;
       });
 
+  @override
+  Future<RenderResult> renderPicture(ScenePicture picture) async {
+    final (future, callbackId) = SkwasmCallbackHandler.instance.registerCallback();
+    surfaceRenderPictureDirect(handle, (picture as SkwasmPicture).handle, callbackId);
+    final RasterResult rasterResult = (await future) as RasterResult;
+    final RenderResult result = (
+      imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
+      rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
+      rasterEndMicros: (rasterResult.rasterEndMilliseconds * 1000).toInt(),
+    );
+    return result;
+  }
+
   Future<ByteData> rasterizeImage(SkwasmImage image, ui.ImageByteFormat format) async {
-    final int callbackId = surfaceRasterizeImage(handle, image.handle, format.index);
-    final int context =
-        (await SkwasmCallbackHandler.instance.registerCallback(callbackId) as JSNumber).toDartInt;
+    final (future, callbackId) = SkwasmCallbackHandler.instance.registerCallback();
+    surfaceRasterizeImage(handle, image.handle, format.index, callbackId);
+    final int context = (await future as JSNumber).toDartInt;
     final SkDataHandle dataHandle = SkDataHandle.fromAddress(context);
     final int byteCount = skDataGetSize(dataHandle);
     final Pointer<Uint8> dataPointer = skDataGetConstPointer(dataHandle).cast<Uint8>();

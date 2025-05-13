@@ -15,21 +15,32 @@
 
 using namespace Skwasm;
 
-Surface::Surface() {
+namespace {
+long unsigned getThread() {
+  static long unsigned thread = 0;
   if (skwasm_isSingleThreaded()) {
-    skwasm_connectThread(0);
-  } else {
-    assert(emscripten_is_main_browser_thread());
-
-    _thread = emscripten_malloc_wasm_worker(65536);
-    emscripten_wasm_worker_post_function_v(_thread, []() {
+    if (thread == 0) {
+      skwasm_connectThread(0);
+      thread = 1;
+    }
+    return 0;
+  }
+  if (thread == 0) {
+    thread = emscripten_malloc_wasm_worker(65536);
+    emscripten_wasm_worker_post_function_v(thread, []() {
       // Listen to the main thread from the worker
       skwasm_connectThread(0);
     });
-
     // Listen to messages from the worker
-    skwasm_connectThread(_thread);
+    skwasm_connectThread(thread);
   }
+  return thread;
+}
+}  // namespace
+
+Surface::Surface(SkwasmObject canvas) {
+  _thread = getThread();
+  skwasm_setAssociatedObjectOnThread(_thread, this, canvas);
 }
 
 // Worker thread only
@@ -38,9 +49,8 @@ void Surface::dispose() {
 }
 
 // Main thread only
-uint32_t Surface::renderPictures(SkPicture** pictures, int count) {
+void Surface::renderPictures(SkPicture** pictures, int count, uint32_t callbackId) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callbackId = ++_currentCallbackId;
   std::unique_ptr<sk_sp<SkPicture>[]> picturePointers =
       std::make_unique<sk_sp<SkPicture>[]>(count);
   for (int i = 0; i < count; i++) {
@@ -51,17 +61,19 @@ uint32_t Surface::renderPictures(SkPicture** pictures, int count) {
   // other thread See surface_renderPicturesOnWorker
   skwasm_dispatchRenderPictures(_thread, this, picturePointers.release(), count,
                                 callbackId);
-  return callbackId;
+}
+
+void Surface::renderPictureDirect(SkPicture* picture, uint32_t callbackId) {
+  skwasm_dispatchRenderPictureDirect(_thread, this,
+                                     sk_ref_sp(picture).release(), callbackId);
 }
 
 // Main thread only
-uint32_t Surface::rasterizeImage(SkImage* image, ImageByteFormat format) {
+void Surface::rasterizeImage(SkImage* image, ImageByteFormat format, uint32_t callbackId) {
   assert(emscripten_is_main_browser_thread());
-  uint32_t callbackId = ++_currentCallbackId;
   image->ref();
 
   skwasm_dispatchRasterizeImage(_thread, this, image, format, callbackId);
-  return callbackId;
 }
 
 std::unique_ptr<TextureSourceWrapper> Surface::createTextureSourceWrapper(
@@ -78,7 +90,7 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 
 // Worker thread only
 void Surface::_init() {
-  _glContext = skwasm_createOffscreenCanvas(256, 256);
+  _glContext = skwasm_createOffscreenCanvas(skwasm_getAssociatedObject(this));
   if (!_glContext) {
     printf("Failed to create context!\n");
     return;
@@ -159,6 +171,28 @@ void Surface::renderPicturesOnWorker(sk_sp<SkPicture>* pictures,
   skwasm_postImages(this, imageBitmapArray, rasterStart, callbackId);
 }
 
+void Surface::renderPictureDirectOnWorker(sk_sp<SkPicture> picture,
+                                          uint32_t callbackId,
+                                          double rasterStart) {
+  if (!_isInitialized) {
+    _init();
+  }
+
+  SkRect pictureRect = picture->cullRect();
+  SkIRect roundedOutRect;
+  pictureRect.roundOut(&roundedOutRect);
+  _resizeCanvasToFit(roundedOutRect.width(), roundedOutRect.height());
+  SkMatrix matrix =
+      SkMatrix::Translate(-roundedOutRect.fLeft, -roundedOutRect.fTop);
+  makeCurrent(_glContext);
+  auto canvas = _surface->getCanvas();
+  canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
+  canvas->drawPicture(picture, &matrix, nullptr);
+  _grContext->flush(_surface.get());
+  skwasm_postImages(this, __builtin_wasm_ref_null_extern(), rasterStart,
+                    callbackId);
+}
+
 // Worker thread only
 void Surface::rasterizeImageOnWorker(SkImage* image,
                                      ImageByteFormat format,
@@ -233,8 +267,8 @@ SkwasmObject TextureSourceWrapper::getTextureSource() {
   return skwasm_getAssociatedObject(this);
 }
 
-SKWASM_EXPORT Surface* surface_create() {
-  return new Surface();
+SKWASM_EXPORT Surface* surface_create(SkwasmObject canvas) {
+  return new Surface(canvas);
 }
 
 SKWASM_EXPORT unsigned long surface_getThreadId(Surface* surface) {
@@ -257,10 +291,11 @@ SKWASM_EXPORT void surface_dispose(Surface* surface) {
   surface->dispose();
 }
 
-SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,
-                                              SkPicture** pictures,
-                                              int count) {
-  return surface->renderPictures(pictures, count);
+SKWASM_EXPORT void surface_renderPictures(Surface* surface,
+                                          SkPicture** pictures,
+                                          int count,
+                                          uint32_t callbackId) {
+  return surface->renderPictures(pictures, count, callbackId);
 }
 
 SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
@@ -275,10 +310,25 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
                                   rasterStart);
 }
 
-SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
-                                              SkImage* image,
-                                              ImageByteFormat format) {
-  return surface->rasterizeImage(image, format);
+SKWASM_EXPORT void surface_renderPictureDirect(Surface* surface,
+                                               SkPicture* picture,
+                                               uint32_t callbackId) {
+  surface->renderPictureDirect(picture, callbackId);
+}
+
+SKWASM_EXPORT void surface_renderPictureDirectOnWorker(Surface* surface,
+                                                       SkPicture* picture,
+                                                       uint32_t callbackId,
+                                                       double rasterStart) {
+  surface->renderPictureDirectOnWorker(sk_sp<SkPicture>(picture), callbackId,
+                                       rasterStart);
+}
+
+SKWASM_EXPORT void surface_rasterizeImage(Surface* surface,
+                                          SkImage* image,
+                                          ImageByteFormat format,
+                                          uint32_t callbackId) {
+  surface->rasterizeImage(image, format, callbackId);
 }
 
 SKWASM_EXPORT void surface_rasterizeImageOnWorker(Surface* surface,

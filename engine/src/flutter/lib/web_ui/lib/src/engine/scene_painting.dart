@@ -43,3 +43,7 @@ abstract class ScenePath implements ui.Path {
   // string representation of them.
   String toSvgString();
 }
+
+abstract class SceneSurface {
+  Future<void> renderPicture(ScenePicture picture);
+}
