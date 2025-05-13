@@ -7796,7 +7796,10 @@ class IndexedSemantics extends SingleChildRenderObjectWidget {
 ///
 /// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
-  /// Creates a widget that builds its child.
+  /// Creates a widget that builds its child while assigning it a key.
+  ///
+  /// This is useful when you want to preserve the state of a widget when it moves
+  /// around in the widget tree by associating it with a consistent key.
   const KeyedSubtree({super.key, required this.child});
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
