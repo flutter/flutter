@@ -64,6 +64,8 @@ void main() {
       directory: package,
       packages: <String, String>{
         'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+        'flutter_test':
+            'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/flutter_test-0.2.19',
         'integration_test': 'file:///path/to/flutter/packages/integration_test',
       },
       mainLibName: 'my_app',
@@ -124,6 +126,8 @@ dev_dependencies:
         directory: fs.currentDirectory,
         packages: <String, String>{
           'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'flutter_test':
+              'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/flutter_test-0.2.19',
         },
         mainLibName: 'my_app',
       );
@@ -590,74 +594,6 @@ resolution: workspace
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    },
-  );
-
-  testUsingContext(
-    'Generates a satisfactory test runner package_config.json when --experimental-faster-testing is set',
-    () async {
-      final TestCommand testCommand = TestCommand();
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-      bool caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
-
-          final File isolateSpawningTesterPackageConfigFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childDirectory('.dart_tool')
-              .childFile('package_config.json');
-          expect(isolateSpawningTesterPackageConfigFile.existsSync(), true);
-          // We expect [isolateSpawningTesterPackageConfigFile] to contain the
-          // union of the packages in [_packageConfigContents] and
-          // [_flutterToolsPackageConfigContents].
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "integration_test"',
-            ),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "ffi"'),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "test"'),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "test_api"',
-            ),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "test_core"',
-            ),
-            true,
-          );
-        },
-      );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
     },
   );
 
@@ -1701,7 +1637,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool updateGoldens = false,
     required int? concurrency,
     String? testAssetDirectory,
-    FlutterProject? flutterProject,
+    required BuildInfo buildInfo,
+    required FlutterProject flutterProject,
     String? icudtlPath,
     String? randomSeed,
     String? reporter,
