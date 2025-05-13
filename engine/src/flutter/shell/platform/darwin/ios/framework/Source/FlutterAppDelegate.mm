@@ -29,7 +29,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 - (void)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
-                 options:(UISceneConnectionOptions*)connectionOptions API_AVAILABLE(ios(13.0)) {
+                 options:(UISceneConnectionOptions*)connectionOptions {
   NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
   if (appDelegate.window.rootViewController) {
     // If this is not nil we are running into a case where someone is manually

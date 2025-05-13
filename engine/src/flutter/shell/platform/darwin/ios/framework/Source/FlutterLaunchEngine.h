@@ -17,8 +17,16 @@
  */
 @interface FlutterLaunchEngine : NSObject
 
+/**
+ * Accessor for the launch engine.
+ */
 @property(nonatomic, strong, nullable, readonly) FlutterEngine* engine;
 
+/**
+ * Grab ownership of the launch engine.
+ *
+ * After this is called `self.engine` and `grabEngine` will always return nil.
+ */
 - (nullable FlutterEngine*)grabEngine;
 
 @end
