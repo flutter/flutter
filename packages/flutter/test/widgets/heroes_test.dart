@@ -439,6 +439,59 @@ Future<void> main() async {
     expect(find.byKey(heroKey), findsNothing);
   });
 
+  testWidgets('Heroes should unhide if no animation', (WidgetTester tester) async {
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    List<Page<void>> pages = <Page<void>>[
+      MaterialPage<void>(
+        name: '1',
+        child: Hero(tag: 'hero', child: SizedBox(key: key1, width: 20, height: 20)),
+      ),
+    ];
+    final HeroController controller = HeroController();
+    addTearDown(controller.dispose);
+    Widget buildWidget() {
+      return MaterialApp(
+        home: HeroControllerScope(
+          controller: controller,
+          child: Navigator(key: nav, pages: pages, onDidRemovePage: (Page<Object?> page) {}),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+    expect(find.byKey(key1), findsOneWidget);
+
+    pages = <Page<void>>[
+      ...pages,
+      MaterialPage<void>(
+        name: '2',
+        child: Hero(tag: 'hero', child: SizedBox(key: key2, width: 20, height: 20)),
+      ),
+    ];
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    expect(find.byKey(key1), findsNothing);
+    expect(find.byKey(key2), findsOneWidget);
+
+    showDialog<void>(
+      context: nav.currentContext!,
+      useRootNavigator: false,
+      builder: (BuildContext context) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog'), findsOneWidget);
+
+    // Pop the dialog and remove last page at the same time.
+    nav.currentState!.pop();
+    pages = pages.toList();
+    pages.removeLast();
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+    expect(find.byKey(key1), findsOneWidget);
+  });
+
   testWidgets('Heroes animate should hide original hero', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: routes));
     // Checks initial state.
