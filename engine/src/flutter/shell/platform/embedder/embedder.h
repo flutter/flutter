@@ -105,6 +105,8 @@ typedef enum {
   kFlutterAccessibilityFeatureHighContrast = 1 << 5,
   /// Request to show on/off labels inside switches.
   kFlutterAccessibilityFeatureOnOffSwitchLabels = 1 << 6,
+  /// Indicate the platform does not support announcements.
+  kFlutterAccessibilityFeatureNoAnnounce = 1 << 7,
 } FlutterAccessibilityFeature;
 
 /// The set of possible actions that can be conveyed to a semantics node.
