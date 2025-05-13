@@ -561,23 +561,21 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 
   /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
   ///
-  /// Call this when the menu should be shown to the user.
+  /// Call this when the menu overlay should be shown and added to the widget
+  /// tree.
   ///
-  /// The optional `position` argument should specify the location of the menu in
-  /// the local coordinates of the [RawMenuAnchor].
+  /// The optional `position` argument should specify the location of the menu
+  /// in the local coordinates of the [RawMenuAnchor].
   @protected
   void open({Offset? position});
 
   /// Close the menu and all of its children.
   ///
+  /// Call this when the menu overlay should be hidden and removed from the
+  /// widget tree.
+  ///
   /// If `inDispose` is true, this method call was triggered by the widget being
   /// unmounted.
-  ///
-  /// The [close] method might be called by the base class
-  /// [_RawMenuAnchorBaseMixin] and its subclasses. [_RawMenuAnchorBaseMixin]
-  /// should only call [close] if the menu needs to be closed immediately;
-  /// otherwise, call [handleCloseRequest] to allow parent widgets to control
-  /// how the menu is closed.
   @protected
   void close({bool inDispose = false});
 
