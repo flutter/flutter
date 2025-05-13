@@ -332,8 +332,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// 3. `hideOverlay`
   /// 4. [onClose]
   ///
-  /// During the closing sequence, menus are expected to lose focus and
-  /// interactivity.
+  /// Throughout the closing sequence, menus should not be focusable or
+  /// interactive.
   ///
   /// Defaults to a callback that immediately hides the menu.
   final RawMenuAnchorCloseRequestedCallback onCloseRequested;
