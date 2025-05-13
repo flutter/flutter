@@ -32,33 +32,66 @@ class Context {
   final List<String> arguments;
   RandomAccessFile? scriptOutputStream;
 
+  static const String incompatibleErrorMessage =
+      'Your Xcode project is incompatible with this version of Flutter. '
+      'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
+
   void run() {
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
-      stderr.write(
-        'error: Your Xcode project is incompatible with this version of Flutter. '
-        'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n',
-      );
+      echoXcodeError(incompatibleErrorMessage);
       exit(-1);
     }
 
-    final String subCommand = arguments.first;
+    final String subCommand = validateCommand(arguments[0]);
+    final String? platformName = arguments.length < 2 ? null : arguments[1];
+    final TargetPlatform platform = parsePlatform(platformName);
     switch (subCommand) {
       case 'build':
-        buildApp();
+        buildApp(platform);
       case 'prepare':
-        prepare();
+        prepare(platform);
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
-        embedFlutterFrameworks();
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
-        embedFlutterFrameworks();
+        embedFlutterFrameworks(platform);
       case 'test_vm_service_bonjour_service':
         // Exposed for integration testing only.
         addVmServiceBonjourService();
+    }
+  }
+
+  /// Validates the command argument matches one of the possible commands.
+  /// Returns null if not.
+  String validateCommand(String command) {
+    switch (command) {
+      case 'build':
+      case 'prepare':
+      case 'thin':
+      case 'embed':
+      case 'embed_and_thin':
+      case 'test_vm_service_bonjour_service':
+        return command;
+      default:
+        echoXcodeError(incompatibleErrorMessage);
+        exit(-1);
+    }
+  }
+
+  /// Converts the [platformName] argument to a [TargetPlatform]. If there is
+  /// not a match, prints a warning and defaults to [TargetPlatform.ios].
+  TargetPlatform parsePlatform(String? platformName) {
+    switch (platformName) {
+      case 'macos':
+        return TargetPlatform.macos;
+      case 'ios':
+        return TargetPlatform.ios;
+      default:
+        echoXcodeWarning('Unrecognized platform: $platformName. Defaulting to iOS.');
+        return TargetPlatform.ios;
     }
   }
 
@@ -66,6 +99,8 @@ class Context {
     final File file = File(path);
     return file.existsSync();
   }
+
+  Directory directoryFromPath(String path) => Directory(path);
 
   /// Run given command in a synchronous subprocess.
   ///
@@ -105,6 +140,17 @@ class Context {
     stderr.writeln(message);
   }
 
+  /// Log message to stderr.
+  void echoXcodeError(String message) {
+    stderr.writeln('error: $message');
+  }
+
+  /// Log message appended with `warning:` to stderr.
+  /// This will display with a yellow warning icon in Xcode.
+  void echoXcodeWarning(String message) {
+    stderr.writeln('warning: $message');
+  }
+
   /// Log message to stdout.
   void echo(String message) {
     stdout.write(message);
@@ -132,6 +178,12 @@ class Context {
     scriptOutputStream?.writeStringSync('$output\n');
   }
 
+  /// Parses and normalizes the build mode (debug, profile, release).
+  ///
+  /// Uses `FLUTTER_BUILD_MODE` (uncommon) if set, otherwise uses `CONFIGURATION`.
+  /// The `CONFIGURATION` may not match exactly since it can be named by the developer.
+  /// If the `FLUTTER_BUILD_MODE` and `CONFIGURATION` do not contain either
+  /// debug, profile, or release, prints an error and exits the build.
   String parseFlutterBuildMode() {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
@@ -169,17 +221,12 @@ class Context {
   ///
   /// Does not copy `.DS_Store`.
   ///
-  /// If [delete], delete extraneous files from [destination].
-  void runRsync(
-    String source,
-    String destination, {
-    List<String> extraArgs = const <String>[],
-    bool delete = false,
-  }) {
+  /// Deletes extraneous files from [destination].
+  void runRsync(String source, String destination, {List<String> extraArgs = const <String>[]}) {
     runSync('rsync', <String>[
       '-8', // Avoid mangling filenames with encodings that do not match the current locale.
       '-av',
-      if (delete) '--delete',
+      '--delete',
       '--filter',
       '- .DS_Store',
       ...extraArgs,
@@ -188,55 +235,148 @@ class Context {
     ]);
   }
 
-  // Adds the App.framework as an embedded binary and the flutter_assets as
-  // resources.
-  void embedFlutterFrameworks() {
+  /// Embeds the App.framework, Flutter/FlutterMacOS.framework, and any native
+  /// asset frameworks into the app.
+  ///
+  /// On macOS, also codesigns the framework binaries. Codesigning occurs here rather
+  /// than during the Run Script `build` phase because the `EXPANDED_CODE_SIGN_IDENTITY`
+  /// is not passed in the build settings during the `build` phase for macOS.
+  ///
+  /// On iOS, also injects local network permissions into the app's Info.plist.
+  void embedFlutterFrameworks(TargetPlatform platform) {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
     final String xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
-    runRsync(
-      delete: true,
-      '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
-      xcodeFrameworksDir,
-    );
+    runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
+
+    final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
+
+    final bool codesign =
+        platform == TargetPlatform.macos &&
+        expandedCodeSignIdentity != null &&
+        expandedCodeSignIdentity.isNotEmpty &&
+        environment['CODE_SIGNING_REQUIRED'] != 'NO';
 
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type specific build.
-    runRsync(
-      delete: true,
-      '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-      '$xcodeFrameworksDir/',
+    switch (platform) {
+      case TargetPlatform.ios:
+        runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
+      case TargetPlatform.macos:
+        runRsync(
+          extraArgs: <String>['--filter', '- Headers', '--filter', '- Modules'],
+          '${environment['BUILT_PRODUCTS_DIR']}/FlutterMacOS.framework',
+          '$xcodeFrameworksDir/',
+        );
+
+        if (codesign) {
+          _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
+          _codesignFramework(
+            expandedCodeSignIdentity,
+            '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
+          );
+        }
+    }
+
+    _embedNativeAssets(
+      platform,
+      xcodeFrameworksDir: xcodeFrameworksDir,
+      codesign: codesign,
+      expandedCodeSignIdentity: expandedCodeSignIdentity,
     );
 
-    // Copy the native assets. These do not have to be codesigned here because,
-    // they are already codesigned in buildNativeAssetsMacOS.
+    if (platform == TargetPlatform.ios) {
+      addVmServiceBonjourService();
+    }
+  }
+
+  void _embedNativeAssets(
+    TargetPlatform platform, {
+    required String xcodeFrameworksDir,
+    required bool codesign,
+    String? expandedCodeSignIdentity,
+  }) {
+    // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     String projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/ios/';
+    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
-    if (Directory(nativeAssetsPath).existsSync()) {
+    final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
+    if (!nativeAssetsDir.existsSync()) {
       if (verbose) {
-        print('♦ Copying native assets from $nativeAssetsPath.');
+        print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
       }
-      runRsync(
-        extraArgs: <String>['--filter', '- native_assets.yaml', '--filter', '- native_assets.json'],
-        nativeAssetsPath,
-        xcodeFrameworksDir,
-      );
-    } else if (verbose) {
-      print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
+      return;
     }
 
-    addVmServiceBonjourService();
+    if (verbose) {
+      print('♦ Copying native assets from $nativeAssetsPath.');
+    }
+    for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
+      if (entity is Directory) {
+        final String? frameworkName = parseFrameworkNameFromDirectory(entity);
+        if (frameworkName != null) {
+          runRsync(
+            extraArgs: <String>[
+              '--filter',
+              '- native_assets.yaml',
+              '--filter',
+              '- native_assets.json',
+            ],
+            entity.path,
+            xcodeFrameworksDir,
+          );
+          if (codesign && expandedCodeSignIdentity != null) {
+            _codesignFramework(
+              expandedCodeSignIdentity,
+              '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
+            );
+          }
+        }
+      }
+    }
   }
 
-  // Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
+  void _codesignFramework(String expandedCodeSignIdentity, String frameworkPath) {
+    runSync('codesign', <String>[
+      '--force',
+      '--verbose',
+      '--sign',
+      expandedCodeSignIdentity,
+      '--',
+      frameworkPath,
+    ]);
+  }
+
+  /// Parse the [dir]'s path to get the framework name. For example,
+  /// `/path/to/framework_name.framework/` would parse to `framework_name`.
+  ///
+  /// Returns null if [dir] is not a `.framework`.
+  static String? parseFrameworkNameFromDirectory(Directory dir) {
+    final List<String> pathSegments = dir.uri.pathSegments;
+    if (pathSegments.isEmpty) {
+      return null;
+    }
+    final String basename;
+    if (pathSegments.last.isEmpty && pathSegments.length > 1) {
+      basename = pathSegments[pathSegments.length - 2];
+    } else {
+      basename = pathSegments.last;
+    }
+    final int extensionIndex = basename.indexOf('.framework');
+    if (extensionIndex == -1) {
+      return null;
+    }
+    return basename.substring(0, extensionIndex);
+  }
+
+  /// Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
   void addVmServiceBonjourService() {
     // Skip adding Bonjour service settings when DISABLE_PORT_PUBLICATION is YES.
     // These settings are not needed if port publication is disabled.
@@ -318,7 +458,8 @@ class Context {
     }
   }
 
-  void prepare() {
+  /// Calls `flutter assemble [buildMode]_unpack_[platform]` (e.g. `debug_unpack_ios`, `debug_unpack_macos`)
+  void prepare(TargetPlatform platform) {
     // The "prepare" command runs in a pre-action script, which also runs when
     // using the Xcode/xcodebuild clean command. Skip if cleaning.
     if (environment['ACTION'] == 'clean') {
@@ -330,11 +471,17 @@ class Context {
 
     final String buildMode = parseFlutterBuildMode();
 
-    final List<String> flutterArgs = _generateFlutterArgsForAssemble('prepare', buildMode, verbose);
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(
+      command: 'prepare',
+      buildMode: buildMode,
+      sourceRoot: sourceRoot,
+      platform: platform,
+      verbose: verbose,
+    );
 
-    // The "prepare" command only targets the UnpackIOS target, which copies the
+    // The "prepare" command only targets the UnpackIOS/UnpackMacOS target, which copies the
     // Flutter framework to the BUILT_PRODUCTS_DIR.
-    flutterArgs.add('${buildMode}_unpack_ios');
+    flutterArgs.add('${buildMode}_unpack_${platform.name}');
 
     final ProcessResult result = runSync(
       '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
@@ -350,17 +497,24 @@ class Context {
     }
   }
 
-  void buildApp() {
+  /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
+  /// (e.g. `debug_ios_bundle_flutter_assets`, `debug_macos_bundle_flutter_assets`)
+  void buildApp(TargetPlatform platform) {
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
     final String buildMode = parseFlutterBuildMode();
 
-    final List<String> flutterArgs = _generateFlutterArgsForAssemble('build', buildMode, verbose);
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(
+      command: 'build',
+      buildMode: buildMode,
+      sourceRoot: sourceRoot,
+      platform: platform,
+      verbose: verbose,
+    );
 
-    flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
-
+    flutterArgs.add('${buildMode}_${platform.name}_bundle_flutter_assets');
     final ProcessResult result = runSync(
       '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
       flutterArgs,
@@ -380,7 +534,13 @@ class Context {
     echo('Project $projectPath built and packaged successfully.');
   }
 
-  List<String> _generateFlutterArgsForAssemble(String command, String buildMode, bool verbose) {
+  List<String> _generateFlutterArgsForAssemble({
+    required String command,
+    required String buildMode,
+    required String sourceRoot,
+    required TargetPlatform platform,
+    required bool verbose,
+  }) {
     String targetPath = 'lib/main.dart';
     if (environment['FLUTTER_TARGET'] != null) {
       targetPath = environment['FLUTTER_TARGET']!;
@@ -389,8 +549,8 @@ class Context {
     // Warn the user if not archiving (ACTION=install) in release mode.
     final String? action = environment['ACTION'];
     if (action == 'install' && buildMode != 'release') {
-      echo(
-        'warning: Flutter archive not built in Release mode. Ensure '
+      echoXcodeWarning(
+        'Flutter archive not built in Release mode. Ensure '
         'FLUTTER_BUILD_MODE is set to release or run "flutter build ios '
         '--release", then re-run Archive from Xcode.',
       );
@@ -432,18 +592,29 @@ class Context {
       }
     }
 
+    final String targetPlatform;
+    final String platformArches;
+    switch (platform) {
+      case TargetPlatform.ios:
+        targetPlatform = '-dTargetPlatform=ios';
+        platformArches = '-dIosArchs=$archs';
+      case TargetPlatform.macos:
+        targetPlatform = '-dTargetPlatform=darwin';
+        platformArches = '-dDarwinArchs=$archs';
+    }
+
     flutterArgs.addAll(<String>[
       'assemble',
       '--no-version-check',
       '--output=${environment['BUILT_PRODUCTS_DIR'] ?? ''}/',
-      '-dTargetPlatform=ios',
+      targetPlatform,
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
       // FLAVOR is set by the Flutter CLI in the Flutter/Generated.xcconfig file
       // when the --flavor flag is used, so it may not always be present.
       if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
       '-dConfiguration=${environment['CONFIGURATION']}',
-      '-dIosArchs=$archs',
+      platformArches,
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
       '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',
@@ -455,9 +626,27 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
-      '-dTargetDeviceOSVersion=${environment['TARGET_DEVICE_OS_VERSION'] ?? ''}',
       '-dDevDependenciesEnabled=${environment['FLUTTER_DEV_DEPENDENCIES_ENABLED'] ?? ''}',
     ]);
+
+    if (platform == TargetPlatform.ios) {
+      flutterArgs.add('-dTargetDeviceOSVersion=${environment['TARGET_DEVICE_OS_VERSION'] ?? ''}');
+      final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
+      if (expandedCodeSignIdentity != null &&
+          expandedCodeSignIdentity.isNotEmpty &&
+          environment['CODE_SIGNING_REQUIRED'] != 'NO') {
+        flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
+      }
+    }
+    if (platform == TargetPlatform.macos && command == 'build') {
+      final String ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
+      final String buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
+      final String buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
+      flutterArgs.addAll(<String>[
+        '--build-inputs=$buildInputsPath',
+        '--build-outputs=$buildOutputsPath',
+      ]);
+    }
 
     if (command == 'prepare') {
       // Use the PreBuildAction define flag to force the tool to use a different
@@ -474,13 +663,6 @@ class Context {
       );
     }
 
-    final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-    if (expandedCodeSignIdentity != null &&
-        expandedCodeSignIdentity.isNotEmpty &&
-        environment['CODE_SIGNING_REQUIRED'] != 'NO') {
-      flutterArgs.add('-dCodesignIdentity=$expandedCodeSignIdentity');
-    }
-
     if (environment['CODE_SIZE_DIRECTORY'] != null &&
         environment['CODE_SIZE_DIRECTORY']!.isNotEmpty) {
       flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
@@ -488,4 +670,12 @@ class Context {
 
     return flutterArgs;
   }
+}
+
+enum TargetPlatform {
+  ios('ios'),
+  macos('macos');
+
+  const TargetPlatform(this.name);
+  final String name;
 }
