@@ -271,8 +271,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// Called when the menu overlay is hidden.
   ///
   /// This callback is triggered when the menu overlay is removed from the
-  /// widget tree, typically after any closing animations have completed. A
-  /// typical usage is to restore focus to a previously active element.
+  /// widget tree, typically after any closing animations have completed.
   ///
   /// If a callback is provided for [onCloseRequested], [onClose] will not be
   /// called until after `hideOverlay` is called.
