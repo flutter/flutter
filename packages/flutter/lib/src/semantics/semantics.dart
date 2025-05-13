@@ -3464,27 +3464,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
   List<SemanticsNode> reorderWithTargetsFirst(Set<SemanticsNode> targets) {
-    // For fast lookup of non-targets.
-    // final Set<int> targetSet = targetIds.toSet();
-
-    // Pre-allocate the result buffer.
-    // final result = Int32List(_children!.length);
     final List<SemanticsNode> reversedChildren = _children!.reversed.toList();
     final List<SemanticsNode> hitTestOrder = <SemanticsNode>[];
-    int writeIndex = 0;
 
-    // 1. Place all target elements (including duplicates) up front,
-    //    in the exact sequence of targetIds.
-    for (final target in targets) {
-      for (final child in reversedChildren) {
+    for (final SemanticsNode target in targets) {
+      for (final SemanticsNode child in reversedChildren) {
         if (target.id == child.id) {
           hitTestOrder.add(target);
         }
       }
     }
 
-    // 2. Then append every other element, preserving their original order.
-    for (final child in reversedChildren) {
+    for (final SemanticsNode child in reversedChildren) {
       if (!targets.contains(child)) {
         hitTestOrder.add(child);
       }
@@ -3515,57 +3506,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
       for (int i = 0; i < childCount; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
-      // _children is sorted in paint order, so we invert it to get the hit test
-      // order.
-      // childrenInHitTestOrder = Int32List(childCount);
-      // for (int i = childCount - 1; i >= 0; i -= 1) {
-      //   childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
-      // }
 
       final List<SemanticsNode> childrenInHitTestOrderList = _childrenInHitTestOrder();
       childrenInHitTestOrder = Int32List(childCount);
       for (int i = 0; i < childCount; i += 1) {
         childrenInHitTestOrder[i] = childrenInHitTestOrderList[i].id;
       }
-
-      // final Set<int> overlayPortalIds = <int>{};
-      // for (int i = 0; i < childCount; i++) {
-      //   // print('child id: ${_children![i].id}, label: ${_children![i].label}');
-      //   if (_children![i].label == 'OverlayPortal') {
-      //     overlayPortalIds.add(_children![i].id);
-      //   }
-      // }
-
-      // childrenInHitTestOrder = reorderWithTargetsFirst(childrenInHitTestOrder, overlayPortalIds);
-
-      // int currentOverlayPortalIndex = 0;
-      // int currentLeadingHitTestIndex = 0;
-      // while (currentOverlayPortalIndex < childCount) {
-      //   if (overlayPortalIds.contains(_children![currentOverlayPortalIndex].id)) {
-      //     final int tempValue = childrenInHitTestOrder[currentOverlayPortalIndex];
-      //     childrenInHitTestOrder[currentOverlayPortalIndex] =
-      //         childrenInHitTestOrder[currentLeadingHitTestIndex];
-      //     childrenInHitTestOrder[currentLeadingHitTestIndex] = tempValue;
-      //   }
-      //   currentLeadingHitTestIndex++;
-      //   currentOverlayPortalIndex++;
-      // }
-      // // print('overlayPortalIds: $overlayPortalIds');
-
-      // // put label with 'OverlayPortal' in the end of the list.
-      // // childrenInHitTestOrder.sort((int a, int b) {
-      // //   final SemanticsNode nodeA = _children![a];
-      // //   final SemanticsNode nodeB = _children![b];
-      // //   if (nodeA.label == 'OverlayPortal' && nodeB.label != 'OverlayPortal') {
-      // //     return 1;
-      // //   } else if (nodeA.label != 'OverlayPortal' && nodeB.label == 'OverlayPortal') {
-      // //     return -1;
-      // //   }
-      // //   return 0;
-      // // });
-      // print('overlayPortalIds: $overlayPortalIds');
-      print('children id: ${_children!.map((e) => e.id).toList()}');
-      print('>>>>>>>>>>>>> childrenInHitTestOrder: $childrenInHitTestOrder <<<<<<<<<<<<');
     }
     Int32List? customSemanticsActionIds;
     if (data.customSemanticsActionIds?.isNotEmpty ?? false) {
@@ -3621,9 +3567,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   List<SemanticsNode> _childrenInHitTestOrder() {
     final Set<SemanticsNode> overlayPortalNode = <SemanticsNode>{};
-    // final Set<int> overlayPortalIds = <int>{};
     for (final SemanticsNode child in _children!) {
-      // print('child id: ${_children![i].id}, label: ${_children![i].label}');
       if (child.hasFlag(SemanticsFlag.isOverlayPortal)) {
         overlayPortalNode.add(child);
       }
