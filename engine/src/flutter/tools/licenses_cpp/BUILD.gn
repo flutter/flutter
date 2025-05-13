@@ -3,6 +3,8 @@ executable("licenses_cpp") {
 
   sources = [ "src/main.cc" ]
   deps = [
+    "//flutter/third_party/abseil-cpp/absl/flags:flag",
+    "//flutter/third_party/abseil-cpp/absl/flags:parse",
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
     "//flutter/third_party/re2",
   ]
