@@ -64,11 +64,24 @@ txt::TextStyle ParagraphStyle::CreateTextStyle() const {
   if (background_) {
     style.background = background_->GetPaint();
   }
+  if (decoration_.has_value()) {
+    const auto& decoration = decoration_.value();
+    style.decoration = decoration.types;
+    style.decoration_color = ToSkiaType(decoration.color);
+    style.decoration_style = ToTxtType(decoration.style);
+    style.decoration_thickness_multiplier = decoration.thickness_multiplier;
+  }
+
   return style;
 }
 
 const txt::ParagraphStyle& ParagraphStyle::GetParagraphStyle() const {
   return style_;
+}
+
+void ParagraphStyle::SetTextDecoration(
+    const ImpellerTextDecoration& decoration) {
+  decoration_ = decoration;
 }
 
 }  // namespace impeller::interop

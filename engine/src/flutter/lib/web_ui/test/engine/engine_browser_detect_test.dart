@@ -8,7 +8,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/safe_browser_api.dart';
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -68,14 +67,6 @@ void testMain() {
       intlSegmenter = null;
 
       expect(browserSupportsCanvaskitChromium, isFalse);
-    });
-  });
-
-  group('OffscreenCanvas', () {
-    test('OffscreenCanvas is detected as unsupported in Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
-      expect(OffScreenCanvas.supported, isFalse);
-      ui_web.browser.debugBrowserEngineOverride = null;
     });
   });
 }

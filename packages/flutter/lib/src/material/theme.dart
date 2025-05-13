@@ -14,7 +14,7 @@ import 'material_localizations.dart';
 import 'theme_data.dart';
 import 'typography.dart';
 
-export 'theme_data.dart' show Brightness, ThemeData;
+export 'theme_data.dart' show Brightness, MaterialTapTargetSize, ThemeData;
 
 /// The duration over which theme changes animate by default.
 const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
