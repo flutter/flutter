@@ -241,7 +241,7 @@ team-ios:
       - packages/flutter_tools/**/*ios*
       - packages/flutter_tools/**/*macos*
 
-team-release:
+"infra: release":
   - changed-files:
     - any-glob-to-any-file:
       - docs/releases/**/*
