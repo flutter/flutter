@@ -53,14 +53,17 @@ class TextPaint {
       'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.formattingShift}->${line.bounds.width}x${line.bounds.height}',
     );
     for (final LineRun run in line.visualRuns) {
+      WebParagraphDebug.log(
+        'run: ${run.clusterRange} ${run.shiftInsideLine} line.formattingShift: ${line.formattingShift}',
+      );
       final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
       final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
       final int step = run.bidiLevel.isEven ? 1 : -1;
-      WebParagraphDebug.log(
-        'run.shiftInsideLine: ${run.shiftInsideLine} line.formattingShift: ${line.formattingShift}',
-      );
       for (int i = start; i != end; i += step) {
         final clusterText = layout.textClusters[i];
+        WebParagraphDebug.log(
+          '$i: ${line.formattingShift} + ${run.shiftInsideLine} + ${clusterText.shift}',
+        );
         paintCluster(
           canvas,
           clusterText,
@@ -90,7 +93,10 @@ class TextPaint {
     );
 
     // Define the text cluster bounds
-    final pos = webTextCluster.bounds.left - webTextCluster.cluster!.x;
+    WebParagraphDebug.log(
+      'pos = ${webTextCluster.bounds.left - webTextCluster.advance.left} = ${webTextCluster.bounds.left} - ${webTextCluster.advance.left} ',
+    );
+    final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
       pos,
       0,
@@ -103,11 +109,11 @@ class TextPaint {
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
 
-    final double left = clusterOffset.dx + webTextCluster.cluster!.x + lineOffset.dx;
+    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
     final double shift = left - left.floorToDouble();
     // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
-        .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
+        .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
         .translate(lineOffset.dx, lineOffset.dy)
         .translate(-shift, 0);
 
@@ -119,7 +125,7 @@ class TextPaint {
             rects.first.width.ceilToDouble(),
             rects.first.height,
           )
-          .translate(clusterOffset.dx + webTextCluster.cluster!.x, clusterOffset.dy)
+          .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
           .translate(lineOffset.dx, lineOffset.dy)
           .translate(-shift, 0);
       canvas.drawRect(backgroundRect, textStyle.background!);
@@ -142,7 +148,10 @@ class TextPaint {
       webTextCluster.cluster!,
       /*left:*/ 0,
       /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
-      /*ignore the text cluster shift from the text run*/ {'x': 0, 'y': 0},
+      /*ignore the text cluster shift from the text run*/ {
+        'x': paragraph.getLayout().isDefaultLtr ? 0 : webTextCluster.advance.width,
+        'y': 0,
+      },
     );
 
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();

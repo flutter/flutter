@@ -58,21 +58,33 @@ class TextWrapper {
   }
 
   void breakLines(double width) {
-    // "words":[startLine:whitespaces.start) whitespaces:[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
+    // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
+    // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
     _top = 0.0;
-    startNewLine(0, 0.0);
+    startNewLine(_layout.isDefaultLtr ? 0 : _layout.textClusters.length - 1 - 1, 0.0);
 
     bool hardLineBreak = false;
-    for (int index = 0; index < _layout.textClusters.length - 1; index++) {
+    final int firstClusterIndex = _layout.isDefaultLtr ? 0 : _layout.textClusters.length - 1;
+    final int lastClusterIndex = _layout.isDefaultLtr ? _layout.textClusters.length - 1 : -1;
+    final int step = _layout.isDefaultLtr ? 1 : -1;
+    for (int index = firstClusterIndex; index != lastClusterIndex; index += step) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
       // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
       double widthCluster = cluster.advance.width;
       hardLineBreak = isHardLineBreak(cluster);
 
+      WebParagraphDebug.log(
+        'Wrapping1: '
+        '$_widthText ${ClusterRange(start: _startLine, end: _whitespaces.start)} '
+        '$_widthWhitespaces ${ClusterRange(start: _whitespaces.start, end: _whitespaces.end)} '
+        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + step)}',
+      );
+
       if (hardLineBreak) {
+        WebParagraphDebug.log('isHardLineBreak: $index');
         // Break the line and then continue with the current cluster as usual
-        if (_whitespaces.end < index) {
+        if (_whitespaces.end != index) {
           // Take letters into account
           _widthText += _widthWhitespaces + _widthLetters;
           _whitespaces.start = index;
@@ -111,10 +123,8 @@ class TextWrapper {
 
       // Check if we have a (hanging) whitespace which does not affect the line width
       if (isWhitespace(cluster)) {
-        WebParagraphDebug.log(
-          'isWhitespace: $index [${cluster.textRange.start}:${cluster.textRange.end})',
-        );
-        if (_whitespaces.end < index) {
+        WebParagraphDebug.log('isWhitespace: @$index ${cluster.textRange}');
+        if (_whitespaces.end != index) {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
           _widthLetters = 0.0;
@@ -122,7 +132,7 @@ class TextWrapper {
           _widthWhitespaces = 0.0;
         }
         // Add the cluster to the current whitespace sequence (empty or not)
-        _whitespaces.end = index + 1;
+        _whitespaces.end = index + step;
         _widthWhitespaces += widthCluster;
         continue;
       }
@@ -157,8 +167,8 @@ class TextWrapper {
                 _widthLetters == 0.0,
           );
           _widthText = widthCluster;
-          _whitespaces.start = index + 1;
-          _whitespaces.end = index + 1;
+          _whitespaces.start = index + step;
+          _whitespaces.end = index + step;
           widthCluster = 0.0; // Since we already processed this cluster
         }
 
@@ -176,21 +186,21 @@ class TextWrapper {
         startNewLine(_whitespaces.end, _widthLetters);
       }
 
-      // This is just a regular cluster, keep track of it
       WebParagraphDebug.log(
-        '**** $_widthLetters + $widthCluster = ${_widthLetters + widthCluster}',
+        'Wrapping2: '
+        '$_widthText ${ClusterRange(start: _startLine, end: _whitespaces.start)} '
+        '$_widthWhitespaces ${ClusterRange(start: _whitespaces.start, end: _whitespaces.end)} '
+        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + step)}',
       );
+      // This is just a regular cluster, keep track of it
       _widthLetters += widthCluster;
     }
 
     // Assume a soft line break at the end of the text
-    if (_whitespaces.end < _layout.textClusters.length - 1) {
+    if (_whitespaces.end != lastClusterIndex) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange(
-        start: _layout.textClusters.length - 1,
-        end: _layout.textClusters.length - 1,
-      );
+      _whitespaces = ClusterRange(start: lastClusterIndex, end: lastClusterIndex);
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }
@@ -216,6 +226,7 @@ class TextWrapper {
       _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
     }
     */
+    /*
     if (WebParagraphDebug.logging) {
       for (int i = 0; i < _layout.lines.length; ++i) {
         final TextLine line = _layout.lines[i];
@@ -228,5 +239,6 @@ class TextWrapper {
         );
       }
     }
+    */
   }
 }

@@ -201,6 +201,15 @@ class ClusterRange {
     return Object.hash(start, end);
   }
 
+  @override
+  String toString() {
+    return '[$start:$end)';
+  }
+
+  ClusterRange normalize(bool isDefaultLtr) {
+    return isDefaultLtr ? this : ClusterRange(start: end + 1, end: start + 1);
+  }
+
   int get width => end - start;
 
   bool get isEmpty => start == end;
