@@ -18,3 +18,15 @@ executable("licenses_cpp") {
     "//flutter/third_party/re2",
   ]
 }
+
+executable("licenses_cpp_testrunner") {
+  testonly = true
+  sources = [
+    "src/license_checker_unittests.cc",
+  ]
+  deps = [
+    ":licenses",
+    "//flutter/third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gtest_main",
+  ]
+}
