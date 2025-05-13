@@ -6,9 +6,11 @@
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "flutter/third_party/skia/include/core/SkArc.h"
 
 namespace {
+
 inline constexpr SkPathFillType ToSkFillType(flutter::DlPathFillType dl_type) {
   switch (dl_type) {
     case impeller::FillType::kOdd:
@@ -17,6 +19,34 @@ inline constexpr SkPathFillType ToSkFillType(flutter::DlPathFillType dl_type) {
       return SkPathFillType::kWinding;
   }
 }
+
+class BuilderReceiver : public impeller::PathReceiver {
+ private:
+  using Point = impeller::Point;
+  using Scalar = impeller::Scalar;
+
+ public:
+  explicit BuilderReceiver(flutter::DlPathBuilder& builder)
+      : builder_(builder) {}
+
+  void MoveTo(const Point& p2, bool will_be_closed) { builder_.MoveTo(p2); }
+  void LineTo(const Point& p2) { builder_.LineTo(p2); }
+  void QuadTo(const Point& cp, const Point& p2) {
+    builder_.QuadraticCurveTo(cp, p2);
+  }
+  bool ConicTo(const Point& cp, const Point& p2, Scalar weight) {
+    builder_.ConicCurveTo(cp, p2, weight);
+    return true;
+  }
+  void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) {
+    builder_.CubicCurveTo(cp1, cp2, p2);
+  }
+  void Close() { builder_.Close(); }
+
+ private:
+  flutter::DlPathBuilder& builder_;
+};
+
 }  // namespace
 
 namespace flutter {
@@ -82,7 +112,10 @@ DlPathBuilder& DlPathBuilder::AddRoundRect(const DlRoundRect& round_rect) {
 
 DlPathBuilder& DlPathBuilder::AddRoundSuperellipse(
     const DlRoundSuperellipse& rse) {
-  // TBD - don't submit without this impl!
+  BuilderReceiver receiver(*this);
+  impeller::RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(),
+                                                    rse.GetRadii())
+      .AddToPath(receiver);
   return *this;
 }
 
