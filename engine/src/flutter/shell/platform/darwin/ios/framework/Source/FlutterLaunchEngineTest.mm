@@ -19,7 +19,7 @@ FLUTTER_ASSERT_ARC;
 - (void)testSimple {
   FlutterLaunchEngine* launchEngine = [[FlutterLaunchEngine alloc] init];
   XCTAssertTrue(launchEngine.engine);
-  XCTAssertTrue([launchEngine grabEngine]);
+  XCTAssertTrue([launchEngine takeEngine]);
   XCTAssertFalse(launchEngine.engine);
 }
 

@@ -33,7 +33,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
   if (appDelegate.window.rootViewController) {
     // If this is not nil we are running into a case where someone is manually
-    // performing root view controller setup outside of Storyboard initialization.
+    // performing root view controller setup in the UIApplicationDelegate.
     UIWindowScene* windowScene = (UIWindowScene*)scene;
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
     self.window.rootViewController = appDelegate.window.rootViewController;
@@ -60,8 +60,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   return self;
 }
 
-- (nullable FlutterEngine*)grabLaunchEngine {
-  return [self.launchEngine grabEngine];
+- (nullable FlutterEngine*)takeLaunchEngine {
+  return [self.launchEngine takeEngine];
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -373,8 +373,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 - (UISceneConfiguration*)application:(UIApplication*)application
     configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
-                                   options:(UISceneConnectionOptions*)options
-    API_AVAILABLE(ios(13.0)) {
+                                   options:(UISceneConnectionOptions*)options {
   NSDictionary* sceneManifest =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
   NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];

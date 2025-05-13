@@ -9,7 +9,7 @@
 
 @interface FlutterAppDelegate ()
 
-- (nullable FlutterEngine*)grabLaunchEngine;
+- (nullable FlutterEngine*)takeLaunchEngine;
 
 @end
 

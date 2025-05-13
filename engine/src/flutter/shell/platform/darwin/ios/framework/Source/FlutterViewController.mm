@@ -256,17 +256,17 @@ typedef struct MouseState {
                   initialRoute:(nullable NSString*)initialRoute {
   id appDelegate = FlutterSharedApplication.application.delegate;
   FlutterEngine* engine;
-  if ([appDelegate respondsToSelector:@selector(grabLaunchEngine)]) {
+  if ([appDelegate respondsToSelector:@selector(takeLaunchEngine)]) {
     if (self.nibName) {
       // Only grab the launch engine if it was created with a nib.
       // FlutterViewControllers created from nibs can't specify their initial
       // routes so it's safe to take it.
-      engine = [appDelegate grabLaunchEngine];
+      engine = [appDelegate takeLaunchEngine];
     } else {
       // If we registered plugins with a FlutterAppDelegate without a xib, throw
       // away the engine that was registered through the FlutterAppDelegate.
       // That's not a valid usage of the API.
-      [appDelegate grabLaunchEngine];
+      [appDelegate takeLaunchEngine];
     }
   }
   if (!engine) {

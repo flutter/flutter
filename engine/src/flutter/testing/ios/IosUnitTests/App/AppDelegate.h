@@ -14,7 +14,7 @@
 @property(strong, nonatomic) UIWindow* window;
 @property(strong, nonatomic) FlutterEngine* launchEngine;
 
-- (FlutterEngine*)grabLaunchEngine;
+- (FlutterEngine*)takeLaunchEngine;
 
 @end
 

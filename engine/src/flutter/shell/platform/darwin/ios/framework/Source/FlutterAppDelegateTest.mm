@@ -161,12 +161,12 @@ FLUTTER_ASSERT_ARC
   self.appDelegate.rootFlutterViewControllerGetter = nil;
   // Working with plugins forces the creation of an engine.
   XCTAssertFalse([self.appDelegate hasPlugin:@"hello"]);
-  XCTAssertNotNil([self.appDelegate grabLaunchEngine]);
-  XCTAssertNil([self.appDelegate grabLaunchEngine]);
+  XCTAssertNotNil([self.appDelegate takeLaunchEngine]);
+  XCTAssertNil([self.appDelegate takeLaunchEngine]);
 }
 
 - (void)testGrabLaunchEngineWithoutPlugins {
-  XCTAssertNil([self.appDelegate grabLaunchEngine]);
+  XCTAssertNil([self.appDelegate takeLaunchEngine]);
 }
 
 #pragma mark - Deep linking

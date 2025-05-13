@@ -14,6 +14,10 @@
  * GeneratedPluginRegistrant is called on a FlutterAppDelegate before the first
  * FlutterViewController is set up. This is the typical flow after the
  * UISceneDelegate migration.
+ *
+ * The launch engine is intended to work only with first FlutterViewController
+ * instantiated with a NIB since that is the only FlutterEngine that registers
+ * plugins through the FlutterAppDelegate.
  */
 @interface FlutterLaunchEngine : NSObject
 
@@ -23,11 +27,11 @@
 @property(nonatomic, strong, nullable, readonly) FlutterEngine* engine;
 
 /**
- * Grab ownership of the launch engine.
+ * Take ownership of the launch engine.
  *
- * After this is called `self.engine` and `grabEngine` will always return nil.
+ * After this is called `self.engine` and `takeEngine` will always return nil.
  */
-- (nullable FlutterEngine*)grabEngine;
+- (nullable FlutterEngine*)takeEngine;
 
 @end
 
