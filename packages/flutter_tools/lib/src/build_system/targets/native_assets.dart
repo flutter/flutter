@@ -121,8 +121,9 @@ abstract class DartBuild extends Target {
 class DartBuildForNative extends DartBuild {
   const DartBuildForNative({@visibleForTesting super.buildRunner});
 
+  // TODO(dcharkes): Add `KernelSnapshot()` for AOT builds only when adding tree-shaking information. https://github.com/dart-lang/native/issues/153
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot()];
+  List<Target> get dependencies => const <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
