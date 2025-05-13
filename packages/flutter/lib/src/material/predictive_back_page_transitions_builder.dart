@@ -150,6 +150,7 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
             animation: animation,
             secondaryAnimation: secondaryAnimation,
             getIsCurrent: () => route.isCurrent,
+            phase: phase,
             child: child,
           );
         }
@@ -342,7 +343,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   // The duration of the commit transition.
   //
-  // This is not the same as PredictiveBackpageTransitionsBuilder's duration,
+  // This is not the same as PredictiveBackPageTransitionsBuilder's duration,
   // which is the duration of widget.animation, so an Interval is used.
   //
   // Eyeballed on a Pixel 9 running Android 16.
@@ -521,11 +522,13 @@ class _PredictiveBackFullscreenPageTransition extends StatefulWidget {
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
+    required this.phase,
     required this.child,
   });
 
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
+  final _PredictiveBackPhase phase;
   final ValueGetter<bool> getIsCurrent;
   final Widget child;
 
@@ -543,13 +546,14 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _kScaleCommit = 0.95;
   static const double _kOpacityFullyOpened = 1.0;
   static const double _kOpacityStartTransition = 0.95;
+  // TODO(justinmc): This commit is a misnomer.
   static const double _kCommitAt = 0.65;
   static const double _kWeightPreCommit = _kCommitAt;
   static const double _kWeightPostCommit = 1 - _kWeightPreCommit;
   static const double _kScreenWidthDivisionFactor = 20.0;
   static const double _kXShiftAdjustment = 8.0;
   static const Duration _kCommitDuration = Duration(
-    milliseconds: _PredictiveBackSharedElementPageTransitionState._kCommitMilliseconds,
+    milliseconds: 100,
   );
 
   final Animatable<double> _primaryOpacityTween = Tween<double>(
@@ -655,7 +659,10 @@ class _PredictiveBackFullscreenPageTransitionState
           // A sudden fadeout at the commit point, driven by time and not the
           // gesture.
           child: AnimatedOpacity(
-            opacity: widget.animation.value < _kCommitAt ? 0.0 : 1.0,
+            opacity: switch (widget.phase) {
+              _PredictiveBackPhase.commit => 0.0,
+              _ => widget.animation.value < _kCommitAt ? 0.0 : 1.0,
+            },
             duration: _kCommitDuration,
             child: child,
           ),
