@@ -4,8 +4,12 @@
 
 re2_base = "//flutter/third_party/re2"
 
+config("re2_config") {
+  include_dirs = [ "$re2_base" ]  # Relative to the BUILD.gn file
+}
+
 source_set("re2") {
-  include_dirs = [ "$re2_base" ]
+  public_configs = [ ":re2_config" ]
   sources = [
     "$re2_base/re2/bitmap256.cc",
     "$re2_base/re2/bitstate.cc",
