@@ -149,6 +149,13 @@ class FlutterPlugin : Plugin<Project> {
                 reset()
                 isUniversalApk = false
             }
+        } else {
+            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                if (!buildType.isDebuggable) {
+                    buildType.ndk.abiFilters.clear()
+                    buildType.ndk.abiFilters.addAll(setOf("arm64-v8a", "x86_64", "armeabi-v7a"))
+                }
+            }
         }
         val propDeferredComponentNames = "deferred-component-names"
         val deferredComponentNamesValue: String? =
