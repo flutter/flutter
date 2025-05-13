@@ -86,8 +86,7 @@ public class FlutterLoaderTest {
       assertTrue(
           e.getMessage()
               .contains(
-                  String.format(
-                      "and the native libraries directory (with path %s) does not exist", path)));
+                  "and the native libraries directory (with path " + path + ") does not exist"));
     }
   }
 

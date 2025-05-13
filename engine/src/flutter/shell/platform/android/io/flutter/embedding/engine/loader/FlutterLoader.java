@@ -214,8 +214,7 @@ public class FlutterLoader {
                     // Get supported ABI and prepare path suffix for lib directories
                     String[] abis = Build.SUPPORTED_ABIS;
                     for (String abi : abis) {
-                      String libPathSuffix =
-                          String.format("!%slib%s%s", File.separator, File.separator, abi);
+                      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
 
                       // Get split APK lib paths
                       String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
@@ -229,7 +228,7 @@ public class FlutterLoader {
 
                       String baseApkPath = appContext.getApplicationInfo().sourceDir;
                       if (baseApkPath != null && !baseApkPath.isEmpty()) {
-                        String baseApkLibDir = String.format("%s%s", baseApkPath, libPathSuffix);
+                        String baseApkLibDir = baseApkPath + libPathSuffix;
                         splitAndSourceDirs.add(baseApkLibDir);
                       }
                     }
