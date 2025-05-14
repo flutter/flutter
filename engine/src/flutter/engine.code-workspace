@@ -444,6 +444,37 @@
         "group": {
           "kind": "build"
         },
+        "label": "ios_debug_sim_unopt_arm64",
+        "args": [
+          "build",
+          "-c",
+          "host_debug_unopt_arm64",
+          "&&",
+          "./flutter/bin/et",
+          "build",
+          "-c",
+          "ios_debug_sim_unopt_arm64"
+        ]
+      },
+      {
+        "type": "shell",
+        "command": "./flutter/bin/et",
+        "options": {
+          "cwd": "${workspaceFolder}/.."
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "presentation": {
+          "echo": true,
+          "reveal": "silent",
+          "focus": false,
+          "panel": "shared",
+          "clear": true
+        },
+        "group": {
+          "kind": "build"
+        },
         "label": "android_debug_unopt_arm64",
         "args": [
           "build",
