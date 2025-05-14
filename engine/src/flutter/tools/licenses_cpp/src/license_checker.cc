@@ -4,15 +4,13 @@
 
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <filesystem>
 #include <vector>
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
+#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
+#include "flutter/tools/licenses_cpp/src/mmap_file.h"
 
 namespace {
 std::vector<std::filesystem::path> GetGitRepos(std::string_view dir) {
@@ -51,71 +49,6 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(
 
   return files;
 }
-
-class MMapFile {
- public:
-  static absl::StatusOr<MMapFile> Make(std::string_view path) {
-    int fd = open(path.data(), O_RDONLY);
-    if (fd < 0) {
-      return absl::UnavailableError("can't open file");
-    }
-
-    struct stat st;
-    if (fstat(fd, &st) < 0) {
-      close(fd);
-      return absl::UnavailableError("can't stat file");
-    }
-
-    if (st.st_size <= 0) {
-      close(fd);
-      return absl::InvalidArgumentError("file of zero length");
-    }
-
-    const char* data = static_cast<const char*>(
-        mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
-
-    if (data == MAP_FAILED) {
-      close(fd);
-      return absl::UnavailableError(
-          absl::StrCat("can't mmap file (", path, "): ", std::strerror(errno)));
-    }
-
-    return MMapFile(fd, data, st.st_size);
-  }
-
-  ~MMapFile() {
-    if (data_) {
-      munmap(const_cast<char*>(data_), size_);
-    }
-    if (fd_ >= 0) {
-      close(fd_);
-    }
-  }
-
-  MMapFile(const MMapFile&) = delete;
-
-  MMapFile& operator=(const MMapFile&) = delete;
-
-  MMapFile(MMapFile&& other) {
-    fd_ = other.fd_;
-    data_ = other.data_;
-    size_ = other.size_;
-    other.fd_ = -1;
-    other.data_ = nullptr;
-    other.size_ = 0;
-  }
-
-  const char* GetData() const { return data_; }
-  size_t GetSize() const { return size_; }
-
- private:
-  MMapFile(int fd, const char* data, size_t size)
-      : fd_(fd), data_(data), size_(size) {}
-
-  int fd_ = -1;
-  const char* data_ = nullptr;
-  size_t size_ = 0;
-};
 }  // namespace
 
 int LicenseChecker::Run(std::string_view working_dir,

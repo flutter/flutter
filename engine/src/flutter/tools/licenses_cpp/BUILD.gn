@@ -4,6 +4,8 @@ source_set("licenses") {
     "src/filter.h",
     "src/license_checker.cc",
     "src/license_checker.h",
+    "src/mmap_file.cc",
+    "src/mmap_file.h",
   ]
   public_deps = [
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
