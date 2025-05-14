@@ -1,17 +1,17 @@
 source_set("licenses") {
   sources = [
+    "src/filter.cc",
+    "src/filter.h",
     "src/license_checker.cc",
     "src/license_checker.h",
   ]
-  deps = [
+  public_deps = [
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
     "//flutter/third_party/re2",
   ]
 }
 
 executable("licenses_cpp") {
-  testonly = true
-
   sources = [ "src/main.cc" ]
   deps = [
     ":licenses",
@@ -23,7 +23,10 @@ executable("licenses_cpp") {
 
 executable("licenses_cpp_testrunner") {
   testonly = true
-  sources = [ "src/license_checker_unittests.cc" ]
+  sources = [ 
+    "src/filter_unittests.cc",
+    "src/license_checker_unittests.cc",
+  ]
   deps = [
     ":licenses",
     "//flutter/third_party/googletest:gtest",
