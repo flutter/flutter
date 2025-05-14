@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -1381,9 +1382,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
             Expanded(
-              child: Stack(
-                textDirection: widget.textDirection,
-                children: <Widget>[if (placeholder != null) placeholder, editableText],
+              child: Directionality(
+                textDirection:
+                    widget.textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr,
+                child: _BaselineStacked(
+                  children: <Widget>[if (placeholder != null) placeholder, editableText],
+                ),
               ),
             ),
             if (suffixWidget != null) suffixWidget,
@@ -1680,5 +1684,148 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
         ),
       ),
     );
+  }
+}
+
+class _BaselineStacked extends MultiChildRenderObjectWidget {
+  const _BaselineStacked({required super.children});
+
+  @override
+  _RenderBaselineStacked createRenderObject(BuildContext context) {
+    return _RenderBaselineStacked();
+  }
+}
+
+class _BaselineStackedParentData extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderBaselineStacked extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _BaselineStackedParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _BaselineStackedParentData> {
+  _RenderBaselineStacked();
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _BaselineStackedParentData) {
+      child.parentData = _BaselineStackedParentData();
+    }
+  }
+
+  RenderBox? get _placeholderChild {
+    if (firstChild == lastChild) {
+      return null;
+    }
+    return firstChild;
+  }
+
+  RenderBox? get _editableTextChild {
+    return lastChild;
+  }
+
+  @override
+  double? getDistanceToBaseline(TextBaseline baseline, {bool onlyReal = false}) {
+    final RenderBox? editableText = _editableTextChild;
+    if (editableText == null) {
+      return super.getDistanceToBaseline(baseline, onlyReal: onlyReal);
+    }
+    final double? editableTextBaseline = editableText.getDistanceToBaseline(
+      baseline,
+      onlyReal: onlyReal,
+    );
+    if (editableTextBaseline == null) {
+      return super.getDistanceToBaseline(baseline, onlyReal: onlyReal);
+    }
+    final _BaselineStackedParentData editableTextParentData =
+        editableText.parentData! as _BaselineStackedParentData;
+    return editableTextParentData.offset.dy + editableTextBaseline;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox? editableText = _editableTextChild;
+
+    if (editableText == null) {
+      size = constraints.smallest;
+      return;
+    }
+
+    // Layout children
+    editableText.layout(constraints, parentUsesSize: true);
+    final Size editableTextSize = editableText.size;
+    placeholder?.layout(constraints, parentUsesSize: true);
+    final Size? placeholderSize = placeholder?.size;
+
+    final _BaselineStackedParentData editableTextParentData =
+        editableText.parentData! as _BaselineStackedParentData;
+    final _BaselineStackedParentData? placeholderParentData =
+        placeholder?.parentData as _BaselineStackedParentData?;
+
+    // Attempt baseline alignment
+    final double? editableTextBaselineValue = editableText.getDistanceToBaseline(
+      TextBaseline.alphabetic,
+    );
+    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
+      TextBaseline.alphabetic,
+    );
+
+    double currentEditableTextY = 0;
+    double currentPlaceholderY = 0;
+
+    final bool canBaselineAlign =
+        editableTextBaselineValue != null &&
+        placeholderBaselineValue != null &&
+        placeholder != null;
+
+    if (canBaselineAlign) {
+      // Position placeholder relative to editableText to align baselines.
+      currentPlaceholderY = editableTextBaselineValue - placeholderBaselineValue;
+      currentEditableTextY = 0;
+    } else {
+      currentEditableTextY = 0;
+      currentPlaceholderY = 0;
+    }
+
+    editableTextParentData.offset = Offset(0, currentEditableTextY);
+    if (placeholder != null && placeholderParentData != null) {
+      placeholderParentData.offset = Offset(0, currentPlaceholderY);
+    }
+
+    // Calculate overall size and adjust offsets so that the top of the combined box is at y=0.
+    double minY = currentEditableTextY;
+    double maxY = currentEditableTextY + editableTextSize.height;
+    double overallWidth = editableTextSize.width;
+
+    if (placeholder != null && placeholderSize != null) {
+      minY = math.min(minY, currentPlaceholderY);
+      maxY = math.max(maxY, currentPlaceholderY + placeholderSize.height);
+      overallWidth = math.max(overallWidth, placeholderSize.width);
+    }
+
+    final double offsetYAdjustment = -minY;
+    editableTextParentData.offset = Offset(0, currentEditableTextY + offsetYAdjustment);
+    if (placeholder != null && placeholderParentData != null) {
+      placeholderParentData.offset = Offset(0, currentPlaceholderY + offsetYAdjustment);
+    }
+
+    final double overallHeight = maxY - minY;
+    size = constraints.constrain(Size(overallWidth, overallHeight));
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox? editableText = _editableTextChild;
+
+    if (placeholder != null) {
+      final _BaselineStackedParentData placeholderParentData =
+          placeholder.parentData! as _BaselineStackedParentData;
+      context.paintChild(placeholder, offset + placeholderParentData.offset);
+    }
+    if (editableText != null) {
+      final _BaselineStackedParentData editableTextParentData =
+          editableText.parentData! as _BaselineStackedParentData;
+      context.paintChild(editableText, offset + editableTextParentData.offset);
+    }
   }
 }
