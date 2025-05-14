@@ -55,7 +55,8 @@ class DlPathBuilder {
   /// produces a curve that is identical to a line segment and will be
   /// inserted as a line segment in lieu of the conic.
   ///
-  /// A weight of (sqrt(2)/2) will produce an elliptical path.
+  /// A weight of (sqrt(2)/2) will produce a quarter section of an
+  /// elliptical path.
   ///
   /// A weight of 1.0 is identical to a quadratic bezier curve and will be
   /// inserted as a quadratic curve in lieu of the conic.

@@ -683,26 +683,8 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  if (paint_.stroke.width >
-      std::max(oval_bounds.GetWidth(), oval_bounds.GetHeight())) {
-    // This is a special case for rendering arcs whose stroke width is so large
-    // you are effectively drawing a sector of a circle.
-    // https://github.com/flutter/flutter/issues/158567
-    DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke.width / 2));
-    flutter::DlPathBuilder builder;
-    Paint fill_paint = paint_;
-    fill_paint.style = Paint::Style::kFill;
-    fill_paint.stroke.width = 1;
-    builder.AddArc(expanded_rect, Degrees(start_degrees),
-                   Degrees(sweep_degrees),
-                   /*use_center=*/true);
-    GetCanvas().DrawPath(builder.TakePath(), fill_paint);
-  } else {
-    flutter::DlPathBuilder builder;
-    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                   use_center);
-    GetCanvas().DrawPath(builder.TakePath(), paint_);
-  }
+  GetCanvas().DrawArc(oval_bounds, start_degrees, sweep_degrees, use_center,
+                      paint_);
 }
 
 // |flutter::DlOpReceiver|

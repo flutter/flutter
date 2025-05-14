@@ -784,7 +784,12 @@ GeometryResult::Mode StrokePathSourceGeometry::GetResultMode() const {
 
 std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
     const Matrix& transform) const {
-  auto path_bounds = GetSource().GetBounds();
+  return GetStrokeCoverage(transform, GetSource().GetBounds());
+}
+
+std::optional<Rect> StrokePathSourceGeometry::GetStrokeCoverage(
+    const Matrix& transform,
+    const Rect& path_bounds) const {
   if (path_bounds.IsEmpty()) {
     return std::nullopt;
   }
@@ -812,6 +817,23 @@ StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
 
 const PathSource& StrokePathGeometry::GetSource() const {
   return path_;
+}
+
+ArcStrokePathGeometry::ArcStrokePathGeometry(const flutter::DlPath& path,
+                                             const Rect& oval_bounds,
+                                             const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      path_(path),
+      oval_bounds_(oval_bounds) {}
+
+const PathSource& ArcStrokePathGeometry::GetSource() const {
+  return path_;
+}
+
+std::optional<Rect> ArcStrokePathGeometry::GetCoverage(
+    const Matrix& transform) const {
+  return GetStrokeCoverage(transform,
+                           path_.GetBounds().IntersectionOrEmpty(oval_bounds_));
 }
 
 }  // namespace impeller

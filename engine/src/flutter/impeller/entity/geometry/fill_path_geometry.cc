@@ -98,4 +98,22 @@ const PathSource& FillPathGeometry::GetSource() const {
   return path_;
 }
 
+ArcFillPathGeometry::ArcFillPathGeometry(const flutter::DlPath& path,
+                                         const Rect& oval_bounds)
+    : FillPathSourceGeometry(std::nullopt),
+      path_(path),
+      oval_bounds_(oval_bounds) {}
+
+const PathSource& ArcFillPathGeometry::GetSource() const {
+  return path_;
+}
+
+std::optional<Rect> ArcFillPathGeometry::GetCoverage(
+    const Matrix& transform) const {
+  return GetSource()
+      .GetBounds()
+      .IntersectionOrEmpty(oval_bounds_)
+      .TransformAndClipBounds(transform);
+}
+
 }  // namespace impeller

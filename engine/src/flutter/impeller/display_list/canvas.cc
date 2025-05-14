@@ -606,6 +606,46 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   }
 }
 
+void Canvas::DrawArc(const Rect& oval_bounds,
+                     Scalar start_degrees,
+                     Scalar sweep_degrees,
+                     bool use_center,
+                     const Paint& paint) {
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kStroke &&
+      paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
+    // This is a special case for rendering arcs whose stroke width is so large
+    // you are effectively drawing a sector of a circle.
+    // https://github.com/flutter/flutter/issues/158567
+    Rect expanded_rect = oval_bounds.Expand(Size(paint.stroke.width * 0.5f));
+
+    flutter::DlPathBuilder builder;
+    builder.AddArc(expanded_rect, Degrees(start_degrees),
+                   Degrees(sweep_degrees), /*use_center=*/true);
+
+    Paint fill_paint = paint;
+    fill_paint.style = Paint::Style::kFill;
+
+    ArcFillPathGeometry geom(builder.TakePath(), expanded_rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    flutter::DlPathBuilder builder;
+    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
+                   use_center);
+
+    if (paint.style == Paint::Style::kFill) {
+      ArcFillPathGeometry geom(builder.TakePath(), oval_bounds);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    } else {
+      ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    }
+  }
+}
+
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   auto& rect = round_rect.GetBounds();
   auto& radii = round_rect.GetRadii();

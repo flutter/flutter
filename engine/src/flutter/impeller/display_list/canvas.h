@@ -200,6 +200,12 @@ class Canvas {
 
   void DrawOval(const Rect& rect, const Paint& paint);
 
+  void DrawArc(const Rect& oval_bounds,
+               Scalar start_degrees,
+               Scalar sweep_degrees,
+               bool use_center,
+               const Paint& paint);
+
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
 
   void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
