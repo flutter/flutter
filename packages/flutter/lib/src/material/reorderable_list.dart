@@ -305,9 +305,6 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// {@tool dartpad}
   ///
-  ///
-  /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **
-  /// {@end-tool}
   final bool buildDefaultDragHandles;
 
   /// {@macro flutter.widgets.reorderable_list.padding}
@@ -366,18 +363,6 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
-
-  /// {@macro flutter.widgets.list_view.itemExtent}
-  /// This is not used by the [ReorderableListView.separated] constructor.
-  final double? itemExtent;
-
-  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
-  /// This is not used by the [ReorderableListView.separated] constructor.
-  final ItemExtentBuilder? itemExtentBuilder;
-
-  /// {@macro flutter.widgets.list_view.prototypeItem}
-  /// This is not used by the [ReorderableListView.separated] constructor.
-  final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
   ///
