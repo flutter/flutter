@@ -79,6 +79,8 @@ class ReorderableListView extends StatefulWidget {
   ///
   ///   * [ReorderableListView.builder], which allows you to build a reorderable
   ///     list where the items are built as needed when scrolling the list.
+  ///   * [ReorderableListView.separated], which allows you to build a reorderable
+  ///     list with separators between items.
   ReorderableListView({
     super.key,
     required List<Widget> children,
