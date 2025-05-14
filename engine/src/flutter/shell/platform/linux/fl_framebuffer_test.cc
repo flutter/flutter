@@ -24,3 +24,17 @@ TEST(FlFramebufferTest, HasDepthStencil) {
                                         &stencil_type);
   EXPECT_NE(stencil_type, GL_NONE);
 }
+
+TEST(FlFramebufferTest, ResourcesRemoved) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+
+  EXPECT_CALL(epoxy, glGenFramebuffers);
+  EXPECT_CALL(epoxy, glGenTextures);
+  EXPECT_CALL(epoxy, glGenRenderbuffers);
+  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100);
+
+  EXPECT_CALL(epoxy, glDeleteFramebuffers);
+  EXPECT_CALL(epoxy, glDeleteTextures);
+  EXPECT_CALL(epoxy, glDeleteRenderbuffers);
+  g_object_unref(framebuffer);
+}
