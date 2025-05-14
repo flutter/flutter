@@ -27,6 +27,16 @@ import 'sliver.dart';
 ///
 /// To send these notifications, consider using [AutomaticKeepAliveClientMixin].
 ///
+/// The [SliverChildBuilderDelegate] and [SliverChildListDelegate] delegates,
+/// used with [SliverList] and [SliverGrid], as well as the scroll view
+/// counterparts [ListView] and [GridView], have an `addAutomaticKeepAlives`
+/// feature, which is enabled by default. This feature inserts
+/// [AutomaticKeepAlive] widgets around each child, which in turn configure
+/// [KeepAlive] widgets in response to [KeepAliveNotification]s.
+///
+/// The same `addAutomaticKeepAlives` feature is supported by
+/// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
+///
 /// {@template flutter.widgets.AutomaticKeepAlive.example}
 ///
 /// {@tool dartpad}
@@ -386,6 +396,16 @@ class KeepAliveHandle extends ChangeNotifier {
 ///
 /// The type argument `T` is the type of the [StatefulWidget] subclass of the
 /// [State] into which this class is being mixed.
+///
+/// The [SliverChildBuilderDelegate] and [SliverChildListDelegate] delegates,
+/// used with [SliverList] and [SliverGrid], as well as the scroll view
+/// counterparts [ListView] and [GridView], have an `addAutomaticKeepAlives`
+/// feature, which is enabled by default. This feature inserts
+/// [AutomaticKeepAlive] widgets around each child, which in turn configure
+/// [KeepAlive] widgets in response to [KeepAliveNotification]s.
+///
+/// The same `addAutomaticKeepAlives` feature is supported by
+/// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
 ///
 /// {@tool dartpad}
 /// This example demonstrates how to use the
