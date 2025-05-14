@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/parse.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/usage.h"
+#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
 #include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 

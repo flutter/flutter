@@ -25,7 +25,7 @@ executable("licenses_cpp") {
 
 executable("licenses_cpp_testrunner") {
   testonly = true
-  sources = [ 
+  sources = [
     "src/filter_unittests.cc",
     "src/license_checker_unittests.cc",
   ]

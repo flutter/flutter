@@ -38,6 +38,6 @@ absl::StatusOr<Filter> Filter::Open(std::istream& input) {
 
 Filter::Filter(std::string_view regex) : re_(std::make_unique<RE2>(regex)) {}
 
-bool Filter::Matches(std::string_view input) const {  
+bool Filter::Matches(std::string_view input) const {
   return RE2::FullMatch(input, *re_);
 }
