@@ -1655,7 +1655,7 @@ void main() {
         ),
       );
 
-      // Should have only created the first 18 items and 17 separators.
+      // Should have only created the first 14 items and 13 separators.
       expect(itemsCreated.length, 14);
       expect(separatorsCreated.length, 13);
       // Verify the indices are contiguous and start from 0
