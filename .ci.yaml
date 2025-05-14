@@ -5232,6 +5232,7 @@ targets:
       task_name: native_assets_ios_simulator
 
   - name: Mac_ios native_assets_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/168809
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
