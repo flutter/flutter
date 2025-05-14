@@ -1066,6 +1066,9 @@ class SemanticsFlags {
 
   /// Convert a list of bools in a predefined order to Flag.
   factory SemanticsFlags.fromBoolList(List<bool> flags) {
+    while (flags.length < 31) {
+      flags.add(false);
+    }
     return SemanticsFlags(
       hasCheckedState: flags[0],
       isChecked: flags[1],
