@@ -443,7 +443,7 @@ void main() {
         ),
       ),
     );
-    expect(textScaler, TextScaler.noScaling);
+    expect(textScaler, isSystemTextScaler(withScaleFactor: 1.0));
   });
 
   testWidgets('MaterialApp.navigatorKey', (WidgetTester tester) async {

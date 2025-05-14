@@ -1065,7 +1065,6 @@
 ../../../flutter/third_party/boringssl/src/crypto/test
 ../../../flutter/third_party/boringssl/src/crypto/thread_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/trust_token/trust_token_test.cc
-../../../flutter/third_party/boringssl/src/crypto/x509/tab_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
@@ -3764,10 +3763,12 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.cpu.ctrl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpio/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.hrtimer/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.mailbox/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/meta.json

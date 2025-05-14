@@ -8945,55 +8945,67 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
+  for (final bool announce in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (announce=$announce)', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final TextEditingController controller = _textEditingController();
+      final Key key = UniqueKey();
 
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-            errorText: 'oh no!',
+      await tester.pumpWidget(
+        overlay(
+          child: MediaQuery(
+            data: MediaQueryData(announce: announce),
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'label',
+                hintText: 'hint',
+                errorText: 'oh no!',
+              ),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              label: 'label',
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-              ],
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              children: <TestSemantics>[
-                TestSemantics(label: 'oh no!', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                label: 'label',
+                textDirection: TextDirection.ltr,
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                ],
+                inputType: ui.SemanticsInputType.text,
+                currentValueLength: 0,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    label: 'oh no!',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[if (!announce) SemanticsFlag.isLiveRegion],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+          ignoreRect: true,
+          ignoreId: true,
         ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+      debugDefaultTargetPlatformOverride = null;
+    });
+  }
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
@@ -16237,6 +16249,74 @@ void main() {
 
         expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
         expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets(
+      'iOS system context menu does not hide selection handles on onSystemHide',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(
+                child: TextField(controller: _textEditingController(text: 'one two three')),
+              ),
+            ),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+
+        // Simulate system hiding the menu.
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'ContextMenu.onDismissSystemContextMenu',
+        });
+        Object? error;
+        try {
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            'flutter/platform',
+            messageBytes,
+            (ByteData? data) {},
+          );
+        } catch (e) {
+          error = e;
+        }
+        await tester.pumpAndSettle();
+
+        expect(error, isNull);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Selection handles are not hidden.
+        final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
+            matching: find.byType(CustomPaint),
+          ),
+        );
+        expect(boxes.length, 2);
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),

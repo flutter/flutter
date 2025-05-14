@@ -5,7 +5,6 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -619,7 +618,7 @@ void main() {
                     isModule: false,
                     swiftPackageManagerUsable: false,
                     swiftPackageManagerFeatureEnabled: false,
-                    projectDisabledSwiftPackageManager: false,
+                    projectDisabledSwiftPackageManager: true,
                     projectHasSwiftPackageManagerIntegration: false,
                     pluginCount: 1,
                     swiftPackageCount: 0,
@@ -792,24 +791,15 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
 }
 
-class FakeFlutterManifest extends Fake implements FlutterManifest {
-  FakeFlutterManifest({this.disabledSwiftPackageManager = false});
-
-  @override
-  final bool disabledSwiftPackageManager;
-}
-
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject({
     required this.fileSystem,
     this.usesSwiftPackageManager = false,
     this.isModule = false,
-    FlutterManifest? manifest,
-  }) : _manifest = manifest ?? FakeFlutterManifest();
+  });
 
   final MemoryFileSystem fileSystem;
   final bool usesSwiftPackageManager;
-  final FlutterManifest _manifest;
 
   @override
   late final FakeIosProject ios = FakeIosProject(
@@ -825,9 +815,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   final bool isModule;
-
-  @override
-  FlutterManifest get manifest => _manifest;
 }
 
 class FakeSwiftPackageManager extends Fake implements SwiftPackageManager {
