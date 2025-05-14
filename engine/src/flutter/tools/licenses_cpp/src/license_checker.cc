@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <vector>
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
+#include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
 
@@ -63,6 +64,11 @@ class MMapFile {
     if (fstat(fd, &st) < 0) {
       close(fd);
       return absl::UnavailableError("can't stat file");
+    }
+
+    if (st.st_size <= 0) {
+      close(fd);
+      return absl::InvalidArgumentError("file of zero length");
     }
 
     const char* data = static_cast<const char*>(
@@ -136,10 +142,15 @@ int LicenseChecker::Run(std::string_view working_dir,
     bool did_print_path = false;
     for (const std::string& git_file : git_files.value()) {
       std::filesystem::path full_path = entry / git_file;
+      VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
-        std::cerr << file.status() << std::endl;
-        continue;
+        if (file.status().code() == absl::StatusCode::kInvalidArgument) {
+          continue;
+        } else {
+          std::cerr << full_path << " : " << file.status() << std::endl;
+          return 1;
+        }
       }
       if (!include_filter->Matches(full_path.string())) {
         continue;
