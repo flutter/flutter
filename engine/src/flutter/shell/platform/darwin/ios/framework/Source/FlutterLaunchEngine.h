@@ -23,6 +23,8 @@
 
 /**
  * Accessor for the launch engine.
+ *
+ * Getting this may allocate an engine.
  */
 @property(nonatomic, strong, nullable, readonly) FlutterEngine* engine;
 

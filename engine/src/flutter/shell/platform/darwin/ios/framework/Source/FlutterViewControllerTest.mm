@@ -120,7 +120,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @end
 
 @interface NSObject (Tests)
-@property(nonatomic, strong) FlutterEngine* launchEngine;
+@property(nonatomic, strong) FlutterEngine* mockLaunchEngine;
 @end
 
 @interface FlutterViewController (Tests)
@@ -2478,8 +2478,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testGrabLaunchEngine {
   id appDelegate = [[UIApplication sharedApplication] delegate];
-  XCTAssertTrue([appDelegate respondsToSelector:@selector(setLaunchEngine:)]);
-  [appDelegate setLaunchEngine:self.mockEngine];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
   UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
   XCTAssertTrue(storyboard);
   FlutterViewController* viewController =
@@ -2487,17 +2487,17 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertTrue(viewController);
   XCTAssertTrue([viewController isKindOfClass:[FlutterViewController class]]);
   XCTAssertEqual(viewController.engine, self.mockEngine);
-  [appDelegate setLaunchEngine:nil];
+  [appDelegate setMockLaunchEngine:nil];
 }
 
 - (void)testDoesntGrabLaunchEngine {
   id appDelegate = [[UIApplication sharedApplication] delegate];
-  XCTAssertTrue([appDelegate respondsToSelector:@selector(setLaunchEngine:)]);
-  [appDelegate setLaunchEngine:self.mockEngine];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
   FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
   XCTAssertNotNil(flutterViewController.engine);
   XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
-  [appDelegate setLaunchEngine:nil];
+  [appDelegate setMockLaunchEngine:nil];
 }
 
 @end

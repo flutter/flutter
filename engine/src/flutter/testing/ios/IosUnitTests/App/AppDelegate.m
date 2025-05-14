@@ -31,7 +31,8 @@
 }
 
 - (FlutterEngine*)takeLaunchEngine {
-  return _launchEngine;
+  // This is just served up for tests and doesn't actually take ownership.
+  return _mockLaunchEngine;
 }
 
 @end
