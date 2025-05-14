@@ -15,6 +15,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -427,11 +428,30 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
 - (void)showLookUpViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
-  UIReferenceLibraryViewController* referenceLibraryViewController =
-      [[UIReferenceLibraryViewController alloc] initWithTerm:term];
-  [engineViewController presentViewController:referenceLibraryViewController
-                                     animated:YES
-                                   completion:nil];
+//  UIReferenceLibraryViewController* referenceLibraryViewController =
+//      [[UIReferenceLibraryViewController alloc] initWithTerm:term];
+//  [engineViewController presentViewController:referenceLibraryViewController
+//                                     animated:YES
+//                                   completion:nil];
+  // controller.loadview?
+  // onload? some kind of loading
+  // translateController nil? any of em nil?
+  // view size?
+
+
+  FlutterTranslateController* translateController = [[FlutterTranslateController alloc] init];
+  UIViewController* controller = [translateController swiftUIWrapper];
+  [engineViewController addChildViewController: controller];
+  [engineViewController.view addSubview:controller.view];
+  controller.view.translatesAutoresizingMaskIntoConstraints = NO;
+  [NSLayoutConstraint activateConstraints:@[
+      [controller.view.topAnchor constraintEqualToAnchor:engineViewController.view.safeAreaLayoutGuide.topAnchor],
+      [controller.view.leadingAnchor constraintEqualToAnchor:engineViewController.view.safeAreaLayoutGuide.leadingAnchor],
+      [controller.view.trailingAnchor constraintEqualToAnchor:engineViewController.view.safeAreaLayoutGuide.trailingAnchor],
+      [controller.view.bottomAnchor constraintEqualToAnchor:engineViewController.view.safeAreaLayoutGuide.bottomAnchor]
+  ]];
+
+  [controller didMoveToParentViewController:engineViewController];
 }
 
 - (UITextField*)textField {
