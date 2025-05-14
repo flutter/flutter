@@ -392,6 +392,9 @@ class _PredictiveBackSharedElementPageTransitionState
   // one before commit, and then after commit goes from zero to one again.
   final ProxyAnimation _animation = ProxyAnimation();
 
+  /// The same as widget.animation but with a curve applied.
+  late final CurvedAnimation _curvedAnimation;
+
   late Animation<Offset> _positionAnimation;
 
   Offset _lastDrag = Offset.zero;
@@ -416,10 +419,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   void _updateAnimations(Size screenSize) {
     _animation.parent = switch (widget.phase) {
-      _PredictiveBackPhase.commit => CurvedAnimation(
-        parent: ReverseAnimation(widget.animation),
-        curve: _kCommitInterval,
-      ),
+      _PredictiveBackPhase.commit => ReverseAnimation(_curvedAnimation),
       _ => widget.animation,
     };
 
@@ -427,7 +427,7 @@ class _PredictiveBackSharedElementPageTransitionState
       _PredictiveBackPhase.commit => Tween<double>(
         begin: 0.0,
         end: _lastBounceAnimationValue,
-      ).animate(CurvedAnimation(parent: widget.animation, curve: _kCommitInterval)),
+      ).animate(_curvedAnimation),
       _ => ReverseAnimation(widget.animation),
     };
 
@@ -460,6 +460,12 @@ class _PredictiveBackSharedElementPageTransitionState
   // https://github.com/flutter/flutter/issues/153577
 
   @override
+  void initState() {
+    super.initState();
+    _curvedAnimation = CurvedAnimation(parent: widget.animation, curve: _kCommitInterval);
+  }
+
+  @override
   void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -472,6 +478,12 @@ class _PredictiveBackSharedElementPageTransitionState
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateAnimations(MediaQuery.sizeOf(context));
+  }
+
+  @override
+  void dispose() {
+    _curvedAnimation.dispose();
+    super.dispose();
   }
 
   @override
