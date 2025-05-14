@@ -304,6 +304,9 @@ class SemanticsFlags {
   static const SemanticsFlags kNone = SemanticsFlags();
 
   factory SemanticsFlags.fromBoolList(List<bool> flags) {
+    while (flags.length < 31) {
+      flags.add(false);
+    }
     return SemanticsFlags(
       hasCheckedState: flags[0],
       isChecked: flags[1],
