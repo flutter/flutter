@@ -2467,6 +2467,7 @@ class TextSelectionGestureDetectorBuilder {
             // Precise devices should place the cursor at a precise position if the
             // word at the text position is not misspelled.
             renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+            editableText.hideToolbar();
           case PointerDeviceKind.touch:
           case PointerDeviceKind.unknown:
             // If the word that was tapped is misspelled, select the word and show the spell check suggestions

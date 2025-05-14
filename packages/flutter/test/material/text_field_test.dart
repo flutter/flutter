@@ -15977,6 +15977,56 @@ void main() {
     skip: isContextMenuProvidedByPlatform,
   );
 
+  testWidgets(
+    'Selection handles should not show when using a mouse on Apple platforms using Flutter context menu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
+      await tester.pumpWidget(
+        MaterialApp(home: Material(child: TextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoCupertinoToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset firstBlah = textOffsetToPosition(tester, 5);
+
+      // Click at the end of blah1.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+
+      // Right click the same position to reveal the context menu.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(controller.selection, const TextSelection.collapsed(offset: 5));
+          expectCupertinoToolbarForCollapsedSelection();
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          return;
+      }
+
+      // Press select all.
+      await tester.tap(find.text('Select All'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
   testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
 
