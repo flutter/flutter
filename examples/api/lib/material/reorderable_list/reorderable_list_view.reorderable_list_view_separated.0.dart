@@ -43,7 +43,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
       itemCount: _items.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
-          key: Key('item_$index'), // Changed key to avoid conflict with separator keys
+          key: Key('item_$index'),
           tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
           title: Text('Item ${_items[index]}'),
         );
