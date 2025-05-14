@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import static io.flutter.Build.API_LEVELS;
 
+import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -622,6 +623,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // Suppressing Lint warning for new API, as we are version guarding all calls to newer APIs
   @SuppressLint("NewApi")
   public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
+    Log.e("HI GRAY", "hi gray, making node info for: " + virtualViewId);
     setAccessibleNavigation(true);
     if (virtualViewId >= MIN_ENGINE_GENERATED_NODE_ID) {
       // The node is in the engine generated range, and is provided by the accessibility view
@@ -659,7 +661,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Log.e("HI GRAY", "check if we should handle a pv in AccessiblityBridge");
     if (semanticsNode.platformViewId != -1) {
       Log.e("HI GRAY", "check if we should handle a pv in AccessiblityBridge: we should");
-      if (platformViewsAccessibilityDelegate.usesVirtualDisplay(semanticsNode.platformViewId)) {
+      if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(semanticsNode.platformViewId)) {
+        Log.e("HI GRAY", "modification being done");
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(semanticsNode.platformViewId);
         if (embeddedView == null) {
@@ -995,7 +998,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
-          Log.e("HI GRAY", "adding as a child");
+          Log.e("HI GRAY", "adding as a child with id " + embeddedView.getId());
+          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+          Log.e("HI GRAY", embeddedView.createAccessibilityNodeInfo().toString());
+          Log.e("HI GRAY", "provider for pv is " + embeddedView.getAccessibilityNodeProvider());
+          Log.e("HI GRAY", "while provider for node is " + this);
+          //printAccessibilityNode(embeddedView.createAccessibilityNodeInfo(), 0, embeddedView);
           result.addChild(embeddedView);
           continue;
         }
@@ -1005,6 +1013,57 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addChild(rootAccessibilityView, child.id);
     }
     return result;
+  }
+
+  /**
+   * Recursively prints the contents of the accessibility tree starting from the given node.
+   *
+   * @param node The AccessibilityNodeInfo to start printing from.
+   * @param depth The current depth in the tree (for indentation).
+   */
+  public static void printAccessibilityNode(AccessibilityNodeInfo node, int depth, View view) {
+    if (node == null) {
+      return;
+    }
+
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < depth; i++) {
+      sb.append(" ");
+    }
+
+    // Append basic information about the current node
+    sb.append("Node: ");
+    if (node.getText() != null) {
+      sb.append("Text='").append(node.getText()).append("', ");
+    }
+    if (node.getContentDescription() != null) {
+      sb.append("ContentDescription='").append(node.getContentDescription()).append("', ");
+    }
+    if (node.getClassName() != null) {
+      sb.append("ClassName='").append(node.getClassName()).append("', ");
+    }
+    // Add more properties as needed
+    Rect rect = new Rect();
+    node.getBoundsInScreen(rect);
+    sb.append("BoundsInScreen=").append(rect);
+    sb.append(", Clickable=").append(node.isClickable());
+    sb.append(", Focusable=").append(node.isFocusable());
+    sb.append(", VisibleToUser=").append(node.isVisibleToUser());
+
+
+    Log.d(TAG, sb.toString());
+
+    // Recursively call for children
+    for (int i = 0; i < node.getChildCount(); i++) {
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+            node.setQueryFromAppProcessEnabled(view, true);
+        }
+        AccessibilityNodeInfo child = node.getChild(i);
+      if (child != null) {
+        printAccessibilityNode(child, depth + 1, view);
+        //child.recycle(); // Important: Recycle the child node when done
+      }
+    }
   }
 
   private boolean isImportant(SemanticsNode node) {
