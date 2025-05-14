@@ -972,7 +972,7 @@ class _MaterialAppState extends State<MaterialApp> {
       semanticsLabel: semanticsLabel,
       // This icon is also used for the Cupertino-styled button and for DevTools.
       // It should be updated in all 3 places if changed.
-      icon: CupertinoIcons.cursor_rays,
+      icon: Icons.gps_fixed,
       isDarkTheme: _isDarkTheme(context),
       toggledOn: selectionOnTapEnabled,
     );
