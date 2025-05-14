@@ -115,7 +115,7 @@ int LicenseChecker::Run(std::string_view working_dir,
                         std::string_view data_dir) {
   std::vector<std::filesystem::path> git_repos = GetGitRepos(working_dir);
 
-  RE2 pattern("Copyright");
+  RE2 pattern("(.*Copyright.*)");
 
   for (const std::filesystem::path& entry : git_repos) {
     absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(entry);
