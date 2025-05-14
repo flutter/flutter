@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/parse.h"
 #include "flutter/third_party/abseil-cpp/absl/flags/usage.h"
@@ -16,6 +17,7 @@ ABSL_FLAG(std::optional<std::string>,
           data_dir,
           std::nullopt,
           "[REQUIRED] The directory with the licenses.");
+ABSL_FLAG(int, v, 0, "Set the verbosity of logs.");
 
 int main(int argc, char** argv) {
   absl::SetProgramUsageMessage(
@@ -23,6 +25,7 @@ int main(int argc, char** argv) {
                    " --working_dir=<directory> --data_dir=<directory>"));
 
   std::vector<char*> args = absl::ParseCommandLine(argc, argv);
+  absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_v));
 
   bool run = true;
   if (!absl::GetFlag(FLAGS_working_dir).has_value()) {
