@@ -1352,8 +1352,7 @@ class TextPainter {
     assert(!_rebuildParagraphForPaint);
 
     assert(
-      !debugPaintTextLayoutBoxes ||
-          _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset)
+      !debugPaintTextLayoutBoxes || _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset),
     );
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
   }
@@ -1486,8 +1485,7 @@ class TextPainter {
   // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
   bool get _strutDisabled => switch (strutStyle) {
     null || StrutStyle.disabled => true,
-    StrutStyle(fontSize: 0.0) => true,
-    StrutStyle() => false,
+    StrutStyle(:final double? fontSize) => fontSize == 0.0,
   };
 
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
