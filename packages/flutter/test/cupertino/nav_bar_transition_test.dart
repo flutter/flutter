@@ -40,7 +40,7 @@ Future<void> startTransitionBetween(
       .push(
         CupertinoPageRoute<void>(
           title: fromTitle,
-          builder: (BuildContext context) => scaffoldForNavBar(from)!,
+          builder: (BuildContext context) => scaffoldForNavBar(from),
         ),
       );
 
@@ -52,7 +52,7 @@ Future<void> startTransitionBetween(
       .push(
         CupertinoPageRoute<void>(
           title: toTitle,
-          builder: (BuildContext context) => scaffoldForNavBar(to)!,
+          builder: (BuildContext context) => scaffoldForNavBar(to),
         ),
       );
 
@@ -299,7 +299,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 1',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -312,7 +312,7 @@ void main() {
           CupertinoPageRoute<void>(
             title: 'Page 2',
             fullscreenDialog: true,
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -662,7 +662,7 @@ void main() {
     final RenderAnimatedOpacity userMiddleOpacity =
         tester
             .element(find.byWidget(userMiddle))
-            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     expect(userMiddleOpacity.opacity.value, 1.0);
 
     tester
@@ -670,7 +670,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 2',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -690,7 +690,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 1',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -733,7 +733,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 1',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -866,7 +866,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 3',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 
@@ -907,7 +907,7 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 3',
-            builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            builder: (BuildContext context) => scaffoldForNavBar(null),
           ),
         );
 

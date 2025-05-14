@@ -135,7 +135,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
     Evaluation result = const Evaluation.pass();
     for (final RenderView view in tester.binding.renderViews) {
-      result += _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!);
+      result += _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode);
     }
 
     return result;
@@ -239,7 +239,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
     Evaluation result = const Evaluation.pass();
 
     for (final RenderView view in tester.binding.renderViews) {
-      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
+      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode);
     }
 
     return result;
@@ -316,7 +316,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     Evaluation result = const Evaluation.pass();
     for (final RenderView renderView in tester.binding.renderViews) {
       final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
-      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode;
 
       late ui.Image image;
       final ByteData? byteData = await tester.binding.runAsync<ByteData?>(() async {
@@ -329,7 +329,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return data;
       });
 
-      result += await _evaluateNode(root, tester, image, byteData!, renderView);
+      result += await _evaluateNode(root, tester, image, byteData, renderView);
     }
 
     return result;

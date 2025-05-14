@@ -1591,7 +1591,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       ScaffoldGeometry geometry = listenerState.cache.value;
-      final Rect transitioningFabRect = geometry.floatingActionButtonArea!;
+      final Rect transitioningFabRect = geometry.floatingActionButtonArea;
 
       final double transitioningRotation =
           tester.widget<RotationTransition>(find.byType(RotationTransition)).turns.value;
@@ -3505,7 +3505,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
 
     geometryListenable?.removeListener(onGeometryChanged);
     geometryListenable = newListenable..addListener(onGeometryChanged);
-    cache = _GeometryCachePainter(geometryListenable!);
+    cache = _GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {

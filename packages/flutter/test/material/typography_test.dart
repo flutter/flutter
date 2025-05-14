@@ -126,7 +126,7 @@ void main() {
     final List<String> nonDefaultPropertyNames =
         builder.properties
             .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.name!)
+            .map((DiagnosticsNode node) => node.name)
             .toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);

@@ -1485,7 +1485,7 @@ void main() {
 
       await tester.pumpWidget(buildNavigationBar());
       Icon icon = tester.widget<Icon>(find.byType(Icon).last);
-      final Color initialColor = icon.color!;
+      final Color initialColor = icon.color;
 
       // Trigger a rebuild.
       await tester.tap(find.text('Alarm'));
@@ -1650,5 +1650,5 @@ TextStyle _getLabelStyle(WidgetTester tester, String text) {
   return tester
       .widget<RichText>(find.descendant(of: find.text(text), matching: find.byType(RichText)))
       .text
-      .style!;
+      .style;
 }

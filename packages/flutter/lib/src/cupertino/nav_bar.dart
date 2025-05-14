@@ -937,7 +937,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@end-tool}
   const CupertinoSliverNavigationBar.search({
     super.key,
-    required Widget this.searchField,
+    required this.searchField,
     this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
@@ -1127,7 +1127,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     _setupSearchableAnimation();
     if (widget._searchable) {
       assert(widget.searchField != null);
-      preferredSizeSearchField = _NavigationBarSearchField(searchField: widget.searchField!);
+      preferredSizeSearchField = _NavigationBarSearchField(searchField: widget.searchField);
     }
   }
 
@@ -2467,7 +2467,7 @@ class _NavigationBarTransition extends StatelessWidget {
           return _wrapWithBackground(
             // Don't update the system status bar color mid-flight.
             updateSystemUiOverlay: false,
-            backgroundColor: backgroundTween.evaluate(animation)!,
+            backgroundColor: backgroundTween.evaluate(animation),
             border: borderTween.evaluate(animation),
             child: SizedBox(height: heightTween.evaluate(animation), width: double.infinity),
           );
@@ -2496,7 +2496,7 @@ class _NavigationBarTransition extends StatelessWidget {
     // avoid odd transitions between pages.
     return MediaQuery.withNoTextScaling(
       child: SizedBox(
-        height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
+        height: math.max(heightTween.begin, heightTween.end) + MediaQuery.paddingOf(context).top,
         width: double.infinity,
         child: Stack(children: children),
       ),

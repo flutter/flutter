@@ -405,7 +405,7 @@ class _HeroState extends State<Hero> {
     final bool showPlaceholder = _placeholderSize != null;
 
     if (showPlaceholder && widget.placeholderBuilder != null) {
-      return widget.placeholderBuilder!(context, _placeholderSize!, widget.child);
+      return widget.placeholderBuilder!(context, _placeholderSize, widget.child);
     }
 
     if (showPlaceholder && !_shouldIncludeChild) {
@@ -566,7 +566,7 @@ class _HeroFlight {
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
-        final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
+        final Rect rect = heroRectTween.evaluate(_proxyAnimation);
         final RelativeRect offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
         return Positioned(
           top: offsets.top,
@@ -912,8 +912,8 @@ class HeroController extends NavigatorObserver {
         fromRoute is! PageRoute<dynamic>) {
       return;
     }
-    final Animation<double> newRouteAnimation = toRoute.animation!;
-    final Animation<double> oldRouteAnimation = fromRoute.animation!;
+    final Animation<double> newRouteAnimation = toRoute.animation;
+    final Animation<double> oldRouteAnimation = fromRoute.animation;
     final HeroFlightDirection flightType;
     switch ((isUserGestureTransition, oldRouteAnimation.status, newRouteAnimation.status)) {
       case (true, _, _):

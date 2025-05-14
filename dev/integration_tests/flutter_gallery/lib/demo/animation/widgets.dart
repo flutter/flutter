@@ -21,7 +21,7 @@ class SectionCard extends StatelessWidget {
       button: true,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: <Color>[section.leftColor!, section.rightColor!]),
+          gradient: LinearGradient(colors: <Color>[section.leftColor, section.rightColor]),
         ),
         child: Image.asset(
           section.backgroundAsset!,

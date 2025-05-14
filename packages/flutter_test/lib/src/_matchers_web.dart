@@ -62,7 +62,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    final ui.FlutterView view = binding.platformDispatcher.implicitView!;
+    final ui.FlutterView view = binding.platformDispatcher.implicitView;
     final RenderView renderView = binding.renderViews.firstWhere(
       (RenderView r) => r.flutterView == view,
     );
@@ -72,9 +72,9 @@ class MatchesGoldenFile extends AsyncMatcher {
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
       return binding.runAsync<String?>(() async {
         assert(element.renderObject != null);
-        RenderObject renderObject = element.renderObject!;
+        RenderObject renderObject = element.renderObject;
         while (!renderObject.isRepaintBoundary) {
-          renderObject = renderObject.parent!;
+          renderObject = renderObject.parent;
         }
         assert(!renderObject.debugNeedsPaint);
         final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
@@ -133,16 +133,16 @@ class MatchesGoldenFile extends AsyncMatcher {
 
 RenderObject _findRepaintBoundary(Element element) {
   assert(element.renderObject != null);
-  RenderObject renderObject = element.renderObject!;
+  RenderObject renderObject = element.renderObject;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent!;
+    renderObject = renderObject.parent;
   }
   return renderObject;
 }
 
 void _renderElement(ui.FlutterView window, RenderObject renderObject) {
   assert(renderObject.debugLayer != null);
-  final Layer layer = renderObject.debugLayer!;
+  final Layer layer = renderObject.debugLayer;
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
   if (layer is OffsetLayer) {
     sceneBuilder.pushOffset(-layer.offset.dx, -layer.offset.dy);

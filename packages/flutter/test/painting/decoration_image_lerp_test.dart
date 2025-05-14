@@ -338,7 +338,7 @@ void main() {
         final ui.Image image =
             (await tester.binding.runAsync<ui.Image>(
               () => captureImage(find.byType(Wrap).evaluate().single),
-            ))!;
+            ));
         addTearDown(() => image.dispose());
         final Uint8List bytes =
             (await tester.binding.runAsync<ByteData?>(
@@ -843,7 +843,7 @@ void main() {
         final ui.Image image =
             (await tester.binding.runAsync<ui.Image>(
               () => captureImage(find.byType(Wrap).evaluate().single),
-            ))!;
+            ));
         addTearDown(() => image.dispose());
         final Uint8List bytes =
             (await tester.binding.runAsync<ByteData?>(

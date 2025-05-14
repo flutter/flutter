@@ -1726,7 +1726,7 @@ class SelectionOverlay {
             lineHeightAtStart,
             midpoint,
             selectionEndpoints,
-            selectionDelegate!,
+            selectionDelegate,
             clipboardStatus,
             toolbarLocation,
           );
@@ -2177,7 +2177,7 @@ class TextSelectionGestureDetectorBuilder {
     assert(renderEditable.selection?.baseOffset != null);
 
     final TextPosition tappedPosition = renderEditable.getPositionForPoint(offset);
-    final TextSelection selection = renderEditable.selection!;
+    final TextSelection selection = renderEditable.selection;
     final TextSelection nextSelection = selection.copyWith(extentOffset: tappedPosition.offset);
 
     editableText.userUpdateTextEditingValue(

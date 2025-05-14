@@ -1166,7 +1166,7 @@ class DataTable extends StatelessWidget {
         end: paddingEnd,
       );
       if (column.columnWidth != null) {
-        tableColumns[displayColumnIndex] = column.columnWidth!;
+        tableColumns[displayColumnIndex] = column.columnWidth;
       } else if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
       } else {

@@ -166,7 +166,7 @@ mixin RenderInlineChildrenContainerDefaults
             ui.PlaceholderAlignment.baseline => getBaseline(
               child,
               childConstraints,
-              span.baseline!,
+              span.baseline,
             ),
           },
         );
@@ -1358,7 +1358,7 @@ class RenderParagraph extends RenderBox
         }
         final SemanticsNode newChild;
         if (_cachedChildNodes?.isNotEmpty ?? false) {
-          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
+          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first);
         } else {
           final UniqueKey key = UniqueKey();
           newChild = SemanticsNode(key: key, showOnScreen: _createShowOnScreenFor(key));
@@ -1380,7 +1380,7 @@ class RenderParagraph extends RenderBox
 
   VoidCallback? _createShowOnScreenFor(Key key) {
     return () {
-      final SemanticsNode node = _cachedChildNodes![key]!;
+      final SemanticsNode node = _cachedChildNodes![key];
       showOnScreen(descendant: this, rect: node.rect);
     };
   }
@@ -3421,12 +3421,12 @@ class _SelectableFragment
     // Normalize current selection.
     late TextPosition currentStart;
     late TextPosition currentEnd;
-    if (_compareTextPositions(_textSelectionStart!, _textSelectionEnd!) > 0) {
-      currentStart = _textSelectionStart!;
-      currentEnd = _textSelectionEnd!;
+    if (_compareTextPositions(_textSelectionStart, _textSelectionEnd) > 0) {
+      currentStart = _textSelectionStart;
+      currentEnd = _textSelectionEnd;
     } else {
-      currentStart = _textSelectionEnd!;
-      currentEnd = _textSelectionStart!;
+      currentStart = _textSelectionEnd;
+      currentEnd = _textSelectionStart;
     }
     return _compareTextPositions(currentStart, position) >= 0 &&
         _compareTextPositions(currentEnd, position) <= 0;
@@ -3542,7 +3542,7 @@ class _SelectableFragment
       final Paint selectionPaint =
           Paint()
             ..style = PaintingStyle.fill
-            ..color = paragraph.selectionColor!;
+            ..color = paragraph.selectionColor;
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }

@@ -1805,8 +1805,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _endSemanticsNode!.updateWith(config: endSemanticsConfiguration);
 
     final List<SemanticsNode> finalChildren = <SemanticsNode>[
-      _startSemanticsNode!,
-      _endSemanticsNode!,
+      _startSemanticsNode,
+      _endSemanticsNode,
     ];
 
     node.updateWith(config: config, childrenInInversePaintOrder: finalChildren);

@@ -403,7 +403,7 @@ void _defineTests() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
 
     // Do the actions work?
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
       switch (action) {
@@ -695,7 +695,7 @@ class _DiffTester {
     await tester.pumpWidget(CustomPaint(painter: _SemanticsDiffTest(from)));
     expect(semanticsTester, hasSemantics(createExpectations(from), ignoreId: true));
 
-    SemanticsNode root = RendererBinding.instance.renderView.debugSemantics!;
+    SemanticsNode root = RendererBinding.instance.renderView.debugSemantics;
     final Map<Key, int> idAssignments = <Key, int>{};
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
@@ -711,7 +711,7 @@ class _DiffTester {
     await tester.pumpAndSettle();
     expect(semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
 
-    root = RendererBinding.instance.renderView.debugSemantics!;
+    root = RendererBinding.instance.renderView.debugSemantics;
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {

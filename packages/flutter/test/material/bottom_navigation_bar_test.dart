@@ -111,9 +111,9 @@ void main() {
     const double selectedFontSize = 14.0;
     const double unselectedFontSize = 12.0;
     final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
     final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.color, equals(primaryColor));
@@ -176,9 +176,9 @@ void main() {
     const double selectedFontSize = 14.0;
     const double unselectedFontSize = 12.0;
     final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
     final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.color, equals(primaryColor));
@@ -237,9 +237,9 @@ void main() {
     );
 
     final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
     final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
     expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(selectedFontStyle.fontWeight, equals(selectedTextStyle.fontWeight));
     expect(
@@ -280,7 +280,7 @@ void main() {
     );
 
     final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
     expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(
       tester
@@ -349,9 +349,9 @@ void main() {
     );
 
     final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
     final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedIcon.color, equals(selectedIconTheme.color));
@@ -2679,7 +2679,7 @@ void main() {
     final double navigationTileVerticalOffset =
         (kBottomNavigationBarHeight - navigationTileHeight) / 2;
 
-    final double iconTop =
+    const double iconTop =
         navigationBarTop + navigationTileVerticalOffset + navigationTileVerticalPadding;
     final double labelBottom = 600 - (navigationTileVerticalOffset + navigationTileVerticalPadding);
 
@@ -2820,7 +2820,7 @@ void main() {
     final double navigationTileVerticalOffset =
         (kBottomNavigationBarHeight - navigationTileHeight) / 2;
 
-    final double iconTop =
+    const double iconTop =
         navigationBarTop + navigationTileVerticalOffset + navigationTileVerticalPadding;
     final double labelBottom = 600 - (navigationTileVerticalOffset + navigationTileVerticalPadding);
 
@@ -2961,7 +2961,7 @@ void main() {
     final double navigationTileVerticalOffset =
         (kBottomNavigationBarHeight - navigationTileHeight) / 2;
 
-    final double iconTop =
+    const double iconTop =
         navigationBarTop + navigationTileVerticalOffset + navigationTileVerticalPadding;
     final double labelBottom = 600 - (navigationTileVerticalOffset + navigationTileVerticalPadding);
 
@@ -3119,7 +3119,7 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );
-  return iconRichText.text.style!;
+  return iconRichText.text.style;
 }
 
 EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {

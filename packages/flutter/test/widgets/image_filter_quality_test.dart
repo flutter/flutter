@@ -127,7 +127,7 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
       (await tester.runAsync(() async {
         final ui.Codec codec = await ui.instantiateImageCodec(test3x3Image);
         return (await codec.getNextFrame()).image;
-      }))!;
+      }));
   addTearDown(image.dispose);
   expect(image.width, 3);
   expect(image.height, 3);

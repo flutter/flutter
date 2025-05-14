@@ -1248,7 +1248,7 @@ void main() {
     late FlutterError error;
     try {
       tester.binding.buildOwner!.scheduleBuildFor(
-        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, Container()),
+        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner, Container()),
       );
     } on FlutterError catch (e) {
       error = e;
@@ -1448,7 +1448,7 @@ void main() {
         return ValueListenableBuilder<int>(
           valueListenable: notifier,
           builder: (BuildContext context, int? value, Widget? child) {
-            return Inherited(value, child: child!);
+            return Inherited(value, child: child);
           },
           child: RenderObjectWidgetSpy(
             onCreateRenderObject: (BuildContext context) {
@@ -1708,7 +1708,7 @@ void main() {
       return _InheritedElementSpy(
         widget,
         onRemoveDependent: (Element dependent) {
-          removedDependentWidgetKeys.add(dependent.widget.key!);
+          removedDependentWidgetKeys.add(dependent.widget.key);
         },
       );
     }

@@ -357,8 +357,8 @@ class _RenderSnapshotWidget extends RenderProxyBox {
         context,
         offset,
         size,
-        _childRaster!,
-        _childRasterSize!,
+        _childRaster,
+        _childRasterSize,
         devicePixelRatio,
       );
     }

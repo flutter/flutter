@@ -231,7 +231,7 @@ class _SelectionContainerState extends State<SelectionContainer>
     if (widget._disabled) {
       return SelectionRegistrarScope._disabled(child: widget.child);
     }
-    return SelectionRegistrarScope(registrar: widget.delegate!, child: widget.child);
+    return SelectionRegistrarScope(registrar: widget.delegate, child: widget.child);
   }
 }
 
@@ -248,7 +248,7 @@ class SelectionRegistrarScope extends InheritedWidget {
   /// Creates a selection registrar scope that host the [registrar].
   const SelectionRegistrarScope({
     super.key,
-    required SelectionRegistrar this.registrar,
+    required this.registrar,
     required super.child,
   });
 

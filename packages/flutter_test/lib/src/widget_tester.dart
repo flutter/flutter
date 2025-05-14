@@ -888,7 +888,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           binding.renderViews.contains(innerTarget)
               ? null
               : _lastWhereOrNull(
-                collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
+                collectAllElementsFrom(binding.rootElement, skipOffstage: true),
                 (Element element) => element.renderObject == innerTarget,
               );
       if (innerTargetElement == null) {

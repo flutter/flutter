@@ -740,11 +740,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         }
 
         final Color focusedForegroundColor =
-            resolveFocusedColor(effectiveForegroundColor ?? defaultStyle.foregroundColor!)!;
+            resolveFocusedColor(effectiveForegroundColor ?? defaultStyle.foregroundColor!);
         final Color focusedIconColor =
-            resolveFocusedColor(effectiveIconColor ?? defaultStyle.iconColor!)!;
+            resolveFocusedColor(effectiveIconColor ?? defaultStyle.iconColor!);
         final Color focusedOverlayColor =
-            resolveFocusedColor(effectiveOverlayColor ?? defaultStyle.overlayColor!)!;
+            resolveFocusedColor(effectiveOverlayColor ?? defaultStyle.overlayColor!);
         // For the background color we can't rely on the default style which is transparent.
         // Defaults to onSurface.withOpacity(0.12).
         final Color focusedBackgroundColor =
@@ -900,7 +900,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (_enableFilter) {
       filteredEntries =
           widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text) ??
-          filter(widget.dropdownMenuEntries, _localTextEditingController!);
+          filter(widget.dropdownMenuEntries, _localTextEditingController);
     } else {
       filteredEntries = widget.dropdownMenuEntries;
     }
@@ -915,7 +915,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       } else {
         final bool shouldUpdateCurrentHighlight = _shouldUpdateCurrentHighlight(filteredEntries);
         if (shouldUpdateCurrentHighlight) {
-          currentHighlight = search(filteredEntries, _localTextEditingController!);
+          currentHighlight = search(filteredEntries, _localTextEditingController);
         }
       }
       if (currentHighlight != null) {

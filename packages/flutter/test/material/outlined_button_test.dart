@@ -14,7 +14,7 @@ void main() {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
     );
-    return iconRichText.text.style!;
+    return iconRichText.text.style;
   }
 
   testWidgets('OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
@@ -583,9 +583,9 @@ void main() {
           MaterialState.focused,
         };
         if (states.any(interactiveStates.contains)) {
-          return Colors.blue[900]!;
+          return Colors.blue[900];
         }
-        return Colors.blue[800]!;
+        return Colors.blue[800];
       }
 
       await tester.pumpWidget(
@@ -685,7 +685,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('OutlinedButton')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('OutlinedButton')).text.style!.color;
     }
 
     // Default, not disabled.
@@ -1567,7 +1567,7 @@ void main() {
             final Rect labelBounds = globalBounds(labelRenderBox);
             final RenderBox? iconRenderBox =
                 icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
-            final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
+            final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox);
             final Rect childBounds =
                 icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
 
@@ -2405,7 +2405,7 @@ void main() {
                     Widget? child,
                   ) {
                     backgroundStates = states;
-                    return child!;
+                    return child;
                   },
                   foregroundBuilder: (
                     BuildContext context,
@@ -2413,7 +2413,7 @@ void main() {
                     Widget? child,
                   ) {
                     foregroundStates = states;
-                    return child!;
+                    return child;
                   },
                 ),
                 onPressed: () {},

@@ -1105,7 +1105,7 @@ class _DayState extends State<_Day> {
           effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
     );
     final OutlinedBorder dayShape =
-        resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states)!;
+        resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states);
     final ShapeDecoration decoration =
         widget.isToday
             ? ShapeDecoration(

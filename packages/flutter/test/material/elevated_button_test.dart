@@ -14,7 +14,7 @@ void main() {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
     );
-    return iconRichText.text.style!;
+    return iconRichText.text.style;
   }
 
   testWidgets('ElevatedButton, ElevatedButton.icon defaults', (WidgetTester tester) async {
@@ -481,7 +481,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('ElevatedButton')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('ElevatedButton')).text.style!.color;
     }
 
     // Default, not disabled.
@@ -1322,7 +1322,7 @@ void main() {
             final Rect labelBounds = globalBounds(labelRenderBox);
             final RenderBox? iconRenderBox =
                 icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
-            final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
+            final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox);
             final Rect childBounds =
                 icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
 
@@ -1483,7 +1483,7 @@ void main() {
     // This is a regression test for https://github.com/flutter/flutter/issues/387
 
     const ColorScheme colorScheme = ColorScheme.light();
-    final Color backgroundColor = colorScheme.primary;
+    const Color backgroundColor = colorScheme.primary;
     final Color disabledBackgroundColor = colorScheme.onSurface.withOpacity(0.12);
 
     Widget buildFrame({required bool enabled}) {
@@ -2262,7 +2262,7 @@ void main() {
                     Widget? child,
                   ) {
                     backgroundStates = states;
-                    return child!;
+                    return child;
                   },
                   foregroundBuilder: (
                     BuildContext context,
@@ -2270,7 +2270,7 @@ void main() {
                     Widget? child,
                   ) {
                     foregroundStates = states;
-                    return child!;
+                    return child;
                   },
                 ),
                 onPressed: () {},

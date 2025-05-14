@@ -758,7 +758,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
         (widget.onWillAcceptWithDetails != null &&
             avatar.data != null &&
             widget.onWillAcceptWithDetails!(
-              DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!),
+              DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset),
             ));
     if (resolvedWillAccept) {
       setState(() {
@@ -796,7 +796,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (avatar.data != null) {
       widget.onAccept?.call(avatar.data! as T);
       widget.onAcceptWithDetails?.call(
-        DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!),
+        DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset),
       );
     }
   }
@@ -805,7 +805,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted || avatar.data == null) {
       return;
     }
-    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset));
   }
 
   @override
@@ -978,7 +978,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _entry!.dispose();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
-    onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
+    onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset, wasAccepted);
   }
 
   Widget _build(BuildContext context) {

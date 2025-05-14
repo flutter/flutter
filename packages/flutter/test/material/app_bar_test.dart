@@ -1692,7 +1692,7 @@ void main() {
     );
 
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('title')).text.style!.color;
     }
 
     Color? leadingIconColor() => _iconStyle(tester, Icons.add_circle)?.color;

@@ -818,7 +818,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       if (_pendingExceptionDetails != null) {
         debugPrint =
             debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
-        reportTestException(_pendingExceptionDetails!, testDescription);
+        reportTestException(_pendingExceptionDetails, testDescription);
         _pendingExceptionDetails = null;
       }
       if (!completer.isCompleted) {
