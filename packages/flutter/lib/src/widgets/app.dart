@@ -12,6 +12,8 @@ library;
 
 import 'dart:collection' show HashMap;
 
+// ignore: unused_import, required for the Widget Inspector's on-device button.
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
