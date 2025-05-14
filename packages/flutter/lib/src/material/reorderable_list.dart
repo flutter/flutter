@@ -7,8 +7,8 @@
 /// @docImport 'card.dart';
 library;
 
-import 'dart:ui' show lerpDouble;
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -247,7 +247,7 @@ class ReorderableListView extends StatefulWidget {
     this.dragBoundaryProvider,
     this.mouseCursor,
   }) : assert(itemCount >= 0),
-       this.itemBuilder = ((BuildContext context, int index) {
+       itemBuilder = ((BuildContext context, int index) {
          final int itemIndex = index ~/ 2;
          if (index.isEven) {
            // It's an item
@@ -257,7 +257,7 @@ class ReorderableListView extends StatefulWidget {
            return separatorBuilder(context, itemIndex);
          }
        }),
-       this.itemCount = _computeActualChildCount(itemCount),
+       itemCount = _computeActualChildCount(itemCount),
        itemExtent = null,
        itemExtentBuilder = null,
        prototypeItem = null;
@@ -619,7 +619,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
               _dragging.value = false;
               if (widget.separatorBuilder != null) {
                 // combinedIndex is the final index of the dragged item. It must be an item.
-                assert(combinedIndex.isEven, 'onReorderEnd should only be called for items.');
                 widget.onReorderEnd?.call(combinedIndex ~/ 2);
               } else {
                 widget.onReorderEnd?.call(combinedIndex);
