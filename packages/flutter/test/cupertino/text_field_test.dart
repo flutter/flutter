@@ -8726,18 +8726,8 @@ void main() {
       // Right click the same position to reveal the context menu.
       await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       await tester.pumpAndSettle();
-
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          expect(controller.selection, const TextSelection.collapsed(offset: 5));
-          expectCupertinoToolbarForCollapsedSelection();
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          return;
-      }
+      expect(controller.selection, const TextSelection.collapsed(offset: 5));
+      expectCupertinoToolbarForCollapsedSelection();
 
       // Press select all.
       await tester.tap(find.text('Select All'), kind: PointerDeviceKind.mouse);
