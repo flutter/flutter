@@ -393,7 +393,10 @@ class _PredictiveBackSharedElementPageTransitionState
   final ProxyAnimation _animation = ProxyAnimation();
 
   /// The same as widget.animation but with a curve applied.
-  late final CurvedAnimation _curvedAnimation;
+  CurvedAnimation? _curvedAnimation;
+
+  /// The reverse of _curvedAnimation.
+  CurvedAnimation? _curvedAnimationReversed;
 
   late Animation<Offset> _positionAnimation;
 
@@ -419,7 +422,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   void _updateAnimations(Size screenSize) {
     _animation.parent = switch (widget.phase) {
-      _PredictiveBackPhase.commit => ReverseAnimation(_curvedAnimation),
+      _PredictiveBackPhase.commit => _curvedAnimationReversed,
       _ => widget.animation,
     };
 
@@ -427,7 +430,7 @@ class _PredictiveBackSharedElementPageTransitionState
       _PredictiveBackPhase.commit => Tween<double>(
         begin: 0.0,
         end: _lastBounceAnimationValue,
-      ).animate(_curvedAnimation),
+      ).animate(_curvedAnimation!),
       _ => ReverseAnimation(widget.animation),
     };
 
@@ -443,16 +446,26 @@ class _PredictiveBackSharedElementPageTransitionState
         end: Offset(screenSize.height * _kYPositionFactor, 0.0),
       ),
       _ => Tween<Offset>(
+        // The y position before commit is given by the vertical drag, not by an
+        // animation.
         begin: switch (widget.currentBackEvent?.swipeEdge) {
           SwipeEdge.left => Offset(xShift, _getYShiftPosition(screenSize.height)),
           SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
           null => Offset(xShift, _getYShiftPosition(screenSize.height)),
         },
-        // The y position before commit is given by the vertical drag, not by an
-        // animation.
         end: Offset.zero,
       ),
     });
+  }
+
+  void _updateCurvedAnimations() {
+    _curvedAnimation?.dispose();
+    _curvedAnimationReversed?.dispose();
+    _curvedAnimation = CurvedAnimation(parent: widget.animation, curve: _kCommitInterval);
+    _curvedAnimationReversed = CurvedAnimation(
+      parent: ReverseAnimation(widget.animation),
+      curve: _kCommitInterval,
+    );
   }
 
   // TODO(justinmc): Should have a delegatedTransition to animate the incoming
@@ -462,13 +475,15 @@ class _PredictiveBackSharedElementPageTransitionState
   @override
   void initState() {
     super.initState();
-    _curvedAnimation = CurvedAnimation(parent: widget.animation, curve: _kCommitInterval);
   }
 
   @override
   void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (widget.animation != oldWidget.animation) {
+      _updateCurvedAnimations();
+    }
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       _updateAnimations(MediaQuery.sizeOf(context));
     }
@@ -477,12 +492,14 @@ class _PredictiveBackSharedElementPageTransitionState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _updateCurvedAnimations();
     _updateAnimations(MediaQuery.sizeOf(context));
   }
 
   @override
   void dispose() {
-    _curvedAnimation.dispose();
+    _curvedAnimation!.dispose();
+    _curvedAnimationReversed!.dispose();
     super.dispose();
   }
 
