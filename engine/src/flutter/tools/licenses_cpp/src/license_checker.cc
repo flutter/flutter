@@ -11,6 +11,7 @@
 #include <vector>
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
+#include "flutter/tools/licenses_cpp/src/filter.h"
 
 namespace {
 std::vector<std::filesystem::path> GetGitRepos(std::string_view dir) {
@@ -113,6 +114,15 @@ class MMapFile {
 
 int LicenseChecker::Run(std::string_view working_dir,
                         std::string_view data_dir) {
+  std::filesystem::path include_path =
+      std::filesystem::path(data_dir) / "include.txt";
+  absl::StatusOr<Filter> include_filter = Filter::Open(include_path.string());
+  if (!include_filter.ok()) {
+    std::cerr << "Can't open include.txt at " << include_path << ": "
+              << include_filter.status() << std::endl;
+    return 1;
+  }
+
   std::vector<std::filesystem::path> git_repos = GetGitRepos(working_dir);
 
   RE2 pattern("(.*Copyright.*)");
@@ -129,6 +139,9 @@ int LicenseChecker::Run(std::string_view working_dir,
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
         std::cerr << file.status() << std::endl;
+        continue;
+      }
+      if (!include_filter->Matches(full_path.string())) {
         continue;
       }
       re2::StringPiece input(file->GetData(), file->GetSize());
