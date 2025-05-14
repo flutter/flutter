@@ -62,13 +62,10 @@ class TextWrapper {
     // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
     _top = 0.0;
-    startNewLine(_layout.isDefaultLtr ? 0 : _layout.textClusters.length - 1 - 1, 0.0);
+    startNewLine(0, 0.0);
 
     bool hardLineBreak = false;
-    final int firstClusterIndex = _layout.isDefaultLtr ? 0 : _layout.textClusters.length - 1;
-    final int lastClusterIndex = _layout.isDefaultLtr ? _layout.textClusters.length - 1 : -1;
-    final int step = _layout.isDefaultLtr ? 1 : -1;
-    for (int index = firstClusterIndex; index != lastClusterIndex; index += step) {
+    for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
       // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
       double widthCluster = cluster.advance.width;
@@ -78,7 +75,7 @@ class TextWrapper {
         'Wrapping1: '
         '$_widthText ${ClusterRange(start: _startLine, end: _whitespaces.start)} '
         '$_widthWhitespaces ${ClusterRange(start: _whitespaces.start, end: _whitespaces.end)} '
-        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + step)}',
+        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + 1)}',
       );
 
       if (hardLineBreak) {
@@ -132,7 +129,7 @@ class TextWrapper {
           _widthWhitespaces = 0.0;
         }
         // Add the cluster to the current whitespace sequence (empty or not)
-        _whitespaces.end = index + step;
+        _whitespaces.end = index + 1;
         _widthWhitespaces += widthCluster;
         continue;
       }
@@ -167,8 +164,8 @@ class TextWrapper {
                 _widthLetters == 0.0,
           );
           _widthText = widthCluster;
-          _whitespaces.start = index + step;
-          _whitespaces.end = index + step;
+          _whitespaces.start = index + 1;
+          _whitespaces.end = index + 1;
           widthCluster = 0.0; // Since we already processed this cluster
         }
 
@@ -190,17 +187,20 @@ class TextWrapper {
         'Wrapping2: '
         '$_widthText ${ClusterRange(start: _startLine, end: _whitespaces.start)} '
         '$_widthWhitespaces ${ClusterRange(start: _whitespaces.start, end: _whitespaces.end)} '
-        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + step)}',
+        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + 1)}',
       );
       // This is just a regular cluster, keep track of it
       _widthLetters += widthCluster;
     }
 
     // Assume a soft line break at the end of the text
-    if (_whitespaces.end != lastClusterIndex) {
+    if (_whitespaces.end != _layout.textClusters.length - 1) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange(start: lastClusterIndex, end: lastClusterIndex);
+      _whitespaces = ClusterRange(
+        start: _layout.textClusters.length - 1,
+        end: _layout.textClusters.length - 1,
+      );
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }

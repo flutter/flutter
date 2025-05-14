@@ -136,7 +136,7 @@ Future<void> testMain() async {
 
     builder.addText('لABC لم def لل لم ghi');
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 450));
+    paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_ltr.png', region: region);
@@ -155,8 +155,9 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
 
     builder.addText('لABC لم def لل لم ghi');
+    //لABC لم def لل لم ghi
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 450));
+    paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_rtl.png', region: region);

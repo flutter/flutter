@@ -118,9 +118,6 @@ class TextLayout {
           rects.first.width,
           rects.first.height,
         );
-        for (int i = cluster.begin; i < cluster.end; i += 1) {
-          textToClusterMap[i + styledBlock.textRange.start] = textClusters.length;
-        }
         textClusters.add(
           ExtendedTextCluster(
             cluster,
@@ -138,6 +135,15 @@ class TextLayout {
       }
       blockStart += blockTextMetrics.width!;
     }
+
+    textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
+    for (int i = 0; i < textClusters.length; ++i) {
+      final ExtendedTextCluster textCluster = textClusters[i];
+      for (int j = textCluster.start; j < textCluster.end; j += 1) {
+        textToClusterMap[j] = i;
+      }
+    }
+
     textToClusterMap[paragraph.text!.length] = textClusters.length;
     textClusters.add(ExtendedTextCluster.empty());
 
@@ -222,20 +228,23 @@ class TextLayout {
     return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
   }
 
+  ClusterRange mergeSequentialClusterRanges(ClusterRange a, ClusterRange b) {
+    assert(a.end == b.start || b.end == a.start);
+    return ClusterRange(start: math.min(a.start, b.start), end: math.max(a.end, b.end));
+  }
+
   String text(ClusterRange r) {
     return paragraph.text!.substring(r.start, r.end);
   }
 
   double addLine(
-    ClusterRange textRange0,
+    ClusterRange textRange,
     double textWidth,
-    ClusterRange whitespaces0,
+    ClusterRange whitespaces,
     double whitespacesWidth,
     bool hardLineBreak,
     double top,
   ) {
-    final ClusterRange textRange = textRange0.normalize(isDefaultLtr);
-    final ClusterRange whitespaces = whitespaces0.normalize(isDefaultLtr);
     // Arrange line vertically, calculate metrics and bounds
     final TextLine line = TextLine(
       this,
@@ -280,13 +289,12 @@ class TextLayout {
     double shiftInsideLine = 0.0;
     for (final BidiIndex visual in visuals) {
       final BidiRun bidiRun = bidiRuns[visual.index + firstRunIndex];
-      // TODO(jlavrova): notice, that we lose trailing space right here and now. Is it right? Need a confirmation...
       final ClusterRange lineRunClusterRange = intersectClusterRange(
         bidiRun.clusterRange,
-        textRange,
+        mergeSequentialClusterRanges(textRange, whitespaces),
       );
       WebParagraphDebug.log(
-        'Intersect [${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) & [${textRange.start}:${textRange.end}) = [${lineRunClusterRange.start}:${lineRunClusterRange.end})',
+        'Intersect ${bidiRun.clusterRange} & ($textRange U $whitespaces) = $lineRunClusterRange',
       );
       final String lineRunText = getTextFromMonodirectionalClusterRange(lineRunClusterRange);
       final DomTextMetrics lineRunTextMetrics = layoutContext.measureText(lineRunText);
