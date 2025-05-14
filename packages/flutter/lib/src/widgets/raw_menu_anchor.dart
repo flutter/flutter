@@ -293,7 +293,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 
   /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
   ///
-  /// If an overridding widget does not provide a [MenuController], then
+  /// If an overriding widget does not provide a [MenuController], then
   /// [_RawMenuAnchorBaseMixin] will create and manage its own.
   MenuController get menuController;
 

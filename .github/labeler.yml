@@ -201,14 +201,10 @@ platform-windows:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
-
-team:
+'c: contributor-productivity':
   - changed-files:
     - any-glob-to-any-file:
-      - docs/about/**/*
       - docs/contributing/**/*
-      - docs/postmortems/**/*
-
 team-android:
   - changed-files:
     - any-glob-to-any-file:

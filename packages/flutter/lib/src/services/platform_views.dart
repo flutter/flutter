@@ -128,9 +128,9 @@ class PlatformViewsService {
   /// null.
   /// {@endtemplate}
   ///
-  /// This attempts to use the newest and most efficient platform view
-  /// implementation when possible. In cases where that is not supported, it
-  /// falls back to using Virtual Display.
+  /// This attempts to use the TLHC implementation when possible.
+  /// In cases where that is not supported, it falls back to using
+  /// Virtual Display.
   static AndroidViewController initAndroidView({
     required int id,
     required String viewType,
@@ -1221,6 +1221,7 @@ class HybridAndroidViewController extends AndroidViewController {
 /// The platform view is created by calling [create] with an initial size.
 ///
 /// The controller is typically created with [PlatformViewsService.initAndroidView].
+// "TLHC" or "VD"
 class TextureAndroidViewController extends AndroidViewController {
   TextureAndroidViewController._({
     required super.viewId,

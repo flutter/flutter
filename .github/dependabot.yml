@@ -14,7 +14,6 @@ updates:
       - "christopherfujino"
       - "jmagman"
     labels:
-      - "team"
       - "team-infra"
       - "autosubmit"
     # Updating patch versions for "github-actions" is too chatty.

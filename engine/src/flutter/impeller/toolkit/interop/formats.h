@@ -38,6 +38,14 @@ constexpr SkPoint ToSkiaType(const Point& point) {
   return SkPoint::Make(point.x, point.y);
 }
 
+constexpr SkColor ToSkiaType(const ImpellerColor& color) {
+  return SkColorSetARGB(color.alpha * 255,  //
+                        color.red * 255,    //
+                        color.green * 255,  //
+                        color.blue * 255    //
+  );
+}
+
 constexpr SkVector ToSkiaVector(const Size& point) {
   return SkVector::Make(point.width, point.height);
 }
@@ -429,6 +437,23 @@ constexpr flutter::DlColor ToDisplayListType(ImpellerColor color) {
                           color.blue,                           //
                           ToDisplayListType(color.color_space)  //
   );
+}
+
+constexpr txt::TextDecorationStyle ToTxtType(
+    ImpellerTextDecorationStyle style) {
+  switch (style) {
+    case kImpellerTextDecorationStyleSolid:
+      return txt::TextDecorationStyle::kSolid;
+    case kImpellerTextDecorationStyleDouble:
+      return txt::TextDecorationStyle::kDouble;
+    case kImpellerTextDecorationStyleDotted:
+      return txt::TextDecorationStyle::kDotted;
+    case kImpellerTextDecorationStyleDashed:
+      return txt::TextDecorationStyle::kDashed;
+    case kImpellerTextDecorationStyleWavy:
+      return txt::TextDecorationStyle::kWavy;
+  }
+  return txt::TextDecorationStyle::kSolid;
 }
 
 constexpr txt::FontWeight ToTxtType(ImpellerFontWeight weight) {

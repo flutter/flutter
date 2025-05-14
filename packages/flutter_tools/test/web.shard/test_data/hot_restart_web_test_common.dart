@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../integration.shard/test_data/hot_reload_project.dart';
 import '../../integration.shard/test_driver.dart';
@@ -12,10 +13,6 @@ import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 
 import 'hot_reload_index_html_samples.dart';
-
-void main() async {
-  await testAll(useDDCLibraryBundleFormat: false);
-}
 
 Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   await _testProject(
@@ -93,7 +90,7 @@ Future<void> _testProject(
   testWithoutContext('$testName: hot restart works without error', () async {
     flutter.stdout.listen(printOnFailure);
     await flutter.run(
-      chrome: true,
+      device: GoogleChromeDevice.kChromeDeviceId,
       additionalCommandArgs: <String>['--verbose', ...additionalCommandArgs],
     );
     await flutter.hotRestart();
@@ -110,7 +107,7 @@ Future<void> _testProject(
         }
       });
       await flutter.run(
-        chrome: true,
+        device: GoogleChromeDevice.kChromeDeviceId,
         additionalCommandArgs: <String>['--verbose', ...additionalCommandArgs],
       );
       project.uncommentHotReloadPrint();

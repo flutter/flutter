@@ -143,7 +143,8 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
   const _FixedSizeSlidingTransition({
     required this.isLTR,
     required this.offsetAnimation,
-    required this.size,
+    required this.width,
+    required this.height,
     required this.child,
   }) : super(listenable: offsetAnimation);
 
@@ -151,8 +152,11 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
   // left-to-right.
   final bool isLTR;
 
-  // The fixed size to impose on `child`.
-  final Size size;
+  // The fixed width to impose on `child`.
+  final double width;
+
+  // The fixed height to impose on `child`.
+  final double height;
 
   // The animated offset from the top-leading corner of the stack.
   //
@@ -174,8 +178,8 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
       top: offsetAnimation.value.dy,
       left: isLTR ? offsetAnimation.value.dx : null,
       right: isLTR ? null : offsetAnimation.value.dx,
-      width: size.width,
-      height: size.height,
+      width: width,
+      height: height,
       child: child,
     );
   }
@@ -827,6 +831,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             border: effectiveBorder,
             hasUserMiddle: widget.middle != null,
             largeExpanded: widget.largeTitle != null,
+            automaticBackgroundVisibility: widget.automaticBackgroundVisibility,
             child: navBar,
           ),
         );
@@ -1542,6 +1547,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
         border: effectiveBorder,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
+        automaticBackgroundVisibility: automaticBackgroundVisibility,
         child: navBar,
       ),
     );
@@ -2429,6 +2435,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.border,
     required this.hasUserMiddle,
     required this.largeExpanded,
+    required this.automaticBackgroundVisibility,
     required this.child,
   }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
@@ -2441,6 +2448,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final Border? border;
   final bool hasUserMiddle;
   final bool largeExpanded;
+  final bool automaticBackgroundVisibility;
   final Widget child;
 
   RenderBox get renderBox {
@@ -2553,11 +2561,7 @@ class _NavigationBarTransition extends StatelessWidget {
       if (componentsTransition.topNavBarBottom != null) componentsTransition.topNavBarBottom!,
     ];
 
-    // The actual outer box is big enough to contain both the bottom and top
-    // navigation bars. It's not a direct Rect lerp because some components
-    // can actually be outside the linearly lerp'ed Rect in the middle of
-    // the animation, such as the topLargeTitle. The text scaling is disabled to
-    // avoid odd transitions between pages.
+    // The text scaling is disabled to avoid odd transitions between pages.
     return MediaQuery.withNoTextScaling(
       child: SizedBox(
         height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
@@ -2614,6 +2618,7 @@ class _NavigationBarComponentsTransition {
        topBackgroundColor = topNavBar.backgroundColor,
        bottomBorder = bottomNavBar.border,
        topBorder = topNavBar.border,
+       bottomAutomaticBackgroundVisibility = bottomNavBar.automaticBackgroundVisibility,
        userGestureInProgress =
            topNavBar.userGestureInProgress || bottomNavBar.userGestureInProgress,
        transitionBox =
@@ -2646,6 +2651,7 @@ class _NavigationBarComponentsTransition {
   final bool bottomLargeExpanded;
   final bool topLargeExpanded;
   final bool userGestureInProgress;
+  final bool bottomAutomaticBackgroundVisibility;
 
   final Color? bottomBackgroundColor;
   final Color? topBackgroundColor;
@@ -2737,7 +2743,8 @@ class _NavigationBarComponentsTransition {
       offsetAnimation: animation
           .drive(CurveTween(curve: curve))
           .drive(anchorMovementInTransitionBox),
-      size: fromBox.size,
+      width: fromNavBarBox.size.width,
+      height: fromBox.size.height,
       child: child,
     );
   }
@@ -2758,7 +2765,8 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget? get bottomNavBarBackground {
-    if (bottomBackgroundColor == null) {
+    if (bottomBackgroundColor == null ||
+        (bottomLargeExpanded && bottomAutomaticBackgroundVisibility)) {
       return null;
     }
     final Curve animationCurve =
@@ -3246,7 +3254,8 @@ class _NavigationBarComponentsTransition {
     return _FixedSizeSlidingTransition(
       isLTR: isLTR,
       offsetAnimation: animation.drive(anchorMovementInTransitionBox),
-      size: toBox.size,
+      width: toBox.size.width,
+      height: toBox.size.height,
       child: FadeTransition(
         opacity: fadeInFrom(0.25),
         child: DefaultTextStyle(style: topTitleTextStyle, child: topMiddle.child),
