@@ -141,26 +141,32 @@ Future<void> testMain() async {
     }
   });
 
-  test('overrides with flutter test font when debugEmulateFlutterTesterEnvironment is enabled', () {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
-    builder.pushStyle(ui.TextStyle(fontSize: 10.0, fontFamily: 'Roboto'));
-    builder.addText('XXXX');
-    final ui.Paragraph paragraph = builder.build();
-    paragraph.layout(const ui.ParagraphConstraints(width: 400));
+  group('when flutter tester emulation is enabled', () {
+    setUp(() {
+      ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
+    });
+    tearDown(() {
+      ui_web.TestEnvironment.tearDown();
+    });
 
-    expect(paragraph.numberOfLines, 1);
-    expect(paragraph.height, 10);
+    test('overrides with flutter test font', () {
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+      builder.pushStyle(ui.TextStyle(fontSize: 10.0, fontFamily: 'Roboto'));
+      builder.addText('XXXX');
+      final ui.Paragraph paragraph = builder.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 400));
 
-    final ui.LineMetrics? metrics = paragraph.getLineMetricsAt(0);
-    expect(metrics, isNotNull);
+      expect(paragraph.numberOfLines, 1);
+      expect(paragraph.height, 10);
 
-    // FlutterTest font's 'X' character is a square, so it's the font size (10.0) * 4 characters.
-    expect(metrics!.width, 40.0);
-  });
+      final ui.LineMetrics? metrics = paragraph.getLineMetricsAt(0);
+      expect(metrics, isNotNull);
 
-  test(
-    'uses flutter test font by default when debugEmulateFlutterTesterEnvironment is enabled',
-    () {
+      // FlutterTest font's 'X' character is a square, so it's the font size (10.0) * 4 characters.
+      expect(metrics!.width, 40.0);
+    });
+
+    test('uses flutter test font by default', () {
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
       builder.pushStyle(ui.TextStyle(fontSize: 10.0));
       builder.addText('XXXX');
@@ -175,10 +181,10 @@ Future<void> testMain() async {
 
       // FlutterTest font's 'X' character is a square, so it's the font size (10.0) * 4 characters.
       expect(metrics!.width, 40.0);
-    },
-  );
+    });
+  });
 
-  group('when debugEmulateFlutterTesterEnvironment is disabled', () {
+  group('when flutter tester emulation is disabled', () {
     setUp(() {
       ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.production());
     });
