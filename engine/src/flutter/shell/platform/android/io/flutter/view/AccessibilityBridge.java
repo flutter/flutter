@@ -6,7 +6,6 @@ package io.flutter.view;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -1003,7 +1002,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           Log.e("HI GRAY", embeddedView.createAccessibilityNodeInfo().toString());
           Log.e("HI GRAY", "provider for pv is " + embeddedView.getAccessibilityNodeProvider());
           Log.e("HI GRAY", "while provider for node is " + this);
-          //printAccessibilityNode(embeddedView.createAccessibilityNodeInfo(), 0, embeddedView);
+          // printAccessibilityNode(embeddedView.createAccessibilityNodeInfo(), 0, embeddedView);
           result.addChild(embeddedView);
           continue;
         }
@@ -1050,18 +1049,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     sb.append(", Focusable=").append(node.isFocusable());
     sb.append(", VisibleToUser=").append(node.isVisibleToUser());
 
-
     Log.d(TAG, sb.toString());
 
     // Recursively call for children
     for (int i = 0; i < node.getChildCount(); i++) {
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
-            node.setQueryFromAppProcessEnabled(view, true);
-        }
-        AccessibilityNodeInfo child = node.getChild(i);
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+        node.setQueryFromAppProcessEnabled(view, true);
+      }
+      AccessibilityNodeInfo child = node.getChild(i);
       if (child != null) {
         printAccessibilityNode(child, depth + 1, view);
-        //child.recycle(); // Important: Recycle the child node when done
+        // child.recycle(); // Important: Recycle the child node when done
       }
     }
   }
