@@ -209,12 +209,12 @@
   },
   "archives": [
     {
-      "source": "out/debug/artifacts.zip",
+      "source": "out/debug_ddm/artifacts.zip",
       "destination": "ios-ddm/artifacts.zip",
       "realm": "production"
     },
     {
-      "source": "out/release/artifacts.zip",
+      "source": "out/debug_ddm/artifacts.zip",
       "destination": "ios-release-ddm/artifacts.zip",
       "realm": "production"
     }
