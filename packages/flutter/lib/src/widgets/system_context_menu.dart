@@ -83,7 +83,7 @@ class SystemContextMenu extends StatefulWidget {
         ),
       ),
       items: items ?? getDefaultItems(editableTextState),
-      onSystemHide: editableTextState.hideToolbar,
+      onSystemHide: () => editableTextState.hideToolbar(false),
     );
   }
 
