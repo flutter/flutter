@@ -291,7 +291,7 @@ class TextLayout {
       final BidiRun bidiRun = bidiRuns[visual.index + firstRunIndex];
       final ClusterRange lineRunClusterRange = intersectClusterRange(
         bidiRun.clusterRange,
-        mergeSequentialClusterRanges(textRange, whitespaces),
+        textRange, //mergeSequentialClusterRanges(textRange, whitespaces),
       );
       WebParagraphDebug.log(
         'Intersect ${bidiRun.clusterRange} & ($textRange U $whitespaces) = $lineRunClusterRange',
@@ -302,6 +302,10 @@ class TextLayout {
         0,
         lineRunClusterRange.width,
       );
+      if (rects.isEmpty) {
+        // This run contains only whitespaces, ignore it
+        continue;
+      }
       for (int i = 0; i < rects.length; i++) {
         WebParagraphDebug.log(
           '$i: ${rects[i].left}:${rects[i].right} ${rects[i].width} ${lineRunTextMetrics.width}',
