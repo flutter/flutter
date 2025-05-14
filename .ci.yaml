@@ -580,19 +580,25 @@ targets:
       # tests are sharded.
       test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
+  # Despite the name, this really means "generate api_docs.zip", and "upload zip
+  # to GCS", and conditionally on the "master" channel will also deploy the docs
+  # to Firebase (https://main-api.flutter.dev/).
+  #
+  # See "Linux docs_deploy_stable" for how the docs are deployed to stable API.
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
     backfill: false
+    # This means "allow this to be scheduled by the release/release_builder"
+    # recipe. Normally we'd use "schedule: true", but that *also* means "do not
+    # run this in normal presubmit/postsubmit", and we do want it to run in
+    # postsubmit for the "master" channel. Sorry.
+    #
+    # See https://github.com/flutter/flutter/issues/168709 for details.
+    schedule_during_release_override: true
     timeout: 60
     dimensions:
       os: "Linux"
-    enabled_branches:
-      # Produces docs for main-api.flutter.dev
-      # stable and beta are managed by the targets:
-      #   - Linux docs_deploy_beta
-      #   - Linux docs_deploy_stable
-      - master
     properties:
       cores: "32"
       dependencies: >-
@@ -6994,30 +7000,10 @@ targets:
     drone_dimensions:
       - os=Windows
 
-
-  - name: Linux docs_deploy_beta
-    recipe: flutter/docs
-    scheduler: release
-    bringup: true
-    enabled_branches:
-      - beta
-    presubmit: false
-    timeout: 60
-    properties:
-      cores: "32"
-      dependencies: >-
-        [
-          {"dependency": "dashing", "version": "0.4.0"},
-          {"dependency": "firebase", "version": "v11.0.1"}
-        ]
-      tags: >
-        ["framework", "hostonly", "linux"]
-      validation: docs_deploy
-      validation_name: Docs_deploy
-      firebase_project: master-docs-flutter-dev
-    drone_dimensions:
-      - os=Linux
-
+  # This step runs on the release channel "stable", after the same commit SHA
+  # has been run and built by Linux flutter_release_builder as part of a release
+  # candidate branch (i.e. /flutter-\d+\.\d+-candidate\.\d+/) in the previous
+  # target, "Linux docs_publish".
   - name: Linux docs_deploy_stable
     recipe: flutter/docs
     scheduler: release
