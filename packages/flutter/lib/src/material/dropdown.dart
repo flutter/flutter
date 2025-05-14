@@ -1369,18 +1369,27 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   bool _isTraditionalPointer = false;
 
   void _handlePointerEvent(PointerEvent event) {
+    final bool hasFocus = focusNode != null && (focusNode!.hasPrimaryFocus || focusNode!.hasFocus);
+    if (!hasFocus && _dropdownRoute == null) {
+      return;
+    }
+
     switch (event.kind) {
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
         if (!_isTraditionalPointer) {
-          _isTraditionalPointer = true;
+          setState(() {
+            _isTraditionalPointer = true;
+          });
         }
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
         if (_isTraditionalPointer) {
-          _isTraditionalPointer = false;
+          setState(() {
+            _isTraditionalPointer = false;
+          });
         }
     }
   }
