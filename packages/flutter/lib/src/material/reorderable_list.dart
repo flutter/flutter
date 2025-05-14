@@ -248,6 +248,9 @@ class ReorderableListView extends StatefulWidget {
     this.mouseCursor,
   }) : assert(itemCount >= 0),
        itemBuilder = ((BuildContext context, int index) {
+         if (separatorBuilder == null) {
+           return itemBuilder(context, index);
+         }
          final int itemIndex = index ~/ 2;
          if (index.isEven) {
            // It's an item
