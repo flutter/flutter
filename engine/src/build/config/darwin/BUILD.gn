@@ -32,21 +32,21 @@ config("compiler") {
     # x86, arm, armv7, etc.
     assert(false, "unsupported cpu: $current_cpu")
   }
+  # OS and deployment target.
+  if (is_ios) {
+    _triplet_os = "apple-ios"
+    _deployment_target = ios_deployment_target
+  } else if (is_mac) {
+    _triplet_os = "apple-macos"
+    _deployment_target = mac_deployment_target
+  }
   # Environment.
   if (use_ios_simulator) {
     _triplet_environment = "-simulator"
   } else {
     _triplet_environment = ""
   }
-  # OS.
-  if (is_ios) {
-    _triplet_os = "apple-ios"
-  } else if (is_mac) {
-    _triplet_os = "apple-macos"
-  } else {
-    assert(false, "unsupported Apple os")
-  }
-  _target_triplet = "$_triplet_cpu-$_triplet_os$mac_deployment_target$_triplet_environment"
+  _target_triplet = "$_triplet_cpu-$_triplet_os$_deployment_target$_triplet_environment"
 
   # swiftc -swift-version flag.
   #
