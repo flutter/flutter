@@ -10,6 +10,8 @@ import '../plugins.dart';
 import '../project.dart';
 import 'swift_packages.dart';
 
+const String kFlutterGeneratedPluginSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
+
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
 ///
@@ -27,8 +29,6 @@ class SwiftPackageManager {
 
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
-
-  static const String _defaultFlutterPluginsSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
 
   static final SwiftPackageSupportedPlatform iosSwiftPackageSupportedPlatform =
       SwiftPackageSupportedPlatform(
@@ -76,19 +76,19 @@ class SwiftPackageManager {
     // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
     // any dynamic dependencies are linked to Runner and prevent undefined symbols.
     final SwiftPackageProduct generatedProduct = SwiftPackageProduct(
-      name: _defaultFlutterPluginsSwiftPackageName,
-      targets: <String>[_defaultFlutterPluginsSwiftPackageName],
+      name: kFlutterGeneratedPluginSwiftPackageName,
+      targets: <String>[kFlutterGeneratedPluginSwiftPackageName],
       libraryType: SwiftPackageLibraryType.static,
     );
 
     final SwiftPackageTarget generatedTarget = SwiftPackageTarget.defaultTarget(
-      name: _defaultFlutterPluginsSwiftPackageName,
+      name: kFlutterGeneratedPluginSwiftPackageName,
       dependencies: targetDependencies,
     );
 
     final SwiftPackage pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
-      name: _defaultFlutterPluginsSwiftPackageName,
+      name: kFlutterGeneratedPluginSwiftPackageName,
       platforms: <SwiftPackageSupportedPlatform>[swiftSupportedPlatform],
       products: <SwiftPackageProduct>[generatedProduct],
       dependencies: packageDependencies,
