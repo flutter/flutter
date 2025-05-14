@@ -136,6 +136,8 @@ class TextLayout {
       blockStart += blockTextMetrics.width!;
     }
 
+    printClusters('Not sorted:');
+
     textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
     for (int i = 0; i < textClusters.length; ++i) {
       final ExtendedTextCluster textCluster = textClusters[i];
@@ -147,7 +149,7 @@ class TextLayout {
     textToClusterMap[paragraph.text!.length] = textClusters.length;
     textClusters.add(ExtendedTextCluster.empty());
 
-    printClusters();
+    printClusters('Sorted');
   }
 
   ClusterRange convertTextToClusterRange(int textStart, int textEnd) {
@@ -186,8 +188,8 @@ class TextLayout {
     }
   }
 
-  void printClusters() {
-    WebParagraphDebug.log('Text Clusters: ${textClusters.length}');
+  void printClusters(String header) {
+    WebParagraphDebug.log('Text Clusters ($header): ${textClusters.length}');
     int i = 0;
     for (final ExtendedTextCluster cluster in textClusters) {
       final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
@@ -254,9 +256,7 @@ class TextLayout {
       whitespacesWidth,
       hardLineBreak,
     );
-    WebParagraphDebug.log(
-      'line [${textRange.start}:${textRange.end}) + [${whitespaces.start}:${whitespaces.end}) $textWidth $whitespacesWidth',
-    );
+    WebParagraphDebug.log('line $textRange + $whitespaces $textWidth $whitespacesWidth');
     // Get visual runs
     final List<int> logicalLevels = <int>[];
     int firstRunIndex = 0;
@@ -274,8 +274,8 @@ class TextLayout {
         // This run is on the line (at least, partially)
         WebParagraphDebug.log(
           'Add bidiRun '
-          '[${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) & [${textRange.start}:${textRange.end}) = [${intesection1.start}:${intesection1.end}) '
-          '[${bidiRun.clusterRange.start}:${bidiRun.clusterRange.end}) & [${whitespaces.start}:${whitespaces.end}) = [${intesection2.start}:${intesection2.end})',
+          '${bidiRun.clusterRange} & $textRange = $intesection1} '
+          '${bidiRun.clusterRange} & $whitespaces = $intesection2} ',
         );
         logicalLevels.add(bidiRun.bidiLevel);
       }
@@ -291,10 +291,16 @@ class TextLayout {
       final BidiRun bidiRun = bidiRuns[visual.index + firstRunIndex];
       final ClusterRange lineRunClusterRange = intersectClusterRange(
         bidiRun.clusterRange,
-        textRange, //mergeSequentialClusterRanges(textRange, whitespaces),
+        textRange,
+      );
+      final ClusterRange whitespacesClusterRange = intersectClusterRange(
+        bidiRun.clusterRange,
+        whitespaces,
       );
       WebParagraphDebug.log(
-        'Intersect ${bidiRun.clusterRange} & ($textRange U $whitespaces) = $lineRunClusterRange',
+        'Intersect '
+        '${bidiRun.clusterRange} & $textRange = $lineRunClusterRange '
+        '${bidiRun.clusterRange} & $whitespaces = $whitespacesClusterRange',
       );
       final String lineRunText = getTextFromMonodirectionalClusterRange(lineRunClusterRange);
       final DomTextMetrics lineRunTextMetrics = layoutContext.measureText(lineRunText);
@@ -302,10 +308,6 @@ class TextLayout {
         0,
         lineRunClusterRange.width,
       );
-      if (rects.isEmpty) {
-        // This run contains only whitespaces, ignore it
-        continue;
-      }
       for (int i = 0; i < rects.length; i++) {
         WebParagraphDebug.log(
           '$i: ${rects[i].left}:${rects[i].right} ${rects[i].width} ${lineRunTextMetrics.width}',
@@ -328,7 +330,7 @@ class TextLayout {
         'Run[${visual.index} + $firstRunIndex]: "$lineRunText" ${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} {bidiRun.clusterRange}=>$lineRunClusterRange '
         'width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.shift}-${firstVisualClusterInRun.advance.left}',
       );
-      shiftInsideLine += rects.first.width; //lineRunTextMetrics.width!;
+      shiftInsideLine += lineRunTextMetrics.width!;
     }
 
     // At this point we are agnostic of any fonts participating in text shaping
