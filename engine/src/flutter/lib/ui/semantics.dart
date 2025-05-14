@@ -399,9 +399,6 @@ enum SemanticsRole {
   /// * [table] ,[cell], [row] for table related roles.
   columnHeader,
 
-  /// An input field for users to enter search terms.
-  searchBox,
-
   /// A control used for dragging across content.
   ///
   /// For example, the drag handle of [ReorderableList].
@@ -600,6 +597,7 @@ class SemanticsFlag {
   //   value of `AccessibilityBridge.FOCUSABLE_FLAGS` in
   //   flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java.
 
+  /// {@template dart.ui.semantics.hasCheckedState}
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
   /// This flag is mutually exclusive with [hasToggledState].
@@ -609,11 +607,13 @@ class SemanticsFlag {
   /// See also:
   ///
   ///   * [SemanticsFlag.isChecked], which controls whether the node is "checked" or "unchecked".
+  /// {@endtemplate}
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(
     _kHasCheckedStateIndex,
     'hasCheckedState',
   );
 
+  /// {@template dart.ui.semantics.isChecked}
   /// Whether a semantics node that [hasCheckedState] is checked.
   ///
   /// If true, the semantics node is "checked". If false, the semantics node is
@@ -624,8 +624,11 @@ class SemanticsFlag {
   /// See also:
   ///
   ///   * [SemanticsFlag.hasCheckedState], which enables a checked state.
+  /// {@endtemplate}
+  ///
   static const SemanticsFlag isChecked = SemanticsFlag._(_kIsCheckedIndex, 'isChecked');
 
+  /// {@template dart.ui.semantics.isCheckStateMixed}
   /// Whether a tristate checkbox is in its mixed state.
   ///
   /// If this is true, the check box this semantics node represents
@@ -635,11 +638,13 @@ class SemanticsFlag {
   /// can have checked,  unchecked, or mixed state.
   ///
   /// Must be false when the checkbox is either checked or unchecked.
+  /// {@endtemplate}
   static const SemanticsFlag isCheckStateMixed = SemanticsFlag._(
     _kIsCheckStateMixedIndex,
     'isCheckStateMixed',
   );
 
+  /// {@template dart.ui.semantics.hasSelectedState}
   /// The semantics node has the quality of either being "selected" or "unselected".
   ///
   /// Whether the widget corresponding to this node is currently selected or not
@@ -648,11 +653,13 @@ class SemanticsFlag {
   /// When this flag is not set, the corresponding widget cannot be selected by
   /// the user, and the presence or the lack of [isSelected] does not carry any
   /// meaning.
+  /// {@endtemplate}
   static const SemanticsFlag hasSelectedState = SemanticsFlag._(
     _kHasSelectedStateIndex,
     'hasSelectedState',
   );
 
+  /// {@template dart.ui.semantics.isSelected}
   /// Whether a semantics node is selected.
   ///
   /// This flag only has meaning in nodes that have [hasSelectedState] flag set.
@@ -661,96 +668,126 @@ class SemanticsFlag {
   /// "unselected".
   ///
   /// For example, the active tab in a tab bar has [isSelected] set to true.
+  /// {@endtemplate}
   static const SemanticsFlag isSelected = SemanticsFlag._(_kIsSelectedIndex, 'isSelected');
 
+  /// {@template dart.ui.semantics.isButton}
   /// Whether the semantic node represents a button.
   ///
   /// Platforms have special handling for buttons, for example Android's TalkBack
   /// and iOS's VoiceOver provides an additional hint when the focused object is
   /// a button.
+  /// {@endtemplate}
   static const SemanticsFlag isButton = SemanticsFlag._(_kIsButtonIndex, 'isButton');
 
+  /// {@template dart.ui.semantics.isTextField}
   /// Whether the semantic node represents a text field.
   ///
   /// Text fields are announced as such and allow text input via accessibility
   /// affordances.
+  /// {@endtemplate}
   static const SemanticsFlag isTextField = SemanticsFlag._(_kIsTextFieldIndex, 'isTextField');
 
+  /// {@template dart.ui.semantics.isSlider}
   /// Whether the semantic node represents a slider.
+  /// {@endtemplate}
   static const SemanticsFlag isSlider = SemanticsFlag._(_kIsSliderIndex, 'isSlider');
 
+  /// {@template dart.ui.semantics.isKeyboardKey}
   /// Whether the semantic node represents a keyboard key.
+  /// {@endtemplate}
   static const SemanticsFlag isKeyboardKey = SemanticsFlag._(_kIsKeyboardKeyIndex, 'isKeyboardKey');
 
+  /// {@template dart.ui.semantics.isReadOnly}
   /// Whether the semantic node is read only.
   ///
   /// Only applicable when [isTextField] is true.
+  /// {@endtemplate}
   static const SemanticsFlag isReadOnly = SemanticsFlag._(_kIsReadOnlyIndex, 'isReadOnly');
 
+  /// {@template dart.ui.semantics.isLink}
   /// Whether the semantic node is an interactive link.
   ///
   /// Platforms have special handling for links, for example iOS's VoiceOver
   /// provides an additional hint when the focused object is a link, as well as
   /// the ability to parse the links through another navigation menu.
+  /// {@endtemplate}
   static const SemanticsFlag isLink = SemanticsFlag._(_kIsLinkIndex, 'isLink');
 
+  /// {@template dart.ui.semantics.isFocusable}
   /// Whether the semantic node is able to hold the user's focus.
   ///
   /// The focused element is usually the current receiver of keyboard inputs.
+  /// {@endtemplate}
   static const SemanticsFlag isFocusable = SemanticsFlag._(_kIsFocusableIndex, 'isFocusable');
 
+  /// {@template dart.ui.semantics.isFocused}
   /// Whether the semantic node currently holds the user's focus.
   ///
   /// The focused element is usually the current receiver of keyboard inputs.
+  /// {@endtemplate}
   static const SemanticsFlag isFocused = SemanticsFlag._(_kIsFocusedIndex, 'isFocused');
 
+  /// {@template dart.ui.semantics.hasEnabledState}
   /// The semantics node has the quality of either being "enabled" or
   /// "disabled".
   ///
   /// For example, a button can be enabled or disabled and therefore has an
   /// "enabled" state. Static text is usually neither enabled nor disabled and
   /// therefore does not have an "enabled" state.
+  /// {@endtemplate}
   static const SemanticsFlag hasEnabledState = SemanticsFlag._(
     _kHasEnabledStateIndex,
     'hasEnabledState',
   );
 
+  /// {@template dart.ui.semantics.isEnabled}
   /// Whether a semantic node that [hasEnabledState] is currently enabled.
   ///
   /// A disabled element does not respond to user interaction. For example, a
   /// button that currently does not respond to user interaction should be
   /// marked as disabled.
+  /// {@endtemplate}
   static const SemanticsFlag isEnabled = SemanticsFlag._(_kIsEnabledIndex, 'isEnabled');
 
+  /// {@template dart.ui.semantics.isInMutuallyExclusiveGroup}
   /// Whether a semantic node is in a mutually exclusive group.
   ///
   /// For example, a radio button is in a mutually exclusive group because
   /// only one radio button in that group can be marked as [isChecked].
+  /// {@endtemplate}
   static const SemanticsFlag isInMutuallyExclusiveGroup = SemanticsFlag._(
     _kIsInMutuallyExclusiveGroupIndex,
     'isInMutuallyExclusiveGroup',
   );
 
+  /// {@template dart.ui.semantics.isHeader}
   /// Whether a semantic node is a header that divides content into sections.
   ///
   /// For example, headers can be used to divide a list of alphabetically
   /// sorted words into the sections A, B, C, etc. as can be found in many
   /// address book applications.
+  /// {@endtemplate}
   static const SemanticsFlag isHeader = SemanticsFlag._(_kIsHeaderIndex, 'isHeader');
 
+  /// {@template dart.ui.semantics.isObscured}
   /// Whether the value of the semantics node is obscured.
   ///
   /// This is usually used for text fields to indicate that its content
   /// is a password or contains other sensitive information.
+  /// {@endtemplate}
   static const SemanticsFlag isObscured = SemanticsFlag._(_kIsObscuredIndex, 'isObscured');
 
+  /// {@template dart.ui.semantics.isMultiline}
   /// Whether the value of the semantics node is coming from a multi-line text
   /// field.
   ///
   /// This is used for text fields to distinguish single-line text fields from
   /// multi-line ones.
+  /// {@endtemplate}
   static const SemanticsFlag isMultiline = SemanticsFlag._(_kIsMultilineIndex, 'isMultiline');
 
+  /// {@template dart.ui.semantics.scopesRoute}
   /// Whether the semantics node is the root of a subtree for which a route name
   /// should be announced.
   ///
@@ -774,8 +811,10 @@ class SemanticsFlag {
   ///
   /// This is used in widgets such as Routes, Drawers, and Dialogs to
   /// communicate significant changes in the visible screen.
+  /// {@endtemplate}
   static const SemanticsFlag scopesRoute = SemanticsFlag._(_kScopesRouteIndex, 'scopesRoute');
 
+  /// {@template dart.ui.semantics.namesRoute}
   /// Whether the semantics node label is the name of a visually distinct
   /// route.
   ///
@@ -787,8 +826,10 @@ class SemanticsFlag {
   ///
   /// Updating this label within the same active route subtree will not cause
   /// additional announcements.
+  /// {@endtemplate}
   static const SemanticsFlag namesRoute = SemanticsFlag._(_kNamesRouteIndex, 'namesRoute');
 
+  /// {@template dart.ui.semantics.isHidden}
   /// Whether the semantics node is considered hidden.
   ///
   /// Hidden elements are currently not visible on screen. They may be covered
@@ -809,14 +850,18 @@ class SemanticsFlag {
   /// See also:
   ///
   /// * [RenderObject.describeSemanticsClip]
+  /// {@endtemplate}
   static const SemanticsFlag isHidden = SemanticsFlag._(_kIsHiddenIndex, 'isHidden');
 
+  /// {@template dart.ui.semantics.isImage}
   /// Whether the semantics node represents an image.
   ///
   /// Both TalkBack and VoiceOver will inform the user the semantics node
   /// represents an image.
+  /// {@endtemplate}
   static const SemanticsFlag isImage = SemanticsFlag._(_kIsImageIndex, 'isImage');
 
+  /// {@template dart.ui.semantics.isLiveRegion}
   /// Whether the semantics node is a live region.
   ///
   /// A live region indicates that updates to semantics node are important.
@@ -829,8 +874,10 @@ class SemanticsFlag {
   /// may not be spoken if the OS accessibility services are already
   /// announcing something else, such as reading the label of a focused
   /// widget or providing a system announcement.
+  /// {@endtemplate}
   static const SemanticsFlag isLiveRegion = SemanticsFlag._(_kIsLiveRegionIndex, 'isLiveRegion');
 
+  /// {@template dart.ui.semantics.hasToggledState}
   /// The semantics node has the quality of either being "on" or "off".
   ///
   /// This flag is mutually exclusive with [hasCheckedState].
@@ -840,11 +887,13 @@ class SemanticsFlag {
   /// See also:
   ///
   ///    * [SemanticsFlag.isToggled], which controls whether the node is "on" or "off".
+  /// {@endtemplate}
   static const SemanticsFlag hasToggledState = SemanticsFlag._(
     _kHasToggledStateIndex,
     'hasToggledState',
   );
 
+  /// {@template dart.ui.semantics.isToggled}
   /// If true, the semantics node is "on". If false, the semantics node is
   /// "off".
   ///
@@ -853,8 +902,10 @@ class SemanticsFlag {
   /// See also:
   ///
   ///   * [SemanticsFlag.hasToggledState], which enables a toggled state.
+  /// {@endtemplate}
   static const SemanticsFlag isToggled = SemanticsFlag._(_kIsToggledIndex, 'isToggled');
 
+  /// {@template dart.ui.semantics.hasImplicitScrolling}
   /// Whether the platform can scroll the semantics node when the user attempts
   /// to move focus to an offscreen child.
   ///
@@ -862,11 +913,13 @@ class SemanticsFlag {
   /// easily move the accessibility focus to the next set of children. A
   /// [PageView] widget does not have implicit scrolling, so that users don't
   /// navigate to the next page when reaching the end of the current one.
+  /// {@endtemplate}
   static const SemanticsFlag hasImplicitScrolling = SemanticsFlag._(
     _kHasImplicitScrollingIndex,
     'hasImplicitScrolling',
   );
 
+  /// {@template dart.ui.semantics.hasExpandedState}
   /// The semantics node has the quality of either being "expanded" or "collapsed".
   ///
   /// For example, a [SubmenuButton] widget has expanded state.
@@ -874,11 +927,13 @@ class SemanticsFlag {
   /// See also:
   ///
   ///   * [SemanticsFlag.isExpanded], which controls whether the node is "expanded" or "collapsed".
+  /// {@endtemplate}
   static const SemanticsFlag hasExpandedState = SemanticsFlag._(
     _kHasExpandedStateIndex,
     'hasExpandedState',
   );
 
+  /// {@template dart.ui.semantics.isExpanded}
   /// Whether a semantics node is expanded.
   ///
   /// If true, the semantics node is "expanded". If false, the semantics node is
@@ -889,18 +944,22 @@ class SemanticsFlag {
   /// See also:
   ///
   ///   * [SemanticsFlag.hasExpandedState], which enables an expanded/collapsed state.
+  /// {@endtemplate}
   static const SemanticsFlag isExpanded = SemanticsFlag._(_kIsExpandedIndex, 'isExpanded');
 
+  /// {@template dart.ui.semantics.hasRequiredState}
   /// The semantics node has the quality of either being required or not.
   ///
   /// See also:
   ///
   ///   * [SemanticsFlag.isRequired], which controls whether the node is required.
+  /// {@endtemplate}
   static const SemanticsFlag hasRequiredState = SemanticsFlag._(
     _kHasRequiredStateIndex,
     'hasRequiredState',
   );
 
+  /// {@template dart.ui.semantics.isRequired}
   /// Whether a semantics node is required.
   ///
   /// If true, user input is required on the semantics node before a form can
@@ -911,6 +970,7 @@ class SemanticsFlag {
   /// See also:
   ///
   ///   * [SemanticsFlag.hasRequiredState], which enables a required state state.
+  /// {@endtemplate}
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
 
   /// The possible semantics flags.
@@ -960,6 +1020,396 @@ class SemanticsFlag {
 
   @override
   String toString() => 'SemanticsFlag.$name';
+}
+
+/// Represents a collection of boolean flags that convey semantic information
+/// about a widget's accessibility state and properties.
+///
+/// For example, These flags can indicate if an element is
+/// checkable, currently checked, selectable, or functions as a button.
+class SemanticsFlags {
+  /// Creates a set of semantics flags that describe various states of a widget.
+  /// All flags default to `false` unless specified.
+  const SemanticsFlags({
+    this.hasCheckedState = false,
+    this.isChecked = false,
+    this.isSelected = false,
+    this.isButton = false,
+    this.isTextField = false,
+    this.isFocused = false,
+    this.hasEnabledState = false,
+    this.isEnabled = false,
+    this.isInMutuallyExclusiveGroup = false,
+    this.isHeader = false,
+    this.isObscured = false,
+    this.scopesRoute = false,
+    this.namesRoute = false,
+    this.isHidden = false,
+    this.isImage = false,
+    this.isLiveRegion = false,
+    this.hasToggledState = false,
+    this.isToggled = false,
+    this.hasImplicitScrolling = false,
+    this.isMultiline = false,
+    this.isReadOnly = false,
+    this.isFocusable = false,
+    this.isLink = false,
+    this.isSlider = false,
+    this.isKeyboardKey = false,
+    this.isCheckStateMixed = false,
+    this.hasExpandedState = false,
+    this.isExpanded = false,
+    this.hasSelectedState = false,
+    this.hasRequiredState = false,
+    this.isRequired = false,
+  });
+
+  /// The set of semantics flags with every flag set to false.
+  static const SemanticsFlags kNone = SemanticsFlags();
+
+  /// {@macro dart.ui.semantics.hasCheckedState}
+  final bool hasCheckedState;
+
+  /// {@macro dart.ui.semantics.isChecked}
+  final bool isChecked;
+
+  /// {@macro dart.ui.semantics.isSelected}
+  final bool isSelected;
+
+  /// {@macro dart.ui.semantics.isButton}
+  final bool isButton;
+
+  /// {@macro dart.ui.semantics.isTextField}
+  final bool isTextField;
+
+  /// {@macro dart.ui.semantics.isFocused}
+  final bool isFocused;
+
+  /// {@macro dart.ui.semantics.hasEnabledState}
+  final bool hasEnabledState;
+
+  /// {@macro dart.ui.semantics.isEnabled}
+  final bool isEnabled;
+
+  /// {@macro dart.ui.semantics.isInMutuallyExclusiveGroup}
+  final bool isInMutuallyExclusiveGroup;
+
+  /// {@macro dart.ui.semantics.isHeader}
+  final bool isHeader;
+
+  /// {@macro dart.ui.semantics.isObscured}
+  final bool isObscured;
+
+  /// {@macro dart.ui.semantics.scopesRoute}
+  final bool scopesRoute;
+
+  /// {@macro dart.ui.semantics.namesRoute}
+  final bool namesRoute;
+
+  /// {@macro dart.ui.semantics.isHidden}
+  final bool isHidden;
+
+  /// {@macro dart.ui.semantics.isImage}
+  final bool isImage;
+
+  /// {@macro dart.ui.semantics.isLiveRegion}
+  final bool isLiveRegion;
+
+  /// {@macro dart.ui.semantics.hasToggledState}
+  final bool hasToggledState;
+
+  /// {@macro dart.ui.semantics.isToggled}
+  final bool isToggled;
+
+  /// {@macro dart.ui.semantics.hasImplicitScrolling}
+  final bool hasImplicitScrolling;
+
+  /// {@macro dart.ui.semantics.isMultiline}
+  final bool isMultiline;
+
+  /// {@macro dart.ui.semantics.isReadOnly}
+  final bool isReadOnly;
+
+  /// {@macro dart.ui.semantics.isFocusable}
+  final bool isFocusable;
+
+  /// {@macro dart.ui.semantics.isLink}
+  final bool isLink;
+
+  /// {@macro dart.ui.semantics.isSlider}
+  final bool isSlider;
+
+  /// {@macro dart.ui.semantics.isKeyboardKey}
+  final bool isKeyboardKey;
+
+  /// {@macro dart.ui.semantics.isCheckStateMixed}
+  final bool isCheckStateMixed;
+
+  /// {@macro dart.ui.semantics.hasExpandedState}
+  final bool hasExpandedState;
+
+  /// {@macro dart.ui.semantics.isExpanded}
+  final bool isExpanded;
+
+  /// {@macro dart.ui.semantics.hasSelectedState}
+  final bool hasSelectedState;
+
+  /// {@macro dart.ui.semantics.hasRequiredState}
+  final bool hasRequiredState;
+
+  /// {@macro dart.ui.semantics.isRequired}
+  final bool isRequired;
+
+  /// Combines two sets of flags, such that if a flag it set to true in any of the two sets, the resulting set contains that flag set to true.
+  SemanticsFlags merge(SemanticsFlags other) {
+    return SemanticsFlags(
+      hasCheckedState: hasCheckedState || other.hasCheckedState,
+      isChecked: isChecked || other.isChecked,
+      isSelected: isSelected || other.isSelected,
+      isButton: isButton || other.isButton,
+      isTextField: isTextField || other.isTextField,
+      isFocused: isFocused || other.isFocused,
+      hasEnabledState: hasEnabledState || other.hasEnabledState,
+      isEnabled: isEnabled || other.isEnabled,
+      isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
+      isHeader: isHeader || other.isHeader,
+      isObscured: isObscured || other.isObscured,
+      scopesRoute: scopesRoute || other.scopesRoute,
+      namesRoute: namesRoute || other.namesRoute,
+      isHidden: isHidden || other.isHidden,
+      isImage: isImage || other.isImage,
+      isLiveRegion: isLiveRegion || other.isLiveRegion,
+      hasToggledState: hasToggledState || other.hasToggledState,
+      isToggled: isToggled || other.isToggled,
+      hasImplicitScrolling: hasImplicitScrolling || other.hasImplicitScrolling,
+      isMultiline: isMultiline || other.isMultiline,
+      isReadOnly: isReadOnly || other.isReadOnly,
+      isFocusable: isFocusable || other.isFocusable,
+      isLink: isLink || other.isLink,
+      isSlider: isSlider || other.isSlider,
+      isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      isCheckStateMixed: isCheckStateMixed || other.isCheckStateMixed,
+      hasExpandedState: hasExpandedState || other.hasExpandedState,
+      isExpanded: isExpanded || other.isExpanded,
+      hasSelectedState: hasSelectedState || other.hasSelectedState,
+      hasRequiredState: hasRequiredState || other.hasRequiredState,
+      isRequired: isRequired || other.isRequired,
+    );
+  }
+
+  /// Copy the semantics flags, with some of them optionally replaced.
+  SemanticsFlags copyWith({
+    bool? hasCheckedState,
+    bool? isChecked,
+    bool? isSelected,
+    bool? isButton,
+    bool? isTextField,
+    bool? isFocused,
+    bool? hasEnabledState,
+    bool? isEnabled,
+    bool? isInMutuallyExclusiveGroup,
+    bool? isHeader,
+    bool? isObscured,
+    bool? scopesRoute,
+    bool? namesRoute,
+    bool? isHidden,
+    bool? isImage,
+    bool? isLiveRegion,
+    bool? hasToggledState,
+    bool? isToggled,
+    bool? hasImplicitScrolling,
+    bool? isMultiline,
+    bool? isReadOnly,
+    bool? isFocusable,
+    bool? isLink,
+    bool? isSlider,
+    bool? isKeyboardKey,
+    bool? isCheckStateMixed,
+    bool? hasExpandedState,
+    bool? isExpanded,
+    bool? hasSelectedState,
+    bool? hasRequiredState,
+    bool? isRequired,
+  }) {
+    return SemanticsFlags(
+      hasCheckedState: hasCheckedState ?? this.hasCheckedState,
+      isChecked: isChecked ?? this.isChecked,
+      isSelected: isSelected ?? this.isSelected,
+      isButton: isButton ?? this.isButton,
+      isTextField: isTextField ?? this.isTextField,
+      isFocused: isFocused ?? this.isFocused,
+      hasEnabledState: hasEnabledState ?? this.hasEnabledState,
+      isEnabled: isEnabled ?? this.isEnabled,
+      isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
+      isHeader: isHeader ?? this.isHeader,
+      isObscured: isObscured ?? this.isObscured,
+      scopesRoute: scopesRoute ?? this.scopesRoute,
+      namesRoute: namesRoute ?? this.namesRoute,
+      isHidden: isHidden ?? this.isHidden,
+      isImage: isImage ?? this.isImage,
+      isLiveRegion: isLiveRegion ?? this.isLiveRegion,
+      hasToggledState: hasToggledState ?? this.hasToggledState,
+      isToggled: isToggled ?? this.isToggled,
+      hasImplicitScrolling: hasImplicitScrolling ?? this.hasImplicitScrolling,
+      isMultiline: isMultiline ?? this.isMultiline,
+      isReadOnly: isReadOnly ?? this.isReadOnly,
+      isFocusable: isFocusable ?? this.isFocusable,
+      isLink: isLink ?? this.isLink,
+      isSlider: isSlider ?? this.isSlider,
+      isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
+      isCheckStateMixed: isCheckStateMixed ?? this.isCheckStateMixed,
+      hasExpandedState: hasExpandedState ?? this.hasExpandedState,
+      isExpanded: isExpanded ?? this.isExpanded,
+      hasSelectedState: hasSelectedState ?? this.hasSelectedState,
+      hasRequiredState: hasRequiredState ?? this.hasRequiredState,
+      isRequired: isRequired ?? this.isRequired,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SemanticsFlags &&
+          runtimeType == other.runtimeType &&
+          hasCheckedState == other.hasCheckedState &&
+          isChecked == other.isChecked &&
+          isSelected == other.isSelected &&
+          isButton == other.isButton &&
+          isTextField == other.isTextField &&
+          isFocused == other.isFocused &&
+          hasEnabledState == other.hasEnabledState &&
+          isEnabled == other.isEnabled &&
+          isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
+          isHeader == other.isHeader &&
+          isObscured == other.isObscured &&
+          scopesRoute == other.scopesRoute &&
+          namesRoute == other.namesRoute &&
+          isHidden == other.isHidden &&
+          isImage == other.isImage &&
+          isLiveRegion == other.isLiveRegion &&
+          hasToggledState == other.hasToggledState &&
+          isToggled == other.isToggled &&
+          hasImplicitScrolling == other.hasImplicitScrolling &&
+          isMultiline == other.isMultiline &&
+          isReadOnly == other.isReadOnly &&
+          isFocusable == other.isFocusable &&
+          isLink == other.isLink &&
+          isSlider == other.isSlider &&
+          isKeyboardKey == other.isKeyboardKey &&
+          isCheckStateMixed == other.isCheckStateMixed &&
+          hasExpandedState == other.hasExpandedState &&
+          isExpanded == other.isExpanded &&
+          hasSelectedState == other.hasSelectedState &&
+          hasRequiredState == other.hasRequiredState &&
+          isRequired == other.isRequired;
+
+  @override
+  int get hashCode => Object.hashAll(<bool>[
+    hasCheckedState,
+    isChecked,
+    isSelected,
+    isButton,
+    isTextField,
+    isFocused,
+    hasEnabledState,
+    isEnabled,
+    isInMutuallyExclusiveGroup,
+    isHeader,
+    isObscured,
+    scopesRoute,
+    namesRoute,
+    isHidden,
+    isImage,
+    isLiveRegion,
+    hasToggledState,
+    isToggled,
+    hasImplicitScrolling,
+    isMultiline,
+    isReadOnly,
+    isFocusable,
+    isLink,
+    isSlider,
+    isKeyboardKey,
+    isCheckStateMixed,
+    hasExpandedState,
+    isExpanded,
+    hasSelectedState,
+    hasRequiredState,
+    isRequired,
+  ]);
+
+  /// Convert flags to a list of string.
+  List<String> toStrings() {
+    return <String>[
+      if (hasCheckedState) 'hasCheckedState',
+      if (isChecked) 'isChecked',
+      if (isSelected) 'isSelected',
+      if (isButton) 'isButton',
+      if (isTextField) 'isTextField',
+      if (isFocused) 'isFocused',
+      if (hasEnabledState) 'hasEnabledState',
+      if (isEnabled) 'isEnabled',
+      if (isInMutuallyExclusiveGroup) 'isInMutuallyExclusiveGroup',
+      if (isHeader) 'isHeader',
+      if (isObscured) 'isObscured',
+      if (scopesRoute) 'scopesRoute',
+      if (namesRoute) 'namesRoute',
+      if (isHidden) 'isHidden',
+      if (isImage) 'isImage',
+      if (isLiveRegion) 'isLiveRegion',
+      if (hasToggledState) 'hasToggledState',
+      if (isToggled) 'isToggled',
+      if (hasImplicitScrolling) 'hasImplicitScrolling',
+      if (isMultiline) 'isMultiline',
+      if (isReadOnly) 'isReadOnly',
+      if (isFocusable) 'isFocusable',
+      if (isLink) 'isLink',
+      if (isSlider) 'isSlider',
+      if (isKeyboardKey) 'isKeyboardKey',
+      if (isCheckStateMixed) 'isCheckStateMixed',
+      if (hasExpandedState) 'hasExpandedState',
+      if (isExpanded) 'isExpanded',
+      if (hasSelectedState) 'hasSelectedState',
+      if (hasRequiredState) 'hasRequiredState',
+      if (isRequired) 'isRequired',
+    ];
+  }
+
+  /// Checks if any of the boolean semantic flags are set to true
+  /// in both this instance and the [other] instance.
+  bool hasRepeatedFlags(SemanticsFlags other) {
+    return (hasCheckedState && other.hasCheckedState) ||
+        (isChecked && other.isChecked) ||
+        (isSelected && other.isSelected) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isFocused && other.isFocused) ||
+        (hasEnabledState && other.hasEnabledState) ||
+        (isEnabled && other.isEnabled) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasToggledState && other.hasToggledState) ||
+        (isToggled && other.isToggled) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isFocusable && other.isFocusable) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isCheckStateMixed && other.isCheckStateMixed) ||
+        (hasExpandedState && other.hasExpandedState) ||
+        (isExpanded && other.isExpanded) ||
+        (hasSelectedState && other.hasSelectedState) ||
+        (hasRequiredState && other.hasRequiredState) ||
+        (isRequired && other.isRequired);
+  }
 }
 
 /// The validation result of a form field.

@@ -292,6 +292,7 @@ class TextField extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.onTapAlwaysCalled = false,
@@ -316,6 +317,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -662,6 +664,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
 
+  /// {@macro flutter.widgets.editableText.selectAllOnFocus}
+  final bool? selectAllOnFocus;
+
   /// {@macro flutter.widgets.editableText.selectionControls}
   final TextSelectionControls? selectionControls;
 
@@ -844,6 +849,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
+
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
 
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
@@ -1088,6 +1096,9 @@ class TextField extends StatefulWidget {
                 ? const <String>[]
                 : kDefaultContentInsertionMimeTypes,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
   }
 }
@@ -1692,6 +1703,7 @@ class _TextFieldState extends State<TextField>
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
           enableInteractiveSelection: widget.enableInteractiveSelection,
+          selectAllOnFocus: widget.selectAllOnFocus,
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
@@ -1708,6 +1720,7 @@ class _TextFieldState extends State<TextField>
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration:
               widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+          hintLocales: widget.hintLocales,
         ),
       ),
     );

@@ -8,8 +8,10 @@ library;
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -208,6 +210,64 @@ void main() {
     final List<String> labels00To23 = List<String>.generate(24, (int index) {
       return index == 0 ? '00' : index.toString();
     });
+    final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
+
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+      labels00To23,
+    );
+    // ignore: avoid_dynamic_calls
+    expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164860
+  testWidgets('Material3 - formats 24-hour numbers correctly in Farsi', (
+    WidgetTester tester,
+  ) async {
+    await mediaQueryBoilerplate(
+      tester,
+      locale: const Locale('fa', 'IR'),
+      materialType: MaterialType.material3,
+    );
+
+    final List<String> labels00To23 = <String>[
+      '۰',
+      '۱',
+      '۲',
+      '۳',
+      '۴',
+      '۵',
+      '۶',
+      '۷',
+      '۸',
+      '۹',
+      '۱۰',
+      '۱۱',
+      '۱۲',
+      '۱۳',
+      '۱۴',
+      '۱۵',
+      '۱۶',
+      '۱۷',
+      '۱۸',
+      '۱۹',
+      '۲۰',
+      '۲۱',
+      '۲۲',
+      '۲۳',
+    ];
     final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
@@ -2017,6 +2077,45 @@ void main() {
         expect(hourField.focusNode!.hasFocus, isFalse);
         expect(minuteField.focusNode!.hasFocus, isFalse);
       });
+
+      testWidgets(
+        'TAB key selects text in hour and minute fields on the web',
+        (WidgetTester tester) async {
+          await mediaQueryBoilerplate(
+            tester,
+            entryMode: TimePickerEntryMode.input,
+            materialType: materialType,
+          );
+
+          // Focus on the hour field.
+          final Finder hourField = find.byType(TextField).first;
+          await tester.tap(hourField);
+          await tester.pumpAndSettle();
+
+          // Verify that the hour field is focused and its text is selected.
+          final TextField hourTextField = tester.widget(hourField);
+          expect(hourTextField.focusNode!.hasFocus, isTrue);
+          expect(hourTextField.controller!.selection.baseOffset, 0);
+          expect(
+            hourTextField.controller!.selection.extentOffset,
+            hourTextField.controller!.text.length,
+          );
+
+          // Press TAB to move to the minute field.
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pumpAndSettle();
+
+          // Verify that the minute field is focused and its text is selected.
+          final Finder minuteField = find.byType(TextField).last;
+          final TextField minuteTextField = tester.widget(minuteField);
+          expect(minuteTextField.controller!.selection.baseOffset, 0);
+          expect(
+            minuteTextField.controller!.selection.extentOffset,
+            minuteTextField.controller!.text.length,
+          );
+        },
+        skip: !kIsWeb, // [intended] Web-specific behavior
+      );
     });
 
     group('Time picker - Restoration (${materialType.name})', () {
@@ -2151,6 +2250,77 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text(':'));
     expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
     expect(paragraph.text.style!.fontSize, 56.0);
+  });
+
+  testWidgets('provides semantics information for hour/minute mode announcement', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(TimePickerDialog)),
+    );
+    final Finder semanticsFinder = find.bySemanticsLabel(
+      localizations.timePickerHourModeAnnouncement,
+    );
+
+    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
+    expect(
+      semanticsNode.label,
+      localizations.timePickerHourModeAnnouncement,
+      reason: 'Label should announce hour mode initially',
+    );
+    expect(
+      semanticsNode.hasFlag(SemanticsFlag.isLiveRegion),
+      isTrue,
+      reason: 'Node should be a live region to announce changes',
+    );
+
+    // --- Switch to minute mode ---
+    final Finder minuteControlInkWell = find.descendant(
+      of: _minuteControl,
+      matching: find.byType(InkWell),
+    );
+    expect(minuteControlInkWell, findsOneWidget, reason: 'Minute control should exist');
+    await tester.tap(minuteControlInkWell);
+    await tester.pumpAndSettle();
+
+    // Get the updated node properties
+    expect(
+      semanticsNode.label,
+      localizations.timePickerMinuteModeAnnouncement,
+      reason: 'Label should announce minute mode after switching',
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for the header (selected time)', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TimeOfDay initialTime = TimeOfDay(hour: 7, minute: 15);
+
+    await mediaQueryBoilerplate(
+      tester,
+      initialTime: initialTime,
+      materialType: MaterialType.material3,
+    );
+
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(TimePickerDialog)),
+    );
+    final String expectedLabel12Hour = localizations.formatTimeOfDay(initialTime);
+    final String expectedHelpText = localizations.timePickerDialHelpText;
+
+    expect(
+      semantics,
+      includesNodeWith(label: '$expectedLabel12Hour\n$expectedHelpText'),
+      reason: 'Header should have semantics label: $expectedLabel12Hour (12-hour)',
+    );
+
+    semantics.dispose();
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/153549.
