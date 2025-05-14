@@ -64,9 +64,6 @@ import 'theme.dart';
 ///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.2.dart **
 /// {@end-tool}
-///
-/// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **
-/// {@end-tool}
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
   ///
@@ -307,6 +304,9 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// {@tool dartpad}
   ///
+  ///
+  /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.build_default_drag_handles.0.dart **
+  /// {@end-tool}
   final bool buildDefaultDragHandles;
 
   /// {@macro flutter.widgets.reorderable_list.padding}
