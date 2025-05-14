@@ -19,18 +19,26 @@ def flutter_ios_podfile_setup; end
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_macos_podfile_setup; end
 
+
+# Cache for dependency checks
+$cache = {}
+
 # Determine whether the target depends on Flutter (including transitive dependency)
 def depends_on_flutter(target, engine_pod_name)
-  target.dependencies.any? do |dependency|
-    if dependency.name == engine_pod_name
-      return true
-    end
+  # Return cached result if available
+  return $cache[target.name] if $cache.has_key?(target.name)
 
-    if depends_on_flutter(dependency.target, engine_pod_name)
-      return true
+  result = target.dependencies.any? do |dependency|
+    if dependency.name == engine_pod_name
+      true
+    elsif depends_on_flutter(dependency.target, engine_pod_name)
+      true
     end
   end
-  return false
+
+  # Cache the result
+  $cache[target.name] = result
+  return result
 end
 
 # Add iOS build settings to pod targets.
