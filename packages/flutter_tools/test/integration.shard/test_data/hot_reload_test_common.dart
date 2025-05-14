@@ -190,7 +190,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       reloaded = false;
       printOnFailure('subscription cancel...');
       await subscription.cancel();
-    });
+    },
+    // Hot reload on web does not reregister breakpoints correctly yet.
+    // https://github.com/dart-lang/sdk/issues/60186
+    skip: chrome);
 
     testWithoutContext(
       "hot reload doesn't reassemble if paused",
