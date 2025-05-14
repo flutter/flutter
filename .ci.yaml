@@ -176,7 +176,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       shard: tool_integration_tests
       subshard: "1_5"
