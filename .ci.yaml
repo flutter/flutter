@@ -1687,7 +1687,6 @@ targets:
 
   - name: Linux web_benchmarks_ddc_hot_reload
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
