@@ -221,7 +221,7 @@ class ReorderableListView extends StatefulWidget {
   ReorderableListView.separated({
     super.key,
     required IndexedWidgetBuilder itemBuilder,
-    required IndexedWidgetBuilder separatorBuilder,
+    required this.separatorBuilder,
     required int itemCount,
     required this.onReorder,
     this.onReorderStart,
@@ -258,10 +258,9 @@ class ReorderableListView extends StatefulWidget {
          }
        }),
        this.itemCount = _computeActualChildCount(itemCount),
-       this.separatorBuilder = separatorBuilder,
-       this.itemExtent = null,
-       this.itemExtentBuilder = null,
-       this.prototypeItem = null;
+       itemExtent = null,
+       itemExtentBuilder = null,
+       prototypeItem = null;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -443,7 +442,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       // However, the underlying SliverReorderableList expects all children to have keys.
       // If the separator widget (item) doesn't have a key, we provide one.
       if (item.key == null) {
-        return KeyedSubtree(key: ValueKey('__separator_$index'), child: item);
+        return KeyedSubtree(key: ValueKey<String>('__separator_$index'), child: item);
       }
       // Separator already has a key.
       return item;
