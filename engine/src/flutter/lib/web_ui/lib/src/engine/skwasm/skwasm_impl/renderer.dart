@@ -502,7 +502,7 @@ class SkwasmRenderer implements Renderer {
   }
 
   void _dumpDebugInfo(String filePrefix, Map<String, dynamic> json) {
-    final String jsonString = jsonEncode(json);
+    final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
     final blob = createDomBlob([jsonString], {'type': 'application/json'});
     final url = domWindow.URL.createObjectURL(blob);
     final element = domDocument.createElement('a');
