@@ -274,26 +274,39 @@ class CupertinoSheetTransition extends StatefulWidget {
             )
             : child;
 
-    return SlideTransition(
-      position: slideAnimation,
-      child: ScaleTransition(
-        scale: scaleAnimation,
-        filterQuality: FilterQuality.medium,
-        alignment: Alignment.topCenter,
-        child: AnimatedBuilder(
-          animation: radiusAnimation,
-          child: child,
-          builder: (BuildContext context, Widget? child) {
-            return ClipRRect(
-              borderRadius:
-                  !secondaryAnimation.isDismissed
-                      ? radiusAnimation.value
-                      : BorderRadius.circular(0),
-              child: contrastedChild,
-            );
-          },
+    final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+
+    return Stack(
+      children: <Widget>[
+        AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light,
+          ),
+          child: SizedBox(height: topGapHeight, width: double.infinity),
         ),
-      ),
+        SlideTransition(
+          position: slideAnimation,
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            filterQuality: FilterQuality.medium,
+            alignment: Alignment.topCenter,
+            child: AnimatedBuilder(
+              animation: radiusAnimation,
+              child: child,
+              builder: (BuildContext context, Widget? child) {
+                return ClipRRect(
+                  borderRadius:
+                      !secondaryAnimation.isDismissed
+                          ? radiusAnimation.value
+                          : BorderRadius.circular(0),
+                  child: contrastedChild,
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -348,12 +361,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
     _setupAnimation();
   }
 
