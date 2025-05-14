@@ -209,6 +209,10 @@ interface class FlutterTestRunner {
         Uri.file(flutterProject.directory.path),
       );
     } else {
+      // We can't use this directly, but need to manually check
+      // `flutterProject.directory.path` first, as `findPackageConfig` is from a
+      // different package which does not use package:file. This inhibits
+      // mocking the file system.
       projectPackageConfig = await findPackageConfig(
         globals.fs.directory(flutterProject.directory.path),
       );
