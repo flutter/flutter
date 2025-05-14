@@ -320,7 +320,8 @@ class ThemeData with Diagnosticable {
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
-    BottomAppBarTheme? bottomAppBarTheme,
+    // TODO(huycozy): Change the parameter type to BottomAppBarThemeData
+    Object? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
@@ -526,7 +527,16 @@ class ThemeData with Diagnosticable {
     appBarTheme ??= const AppBarTheme();
     badgeTheme ??= const BadgeThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
-    bottomAppBarTheme ??= const BottomAppBarTheme();
+    // TODO(huycozy): Clean this up once the type of `bottomAppBarTheme` is changed to `BottomAppBarThemeData`
+    if (bottomAppBarTheme != null) {
+      if (bottomAppBarTheme is BottomAppBarTheme) {
+        bottomAppBarTheme = bottomAppBarTheme.data;
+      } else if (bottomAppBarTheme is! BottomAppBarThemeData) {
+        throw ArgumentError(
+          'bottomAppBarTheme must be either a BottomAppBarThemeData or a BottomAppBarTheme',
+        );
+      }
+    }
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     cardTheme ??= const CardThemeData();
@@ -620,7 +630,9 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme,
       badgeTheme: badgeTheme,
       bannerTheme: bannerTheme,
-      bottomAppBarTheme: bottomAppBarTheme,
+      // TODO(huycozy): Remove this type cast when bottomAppBarTheme is explicitly set to BottomAppBarThemeData
+      bottomAppBarTheme:
+          (bottomAppBarTheme as BottomAppBarThemeData?) ?? const BottomAppBarThemeData(),
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       buttonTheme: buttonTheme,
@@ -1292,7 +1304,7 @@ class ThemeData with Diagnosticable {
   final MaterialBannerThemeData bannerTheme;
 
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
-  final BottomAppBarTheme bottomAppBarTheme;
+  final BottomAppBarThemeData bottomAppBarTheme;
 
   /// A theme for customizing the appearance and layout of [BottomNavigationBar]
   /// widgets.
@@ -1519,7 +1531,8 @@ class ThemeData with Diagnosticable {
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
-    BottomAppBarTheme? bottomAppBarTheme,
+    // TODO(huycozy): Change the parameter type to BottomAppBarThemeData
+    Object? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
@@ -1638,7 +1651,19 @@ class ThemeData with Diagnosticable {
       appBarTheme: appBarTheme ?? this.appBarTheme,
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
-      bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
+      // TODO(huycozy): Remove these checks when bottomAppBarTheme is a BottomAppBarThemeData
+      bottomAppBarTheme: () {
+        if (bottomAppBarTheme != null) {
+          if (bottomAppBarTheme is BottomAppBarTheme) {
+            return bottomAppBarTheme.data;
+          } else if (bottomAppBarTheme is! BottomAppBarThemeData) {
+            throw ArgumentError(
+              'bottomAppBarTheme must be either a BottomAppBarThemeData or a BottomAppBarTheme',
+            );
+          }
+        }
+        return bottomAppBarTheme as BottomAppBarThemeData? ?? this.bottomAppBarTheme;
+      }(),
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       buttonTheme: buttonTheme ?? this.buttonTheme,
@@ -1955,7 +1980,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       badgeTheme: BadgeThemeData.lerp(a.badgeTheme, b.badgeTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
-      bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
+      bottomAppBarTheme: BottomAppBarThemeData.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(
         a.bottomNavigationBarTheme,
         b.bottomNavigationBarTheme,
@@ -2036,7 +2061,6 @@ class ThemeData with Diagnosticable {
         // order in every place that they are separated by section comments (e.g.
         // GENERAL CONFIGURATION). Each section except for deprecations should be
         // alphabetical by symbol name.
-        // GENERAL CONFIGURATION
         mapEquals(other.adaptationMap, adaptationMap) &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
@@ -2529,7 +2553,7 @@ class ThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<BottomAppBarTheme>(
+      DiagnosticsProperty<BottomAppBarThemeData>(
         'bottomAppBarTheme',
         bottomAppBarTheme,
         defaultValue: defaultData.bottomAppBarTheme,
@@ -2925,6 +2949,8 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         _cupertinoOverrideTheme.textTheme,
         _cupertinoOverrideTheme.barBackgroundColor,
         _cupertinoOverrideTheme.scaffoldBackgroundColor,
+        _cupertinoOverrideTheme.selectionHandleColor ??
+            _materialTheme.textSelectionTheme.selectionHandleColor,
         _cupertinoOverrideTheme.applyThemeToAll,
       );
 
@@ -2964,6 +2990,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
   }) {
     return MaterialBasedCupertinoThemeData._(
@@ -2975,6 +3002,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         textTheme: textTheme,
         barBackgroundColor: barBackgroundColor,
         scaffoldBackgroundColor: scaffoldBackgroundColor,
+        selectionHandleColor: selectionHandleColor,
         applyThemeToAll: applyThemeToAll,
       ),
     );

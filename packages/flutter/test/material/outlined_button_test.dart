@@ -2,11 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -41,7 +47,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -88,7 +94,7 @@ void main() {
     // No change vs enabled and not pressed.
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -134,7 +140,7 @@ void main() {
 
     material = tester.widget<Material>(iconButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -167,7 +173,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1121,7 +1127,8 @@ void main() {
             alignment: Alignment.topLeft,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                shape: const RoundedRectangleBorder(), // default border radius is 0
+                shape: const RoundedRectangleBorder(),
+                // default border radius is 0
                 backgroundColor: fillColor,
                 minimumSize: const Size(64, 36),
               ).copyWith(
@@ -2953,5 +2960,33 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  testWidgets("OutlinedButton's outline should be behind its child", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/167431
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(backgroundColor: Colors.transparent),
+                onPressed: () {},
+                child: const Badge(
+                  backgroundColor: Colors.green,
+                  label: Text('Ad', style: TextStyle(fontSize: 18, color: Colors.red)),
+                  child: Icon(Icons.lightbulb_rounded),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(OutlinedButton),
+      matchesGoldenFile('outlined_button.badge.outline.png'),
+    );
   });
 }

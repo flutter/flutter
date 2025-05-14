@@ -2579,13 +2579,28 @@ void _testSelectables() {
           id: 2,
           isSelectable: true,
           isSelected: false,
+          role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
           isSelectable: true,
           isSelected: true,
+          role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+        // Add two new nodes to test the aria-current fallback
+        tester.updateNode(
+          id: 4,
+          isSelectable: true,
+          isSelected: false,
+          rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+        ),
+        tester.updateNode(
+          id: 5,
+          isSelectable: true,
+          isSelected: true,
+          rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
     );
@@ -2594,35 +2609,55 @@ void _testSelectables() {
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="false"></sem>
-    <sem aria-selected="true"></sem>
+    <sem role="row" aria-selected="false"></sem>
+    <sem role="tab" aria-selected="true"></sem>
+    <sem aria-current="false"></sem>
+    <sem aria-current="true"></sem>
 </sem>
 ''');
 
     // Missing attributes cannot be expressed using HTML patterns, so check directly.
-    final nonSelectable = owner().debugSemanticsTree![1]!.element;
+    final nonSelectable = owner().debugSemanticsTree![0]!.element;
     expect(nonSelectable.getAttribute('aria-selected'), isNull);
+    expect(nonSelectable.getAttribute('aria-current'), isNull);
 
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
       isSelectable: true,
       isSelected: true,
+      role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
       isSelectable: true,
       isSelected: false,
+      role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    // Flip the values for the aria-current fallback nodes
+    tester.updateNode(
+      id: 4,
+      isSelectable: true,
+      isSelected: true,
+      rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+    );
+    tester.updateNode(
+      id: 5,
+      isSelectable: true,
+      isSelected: false,
+      rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="true"></sem>
-    <sem aria-selected="false"></sem>
+    <sem role="row" aria-selected="true"></sem>
+    <sem role="tab" aria-selected="false"></sem>
+    <sem aria-current="true"></sem>
+    <sem aria-current="false"></sem>
 </sem>
 ''');
 
@@ -3456,7 +3491,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a route label"><sem></sem></sem>
+      <sem aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3493,9 +3528,8 @@ void _testRoute() {
       'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled route, but it is missing the label. A route should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
     ]);
 
-    // But still sets the dialog role.
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label=""><sem></sem></sem>
+      <sem aria-label=""><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3526,7 +3560,7 @@ void _testRoute() {
       tester.apply();
 
       expectSemanticsTree(owner(), '''
-        <sem role="dialog" aria-describedby="flt-semantic-node-2">
+        <sem aria-describedby="flt-semantic-node-2">
             <sem>
                 <sem><span>$label</span></sem>
             </sem>
@@ -3548,7 +3582,7 @@ void _testRoute() {
     semantics().semanticsEnabled = false;
   });
 
-  test('scopesRoute alone sets the SemanticRoute role and "dialog" ARIA role with no label', () {
+  test('scopesRoute alone sets the SemanticRoute role and with no label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3558,7 +3592,7 @@ void _testRoute() {
     tester.apply();
 
     expectSemanticsTree(owner(), '''
-      <sem role="dialog"></sem>
+      <sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
