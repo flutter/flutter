@@ -33,6 +33,28 @@ TEST(DisplayListPathBuilder, SetFillType) {
   EXPECT_EQ(path.GetFillType(), DlPathFillType::kOdd);
 }
 
+TEST(DisplayListPathBuilder, CopyPathDoesNotResetPath) {
+  DlPathBuilder builder;
+  builder.SetFillType(DlPathFillType::kOdd);
+  builder.MoveTo(DlPoint(10, 10));
+  builder.LineTo(DlPoint(20, 10));
+  builder.QuadraticCurveTo(DlPoint(20, 20), DlPoint(10, 20));
+  DlPath before_path = builder.CopyPath();
+
+  EXPECT_FALSE(before_path.IsEmpty());
+  EXPECT_EQ(before_path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
+  EXPECT_NE(before_path, DlPath());
+  EXPECT_EQ(before_path.GetFillType(), DlPathFillType::kOdd);
+
+  DlPath after_path = builder.TakePath();
+
+  EXPECT_FALSE(after_path.IsEmpty());
+  EXPECT_EQ(after_path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
+  EXPECT_NE(after_path, DlPath());
+  EXPECT_EQ(after_path, before_path);
+  EXPECT_EQ(after_path.GetFillType(), DlPathFillType::kOdd);
+}
+
 TEST(DisplayListPathBuilder, TakePathResetsPath) {
   DlPathBuilder builder;
   builder.SetFillType(DlPathFillType::kOdd);

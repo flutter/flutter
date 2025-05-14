@@ -123,6 +123,10 @@ class DlPathBuilder {
   ///         the fill type of the indicated path.
   DlPathBuilder& AddPath(const DlPath& path);
 
+  /// @brief  Returns the path constructed by this path builder so far and
+  ///         retains all current geometry to continue building the path.
+  const DlPath CopyPath();
+
   /// @brief  Returns the path constructed by this path builder and resets
   ///         its internal state to the default state when it was constructed.
   const DlPath TakePath();

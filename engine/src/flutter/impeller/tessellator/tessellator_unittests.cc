@@ -13,84 +13,85 @@
 namespace impeller {
 namespace testing {
 
-// TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
-//   // Zero points.
-//   {
-//     TessellatorLibtess t;
-//     auto path =
-//         flutter::DlPathBuilder{}.SetFillType(FillType::kOdd).TakePath();
-//     TessellatorLibtess::Result result = t.Tessellate(
-//         path, 1.0f,
-//         [](const float* vertices, size_t vertices_count,
-//            const uint16_t* indices, size_t indices_count) { return true; });
+TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
+  // Zero points.
+  {
+    TessellatorLibtess t;
+    auto path = flutter::DlPathBuilder{}  //
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
+    TessellatorLibtess::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
 
-//     ASSERT_EQ(result, TessellatorLibtess::Result::kInputError);
-//   }
+    ASSERT_EQ(result, TessellatorLibtess::Result::kInputError);
+  }
 
-//   // One point.
-//   {
-//     TessellatorLibtess t;
-//     auto path = flutter::DlPathBuilder{}
-//                     .LineTo({0, 0})
-//                     .SetFillType(FillType::kOdd)
-//                     .TakePath();
-//     TessellatorLibtess::Result result = t.Tessellate(
-//         path, 1.0f,
-//         [](const float* vertices, size_t vertices_count,
-//            const uint16_t* indices, size_t indices_count) { return true; });
+  // One point.
+  {
+    TessellatorLibtess t;
+    auto path = flutter::DlPathBuilder{}
+                    .LineTo({0, 0})
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
+    TessellatorLibtess::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
 
-//     ASSERT_EQ(result, TessellatorLibtess::Result::kSuccess);
-//   }
+    ASSERT_EQ(result, TessellatorLibtess::Result::kSuccess);
+  }
 
-//   // Two points.
-//   {
-//     TessellatorLibtess t;
-//     auto path = flutter::DlPathBuilder{}
-//                     .MoveTo({0, 0})
-//                     .LineTo({0, 1})
-//                     .SetFillType(FillType::kOdd)
-//                     .TakePath();
-//     TessellatorLibtess::Result result = t.Tessellate(
-//         path, 1.0f,
-//         [](const float* vertices, size_t vertices_count,
-//            const uint16_t* indices, size_t indices_count) { return true; });
+  // Two points.
+  {
+    TessellatorLibtess t;
+    auto path = flutter::DlPathBuilder{}
+                    .MoveTo({0, 0})
+                    .LineTo({0, 1})
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
+    TessellatorLibtess::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
 
-//     ASSERT_EQ(result, TessellatorLibtess::Result::kSuccess);
-//   }
+    ASSERT_EQ(result, TessellatorLibtess::Result::kSuccess);
+  }
 
-//   // Many points.
-//   {
-//     TessellatorLibtess t;
-//     flutter::DlPathBuilder builder;
-//     for (int i = 0; i < 1000; i++) {
-//       auto coord = i * 1.0f;
-//       builder.MoveTo({coord, coord}).LineTo({coord + 1, coord + 1});
-//     }
-//     auto path = builder.SetFillType(FillType::kOdd).TakePath();
-//     TessellatorLibtess::Result result = t.Tessellate(
-//         path, 1.0f,
-//         [](const float* vertices, size_t vertices_count,
-//            const uint16_t* indices, size_t indices_count) { return true; });
+  // Many points.
+  {
+    TessellatorLibtess t;
+    flutter::DlPathBuilder builder;
+    for (int i = 0; i < 1000; i++) {
+      auto coord = i * 1.0f;
+      builder.MoveTo({coord, coord}).LineTo({coord + 1, coord + 1});
+    }
+    auto path = builder.SetFillType(FillType::kOdd).TakePath();
+    TessellatorLibtess::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
 
-//     ASSERT_EQ(result, TessellatorLibtess::Result::kSuccess);
-//   }
+    ASSERT_EQ(result, TessellatorLibtess::Result::kSuccess);
+  }
 
-//   // Closure fails.
-//   {
-//     TessellatorLibtess t;
-//     auto path = flutter::DlPathBuilder{}
-//                     .MoveTo({0, 0})
-//                     .LineTo({0, 1})
-//                     .SetFillType(FillType::kOdd)
-//                     .TakePath();
-//     TessellatorLibtess::Result result = t.Tessellate(
-//         path, 1.0f,
-//         [](const float* vertices, size_t vertices_count,
-//            const uint16_t* indices, size_t indices_count) { return false; });
+  // Closure fails.
+  {
+    TessellatorLibtess t;
+    auto path = flutter::DlPathBuilder{}
+                    .MoveTo({0, 0})
+                    .LineTo({0, 1})
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
+    TessellatorLibtess::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return false; });
 
-//     ASSERT_EQ(result, TessellatorLibtess::Result::kInputError);
-//   }
-// }
+    ASSERT_EQ(result, TessellatorLibtess::Result::kInputError);
+  }
+}
 
 TEST(TessellatorTest, TessellateConvex) {
   {

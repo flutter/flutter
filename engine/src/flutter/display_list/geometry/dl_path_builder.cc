@@ -138,6 +138,10 @@ DlPathBuilder& DlPathBuilder::AddPath(const DlPath& path) {
   return *this;
 }
 
+const DlPath DlPathBuilder::CopyPath() {
+  return DlPath(path_);
+}
+
 const DlPath DlPathBuilder::TakePath() {
   DlPath path = DlPath(path_);
   path_.reset();

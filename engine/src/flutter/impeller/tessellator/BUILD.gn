@@ -29,6 +29,7 @@ impeller_component("tessellator_libtess") {
   public_deps = [ "../geometry" ]
 
   deps = [
+    ":tessellator",
     "../core",
     "//flutter/fml",
     "//third_party/libtess2",
@@ -44,14 +45,15 @@ impeller_component("tessellator_shared") {
   }
 
   sources = [
-    # "c/tessellator.cc",
-    # "c/tessellator.h",
+    "c/tessellator.cc",
+    "c/tessellator.h",
   ]
 
   deps = [
     ":tessellator_libtess",
     "../core",
     "../geometry",
+    "//flutter/display_list:display_list",
     "//flutter/fml",
     "//third_party/libtess2",
   ]
@@ -65,7 +67,7 @@ impeller_component("tessellator_unittests") {
   testonly = true
   sources = [
     "path_tessellator_unittests.cc",
-    # "tessellator_unittests.cc",
+    "tessellator_unittests.cc",
   ]
   deps = [
     ":tessellator_libtess",
