@@ -564,9 +564,7 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _kWeightPostCommit = 1 - _kWeightPreCommit;
   static const double _kScreenWidthDivisionFactor = 20.0;
   static const double _kXShiftAdjustment = 8.0;
-  static const Duration _kCommitDuration = Duration(
-    milliseconds: 100,
-  );
+  static const Duration _kCommitDuration = Duration(milliseconds: 100);
 
   final Animatable<double> _primaryOpacityTween = Tween<double>(
     begin: _kOpacityStartTransition,
