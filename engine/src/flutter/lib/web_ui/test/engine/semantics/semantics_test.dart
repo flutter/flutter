@@ -299,6 +299,14 @@ void _testEngineAccessibilityBuilder() {
     expect(features.onOffSwitchLabels, isTrue);
   });
 
+  test('announce', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.announce
+    expect(features.announce, isTrue);
+    builder.announce = false;
+    features = builder.build();
+    expect(features.announce, isFalse);
+  });
+
   test('reduce motion', () {
     expect(features.reduceMotion, isFalse);
     builder.reduceMotion = true;
@@ -391,7 +399,10 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0);
+    // Announce is an inverted check, see EngineAccessibilityFeatures.announce.
+    // Therefore, we need to ensure that the original copy starts with false (1 << 7).
+    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0 | 1 << 7);
+
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
     expect(copy.boldText, false);
@@ -399,6 +410,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(boldText: true);
@@ -417,6 +429,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(highContrast: true);
@@ -426,6 +439,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, true);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(invertColors: true);
@@ -435,6 +449,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, true);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(onOffSwitchLabels: true);
@@ -446,6 +461,16 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, true);
     expect(copy.reduceMotion, false);
 
+    copy = original.copyWith(announce: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, true);
+    expect(copy.reduceMotion, false);
+
     copy = original.copyWith(reduceMotion: true);
     expect(copy.accessibleNavigation, false);
     expect(copy.boldText, false);
@@ -453,6 +478,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, true);
   });
 
