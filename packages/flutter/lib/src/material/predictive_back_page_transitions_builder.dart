@@ -558,7 +558,8 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _kScaleCommit = 0.95;
   static const double _kOpacityFullyOpened = 1.0;
   static const double _kOpacityStartTransition = 0.95;
-  // TODO(justinmc): This commit is a misnomer.
+  // The point at which the drag would cause a commit instead of a cancel if it
+  // were released.
   static const double _kCommitAt = 0.65;
   static const double _kWeightPreCommit = _kCommitAt;
   static const double _kWeightPostCommit = 1 - _kWeightPreCommit;
