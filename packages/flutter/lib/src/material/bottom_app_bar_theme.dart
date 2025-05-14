@@ -15,11 +15,11 @@ import 'theme.dart';
 
 /// Defines default property values for descendant [BottomAppBar] widgets.
 ///
-/// Descendant widgets obtain the current [BottomAppBarTheme] object using
-/// `BottomAppBarTheme.of(context)`. Instances of [BottomAppBarTheme] can be
-/// customized with [BottomAppBarTheme.copyWith].
+/// Descendant widgets obtain the current [BottomAppBarThemeData] object using
+/// `[BottomAppBarTheme.of]`. Instances of [BottomAppBarThemeData] can be
+/// customized with [BottomAppBarThemeData.copyWith].
 ///
-/// Typically a [BottomAppBarTheme] is specified as part of the overall [Theme]
+/// Typically a [BottomAppBarThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.bottomAppBarTheme].
 ///
 /// All [BottomAppBarTheme] properties are `null` by default. When null, the
@@ -157,7 +157,7 @@ class BottomAppBarTheme extends InheritedTheme with Diagnosticable {
     );
   }
 
-  /// Returns the closest [BottomAppBarTheme] instance given the build context.
+  /// Returns the closest [BottomAppBarThemeData] instance given the build context.
   static BottomAppBarThemeData of(BuildContext context) {
     final BottomAppBarTheme? bottomAppBarTheme =
         context.dependOnInheritedWidgetOfExactType<BottomAppBarTheme>();
@@ -197,7 +197,7 @@ class BottomAppBarTheme extends InheritedTheme with Diagnosticable {
 /// Defines default property values for descendant [BottomAppBar] widgets.
 ///
 /// Descendant widgets obtain the current [BottomAppBarThemeData] object using
-/// `BottomAppBarTheme.of(context).data`. Instances of [BottomAppBarThemeData] can be
+/// [BottomAppBarTheme.of]. Instances of [BottomAppBarThemeData] can be
 /// customized with [BottomAppBarThemeData.copyWith].
 ///
 /// Typically a [BottomAppBarThemeData] is specified as part of the overall [Theme]
