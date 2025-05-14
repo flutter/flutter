@@ -1594,6 +1594,24 @@ void main() {
       );
     });
 
+    testWidgets('ReorderableListView.separated asserts on negative childCount', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        () => ReorderableListView.separated(
+          itemBuilder: (BuildContext context, int index) {
+            return const SizedBox();
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return const Divider();
+          },
+          itemCount: -1,
+          onReorder: (int from, int to) {},
+        ),
+        throwsAssertionError,
+      );
+    });
+
     testWidgets('ReorderableListView.builder only creates the children it needs', (
       WidgetTester tester,
     ) async {
@@ -1613,6 +1631,40 @@ void main() {
 
       // Should have only created the first 18 items.
       expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
+    });
+
+    testWidgets('ReorderableListView.separated only creates the children and separators it needs', (
+      WidgetTester tester,
+    ) async {
+      final Set<int> itemsCreated = <int>{};
+      final Set<int> separatorsCreated = <int>{};
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              itemsCreated.add(index);
+              return Text(index.toString(), key: ValueKey<int>(index));
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              separatorsCreated.add(index);
+              return Divider(key: ValueKey<String>('divider_$index'));
+            },
+            itemCount: 1000,
+            onReorder: (int from, int to) {},
+          ),
+        ),
+      );
+
+      // Should have only created the first 18 items and 17 separators.
+      expect(itemsCreated.length, 14);
+      expect(separatorsCreated.length, 13);
+      // Verify the indices are contiguous and start from 0
+      for (int i = 0; i < itemsCreated.length; i++) {
+        expect(itemsCreated.contains(i), isTrue);
+      }
+      for (int i = 0; i < separatorsCreated.length; i++) {
+        expect(separatorsCreated.contains(i), isTrue);
+      }
     });
 
     group('Padding', () {

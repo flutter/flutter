@@ -364,6 +364,18 @@ class ReorderableListView extends StatefulWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.widgets.list_view.itemExtent}
+  /// This is not used by the [ReorderableListView.separated] constructor.
+  final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  /// This is not used by the [ReorderableListView.separated] constructor.
+  final ItemExtentBuilder? itemExtentBuilder;
+
+  /// {@macro flutter.widgets.list_view.prototypeItem}
+  /// This is not used by the [ReorderableListView.separated] constructor.
+  final Widget? prototypeItem;
+
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
   ///
   /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
@@ -413,7 +425,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         // might not have keys or might have non-GlobalKeys.
         // This assertion should only apply to actual reorderable items.
         if (widget.separatorBuilder == null || index.isEven) {
-          throw FlutterError('Every reorderable item of ReorderableListView must have a key.');
+          throw FlutterError('Every item of ReorderableListView must have a key.');
         }
       }
       return true;
