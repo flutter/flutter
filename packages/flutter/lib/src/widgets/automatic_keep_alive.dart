@@ -27,13 +27,15 @@ import 'sliver.dart';
 ///
 /// To send these notifications, consider using [AutomaticKeepAliveClientMixin].
 ///
+/// {@template flutter.widgets.AutomaticKeepAlive.example}
+///
 /// {@tool dartpad}
 /// This sample demonstrates how to use the [AutomaticKeepAlive] widget in
 /// combination with the [AutomaticKeepAliveClientMixin] to selectively preserve
 /// the state of individual items in a scrollable list.
 ///
 /// Normally, widgets in a lazily built list like [ListView.builder] are
-/// disposed of when they leave the visible area to save resources. This means
+/// disposed of when they leave the visible area to maintain performance. This means
 /// that any state inside a [StatefulWidget] would be lost unless explicitly
 /// preserved.
 ///
@@ -49,6 +51,7 @@ import 'sliver.dart';
 ///
 /// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive.0.dart **
 /// {@end-tool}
+/// {@endtemplate}
 ///
 /// See also:
 ///

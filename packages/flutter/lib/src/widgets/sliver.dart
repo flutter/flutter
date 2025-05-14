@@ -1458,11 +1458,12 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// The same `addAutomaticKeepAlives` feature is supported by
 /// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
 ///
-/// To manage keep-alive behavior, you can use [KeepAlive] directly or rely on
-/// notifications. For convenience, you can also mix
-/// [AutomaticKeepAliveClientMixin] into your [State]. See the documentation for
-/// [AutomaticKeepAliveClientMixin] for more details.
+/// Keep-alive behavior can be managed by using [KeepAlive] directly or by
+/// relying on notifications. For convenience, [AutomaticKeepAliveClientMixin]
+/// may be mixed into a [State] subclass. Further details are available in the
+/// documentation for [AutomaticKeepAliveClientMixin].
 ///
+/// {@template flutter.widgets.KeepAlive.example}
 /// {@tool dartpad}
 /// This sample demonstrates how to use the [KeepAlive] widget
 /// to preserve the state of individual list items in a [ListView] when they are
@@ -1485,6 +1486,7 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 ///
 /// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
 /// {@end-tool}
+/// {@endtemplate}
 ///
 /// See also:
 ///
