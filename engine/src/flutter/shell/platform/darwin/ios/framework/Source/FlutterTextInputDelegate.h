@@ -35,44 +35,44 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 };
 
 @protocol FlutterTextInputDelegate <NSObject>
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+- (void)flutterTextInputView:( FlutterTextInputView* _Nonnull)textInputView
          updateEditingClient:(int)client
-                   withState:(NSDictionary*)state;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+                   withState:(NSDictionary* _Nonnull)state;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
          updateEditingClient:(int)client
-                   withState:(NSDictionary*)state
-                     withTag:(NSString*)tag;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+                   withState:(NSDictionary* _Nonnull)state
+                     withTag:(NSString* _Nonnull)tag;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
          updateEditingClient:(int)client
-                   withDelta:(NSDictionary*)state;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+                   withDelta:(NSDictionary* _Nonnull)state;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
                performAction:(FlutterTextInputAction)action
                   withClient:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
         updateFloatingCursor:(FlutterFloatingCursorDragState)state
                   withClient:(int)client
-                withPosition:(NSDictionary*)point;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+                withPosition:(NSDictionary* _Nonnull)point;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
     showAutocorrectionPromptRectForStart:(NSUInteger)start
                                      end:(NSUInteger)end
                               withClient:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView showToolbar:(int)client;
-- (void)flutterTextInputViewScribbleInteractionBegan:(FlutterTextInputView*)textInputView;
-- (void)flutterTextInputViewScribbleInteractionFinished:(FlutterTextInputView*)textInputView;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView showToolbar:(int)client;
+- (void)flutterTextInputViewScribbleInteractionBegan:(FlutterTextInputView* _Nonnull)textInputView;
+- (void)flutterTextInputViewScribbleInteractionFinished:(FlutterTextInputView* _Nonnull)textInputView;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
     insertTextPlaceholderWithSize:(CGSize)size
                        withClient:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView removeTextPlaceholder:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView removeTextPlaceholder:(int)client;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
     didResignFirstResponderWithTextInputClient:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
     willDismissEditMenuWithTextInputClient:(int)client;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
-           shareSelectedText:(NSString*)selectedText;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
-    searchWebWithSelectedText:(NSString*)selectedText;
-- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
-          lookUpSelectedText:(NSString*)selectedText;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
+           shareSelectedText:(NSString*  _Nonnull)selectedText;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
+    searchWebWithSelectedText:(NSString*  _Nonnull)selectedText;
+- (void)flutterTextInputView:(FlutterTextInputView* _Nonnull)textInputView
+          lookUpSelectedText:(NSString* _Nonnull)selectedText;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTDELEGATE_H_

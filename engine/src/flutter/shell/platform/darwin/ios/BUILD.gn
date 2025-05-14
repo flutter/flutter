@@ -200,12 +200,17 @@ if (enable_ios_unittests) {
     testonly = true
     visibility = [ ":*" ]
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    bridge_header = "framework/Source/Source-Bridging-Header.h"
     sources = [
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
+      "framework/Source/UITextInputEditingStateTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
-    deps = [ ":InternalFlutterSwift" ]
+    deps = [
+      ":InternalFlutterSwift",
+      ":flutter_framework_source",
+    ]
   }
 
   shared_library("ios_test_flutter") {
