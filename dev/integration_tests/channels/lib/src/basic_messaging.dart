@@ -36,7 +36,7 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
       _dateTime => DateTime.fromMillisecondsSinceEpoch(buffer.getInt64()),
       _pair => Pair(readValue(buffer), readValue(buffer)),
       _ => super.readValueOfType(type, buffer),
-    };
+    }
   }
 }
 

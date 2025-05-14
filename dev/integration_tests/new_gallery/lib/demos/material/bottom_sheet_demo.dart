@@ -17,14 +17,14 @@ class BottomSheetDemo extends StatelessWidget {
     return switch (type) {
       BottomSheetDemoType.persistent => localizations.demoBottomSheetPersistentTitle,
       BottomSheetDemoType.modal => localizations.demoBottomSheetModalTitle,
-    };
+    }
   }
 
   Widget _bottomSheetDemo(BuildContext context) {
     return switch (type) {
       BottomSheetDemoType.persistent => _PersistentBottomSheetDemo(),
       BottomSheetDemoType.modal => _ModalBottomSheetDemo(),
-    };
+    }
   }
 
   @override

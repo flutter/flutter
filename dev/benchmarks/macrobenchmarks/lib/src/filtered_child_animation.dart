@@ -59,7 +59,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     setState(() => _filterType = selected ? type : null);
   }
 
-  String get _title => switch (_filterType) {
+  String get _title => switch (filterType) {
     FilterType.opacity => 'Fading Child Animation',
     FilterType.rotateTransform => 'Transformed Child Animation',
     FilterType.rotateFilter => 'Matrix Filtered Child Animation',

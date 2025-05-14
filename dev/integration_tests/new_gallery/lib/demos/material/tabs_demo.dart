@@ -16,7 +16,7 @@ class TabsDemo extends StatelessWidget {
     return switch (type) {
       TabsDemoType.scrollable => _TabsScrollableDemo(),
       TabsDemoType.nonScrollable => _TabsNonScrollableDemo(),
-    };
+    }
   }
 }
 

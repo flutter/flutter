@@ -318,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         in widgetSpanSourceMap.entries)
                       Padding(
                         padding: const EdgeInsets.only(left: 20.0),
-                        child: Text.rich(widgetSpanSourceMap[entry.key]!),
+                        child: Text.rich(widgetSpanSourceMap[entry.key]),
                       ),
                   ],
                 ),

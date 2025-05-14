@@ -144,7 +144,7 @@ class Version {
       VersionType.latest ||
       VersionType.gitDescribe ||
       VersionType.development => VersionType.development,
-    };
+    }
 
     switch (increment) {
       case 'x':
@@ -273,6 +273,6 @@ class Version {
       VersionType.development => '$x.$y.$z-$m.$n.pre',
       VersionType.latest => '$x.$y.$z-$m.$n.pre.$commits',
       VersionType.gitDescribe => '$x.$y.$z-$m.$n.pre.$commits',
-    };
+    }
   }
 }

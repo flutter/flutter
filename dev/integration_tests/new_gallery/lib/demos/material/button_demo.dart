@@ -19,7 +19,7 @@ class ButtonDemo extends StatelessWidget {
       ButtonDemoType.outlined => localizations.demoOutlinedButtonTitle,
       ButtonDemoType.toggle => localizations.demoToggleButtonTitle,
       ButtonDemoType.floating => localizations.demoFloatingButtonTitle,
-    };
+    }
   }
 
   @override

@@ -245,7 +245,7 @@ class StartContext extends Context {
       VersionType.development ||
       VersionType.gitDescribe ||
       VersionType.latest => ReleaseType.STABLE_INITIAL,
-    };
+    }
   }
 
   Future<void> run() async {
@@ -376,7 +376,7 @@ class StartContext extends Context {
       ReleaseType.STABLE_HOTFIX => Version.increment(lastVersion, 'z'),
       ReleaseType.BETA_INITIAL => Version.fromCandidateBranch(candidateBranch),
       ReleaseType.BETA_HOTFIX || _ => Version.increment(lastVersion, 'n'),
-    };
+    }
   }
 
   /// Ensures the branch point [candidateBranch] and `master` has a version tag.

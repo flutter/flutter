@@ -11030,7 +11030,7 @@ void main() {
 
           // TextAlignVertical.center is specified so `child` needs to be centered
           // in the available space.
-          final double childMargin = (childVerticalSpaceAffordance - childHeight) / 2;
+          const double childMargin = (childVerticalSpaceAffordance - childHeight) / 2;
           const double childTop =
               visualDensity.baseSizeAdjustment.dy / 2.0 + contentPadding.top + childMargin;
 

@@ -269,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
             _image = value;
           }),
         );
-      case Setup.image ||
+      const (case Setup.image ||
           Setup.blur ||
           Setup.none ||
           Setup.container ||
@@ -277,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Setup.radialGradient ||
           Setup.conicalGradient ||
           Setup.sweepGradient:
-        break;
+        break;)
     }
     super.initState();
   }

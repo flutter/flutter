@@ -217,7 +217,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       2 => 192.0,
       3 => 248.0,
       _ => 278.0,
-    };
+    }
   }
 
   // Returns true if the cart is open or opening and false otherwise.

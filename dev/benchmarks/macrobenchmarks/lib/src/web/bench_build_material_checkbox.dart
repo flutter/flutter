@@ -35,7 +35,7 @@ class BenchBuildMaterialCheckbox extends WidgetBuildRecorder {
       null => true,
       true => false,
       false => null,
-    };
+    }
 
     return Row(
       children: List<Widget>.generate(10, (int i) {

@@ -2705,11 +2705,11 @@ void main() {
     );
     expect(
       tester.getRect(find.byKey(icon0)),
-      Rect.fromLTRB(100.0, iconTop, 300.0, iconTop + iconHeight),
+      const Rect.fromLTRB(100.0, iconTop, 300.0, iconTop + iconHeight),
     );
     expect(
       tester.getRect(find.byKey(icon1)),
-      Rect.fromLTRB(500.0, iconTop, 700.0, iconTop + iconHeight),
+      const Rect.fromLTRB(500.0, iconTop, 700.0, iconTop + iconHeight),
     );
   }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
@@ -2849,11 +2849,11 @@ void main() {
     );
     expect(
       tester.getRect(find.byKey(icon0)),
-      Rect.fromLTRB(150.0, iconTop, 350.0, iconTop + iconHeight),
+      const Rect.fromLTRB(150.0, iconTop, 350.0, iconTop + iconHeight),
     );
     expect(
       tester.getRect(find.byKey(icon1)),
-      Rect.fromLTRB(450.0, iconTop, 650.0, iconTop + iconHeight),
+      const Rect.fromLTRB(450.0, iconTop, 650.0, iconTop + iconHeight),
     );
   }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 

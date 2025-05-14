@@ -21,7 +21,7 @@ class TestStepResult {
       ConnectionState.waiting => const TestStepResult('Executing', nothing, TestStatus.pending),
       ConnectionState.done => snapshot.data ?? snapshot.error! as TestStepResult,
       ConnectionState.active => throw 'Unsupported state: ConnectionState.active',
-    };
+    }
   }
 
   final String name;

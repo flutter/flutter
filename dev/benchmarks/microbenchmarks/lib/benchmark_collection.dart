@@ -44,28 +44,28 @@ Future<void> main() async {
   // benchmarks run together.
   final BenchmarkingBinding binding = BenchmarkingBinding();
   final List<Benchmark> benchmarks = <Benchmark>[
-    ('foundation/change_notifier_bench.dart', change_notifier_bench.execute),
-    ('foundation/clamp.dart', clamp.execute),
-    ('foundation/platform_asset_bundle.dart', platform_asset_bundle.execute),
-    ('foundation/standard_message_codec_bench.dart', standard_message_codec_bench.execute),
-    ('foundation/standard_method_codec_bench.dart', standard_method_codec_bench.execute),
-    ('foundation/timeline_bench.dart', timeline_bench.execute),
-    ('foundation/decode_and_parse_asset_manifest.dart', decode_and_parse_asset_manifest.execute),
-    ('foundation/observer_list_bench.dart', observer_list_bench.execute),
-    ('geometry/matrix_utils_transform_bench.dart', matrix_utils_transform_bench.execute),
-    ('geometry/rrect_contains_bench.dart', rrect_contains_bench.execute),
-    ('gestures/gesture_detector_bench.dart', gesture_detector_bench.execute),
-    ('gestures/velocity_tracker_bench.dart', velocity_tracker_bench.execute),
-    ('language/compute_bench.dart', compute_bench.execute),
-    ('language/sync_star_bench.dart', sync_star_bench.execute),
-    ('language/sync_star_semantics_bench.dart', sync_star_semantics_bench.execute),
-    ('stocks/animation_bench.dart', () => animation_bench.execute(binding)),
-    ('stocks/build_bench.dart', build_bench.execute),
-    ('stocks/build_bench_profiled.dart', build_bench_profiled.execute),
-    ('stocks/layout_bench.dart', layout_bench.execute),
-    ('ui/image_bench.dart', image_bench.execute),
-    ('layout/text_intrinsic_bench.dart', text_intrinsic_bench.execute),
-    (
+    'foundation/change_notifier_bench.dart', change_notifier_bench.execute,
+    'foundation/clamp.dart', clamp.execute,
+    'foundation/platform_asset_bundle.dart', platform_asset_bundle.execute,
+    'foundation/standard_message_codec_bench.dart', standard_message_codec_bench.execute,
+    'foundation/standard_method_codec_bench.dart', standard_method_codec_bench.execute,
+    'foundation/timeline_bench.dart', timeline_bench.execute,
+    'foundation/decode_and_parse_asset_manifest.dart', decode_and_parse_asset_manifest.execute,
+    'foundation/observer_list_bench.dart', observer_list_bench.execute,
+    'geometry/matrix_utils_transform_bench.dart', matrix_utils_transform_bench.execute,
+    'geometry/rrect_contains_bench.dart', rrect_contains_bench.execute,
+    'gestures/gesture_detector_bench.dart', gesture_detector_bench.execute,
+    'gestures/velocity_tracker_bench.dart', velocity_tracker_bench.execute,
+    'language/compute_bench.dart', compute_bench.execute,
+    'language/sync_star_bench.dart', sync_star_bench.execute,
+    'language/sync_star_semantics_bench.dart', sync_star_semantics_bench.execute,
+    'stocks/animation_bench.dart', () => animation_bench.execute(binding),
+    'stocks/build_bench.dart', build_bench.execute,
+    'stocks/build_bench_profiled.dart', build_bench_profiled.execute,
+    'stocks/layout_bench.dart', layout_bench.execute,
+    'ui/image_bench.dart', image_bench.execute,
+    'layout/text_intrinsic_bench.dart', text_intrinsic_bench.execute,
+    
       'foundation/all_elements_bench.dart',
       () async {
         binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
@@ -73,7 +73,7 @@ Future<void> main() async {
         await SchedulerBinding.instance.endOfFrame;
         await all_elements_bench.execute();
       },
-    ),
+    ,
   ];
 
   // Parses the optional compile-time dart variables; we can't have

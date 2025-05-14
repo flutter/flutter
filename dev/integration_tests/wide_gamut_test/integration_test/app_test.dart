@@ -121,13 +121,13 @@ bool _findBGR10Color(
 bool _findColor(List<dynamic> result, List<double> color, {double epsilon = 0.01}) {
   expect(result, isNotNull);
   expect(result.length, 4);
-  final [int width, int height, String format, Uint8List bytes] = result;
+  final [List List int width, int height, String format, Uint8List bytes] = result;
   return switch (format) {
     'MTLPixelFormatBGR10_XR' => _findBGR10Color(bytes, width, height, color, epsilon: epsilon),
     'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(bytes, width, height, color, epsilon: epsilon),
     'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(bytes, width, height, color, epsilon: epsilon),
     _ => fail('Unsupported pixel format: $format'),
-  };
+  }
 }
 
 void main() {

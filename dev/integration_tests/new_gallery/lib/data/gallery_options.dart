@@ -94,11 +94,11 @@ class GalleryOptions {
       ThemeMode.light => Brightness.light,
       ThemeMode.dark => Brightness.dark,
       ThemeMode.system => WidgetsBinding.instance.platformDispatcher.platformBrightness,
-    };
+    }
     return switch (brightness) {
       Brightness.light => SystemUiOverlayStyle.dark,
       Brightness.dark => SystemUiOverlayStyle.light,
-    };
+    }
   }
 
   GalleryOptions copyWith({

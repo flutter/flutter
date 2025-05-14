@@ -136,7 +136,7 @@ class PaintTest extends CustomPainter {
         < 0 => (paintPos, Offset(x, halfHeight * (1 - waveData[index] / 32768))),
         > 0 => (paintNeg, Offset(x, halfHeight * (1 - waveData[index] / 32767))),
         _ => (paintZero, Offset(x, halfHeight + 1)),
-      };
+      }
       final Offset p0 = Offset(x, halfHeight);
       if (consolidate) {
         if (listPaint != null && listPaint != curPaint) {
@@ -208,7 +208,7 @@ class PaintSomeTest extends CustomPainter {
         < 0 => (paintPos, Offset(x, halfHeight * (1 - waveData[index] / 32768))),
         > 0 => (paintNeg, Offset(x, halfHeight * (1 - waveData[index] / 32767))),
         _ => (paintZero, Offset(x, halfHeight + 1)),
-      };
+      }
       final Offset p0 = Offset(x, halfHeight);
       canvas.drawLine(p0, p1, curPaint);
       x += zoomFactor;

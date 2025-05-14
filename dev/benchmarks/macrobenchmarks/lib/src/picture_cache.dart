@@ -164,7 +164,7 @@ class ListItem extends StatelessWidget {
       < 10000 => count.toString(),
       < 100000 => '${(count / 10000).toStringAsPrecision(2)}w',
       _ => '${(count / 10000).floor()}w',
-    };
+    }
   }
 
   Widget _buildUserInfo() {

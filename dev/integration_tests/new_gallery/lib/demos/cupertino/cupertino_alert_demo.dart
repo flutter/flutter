@@ -95,7 +95,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
       AlertDemoType.alertButtons => localizations.demoCupertinoAlertButtonsTitle,
       AlertDemoType.alertButtonsOnly => localizations.demoCupertinoAlertButtonsOnlyTitle,
       AlertDemoType.actionSheet => localizations.demoCupertinoActionSheetTitle,
-    };
+    }
   }
 
   static Route<String> _alertDemoDialog(BuildContext context, Object? arguments) {

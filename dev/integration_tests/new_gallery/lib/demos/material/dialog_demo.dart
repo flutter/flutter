@@ -73,7 +73,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
       DialogDemoType.alertTitle => localizations.demoAlertTitleDialogTitle,
       DialogDemoType.simple => localizations.demoSimpleDialogTitle,
       DialogDemoType.fullscreen => localizations.demoFullscreenDialogTitle,
-    };
+    }
   }
 
   static Route<String> _alertDialogDemoRoute(BuildContext context, Object? arguments) {

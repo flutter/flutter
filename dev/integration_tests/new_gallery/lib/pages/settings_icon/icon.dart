@@ -36,7 +36,7 @@ class _SettingsIconPainter extends CustomPainter {
     final double dx = switch (Directionality.of(context)) {
       TextDirection.rtl => size.width - unitWidth * _scaling / 2,
       TextDirection.ltr => unitWidth * _scaling / 2,
-    };
+    }
     _center = Offset(dx, size.height - unitHeight * _scaling / 2);
   }
 

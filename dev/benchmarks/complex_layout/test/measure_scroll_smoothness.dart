@@ -72,7 +72,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
       TestScenario.resampleOn59Hz => 'resample on with 59Hz input',
       TestScenario.resampleOff90Hz => 'resample off with 90Hz input',
       TestScenario.resampleOff59Hz => 'resample off with 59Hz input',
-    };
+    }
   }
 
   @override

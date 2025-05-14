@@ -44,7 +44,7 @@ class MailboxBody extends StatelessWidget {
           MailboxPageType.trash => model.trashEmails,
           MailboxPageType.spam => model.spamEmails,
           MailboxPageType.drafts => model.draftEmails,
-        };
+        }
 
         return SafeArea(
           bottom: false,

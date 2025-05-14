@@ -310,11 +310,11 @@ void main() {
       const MethodCall('pushRoute', testRouteName),
     );
     final ByteData result =
-        (await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/navigation',
           message,
           (_) {},
-        ));
+        );
     final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, true);
@@ -336,11 +336,11 @@ void main() {
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
     final ByteData result =
-        (await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/navigation',
           message,
           (_) {},
-        ));
+        );
     final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, true);
@@ -468,11 +468,11 @@ void main() {
     );
 
     final ByteData result =
-        (await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/navigation',
           message,
           (_) {},
-        ));
+        );
     final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);
@@ -485,11 +485,11 @@ void main() {
     );
 
     final ByteData result =
-        (await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/navigation',
           message,
           (_) {},
-        ));
+        );
     final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);
@@ -499,11 +499,11 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
 
     final ByteData result =
-        (await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/navigation',
           message,
           (_) {},
-        ));
+        );
     final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);

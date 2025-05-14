@@ -146,7 +146,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo>
                   TabsDemoStyle.iconsAndText => Tab(text: page.text, icon: Icon(page.icon)),
                   TabsDemoStyle.iconsOnly => Tab(icon: Icon(page.icon)),
                   TabsDemoStyle.textOnly => Tab(text: page.text),
-                };
+                }
               }).toList(),
         ),
       ),

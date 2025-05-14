@@ -155,7 +155,7 @@ String getNewPrLink({
       throw ConductorException(
         'Expected repoName to be one of flutter or engine but got $repoName.',
       ),
-  };
+  }
   final String candidateBranch = repository.candidateBranch;
   final String workingBranch = repository.workingBranch;
   assert(candidateBranch.isNotEmpty);

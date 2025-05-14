@@ -45,7 +45,7 @@ enum GalleryDemoCategory {
       study => null,
       material || cupertino => toString(),
       other => localizations.homeCategoryReference,
-    };
+    }
   }
 }
 

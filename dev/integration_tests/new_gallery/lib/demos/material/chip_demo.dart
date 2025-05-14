@@ -18,7 +18,7 @@ class ChipDemo extends StatelessWidget {
       ChipDemoType.choice => localizations.demoChoiceChipTitle,
       ChipDemoType.filter => localizations.demoFilterChipTitle,
       ChipDemoType.input => localizations.demoInputChipTitle,
-    };
+    }
   }
 
   @override
