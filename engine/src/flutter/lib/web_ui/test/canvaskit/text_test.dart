@@ -84,7 +84,7 @@ void testMain() {
 
     group('test fonts in flutterTester environment', () {
       setUpAll(() {
-        ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.framework());
+        ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
       });
       tearDownAll(() {
         ui_web.TestEnvironment.tearDown();

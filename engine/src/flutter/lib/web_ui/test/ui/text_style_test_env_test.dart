@@ -16,7 +16,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(
     setUpTestViewDimensions: false,
-    testEnvironment: const ui_web.TestEnvironment.framework(),
+    testEnvironment: const ui_web.TestEnvironment.flutterTester(),
   );
 
   // Previously the logic that set the effective font family would forget the

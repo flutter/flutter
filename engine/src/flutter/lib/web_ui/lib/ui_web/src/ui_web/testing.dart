@@ -47,7 +47,7 @@ final class TestEnvironment {
     this.defaultToTestUrlStrategy = false,
   });
 
-  const TestEnvironment.framework()
+  const TestEnvironment.flutterTester()
     : ignorePlatformMessages = true,
       forceTestFonts = true,
       keepSemanticsDisabledOnUpdate = true,
