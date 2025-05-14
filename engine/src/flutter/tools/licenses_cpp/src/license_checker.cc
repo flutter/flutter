@@ -142,6 +142,9 @@ int LicenseChecker::Run(std::string_view working_dir,
     bool did_print_path = false;
     for (const std::string& git_file : git_files.value()) {
       std::filesystem::path full_path = entry / git_file;
+      if (!include_filter->Matches(full_path.string())) {
+        continue;
+      }
       VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
@@ -151,9 +154,6 @@ int LicenseChecker::Run(std::string_view working_dir,
           std::cerr << full_path << " : " << file.status() << std::endl;
           return 1;
         }
-      }
-      if (!include_filter->Matches(full_path.string())) {
-        continue;
       }
       re2::StringPiece input(file->GetData(), file->GetSize());
       re2::StringPiece match;
