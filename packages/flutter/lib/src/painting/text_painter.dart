@@ -1351,10 +1351,10 @@ class TextPainter {
     }
     assert(!_rebuildParagraphForPaint);
 
-    assert(() {
-      return !debugPaintTextLayoutBoxes ||
-          _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset);
-    }());
+    assert(
+      !debugPaintTextLayoutBoxes ||
+          _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset)
+    );
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
   }
 
