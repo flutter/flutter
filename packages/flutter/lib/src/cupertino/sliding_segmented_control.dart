@@ -269,6 +269,10 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
         return Padding(
           padding: _kSeparatorInset,
           child: DecoratedBox(
+            // Although the separator might technically be an RSuperellipse, we
+            // still use an RRect (implicily with BoxDecoration.borderRadius)
+            // here since the radius is too small to make enough visual
+            // difference.
             decoration: BoxDecoration(
               color: _kSeparatorColor.withOpacity(
                 _kSeparatorColor.opacity * separatorOpacityController.value,
@@ -800,8 +804,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         // behavior is eyeballed by the iOS 17.5 simulator.
         clipBehavior: Clip.antiAlias,
         padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(_kCornerRadius),
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
         ),
         child: AnimatedBuilder(
@@ -1347,15 +1351,21 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       BoxShadow(color: Color(0x0A000000), offset: Offset(0, 3), blurRadius: 1),
     ];
 
-    final RRect thumbRRect = RRect.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
+    final RSuperellipse thumbShape = RSuperellipse.fromRectAndRadius(
+      thumbRect.shift(offset),
+      _kThumbRadius,
+    );
 
     for (final BoxShadow shadow in thumbShadow) {
-      context.canvas.drawRRect(thumbRRect.shift(shadow.offset), shadow.toPaint());
+      context.canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint());
     }
 
-    context.canvas.drawRRect(thumbRRect.inflate(0.5), Paint()..color = const Color(0x0A000000));
+    context.canvas.drawRSuperellipse(
+      thumbShape.inflate(0.5),
+      Paint()..color = const Color(0x0A000000),
+    );
 
-    context.canvas.drawRRect(thumbRRect, Paint()..color = thumbColor);
+    context.canvas.drawRSuperellipse(thumbShape, Paint()..color = thumbColor);
   }
 
   @override
