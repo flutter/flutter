@@ -145,18 +145,6 @@ platform_properties:
         }
 
 targets:
-  - name: Linux analyze
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      shard: analyze
-      dependencies: >-
-        [
-          {"dependency": "ktlint", "version": "version_1_5_0"}
-        ]
-      tags: >
-        ["framework","hostonly","shard","linux"]
-
   - name: Mac build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
