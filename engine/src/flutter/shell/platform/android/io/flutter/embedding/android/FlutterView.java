@@ -1164,7 +1164,7 @@ public class FlutterView extends FrameLayout
     // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
     // This allows platform Views to hook into Flutter's overall accessibility system.
     //
-    // this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
+    this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
     this.flutterEngine
         .getPlatformViewsController()
         .attachToFlutterRenderer(this.flutterEngine.getRenderer());
