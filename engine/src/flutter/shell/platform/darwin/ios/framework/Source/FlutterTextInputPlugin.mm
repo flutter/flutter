@@ -12,6 +12,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
@@ -920,7 +921,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (command) {
     [items addObject:command];
   } else {
-    FML_LOG(ERROR) << "Cannot find context menu item of type \"" << type.UTF8String << "\".";
+    NSString* errorMessage =
+        [NSString stringWithFormat:@"Cannot find context menu item of type \"%@\".", type];
+    [FlutterLogger logError:errorMessage];
   }
 }
 
@@ -936,7 +939,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                         propertyList:nil];
     [items addObject:command];
   } else {
-    FML_LOG(ERROR) << "Missing title for context menu item of type \"" << type.UTF8String << "\".";
+    NSString* errorMessage =
+        [NSString stringWithFormat:@"Missing title for context menu item of type \"%@\".", type];
+    [FlutterLogger logError:errorMessage];
   }
 }
 
@@ -1134,15 +1139,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputState:(NSDictionary*)state {
-  if (@available(iOS 13.0, *)) {
-    // [UITextInteraction willMoveToView:] sometimes sets the textInput's inputDelegate
-    // to nil. This is likely a bug in UIKit. In order to inform the keyboard of text
-    // and selection changes when that happens, add a dummy UITextInteraction to this
-    // view so it sets a valid inputDelegate that we can call textWillChange et al. on.
-    // See https://github.com/flutter/engine/pull/32881.
-    if (!self.inputDelegate && self.isFirstResponder) {
-      [self addInteraction:self.textInteraction];
-    }
+  // [UITextInteraction willMoveToView:] sometimes sets the textInput's inputDelegate
+  // to nil. This is likely a bug in UIKit. In order to inform the keyboard of text
+  // and selection changes when that happens, add a dummy UITextInteraction to this
+  // view so it sets a valid inputDelegate that we can call textWillChange et al. on.
+  // See https://github.com/flutter/engine/pull/32881.
+  if (!self.inputDelegate && self.isFirstResponder) {
+    [self addInteraction:self.textInteraction];
   }
 
   NSString* newText = state[@"text"];
@@ -1181,10 +1184,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     [self.inputDelegate textDidChange:self];
   }
 
-  if (@available(iOS 13.0, *)) {
-    if (_textInteraction) {
-      [self removeInteraction:_textInteraction];
-    }
+  if (_textInteraction) {
+    [self removeInteraction:_textInteraction];
   }
 }
 
@@ -2517,6 +2518,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (UIView<UITextInput>*)textInputView {
   return _activeView;
+}
+
+- (void)reset {
+  [self hideTextInput];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {

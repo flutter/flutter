@@ -178,11 +178,10 @@ group("unittests") {
     ]
   }
 
-  if (is_ios) {
+  if (enable_ios_unittests) {
     public_deps += [ "//flutter/shell/platform/darwin/ios:ios_test_flutter" ]
   }
 
-  # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
       "//flutter/assets:assets_unittests",
@@ -228,6 +227,7 @@ group("unittests") {
         "//flutter/impeller/golden_tests:impeller_golden_tests",
         "//flutter/shell/gpu:gpu_surface_metal_unittests",
         "//flutter/shell/platform/darwin/common:availability_version_check_unittests",
+        "//flutter/shell/platform/darwin/common:framework_common_swift_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",
         "//flutter/third_party/spring_animation:spring_animation_unittests",
       ]

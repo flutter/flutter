@@ -1,11 +1,12 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
-
-#include "flutter/fml/logging.h"
 
 #include <optional>
 #include <vector>
+
+#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
 
 #if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
 #define VSYNC_TRACING_ENABLED 1
@@ -78,17 +79,17 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
     TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
 
     [FlutterRunLoop.mainRunLoop
-        performBlock:^{
-          if (!_pendingBaton.has_value()) {
-            TRACE_VSYNC("DisplayLinkPaused", size_t(0));
-            _displayLink.paused = YES;
-            return;
-          }
-          TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
-          _block(minStart, targetTimestamp, *_pendingBaton);
-          _pendingBaton = std::nullopt;
-        }
-          afterDelay:remaining];
+        performAfterDelay:remaining
+                    block:^{
+                      if (!_pendingBaton.has_value()) {
+                        TRACE_VSYNC("DisplayLinkPaused", size_t(0));
+                        _displayLink.paused = YES;
+                        return;
+                      }
+                      TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
+                      _block(minStart, targetTimestamp, *_pendingBaton);
+                      _pendingBaton = std::nullopt;
+                    }];
   }
 }
 
@@ -106,7 +107,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   }
 
   if (_pendingBaton.has_value()) {
-    FML_LOG(WARNING) << "Engine requested vsync while another was pending";
+    [FlutterLogger logWarning:@"Engine requested vsync while another was pending"];
     _block(0, 0, *_pendingBaton);
     _pendingBaton = std::nullopt;
   }
@@ -138,13 +139,12 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
       delay = std::max(start - now - kTimerLatencyCompensation, 0.0);
     }
 
-    [FlutterRunLoop.mainRunLoop
-        performBlock:^{
-          CFTimeInterval targetTimestamp = start + tick_interval;
-          TRACE_VSYNC("SynthesizedInitialVSync", baton);
-          _block(start, targetTimestamp, baton);
-        }
-          afterDelay:delay];
+    [FlutterRunLoop.mainRunLoop performAfterDelay:delay
+                                            block:^{
+                                              CFTimeInterval targetTime = start + tick_interval;
+                                              TRACE_VSYNC("SynthesizedInitialVSync", baton);
+                                              _block(start, targetTime, baton);
+                                            }];
     _displayLink.paused = NO;
   } else {
     _pendingBaton = baton;
@@ -153,7 +153,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
 
 - (void)dealloc {
   if (_pendingBaton.has_value()) {
-    FML_LOG(WARNING) << "Deallocating FlutterVSyncWaiter with a pending vsync";
+    [FlutterLogger logWarning:@"Deallocating FlutterVSyncWaiter with a pending vsync"];
   }
   // It is possible that block running on UI thread held the last reference to
   // the waiter, in which case reschedule to main thread.

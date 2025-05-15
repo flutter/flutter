@@ -82,8 +82,8 @@ TEST_F(WindowsTest, LaunchMain) {
 
 // Verify there is no unexpected output from launching main.
 TEST_F(WindowsTest, LaunchMainHasNoOutput) {
-  // Replace stdout & stderr stream buffers with our own.
-  StreamCapture stdout_capture(&std::cout);
+  // Replace stderr stream buffer with our own.  (stdout may contain expected
+  // output printed by Dart, such as the Dart VM service startup message)
   StreamCapture stderr_capture(&std::cerr);
 
   auto& context = GetContext();
@@ -91,11 +91,9 @@ TEST_F(WindowsTest, LaunchMainHasNoOutput) {
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
-  stdout_capture.Stop();
   stderr_capture.Stop();
 
-  // Verify stdout & stderr have no output.
-  EXPECT_TRUE(stdout_capture.GetOutput().empty());
+  // Verify stderr has no output.
   EXPECT_TRUE(stderr_capture.GetOutput().empty());
 }
 

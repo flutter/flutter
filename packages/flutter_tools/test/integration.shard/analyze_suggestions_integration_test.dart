@@ -51,15 +51,15 @@ void main() {
 
       const String expected =
           '\n'
-          '┌───────────────────────────────────────────────────────────────────┐\n'
-          '│ General Info                                                      │\n'
-          '│ [✓] App Name: flutter_gallery                                     │\n'
-          '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows │\n'
-          '│ [✓] Is Flutter Package: yes                                       │\n'
-          '│ [✓] Uses Material Design: yes                                     │\n'
-          '│ [✓] Is Plugin: no                                                 │\n'
-          '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpString} │\n'
-          '└───────────────────────────────────────────────────────────────────┘\n';
+          '┌───────────────────────────────────────────────────────────────────────────┐\n'
+          '│ General Info                                                              │\n'
+          '│ [✓] App Name: flutter_gallery                                             │\n'
+          '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows         │\n'
+          '│ [✓] Is Flutter Package: yes                                               │\n'
+          '│ [✓] Uses Material Design: yes                                             │\n'
+          '│ [✓] Is Plugin: no                                                         │\n'
+          '│ [✓] Java/Gradle/KGP/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpKgpString} │\n'
+          '└───────────────────────────────────────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
     });

@@ -462,6 +462,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('availability_version_check_unittests'),
+        make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
         make_test('gpu_surface_metal_unittests'),
@@ -1115,7 +1116,7 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
         raise RuntimeError(
             """
 The GOLDCTL environment variable is not set. This is required for Skia Gold tests.
-See https://github.com/flutter/engine/tree/main/testing/skia_gold_client#configuring-ci
+See flutter/tree/main/engine/src/flutter/testing/skia_gold_client#configuring-ci
 for more information.
 """
         )

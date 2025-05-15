@@ -10,10 +10,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
@@ -63,6 +63,11 @@ void main() {
     );
     iosEnvironment.buildDir.createSync(recursive: true);
     androidEnvironment.buildDir.createSync(recursive: true);
+  });
+
+  testWithoutContext('no dependency on KernelSnapshot', () async {
+    const DartBuildForNative target = DartBuildForNative();
+    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
   });
 
   testWithoutContext('NativeAssets throws error if missing target platform', () async {
@@ -194,8 +199,6 @@ void main() {
           package: 'foo',
           name: 'foo.dart',
           linkMode: DynamicLoadingBundled(),
-          os: OS.iOS,
-          architecture: Architecture.arm64,
           file: Uri.file('foo.framework/foo'),
         ),
       ];
@@ -261,8 +264,6 @@ void main() {
               package: 'foo',
               name: 'foo.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.android,
-              architecture: Architecture.arm64,
               file: Uri.file('libfoo.so'),
             ),
         ];
