@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io show IOOverrides;
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
