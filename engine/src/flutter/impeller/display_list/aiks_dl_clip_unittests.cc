@@ -9,6 +9,7 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 
 namespace impeller {
@@ -48,7 +49,7 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(-100, 50));
   path_builder.QuadraticCurveTo(DlPoint(0, 150), DlPoint(100, 50));
-  builder.ClipPath(DlPath(path_builder), DlClipOp::kDifference);
+  builder.ClipPath(path_builder.TakePath(), DlClipOp::kDifference);
 
   // Draw a huge yellow rectangle to prove the clipping works.
   DlPaint paint;
@@ -65,7 +66,7 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
   path_builder_2.CubicCurveTo(DlPoint(0, -40), DlPoint(0, -80),
                               DlPoint(200, -80));
 
-  builder.DrawPath(DlPath(path_builder_2), paint);
+  builder.DrawPath(path_builder_2.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

@@ -15,8 +15,7 @@
 
 namespace impeller {
 
-class Tessellator;
-
+[[maybe_unused]]
 static constexpr Scalar kMinStrokeSize = 1.0f;
 
 struct GeometryResult {
@@ -53,15 +52,12 @@ class Geometry {
   virtual ~Geometry() {}
 
   static std::unique_ptr<Geometry> MakeFillPath(
-      const Path& path,
+      const flutter::DlPath& path,
       std::optional<Rect> inner_rect = std::nullopt);
 
   static std::unique_ptr<Geometry> MakeStrokePath(
-      const Path& path,
-      Scalar stroke_width = 0.0,
-      Scalar miter_limit = 4.0,
-      Cap stroke_cap = Cap::kButt,
-      Join stroke_join = Join::kMiter);
+      const flutter::DlPath& path,
+      const StrokeParameters& stroke = {});
 
   static std::unique_ptr<Geometry> MakeCover();
 

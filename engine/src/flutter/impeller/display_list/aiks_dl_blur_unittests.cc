@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "gmock/gmock.h"
@@ -566,7 +567,7 @@ static sk_sp<DisplayList> MaskBlurVariantTest(
     path_builder.LineTo(DlPoint(x + 60, y + 60));
     path_builder.Close();
 
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
   }
 
   y += y_spacing;
@@ -662,7 +663,7 @@ TEST_P(AiksTest, GaussianBlurStyleInner) {
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -689,7 +690,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuter) {
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -716,7 +717,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -923,7 +924,7 @@ TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
   path_builder.LineTo(DlPoint(300, 400));
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -960,7 +961,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
   path_builder.LineTo(DlPoint(300, 400));
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -996,7 +997,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuterGradient) {
   path_builder.LineTo(DlPoint(300, 400));
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -1271,7 +1272,7 @@ TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
     auto blur_filter = DlImageFilter::MakeBlur(0.1, 0.1, DlTileMode::kClamp);
     paint.setImageFilter(blur_filter);
 
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
 
     auto image = DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
     EXPECT_TRUE(image) << " length " << i;

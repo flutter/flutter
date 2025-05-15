@@ -82,21 +82,4 @@ Scalar ComputeConicSubdivisions(Scalar scale_factor,
   return std::sqrt(numer / denom);
 }
 
-Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
-                                    const QuadraticPathComponent& quad) {
-  return ComputeQuadradicSubdivisions(scale_factor, quad.p1, quad.cp, quad.p2);
-}
-
-Scalar ComputeCubicSubdivisions(float scale_factor,
-                                const CubicPathComponent& cub) {
-  return ComputeCubicSubdivisions(scale_factor, cub.p1, cub.cp1, cub.cp2,
-                                  cub.p2);
-}
-
-Scalar ComputeConicSubdivisions(float scale_factor,
-                                const ConicPathComponent& conic) {
-  return ComputeConicSubdivisions(scale_factor, conic.p1, conic.cp, conic.p2,
-                                  conic.weight.x);
-}
-
 }  // namespace impeller

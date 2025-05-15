@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/shell/common/dl_op_spy.h"
 #include "flutter/testing/testing.h"
@@ -289,7 +290,7 @@ TEST(DlOpSpy, DrawPath) {
     DlPathBuilder path_builder;
     path_builder.MoveTo({0, 1});
     path_builder.LineTo({1, 1});
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -302,7 +303,7 @@ TEST(DlOpSpy, DrawPath) {
     path_builder.MoveTo({0, 0});
     path_builder.LineTo({1, 0});
     path_builder.LineTo({0, 1});
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -315,7 +316,7 @@ TEST(DlOpSpy, DrawPath) {
     DlPathBuilder path_builder;
     path_builder.MoveTo({0, 1});
     path_builder.LineTo({1, 1});
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);

@@ -5,6 +5,7 @@
 #include "flutter/display_list/benchmarking/dl_benchmarks.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 
@@ -15,6 +16,26 @@
 
 namespace flutter {
 namespace testing {
+
+class DlPathVerbCounter : public DlPathReceiver {
+ public:
+  void MoveTo(const DlPoint& p2, bool will_be_closed) { verb_count_++; }
+  void LineTo(const DlPoint& p2) { verb_count_++; }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) { verb_count_++; }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) {
+    verb_count_++;
+    return false;
+  }
+  void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2) {
+    verb_count_++;
+  }
+  void Close() { verb_count_++; }
+
+  uint32_t GetVerbCount() { return verb_count_; }
+
+ private:
+  uint32_t verb_count_ = 0u;
+};
 
 DlPaint GetPaintForRun(unsigned attributes) {
   DlPaint paint;
@@ -662,9 +683,11 @@ void BM_DrawPath(benchmark::State& state,
   state.SetComplexityN(state.range(0));
 
   MultiplyPath(path_builder, type, center, 20, state.range(0), radius);
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
-  state.counters["VerbCount"] = path.GetPath().GetComponentCount();
+  DlPathVerbCounter counter;
+  path.Dispatch(counter);
+  state.counters["VerbCount"] = counter.GetVerbCount();
   state.counters["DrawCallCount"] = 1;
 
   builder.DrawPath(path, paint);
@@ -1277,7 +1300,7 @@ void BM_DrawShadow(benchmark::State& state,
   float elevation = state.range(0);
   state.counters["DrawCallCount"] = 1;
 
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   // We can hardcode dpr to 1.0f as we're varying elevation, and dpr is only
   // ever used in conjunction with elevation.

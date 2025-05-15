@@ -6,7 +6,6 @@
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_PATH_H_
 
 #include "flutter/third_party/skia/include/core/SkPath.h"
-#include "impeller/geometry/path.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 

@@ -12,6 +12,11 @@
 namespace flutter {
 namespace testing {
 
+MATCHER_P(PointEq, p, "") {
+  *result_listener << "isn't equal to " << p;
+  return arg.GetDistance(p) <= kEhCloseEnough;
+}
+
 class DlPathReceiverMock : public DlPathReceiver {
  public:
   MOCK_METHOD(void,

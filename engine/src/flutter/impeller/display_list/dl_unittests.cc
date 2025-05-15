@@ -16,6 +16,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/display_list/aiks_context.h"
@@ -111,7 +112,7 @@ TEST_P(DisplayListTest, CanDrawCapsAndJoins) {
   path_builder.MoveTo(DlPoint(-50, 0));
   path_builder.LineTo(DlPoint(0, -50));
   path_builder.LineTo(DlPoint(50, 0));
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   builder.Translate(100, 100);
   {
@@ -293,7 +294,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       path_builder.LineTo(DlPoint(100, 0));
       path_builder.LineTo(DlPoint(100, 0));
       path_builder.LineTo(DlPoint(100, 100));
-      builder.DrawPath(DlPath(path_builder), paint);
+      builder.DrawPath(path_builder.TakePath(), paint);
     }
 
     // Contour with duplicate start and end points
@@ -312,7 +313,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       line_path_builder.LineTo(DlPoint(50, 50));
       line_path_builder.LineTo(DlPoint(100, 0));
       line_path_builder.LineTo(DlPoint(100, 0));
-      DlPath line_path(line_path_builder);
+      DlPath line_path = line_path_builder.TakePath();
       builder.DrawPath(line_path, paint);
 
       builder.Translate(0, 100);
@@ -323,7 +324,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       line_path_builder2.MoveTo(DlPoint(0, 0));
       line_path_builder2.LineTo(DlPoint(0, 0));
       line_path_builder2.LineTo(DlPoint(0, 0));
-      builder.DrawPath(DlPath(line_path_builder2), paint);
+      builder.DrawPath(line_path_builder2.TakePath(), paint);
 
       builder.Restore();
     }
@@ -338,7 +339,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       cubic_path.CubicCurveTo(DlPoint(0, 0),          //
                               DlPoint(140.0, 100.0),  //
                               DlPoint(140, 20));
-      builder.DrawPath(DlPath(cubic_path), paint);
+      builder.DrawPath(cubic_path.TakePath(), paint);
 
       builder.Translate(0, 100);
       flutter::DlPathBuilder cubic_path2;
@@ -346,7 +347,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       cubic_path2.CubicCurveTo(DlPoint(0, 0),  //
                                DlPoint(0, 0),  //
                                DlPoint(150, 150));
-      builder.DrawPath(DlPath(cubic_path2), paint);
+      builder.DrawPath(cubic_path2.TakePath(), paint);
 
       builder.Translate(0, 100);
       flutter::DlPathBuilder cubic_path3;
@@ -354,7 +355,7 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       cubic_path3.CubicCurveTo(DlPoint(0, 0),  //
                                DlPoint(0, 0),  //
                                DlPoint(0, 0));
-      builder.DrawPath(DlPath(cubic_path3), paint);
+      builder.DrawPath(cubic_path3.TakePath(), paint);
 
       builder.Restore();
     }
@@ -368,20 +369,20 @@ TEST_P(DisplayListTest, StrokedPathsDrawCorrectly) {
       quad_path.MoveTo(DlPoint(0, 0));
       quad_path.MoveTo(DlPoint(0, 0));
       quad_path.QuadraticCurveTo(DlPoint(100, 40), DlPoint(50, 80));
-      builder.DrawPath(DlPath(quad_path), paint);
+      builder.DrawPath(quad_path.TakePath(), paint);
 
       builder.Translate(0, 150);
       flutter::DlPathBuilder quad_path2;
       quad_path2.MoveTo(DlPoint(0, 0));
       quad_path2.MoveTo(DlPoint(0, 0));
       quad_path2.QuadraticCurveTo(DlPoint(0, 0), DlPoint(100, 100));
-      builder.DrawPath(DlPath(quad_path2), paint);
+      builder.DrawPath(quad_path2.TakePath(), paint);
 
       builder.Translate(0, 100);
       flutter::DlPathBuilder quad_path3;
       quad_path3.MoveTo(DlPoint(0, 0));
       quad_path3.QuadraticCurveTo(DlPoint(0, 0), DlPoint(0, 0));
-      builder.DrawPath(DlPath(quad_path3), paint);
+      builder.DrawPath(quad_path3.TakePath(), paint);
 
       builder.Restore();
     }
@@ -401,7 +402,8 @@ TEST_P(DisplayListTest, CanDrawWithOddPathWinding) {
   flutter::DlPathBuilder path_builder;
   path_builder.AddCircle(DlPoint(0, 0), 100);
   path_builder.AddCircle(DlPoint(0, 0), 50);
-  builder.DrawPath(DlPath(path_builder, flutter::DlPathFillType::kOdd), paint);
+  path_builder.SetFillType(flutter::DlPathFillType::kOdd);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -428,7 +430,7 @@ TEST_P(DisplayListTest, CanDrawAnOpenPath) {
   path_builder.LineTo(DlPoint(50, 100));
   path_builder.LineTo(DlPoint(100, 100));
   path_builder.LineTo(DlPoint(100, 50));
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

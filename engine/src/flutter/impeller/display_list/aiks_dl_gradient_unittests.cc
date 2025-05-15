@@ -8,6 +8,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_builder.h"
@@ -777,7 +778,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     path_builder.Close();
     path_builder.MoveTo(DlPoint(60, 20));
     path_builder.QuadraticCurveTo(DlPoint(60, 60), DlPoint(20, 60));
-    DlPath path(path_builder);
+    DlPath path = path_builder.TakePath();
 
     builder.Scale(scale, scale);
 

@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "display_list/display_list.h"
-#include "display_list/dl_blend_mode.h"
-#include "display_list/dl_tile_mode.h"
-#include "display_list/effects/dl_color_source.h"
-#include "display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_tile_mode.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
@@ -683,7 +684,7 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   path_builder.LineTo(DlPoint(25.0, 118.0));
   path_builder.LineTo(DlPoint(150.0, 29.5));
   path_builder.Close();
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   DlColor fill_color(1.0, 1.0, 0.0, 0.0, DlColorSpace::kSRGB);
   DlColor stroke_color(1.0, 0.0, 0.0, 0.0, DlColorSpace::kSRGB);
