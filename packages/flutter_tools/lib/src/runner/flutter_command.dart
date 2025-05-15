@@ -1897,11 +1897,11 @@ abstract class FlutterCommand extends Command<void> {
     return runCommand();
   }
 
-  /// Whether to run [regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
   ///
   /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
   /// builds sequentially in one-go) may choose to override this and provide `false`, instead
-  /// calling [regeneratePlatformSpecificTooling] manually when applicable.
+  /// calling [FlutterProject.regeneratePlatformSpecificTooling] manually when applicable.
   @visibleForOverriding
   bool get regeneratePlatformSpecificToolingDuringVerify => true;
 

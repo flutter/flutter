@@ -108,7 +108,7 @@ class AOTSnapshotter {
 
   /// If true then AOTSnapshotter would report timings for individual building
   /// steps (Dart front-end parsing and snapshot generation) in a stable
-  /// machine readable form. See [AOTSnapshotter._timedStep].
+  /// machine readable form.
   final bool reportTimings;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
