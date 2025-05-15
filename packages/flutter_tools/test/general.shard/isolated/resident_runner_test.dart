@@ -19,12 +19,12 @@ import '../../src/testbed.dart';
 import '../resident_runner_helpers.dart';
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late FakeDevFS devFS;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.file(globals.fs.path.join('build', 'app.dill'))
           ..createSync(recursive: true)
