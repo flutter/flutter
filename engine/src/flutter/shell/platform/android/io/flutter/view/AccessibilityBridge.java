@@ -622,7 +622,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // Suppressing Lint warning for new API, as we are version guarding all calls to newer APIs
   @SuppressLint("NewApi")
   public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
-    Log.e("HI GRAY", "hi gray, making node info for: " + virtualViewId);
     setAccessibleNavigation(true);
     if (virtualViewId >= MIN_ENGINE_GENERATED_NODE_ID) {
       // The node is in the engine generated range, and is provided by the accessibility view
@@ -657,9 +656,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // so it doesn't need to be mirrored.
     //
     // See the case down below for how hybrid composition is handled.
-    // Log.e("HI GRAY", "check if we should handle a pv in AccessiblityBridge");
     if (semanticsNode.platformViewId != -1) {
-      Log.e("HI GRAY", "check if we should handle a pv in AccessiblityBridge: we should");
       if (platformViewsAccessibilityDelegate.usesVirtualDisplay(semanticsNode.platformViewId)) {
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(semanticsNode.platformViewId);
@@ -978,13 +975,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
     }
 
-    // Log.e("HI GRAY", "in createAccessibilityNodeInfo");
     for (SemanticsNode child : semanticsNode.childrenInTraversalOrder) {
       if (child.hasFlag(Flag.IS_HIDDEN)) {
         continue;
       }
       if (child.platformViewId != -1) {
-        Log.e("HI GRAY", "we have a child pv with id " + child.platformViewId);
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(child.platformViewId);
 
@@ -996,17 +991,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
-          Log.e("HI GRAY", "adding as a child with id " + embeddedView.getId());
+          assert embeddedView != null;
+          // The embedded view is initially marked as not important at creation in the platform
+          // view controller, so we must explicitly mark it as important here.
           embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-          Log.e("HI GRAY", embeddedView.createAccessibilityNodeInfo().toString());
-          Log.e("HI GRAY", "provider for pv is " + embeddedView.getAccessibilityNodeProvider());
-          Log.e("HI GRAY", "while provider for node is " + this);
-          // printAccessibilityNode(embeddedView.createAccessibilityNodeInfo(), 0, embeddedView);
-          // result.addChild(embeddedView);
+          result.addChild(embeddedView);
           continue;
         }
-      } else {
-        Log.e("HI GRAY", "we don't have a child pv");
       }
       result.addChild(rootAccessibilityView, child.id);
     }

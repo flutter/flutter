@@ -115,7 +115,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
-    Log.e("HI GRAY", "view id is " + request.viewId);
     maybeInvokeOnFlutterViewAttached(platformView);
     return platformView;
   }
@@ -474,7 +473,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     // To prevent races, the framework populate the SemanticsNode after the platform view has been
     // created.
     embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
-
     parentView.addView(embeddedView);
     flutterView.addView(parentView);
     return true;
@@ -565,7 +563,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
-    Log.e("HI GRAY", "creating an overlay surface in the controller for pv 2");
     if (overlayerSurface == null) {
       final SurfaceControl.Builder surfaceControlBuilder = new SurfaceControl.Builder();
       surfaceControlBuilder.setBufferSize(flutterView.getWidth(), flutterView.getHeight());
@@ -621,7 +618,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         @Override
         public void createPlatformView(
             @NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
-          Log.e("HI GRAY!!!!!!!!", "the handler is right!!!");
           createFlutterPlatformView(request);
         }
 
