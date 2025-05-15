@@ -10,6 +10,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -205,6 +206,33 @@ public class FlutterLoader {
                     File nativeLibsDir = new File(flutterApplicationInfo.nativeLibraryDir);
                     String[] nativeLibsContents = nativeLibsDir.list();
 
+                    // To gather more information for
+                    // https://github.com/flutter/flutter/issues/151638,
+                    // log the contents of the split libraries directory as well.
+
+                    List<String> splitAndSourceDirs = new ArrayList<>();
+                    // Get supported ABI and prepare path suffix for lib directories
+                    String[] abis = Build.SUPPORTED_ABIS;
+                    for (String abi : abis) {
+                      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
+
+                      // Get split APK lib paths
+                      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
+                      List<String> splitLibPaths = new ArrayList<>();
+                      if (splitSourceDirs != null) {
+                        for (String splitSourceDir : splitSourceDirs) {
+                          splitLibPaths.add(splitSourceDir + libPathSuffix);
+                        }
+                        splitAndSourceDirs.addAll(splitLibPaths);
+                      }
+
+                      String baseApkPath = appContext.getApplicationInfo().sourceDir;
+                      if (baseApkPath != null && !baseApkPath.isEmpty()) {
+                        String baseApkLibDir = baseApkPath + libPathSuffix;
+                        splitAndSourceDirs.add(baseApkLibDir);
+                      }
+                    }
+
                     throw new UnsupportedOperationException(
                         "Could not load libflutter.so this is possibly because the application"
                             + " is running on an architecture that Flutter Android does not support (e.g. x86)"
@@ -218,7 +246,13 @@ public class FlutterLoader {
                             + (nativeLibsDir.exists()
                                 ? "contains the following files: "
                                     + Arrays.toString(nativeLibsContents)
-                                : "does not exist."),
+                                : "does not exist")
+                            + (splitAndSourceDirs.isEmpty()
+                                ? ""
+                                : ", and the split and source libraries directory (with path(s) "
+                                    + splitAndSourceDirs
+                                    + ")")
+                            + ".",
                         unsatisfiedLinkError);
                   }
 
