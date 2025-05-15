@@ -30,9 +30,4 @@
 - (void)applicationWillTerminate:(UIApplication*)application {
 }
 
-- (FlutterEngine*)takeLaunchEngine {
-  // This is just served up for tests and doesn't actually take ownership.
-  return _mockLaunchEngine;
-}
-
 @end
