@@ -5,12 +5,13 @@
 import Foundation
 import UIKit
 import SwiftUI
+import Translation
 
-@available(iOS 13.4, *)
+@available(iOS 17.4, *)
 @objc(FlutterTranslateController)
 public class FlutterTranslateController: UIViewController {
 
-  @available(iOS 13.4, *)
+  @available(iOS 17.4, *)
   @objc public func showTranslateUI(word: String) {
     print("Showing translate UI for word: \(word)")
 
@@ -34,20 +35,31 @@ public class FlutterTranslateController: UIViewController {
     swiftUIController.didMove(toParent: self) 
   }
 
-  @available(iOS 13.4, *)
+  @available(iOS 17.4, *)
   @objc public func swiftUIWrapper() -> UIViewController {
     let hostingController = UIHostingController(rootView: ContentView())
     return hostingController;
   }
 }
 
-@available(iOS 13.4, *)
+@available(iOS 17.4, *)
 struct ContentView: View {
-  @available(iOS 13.4, *)
+  @available(iOS 17.4, *)
+  @State private var isTranslationPopoverShown = false
+  private var originalText = "bienvenue"
   var body: some View {
-    Rectangle()
-        .fill(.red)
-        .frame(width: 200, height: 200)
+    VStack(spacing: 20) {
+      Text(verbatim: originalText)
+        .font(.largeTitle)
+        .padding()
+        .translationPresentation(
+          isPresented: $isTranslationPopoverShown, text: originalText)
+
+      Button("Show Translation") {
+        isTranslationPopoverShown.toggle()
+      }
+      .buttonStyle(.borderedProminent)
+    }
   }
 }
 
