@@ -94,7 +94,6 @@ TessellatorLibtess::Result TessellatorLibtess::Tessellate(
   PathTessellator::PathToFilledVertices(source, polyline, tolerance);
 
   auto fill_type = source.GetFillType();
-  ToTessWindingRule(fill_type);
 
   if (polyline.points.empty()) {
     return TessellatorLibtess::Result::kInputError;
