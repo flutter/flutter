@@ -275,13 +275,14 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
 
   @override
   cb.Expression visitIntegerLiteral(analyzer.IntegerLiteral node) {
-    // TODO: handle the case of an invalid integer constant due to overflow.
+    // TODO(bkonyi): handle the case of an invalid integer constant due to overflow.
     return cb.literalNum(node.value!);
   }
 
   @override
   cb.Expression visitRecordLiteral(analyzer.RecordLiteral node) {
-    // TODO(bkonyi):
+    // TODO(bkonyi): fully implement. Low priority as records aren't currently arguments
+    // to @Preview(...).
     final List<Object?> positionalFieldValues = <Object?>[];
     final Map<String, Object?> namedFieldValues = <String, Object?>{};
     return node.isConst
