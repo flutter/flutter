@@ -144,7 +144,7 @@ void main() {
                     platform == SupportedPlatform.ios ? project.ios : project.macos;
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
                 xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
-                  'FlutterGeneratedPluginSwiftPackage',
+                  '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
                 );
 
                 final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
@@ -373,7 +373,7 @@ void main() {
                 xcodeProject.podfile.writeAsStringSync('Non-Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
                 xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
-                  'FlutterGeneratedPluginSwiftPackage',
+                  '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
                 );
 
                 final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
@@ -742,8 +742,13 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return false;
+    }
+
+    return xcodeProjectInfoFile.readAsStringSync().contains(
+      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
+    );
   }
 
   @override
@@ -777,8 +782,13 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return false;
+    }
+
+    return xcodeProjectInfoFile.readAsStringSync().contains(
+      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
+    );
   }
 
   @override

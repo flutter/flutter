@@ -76,6 +76,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// Existing macOS identifier for Runner PBXProject.
   static const String _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
+  /// Existing identifier for a PBXNativeTarget that is a unit testing bundle.
+  static const String _unitTestBundleIdentifier = 'com.apple.product-type.bundle.unit-test';
+
+  /// Existing identifier for a PBXNativeTarget that is a UI testing bundle.
+  static const String _uiTestBundleIdentifier = 'com.apple.product-type.bundle.ui-testing';
+
   File get backupProjectSettings =>
       _fileSystem.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
 
@@ -201,6 +207,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     }
   }
 
+  /// Get a label for the given [nativeTarget], for logging purposes.
+  String _getPbxNativeTargetLabel(ParsedNativeTarget nativeTarget) {
+    return nativeTarget.name == null ? 'PBXNativeTarget' : 'PBXNativeTarget "${nativeTarget.name}"';
+  }
+
   Future<SchemeInfo> _getSchemeFile() async {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
@@ -221,6 +232,105 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
     final String schemeContent = schemeFile.readAsStringSync();
     return SchemeInfo(schemeName: scheme, schemeFile: schemeFile, schemeContent: schemeContent);
+  }
+
+  /// Parse the given [schemeContent] and extract the `BuildableName`, `BlueprintName` and `ReferencedContainer`
+  /// of the `BuildableReference` for the Runner target.
+  ({String buildableName, String blueprintName, String referencedContainer}) _parseSchemeFile(
+    String schemeFileName,
+    String schemeContent,
+  ) {
+    final XmlDocument document;
+
+    try {
+      document = XmlDocument.parse(schemeContent);
+    } on XmlException catch (exception) {
+      throw Exception('Failed to parse $schemeFileName: Invalid xml: $schemeContent\n$exception');
+    }
+
+    final XmlNode schemeNode;
+
+    try {
+      if (document.rootElement.name.local != 'Scheme') {
+        throw StateError('The root element is not a Scheme tag.');
+      }
+
+      schemeNode = document.rootElement;
+    } on StateError {
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find Scheme for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final XmlElement? launchActionNode = schemeNode.getElement('LaunchAction');
+
+    if (launchActionNode == null) {
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find LaunchAction for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final XmlNode? buildableProductRunnable = launchActionNode.getElement(
+      'BuildableProductRunnable',
+    );
+
+    if (buildableProductRunnable == null) {
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find BuildableProductRunnable for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final XmlNode? buildableReference = buildableProductRunnable.getElement('BuildableReference');
+
+    if (buildableReference == null) {
+      // TODO(vashworth): The BuildableReference references a native target, not the project
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find BuildableReference '
+        'for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final String? blueprintIdentifier = buildableReference.getAttribute('BlueprintIdentifier');
+
+    if (blueprintIdentifier == null) {
+      // TODO(vashworth): The BuildableReference references a native target, not the project
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find BlueprintIdentifier '
+        'for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    if (blueprintIdentifier != _runnerNativeTargetIdentifier) {
+      throw Exception(
+        'The scheme "$schemeFileName" references a custom target, which requires a manual migration.\n'
+        'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+        'for instructions on how to migrate custom targets.',
+      );
+    }
+
+    final String? buildableName = buildableReference.getAttribute('BuildableName');
+
+    if (buildableName == null) {
+      throw Exception('Failed to parse $schemeFileName: Could not find BuildableName.');
+    }
+
+    final String? blueprintName = buildableReference.getAttribute('BlueprintName');
+
+    if (blueprintName == null) {
+      throw Exception('Failed to parse $schemeFileName: Could not find BlueprintName.');
+    }
+
+    final String? referencedContainer = buildableReference.getAttribute('ReferencedContainer');
+
+    if (referencedContainer == null) {
+      throw Exception('Failed to parse $schemeFileName: Could not find ReferencedContainer.');
+    }
+
+    return (
+      buildableName: buildableName,
+      blueprintName: blueprintName,
+      referencedContainer: referencedContainer,
+    );
   }
 
   bool _isSchemeMigrated(SchemeInfo schemeInfo) {
@@ -246,33 +356,13 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     //     BlueprintName = "Runner"
     //     ReferencedContainer = "container:Runner.xcodeproj">
     // </BuildableReference>
+    final (
+      :String buildableName,
+      :String blueprintName,
+      :String referencedContainer,
+    ) = _parseSchemeFile(schemeFile.basename, schemeContent);
+
     final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
-    final int index = schemeLines.indexWhere(
-      (String line) => line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifier"'),
-    );
-    if (index == -1 || index + 3 >= schemeLines.length) {
-      throw Exception(
-        'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
-        'for ${_xcodeProject.hostAppProjectName}.',
-      );
-    }
-
-    final String buildableName = schemeLines[index + 1].trim();
-    if (!buildableName.contains('BuildableName')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildableName.');
-    }
-
-    final String blueprintName = schemeLines[index + 2].trim();
-    if (!blueprintName.contains('BlueprintName')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BlueprintName.');
-    }
-
-    final String referencedContainer = schemeLines[index + 3].trim();
-    if (!referencedContainer.contains('ReferencedContainer')) {
-      throw Exception(
-        'Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.',
-      );
-    }
 
     schemeInfo.backupSchemeFile = schemeFile.parent.childFile('${schemeFile.basename}.backup');
     schemeFile.copySync(schemeInfo.backupSchemeFile!.path);
@@ -296,9 +386,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "$_runnerNativeTargetIdentifier"
-                     $buildableName
-                     $blueprintName
-                     $referencedContainer
+                     BuildableName = "$buildableName"
+                     BlueprintName = "$blueprintName"
+                     ReferencedContainer = "$referencedContainer">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>
@@ -369,7 +459,7 @@ $newContent
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
-    final bool nativeTargetsMigrated = _isNativeTargetMigrated(
+    final bool nativeTargetsMigrated = _areNativeTargetsMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
@@ -395,16 +485,16 @@ $newContent
 
   void _migratePbxproj() {
     final String originalProjectContents = _xcodeProjectInfoFile.readAsStringSync();
+    List<String> lines = LineSplitter.split(originalProjectContents).toList();
 
-    _ensureNewIdentifiersNotUsed(originalProjectContents);
+    _ensureNewIdentifiersNotUsed(List<String>.unmodifiable(lines));
 
     // Parse project.pbxproj into JSON
     final ParsedProjectInfo parsedInfo = _parsePbxproj();
 
-    List<String> lines = LineSplitter.split(originalProjectContents).toList();
     lines = _migrateBuildFile(lines, parsedInfo);
     lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
-    lines = _migrateNativeTarget(lines, parsedInfo);
+    lines = _migrateNativeTargets(lines, parsedInfo);
     lines = _migrateProjectObject(lines, parsedInfo);
     lines = _migrateLocalPackageProductDependencies(lines, parsedInfo);
     lines = _migratePackageProductDependencies(lines, parsedInfo);
@@ -418,14 +508,40 @@ $newContent
     }
   }
 
-  void _ensureNewIdentifiersNotUsed(String originalProjectContents) {
-    if (originalProjectContents.contains(_flutterPluginsSwiftPackageBuildFileIdentifier)) {
+  /// Check if the reserved identifiers are used outside of the allowed sections in the pbxproj file.
+  ///
+  /// When the migrator is rerun, it should not fail
+  /// when encountering the reserved identifiers in existing, migrated sections of the file.
+  ///
+  /// For example:
+  /// - An unmigrated project is migrated on the first try
+  /// - A new application target is added to the project, through XCode
+  /// - The migrator is rerun through the flutter CLI upon executing `flutter run`
+  /// - The migrator should skip sections like 'PBXBuildFile' or 'XCSwiftPackageProductDependency',
+  ///   since they are already migrated
+  /// - The migrator should warn that the newly added target should be migrated manually
+  void _ensureNewIdentifiersNotUsed(List<String> lines) {
+    if (_isIdentifierOutsideAllowedSections(
+      _flutterPluginsSwiftPackageBuildFileIdentifier,
+      lines,
+      <String>{'PBXBuildFile', 'PBXFrameworksBuildPhase'},
+    )) {
       throw Exception('Duplicate id found for PBXBuildFile.');
     }
-    if (originalProjectContents.contains(_flutterPluginsSwiftPackageProductDependencyIdentifier)) {
+
+    if (_isIdentifierOutsideAllowedSections(
+      _flutterPluginsSwiftPackageProductDependencyIdentifier,
+      lines,
+      <String>{'PBXBuildFile', 'PBXNativeTarget', 'XCSwiftPackageProductDependency'},
+    )) {
       throw Exception('Duplicate id found for XCSwiftPackageProductDependency.');
     }
-    if (originalProjectContents.contains(_localFlutterPluginsSwiftPackageReferenceIdentifier)) {
+
+    if (_isIdentifierOutsideAllowedSections(
+      _localFlutterPluginsSwiftPackageReferenceIdentifier,
+      lines,
+      <String>{'PBXProject', 'XCLocalSwiftPackageReference'},
+    )) {
       throw Exception('Duplicate id found for XCLocalSwiftPackageReference.');
     }
   }
@@ -495,7 +611,7 @@ $newContent
     if (runnerFrameworksPhaseStartIndex == -1 ||
         runnerFrameworksPhaseStartIndex > endSectionIndex) {
       throw Exception(
-        'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
@@ -511,7 +627,7 @@ $newContent
             .firstOrNull;
     if (runnerFrameworksPhase == null) {
       throw Exception(
-        'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
@@ -530,7 +646,7 @@ $newContent
       );
       if (startFilesIndex == -1 || startFilesIndex > endSectionIndex) {
         throw Exception(
-          'Unable to files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} target.',
+          'Unable to find files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} project.',
         );
       }
       const String newContent =
@@ -541,32 +657,108 @@ $newContent
     return lines;
   }
 
-  bool _isNativeTargetMigrated(
+  bool _isNativeTargetMigrated(ParsedNativeTarget target) {
+    if (target.packageProductDependencies == null) {
+      return false;
+    }
+
+    return target.packageProductDependencies!.contains(
+      _flutterPluginsSwiftPackageProductDependencyIdentifier,
+    );
+  }
+
+  bool _isNotATestingNativeTarget(ParsedNativeTarget target) {
+    return target.productType != _unitTestBundleIdentifier &&
+        target.productType != _uiTestBundleIdentifier;
+  }
+
+  bool _areNativeTargetsMigrated(
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated =
-        projectInfo.nativeTargets
-            .where(
-              (ParsedNativeTarget target) =>
-                  target.identifier == _runnerNativeTargetIdentifier &&
-                  target.packageProductDependencies != null &&
-                  target.packageProductDependencies!.contains(
-                    _flutterPluginsSwiftPackageProductDependencyIdentifier,
-                  ),
-            )
-            .toList()
-            .isNotEmpty;
+    final bool migrated = projectInfo.nativeTargets
+        // Skip native targets that are intended for testing, as those do not need a migration.
+        .where(_isNotATestingNativeTarget)
+        .every(_isNativeTargetMigrated);
+
     if (logErrorIfNotMigrated && !migrated) {
-      logger.printError('PBXNativeTarget was not migrated or was migrated incorrectly.');
+      logger.printError('Some PBXNativeTargets were not migrated or were migrated incorrectly.');
     }
     return migrated;
   }
 
-  List<String> _migrateNativeTarget(List<String> lines, ParsedProjectInfo projectInfo) {
-    if (_isNativeTargetMigrated(projectInfo)) {
-      logger.printTrace('PBXNativeTarget already migrated. Skipping...');
+  void _migrateNativeTarget(
+    List<String> lines,
+    ParsedNativeTarget nativeTarget, {
+    required int startSectionIndex,
+    required int endSectionIndex,
+  }) {
+    final String pbxTargetLabel = _getPbxNativeTargetLabel(nativeTarget);
+    final String subsectionLineStart =
+        nativeTarget.name != null
+            ? '${nativeTarget.identifier} /* ${nativeTarget.name} */ = {'
+            : nativeTarget.identifier;
+    final int nativeTargetStartIndex = lines.indexWhere(
+      (String line) => line.trim().startsWith(subsectionLineStart),
+      startSectionIndex,
+    );
+
+    if (nativeTargetStartIndex == -1 || nativeTargetStartIndex > endSectionIndex) {
+      throw Exception(
+        'Unable to find $pbxTargetLabel for ${_xcodeProject.hostAppProjectName} project.',
+      );
+    }
+
+    if (nativeTarget.packageProductDependencies == null) {
+      // If packageProductDependencies is null, the packageProductDependencies field is missing and must be added.
+      const List<String> newContent = <String>[
+        '			packageProductDependencies = (',
+        '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */,',
+        '			);',
+      ];
+      lines.insertAll(nativeTargetStartIndex + 1, newContent);
+      return;
+    }
+
+    // Find the packageProductDependencies field within the Native Target.
+    final int packageProductDependenciesIndex = lines.indexWhere(
+      (String line) => line.trim().contains('packageProductDependencies'),
+      nativeTargetStartIndex,
+    );
+    if (packageProductDependenciesIndex == -1 ||
+        packageProductDependenciesIndex > endSectionIndex) {
+      throw Exception(
+        'Unable to find packageProductDependencies for $pbxTargetLabel in ${_xcodeProject.hostAppProjectName} project.',
+      );
+    }
+    const String newContent =
+        '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */,';
+    lines.insert(packageProductDependenciesIndex + 1, newContent);
+  }
+
+  List<String> _migrateNativeTargets(List<String> lines, ParsedProjectInfo projectInfo) {
+    if (projectInfo.nativeTargets.isNotEmpty && _areNativeTargetsMigrated(projectInfo)) {
+      logger.printTrace('PBXNativeTargets already migrated. Skipping...');
       return lines;
+    }
+
+    final Iterable<ParsedNativeTarget> notMigratedCustomTargets = projectInfo.nativeTargets.where((
+      ParsedNativeTarget target,
+    ) {
+      return target.identifier != _runnerNativeTargetIdentifier &&
+          // Skip native targets that are intended for testing, as those do not need a migration.
+          _isNotATestingNativeTarget(target) &&
+          !_isNativeTargetMigrated(target);
+    });
+
+    // If there are unmigrated custom targets, abort the migration.
+    // Otherwise, continue migrating the default Runner target.
+    if (notMigratedCustomTargets.isNotEmpty) {
+      throw Exception(
+        'The PBXNativeTargets section references one or more custom targets, which requires a manual migration.\n'
+        'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+        'for instructions on how to migrate custom targets.',
+      );
     }
 
     final (int startSectionIndex, int endSectionIndex) = _sectionRange('PBXNativeTarget', lines);
@@ -578,49 +770,27 @@ $newContent
               (ParsedNativeTarget target) => target.identifier == _runnerNativeTargetIdentifier,
             )
             .firstOrNull;
+
     if (runnerNativeTarget == null) {
       throw Exception(
-        'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
-      );
-    }
-    final String subsectionLineStart =
-        runnerNativeTarget.name != null
-            ? '$_runnerNativeTargetIdentifier /* ${runnerNativeTarget.name} */ = {'
-            : _runnerNativeTargetIdentifier;
-    final int runnerNativeTargetStartIndex = lines.indexWhere(
-      (String line) => line.trim().startsWith(subsectionLineStart),
-      startSectionIndex,
-    );
-    if (runnerNativeTargetStartIndex == -1 || runnerNativeTargetStartIndex > endSectionIndex) {
-      throw Exception(
-        'Unable to find PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
-    if (runnerNativeTarget.packageProductDependencies == null) {
-      // If packageProductDependencies is null, the packageProductDependencies field is missing and must be added.
-      const List<String> newContent = <String>[
-        '			packageProductDependencies = (',
-        '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */,',
-        '			);',
-      ];
-      lines.insertAll(runnerNativeTargetStartIndex + 1, newContent);
-    } else {
-      // Find the packageProductDependencies field within the Native Target for the Runner target.
-      final int packageProductDependenciesIndex = lines.indexWhere(
-        (String line) => line.trim().contains('packageProductDependencies'),
-        runnerNativeTargetStartIndex,
-      );
-      if (packageProductDependenciesIndex == -1 ||
-          packageProductDependenciesIndex > endSectionIndex) {
-        throw Exception(
-          'Unable to find packageProductDependencies for ${_xcodeProject.hostAppProjectName} PBXNativeTarget.',
-        );
-      }
-      const String newContent =
-          '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */,';
-      lines.insert(packageProductDependenciesIndex + 1, newContent);
+    if (_isNativeTargetMigrated(runnerNativeTarget)) {
+      final String pbxTargetLabel = _getPbxNativeTargetLabel(runnerNativeTarget);
+
+      logger.printTrace('$pbxTargetLabel already migrated. Skipping...');
+      return lines;
     }
+
+    _migrateNativeTarget(
+      lines,
+      runnerNativeTarget,
+      startSectionIndex: startSectionIndex,
+      endSectionIndex: endSectionIndex,
+    );
+
     return lines;
   }
 
@@ -660,7 +830,7 @@ $newContent
       startSectionIndex,
     );
     if (projectStartIndex == -1 || projectStartIndex > endSectionIndex) {
-      throw Exception('Unable to find PBXProject for ${_xcodeProject.hostAppProjectName}.');
+      throw Exception('Unable to find PBXProject for ${_xcodeProject.hostAppProjectName} project.');
     }
 
     // Get the Runner project from the parsed project info.
@@ -670,7 +840,9 @@ $newContent
             .toList()
             .firstOrNull;
     if (projectObject == null) {
-      throw Exception('Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.');
+      throw Exception(
+        'Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName} project.',
+      );
     }
 
     if (projectObject.packageReferences == null) {
@@ -837,6 +1009,49 @@ $newContent
     }
     return (startSectionIndex, endSectionIndex);
   }
+
+  /// Check whether the given [identifier] occurs in any of the [lines],
+  /// and outside of the text ranges of the given [sectionNames].
+  ///
+  /// Returns false if the [identifier] does not occur in the given [lines].
+  /// Returns false if the [identifier] only occurs within the sections denoted by the [sectionNames].
+  /// Returns true otherwise.
+  bool _isIdentifierOutsideAllowedSections(
+    String identifier,
+    List<String> lines,
+    Set<String> sectionNames,
+  ) {
+    final List<(int, int)> sectionRanges = <(int, int)>[];
+
+    for (final String sectionName in sectionNames) {
+      final (int, int) range = _sectionRange(sectionName, lines, throwIfMissing: false);
+
+      if (range != (-1, -1)) {
+        sectionRanges.add(range);
+      }
+    }
+
+    sectionRanges.sort(((int, int) a, (int, int) b) => a.$1.compareTo(b.$1));
+
+    for (int i = 0; i < lines.length; i++) {
+      if (!lines[i].contains(identifier)) {
+        continue;
+      }
+
+      bool isInSection = false;
+
+      for (final (int start, int end) in sectionRanges) {
+        if (i >= start && i <= end) {
+          isInSection = true;
+          break;
+        }
+      }
+
+      return !isInSection;
+    }
+
+    return false;
+  }
 }
 
 class SchemeInfo {
@@ -977,12 +1192,17 @@ class ParsedNativeTarget {
       packageProductDependencies = switch (data['packageProductDependencies']) {
         final List<Object?> dependencies => dependencies.whereType<String>().toList(),
         _ => null,
+      },
+      productType = switch (data) {
+        {'productType': final String productType} => productType,
+        _ => null,
       };
 
   final Map<String, Object?> data;
   final String identifier;
   final String? name;
   final List<String>? packageProductDependencies;
+  final String? productType;
 }
 
 /// Representation of data parsed from PBXProject section in Xcode project's
