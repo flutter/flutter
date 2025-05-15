@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io show IOOverrides;
+import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -198,7 +200,16 @@ Widget preview() => Text('Foo');''';
 
     const String expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'widget_preview.dart' as _i1;import 'package:flutter_project/foo.dart' as _i2;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(name: 'preview', builder: () => _i2.preview(), )];''';
+import 'widget_preview.dart' as _i1;
+import 'package:flutter_project/foo.dart' as _i2;
+
+List<_i1.WidgetPreview> previews() => [
+      _i1.WidgetPreview(
+        name: 'preview',
+        builder: () => _i2.preview(),
+      )
+    ];
+''';
 
     testUsingContext(
       'start finds existing previews and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
@@ -268,7 +279,7 @@ import 'widget_preview.dart' as _i1;import 'package:flutter_project/foo.dart' as
     );
 
     testUsingContext(
-      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
