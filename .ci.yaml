@@ -6943,9 +6943,7 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: true # https://github.com/flutter/flutter/issues/126286
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
@@ -6960,7 +6958,6 @@ targets:
     timeout: 60
     scheduler: release
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
@@ -6977,7 +6974,6 @@ targets:
     timeout: 60
     scheduler: release
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
@@ -6994,7 +6990,6 @@ targets:
     scheduler: release
     bringup: true
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
