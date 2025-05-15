@@ -1705,9 +1705,7 @@ class _BaselineStacked extends MultiChildRenderObjectWidget {
 class _BaselineStackedParentData extends ContainerBoxParentData<RenderBox> {}
 
 class _RenderBaselineStacked extends RenderBox
-    with
-        ContainerRenderObjectMixin<RenderBox, _BaselineStackedParentData>,
-        RenderBoxContainerDefaultsMixin<RenderBox, _BaselineStackedParentData> {
+    with ContainerRenderObjectMixin<RenderBox, _BaselineStackedParentData> {
   _RenderBaselineStacked();
 
   @override
