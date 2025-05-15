@@ -952,6 +952,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   set fillStyle(Object? style) => _fillStyle = style?.toJSAnyShallow;
 
   external String font;
+  external String fontWeight;
   external String direction;
   external set lineWidth(num? value);
 

@@ -327,4 +327,82 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
   });
+
+  test('Draw WebParagraph multiple font styles text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+
+    final WebTextStyle normal_normal = WebTextStyle(
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+    );
+
+    final WebTextStyle normal_bold = WebTextStyle(
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.bold,
+    );
+
+    final WebTextStyle normal_thin = WebTextStyle(
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w100,
+    );
+
+    final WebTextStyle italic_normal = WebTextStyle(
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.normal,
+    );
+
+    final WebTextStyle italic_bold = WebTextStyle(
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.bold,
+    );
+
+    final WebTextStyle italic_thin = WebTextStyle(
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.w100,
+    );
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+    builder.pushStyle(normal_normal);
+    builder.addText('Normal normal\n');
+    builder.pop();
+
+    builder.pushStyle(normal_bold);
+    builder.addText('Normal bold\n');
+    builder.pop();
+
+    builder.pushStyle(normal_thin);
+    builder.addText('Normal thin\n');
+    builder.pop();
+
+    builder.pushStyle(italic_normal);
+    builder.addText('Italic normal\n');
+    builder.pop();
+
+    builder.pushStyle(italic_bold);
+    builder.addText('Italic bold\n');
+    builder.pop();
+
+    builder.pushStyle(italic_thin);
+    builder.addText('Italic thin\n');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
+  });
 }

@@ -89,6 +89,26 @@ class TextLayout {
     }
   }
 
+  String styleToString(ui.FontStyle fontStyle) {
+    return fontStyle == ui.FontStyle.normal
+        ? 'normal'
+        : fontStyle == ui.FontStyle.italic
+        ? 'italic'
+        : 'undefined';
+  }
+
+  String weightToString(ui.FontWeight fontWeight) {
+    return fontWeight.value == ui.FontWeight.normal.value
+        ? 'normal'
+        : fontWeight.value == ui.FontWeight.bold.value
+        ? 'bold'
+        : fontWeight.value > ui.FontWeight.normal.value
+        ? 'bolder'
+        : fontWeight.value < ui.FontWeight.normal.value
+        ? 'lighter'
+        : fontWeight.value.toStringAsFixed(2);
+  }
+
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     double blockStart = 0.0;
@@ -99,7 +119,7 @@ class TextLayout {
         styledBlock.textRange.end,
       );
       layoutContext.font =
-          '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
+          '${styleToString(styledBlock.textStyle.fontStyle!)} ${weightToString(styledBlock.textStyle.fontWeight!)} ${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
