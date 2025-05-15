@@ -10,7 +10,7 @@ import 'project.dart';
 /// Returns dependencies of [project] that are _only_ used as `dev_dependency`.
 ///
 /// That is, computes and returns a subset of dependencies, where the original
-/// set is based on packages listed as [`dev_dependency`][dev_deps] in the
+/// set is based on packages listed as a `dev_dependency` in the
 /// `pubspec.yaml` file, and removing packages from that set that appear as
 /// dependencies (implicitly non-dev) in any non-dev package depended on.
 Future<Set<String>> computeExclusiveDevDependencies(
