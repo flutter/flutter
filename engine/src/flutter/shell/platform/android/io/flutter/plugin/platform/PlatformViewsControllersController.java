@@ -5,12 +5,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.view.AccessibilityBridge;
 
-public class PlatformViewsControllerController implements PlatformViewsAccessibilityDelegate {
+public class PlatformViewsControllersController implements PlatformViewsAccessibilityDelegate {
 
   PlatformViewsController platformViewsController;
   PlatformViewsController2 platformViewsController2;
 
-  public PlatformViewsControllerController(
+  public PlatformViewsControllersController(
       PlatformViewsController platformViewsController,
       PlatformViewsController2 platformViewsController2) {
     this.platformViewsController = platformViewsController;
