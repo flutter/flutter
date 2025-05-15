@@ -220,6 +220,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
+    addWindowingFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -301,6 +302,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        enableWindowing: featureFlags.isWindowingEnabled,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
       );
@@ -366,6 +368,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        enableWindowing: featureFlags.isWindowingEnabled,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
