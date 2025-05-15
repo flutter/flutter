@@ -49,18 +49,25 @@ class DisplayListMatrixClipState {
   bool is_cull_rect_empty() const { return cull_rect_.IsEmpty(); }
 
   void translate(DlScalar tx, DlScalar ty) {
+    // No impact on translate scale.
     matrix_ = matrix_.Translate({tx, ty});
   }
   void scale(DlScalar sx, DlScalar sy) {
+    // No impact on translate scale.
     matrix_ = matrix_.Scale({sx, sy, 1.0f});
   }
   void skew(DlScalar skx, DlScalar sky) {
+    is_translate_scale_ = false;
     matrix_ = matrix_ * DlMatrix::MakeSkew(skx, sky);
   }
   void rotate(DlRadians angle) {
+    is_translate_scale_ = false;
     matrix_ = matrix_ * DlMatrix::MakeRotationZ(angle);
   }
-  void transform(const DlMatrix& matrix) { matrix_ = matrix_ * matrix; }
+  void transform(const DlMatrix& matrix) {
+    matrix_ = matrix_ * matrix;
+    is_translate_scale_ = matrix_.IsTranslationScaleOnly();
+  }
   // clang-format off
   void transform2DAffine(
       DlScalar mxx, DlScalar mxy, DlScalar mxt,
@@ -71,6 +78,7 @@ class DisplayListMatrixClipState {
         0.0f, 0.0f, 1.0f, 0.0f,
          mxt,  myt, 0.0f, 1.0f
     );
+    is_translate_scale_ = matrix_.IsTranslationScaleOnly();
   }
   void transformFullPerspective(
       DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
@@ -83,10 +91,17 @@ class DisplayListMatrixClipState {
         mxz, myz, mzz, mwz,
         mxt, myt, mzt, mwt
     );
+    is_translate_scale_ = matrix_.IsTranslationScaleOnly();
   }
   // clang-format on
-  void setTransform(const DlMatrix& matrix) { matrix_ = matrix; }
-  void setIdentity() { matrix_ = DlMatrix(); }
+  void setTransform(const DlMatrix& matrix) {
+    matrix_ = matrix;
+    is_translate_scale_ = matrix_.IsTranslationScaleOnly();
+  }
+  void setIdentity() {
+    matrix_ = DlMatrix();
+    is_translate_scale_ = true;
+  }
   // If the matrix in |other_tracker| is invertible then transform this
   // tracker by the inverse of its matrix and return true. Otherwise,
   // return false and leave this tracker unmodified.
@@ -161,6 +176,7 @@ class DisplayListMatrixClipState {
  private:
   DlRect cull_rect_;
   DlMatrix matrix_;
+  bool is_translate_scale_ = true;
 
   void adjustCullRect(const DlRect& clip, DlClipOp op, bool is_aa);
 
