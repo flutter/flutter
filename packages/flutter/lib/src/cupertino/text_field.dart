@@ -1756,7 +1756,6 @@ class _RenderBaselineStacked extends RenderBox
       return;
     }
 
-    // Layout children
     editableText.layout(constraints, parentUsesSize: true);
     final Size editableTextSize = editableText.size;
     placeholder?.layout(constraints, parentUsesSize: true);
@@ -1767,7 +1766,6 @@ class _RenderBaselineStacked extends RenderBox
     final _BaselineStackedParentData? placeholderParentData =
         placeholder?.parentData as _BaselineStackedParentData?;
 
-    // Attempt baseline alignment
     final double? editableTextBaselineValue = editableText.getDistanceToBaseline(
       TextBaseline.alphabetic,
     );
@@ -1833,5 +1831,34 @@ class _RenderBaselineStacked extends RenderBox
           editableText.parentData! as _BaselineStackedParentData;
       context.paintChild(editableText, offset + editableTextParentData.offset);
     }
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return _computeSize(constraints: constraints, layoutChild: ChildLayoutHelper.dryLayoutChild);
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    double width = constraints.minWidth;
+    double height = constraints.minHeight;
+
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox? editableText = _editableTextChild;
+
+    if (placeholder != null) {
+      final Size placeholderSize = layoutChild(placeholder, constraints);
+      width = math.max(width, placeholderSize.width);
+      height = math.max(height, placeholderSize.height);
+    }
+
+    if (editableText != null) {
+      final Size editableTextSize = layoutChild(editableText, constraints);
+      width = math.max(width, editableTextSize.width);
+      height = math.max(height, editableTextSize.height);
+    }
+
+    final Size size = Size(width, height);
+    assert(size.isFinite);
+    return size;
   }
 }
