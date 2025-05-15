@@ -553,6 +553,7 @@ class LabelAndValue extends SemanticBehavior {
     if (_describedBySpan!.parentNode != owner.element) {
       owner.element.append(_describedBySpan!);
     }
+    owner.setAttribute('aria-describedby', _describedById!);
   }
 
   void _removeDescribedBy() {
