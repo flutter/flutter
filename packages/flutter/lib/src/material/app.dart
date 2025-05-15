@@ -970,8 +970,8 @@ class _MaterialAppState extends State<MaterialApp> {
     return _MaterialInspectorButton.toggle(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      // This icon is also used for the Cupertino-styled button and for DevTools.
-      // It should be updated in all 3 places if changed.
+      // This unicode icon is also used for the Cupertino-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
       icon: const IconData(0x1F74A),
       isDarkTheme: _isDarkTheme(context),
       toggledOn: selectionOnTapEnabled,
