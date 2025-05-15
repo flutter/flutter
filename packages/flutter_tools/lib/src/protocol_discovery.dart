@@ -81,7 +81,6 @@ class ProtocolDiscovery {
   ///
   /// When a new VM Service URL: is available in [logReader],
   /// the URLs are forwarded at most once every [throttleDuration].
-  /// Returns when no event has been observed for [throttleTimeout].
   ///
   /// Port forwarding is only attempted when this is invoked,
   /// for each VM Service URL in the stream.

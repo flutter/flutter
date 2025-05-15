@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_cache.dart';
+/// @docImport 'runner/flutter_command.dart';
+/// @docImport 'runner/flutter_command_runner.dart';
+library;
+
 import 'dart:async';
 
 import 'package:crypto/crypto.dart';
@@ -814,7 +819,7 @@ abstract class ArtifactSet {
   /// The development artifact.
   final DevelopmentArtifact developmentArtifact;
 
-  /// [true] if the artifact is up to date.
+  /// Whether the artifact is up to date.
   Future<bool> isUpToDate(FileSystem fileSystem);
 
   /// The environment variables (if any) required to consume the artifacts.
@@ -834,8 +839,9 @@ abstract class ArtifactSet {
   /// The canonical name of the artifact.
   String get name;
 
-  // The name of the stamp file. Defaults to the same as the
-  // artifact name.
+  /// The name of the stamp file.
+  ///
+  /// Defaults to the same as the artifact name.
   String get stampName => name;
 }
 
@@ -1094,8 +1100,8 @@ class ArtifactUpdater {
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
-  /// extraction in case [update] is interrupted, so we can restart without
-  /// starting from scratch.
+  /// extraction in case [ArtifactSet.update] is interrupted, so we can
+  /// restart without starting from scratch.
   @visibleForTesting
   final List<File> downloadedFiles = <File>[];
 
@@ -1310,8 +1316,7 @@ class ArtifactUpdater {
     return md5Hash;
   }
 
-  /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [downloadedFiles].
+  /// Create a temporary file and add it to the [downloadedFiles].
   File _createDownloadFile(String name) {
     final File tempFile = _fileSystem.file(_fileSystem.path.join(_tempStorage.path, name));
     downloadedFiles.add(tempFile);

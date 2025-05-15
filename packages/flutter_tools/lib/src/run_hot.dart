@@ -744,8 +744,8 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  /// Returns [true] if the reload was successful.
-  /// Prints errors if [printErrors] is [true].
+  /// Returns `true` if the reload was successful.
+  /// Prints errors if [printErrors] is `true`.
   static bool validateReloadReport(
     vm_service.ReloadReport? reloadReport, {
     bool printErrors = true,

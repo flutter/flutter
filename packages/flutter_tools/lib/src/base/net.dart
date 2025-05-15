@@ -20,8 +20,8 @@ typedef HttpClientFactory = HttpClient Function();
 
 typedef UrlTunneller = Future<String> Function(String url);
 
-/// If [httpClientFactory] is null, a default [HttpClient] is used.
 class Net {
+  /// If [httpClientFactory] is `null`, a default [HttpClient] is used.
   Net({HttpClientFactory? httpClientFactory, required Logger logger, required Platform platform})
     : _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
       _logger = logger,
@@ -221,7 +221,7 @@ class _MemoryIOSink implements IOSink {
   Future<void> flush() async {}
 }
 
-/// Returns [true] if [address] is an IPv6 address.
+/// Whether [address] is an IPv6 address.
 bool isIPv6Address(String address) {
   try {
     Uri.parseIPv6Address(address);

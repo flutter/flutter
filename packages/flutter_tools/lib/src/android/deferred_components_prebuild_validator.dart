@@ -102,7 +102,9 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// For example, if there is a deferred component named `component1`,
   /// there should be the following string resource:
   ///
-  ///   <string name="component1Name">component1</string>
+  /// ```xml
+  /// <string name="component1Name">component1</string>
+  /// ```
   ///
   /// The string element's name attribute should be the component name with
   /// `Name` as a suffix, and the text contents should be the component name.

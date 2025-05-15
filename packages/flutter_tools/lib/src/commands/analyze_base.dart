@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'analyze.dart';
+/// @docImport 'analyze_continuously.dart';
+/// @docImport 'analyze_once.dart';
+library;
+
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';

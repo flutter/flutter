@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:fake_async/fake_async.dart';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show Process, ProcessResult, ProcessSignal, ProcessStartMode, systemEncoding;
@@ -137,14 +140,15 @@ class FakeCommand {
 }
 
 /// A fake process for use with [FakeProcessManager].
-///
-/// The process delays exit until both [duration] (if specified) has elapsed
-/// and [completer] (if specified) has completed.
-///
-/// When [outputFollowsExit] is specified, bytes are streamed to [stderr] and
-/// [stdout] after the process exits.
 @visibleForTesting
 class FakeProcess implements io.Process {
+  /// Creates a fake process for use with [FakeProcessManager].
+  ///
+  /// The process delays exit until both [duration] (if specified) has elapsed
+  /// and [completer] (if specified) has completed.
+  ///
+  /// When [outputFollowsExit] is specified, bytes are streamed to [stderr] and
+  /// [stdout] after the process exits.
   FakeProcess({
     int exitCode = 0,
     Duration duration = Duration.zero,
@@ -499,7 +503,7 @@ class _SequenceProcessManager extends FakeProcessManager {
 }
 
 /// Matcher that successfully matches against a [FakeProcessManager] with
-/// no remaining expectations ([item.hasRemainingExpectations] returns false).
+/// no remaining expectations ([FakeProcessManager.hasRemainingExpectations] returns `false`).
 const Matcher hasNoRemainingExpectations = _HasNoRemainingExpectations();
 
 class _HasNoRemainingExpectations extends Matcher {

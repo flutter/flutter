@@ -12,9 +12,9 @@ import 'package:file/file.dart';
 /// It will contain a package entry for [mainLibName] with `rootUri` at
 /// [directory].
 ///
-/// [otherLibs] maps other package names to their `rootUri` relative to `directory`.
+/// [packages] maps other package names to their `rootUri` relative to `directory`.
 ///
-/// Returns the `File` Object representing the package config.
+/// Returns the [File] object representing the package config.
 File writePackageConfigFile({
   required Directory directory,
   required String mainLibName,

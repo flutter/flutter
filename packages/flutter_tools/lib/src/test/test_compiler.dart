@@ -92,9 +92,9 @@ final class TestCompilerFailure extends TestCompilerResult {
 class TestCompiler {
   /// Creates a new [TestCompiler] which acts as a frontend_server proxy.
   ///
-  /// [trackWidgetCreation] configures whether the kernel transform is applied
-  /// to the output. This also changes the output file to include a '.track`
-  /// extension.
+  /// [BuildInfo.trackWidgetCreation] configures whether
+  /// the kernel transform is applied to the output.
+  /// This also changes the output file to include a '.track` extension.
   ///
   /// [flutterProject] is the project for which we are running tests.
   ///

@@ -19,12 +19,12 @@ import '../../src/testbed.dart';
 final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late SourceVisitor visitor;
   late Environment environment;
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.directory('cache').createSync();
         final Directory outputs = globals.fs.directory('outputs')..createSync();

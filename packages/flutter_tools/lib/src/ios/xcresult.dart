@@ -258,7 +258,7 @@ class XCResultIssue {
   /// The location where the issue occurs.
   ///
   /// This is a re-formatted version of the "url" value in the json.
-  /// The format looks like <FileLocation>:<StartingLineNumber>:<StartingColumnNumber>.
+  /// The format looks like `<FileLocation>:<StartingLineNumber>:<StartingColumnNumber>`.
   final String? location;
 
   /// Warnings when constructing the issue object.

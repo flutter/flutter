@@ -127,14 +127,14 @@ FlutterPlatform installHook({
 /// running.
 ///
 /// If [testConfigFile] is specified, it must follow the conventions of test
-/// configuration files as outlined in the [flutter_test] library. By default,
+/// configuration files as outlined in the `flutter_test` library. By default,
 /// the test file will be launched directly.
 ///
 /// The [packageConfigUri] argument specifies the package config location for
 /// the test file being launched. This is expected to be a file URI.
 ///
-/// The [updateGoldens] argument will set the [autoUpdateGoldens] global
-/// variable in the [flutter_test] package before invoking the test.
+/// The [updateGoldens] argument will set the `autoUpdateGoldens` global
+/// variable in the `flutter_test` package before invoking the test.
 ///
 /// The [integrationTest] argument can be specified to generate the bootstrap
 /// for integration tests.

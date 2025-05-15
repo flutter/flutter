@@ -37,7 +37,7 @@ T _cast<T>(Object? object) {
 /// A [DeviceDiscovery] that will connect to a flutter daemon and connects to
 /// the devices remotely.
 ///
-/// If [deltaFileTransfer] is true, the proxy will use an rsync-like algorithm that
+/// If [_deltaFileTransfer] is `true`, the proxy will use an rsync-like algorithm that
 /// only transfers the changed part of the application package for deployment.
 class ProxiedDevices extends PollingDeviceDiscovery {
   ProxiedDevices(
@@ -162,10 +162,10 @@ class ProxiedDevices extends PollingDeviceDiscovery {
 ///
 /// The communication happens via a flutter daemon.
 ///
-/// If [deltaFileTransfer] is true, the proxy will use an rsync-like algorithm that
+/// If [_deltaFileTransfer] is `true`, the proxy will use an rsync-like algorithm that
 /// only transfers the changed part of the application package for deployment.
 ///
-/// If [enableDdsProxy] is true, DDS will be started on the daemon instead of
+/// If [_enableDdsProxy] is `true`, DDS will be started on the daemon instead of
 /// starting locally.
 class ProxiedDevice extends Device {
   ProxiedDevice(
@@ -595,11 +595,11 @@ typedef CreateSocketServer =
 
 /// A [DevicePortForwarder] for a proxied device.
 ///
-/// If [deviceId] is not null, the port forwarder forwards ports from the remote
-/// device, to the remote host, and then to the local host.
+/// If [_deviceId] is not `null`, the port forwarder forwards ports from
+/// the remote device, to the remote host, and then to the local host.
 ///
-/// If [deviceId] is null, then the port forwarder only forwards ports from the
-/// remote host to the local host.
+/// If [_deviceId] is `null`, then the port forwarder only forwards ports from
+/// the remote host to the local host.
 @visibleForTesting
 class ProxiedPortForwarder extends DevicePortForwarder {
   ProxiedPortForwarder(
@@ -824,11 +824,11 @@ class ProxiedDartDevelopmentService
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
-  /// [_proxiedPortForwarder] matches the [proxiedPortForwarder] of a ProxiedDevice.
+  /// [_proxiedPortForwarder] matches the [ProxiedDevice.proxiedPortForwarder] of a ProxiedDevice.
   /// It forwards a port on the remote host to the local host.
   final ProxiedPortForwarder _proxiedPortForwarder;
 
-  /// [_devicePortForwarder] matches the [portForwarder] of a ProxiedDevice.
+  /// [_devicePortForwarder] matches the [ProxiedDevice.portForwarder] of a ProxiedDevice.
   /// It forwards a port on the remotely connected device, to the remote host, then to the local host.
   final ProxiedPortForwarder _devicePortForwarder;
 

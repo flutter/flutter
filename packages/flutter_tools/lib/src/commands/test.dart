@@ -750,7 +750,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   /// Parses a test file/directory target passed as an argument and returns it
-  /// as an absolute file:/// [URI] with optional querystring for name/line/col.
+  /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
   Uri _parseTestArgument(String arg) {
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.

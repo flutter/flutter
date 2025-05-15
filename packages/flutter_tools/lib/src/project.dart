@@ -412,7 +412,9 @@ class FlutterProject {
     }
   }
 
-  /// Returns a json encoded string containing the [appName], [version], and [buildNumber] that is used to generate version.json
+  /// A JSON encoded string containing the [FlutterManifest.appName],
+  /// [FlutterManifest.buildName] (version), and [FlutterManifest.buildNumber]
+  /// that are used to generate `version.json`.
   String getVersionInfo() {
     final String? buildName = manifest.buildName;
     final String? buildNumber = manifest.buildNumber;
@@ -727,8 +729,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
     final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
       globals.logger,
-      javaV: javaVersion,
-      gradleV: gradleVersion,
+      javaVersion: javaVersion,
+      gradleVersion: gradleVersion,
     );
 
     final bool compatibleKgpGradle = gradle.validateGradleAndKGP(

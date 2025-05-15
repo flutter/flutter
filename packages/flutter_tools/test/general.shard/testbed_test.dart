@@ -19,7 +19,7 @@ import '../src/testbed.dart';
 void main() {
   group('Testbed', () {
     test('Can provide default interfaces', () async {
-      final Testbed testbed = Testbed();
+      final TestBed testbed = TestBed();
 
       late FileSystem localFileSystem;
       await testbed.run(() {
@@ -31,7 +31,7 @@ void main() {
     });
 
     test('Can provide setup interfaces', () async {
-      final Testbed testbed = Testbed(overrides: <Type, Generator>{A: () => A()});
+      final TestBed testbed = TestBed(overrides: <Type, Generator>{A: () => A()});
 
       A? instance;
       await testbed.run(() {
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('Can provide local overrides', () async {
-      final Testbed testbed = Testbed(overrides: <Type, Generator>{A: () => A()});
+      final TestBed testbed = TestBed(overrides: <Type, Generator>{A: () => A()});
 
       A? instance;
       await testbed.run(() {
@@ -53,7 +53,7 @@ void main() {
     });
 
     test('provides a mocked http client', () async {
-      final Testbed testbed = Testbed();
+      final TestBed testbed = TestBed();
       await testbed.run(() async {
         final HttpClient client = HttpClient();
         final HttpClientRequest request = await client.getUrl(Uri.parse('http://foo.dev'));
@@ -65,7 +65,7 @@ void main() {
     });
 
     test('Throws StateError if Timer is left pending', () async {
-      final Testbed testbed = Testbed();
+      final TestBed testbed = TestBed();
 
       expect(
         testbed.run(() async {
@@ -76,7 +76,7 @@ void main() {
     });
 
     test("Doesn't throw a StateError if Timer is left cleaned up", () async {
-      final Testbed testbed = Testbed();
+      final TestBed testbed = TestBed();
 
       await testbed.run(() async {
         final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {});
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('Throws if ProcessUtils is injected', () {
-      final Testbed testbed = Testbed(overrides: <Type, Generator>{ProcessUtils: () => null});
+      final TestBed testbed = TestBed(overrides: <Type, Generator>{ProcessUtils: () => null});
 
       expect(() => testbed.run(() {}), throwsStateError);
     });

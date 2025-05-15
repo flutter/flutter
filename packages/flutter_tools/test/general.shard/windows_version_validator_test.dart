@@ -13,7 +13,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
-/// Fake [_WindowsUtils] to use for testing
+/// Fake Windows version of [OperatingSystemUtils] to use for testing.
 class FakeValidOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeValidOperatingSystemUtils([this.name = 'Microsoft Windows [Version 11.0.22621.963]']);
 
