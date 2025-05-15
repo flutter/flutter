@@ -24,6 +24,9 @@ declare_args() {
 
   mac_swift_lib_paths = []
 
+  # Version of iOS that we're targeting for tests.
+  mac_testing_deployment_target = "14.0"
+
   # Path to the iOS platform to use.
   #
   # When empty, this will use the default platform based on the value of
