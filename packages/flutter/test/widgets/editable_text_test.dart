@@ -8932,6 +8932,7 @@ void main() {
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
+            selectionColor: Colors.deepPurpleAccent.withOpacity(0.40),
             keyboardType: TextInputType.text,
           ),
         ),
