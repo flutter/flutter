@@ -24,7 +24,7 @@ void validatePubspecForPlugin({
         '$projectDir/pubspec.yaml',
         fileSystem: globals.fs,
         logger: globals.logger,
-      )!;
+      );
   final YamlMap platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final String platform in expectedPlatforms) {
     expect(platformMaps[platform], isNotNull);

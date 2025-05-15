@@ -14,7 +14,7 @@ void main() {
 
     RenderObject parent = renderObject;
     while (parent.parent != null) {
-      parent = parent.parent!;
+      parent = parent.parent;
     }
     expect(parent, isA<RenderView>());
     expect(parent, equals(tester.binding.renderView));

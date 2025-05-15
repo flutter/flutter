@@ -22,7 +22,7 @@ LanguageVersion? _currentLanguageVersion;
 /// Lookup the current Dart language version.
 LanguageVersion currentLanguageVersion(FileSystem fileSystem, String flutterRoot) {
   if (_currentLanguageVersion != null) {
-    return _currentLanguageVersion!;
+    return _currentLanguageVersion;
   }
   // Either reading the file or parsing the version could fail on a corrupt Dart SDK.
   // let it crash so it shows up in crash logging.

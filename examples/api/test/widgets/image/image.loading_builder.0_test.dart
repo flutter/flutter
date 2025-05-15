@@ -22,7 +22,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));
-    final ImageLoadingBuilder loadingBuilder = image.loadingBuilder!;
+    final ImageLoadingBuilder loadingBuilder = image.loadingBuilder;
     final BuildContext context = tester.element(find.byType(Image));
 
     const SizedBox child = SizedBox(key: Key('child'));
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));
-    final ImageLoadingBuilder loadingBuilder = image.loadingBuilder!;
+    final ImageLoadingBuilder loadingBuilder = image.loadingBuilder;
     final BuildContext context = tester.element(find.byType(Image));
 
     const SizedBox child = SizedBox(key: Key('child'));

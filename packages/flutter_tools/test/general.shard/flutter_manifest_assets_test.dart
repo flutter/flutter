@@ -45,7 +45,7 @@ flutter:
 ''';
 
       final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+          FlutterManifest.createFromString(manifest, logger: logger);
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo')),
@@ -89,7 +89,7 @@ flutter:
 ''';
 
       final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+          FlutterManifest.createFromString(manifest, logger: logger);
       final List<AssetsEntry> assets = flutterManifest.assets;
 
       expect(assets, <AssetsEntry>[
@@ -116,7 +116,7 @@ flutter:
 ''';
 
       final FlutterManifest flutterManifest =
-          FlutterManifest.createFromString(manifest, logger: logger)!;
+          FlutterManifest.createFromString(manifest, logger: logger);
 
       expect(flutterManifest.assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('a/foo'), flavors: const <String>{'apple', 'strawberry'}),

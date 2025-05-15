@@ -530,7 +530,7 @@ void main() {
     );
 
     final BuildContext context = tester.element(find.byType(DropdownButton<String>));
-    final TextStyle style = Theme.of(context).textTheme.titleMedium!;
+    final TextStyle style = Theme.of(context).textTheme.titleMedium;
     final double lineHeight = style.fontSize! * style.height!; // 16 * 1.5 = 24
     final double labelHeight = lineHeight * scaleFactor; // 24 * 3.0 = 72
     const double decorationVerticalPadding = 16.0;

@@ -343,7 +343,7 @@ class PaintingContext extends ClipContext {
     assert(!_isRecording);
     _currentLayer = PictureLayer(estimatedBounds);
     _recorder = RendererBinding.instance.createPictureRecorder();
-    _canvas = RendererBinding.instance.createCanvas(_recorder!);
+    _canvas = RendererBinding.instance.createCanvas(_recorder);
     _containerLayer.append(_currentLayer!);
   }
 
@@ -4744,7 +4744,7 @@ class _SemanticsConfigurationProvider {
   SemanticsConfiguration get original {
     if (_originalConfiguration == null) {
       _effectiveConfiguration = _originalConfiguration = SemanticsConfiguration();
-      _renderObject.describeSemanticsConfiguration(_originalConfiguration!);
+      _renderObject.describeSemanticsConfiguration(_originalConfiguration);
       assert(
         !_originalConfiguration!.explicitChildNodes ||
             _originalConfiguration!.childConfigurationsDelegate == null,
@@ -5232,7 +5232,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         if (hasChildConfigurationsDelegate && fragment.configToMergeUp != null) {
           // This fragment need to go through delegate to determine whether it
           // merge up or not.
-          childConfigurations.add(fragment.configToMergeUp!);
+          childConfigurations.add(fragment.configToMergeUp);
           configToFragment[fragment.configToMergeUp!] = fragment;
         } else {
           mergeUp.add(fragment);
@@ -5419,7 +5419,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     // Any node other than producedNode in _semanticsNodes are sibling nodes
     // from children fragments. They share the same tags as the producedNode.
-    final SemanticsNode producedNode = cachedSemanticsNode!;
+    final SemanticsNode producedNode = cachedSemanticsNode;
     for (final SemanticsNode node in semanticsNodes) {
       if (node != producedNode) {
         if (parentData?.tagsForChildren != null) {
@@ -5454,7 +5454,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       children.addAll(child.semanticsNodes);
     }
 
-    final SemanticsNode node = cachedSemanticsNode!;
+    final SemanticsNode node = cachedSemanticsNode;
     children.removeWhere(shouldDrop);
     if (configProvider.effective.isSemanticBoundary) {
       renderObject.assembleSemanticsNode(node, configProvider.effective, children);
@@ -5554,7 +5554,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Returns true if geometry changes that may result in children's geometries
   /// change as well.
   void _updateSemanticsNodeGeometry() {
-    final SemanticsNode node = cachedSemanticsNode!;
+    final SemanticsNode node = cachedSemanticsNode;
     final _SemanticsGeometry nodeGeometry = geometry!;
     node.elevationAdjustment = elevationAdjustment;
     if (elevationAdjustment != 0.0) {
@@ -5622,7 +5622,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
       final SemanticsNode node = entry.key;
       node
-        ..rect = rect!
+        ..rect = rect
         ..transform =
             null // transform has be taking into account when
         // calculating the rect.
@@ -6023,7 +6023,7 @@ final class _SemanticsGeometry {
         _transformRect(
           _intersectRects(additionalPaintClip, parentPaintClipRect),
           _temporaryTransformHolder,
-        )!;
+        );
     final Rect? semanticsClip =
         parent.describeSemanticsClip(child) ??
         _intersectRects(parentSemanticsClipRect, additionalPaintClip);

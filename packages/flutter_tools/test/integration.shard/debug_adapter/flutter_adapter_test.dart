@@ -22,7 +22,7 @@ import 'test_support.dart';
 void main() {
   late Directory tempDir;
   late DapTestSession dap;
-  final String relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
+  const String relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();

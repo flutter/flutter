@@ -141,7 +141,7 @@ class LocalEngineLocator {
       kFlutterEnginePackageName,
       'lib',
     );
-    if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
+    if (_fileSystem.identicalSync(cachedPath, engineUri.path)) {
       _logger.printTrace(
         'Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.',
       );

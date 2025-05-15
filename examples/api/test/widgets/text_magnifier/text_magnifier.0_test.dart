@@ -54,7 +54,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final TextEditingController controller =
-        tester.firstWidget<TextField>(find.byType(TextField)).controller!;
+        tester.firstWidget<TextField>(find.byType(TextField)).controller;
 
     final TextSelection selection = controller.selection;
     final RenderEditable renderEditable = _findRenderEditable(tester);

@@ -3478,7 +3478,7 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
       expect(_xcodeProject.xcodeProjectInfoFile.readAsStringSync() == originalSettings, isFalse);
 
       expect(schemeInfo?.backupSchemeFile, isNotNull);
-      final File backupScheme = schemeInfo!.backupSchemeFile!;
+      final File backupScheme = schemeInfo!.backupSchemeFile;
       expect(backupScheme.existsSync(), isTrue);
       final String originalScheme = backupScheme.readAsStringSync();
       expect(_xcodeProject.xcodeProjectSchemeFile().readAsStringSync() == originalScheme, isFalse);

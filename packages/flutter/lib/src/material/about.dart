@@ -556,6 +556,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
           ),
         ];
     }
+    return null;
   }
 
   @override
@@ -1308,7 +1309,7 @@ class _MasterDetailFlow extends StatefulWidget {
       }
       return true;
     }());
-    return _MasterDetailFlowProxy._(pageOpener!);
+    return _MasterDetailFlowProxy._(pageOpener);
   }
 }
 

@@ -269,7 +269,7 @@ void main() {
       isNot(contains('Deferred components gen_snapshot validation passed.')),
     );
 
-    final String pathSeparator = fileSystem.path.separator;
+    const String pathSeparator = fileSystem.path.separator;
     expect(
       result.stdout.toString(),
       contains(

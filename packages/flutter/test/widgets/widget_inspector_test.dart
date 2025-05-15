@@ -397,7 +397,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         await tester.pump();
 
         // Verify the tap was intercepted by the Widget Inspector.
-        final RenderObject renderObject = find.byKey(widgetKey).evaluate().first.renderObject!;
+        final RenderObject renderObject = find.byKey(widgetKey).evaluate().first.renderObject;
         expect(WidgetInspectorService.instance.selection.candidates, contains(renderObject));
       }
 
@@ -417,7 +417,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         await tester.pump();
 
         // Verify the pan end was intercepted by the Widget Inspector.
-        final RenderObject renderObject = find.byKey(widgetKey).evaluate().first.renderObject!;
+        final RenderObject renderObject = find.byKey(widgetKey).evaluate().first.renderObject;
         expect(WidgetInspectorService.instance.selection.candidates, contains(renderObject));
       }
 
@@ -2225,7 +2225,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               service.setSelection(elementA.renderObject, 'my-group');
 
               // Verify the correct events were dispatched in response.
-              verifyDeveloperInspectCalled<RenderObject>(elementA.renderObject!);
+              verifyDeveloperInspectCalled<RenderObject>(elementA.renderObject);
               verifyNavigateEvent(
                 // The Text widget does not have a render object, the backing
                 // render object is provided by RichText which is defined in
@@ -2243,7 +2243,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               service.setSelection(stackElement.renderObject, 'my-group');
 
               // Verify the correct events were dispatched in response.
-              verifyDeveloperInspectCalled<RenderObject>(stackElement.renderObject!);
+              verifyDeveloperInspectCalled<RenderObject>(stackElement.renderObject);
               verifyNavigateEvent(
                 expectedFileEnding: 'widget_inspector_test.dart',
                 expectedColumn: 18,
@@ -4817,7 +4817,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           // Verify calling the screenshot method still works if the RenderObject
           // needs to be laid out again.
           final RenderObject container =
-              find.byKey(outerContainerKey).evaluate().single.renderObject!;
+              find.byKey(outerContainerKey).evaluate().single.renderObject;
           container
             ..markNeedsLayout()
             ..markNeedsPaint();
@@ -4906,7 +4906,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               final ui.FrameInfo frame = await codec.getNextFrame();
               codec.dispose();
               return frame.image;
-            }))!;
+            }));
         addTearDown(screenshotImage.dispose);
 
         await expectLater(screenshotImage, matchesReferenceImage(clipRectScreenshot!));

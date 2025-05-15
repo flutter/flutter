@@ -155,7 +155,7 @@ class _PaintDecuplePixels extends CustomPainter {
         RectTween(
           begin: const Rect.fromLTWH(1, 1, 1, 1),
           end: const Rect.fromLTWH(11, 1, 1, 1),
-        ).transform(value)!;
+        ).transform(value);
     canvas.drawRect(rect, Paint()..color = Colors.yellow);
     final Paint black = Paint()..color = Colors.black;
     canvas

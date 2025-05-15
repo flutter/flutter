@@ -1376,7 +1376,7 @@ class RenderEditable extends RenderBox
       }
     }
     config
-      ..attributedValue = _cachedAttributedValue!
+      ..attributedValue = _cachedAttributedValue
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -1514,7 +1514,7 @@ class RenderEditable extends RenderBox
         }
         late final SemanticsNode newChild;
         if (_cachedChildNodes?.isNotEmpty ?? false) {
-          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first)!;
+          newChild = _cachedChildNodes!.remove(_cachedChildNodes!.keys.first);
         } else {
           final UniqueKey key = UniqueKey();
           newChild = SemanticsNode(key: key, showOnScreen: _createShowOnScreenFor(key));
@@ -1532,7 +1532,7 @@ class RenderEditable extends RenderBox
 
   VoidCallback? _createShowOnScreenFor(Key key) {
     return () {
-      final SemanticsNode node = _cachedChildNodes![key]!;
+      final SemanticsNode node = _cachedChildNodes![key];
       showOnScreen(descendant: this, rect: node.rect);
     };
   }
@@ -2116,7 +2116,7 @@ class RenderEditable extends RenderBox
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
   void selectPosition({required SelectionChangedCause cause}) {
-    selectPositionAt(from: _lastTapDownPosition!, cause: cause);
+    selectPositionAt(from: _lastTapDownPosition, cause: cause);
   }
 
   /// Select text between the global positions [from] and [to].
@@ -2150,7 +2150,7 @@ class RenderEditable extends RenderBox
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWord({required SelectionChangedCause cause}) {
-    selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
+    selectWordsInRange(from: _lastTapDownPosition, cause: cause);
   }
 
   /// Selects the set words of a paragraph that intersect a given range of global positions.
@@ -2196,7 +2196,7 @@ class RenderEditable extends RenderBox
     _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
     final TextPosition position = _textPainter.getPositionForOffset(
-      globalToLocal(_lastTapDownPosition!) - _paintOffset,
+      globalToLocal(_lastTapDownPosition) - _paintOffset,
     );
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;

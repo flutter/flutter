@@ -75,7 +75,7 @@ void main() {
       opacity,
       phase: EnginePhase.flushSemantics,
       onErrors: () {
-        error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+        error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
       },
     );
     expect(

@@ -317,7 +317,7 @@ dev_dependencies:
             jsonResponse:
                 (VM.parse(<String, Object>{})!
                       ..isolates = <IsolateRef>[
-                        IsolateRef.parse(<String, Object>{'id': '1'})!,
+                        IsolateRef.parse(<String, Object>{'id': '1'}),
                       ])
                     .toJson(),
           ),
@@ -401,7 +401,7 @@ resolution: workspace
             jsonResponse:
                 (VM.parse(<String, Object>{})!
                       ..isolates = <IsolateRef>[
-                        IsolateRef.parse(<String, Object>{'id': '1'})!,
+                        IsolateRef.parse(<String, Object>{'id': '1'}),
                       ])
                     .toJson(),
           ),
@@ -460,7 +460,7 @@ resolution: workspace
             jsonResponse:
                 (VM.parse(<String, Object>{})!
                       ..isolates = <IsolateRef>[
-                        IsolateRef.parse(<String, Object>{'id': '1'})!,
+                        IsolateRef.parse(<String, Object>{'id': '1'}),
                       ])
                     .toJson(),
           ),

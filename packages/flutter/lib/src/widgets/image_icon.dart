@@ -80,7 +80,7 @@ class ImageIcon extends StatelessWidget {
     return Semantics(
       label: semanticLabel,
       child: Image(
-        image: image!,
+        image: image,
         width: iconSize,
         height: iconSize,
         color: iconColor,
