@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
-#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
 FLUTTER_ASSERT_ARC
@@ -13,7 +13,7 @@ FLUTTER_ASSERT_ARC
 
 - (UIWindowScene*)flutterWindowSceneIfViewLoaded {
   if (self.viewIfLoaded == nil) {
-    FML_LOG(WARNING) << "Trying to access the window scene before the view is loaded.";
+    [FlutterLogger logWarning:@"Trying to access the window scene before the view is loaded."];
     return nil;
   }
   return self.viewIfLoaded.window.windowScene;
@@ -21,7 +21,7 @@ FLUTTER_ASSERT_ARC
 
 - (UIScreen*)flutterScreenIfViewLoaded {
   if (self.viewIfLoaded == nil) {
-    FML_LOG(WARNING) << "Trying to access the screen before the view is loaded.";
+    [FlutterLogger logWarning:@"Trying to access the screen before the view is loaded."];
     return nil;
   }
   return [self flutterWindowSceneIfViewLoaded].screen;

@@ -1141,6 +1141,13 @@ void ImpellerParagraphStyleSetTextDirection(
 }
 
 IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetTextDecoration(
+    ImpellerParagraphStyle paragraph_style,
+    const ImpellerTextDecoration* decoration) {
+  GetPeer(paragraph_style)->SetTextDecoration(*decoration);
+}
+
+IMPELLER_EXTERN_C
 void ImpellerParagraphStyleSetMaxLines(ImpellerParagraphStyle paragraph_style,
                                        uint32_t max_lines) {
   GetPeer(paragraph_style)->SetMaxLines(max_lines);
@@ -1282,9 +1289,10 @@ uint32_t ImpellerParagraphGetLineCount(ImpellerParagraph paragraph) {
 }
 
 IMPELLER_EXTERN_C
-ImpellerRange ImpellerParagraphGetWordBoundary(ImpellerParagraph paragraph,
-                                               size_t code_unit_index) {
-  return GetPeer(paragraph)->GetWordBoundary(code_unit_index);
+void ImpellerParagraphGetWordBoundary(ImpellerParagraph paragraph,
+                                      size_t code_unit_index,
+                                      ImpellerRange* out_range) {
+  *out_range = GetPeer(paragraph)->GetWordBoundary(code_unit_index);
 }
 
 IMPELLER_EXTERN_C
@@ -1458,9 +1466,9 @@ size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd(
 }
 
 IMPELLER_EXTERN_C
-ImpellerRect ImpellerGlyphInfoGetGraphemeClusterBounds(
-    ImpellerGlyphInfo glyph_info) {
-  return GetPeer(glyph_info)->GetGraphemeClusterBounds();
+void ImpellerGlyphInfoGetGraphemeClusterBounds(ImpellerGlyphInfo glyph_info,
+                                               ImpellerRect* out_bounds) {
+  *out_bounds = GetPeer(glyph_info)->GetGraphemeClusterBounds();
 }
 
 IMPELLER_EXTERN_C
