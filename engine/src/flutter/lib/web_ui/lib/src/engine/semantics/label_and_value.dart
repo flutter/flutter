@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html' as html;
+import 'dart:html' show window;
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -471,7 +471,7 @@ class LabelAndValue extends SemanticBehavior {
 
   /// Checks if the current browser supports aria-description based on version.
   static bool _checkBrowserSupport() {
-    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    final userAgent = domWindow.navigator.userAgent.toLowerCase();
 
     // Detect Chrome
     final chromeMatch = RegExp(r'chrome/(\d+)').firstMatch(userAgent);
@@ -597,7 +597,7 @@ class LabelAndValue extends SemanticBehavior {
     _describedBySpan!.setAttribute('hidden', '');
     _describedBySpan!.text = description;
     // Attach as a child of the semantics element, not document.body
-    if (!_describedBySpan!.isConnected) {
+    if (_describedBySpan!.isConnected == false) {
       owner.element.append(_describedBySpan!);
     }
     owner.setAttribute('aria-describedby', _describedById!);
