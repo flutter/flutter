@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html' as html;
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -456,19 +457,66 @@ class LabelAndValue extends SemanticBehavior {
   /// we fallback to using `aria-describedby` with a hidden element instead.
   ///
   /// This check is run only once and cached for performance.
-  /// It works by setting and immediately reading back an `aria-description`
-  /// attribute on a dummy DOM element.
+  /// It works by checking the browser version against known supported versions.
   ///
-  /// See: https://w3c.github.io/aria/#aria-description
+  /// See: https://caniuse.com/?search=aria-description
   static bool? _supportsAriaDescription;
 
   static bool get supportsAriaDescription {
     if (_supportsAriaDescription == null) {
-      final test = domDocument.createElement('div');
-      test.setAttribute('aria-description', 'test');
-      _supportsAriaDescription = test.getAttribute('aria-description') == 'test';
+      _supportsAriaDescription = _checkBrowserSupport();
     }
     return _supportsAriaDescription!;
+  }
+
+  /// Checks if the current browser supports aria-description based on version.
+  static bool _checkBrowserSupport() {
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+
+    // Detect Chrome
+    final chromeMatch = RegExp(r'chrome/(\d+)').firstMatch(userAgent);
+    if (chromeMatch != null) {
+      final version = int.tryParse(chromeMatch.group(1) ?? '');
+      if (version != null && version >= 83) return true;
+    }
+
+    // Detect Edge (Chromium)
+    final edgeMatch = RegExp(r'edg/(\d+)').firstMatch(userAgent);
+    if (edgeMatch != null) {
+      final version = int.tryParse(edgeMatch.group(1) ?? '');
+      if (version != null && version >= 83) return true;
+    }
+
+    // Detect Opera
+    final operaMatch = RegExp(r'opr/(\d+)').firstMatch(userAgent);
+    if (operaMatch != null) {
+      final version = int.tryParse(operaMatch.group(1) ?? '');
+      if (version != null && version >= 69) return true;
+    }
+
+    // Detect Firefox
+    final firefoxMatch = RegExp(r'firefox/(\d+)').firstMatch(userAgent);
+    if (firefoxMatch != null) {
+      final version = int.tryParse(firefoxMatch.group(1) ?? '');
+      if (version != null && version >= 119) return true;
+    }
+
+    // Detect Safari (macOS or iOS)
+    final safariMatch = RegExp(r'version/(\d+(\.\d+)?) safari').firstMatch(userAgent);
+    if (safariMatch != null) {
+      final version = double.tryParse(safariMatch.group(1) ?? '');
+      if (version != null && version >= 17.4) return true;
+    }
+
+    // Detect Samsung Internet
+    final samsungMatch = RegExp(r'samsungbrowser/(\d+)').firstMatch(userAgent);
+    if (samsungMatch != null) {
+      final version = int.tryParse(samsungMatch.group(1) ?? '');
+      if (version != null && version >= 27) return true;
+    }
+
+    // Unknown or older browser → fallback
+    return false;
   }
 
   /// Allows tests to override the `supportsAriaDescription` value.
@@ -503,7 +551,6 @@ class LabelAndValue extends SemanticBehavior {
         _removeDescribedBy();
       } else {
         _ensureDescribedBy(description);
-        owner.setAttribute('aria-describedby', _describedById!);
         owner.removeAttribute('aria-description');
       }
     } else {
