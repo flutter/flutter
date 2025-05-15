@@ -714,12 +714,13 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   _CupertinoDragGestureController<T>? _dragGestureController;
 
   late VerticalDragGestureRecognizer _recognizer;
-  _UpDragAnimationControllerProvider? provider;
+  _UpDragAnimationControllerProvider? upDragController;
 
   @override
   void initState() {
     super.initState();
-    provider ??= _UpDragAnimationControllerProvider.maybeOf(context);
+    assert(upDragController == null);
+    upDragController = _UpDragAnimationControllerProvider.maybeOf(context);
     _recognizer =
         VerticalDragGestureRecognizer(debugOwner: this)
           ..onStart = _handleDragStart
@@ -753,10 +754,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_dragGestureController != null);
-    _dragGestureController!.dragUpdate(
-      details.primaryDelta!,
-      provider!.controller,
-    );
+    _dragGestureController!.dragUpdate(details.primaryDelta!, upDragController!.controller);
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -764,7 +762,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     assert(_dragGestureController != null);
     _dragGestureController!.dragEnd(
       details.velocity.pixelsPerSecond.dy / context.size!.height,
-      provider!.controller,
+      upDragController!.controller,
     );
     _dragGestureController = null;
   }
@@ -773,7 +771,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     assert(mounted);
     // This can be called even if start is not called, paired with the "down" event
     // that we don't consider here.
-    _dragGestureController?.dragEnd(0.0, provider!.controller);
+    _dragGestureController?.dragEnd(0.0, upDragController!.controller);
     _dragGestureController = null;
   }
 
