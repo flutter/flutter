@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/template.dart';
 import '../base/version.dart';
@@ -52,10 +53,19 @@ class SwiftPackageManager {
   ) async {
     _validatePlatform(platform);
 
+    final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
+    ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
+    symlinkDirectory.createSync(recursive: true);
+
     final (
       List<SwiftPackagePackageDependency> packageDependencies,
       List<SwiftPackageTargetDependency> targetDependencies,
-    ) = _dependenciesForPlugins(plugins, platform);
+    ) = _dependenciesForPlugins(
+      plugins: plugins,
+      platform: platform,
+      symlinkDirectory: symlinkDirectory,
+      pathRelativeTo: project.flutterPluginSwiftPackageDirectory.path,
+    );
 
     // If there aren't any Swift Package plugins and the project hasn't been
     // migrated yet, don't generate a Swift package or migrate the app since
@@ -98,10 +108,13 @@ class SwiftPackageManager {
     pluginsPackage.createSwiftPackage();
   }
 
-  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) _dependenciesForPlugins(
-    List<Plugin> plugins,
-    SupportedPlatform platform,
-  ) {
+  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>)
+  _dependenciesForPlugins({
+    required List<Plugin> plugins,
+    required SupportedPlatform platform,
+    required Directory symlinkDirectory,
+    required String pathRelativeTo,
+  }) {
     final List<SwiftPackagePackageDependency> packageDependencies =
         <SwiftPackagePackageDependency>[];
     final List<SwiftPackageTargetDependency> targetDependencies = <SwiftPackageTargetDependency>[];
@@ -111,16 +124,23 @@ class SwiftPackageManager {
         _fileSystem,
         platform.name,
       );
+      String? packagePath = plugin.pluginSwiftPackagePath(_fileSystem, platform.name);
       if (plugin.platforms[platform.name] == null ||
-          pluginSwiftPackageManifestPath == null ||
+          pluginSwiftPackageManifestPath == null || packagePath == null ||
           !_fileSystem.file(pluginSwiftPackageManifestPath).existsSync()) {
         continue;
       }
 
+      final Link pluginSymlink = symlinkDirectory.childLink(plugin.name);
+      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
+      pluginSymlink.createSync(packagePath);
+      packagePath = pluginSymlink.path;
+      packagePath = _fileSystem.path.relative(packagePath, from: pathRelativeTo);
+
       packageDependencies.add(
         SwiftPackagePackageDependency(
           name: plugin.name,
-          path: _fileSystem.file(pluginSwiftPackageManifestPath).parent.path,
+          path: packagePath,
         ),
       );
 

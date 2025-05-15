@@ -51,6 +51,21 @@ void main() {
       expect(project.ephemeralDirectory.path, 'app_name/.ios/Flutter/ephemeral');
     });
 
+    testWithoutContext('flutterSwiftPackagesDirectory', () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(project.flutterSwiftPackagesDirectory.path, 'app_name/ios/Flutter/ephemeral/Packages');
+    });
+
+    testWithoutContext('relativeSwiftPackagesDirectory', () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.relativeSwiftPackagesDirectory.path,
+        'app_name/ios/Flutter/ephemeral/Packages/.packages',
+      );
+    });
+
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final IosProject project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -438,6 +453,24 @@ void main() {
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final MacOSProject project = MacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
       expect(project.ephemeralDirectory.path, 'app_name/macos/Flutter/ephemeral');
+    });
+
+    testWithoutContext('flutterSwiftPackagesDirectory', () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final MacOSProject project = MacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.flutterSwiftPackagesDirectory.path,
+        'app_name/macos/Flutter/ephemeral/Packages',
+      );
+    });
+
+    testWithoutContext('relativeSwiftPackagesDirectory', () {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final MacOSProject project = MacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.relativeSwiftPackagesDirectory.path,
+        'app_name/macos/Flutter/ephemeral/Packages/.packages',
+      );
     });
 
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {

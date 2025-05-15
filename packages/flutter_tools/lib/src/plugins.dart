@@ -439,14 +439,29 @@ class Plugin {
   /// Dev dependencies are intended to be stripped out in release builds.
   final bool isDevDependency;
 
-  /// Expected path to the plugin's Package.swift. Returns null if the plugin
-  /// does not support the [platform] or the [platform] is not iOS or macOS.
-  String? pluginSwiftPackageManifestPath(FileSystem fileSystem, String platform) {
+  /// Expected path to the plugin's swift package, which contains the Package.swift.
+  ///
+  /// This path should be `/path/to/[package_name]/[platform]/[package_name]`
+  /// (e.g. `/path/to/my_plugin/ios/my_plugin`).
+  ///
+  /// Returns null if the plugin does not support the [platform] or the
+  /// [platform] is not iOS or macOS.
+  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform) {
     final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
     if (platformDirectoryName == null) {
       return null;
     }
-    return fileSystem.path.join(path, platformDirectoryName, name, 'Package.swift');
+    return fileSystem.path.join(path, platformDirectoryName, name);
+  }
+
+  /// Expected path to the plugin's Package.swift. Returns null if the plugin
+  /// does not support the [platform] or the [platform] is not iOS or macOS.
+  String? pluginSwiftPackageManifestPath(FileSystem fileSystem, String platform) {
+    final String? packagePath = pluginSwiftPackagePath(fileSystem, platform);
+    if (packagePath == null) {
+      return null;
+    }
+    return fileSystem.path.join(packagePath, 'Package.swift');
   }
 
   /// Expected path to the plugin's podspec. Returns null if the plugin does
