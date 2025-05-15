@@ -994,7 +994,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           assert embeddedView != null;
           // The embedded view is initially marked as not important at creation in the platform
           // view controller, so we must explicitly mark it as important here.
-          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
           result.addChild(embeddedView);
           continue;
         }
