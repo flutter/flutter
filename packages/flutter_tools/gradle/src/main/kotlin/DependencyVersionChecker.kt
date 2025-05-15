@@ -185,7 +185,7 @@ object DependencyVersionChecker {
         return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
             MinSdkVersion(it.name, it.minSdk.apiLevel)
         } else {
-            MinSdkVersion(it.name, it.minSdkVersion.apiLevel)
+            MinSdkVersion(it.name, it.minSdk.apiLevel)
         }
     }
 
