@@ -27,6 +27,9 @@ namespace impeller::interop::testing {
 using InteropPlaygroundTest = PlaygroundTest;
 INSTANTIATE_PLAYGROUND_SUITE(InteropPlaygroundTest);
 
+// Just ensures that context can be subclassed.
+class ContextSub : public hpp::Context {};
+
 TEST_P(InteropPlaygroundTest, CanCreateContext) {
   auto context = CreateContext();
   ASSERT_TRUE(context);
@@ -281,6 +284,32 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
   // Build the display list.
   auto dl = dl_builder.Build();
 
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanCreateDecorations) {
+  hpp::TypographyContext context;
+  auto para =
+      hpp::ParagraphBuilder(context)
+          .PushStyle(
+              hpp::ParagraphStyle{}
+                  .SetForeground(hpp::Paint{}.SetColor({1.0, 0.0, 0.0, 1.0}))
+                  .SetFontSize(150.0f)
+                  .SetTextDecoration(ImpellerTextDecoration{
+                      .types = kImpellerTextDecorationTypeLineThrough |
+                               kImpellerTextDecorationTypeUnderline,
+                      .color = ImpellerColor{0.0, 1.0, 0.0, 0.75},
+                      .style = kImpellerTextDecorationStyleWavy,
+                      .thickness_multiplier = 1.5,
+                  }))
+          .AddText(std::string{"Holy text decorations Batman!"})
+          .Build(900);
+  auto dl = hpp::DisplayListBuilder{}.DrawParagraph(para, {100, 100}).Build();
   ASSERT_TRUE(
       OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
         hpp::Surface window(surface.GetC());
@@ -553,6 +582,11 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
     ASSERT_GT(bounds.height, 0.0);
     ASSERT_FALSE(glyph.IsEllipsis());
     ASSERT_EQ(glyph.GetTextDirection(), kImpellerTextDirectionLTR);
+
+    ImpellerRect bounds2 = {};
+    ImpellerGlyphInfoGetGraphemeClusterBounds(glyph.Get(), &bounds2);
+    ASSERT_EQ(bounds.width, bounds2.width);
+    ASSERT_EQ(bounds.height, bounds2.height);
   }
 
   // Glyph info by coordinates.
@@ -570,6 +604,11 @@ TEST_P(InteropPlaygroundTest, CanMeasureText) {
     auto range =
         paragraph.GetWordBoundary(glyph.GetGraphemeClusterCodeUnitRangeEnd());
     ASSERT_GT(range.end, 0u);
+    ImpellerRange range2 = {};
+    ImpellerParagraphGetWordBoundary(
+        paragraph.Get(), glyph.GetGraphemeClusterCodeUnitRangeEnd(), &range2);
+    ASSERT_EQ(range.start, range2.start);
+    ASSERT_EQ(range.end, range2.end);
   }
 
   builder.DrawParagraph(paragraph, ImpellerPoint{100, 100});

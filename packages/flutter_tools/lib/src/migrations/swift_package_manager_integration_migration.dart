@@ -186,7 +186,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         'https://docs.flutter.dev/to/add-swift-package-manager-manually\n\n'
         'Alternatively, to avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
         'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n'
+        '  config:\n'
+        '    enable-swift-package-manager: false\n'
         'Or disable Flutter Swift Package Manager integration globally with the\n'
         'following command:\n'
         '  "flutter config --no-enable-swift-package-manager"\n',

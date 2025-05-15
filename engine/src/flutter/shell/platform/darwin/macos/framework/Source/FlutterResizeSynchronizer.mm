@@ -6,7 +6,7 @@
 
 #include <atomic>
 
-#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 
 @implementation FlutterResizeSynchronizer {
@@ -31,7 +31,7 @@
       break;
     }
     if (CFAbsoluteTimeGetCurrent() - start > 1.0) {
-      FML_LOG(ERROR) << "Resize timed out.";
+      [FlutterLogger logError:@"Resize timed out."];
       break;
     }
     [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
