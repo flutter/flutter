@@ -530,7 +530,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
           builder: (BuildContext context) {
-            screenHeight = MediaQuery.sizeOf(context).height;
+            screenHeight = MediaQuery.heightOf(context);
             return MediaQuery.withClampedTextScaling(
               minScaleFactor: 3.0,
               maxScaleFactor: 3.0,
@@ -706,7 +706,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
           builder: (BuildContext context) {
-            screenHeight = MediaQuery.sizeOf(context).height;
+            screenHeight = MediaQuery.heightOf(context);
             return CupertinoActionSheet(
               message: Text('content ' * 1000),
               actions: <Widget>[
