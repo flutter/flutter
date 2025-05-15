@@ -161,7 +161,8 @@ class ActionIconTheme extends InheritedTheme {
   /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] widgets.
   final ActionIconThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ActionIconThemeData] from the closest ancestor [ActionIconTheme]
+  /// widget.
   ///
   /// If there is no enclosing [ActionIconTheme] widget, then
   /// [ThemeData.actionIconTheme] is used.

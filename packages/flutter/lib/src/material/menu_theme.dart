@@ -15,12 +15,13 @@ import 'theme.dart';
 
 // Examples can assume:
 // late Widget child;
+// late BuildContext context;
 
 /// Defines the configuration of the submenus created by the [SubmenuButton],
 /// [MenuBar], or [MenuAnchor] widgets.
 ///
 /// Descendant widgets obtain the current [MenuThemeData] object using
-/// `MenuTheme.of(context)`.
+/// [MenuTheme.of].
 ///
 /// Typically, a [MenuThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.menuTheme]. Otherwise, [MenuTheme] can be used to configure
@@ -125,16 +126,7 @@ class MenuTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return MenuTheme(
-  ///     data: const MenuThemeData(
-  ///       style: MenuStyle(
-  ///         backgroundColor: WidgetStatePropertyAll<Color>(Colors.red),
-  ///       ),
-  ///     ),
-  ///     child: child,
-  ///   );
-  /// }
+  /// MenuThemeData theme = MenuTheme.of(context);
   /// ```
   static MenuThemeData of(BuildContext context) {
     final MenuTheme? menuTheme = context.dependOnInheritedWidgetOfExactType<MenuTheme>();
