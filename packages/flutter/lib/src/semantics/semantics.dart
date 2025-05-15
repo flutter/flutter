@@ -142,7 +142,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.contentInfo => _noCheckRequired,
     SemanticsRole.main => _noCheckRequired,
     SemanticsRole.navigation => _noCheckRequired,
-    SemanticsRole.region => _noCheckRequired,
+    SemanticsRole.region => _semanticsRegion,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
@@ -357,6 +357,17 @@ sealed class _DebugSemanticsRoleChecks {
         'Please assign the ${SemanticsRole.list} to node ${parent.id}',
       );
     }
+    return null;
+  }
+
+  static FlutterError? _semanticsRegion(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (data.label.isEmpty) {
+      return FlutterError(
+        'A region role should include a label that describes the purpose of the content.',
+      );
+    }
+
     return null;
   }
 }
