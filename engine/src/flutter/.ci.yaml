@@ -502,7 +502,6 @@ targets:
   - name: Linux windows_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 120
-    bringup: true
     properties:
       add_recipes_cq: "true"
       release_build: "true"
