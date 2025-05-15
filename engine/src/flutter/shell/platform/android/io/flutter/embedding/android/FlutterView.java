@@ -69,7 +69,6 @@ import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
-import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.plugin.platform.PlatformViewsControllerController;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityBridge;
@@ -1154,7 +1153,9 @@ public class FlutterView extends FrameLayout
             flutterEngine.getAccessibilityChannel(),
             (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
             getContext().getContentResolver(),
-            new PlatformViewsControllerController(this.flutterEngine.getPlatformViewsController(), this.flutterEngine.getPlatformViewsController2()));
+            new PlatformViewsControllerController(
+                this.flutterEngine.getPlatformViewsController(),
+                this.flutterEngine.getPlatformViewsController2()));
     accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
     resetWillNotDraw(
         accessibilityBridge.isAccessibilityEnabled(),
