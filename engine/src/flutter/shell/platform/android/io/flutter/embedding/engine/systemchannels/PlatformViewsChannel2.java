@@ -65,7 +65,6 @@ public class PlatformViewsChannel2 {
           Log.v(TAG, "Received '" + call.method + "' message.");
           switch (call.method) {
             case "create":
-              Log.e("HI GRAY", "in create for pv 2 channel");
               create(call, result);
               break;
             case "dispose":

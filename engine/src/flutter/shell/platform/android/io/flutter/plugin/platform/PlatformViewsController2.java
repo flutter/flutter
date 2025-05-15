@@ -473,6 +473,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     // To prevent races, the framework populate the SemanticsNode after the platform view has been
     // created.
     embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    
     parentView.addView(embeddedView);
     flutterView.addView(parentView);
     return true;

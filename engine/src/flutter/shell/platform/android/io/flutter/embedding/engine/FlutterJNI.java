@@ -1333,7 +1333,6 @@ public class FlutterJNI {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to position an overlay surface");
     }
-    Log.e("HI GRAY", "creating overlay surface in pv 2");
     return platformViewsController2.createOverlaySurface();
   }
 
@@ -1345,7 +1344,6 @@ public class FlutterJNI {
       throw new RuntimeException(
           "platformViewsController must be set before attempting to destroy an overlay surface");
     }
-    Log.e("HI GRAY", "showing overlay surface in pv 2");
     platformViewsController2.showOverlaySurface();
   }
 
