@@ -37,7 +37,7 @@ enum _RadioType { material, adaptive }
 /// The entire list tile is interactive: tapping anywhere in the tile selects
 /// the radio button.
 ///
-/// This widget is typically wrapped under a [RadioGroup], which takes in a
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
 /// [RadioGroup.groupValue], and the [RadioListTile] under it with matching
 /// [value] will be selected.
 ///
@@ -154,7 +154,7 @@ enum _RadioType { material, adaptive }
 class RadioListTile<T> extends StatefulWidget {
   /// Creates a combination of a list tile and a radio button.
   ///
-  /// This widget is typically wrapped under a [RadioGroup], which takes in a
+  /// This widget typically has a [RadioGroup] ancestor, which takes in a
   /// [RadioGroup.groupValue], and the [RadioListTile] under it with matching
   /// [value] will be selected.
   ///
@@ -163,7 +163,7 @@ class RadioListTile<T> extends StatefulWidget {
     super.key,
     required this.value,
     @Deprecated(
-      'Use RadioGroup to manage group value instead. '
+      'Use a RadioGroup ancestor to manage group value instead. '
       'This feature was deprecated after v3.32.0-0.0.pre.',
     )
     this.groupValue,
@@ -214,7 +214,7 @@ class RadioListTile<T> extends StatefulWidget {
     super.key,
     required this.value,
     @Deprecated(
-      'Use RadioGroup to manage group value instead. '
+      'Use a RadioGroup ancestor to manage group value instead. '
       'This feature was deprecated after v3.32.0-0.0.pre.',
     )
     this.groupValue,
@@ -265,7 +265,7 @@ class RadioListTile<T> extends StatefulWidget {
   ///
   /// leave this unassigned or null if building this widget under [RadioGroup].
   @Deprecated(
-    'Use RadioGroup to manage group value instead. '
+    'Use a RadioGroup ancestor to manage group value instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
   final T? groupValue;
@@ -503,10 +503,10 @@ class RadioListTile<T> extends StatefulWidget {
   /// Defaults to 1.0.
   final double radioScaleFactor;
 
-  /// Whether this widget is enabled.
+  /// Whether this widget is interactable.
   ///
-  /// If not provided, this widget will be enable if one of the following is
-  /// true:
+  /// If not provided, this widget will be interactable if one of the following
+  /// is true:
   ///
   /// * a [onChanged] is provided.
   /// * Having a [RadioGroup] with the same type T above this widget.
@@ -680,6 +680,12 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
   }
 }
 
+/// A registry to controls internal [Radio] and hides it from [RadioGroup]
+/// ancestor.
+///
+/// [RadioListTile] implements the [RadioClient] directly to register to
+/// [RadioGroup] ancestor. Therefore, it has to hide the internal [Radio] from
+/// participate in the [RadioGroup] ancestor.
 class _InternalRadioRegistry<T> extends RadioGroupRegistry<T> {
   _InternalRadioRegistry(this.state);
 
