@@ -126,7 +126,8 @@ class SwiftPackageManager {
       );
       String? packagePath = plugin.pluginSwiftPackagePath(_fileSystem, platform.name);
       if (plugin.platforms[platform.name] == null ||
-          pluginSwiftPackageManifestPath == null || packagePath == null ||
+          pluginSwiftPackageManifestPath == null ||
+          packagePath == null ||
           !_fileSystem.file(pluginSwiftPackageManifestPath).existsSync()) {
         continue;
       }
@@ -137,12 +138,7 @@ class SwiftPackageManager {
       packagePath = pluginSymlink.path;
       packagePath = _fileSystem.path.relative(packagePath, from: pathRelativeTo);
 
-      packageDependencies.add(
-        SwiftPackagePackageDependency(
-          name: plugin.name,
-          path: packagePath,
-        ),
-      );
+      packageDependencies.add(SwiftPackagePackageDependency(name: plugin.name, path: packagePath));
 
       // The target dependency product name is hyphen separated because it's
       // the dependency's library name, which Swift Package Manager will

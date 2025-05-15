@@ -295,7 +295,7 @@ class SwiftPackageManagerUtils {
       if (swiftPackageMangerEnabled) {
         expectedLines.addAll(<Pattern>[
           RegExp(
-            '${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+            '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           ),
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
@@ -335,6 +335,8 @@ class SwiftPackageManagerUtils {
     bool migrated = false,
   }) {
     final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
+    final String appPlatformDirectoryPath = fileSystem.path.join(appDirectoryPath, platform);
+
     final List<String> unexpectedLines = <String>[];
     if (cocoaPodsPlugin == null && !migrated) {
       unexpectedLines.addAll(<String>[
@@ -351,7 +353,7 @@ class SwiftPackageManagerUtils {
         ]);
       } else {
         unexpectedLines.addAll(<String>[
-          '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+          '${swiftPackagePlugin.pluginName}: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       }
