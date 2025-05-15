@@ -550,7 +550,7 @@ class LabelAndValue extends SemanticBehavior {
     _describedBySpan!.setAttribute('hidden', '');
     _describedBySpan!.text = description;
     // Attach as a child of the semantics element, not document.body
-    if (_describedBySpan!.parentNode != owner.element) {
+    if (!_describedBySpan!.isConnected) {
       owner.element.append(_describedBySpan!);
     }
     owner.setAttribute('aria-describedby', _describedById!);
