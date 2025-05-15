@@ -77,7 +77,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.empty(),
         },
         () async {
-          writePackageConfigFile(directory: environment.projectDir, mainLibName: 'my_app');
+          writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri =
               environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
           final File dylibAfterCompiling = fileSystem.file('bar.dll');
@@ -250,7 +250,7 @@ void main() {
       );
       await msvcBinDir.create(recursive: true);
 
-      final File packageConfigFile = writePackageConfigFile(
+      final File packageConfigFile = writePackageConfigFiles(
         directory: fileSystem.directory(projectUri),
         mainLibName: 'my_app',
       );
