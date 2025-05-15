@@ -128,7 +128,7 @@ class DividerThemeData with Diagnosticable {
 /// An inherited widget that defines the configuration for
 /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
 /// between rows in [DataTable]s in this widget's subtree.
-class DividerTheme extends InheritedTheme {
+class DividerTheme extends InheritedTheme<DividerThemeData> {
   /// Creates a divider theme that controls the configurations for
   /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
   /// between rows in [DataTable]s in its widget subtree.
@@ -144,6 +144,16 @@ class DividerTheme extends InheritedTheme {
   /// If there is no ancestor, it returns [ThemeData.dividerTheme]. Applications
   /// can assume that the returned value will not be null.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? color = DividerTheme.selectOf(
+  ///   context,
+  ///   (DividerThemeData data) => data.color,
+  ///   id: 'data.color',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -154,11 +164,28 @@ class DividerTheme extends InheritedTheme {
     return dividerTheme?.data ?? Theme.of(context).dividerTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [DividerTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DividerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DividerThemeData, T> themeSelector =
+        ModelSelector<DividerThemeData, T>.from(selector: selector, id: id);
+    final DividerThemeData theme =
+        InheritedModel.inheritFrom<DividerTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return DividerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DividerTheme oldWidget) => data != oldWidget.data;
+  DividerThemeData get themeData => data;
 }

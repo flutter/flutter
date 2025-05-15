@@ -54,7 +54,7 @@ import 'theme.dart';
 ///    the [RangeSlider]'s track.
 ///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s tick marks.
-class SliderTheme extends InheritedTheme {
+class SliderTheme extends InheritedTheme<SliderThemeData> {
   /// Applies the given theme [data] to [child].
   const SliderTheme({super.key, required this.data, required super.child});
 
@@ -66,6 +66,9 @@ class SliderTheme extends InheritedTheme {
   ///
   /// Defaults to the ambient [ThemeData.sliderTheme] if there is no
   /// [SliderTheme] in the given build context.
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes.
   ///
   /// {@tool snippet}
   ///
@@ -103,13 +106,32 @@ class SliderTheme extends InheritedTheme {
     return inheritedTheme != null ? inheritedTheme.data : Theme.of(context).sliderTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [SliderThemeData]
+  /// in the closest [SliderTheme] ancestor of the given [context].
+  ///
+  /// If there is no [SliderTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.sliderTheme] is used.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(SliderThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<SliderThemeData, T> themeSelector = ModelSelector<SliderThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final SliderThemeData theme =
+        InheritedModel.inheritFrom<SliderTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return SliderTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(SliderTheme oldWidget) => data != oldWidget.data;
+  SliderThemeData get themeData => data;
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]

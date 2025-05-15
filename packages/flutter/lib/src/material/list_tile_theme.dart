@@ -358,7 +358,7 @@ class ListTileThemeData with Diagnosticable {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedTheme {
+class ListTileTheme extends InheritedTheme<ListTileThemeData> {
   /// Creates a list tile theme that defines the color and style parameters for
   /// descendant [ListTile]s.
   ///
@@ -548,6 +548,16 @@ class ListTileTheme extends InheritedTheme {
   /// If there is no enclosing [ListTileTheme] widget, then
   /// [ThemeData.listTileTheme] is used (see [Theme.of]).
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? tileColor = ListTileTheme.selectOf(
+  ///   context,
+  ///   (ListTileThemeData data) => data.tileColor,
+  ///   id: 'data.tileColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -556,6 +566,23 @@ class ListTileTheme extends InheritedTheme {
   static ListTileThemeData of(BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
     return result?.data ?? Theme.of(context).listTileTheme;
+  }
+
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ListTileTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ListTileThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ListTileThemeData, T> themeSelector =
+        ModelSelector<ListTileThemeData, T>.from(selector: selector, id: id);
+    final ListTileThemeData theme =
+        InheritedModel.inheritFrom<ListTileTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
   }
 
   /// Creates a list tile theme that controls the color and style parameters for
@@ -646,5 +673,5 @@ class ListTileTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(ListTileTheme oldWidget) => data != oldWidget.data;
+  ListTileThemeData get themeData => data;
 }

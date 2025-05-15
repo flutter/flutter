@@ -90,7 +90,7 @@ class FilledButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [FilledButton]'s defaults.
 ///  * [ThemeData.filledButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
-class FilledButtonTheme extends InheritedTheme {
+class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData> {
   /// Create a [FilledButtonTheme].
   const FilledButtonTheme({super.key, required this.data, required super.child});
 
@@ -101,6 +101,16 @@ class FilledButtonTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [FilledButtonTheme] widget, then
   /// [ThemeData.filledButtonTheme] is used.
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final WidgetStateProperty<Color?>? backgroundColor = FilledButtonTheme.selectOf(
+  ///   context,
+  ///   (FilledButtonThemeData data) => data.style?.backgroundColor,
+  ///   id: 'data.style?.backgroundColor',
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -113,11 +123,28 @@ class FilledButtonTheme extends InheritedTheme {
     return buttonTheme?.data ?? Theme.of(context).filledButtonTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [FilledButtonTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(FilledButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<FilledButtonThemeData, T> themeSelector =
+        ModelSelector<FilledButtonThemeData, T>.from(selector: selector, id: id);
+    final FilledButtonThemeData theme =
+        InheritedModel.inheritFrom<FilledButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return FilledButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(FilledButtonTheme oldWidget) => data != oldWidget.data;
+  FilledButtonThemeData get themeData => data;
 }

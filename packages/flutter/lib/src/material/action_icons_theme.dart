@@ -151,7 +151,7 @@ class ActionIconThemeData with Diagnosticable {
 ///
 /// ** See code in examples/api/lib/material/action_buttons/action_icon_theme.0.dart **
 /// {@end-tool}
-class ActionIconTheme extends InheritedTheme {
+class ActionIconTheme extends InheritedTheme<ActionIconThemeData> {
   /// Creates a theme that overrides the default icon of [BackButtonIcon],
   /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] in this
   /// widget's subtree.
@@ -166,6 +166,16 @@ class ActionIconTheme extends InheritedTheme {
   /// If there is no enclosing [ActionIconTheme] widget, then
   /// [ThemeData.actionIconTheme] is used.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Widget Function(BuildContext)? closeButtonIconBuilder = ActionIconTheme.selectOf(
+  ///   context,
+  ///   (ActionIconThemeData data) => data.closeButtonIconBuilder,
+  ///   id: 'data.closeButtonIconBuilder',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -177,11 +187,28 @@ class ActionIconTheme extends InheritedTheme {
     return actionIconTheme?.data ?? Theme.of(context).actionIconTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ActionIconTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ActionIconThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ActionIconThemeData, T> themeSelector =
+        ModelSelector<ActionIconThemeData, T>.from(selector: selector, id: id);
+    final ActionIconThemeData theme =
+        InheritedModel.inheritFrom<ActionIconTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ActionIconTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ActionIconTheme oldWidget) => data != oldWidget.data;
+  ActionIconThemeData get themeData => data;
 }

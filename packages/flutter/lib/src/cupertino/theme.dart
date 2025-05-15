@@ -66,6 +66,9 @@ class CupertinoTheme extends StatelessWidget {
   ///
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes.
   static CupertinoThemeData of(BuildContext context) {
     final InheritedCupertinoTheme? inheritedTheme =
         context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
@@ -114,6 +117,23 @@ class CupertinoTheme extends StatelessWidget {
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [CupertinoTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(CupertinoThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<CupertinoThemeData, T> themeSelector =
+        ModelSelector<CupertinoThemeData, T>.from(selector: selector, id: id);
+    final InheritedCupertinoTheme? inheritedTheme =
+        InheritedModel.inheritFrom<InheritedCupertinoTheme>(context, aspect: themeSelector);
+    return themeSelector.selectFrom(inheritedTheme?.theme.data ?? const CupertinoThemeData());
+  }
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -135,7 +155,7 @@ class CupertinoTheme extends StatelessWidget {
 }
 
 /// Provides a [CupertinoTheme] to all descendents.
-class InheritedCupertinoTheme extends InheritedTheme {
+class InheritedCupertinoTheme extends InheritedTheme<CupertinoThemeData> {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
   /// descendents.
   const InheritedCupertinoTheme({super.key, required this.theme, required super.child});
@@ -149,7 +169,7 @@ class InheritedCupertinoTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(InheritedCupertinoTheme oldWidget) => theme.data != oldWidget.theme.data;
+  CupertinoThemeData get themeData => theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].

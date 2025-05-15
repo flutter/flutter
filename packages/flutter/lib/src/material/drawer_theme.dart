@@ -179,7 +179,7 @@ class DrawerThemeData with Diagnosticable {
 /// given an explicit non-null value.
 ///
 /// Using this would allow you to override the [ThemeData.drawerTheme].
-class DrawerTheme extends InheritedTheme {
+class DrawerTheme extends InheritedTheme<DrawerThemeData> {
   /// Creates a theme that defines the [DrawerThemeData] properties for a
   /// [Drawer].
   const DrawerTheme({super.key, required this.data, required super.child});
@@ -193,6 +193,16 @@ class DrawerTheme extends InheritedTheme {
   /// If there is no enclosing [DrawerTheme] widget, then
   /// [ThemeData.drawerTheme] is used.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = DrawerTheme.selectOf(
+  ///   context,
+  ///   (DrawerThemeData data) => data.backgroundColor,
+  ///   id: 'data.backgroundColor',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -203,11 +213,30 @@ class DrawerTheme extends InheritedTheme {
     return drawerTheme?.data ?? Theme.of(context).drawerTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [DrawerTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(DrawerThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<DrawerThemeData, T> themeSelector = ModelSelector<DrawerThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final DrawerThemeData theme =
+        InheritedModel.inheritFrom<DrawerTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return DrawerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DrawerTheme oldWidget) => data != oldWidget.data;
+  DrawerThemeData get themeData => data;
 }

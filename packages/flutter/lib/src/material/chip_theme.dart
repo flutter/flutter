@@ -49,7 +49,7 @@ import 'theme.dart';
 ///    theme.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class ChipTheme extends InheritedTheme {
+class ChipTheme extends InheritedTheme<ChipThemeData> {
   /// Applies the given theme [data] to [child].
   const ChipTheme({super.key, required this.data, required super.child});
 
@@ -62,6 +62,9 @@ class ChipTheme extends InheritedTheme {
   ///
   /// Defaults to the ambient [ThemeData.chipTheme] if there is no
   /// [ChipTheme] in the given build context.
+  ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes.
   ///
   /// {@tool snippet}
   ///
@@ -92,13 +95,32 @@ class ChipTheme extends InheritedTheme {
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ChipTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ChipThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ChipThemeData, T> themeSelector = ModelSelector<ChipThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final ChipThemeData theme =
+        InheritedModel.inheritFrom<ChipTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ChipTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
+  ChipThemeData get themeData => data;
 }
 
 /// Holds the color, shape, and text styles for a Material Design chip theme.

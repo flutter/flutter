@@ -20,7 +20,7 @@ import 'theme.dart';
 ///  * [TabBarThemeData], which describes the actual configuration of a tab
 ///    bar theme.
 @immutable
-class TabBarTheme extends InheritedTheme with Diagnosticable {
+class TabBarTheme extends InheritedTheme<TabBarThemeData> with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
   const TabBarTheme({
     super.key,
@@ -310,10 +310,47 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   @override
   bool updateShouldNotify(TabBarTheme oldWidget) => data != oldWidget.data;
 
+  /// Returns the value of the field specified by [selector] from the [TabBarThemeData]
+  /// in the closest [TabBarTheme] ancestor of the given [context].
+  ///
+  /// If there is no [TabBarTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.tabBarTheme] is used.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(TabBarThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<TabBarThemeData, T> themeSelector = ModelSelector<TabBarThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final TabBarThemeData theme =
+        InheritedModel.inheritFrom<TabBarTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TabBarTheme(data: data, child: child);
   }
+
+  @override
+  bool updateShouldNotifyDependent(
+    TabBarTheme oldWidget,
+    Set<ModelSelector<TabBarThemeData, Object?>> dependencies,
+  ) {
+    for (final ModelSelector<TabBarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  TabBarThemeData get themeData => data;
 }
 
 /// Defines default property values for descendant [TabBar] widgets.

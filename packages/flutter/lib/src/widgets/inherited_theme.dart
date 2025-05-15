@@ -6,6 +6,7 @@
 library;
 
 import 'framework.dart';
+import 'inherited_model.dart';
 
 // Examples can assume:
 // TooltipThemeData data = const TooltipThemeData();
@@ -33,7 +34,7 @@ import 'framework.dart';
 ///
 /// ** See code in examples/api/lib/widgets/inherited_theme/inherited_theme.0.dart **
 /// {@end-tool}
-abstract class InheritedTheme extends InheritedWidget {
+abstract class InheritedTheme<T> extends InheritedModel<ModelSelector<T, Object?>> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
 
@@ -87,10 +88,10 @@ abstract class InheritedTheme extends InheritedWidget {
   static CapturedThemes capture({required BuildContext from, required BuildContext? to}) {
     if (from == to) {
       // Nothing to capture.
-      return CapturedThemes._(const <InheritedTheme>[]);
+      return CapturedThemes._(const <InheritedTheme<Object?>>[]);
     }
 
-    final List<InheritedTheme> themes = <InheritedTheme>[];
+    final List<InheritedTheme<Object?>> themes = <InheritedTheme<Object?>>[];
     final Set<Type> themeTypes = <Type>{};
     late bool debugDidFindAncestor;
     assert(() {
@@ -105,7 +106,7 @@ abstract class InheritedTheme extends InheritedWidget {
         }());
         return false;
       }
-      if (ancestor case InheritedElement(widget: final InheritedTheme theme)) {
+      if (ancestor case InheritedElement(widget: final InheritedTheme<Object?> theme)) {
         final Type themeType = theme.runtimeType;
         // Only remember the first theme of any type. This assumes
         // that inherited themes completely shadow ancestors of the
@@ -124,6 +125,29 @@ abstract class InheritedTheme extends InheritedWidget {
     );
     return CapturedThemes._(themes);
   }
+
+  /// Abstract method to get the theme data
+  T get themeData;
+
+  @override
+  bool updateShouldNotify(covariant InheritedTheme<T> oldWidget) {
+    return themeData != oldWidget.themeData;
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    covariant InheritedTheme<T> oldWidget,
+    Set<ModelSelector<T, Object?>> dependencies,
+  ) {
+    for (final ModelSelector<T, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.themeData);
+      final Object? newValue = selector.selectFrom(themeData);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// Stores a list of captured [InheritedTheme]s that can be wrapped around a
@@ -133,7 +157,7 @@ abstract class InheritedTheme extends InheritedWidget {
 class CapturedThemes {
   CapturedThemes._(this._themes);
 
-  final List<InheritedTheme> _themes;
+  final List<InheritedTheme<Object?>> _themes;
 
   /// Wraps a `child` [Widget] in the [InheritedTheme]s captured in this object.
   Widget wrap(Widget child) {
@@ -144,13 +168,13 @@ class CapturedThemes {
 class _CaptureAll extends StatelessWidget {
   const _CaptureAll({required this.themes, required this.child});
 
-  final List<InheritedTheme> themes;
+  final List<InheritedTheme<Object?>> themes;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     Widget wrappedChild = child;
-    for (final InheritedTheme theme in themes) {
+    for (final InheritedTheme<Object?> theme in themes) {
       wrappedChild = theme.wrap(context, wrappedChild);
     }
     return wrappedChild;

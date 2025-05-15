@@ -77,7 +77,7 @@ enum ButtonBarLayoutBehavior {
 ///
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
-class ButtonTheme extends InheritedTheme {
+class ButtonTheme extends InheritedTheme<ButtonThemeData> {
   /// Creates a button theme.
   ButtonTheme({
     super.key,
@@ -125,6 +125,15 @@ class ButtonTheme extends InheritedTheme {
 
   /// The closest instance of this class that encloses the given context.
   ///
+  /// For specific theme properties, consider using [selectOf],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final double height = ButtonTheme.selectOf(
+  ///   context, (ButtonThemeData data) => data.height,
+  ///   id: 'data.height',
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -148,13 +157,32 @@ class ButtonTheme extends InheritedTheme {
     return buttonTheme!;
   }
 
+  /// Evaluates [ModelSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ButtonTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T selectOf<T>(
+    BuildContext context,
+    T Function(ButtonThemeData) selector, {
+    required Object id,
+  }) {
+    final ModelSelector<ButtonThemeData, T> themeSelector = ModelSelector<ButtonThemeData, T>.from(
+      selector: selector,
+      id: id,
+    );
+    final ButtonThemeData theme =
+        InheritedModel.inheritFrom<ButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ButtonTheme oldWidget) => data != oldWidget.data;
+  ButtonThemeData get themeData => data;
 }
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
