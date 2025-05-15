@@ -12,12 +12,14 @@
 #include "flutter/tools/licenses_cpp/src/filter.h"
 #include "flutter/tools/licenses_cpp/src/mmap_file.h"
 
+namespace fs = std::filesystem;
+
 namespace {
-std::vector<std::filesystem::path> GetGitRepos(std::string_view dir) {
-  std::vector<std::filesystem::path> result;
+std::vector<fs::path> GetGitRepos(std::string_view dir) {
+  std::vector<fs::path> result;
   result.push_back(dir);
-  for (const std::filesystem::directory_entry& entry :
-       std::filesystem::recursive_directory_iterator(dir)) {
+  for (const fs::directory_entry& entry :
+       fs::recursive_directory_iterator(dir)) {
     if (entry.path().stem() == ".git") {
       result.push_back(entry.path().parent_path());
     }
@@ -25,8 +27,7 @@ std::vector<std::filesystem::path> GetGitRepos(std::string_view dir) {
   return result;
 }
 
-absl::StatusOr<std::vector<std::string>> GitLsFiles(
-    const std::filesystem::path& repo_path) {
+absl::StatusOr<std::vector<std::string>> GitLsFiles(const fs::path& repo_path) {
   std::vector<std::string> files;
 
   std::string cmd = "git -C \"" + repo_path.string() + "\" ls-files";
@@ -49,12 +50,18 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(
 
   return files;
 }
+
+absl::Status CheckLicense(const fs::path& path) {
+  if (!fs::exists(path)) {
+    return absl::UnavailableError(absl::StrCat("Expected LICENSE at ", path));
+  }
+  return absl::UnimplementedError("");
+}
 }  // namespace
 
 int LicenseChecker::Run(std::string_view working_dir,
                         std::string_view data_dir) {
-  std::filesystem::path include_path =
-      std::filesystem::path(data_dir) / "include.txt";
+  fs::path include_path = fs::path(data_dir) / "include.txt";
   absl::StatusOr<Filter> include_filter = Filter::Open(include_path.string());
   if (!include_filter.ok()) {
     std::cerr << "Can't open include.txt at " << include_path << ": "
@@ -62,19 +69,27 @@ int LicenseChecker::Run(std::string_view working_dir,
     return 1;
   }
 
-  std::vector<std::filesystem::path> git_repos = GetGitRepos(working_dir);
+  std::vector<fs::path> git_repos = GetGitRepos(working_dir);
 
   RE2 pattern("(.*Copyright.*)");
 
-  for (const std::filesystem::path& entry : git_repos) {
-    absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(entry);
+  for (const fs::path& git_repo : git_repos) {
+    fs::path license_path = git_repo / "LICENSE";
+    absl::Status license_status = CheckLicense(license_path);
+    if (!license_status.ok() &&
+        license_status.status().code() != absl::StatusCode::kUnavailableError) {
+      std::cerr << license_status.status() << std::endl;
+      return 1;
+    }
+
+    absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
     if (!git_files.ok()) {
       std::cerr << git_files.status() << std::endl;
       return 1;
     }
     bool did_print_path = false;
     for (const std::string& git_file : git_files.value()) {
-      std::filesystem::path full_path = entry / git_file;
+      fs::path full_path = entry / git_file;
       if (!include_filter->Matches(full_path.string())) {
         continue;
       }
