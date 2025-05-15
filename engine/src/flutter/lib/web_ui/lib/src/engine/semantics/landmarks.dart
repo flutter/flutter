@@ -28,7 +28,7 @@ class SemanticComplementary extends SemanticRole {
 
 /// Indicates a content info element.
 ///
-/// Uses aria contentinto role to convey this semantic information to the element.
+/// Uses aria contentinfo role to convey this semantic information to the element.
 ///
 /// Screen-readers takes advantage of "aria-label" to describe the visual.
 class SemanticContentInfo extends SemanticRole {
