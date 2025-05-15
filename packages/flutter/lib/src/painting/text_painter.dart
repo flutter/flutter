@@ -1293,7 +1293,7 @@ class TextPainter {
 
   /// Causes the paragraph to paint the layout boxes of the text.
   ///
-  /// {@template flutter.painting.textPainter.debugPaintCharacterLayoutBoxes}
+  /// {@template flutter.painting.textPainter.debugPaintTextLayoutBoxes}
   /// Each painted box illustrates how the encompassed text contributes to the
   /// overall text layout. For instance, the line height of a line is the smallest
   /// vertical extent that covers all text boxes on that line.
