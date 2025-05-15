@@ -106,7 +106,7 @@ class CupertinoRadio<T> extends StatefulWidget {
     super.key,
     required this.value,
     @Deprecated(
-      'Use RadioGroup to manage group value instead. '
+      'Use a RadioGroup ancestor to manage group value instead. '
       'This feature was deprecated after v3.32.0-0.0.pre.',
     )
     this.groupValue,
@@ -133,7 +133,7 @@ class CupertinoRadio<T> extends StatefulWidget {
 
   /// {@macro flutter.material.Radio.groupValue}
   @Deprecated(
-    'Use RadioGroup to manage group value instead. '
+    'Use a RadioGroup ancestor to manage group value instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
   final T? groupValue;
@@ -216,8 +216,8 @@ class CupertinoRadio<T> extends StatefulWidget {
 
   /// {@macro flutter.widget.RawRadio.groupRegistry}
   ///
-  /// This is typically leave as unassigned since this widget gets group registry
-  /// from [BuildContext] if this is null.
+  /// Unless provided, the [BuildContext] will be used to look up the ancestor
+  /// [RadioGroupRegistry].
   final RadioGroupRegistry<T>? groupRegistry;
 
   /// {@macro flutter.material.Radio.enabled}
@@ -265,7 +265,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
           widget.onChanged != null ||
           widget.groupRegistry != null ||
           RadioGroup.maybeOf<T>(context) != null,
-      'Radio is enabled but has no CupertinoRadio.onChange or registry above',
+      'Radio is enabled but has no CupertinoRadio.onChange, '
+      'CupertinoRadio.groupRegistry, or RadioGroup above',
     );
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
@@ -299,6 +300,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
   }
 }
 
+/// A registry for deprecated API.
+// Remove this once deprecated API is removed.
 class _InternalRadioRegistry<T> extends RadioGroupRegistry<T> {
   _InternalRadioRegistry(this.state);
   final _CupertinoRadioState<T> state;
