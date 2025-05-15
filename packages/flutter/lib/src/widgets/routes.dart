@@ -2197,13 +2197,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
-  /// Whether this route should display a close button instead of a back button in the app bar.
-  ///
-  /// By default, this returns false, meaning a back button will be used when [impliesAppBarDismissal] is true.
-  /// Subclasses can override this to return true when a close button (typically an X) should be shown instead.
-  ///
-  /// This is intended to be used by [AppBar] implementations to determine the appropriate leading widget.
-  bool get shouldUseAppBarClose => false;
+  /// {@macro flutter.widgets.RawDialogRoute.fullscreenDialog}
+  bool get fullscreenDialog => false;
 
   // Internals
 
@@ -2571,10 +2566,8 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   /// iOS, dialogs transitions animate differently and are also not closeable
   /// with the back swipe gesture.
   /// {@endtemplate}
-  final bool fullscreenDialog;
-
   @override
-  bool get shouldUseAppBarClose => fullscreenDialog;
+  final bool fullscreenDialog;
 
   @override
   Widget buildPage(

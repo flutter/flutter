@@ -40,6 +40,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// iOS, dialogs transitions animate differently and are also not closeable
   /// with the back swipe gesture.
   /// {@endtemplate}
+  @override
   final bool fullscreenDialog;
 
   @override
@@ -63,9 +64,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     // Fullscreen dialogs aren't dismissible by back swipe.
     return !fullscreenDialog && super.popGestureEnabled;
   }
-
-  @override
-  bool get shouldUseAppBarClose => fullscreenDialog;
 }
 
 Widget _defaultTransitionsBuilder(
