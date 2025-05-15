@@ -110,6 +110,22 @@ class ArcStrokePathGeometry final : public StrokePathSourceGeometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 };
 
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a pair of nested |RoundRect| objects using
+///        the |StrokePathSourceGeometry| base class.
+class StrokeDiffRoundRectGeometry final : public StrokePathSourceGeometry {
+ public:
+  explicit StrokeDiffRoundRectGeometry(const RoundRect& outer,
+                                       const RoundRect& inner,
+                                       const StrokeParameters& parameters);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const DiffRoundRectPathSource source_;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_

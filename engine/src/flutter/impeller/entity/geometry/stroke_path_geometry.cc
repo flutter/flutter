@@ -836,4 +836,14 @@ std::optional<Rect> ArcStrokePathGeometry::GetCoverage(
                            path_.GetBounds().IntersectionOrEmpty(oval_bounds_));
 }
 
+StrokeDiffRoundRectGeometry::StrokeDiffRoundRectGeometry(
+    const RoundRect& outer,
+    const RoundRect& inner,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters), source_(outer, inner) {}
+
+const PathSource& StrokeDiffRoundRectGeometry::GetSource() const {
+  return source_;
+}
+
 }  // namespace impeller
