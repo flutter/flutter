@@ -23,6 +23,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'input_decorator.dart';
 import 'material.dart';
@@ -217,14 +218,22 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
       child = Padding(padding: padding, child: child);
     }
     child = SizedBox(height: widget.route.itemHeight, child: child);
+
+    final bool isSelected = widget.itemIndex == widget.route.selectedIndex;
+    final FocusHighlightMode highlightMode = FocusManager.instance.highlightMode;
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
-        autofocus: widget.itemIndex == widget.route.selectedIndex,
+        autofocus: isSelected,
         enableFeedback: widget.enableFeedback,
         onTap: _handleOnTap,
         onFocusChange: _handleFocusChange,
-        child: child,
+        // When highlightMode is traditional, the InkWell draws the selected item background color.
+        // When highlightMode is touch, insert an Ink to force the selected item background color.
+        child:
+            highlightMode == FocusHighlightMode.touch
+                ? Ink(color: isSelected ? Theme.of(context).focusColor : null, child: child)
+                : child,
       );
     }
     child = FadeTransition(opacity: _opacityAnimation, child: child);
@@ -1565,6 +1574,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
+    final Widget effectiveSuffixIcon = IconTheme(
+      data: IconThemeData(color: _iconColor, size: widget.iconSize),
+      child: widget.icon ?? widget._inputDecoration?.suffixIcon ?? defaultIcon,
+    );
 
     Widget result = DefaultTextStyle(
       style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
@@ -1577,10 +1590,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               if (widget.isExpanded) Expanded(child: innerItemsWidget) else innerItemsWidget,
-              IconTheme(
-                data: IconThemeData(color: _iconColor, size: widget.iconSize),
-                child: widget.icon ?? defaultIcon,
-              ),
+              if (widget._inputDecoration == null) effectiveSuffixIcon,
             ],
           ),
         ),
@@ -1623,7 +1633,27 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // visible only for filled dropdown button, see:
     // https://m2.material.io/components/menus#dropdown-menu
     if (widget._inputDecoration != null) {
-      InputDecoration effectiveDecoration = widget._inputDecoration!;
+      final bool filled =
+          widget._inputDecoration?.filled ?? Theme.of(context).inputDecorationTheme.filled;
+      final bool oulined =
+          widget._inputDecoration?.border?.isOutline ??
+          Theme.of(context).inputDecorationTheme.border?.isOutline ??
+          false;
+
+      final double suffixIconEndMargin = (filled || oulined) ? 12.0 : 0.0;
+      InputDecoration effectiveDecoration = widget._inputDecoration!.copyWith(
+        // Override the suffix icon constraints to allow the
+        // icon alignment to match the regular dropdown button.
+        suffixIconConstraints: BoxConstraints(
+          minWidth: widget.iconSize + suffixIconEndMargin,
+          minHeight: widget.iconSize,
+        ),
+        // suffixIconGap: 0.0,
+        suffixIcon: Padding(
+          padding: EdgeInsetsGeometry.directional(end: suffixIconEndMargin),
+          child: effectiveSuffixIcon,
+        ),
+      );
       if (_hasPrimaryFocus) {
         final Color? focusColor = widget.focusColor ?? effectiveDecoration.focusColor;
         // For compatibility, override the fill color when focusColor is set.

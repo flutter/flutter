@@ -360,8 +360,6 @@ class PreviewDetailsMatcher extends Matcher {
     );
     return matches;
   }
-
-  //String _buildMismatch
 }
 
 const String previewContainingFileContents = '''

@@ -4,7 +4,7 @@
 
 assert(is_mac)
 
-import("//build/config/apple/apple_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
@@ -50,6 +50,14 @@ _flutter_framework_headers = [
 _flutter_framework_headers_copy_dir =
     "$_flutter_framework_dir/Versions/A/Headers"
 
+source_set("InternalFlutterSwift") {
+  visibility = [ ":*" ]
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
+
+  sources = [ "framework/Source/FlutterRunLoop.swift" ]
+  deps = [ "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon" ]
+}
+
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
@@ -94,8 +102,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRenderer.mm",
     "framework/Source/FlutterResizeSynchronizer.h",
     "framework/Source/FlutterResizeSynchronizer.mm",
-    "framework/Source/FlutterRunLoop.h",
-    "framework/Source/FlutterRunLoop.mm",
     "framework/Source/FlutterSurface.h",
     "framework/Source/FlutterSurface.mm",
     "framework/Source/FlutterSurfaceManager.h",
@@ -123,6 +129,7 @@ source_set("flutter_framework_source") {
   sources += _flutter_framework_headers
 
   deps = [
+    ":InternalFlutterSwift",
     ":macos_gpu_configuration",
     "//flutter/flow:flow",
     "//flutter/fml",
@@ -130,6 +137,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
+    "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon",
     "//flutter/shell/platform/darwin/common:availability_version_check",
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics:graphics",
@@ -210,12 +218,15 @@ executable("flutter_desktop_darwin_unittests") {
   ]
 
   deps = [
+    ":InternalFlutterSwift",
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_enums",
+    "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon",
     "//flutter/shell/platform/darwin/common:framework_common",
+    "//flutter/shell/platform/darwin/common:test_utils_swift",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",

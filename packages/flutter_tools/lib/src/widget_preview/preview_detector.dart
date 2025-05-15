@@ -12,7 +12,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
 import '../base/file_system.dart';
