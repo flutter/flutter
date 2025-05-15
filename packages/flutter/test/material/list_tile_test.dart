@@ -4447,8 +4447,6 @@ void main() {
       );
     }
 
-
-
     void expectTwoLine() {
       expect(
         tester.getRect(find.byType(ListTile).at(0)),
@@ -4555,12 +4553,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child:
-                ListTile(
-                  statesController: controller,
-                  onTap: () {},
-                  title: const Text('title'),
-                ),
+            child: ListTile(statesController: controller, onTap: () {}, title: const Text('title')),
           ),
         ),
       ),
@@ -4618,13 +4611,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child:
-                ListTile(
-                  statesController: controller,
-                  title: const Text('title'),
-                ),
-          ),
+          body: Center(child: ListTile(statesController: controller, title: const Text('title'))),
         ),
       ),
     );
@@ -4638,8 +4625,6 @@ void main() {
     await gesture.removePointer();
   });
 }
-
-
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
   return tester.renderObject(find.descendant(of: find.byType(ListTile), matching: find.text(text)));
