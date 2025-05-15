@@ -136,12 +136,10 @@ class TextLayout {
       blockStart += blockTextMetrics.width!;
     }
 
-    printClusters('Not sorted:');
-
     textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
     for (int i = 0; i < textClusters.length; ++i) {
       final ExtendedTextCluster textCluster = textClusters[i];
-      for (int j = textCluster.start; j < textCluster.end; j += 1) {
+      for (int j = textCluster.textRange.start; j < textCluster.textRange.end; j += 1) {
         textToClusterMap[j] = i;
       }
     }
@@ -162,8 +160,8 @@ class TextLayout {
     final ExtendedTextCluster start = textClusters[clusterRange.start];
     final ExtendedTextCluster end = textClusters[clusterRange.end - 1];
     return paragraph.text!.substring(
-      math.min(start.start, end.end),
-      math.max(start.start, end.end),
+      math.min(start.textRange.start, end.textRange.end),
+      math.max(start.textRange.start, end.textRange.end),
     );
   }
 
@@ -194,7 +192,7 @@ class TextLayout {
     for (final ExtendedTextCluster cluster in textClusters) {
       final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
       WebParagraphDebug.log(
-        'cluster[$i]: [${cluster.start}:${cluster.end}) "$clusterText" ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height}',
+        'cluster[$i]: [${cluster.start}:${cluster.end}) "$clusterText" ${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height}',
       );
       i += 1;
     }
@@ -297,12 +295,12 @@ class TextLayout {
         bidiRun.clusterRange,
         whitespaces,
       );
+      final String lineRunText = getTextFromMonodirectionalClusterRange(lineRunClusterRange);
       WebParagraphDebug.log(
-        'Intersect '
+        'Intersect "$lineRunText" '
         '${bidiRun.clusterRange} & $textRange = $lineRunClusterRange '
         '${bidiRun.clusterRange} & $whitespaces = $whitespacesClusterRange',
       );
-      final String lineRunText = getTextFromMonodirectionalClusterRange(lineRunClusterRange);
       final DomTextMetrics lineRunTextMetrics = layoutContext.measureText(lineRunText);
       final List<DomRectReadOnly> rects = lineRunTextMetrics.getSelectionRects(
         0,
@@ -332,6 +330,8 @@ class TextLayout {
       );
       shiftInsideLine += lineRunTextMetrics.width!;
     }
+
+    WebParagraphDebug.log('Line width: $shiftInsideLine vs $textWidth +$whitespacesWidth');
 
     // At this point we are agnostic of any fonts participating in text shaping
     // so we have to assume each cluster has a (different) font

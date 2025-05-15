@@ -46,7 +46,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
   */
-  /*
+
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -107,6 +107,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_rtl_1.png', region: region);
   });
 
+  // Small line breaking difference with Chrome
   test('Draw WebParagraph RTL with multiple lines', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -121,7 +122,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_rtl_multilined.png', region: region);
   });
-*/
+
   test('Draw WebParagraph LTR/RTL 1 Line in ltr', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -162,7 +163,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_rtl.png', region: region);
   });
-  /*
+
   test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -326,28 +327,4 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
   });
-
-  test('Draw WebParagraph One line text', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder, region);
-    //canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
-    //final Paint greyPaint = Paint()..color = const Color(0xFF444444);
-    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
-
-    final WebParagraphStyle arialStyle = WebParagraphStyle(
-      fontFamily: 'Roboto',
-      fontSize: 20,
-      foreground: bluePaint,
-    );
-    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
-    builder.addText('Red color Blue color Black color Red color Blue color ');
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    //canvas.drawRect(const Rect.fromLTWH(0, 0, 500, 50), greyPaint);
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_text.png', region: region);
-  });
-*/
 }

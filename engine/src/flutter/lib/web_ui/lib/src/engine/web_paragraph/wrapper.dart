@@ -101,7 +101,7 @@ class TextWrapper {
       } else if (isSoftLineBreak(cluster) && index != _startLine) {
         WebParagraphDebug.log('isSoftLineBreak: $index');
         // Mark the potential line break and then continue with the current cluster as usual
-        if (_whitespaces.start == _startLine) {
+        if (_whitespaces.start == _startLine && _whitespaces.end != _startLine) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
           // We need to pretend that these are not whitespaces
