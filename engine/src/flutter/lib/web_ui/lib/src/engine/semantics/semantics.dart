@@ -30,6 +30,7 @@ import 'heading.dart';
 import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
+import 'landmarks.dart';
 import 'link.dart';
 import 'list.dart';
 import 'live_region.dart';

@@ -148,6 +148,9 @@ void runSemanticsTests() {
   group('SemanticsValidationResult', () {
     _testSemanticsValidationResult();
   });
+  group('landmarks', () {
+    _testLandmarks();
+  });
 }
 
 void _testSemanticRole() {
@@ -4891,7 +4894,7 @@ void _testLandmarks() {
 
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.complementary);
-    expect(object.element.getAttribute('role'), 'menu');
+    expect(object.element.getAttribute('role'), 'complementary');
   });
 
   test('nodes with contentInfo role', () {
@@ -4966,6 +4969,7 @@ void _testLandmarks() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
+        label: 'Header 1',
         role: ui.SemanticsRole.region,
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
@@ -4976,6 +4980,7 @@ void _testLandmarks() {
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.region);
     expect(object.element.getAttribute('role'), 'region');
+    expect(object.element.getAttribute('aria-label'), 'Header 1');
   });
 
   semantics().semanticsEnabled = false;

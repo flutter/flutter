@@ -99,5 +99,11 @@ class SemanticRegion extends SemanticRole {
   }
 
   @override
+  void update() {
+    super.update();
+    setAttribute('aria-label', semanticsObject.label ?? '');
+  }
+
+  @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
