@@ -9769,9 +9769,11 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
-  testWidgets('Placeholder is aligned with text', (WidgetTester tester) async {
+  testWidgets('Placeholder is baseline aligned with text', (WidgetTester tester) async {
     const String placeholder = 'hint text';
-    const TextStyle style = TextStyle(fontSize: 100, fontWeight: FontWeight.w400);
+    const String text = 'text';
+    const double placeholderSize = 40;
+    const double textSize = 20;
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -9780,22 +9782,29 @@ void main() {
             minLines: 4,
             maxLines: 6,
             placeholder: placeholder,
-            placeholderStyle: style,
-            style: style,
+            placeholderStyle: TextStyle(fontSize: placeholderSize),
+            style: TextStyle(fontSize: textSize),
           ),
         ),
       ),
     );
 
-    final Finder placeholderFinder = find.text(placeholder);
-    expect(placeholderFinder, findsOne);
+    expect(find.text(placeholder), findsOne);
+    expect(find.text(text), findsNothing);
 
-    await tester.enterText(find.byType(CupertinoTextField), placeholder);
+    await tester.enterText(find.byType(CupertinoTextField), text);
     await tester.pumpAndSettle();
 
+    // The placeholder and text are baseline aligned, so some portion of them
+    // extends both above and below the baseline.
+    const double ahemBaselineLocation =
+        0.8; // https://web-platform-tests.org/writing-tests/ahem.html
+    const double placeholderAboveBaseline = placeholderSize * ahemBaselineLocation;
+    const double textAboveBaseline = textSize * ahemBaselineLocation;
+    final double placeholderPos = tester.getTopLeft(find.text(placeholder)).dy;
     expect(
-      tester.getTopLeft(find.text(placeholder).first).dy,
-      tester.getTopLeft(find.text(placeholder).last).dy,
+      tester.getTopLeft(find.text(text)).dy,
+      closeTo(placeholderAboveBaseline - textAboveBaseline + placeholderPos, 1.0),
     );
   });
 
