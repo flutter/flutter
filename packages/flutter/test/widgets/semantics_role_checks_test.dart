@@ -682,4 +682,56 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('landmarks', () {
+    testWidgets('Success case, complementary role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.complementary, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, contentInfo role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.contentInfo, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, main role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.main, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, navigation role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.navigation, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, region role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.region, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
 }

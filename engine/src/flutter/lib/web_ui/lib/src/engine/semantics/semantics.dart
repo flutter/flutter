@@ -501,6 +501,24 @@ enum EngineSemanticsRole {
 
   /// An option with a radio button in a set of choices contained by a [menu] or [menuBar].
   menuItemRadio,
+
+  /// A supporting section of a web page.
+  complementary,
+
+  /// A section containing identifying information such as copyright
+  /// information, navigation links and privacy statements.
+  contentInfo,
+
+  /// The primary content of a document.
+  main,
+
+  /// A region of a web page that contains navigation links.
+  navigation,
+
+  /// A section of content sufficiently important but cannot be descrived by one
+  /// of the other landmark roles, such as main, contentinfo, complementary, or
+  /// navigation.
+  region,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -1962,6 +1980,16 @@ class SemanticsObject {
         return EngineSemanticsRole.list;
       case ui.SemanticsRole.listItem:
         return EngineSemanticsRole.listItem;
+      case ui.SemanticsRole.complementary:
+        return EngineSemanticsRole.complementary;
+      case ui.SemanticsRole.contentInfo:
+        return EngineSemanticsRole.contentInfo;
+      case ui.SemanticsRole.main:
+        return EngineSemanticsRole.main;
+      case ui.SemanticsRole.navigation:
+        return EngineSemanticsRole.navigation;
+      case ui.SemanticsRole.region:
+        return EngineSemanticsRole.region;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
@@ -2038,6 +2066,11 @@ class SemanticsObject {
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
+      EngineSemanticsRole.complementary => SemanticComplementary(this),
+      EngineSemanticsRole.contentInfo => SemanticContentInfo(this),
+      EngineSemanticsRole.main => SemanticMain(this),
+      EngineSemanticsRole.navigation => SemanticNavigation(this),
+      EngineSemanticsRole.region => SemanticRegion(this),
     };
   }
 

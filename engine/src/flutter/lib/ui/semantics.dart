@@ -501,6 +501,24 @@ enum SemanticsRole {
   /// * The connection to the server was lost so local changes will not be
   ///   saved.
   alert,
+
+  /// A supporting section of a web page.
+  complementary,
+
+  /// A section for a footer, containing identifying information such as
+  /// copyright information, navigation links and privacy statements.
+  contentInfo,
+
+  /// The primary content of a document.
+  main,
+
+  /// A region of a web page that contains navigation links.
+  navigation,
+
+  /// A section of content sufficiently important but cannot be descrived by one
+  /// of the other landmark roles, such as main, contentinfo, complementary, or
+  /// navigation.
+  region,
 }
 
 /// Describe the type of data for an input field.
