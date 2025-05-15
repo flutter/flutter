@@ -183,7 +183,6 @@ class NetworkAssetBundle extends AssetBundle {
 ///
 /// Binary resources (from [load]) are not cached.
 abstract class CachingAssetBundle extends AssetBundle {
-  // TODO(ianh): Replace this with an intelligent cache, see https://github.com/flutter/flutter/issues/3568
   final Map<String, Future<String>> _stringCache = <String, Future<String>>{};
   final Map<String, Future<dynamic>> _structuredDataCache = <String, Future<dynamic>>{};
   final Map<String, Future<dynamic>> _structuredBinaryDataCache = <String, Future<dynamic>>{};
