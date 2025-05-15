@@ -728,7 +728,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Semantics(role: SemanticsRole.region, child: const Text('some child')),
+          child: Semantics(role: SemanticsRole.region, child: const SizedBox()),
         ),
       );
       final Object? exception = tester.takeException();
@@ -746,11 +746,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Semantics(
-            label: 'Header 1',
-            role: SemanticsRole.region,
-            child: const Text('some child'),
-          ),
+          child: Semantics(label: 'Header 1', role: SemanticsRole.region, child: const SizedBox()),
         ),
       );
       expect(tester.takeException(), isNull);
