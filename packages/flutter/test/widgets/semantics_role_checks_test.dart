@@ -724,11 +724,33 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Success case, region role', (WidgetTester tester) async {
+    testWidgets('failure case, region role without label', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Semantics(role: SemanticsRole.region, child: const Text('some child')),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'A region role should include a label that describes the purpose of the content.',
+        ),
+      );
+    });
+
+    testWidgets('Success case, region role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            label: 'Header 1',
+            role: SemanticsRole.region,
+            child: const Text('some child'),
+          ),
         ),
       );
       expect(tester.takeException(), isNull);
