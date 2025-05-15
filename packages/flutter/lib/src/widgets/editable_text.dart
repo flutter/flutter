@@ -882,6 +882,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    bool? selectAllOnFocus,
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
@@ -925,6 +926,7 @@ class EditableText extends StatefulWidget {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       selectAllOnFocus = selectAllOnFocus ?? _defaultSelectAllOnFocus,
        toolbarOptions =
            selectionControls is TextSelectionHandleControls && toolbarOptions == null
                ? ToolbarOptions.empty
@@ -1800,6 +1802,16 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
 
+  /// {@template flutter.widgets.editableText.selectAllOnFocus}
+  /// Whether this field should select all text when gaining focus.
+  ///
+  /// When false, focusing this text field will leave its
+  /// existing text selection unchanged.
+  ///
+  /// Defaults to true on web and desktop platforms, and false on mobile platforms.
+  /// {@endtemplate}
+  final bool selectAllOnFocus;
+
   /// {@template flutter.widgets.editableText.autofillHints}
   /// A list of strings that helps the autofill service identify the type of this
   /// text input.
@@ -2041,6 +2053,21 @@ class EditableText extends StatefulWidget {
   static const bool defaultStylusHandwritingEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
+
+  /// The default value for [selectAllOnFocus].
+  static bool get _defaultSelectAllOnFocus {
+    if (kIsWeb) {
+      return true;
+    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => false,
+      TargetPlatform.iOS => false,
+      TargetPlatform.fuchsia => false,
+      TargetPlatform.linux => true,
+      TargetPlatform.macOS => true,
+      TargetPlatform.windows => true,
+    };
+  }
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu for an editable field.
@@ -4679,13 +4706,9 @@ class EditableTextState extends State<EditableText>
 
   TextSelection? _adjustedSelectionWhenFocused() {
     TextSelection? selection;
-    final bool isDesktop = switch (defaultTargetPlatform) {
-      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
-      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
-    };
     final bool shouldSelectAll =
+        widget.selectAllOnFocus &&
         widget.selectionEnabled &&
-        (kIsWeb || isDesktop) &&
         !_isMultiline &&
         !_nextFocusChangeIsInternal &&
         !_justResumed;
