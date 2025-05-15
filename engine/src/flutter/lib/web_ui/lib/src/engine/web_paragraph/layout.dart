@@ -157,6 +157,9 @@ class TextLayout {
   }
 
   String getTextFromMonodirectionalClusterRange(ClusterRange clusterRange) {
+    if (clusterRange.isEmpty) {
+      return '';
+    }
     final ExtendedTextCluster start = textClusters[clusterRange.start];
     final ExtendedTextCluster end = textClusters[clusterRange.end - 1];
     return paragraph.text!.substring(

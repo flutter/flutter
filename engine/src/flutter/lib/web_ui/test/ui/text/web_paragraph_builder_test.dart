@@ -35,7 +35,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges.last.textStyle, paragraphStyle.getTextStyle());
     expect(
       paragraph.styledTextRanges.last.textRange,
-      ClusterRange(start: 0, end: paragraph.text!.length),
+      TextRange(start: 0, end: paragraph.text!.length),
     );
   });
 
@@ -68,7 +68,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges.first.textStyle, textStyle1);
     expect(
       paragraph.styledTextRanges.first.textRange,
-      ClusterRange(start: 0, end: paragraph.text!.length),
+      TextRange(start: 0, end: paragraph.text!.length),
     );
   });
 
@@ -90,7 +90,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[0].textStyle, textStyle3);
     expect(
       paragraph.styledTextRanges[0].textRange,
-      ClusterRange(start: 0, end: paragraph.text!.length),
+      TextRange(start: 0, end: paragraph.text!.length),
     );
   });
 
@@ -117,9 +117,9 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[0].textStyle, textStyle1);
     expect(paragraph.styledTextRanges[1].textStyle, textStyle2);
     expect(paragraph.styledTextRanges[2].textStyle, textStyle3);
-    expect(paragraph.styledTextRanges[0].textRange, ClusterRange(start: 0, end: 3));
-    expect(paragraph.styledTextRanges[1].textRange, ClusterRange(start: 3, end: 6));
-    expect(paragraph.styledTextRanges[2].textRange, ClusterRange(start: 6, end: 9));
+    expect(paragraph.styledTextRanges[0].textRange, TextRange(start: 0, end: 3));
+    expect(paragraph.styledTextRanges[1].textRange, TextRange(start: 3, end: 6));
+    expect(paragraph.styledTextRanges[2].textRange, TextRange(start: 6, end: 9));
   });
 
   test('Build paragraph with nested styles [1[2[3]]]', () {
@@ -142,9 +142,9 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[0].textStyle, textStyle1);
     expect(paragraph.styledTextRanges[1].textStyle, textStyle2);
     expect(paragraph.styledTextRanges[2].textStyle, textStyle3);
-    expect(paragraph.styledTextRanges[0].textRange, ClusterRange(start: 0, end: 2));
-    expect(paragraph.styledTextRanges[1].textRange, ClusterRange(start: 2, end: 4));
-    expect(paragraph.styledTextRanges[2].textRange, ClusterRange(start: 4, end: 9));
+    expect(paragraph.styledTextRanges[0].textRange, TextRange(start: 0, end: 2));
+    expect(paragraph.styledTextRanges[1].textRange, TextRange(start: 2, end: 4));
+    expect(paragraph.styledTextRanges[2].textRange, TextRange(start: 4, end: 9));
   });
 
   test('Build paragraph with complex nested styles [1[11[111][112]]][2[21[221][222]]]', () {

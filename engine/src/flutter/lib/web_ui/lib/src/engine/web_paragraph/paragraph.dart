@@ -167,12 +167,17 @@ class TextRange {
     if (identical(this, other)) {
       return true;
     }
-    return other is ClusterRange && other.start == start && other.end == end;
+    return other is TextRange && other.start == start && other.end == end;
   }
 
   @override
   int get hashCode {
     return Object.hash(start, end);
+  }
+
+  @override
+  String toString() {
+    return '[$start:$end)';
   }
 
   int get width => end - start;
@@ -223,6 +228,11 @@ class ClusterRange {
 class StyledTextRange {
   StyledTextRange(int start, int end, this.textStyle) {
     textRange = TextRange(start: start, end: end);
+  }
+
+  @override
+  String toString() {
+    return 'StyledTextRange[${textRange.start}:${textRange.end})';
   }
 
   TextRange textRange = TextRange(start: 0, end: 0);
