@@ -465,7 +465,6 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const std::weak_ptr<PipelineLibrary>& weak_library,
-    PipelineKey pipeline_key,
     std::shared_ptr<SamplerVK> immutable_sampler) {
   TRACE_EVENT1("flutter", "PipelineVK::Create", "Name", desc.GetLabel().data());
 
@@ -512,7 +511,6 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
       std::move(render_pass),              //
       std::move(pipeline_layout.value()),  //
       std::move(descs_layout.value()),     //
-      pipeline_key,                        //
       std::move(immutable_sampler)         //
       ));
   if (!pipeline_vk->IsValid()) {
@@ -529,7 +527,6 @@ PipelineVK::PipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,
                        vk::UniqueRenderPass render_pass,
                        vk::UniquePipelineLayout layout,
                        vk::UniqueDescriptorSetLayout descriptor_set_layout,
-                       PipelineKey pipeline_key,
                        std::shared_ptr<SamplerVK> immutable_sampler)
     : Pipeline(std::move(library), desc),
       device_holder_(std::move(device_holder)),
@@ -537,8 +534,7 @@ PipelineVK::PipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,
       render_pass_(std::move(render_pass)),
       layout_(std::move(layout)),
       descriptor_set_layout_(std::move(descriptor_set_layout)),
-      immutable_sampler_(std::move(immutable_sampler)),
-      pipeline_key_(pipeline_key) {
+      immutable_sampler_(std::move(immutable_sampler)) {
   is_valid_ = pipeline_ && render_pass_ && layout_ && descriptor_set_layout_;
 }
 
@@ -583,8 +579,7 @@ std::shared_ptr<PipelineVK> PipelineVK::CreateVariantForImmutableSamplers(
     return nullptr;
   }
   return (immutable_sampler_variants_[cache_key] =
-              Create(desc_, device_holder, library_, pipeline_key_,
-                     immutable_sampler));
+              Create(desc_, device_holder, library_, immutable_sampler));
 }
 
 }  // namespace impeller

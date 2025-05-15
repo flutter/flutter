@@ -4,16 +4,23 @@
 
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 
+#include <chrono>
 #include <cstdint>
+#include <optional>
+#include <sstream>
 
 #include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/promise.h"
+#include "impeller/base/timing.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
+#include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
+#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 
@@ -43,8 +50,7 @@ bool PipelineLibraryVK::IsValid() const {
 }
 
 std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
-    const ComputePipelineDescriptor& desc,
-    PipelineKey pipeline_key) {
+    const ComputePipelineDescriptor& desc) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   vk::ComputePipelineCreateInfo pipeline_info;
 
@@ -145,8 +151,8 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
       desc,                              //
       std::move(pipeline),               //
       std::move(pipeline_layout.value),  //
-      std::move(descs_layout),           //
-      pipeline_key);
+      std::move(descs_layout)            //
+  );
 }
 
 // |PipelineLibrary|
@@ -173,8 +179,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto weak_this = weak_from_this();
 
-  PipelineKey next_key = pipeline_key_++;
-  auto generation_task = [descriptor, weak_this, promise, next_key]() {
+  auto generation_task = [descriptor, weak_this, promise]() {
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
@@ -186,8 +191,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     promise->set_value(PipelineVK::Create(
         descriptor,                                            //
         PipelineLibraryVK::Cast(*thiz).device_holder_.lock(),  //
-        weak_this,                                             //
-        next_key                                               //
+        weak_this                                              //
         ));
   };
 
@@ -204,7 +208,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
     ComputePipelineDescriptor descriptor,
     bool async) {
-  Lock lock(pipelines_mutex_);
+  Lock lock(compute_pipelines_mutex_);
   if (auto found = compute_pipelines_.find(descriptor);
       found != compute_pipelines_.end()) {
     return found->second;
@@ -226,8 +230,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto weak_this = weak_from_this();
 
-  PipelineKey next_key = pipeline_key_++;
-  auto generation_task = [descriptor, weak_this, promise, next_key]() {
+  auto generation_task = [descriptor, weak_this, promise]() {
     auto self = weak_this.lock();
     if (!self) {
       promise->set_value(nullptr);
@@ -236,8 +239,8 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
       return;
     }
 
-    auto pipeline = PipelineLibraryVK::Cast(*self).CreateComputePipeline(
-        descriptor, next_key);
+    auto pipeline =
+        PipelineLibraryVK::Cast(*self).CreateComputePipeline(descriptor);
     if (!pipeline) {
       promise->set_value(nullptr);
       VALIDATION_LOG << "Could not create pipeline: " << descriptor.GetLabel();

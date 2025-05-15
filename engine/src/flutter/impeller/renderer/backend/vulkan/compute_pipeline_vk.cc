@@ -12,14 +12,12 @@ ComputePipelineVK::ComputePipelineVK(
     const ComputePipelineDescriptor& desc,
     vk::UniquePipeline pipeline,
     vk::UniquePipelineLayout layout,
-    vk::UniqueDescriptorSetLayout descriptor_set_layout,
-    PipelineKey pipeline_key)
+    vk::UniqueDescriptorSetLayout descriptor_set_layout)
     : Pipeline(std::move(library), desc),
       device_holder_(std::move(device_holder)),
       pipeline_(std::move(pipeline)),
       layout_(std::move(layout)),
-      descriptor_set_layout_(std::move(descriptor_set_layout)),
-      pipeline_key_(pipeline_key) {
+      descriptor_set_layout_(std::move(descriptor_set_layout)) {
   is_valid_ = pipeline_ && layout_ && descriptor_set_layout_;
 }
 
@@ -51,10 +49,6 @@ const vk::PipelineLayout& ComputePipelineVK::GetPipelineLayout() const {
 const vk::DescriptorSetLayout& ComputePipelineVK::GetDescriptorSetLayout()
     const {
   return *descriptor_set_layout_;
-}
-
-PipelineKey ComputePipelineVK::GetPipelineKey() const {
-  return pipeline_key_;
 }
 
 }  // namespace impeller

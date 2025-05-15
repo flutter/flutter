@@ -548,8 +548,9 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
     DescriptorPoolMap::iterator current_pool =
         cached_descriptor_pool_.find(std::this_thread::get_id());
     if (current_pool == cached_descriptor_pool_.end()) {
-      descriptor_pool = (cached_descriptor_pool_[std::this_thread::get_id()] =
-                             descriptor_pool_recycler_->GetDescriptorPool());
+      descriptor_pool =
+          (cached_descriptor_pool_[std::this_thread::get_id()] =
+               std::make_shared<DescriptorPoolVK>(weak_from_this()));
     } else {
       descriptor_pool = current_pool->second;
     }

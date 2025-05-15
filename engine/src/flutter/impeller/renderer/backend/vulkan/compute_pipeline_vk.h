@@ -24,8 +24,7 @@ class ComputePipelineVK final
                     const ComputePipelineDescriptor& desc,
                     vk::UniquePipeline pipeline,
                     vk::UniquePipelineLayout layout,
-                    vk::UniqueDescriptorSetLayout descriptor_set_layout,
-                    PipelineKey pipeline_key);
+                    vk::UniqueDescriptorSetLayout descriptor_set_layout);
 
   // |Pipeline|
   ~ComputePipelineVK() override;
@@ -36,10 +35,6 @@ class ComputePipelineVK final
 
   const vk::DescriptorSetLayout& GetDescriptorSetLayout() const;
 
-  /// @brief Retrieve the unique identifier for this pipeline's descriptor set
-  ///        layout.
-  PipelineKey GetPipelineKey() const;
-
  private:
   friend class PipelineLibraryVK;
 
@@ -47,7 +42,6 @@ class ComputePipelineVK final
   vk::UniquePipeline pipeline_;
   vk::UniquePipelineLayout layout_;
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;
-  const PipelineKey pipeline_key_;
   bool is_valid_ = false;
 
   // |Pipeline|

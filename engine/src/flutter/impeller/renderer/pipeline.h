@@ -18,8 +18,6 @@
 
 namespace impeller {
 
-using PipelineKey = uint64_t;
-
 class PipelineLibrary;
 template <typename PipelineDescriptor_>
 class Pipeline;

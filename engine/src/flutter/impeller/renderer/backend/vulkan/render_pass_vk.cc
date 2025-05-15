@@ -520,8 +520,7 @@ fml::Status RenderPassVK::Draw() {
   const auto& pipeline_vk = PipelineVK::Cast(*pipeline_);
 
   auto descriptor_result = command_buffer_->AllocateDescriptorSets(
-      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
-      context_vk);
+      pipeline_vk.GetDescriptorSetLayout(), context_vk);
   if (!descriptor_result.ok()) {
     return fml::Status(fml::StatusCode::kAborted,
                        "Could not allocate descriptor sets.");

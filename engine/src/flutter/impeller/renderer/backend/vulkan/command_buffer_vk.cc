@@ -160,14 +160,13 @@ bool CommandBufferVK::Track(const std::shared_ptr<const Texture>& texture) {
 
 fml::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
-    PipelineKey pipeline_key,
     const ContextVK& context) {
   if (!IsValid()) {
     return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");
   }
 
-  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(
-      layout, pipeline_key, context);
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(layout,
+                                                                      context);
 }
 
 void CommandBufferVK::PushDebugGroup(std::string_view label) const {
