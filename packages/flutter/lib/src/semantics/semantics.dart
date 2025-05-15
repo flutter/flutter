@@ -138,6 +138,11 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.status => _noLiveRegion,
     SemanticsRole.list => _noCheckRequired,
     SemanticsRole.listItem => _semanticsListItem,
+    SemanticsRole.complementary => _noCheckRequired,
+    SemanticsRole.contentInfo => _noCheckRequired,
+    SemanticsRole.main => _noCheckRequired,
+    SemanticsRole.navigation => _noCheckRequired,
+    SemanticsRole.region => _noCheckRequired,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
