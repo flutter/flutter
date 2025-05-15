@@ -66,7 +66,6 @@ source_set("flutter_framework_source") {
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterCallbackCache.mm",
     "framework/Source/FlutterCallbackCache_Internal.h",
     "framework/Source/FlutterChannelKeyResponder.h",
@@ -85,8 +84,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterKeySecondaryResponder.h",
     "framework/Source/FlutterKeyboardManager.h",
     "framework/Source/FlutterKeyboardManager.mm",
-    "framework/Source/FlutterLaunchEngine.h",
-    "framework/Source/FlutterLaunchEngine.m",
     "framework/Source/FlutterMetalLayer.h",
     "framework/Source/FlutterMetalLayer.mm",
     "framework/Source/FlutterOverlayView.h",
@@ -244,7 +241,6 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterFakeKeyEvents.h",
       "framework/Source/FlutterFakeKeyEvents.mm",
       "framework/Source/FlutterKeyboardManagerTest.mm",
-      "framework/Source/FlutterLaunchEngineTest.mm",
       "framework/Source/FlutterMetalLayerTest.mm",
       "framework/Source/FlutterPlatformPluginTest.mm",
       "framework/Source/FlutterPlatformViewsTest.mm",
