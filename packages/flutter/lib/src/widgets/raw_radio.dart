@@ -31,12 +31,9 @@ typedef RadioBuilder = Widget Function(BuildContext context, ToggleableStateMixi
 /// group cease to be selected. The values are of type `T`, the type parameter
 /// of the radio class. Enums are commonly used for this purpose.
 ///
-/// The radio relies on [groupRegistry] to maintains the state for selection.
-/// If use in conjunction with a [RadioGroup] widget, use [RadioGroup.maybeOf]
-/// to get the group registry from the context.
+/// {@macro flutter.widget.RawRadio.groupValue}
 ///
-/// If [groupRegistry] is null or its [RadioGroupRegistry.onChanged] is null,
-/// the radio will not be interactable.
+/// If [enabled] is false, the radio will not be interactable.
 ///
 /// See also:
 ///
@@ -45,6 +42,8 @@ typedef RadioBuilder = Widget Function(BuildContext context, ToggleableStateMixi
 ///    radio button.
 class RawRadio<T> extends StatefulWidget {
   /// Creates a radio button.
+  ///
+  /// If [enabled] is true, the [groupRegistry] must not be null.
   const RawRadio({
     super.key,
     required this.value,
@@ -106,7 +105,11 @@ class RawRadio<T> extends StatefulWidget {
   /// The registry this radio registers to.
   /// {@endtemplate}
   ///
-  /// If null or not provided, this radio will be disabled.
+  /// {@template flutter.widget.RawRadio.groupValue}
+  /// The radio relies on [groupRegistry] to maintains the state for selection.
+  /// If use in conjunction with a [RadioGroup] widget, use [RadioGroup.maybeOf]
+  /// to get the group registry from the context.
+  /// {@endtemplate}
   final RadioGroupRegistry<T>? groupRegistry;
 
   @override

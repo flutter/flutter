@@ -41,7 +41,7 @@ const double _kInnerRadius = 4.5;
 /// be selected. The values are of type `T`, the type parameter of the [Radio]
 /// class. Enums are commonly used for this purpose.
 ///
-/// This widget is typically wrapped under a [RadioGroup], which takes in a
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
 /// [RadioGroup.groupValue], and the [Radio] under it with matching [value]
 /// will be selected.
 ///
@@ -74,7 +74,7 @@ const double _kInnerRadius = 4.5;
 class Radio<T> extends StatefulWidget {
   /// Creates a Material Design radio button.
   ///
-  /// This widget is typically wrapped under a [RadioGroup], which takes in a
+  /// This widget typically has a [RadioGroup] ancestor, which takes in a
   /// [RadioGroup.groupValue], and the [Radio] under it with matching [value]
   /// will be selected.
   ///
@@ -83,7 +83,7 @@ class Radio<T> extends StatefulWidget {
     super.key,
     required this.value,
     @Deprecated(
-      'Use RadioGroup to manage group value instead. '
+      'Use a RadioGroup ancestor to manage group value instead. '
       'This feature was deprecated after v3.32.0-0.0.pre.',
     )
     this.groupValue,
@@ -129,7 +129,7 @@ class Radio<T> extends StatefulWidget {
     super.key,
     required this.value,
     @Deprecated(
-      'Use RadioGroup to manage group value instead. '
+      'Use a RadioGroup ancestor to manage group value instead. '
       'This feature was deprecated after v3.32.0-0.0.pre.',
     )
     this.groupValue,
@@ -163,9 +163,11 @@ class Radio<T> extends StatefulWidget {
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
+  ///
+  /// This is deprecated, use [RadioGroup] to manage group value instead.
   /// {@endtemplate}
   @Deprecated(
-    'Use RadioGroup to manage group value instead. '
+    'Use a RadioGroup ancestor to manage group value instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
   final T? groupValue;
@@ -203,6 +205,8 @@ class Radio<T> extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  ///
+  /// This is deprecated, use [RadioGroup] to handle value change instead.
   @Deprecated(
     'Use RadioGroup to handle value change instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
@@ -373,17 +377,17 @@ class Radio<T> extends StatefulWidget {
 
   /// {@macro flutter.widget.RawRadio.groupRegistry}
   ///
-  /// This is typically leave as unassigned since this widget gets group registry
-  /// from [BuildContext] if this is null.
+  /// Unless provided, the [BuildContext] will be used to look up the ancestor
+  /// [RadioGroupRegistry].
   final RadioGroupRegistry<T>? groupRegistry;
 
   final _RadioType _radioType;
 
   /// {@template flutter.material.Radio.enabled}
-  /// Whether this widget is enabled.
+  /// Whether this widget is interactable.
   ///
-  /// If not provided, this widget will be enable if one of the following is
-  /// true:
+  /// If not provided, this widget will be interactable if one of the following
+  /// is true:
   ///
   /// * a [onChanged] is provided.
   /// * Having a [RadioGroup] with the same type T above this widget.
@@ -505,6 +509,8 @@ class _RadioState<T> extends State<Radio<T>> {
   }
 }
 
+/// A registry for deprecated API.
+// Remove this once deprecated API is removed.
 class _InternalRadioRegistry<T> extends RadioGroupRegistry<T> {
   _InternalRadioRegistry(this.state);
   final _RadioState<T> state;
