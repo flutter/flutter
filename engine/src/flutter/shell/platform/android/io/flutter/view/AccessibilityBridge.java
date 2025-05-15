@@ -1002,7 +1002,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           Log.e("HI GRAY", "provider for pv is " + embeddedView.getAccessibilityNodeProvider());
           Log.e("HI GRAY", "while provider for node is " + this);
           // printAccessibilityNode(embeddedView.createAccessibilityNodeInfo(), 0, embeddedView);
-          //result.addChild(embeddedView);
+          // result.addChild(embeddedView);
           continue;
         }
       } else {
@@ -1012,7 +1012,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     return result;
   }
-  
+
   private boolean isImportant(SemanticsNode node) {
     if (node.hasFlag(Flag.SCOPES_ROUTE)) {
       return false;
