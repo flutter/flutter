@@ -175,7 +175,6 @@ import 'package:foo_project/src/wrapper.dart' as _i6;
 import 'package:flutter/widgets.dart' as _i7;
 import 'package:foo_project/foo.dart' as _i8;
 
-
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(builder: () => _i2.preview()),
       _i1.WidgetPreview(builder: () => _i3.barPreview1()),
