@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
@@ -64,6 +65,13 @@ TaskFunction createHotModeTest({
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
+      final File pubspec = file(path.join(_editedFlutterGalleryDir.path, 'pubspec.yaml'));
+      pubspec.writeAsStringSync(
+        pubspec
+            .readAsLinesSync()
+            .whereNot((String line) => line.startsWith('resolution: workspace'))
+            .join('\n'),
+      );
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {

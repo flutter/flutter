@@ -4,6 +4,8 @@ description: Tool to run the tests listed in the flutter/tests repository.
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   args: 2.7.0
   path: 1.9.1

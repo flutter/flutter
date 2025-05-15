@@ -5,6 +5,8 @@ version: 0.0.1
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 hooks:
   user_defines:
     hook_user_defines: # package name

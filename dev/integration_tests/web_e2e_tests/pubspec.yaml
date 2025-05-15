@@ -4,6 +4,8 @@ publish_to: none
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 flutter:
   assets:
     - packages/flutter_gallery_assets/assets/icons/material/1.5x/material.png

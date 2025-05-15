@@ -4,6 +4,8 @@ description: Small benchmarks for very specific parts of the Flutter framework.
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   meta: 1.16.0
   flutter:

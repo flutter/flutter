@@ -20,6 +20,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 const String _kPluginsFileWithoutDevDependencies = '''
 {
@@ -550,10 +551,7 @@ void main() {
       fileSystem.file('assets/common/image.png').createSync(recursive: true);
       fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
       fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       await const DebugMacOSBundleFlutterAssets().build(environment);
       final Directory frameworkDirectory = environment.outputDir.childDirectory(
