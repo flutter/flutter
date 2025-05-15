@@ -55,6 +55,7 @@ source_set("InternalFlutterSwift") {
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
 
   sources = [ "framework/Source/FlutterRunLoop.swift" ]
+  deps = [ "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon" ]
 }
 
 source_set("flutter_framework_source") {
@@ -136,6 +137,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
+    "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon",
     "//flutter/shell/platform/darwin/common:availability_version_check",
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics:graphics",
@@ -222,7 +224,9 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_enums",
+    "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon",
     "//flutter/shell/platform/darwin/common:framework_common",
+    "//flutter/shell/platform/darwin/common:test_utils_swift",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
