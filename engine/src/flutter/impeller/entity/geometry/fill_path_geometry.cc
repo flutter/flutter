@@ -90,16 +90,38 @@ bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
   return coverage.Contains(rect);
 }
 
-FillPathGeometry::FillPathGeometry(const Path& path,
-                                   std::optional<Rect> inner_rect)
-    : FillPathSourceGeometry(inner_rect), path_(path) {}
-
 FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
                                    std::optional<Rect> inner_rect)
     : FillPathSourceGeometry(inner_rect), path_(path) {}
 
 const PathSource& FillPathGeometry::GetSource() const {
   return path_;
+}
+
+ArcFillPathGeometry::ArcFillPathGeometry(const flutter::DlPath& path,
+                                         const Rect& oval_bounds)
+    : FillPathSourceGeometry(std::nullopt),
+      path_(path),
+      oval_bounds_(oval_bounds) {}
+
+const PathSource& ArcFillPathGeometry::GetSource() const {
+  return path_;
+}
+
+std::optional<Rect> ArcFillPathGeometry::GetCoverage(
+    const Matrix& transform) const {
+  return GetSource()
+      .GetBounds()
+      .IntersectionOrEmpty(oval_bounds_)
+      .TransformAndClipBounds(transform);
+}
+
+FillDiffRoundRectGeometry::FillDiffRoundRectGeometry(const RoundRect& outer,
+                                                     const RoundRect& inner)
+    : FillPathSourceGeometry(std::nullopt), source_(outer, inner) {}
+
+const PathSource& FillDiffRoundRectGeometry::GetSource() const {
+  return source_;
 }
 
 }  // namespace impeller

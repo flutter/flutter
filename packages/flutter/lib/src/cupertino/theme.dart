@@ -134,10 +134,10 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-/// Provides a [CupertinoTheme] to all descendents.
+/// Provides a [CupertinoTheme] to all descendants.
 class InheritedCupertinoTheme extends InheritedTheme {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
-  /// descendents.
+  /// descendants.
   const InheritedCupertinoTheme({super.key, required this.theme, required super.child});
 
   /// The [CupertinoTheme] that is provided to widgets lower in the tree.
