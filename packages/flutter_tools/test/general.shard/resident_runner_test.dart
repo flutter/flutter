@@ -43,7 +43,7 @@ import 'resident_runner_helpers.dart';
 FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
@@ -57,7 +57,7 @@ void main() {
   }
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.file(globals.fs.path.join('build', 'app.dill'))
           ..createSync(recursive: true)

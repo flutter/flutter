@@ -22,7 +22,7 @@ import 'package:file/file.dart';
 /// All [packages] will be marked as dependencies of [mainLibName]. Except those
 /// in [devDependencies] which will be marked as dev_dependencies.
 ///
-/// Returns the `File` Object representing the package config.
+/// Returns the `File` object representing the package config.
 File writePackageConfigFiles({
   required Directory directory,
   required String mainLibName,

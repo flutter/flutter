@@ -374,7 +374,7 @@ class LocalizationOptions {
 
   /// The `--template-arb-file` argument.
   ///
-  /// This path is relative to [arbDirectory].
+  /// This path is relative to [arbDir].
   final String templateArbFile;
 
   /// The `--output-localization-file` argument.
