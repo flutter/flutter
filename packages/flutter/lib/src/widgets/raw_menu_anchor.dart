@@ -578,7 +578,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   /// is called.
   ///
   /// This method should not be directly called by subclasses. Its call chain
-  /// should eventually invoke [open].
+  /// should eventually invoke `_RawMenuAnchorBaseMixin.open`
   @protected
   void handleOpenRequest({Offset? position});
 
@@ -586,7 +586,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   /// is called.
   ///
   /// This method should not be directly called by subclasses. Its call chain
-  /// should eventually invoke [close].
+  /// should eventually invoke `_RawMenuAnchorBaseMixin.close`.
   @protected
   void handleCloseRequest();
 
