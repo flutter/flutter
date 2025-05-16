@@ -1391,9 +1391,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
               child: Directionality(
                 textDirection:
                     widget.textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr,
-                child: _BaselineAlignedStack(
-                  children: <Widget>[if (placeholder != null) placeholder, editableText],
-                ),
+                child: _BaselineAlignedStack(placeholder: placeholder, editableText: editableText),
               ),
             ),
             if (suffixWidget != null) suffixWidget,
@@ -1694,8 +1692,25 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
   }
 }
 
-class _BaselineAlignedStack extends MultiChildRenderObjectWidget {
-  const _BaselineAlignedStack({required super.children});
+enum _BaselineAlignedStackSlot { placeholder, editableText }
+
+class _BaselineAlignedStack
+    extends SlottedMultiChildRenderObjectWidget<_BaselineAlignedStackSlot, RenderBox> {
+  const _BaselineAlignedStack({required this.editableText, this.placeholder});
+
+  final Widget? placeholder;
+  final Widget editableText;
+
+  @override
+  Iterable<_BaselineAlignedStackSlot> get slots => _BaselineAlignedStackSlot.values;
+
+  @override
+  Widget? childForSlot(_BaselineAlignedStackSlot slot) {
+    return switch (slot) {
+      _BaselineAlignedStackSlot.placeholder => placeholder,
+      _BaselineAlignedStackSlot.editableText => editableText,
+    };
+  }
 
   @override
   _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
@@ -1706,7 +1721,7 @@ class _BaselineAlignedStack extends MultiChildRenderObjectWidget {
 class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> {}
 
 class _RenderBaselineAlignedStack extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _BaselineAlignedStackParentData> {
+    with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
   _RenderBaselineAlignedStack();
 
   @override
@@ -1717,14 +1732,11 @@ class _RenderBaselineAlignedStack extends RenderBox
   }
 
   RenderBox? get _placeholderChild {
-    if (firstChild == lastChild) {
-      return null;
-    }
-    return firstChild;
+    return childForSlot(_BaselineAlignedStackSlot.placeholder);
   }
 
   RenderBox? get _editableTextChild {
-    return lastChild;
+    return childForSlot(_BaselineAlignedStackSlot.editableText);
   }
 
   @override
