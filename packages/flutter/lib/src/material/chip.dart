@@ -2462,7 +2462,7 @@ class _RenderEnsureMinSemanticsSize extends RenderProxyBox {
       return;
     }
     _semanticSize = value;
-    markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   @override
