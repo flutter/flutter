@@ -88,7 +88,7 @@ ThemeData _buildShrineTheme() {
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
     primaryIconTheme: _customIconTheme(base.iconTheme),
-    inputDecorationTheme: const InputDecorationTheme(border: CutCornersBorder()),
+    inputDecorationTheme: const InputDecorationThemeData(border: CutCornersBorder()),
     textTheme: _buildShrineTextTheme(base.textTheme),
     primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),

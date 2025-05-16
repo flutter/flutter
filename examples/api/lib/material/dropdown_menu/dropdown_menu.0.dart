@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 // has the default outlined border and demos using the
 // [DropdownMenuEntry] style parameter to customize its appearance.
 // The second dropdown menu customizes the appearance of the dropdown
-// menu's text field with its [InputDecorationTheme] parameter.
+// menu's text field with its [inputDecorationTheme] parameter.
 
 void main() {
   runApp(const DropdownMenuExample());
@@ -113,7 +113,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                         requestFocusOnTap: true,
                         leadingIcon: const Icon(Icons.search),
                         label: const Text('Icon'),
-                        inputDecorationTheme: const InputDecorationTheme(
+                        inputDecorationTheme: const InputDecorationThemeData(
                           filled: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 5.0),
                         ),
