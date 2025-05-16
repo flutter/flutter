@@ -1,2 +1,3 @@
-
-void 
+.*\/test\/.*
+.*\/testing\/.*
+.*\/tests\/.*

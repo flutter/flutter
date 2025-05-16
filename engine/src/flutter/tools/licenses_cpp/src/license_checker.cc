@@ -53,15 +53,15 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(const fs::path& repo_path) {
 
 absl::Status CheckLicense(const fs::path& git_repo) {
   static std::array<std::string_view, 3> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md"
-  };
+      "LICENSE", "LICENSE.TXT", "LICENSE.md"};
   for (std::string_view license_name : kLicenseFileNames) {
     fs::path license_path = git_repo / license_name;
     if (fs::exists(license_path)) {
       return absl::UnimplementedError("");
     }
   }
-  return absl::UnavailableError(absl::StrCat("Expected LICENSE at ", git_repo.string()));
+  return absl::UnavailableError(
+      absl::StrCat("Expected LICENSE at ", git_repo.string()));
 }
 }  // namespace
 
@@ -74,10 +74,17 @@ int LicenseChecker::Run(std::string_view working_dir,
               << include_filter.status() << std::endl;
     return 1;
   }
+  fs::path exclude_path = fs::path(data_dir) / "exclude.txt";
+  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude_path.string());
+  if (!exclude_filter.ok()) {
+    std::cerr << "Can't open include.txt at " << include_path << ": "
+              << exclude_filter.status() << std::endl;
+    return 1;
+  }
 
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
 
-  RE2 pattern("(.*Copyright.*)");
+  RE2 pattern("(.*(Copyright|License).*)");
   int return_code = 0;
 
   for (const fs::path& git_repo : git_repos) {
@@ -96,7 +103,8 @@ int LicenseChecker::Run(std::string_view working_dir,
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
-      if (!include_filter->Matches(full_path.string())) {
+      if (!include_filter->Matches(full_path.string()) ||
+          exclude_filter->Matches(full_path.string())) {
         // Ignore file.
         continue;
       }
@@ -116,6 +124,7 @@ int LicenseChecker::Run(std::string_view working_dir,
       re2::StringPiece match;
       while (RE2::FindAndConsume(&input, pattern, &match)) {
         did_find_copyright = true;
+        VLOG(1) << match;
       }
       if (!did_find_copyright) {
         std::cerr << "Expected copyright in " << full_path << std::endl;
