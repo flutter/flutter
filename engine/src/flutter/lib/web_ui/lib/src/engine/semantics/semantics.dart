@@ -271,7 +271,7 @@ class SemanticsNodeUpdate {
   final int id;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<bool> flags;
+  final ui.SemanticsFlags flags;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int actions;
@@ -1007,7 +1007,7 @@ class SemanticsObject {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   ui.SemanticsFlags get flags => _flags;
-  ui.SemanticsFlags _flags = ui.SemanticsFlags();
+  ui.SemanticsFlags _flags = ui.SemanticsFlags.none;
 
   /// Whether the [flags] field has been updated but has not been applied to the
   /// DOM yet.
@@ -1562,9 +1562,8 @@ class SemanticsObject {
   void updateSelf(SemanticsNodeUpdate update) {
     // Update all field values and their corresponding dirty flags before
     // applying the updates to the DOM.
-    final updatedFlags = ui.SemanticsFlags.fromBoolList(update.flags);
-    if (_flags != updatedFlags) {
-      _flags = updatedFlags;
+    if (_flags != update.flags) {
+      _flags = update.flags;
       _markFlagsDirty();
     }
 

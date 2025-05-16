@@ -1027,10 +1027,10 @@ class SemanticsFlag {
 ///
 /// For example, These flags can indicate if an element is
 /// checkable, currently checked, selectable, or functions as a button.
-class SemanticsFlags {
+class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// Creates a set of semantics flags that describe various states of a widget.
   /// All flags default to `false` unless specified.
-  const SemanticsFlags({
+  SemanticsFlags({
     this.hasCheckedState = false,
     this.isChecked = false,
     this.isSelected = false,
@@ -1062,50 +1062,116 @@ class SemanticsFlags {
     this.hasSelectedState = false,
     this.hasRequiredState = false,
     this.isRequired = false,
-  });
-
-  /// Convert a list of bools in a predefined order to Flag.
-  factory SemanticsFlags.fromBoolList(List<bool> flags) {
-    while (flags.length < 31) {
-      flags.add(false);
-    }
-    return SemanticsFlags(
-      hasCheckedState: flags[0],
-      isChecked: flags[1],
-      isSelected: flags[2],
-      isButton: flags[3],
-      isTextField: flags[4],
-      isFocused: flags[5],
-      hasEnabledState: flags[6],
-      isEnabled: flags[7],
-      isInMutuallyExclusiveGroup: flags[8],
-      isHeader: flags[9],
-      isObscured: flags[10],
-      scopesRoute: flags[11],
-      namesRoute: flags[12],
-      isHidden: flags[13],
-      isImage: flags[14],
-      isLiveRegion: flags[15],
-      hasToggledState: flags[16],
-      isToggled: flags[17],
-      hasImplicitScrolling: flags[18],
-      isMultiline: flags[19],
-      isReadOnly: flags[20],
-      isFocusable: flags[21],
-      isLink: flags[22],
-      isSlider: flags[23],
-      isKeyboardKey: flags[24],
-      isCheckStateMixed: flags[25],
-      hasExpandedState: flags[26],
-      isExpanded: flags[27],
-      hasSelectedState: flags[28],
-      hasRequiredState: flags[29],
-      isRequired: flags[30],
+  }) {
+    _initSemanticsFlags(
+      this,
+      hasCheckedState,
+      isChecked,
+      isSelected,
+      isButton,
+      isTextField,
+      isFocused,
+      hasEnabledState,
+      isEnabled,
+      isInMutuallyExclusiveGroup,
+      isHeader,
+      isObscured,
+      scopesRoute,
+      namesRoute,
+      isHidden,
+      isImage,
+      isLiveRegion,
+      hasToggledState,
+      isToggled,
+      hasImplicitScrolling,
+      isMultiline,
+      isReadOnly,
+      isFocusable,
+      isLink,
+      isSlider,
+      isKeyboardKey,
+      isCheckStateMixed,
+      hasExpandedState,
+      isExpanded,
+      hasSelectedState,
+      hasRequiredState,
+      isRequired,
     );
   }
 
+  @Native<
+    Void Function(
+      Handle,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+    )
+  >(symbol: 'NativeSemanticsFlags::initSemanticsFlags')
+  external static void _initSemanticsFlags(
+    SemanticsFlags instance,
+    bool hasCheckedState,
+    bool isChecked,
+    bool isSelected,
+    bool isButton,
+    bool isTextField,
+    bool isFocused,
+    bool hasEnabledState,
+    bool isEnabled,
+    bool isInMutuallyExclusiveGroup,
+    bool isHeader,
+    bool isObscured,
+    bool scopesRoute,
+    bool namesRoute,
+    bool isHidden,
+    bool isImage,
+    bool isLiveRegion,
+    bool hasToggledState,
+    bool isToggled,
+    bool hasImplicitScrolling,
+    bool isMultiline,
+    bool isReadOnly,
+    bool isFocusable,
+    bool isLink,
+    bool isSlider,
+    bool isKeyboardKey,
+    bool isCheckStateMixed,
+    bool hasExpandedState,
+    bool isExpanded,
+    bool hasSelectedState,
+    bool hasRequiredState,
+    bool isRequired,
+  );
+
   /// The set of semantics flags with every flag set to false.
-  static const SemanticsFlags kNone = SemanticsFlags();
+  static SemanticsFlags none = SemanticsFlags();
 
   /// {@macro dart.ui.semantics.hasCheckedState}
   final bool hasCheckedState;
@@ -1415,44 +1481,6 @@ class SemanticsFlags {
     ];
   }
 
-  /// Convert flags to a list of bools in a predefined order.
-  /// This can be used for serialization.
-  List<bool> toBoolList() {
-    return <bool>[
-      hasCheckedState,
-      isChecked,
-      isSelected,
-      isButton,
-      isTextField,
-      isFocused,
-      hasEnabledState,
-      isEnabled,
-      isInMutuallyExclusiveGroup,
-      isHeader,
-      isObscured,
-      scopesRoute,
-      namesRoute,
-      isHidden,
-      isImage,
-      isLiveRegion,
-      hasToggledState,
-      isToggled,
-      hasImplicitScrolling,
-      isMultiline,
-      isReadOnly,
-      isFocusable,
-      isLink,
-      isSlider,
-      isKeyboardKey,
-      isCheckStateMixed,
-      hasExpandedState,
-      isExpanded,
-      hasSelectedState,
-      hasRequiredState,
-      isRequired,
-    ];
-  }
-
   /// Checks if any of the boolean semantic flags are set to true
   /// in both this instance and the [other] instance.
   bool hasRepeatedFlags(SemanticsFlags other) {
@@ -1738,7 +1766,7 @@ abstract class SemanticsUpdateBuilder {
   ///    `validationResult` argument.
   void updateNode({
     required int id,
-    required List<bool> flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1815,7 +1843,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   @override
   void updateNode({
     required int id,
-    required List<bool> flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1948,7 +1976,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
     int id,
-    List<bool> flags,
+    SemanticsFlags flags,
     int actions,
     int maxValueLength,
     int currentValueLength,

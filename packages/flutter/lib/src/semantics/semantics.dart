@@ -2801,7 +2801,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node is tagged with `tag`.
   bool isTagged(SemanticsTag tag) => tags != null && tags!.contains(tag);
 
-  SemanticsFlags _flags = SemanticsFlags.kNone;
+  SemanticsFlags _flags = SemanticsFlags.none;
 
   /// Semantics flags.
   SemanticsFlags get flagsCollection => _flags;
@@ -3392,7 +3392,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     builder.updateNode(
       id: id,
-      flags: data.flagsCollection.toBoolList(),
+      flags: data.flagsCollection,
       actions: data.actions,
       rect: data.rect,
       identifier: data.identifier,
@@ -5630,7 +5630,7 @@ class SemanticsConfiguration {
 
   // INTERNAL FLAG MANAGEMENT
 
-  SemanticsFlags _flags = SemanticsFlags.kNone;
+  SemanticsFlags _flags = SemanticsFlags.none;
 
   bool get _hasExplicitRole {
     if (_role != SemanticsRole.none) {

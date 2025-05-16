@@ -300,47 +300,7 @@ class SemanticsFlags {
     this.hasRequiredState = false,
     this.isRequired = false,
   });
-
-  static const SemanticsFlags kNone = SemanticsFlags();
-
-  factory SemanticsFlags.fromBoolList(List<bool> flags) {
-    while (flags.length < 31) {
-      flags.add(false);
-    }
-    return SemanticsFlags(
-      hasCheckedState: flags[0],
-      isChecked: flags[1],
-      isSelected: flags[2],
-      isButton: flags[3],
-      isTextField: flags[4],
-      isFocused: flags[5],
-      hasEnabledState: flags[6],
-      isEnabled: flags[7],
-      isInMutuallyExclusiveGroup: flags[8],
-      isHeader: flags[9],
-      isObscured: flags[10],
-      scopesRoute: flags[11],
-      namesRoute: flags[12],
-      isHidden: flags[13],
-      isImage: flags[14],
-      isLiveRegion: flags[15],
-      hasToggledState: flags[16],
-      isToggled: flags[17],
-      hasImplicitScrolling: flags[18],
-      isMultiline: flags[19],
-      isReadOnly: flags[20],
-      isFocusable: flags[21],
-      isLink: flags[22],
-      isSlider: flags[23],
-      isKeyboardKey: flags[24],
-      isCheckStateMixed: flags[25],
-      hasExpandedState: flags[26],
-      isExpanded: flags[27],
-      hasSelectedState: flags[28],
-      hasRequiredState: flags[29],
-      isRequired: flags[30],
-    );
-  }
+  static const SemanticsFlags none = SemanticsFlags();
   final bool hasCheckedState;
   final bool isChecked;
   final bool isSelected;
@@ -585,42 +545,6 @@ class SemanticsFlags {
     ];
   }
 
-  List<bool> toBoolList() {
-    return <bool>[
-      hasCheckedState,
-      isChecked,
-      isSelected,
-      isButton,
-      isTextField,
-      isFocused,
-      hasEnabledState,
-      isEnabled,
-      isInMutuallyExclusiveGroup,
-      isHeader,
-      isObscured,
-      scopesRoute,
-      namesRoute,
-      isHidden,
-      isImage,
-      isLiveRegion,
-      hasToggledState,
-      isToggled,
-      hasImplicitScrolling,
-      isMultiline,
-      isReadOnly,
-      isFocusable,
-      isLink,
-      isSlider,
-      isKeyboardKey,
-      isCheckStateMixed,
-      hasExpandedState,
-      isExpanded,
-      hasSelectedState,
-      hasRequiredState,
-      isRequired,
-    ];
-  }
-
   bool hasRepeatedFlags(SemanticsFlags other) {
     return (hasCheckedState && other.hasCheckedState) ||
         (isChecked && other.isChecked) ||
@@ -745,7 +669,7 @@ class SemanticsUpdateBuilder {
   final List<engine.SemanticsNodeUpdate> _nodeUpdates = <engine.SemanticsNodeUpdate>[];
   void updateNode({
     required int id,
-    required List<bool> flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,

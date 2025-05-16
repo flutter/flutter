@@ -30,49 +30,9 @@ SemanticsUpdateBuilder::SemanticsUpdateBuilder() = default;
 
 SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
-SemanticsFlags vectorBoolToSemanticsFlags(const std::vector<bool>& vec) {
-  std::vector<bool> local_vec = vec;
-  if (local_vec.size() < 31) {
-    local_vec.resize(31, false);
-  }
-  SemanticsFlags flags = {};
-  flags.hasCheckedState = local_vec[0];
-  flags.isChecked = local_vec[1];
-  flags.isSelected = local_vec[2];
-  flags.isButton = local_vec[3];
-  flags.isTextField = local_vec[4];
-  flags.isFocused = local_vec[5];
-  flags.hasEnabledState = local_vec[6];
-  flags.isEnabled = local_vec[7];
-  flags.isInMutuallyExclusiveGroup = local_vec[8];
-  flags.isHeader = local_vec[9];
-  flags.isObscured = local_vec[10];
-  flags.scopesRoute = local_vec[11];
-  flags.namesRoute = local_vec[12];
-  flags.isHidden = local_vec[13];
-  flags.isImage = local_vec[14];
-  flags.isLiveRegion = local_vec[15];
-  flags.hasToggledState = local_vec[16];
-  flags.isToggled = local_vec[17];
-  flags.hasImplicitScrolling = local_vec[18];
-  flags.isMultiline = local_vec[19];
-  flags.isReadOnly = local_vec[20];
-  flags.isFocusable = local_vec[21];
-  flags.isLink = local_vec[22];
-  flags.isSlider = local_vec[23];
-  flags.isKeyboardKey = local_vec[24];
-  flags.isCheckStateMixed = local_vec[25];
-  flags.hasExpandedState = local_vec[26];
-  flags.isExpanded = local_vec[27];
-  flags.hasSelectedState = local_vec[28];
-  flags.hasRequiredState = local_vec[29];
-  flags.isRequired = local_vec[30];
-  return flags;
-}
-
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    const std::vector<bool>& flags,
+    NativeSemanticsFlags* flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -116,7 +76,7 @@ void SemanticsUpdateBuilder::updateNode(
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = vectorBoolToSemanticsFlags(flags);
+  node.flags = flags->GetFlags();
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;
