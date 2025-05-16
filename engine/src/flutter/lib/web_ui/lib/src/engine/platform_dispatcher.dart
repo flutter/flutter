@@ -260,6 +260,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
+    renderer.frameArena.collect();
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -740,7 +741,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // order to perform golden tests in Flutter framework because on the HTML
     // renderer, golden tests render to DOM and then take a browser screenshot,
     // https://github.com/flutter/flutter/issues/137073.
-    if (shouldRender || renderer.rendererTag == 'html') {
+    if (shouldRender) {
       await renderer.renderScene(scene, target);
     }
   }

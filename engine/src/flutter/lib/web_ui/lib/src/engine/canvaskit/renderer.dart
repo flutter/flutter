@@ -43,6 +43,9 @@ class CanvasKitRenderer implements Renderer {
   Future<void>? _initialized;
 
   @override
+  final Arena frameArena = Arena();
+
+  @override
   String get rendererTag => 'canvaskit';
 
   late final SkiaFontCollection _fontCollection = SkiaFontCollection();
