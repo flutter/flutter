@@ -88,6 +88,21 @@ class ArcFillPathGeometry final : public FillPathSourceGeometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 };
 
+/// @brief A Geometry that produces fillable vertices for the gap between
+///        a pair of |RoundRect| objects using the |FillPathSourceGeometry|
+///        base class.
+class FillDiffRoundRectGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit FillDiffRoundRectGeometry(const RoundRect& outer,
+                                     const RoundRect& inner);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const DiffRoundRectPathSource source_;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_ENTITY_GEOMETRY_FILL_PATH_GEOMETRY_H_

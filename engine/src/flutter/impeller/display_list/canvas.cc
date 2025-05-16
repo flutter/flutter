@@ -678,6 +678,22 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   }
 }
 
+void Canvas::DrawDiffRoundRect(const RoundRect& outer,
+                               const RoundRect& inner,
+                               const Paint& paint) {
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kFill) {
+    FillDiffRoundRectGeometry geom(outer, inner);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    StrokeDiffRoundRectGeometry geom(outer, inner, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
+}
+
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                                    const Paint& paint) {
   if (paint.style == Paint::Style::kFill) {
