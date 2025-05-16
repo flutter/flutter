@@ -222,7 +222,7 @@
           "out/ci/ios_debug_sim_ddm",
           "--simulator-arm64-out-dir",
           "out/ci/ios_debug_sim_arm64_ddm",
-          "--skip-extension-safe-frameworks"
+          "--no-extension-safe-frameworks"
         ],
         "script": "flutter/sky/tools/create_ios_framework.py",
         "language": "python3"
@@ -240,7 +240,7 @@
           "out/ci/ios_debug_sim_arm64_ddm",
           "--dsym",
           "--strip",
-          "--skip-extension-safe-frameworks"
+          "--no-extension-safe-frameworks"
         ],
         "script": "flutter/sky/tools/create_ios_framework.py",
         "language": "python3"

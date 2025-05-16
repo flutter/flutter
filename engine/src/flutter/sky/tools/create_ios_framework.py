@@ -30,7 +30,12 @@ def main():
   parser.add_argument('--simulator-arm64-out-dir', type=str, required=False)
   parser.add_argument('--strip', action='store_true', default=False)
   parser.add_argument('--dsym', action='store_true', default=False)
-  parser.add_argument('--skip-extension-safe-frameworks', action='store_true', default=False)
+  parser.add_argument(
+      '--no-extension-safe-frameworks',
+      dest='include_extension_safe_frameworks',
+      action='store_false',
+      default=True
+  )
 
   args = parser.parse_args()
 
@@ -77,7 +82,7 @@ def main():
       simulator_arm64_framework
   )
 
-  if not args.skip_extension_safe_frameworks:
+  if args.include_extension_safe_frameworks:
     extension_safe_dst = os.path.join(dst, 'extension_safe')
     create_extension_safe_framework(
         args, extension_safe_dst, '%s_extension_safe' % arm64_out_dir,
@@ -181,7 +186,7 @@ def zip_archive(dst, args):
       'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
   ]
-  if not args.skip_extension_safe_frameworks:
+  if args.include_extension_safe_frameworks:
     without_entitlements.extend([
         'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
         'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
@@ -196,7 +201,7 @@ def zip_archive(dst, args):
     unsigned_binaries.append(
         'Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter'
     )
-    if not args.skip_extension_safe_frameworks:
+    if args.include_extension_safe_frameworks:
       unsigned_binaries.append(
           'extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter'
       )
@@ -213,7 +218,7 @@ def zip_archive(dst, args):
       'unsigned_binaries.txt',
   ]
 
-  if not args.skip_extension_safe_frameworks:
+  if args.include_extension_safe_frameworks:
     zip_contents.append('extension_safe/Flutter.xcframework')
 
   sky_utils.assert_valid_codesign_config(
