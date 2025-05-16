@@ -23,8 +23,6 @@ import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
 class FlutterCache extends Cache {
-  /// [rootOverride] is configurable for testing.
-  /// [artifacts] is configurable for testing.
   FlutterCache({
     required Logger logger,
     required super.fileSystem,

@@ -69,8 +69,8 @@ final class PreviewDetails {
   /// The name of the function returning the preview.
   final String functionName;
 
-  /// Set to `true` if the preview function is returning a [WidgetBuilder]
-  /// instead of a [Widget].
+  /// Set to `true` if the preview function is returning a `WidgetBuilder`
+  /// instead of a `Widget`.
   final bool isBuilder;
 
   /// A description to be displayed alongside the preview.
@@ -79,24 +79,24 @@ final class PreviewDetails {
   Expression? get name => _name;
   Expression? _name;
 
-  /// Artificial constraints to be applied to the [child].
+  /// Artificial constraints to be applied to the `child`.
   ///
   /// If not provided, the previewed widget will attempt to set its own
   /// constraints and may result in an unbounded constraint error.
   Expression? get size => _size;
   Expression? _size;
 
-  /// Applies font scaling to text within the [child].
+  /// Applies font scaling to text within the `child`.
   ///
-  /// If not provided, the default text scaling factor provided by [MediaQuery]
+  /// If not provided, the default text scaling factor provided by `MediaQuery`
   /// will be used.
   Expression? get textScaleFactor => _textScaleFactor;
   Expression? _textScaleFactor;
 
-  /// The name of a tear-off used to wrap the [Widget] returned by the preview
+  /// The name of a tear-off used to wrap the `Widget` returned by the preview
   /// function defined by [functionName].
   ///
-  /// If not provided, the [Widget] returned by [functionName] will be used by
+  /// If not provided, the `Widget` returned by [functionName] will be used by
   /// the previewer directly.
   Identifier? get wrapper => _wrapper;
   Identifier? _wrapper;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "../export.h"
+#include "../live_objects.h"
 #include "../wrappers.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 #include "third_party/skia/modules/skunicode/include/SkUnicode_client.h"
@@ -11,6 +12,7 @@ using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT void paragraphBuilder_dispose(ParagraphBuilder* builder) {
+  liveParagraphBuilderCount--;
   delete builder;
 }
 
@@ -48,6 +50,7 @@ SKWASM_EXPORT void paragraphBuilder_pop(ParagraphBuilder* builder) {
 
 SKWASM_EXPORT std::vector<SkUnicode::Position>* unicodePositionBuffer_create(
     size_t length) {
+  liveUnicodePositionBufferCount++;
   return new std::vector<SkUnicode::Position>(length);
 }
 
@@ -58,11 +61,13 @@ SKWASM_EXPORT SkUnicode::Position* unicodePositionBuffer_getDataPointer(
 
 SKWASM_EXPORT void unicodePositionBuffer_free(
     std::vector<SkUnicode::Position>* buffer) {
+  liveUnicodePositionBufferCount--;
   delete buffer;
 }
 
 SKWASM_EXPORT std::vector<SkUnicode::LineBreakBefore>* lineBreakBuffer_create(
     size_t length) {
+  liveLineBreakBufferCount++;
   return new std::vector<SkUnicode::LineBreakBefore>(
       length, {0, SkUnicode::LineBreakType::kSoftLineBreak});
 }
@@ -74,5 +79,6 @@ SKWASM_EXPORT SkUnicode::LineBreakBefore* lineBreakBuffer_getDataPointer(
 
 SKWASM_EXPORT void lineBreakBuffer_free(
     std::vector<SkUnicode::LineBreakBefore>* buffer) {
+  liveLineBreakBufferCount--;
   delete buffer;
 }
