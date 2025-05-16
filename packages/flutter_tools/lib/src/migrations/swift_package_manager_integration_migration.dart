@@ -107,6 +107,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         : _macosFlutterGroupIdentifier;
   }
 
+  /// The leading path for the `PBXFileReference` relative to the Flutter `PBXGroup`.
+  ///
+  /// The actual location for both iOS and macOS is `Flutter/ephemeral`. However,
+  /// including the `Flutter/` prefix for macOS will cause it to resolve to
+  /// `Flutter/Flutter/ephemeral`. This is likely due to the macOS Flutter `PBXGroup`
+  /// using `path` whereas the iOS Flutter `PBXGroup` uses `name`.
   String get _relativeEphemeralPath {
     return _platform == SupportedPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
   }
