@@ -718,10 +718,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
   }
 
-  // Close the menu.
-  //
-  // Call this when the menu should be closed. Has no effect if the menu is
-  // already closed.
   @override
   void close({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing $this'));
