@@ -43,6 +43,7 @@ final class TestEnvironment {
   const TestEnvironment({
     this.ignorePlatformMessages = false,
     this.forceTestFonts = false,
+    this.disableFontFallbacks = false,
     this.keepSemanticsDisabledOnUpdate = false,
     this.defaultToTestUrlStrategy = false,
   });
@@ -50,12 +51,14 @@ final class TestEnvironment {
   const TestEnvironment.flutterTester()
     : ignorePlatformMessages = true,
       forceTestFonts = true,
+      disableFontFallbacks = true,
       keepSemanticsDisabledOnUpdate = true,
       defaultToTestUrlStrategy = true;
 
   const TestEnvironment.production()
     : ignorePlatformMessages = false,
       forceTestFonts = false,
+      disableFontFallbacks = false,
       keepSemanticsDisabledOnUpdate = false,
       defaultToTestUrlStrategy = false;
 
@@ -86,6 +89,15 @@ final class TestEnvironment {
   /// Only test fonts in [ui.TextStyle] and [ui.ParagraphStyle] will be respected. Any other fonts
   /// will be ignored.
   final bool forceTestFonts;
+
+  /// When true, the font fallback system will be disabled.
+  ///
+  /// We need to disable font fallbacks for some framework tests because
+  /// Flutter error messages may contain an arrow symbol which is not
+  /// covered by ASCII fonts. This causes us to try to download the
+  /// Noto Sans Symbols font, which kicks off a `Timer` which doesn't
+  /// complete before the Widget tree is disposed (this is by design).
+  final bool disableFontFallbacks;
 
   /// When true, semantics will NOT be automatically enabled when a semantics update is received by
   /// [ui.FlutterView.updateSemantics].

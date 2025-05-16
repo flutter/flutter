@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/test_initialization.dart';
@@ -23,10 +24,6 @@ const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 100);
 void testMain() {
   group('Font fallbacks', () {
     setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
-
-    setUp(() {
-      debugDisableFontFallbacks = false;
-    });
 
     /// Used to save and restore [ui.PlatformDispatcher.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
@@ -562,24 +559,33 @@ void testMain() {
       }
     });
 
-    test('fallback fonts do not download when debugDisableFontFallbacks is set', () async {
-      debugDisableFontFallbacks = true;
+    group('when fallback fonts are disabled', () {
+      setUp(() {
+        ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment(disableFontFallbacks: true));
+      });
+      tearDown(() {
+        ui_web.TestEnvironment.tearDown();
+      });
 
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+      test('fallback fonts do not download', () async {
+        expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
+          'Roboto',
+        ]);
 
-      // Creating this paragraph would cause us to start to download the
-      // fallback font if we didn't disable font fallbacks.
-      final ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
-      pb.addText('Hello 😊');
-      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+        // Creating this paragraph would cause us to start to download the
+        // fallback font if we didn't disable font fallbacks.
+        final ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+        pb.addText('Hello 😊');
+        pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+        await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
-      // Make sure we didn't download the fallback font.
-      expect(
-        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
-        isNot(contains('Noto Color Emoji 9')),
-      );
+        // Make sure we didn't download the fallback font.
+        expect(
+          renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+          isNot(contains('Noto Color Emoji 9')),
+        );
+      });
     });
 
     test('only woff2 fonts are used for fallback', () {
