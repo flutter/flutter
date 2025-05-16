@@ -622,11 +622,7 @@ void DlDispatcherBase::drawDiffRoundRect(const DlRoundRect& outer,
                                          const DlRoundRect& inner) {
   AUTO_DEPTH_WATCHER(1u);
 
-  flutter::DlPathBuilder builder;
-  builder.SetFillType(flutter::DlPathFillType::kOdd);
-  builder.AddRoundRect(outer);
-  builder.AddRoundRect(inner);
-  GetCanvas().DrawPath(builder.TakePath(), paint_);
+  GetCanvas().DrawDiffRoundRect(outer, inner, paint_);
 }
 
 // |flutter::DlOpReceiver|
