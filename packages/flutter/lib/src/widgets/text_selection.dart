@@ -727,6 +727,7 @@ class TextSelectionOverlay {
       Offset(details.globalPosition.dx, centerOfLineGlobal),
     );
 
+    // The drag start selection is only utilized on Apple platforms.
     if (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS) {
       _dragStartSelection ??= _selection;
@@ -885,6 +886,7 @@ class TextSelectionOverlay {
       Offset(details.globalPosition.dx, centerOfLineGlobal),
     );
 
+    // The drag start selection is only utilized on Apple platforms.
     if (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS) {
       _dragStartSelection ??= _selection;
@@ -1205,7 +1207,9 @@ class SelectionOverlay {
 
   // Whether the start handle can be dragged.
   //
-  // On Apple and web platforms only one selection handle can be dragged at a time.
+  // On Apple and web platforms only one selection handle can be dragged
+  // at a time, so when the end handle is being dragged on these platforms
+  // the the start handle cannot be dragged.
   bool get _canDragStartHandle =>
       !_isDraggingEndHandle ||
       (defaultTargetPlatform != TargetPlatform.iOS ||
@@ -1305,7 +1309,9 @@ class SelectionOverlay {
 
   // Whether the end handle can be dragged.
   //
-  // On Apple and web platforms only one selection handle can be dragged at a time.
+  // On Apple and web platforms only one selection handle can be dragged
+  // at a time, so when the start handle is being dragged on these platforms
+  // the the end handle cannot be dragged.
   bool get _canDragEndHandle =>
       !_isDraggingStartHandle ||
       (defaultTargetPlatform != TargetPlatform.iOS ||
