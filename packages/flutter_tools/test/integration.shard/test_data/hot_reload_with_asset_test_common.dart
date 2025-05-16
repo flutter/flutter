@@ -48,6 +48,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           onSecondLoad.complete();
         }
       });
+      throw 'here!!';
       flutter.stdout.listen(printOnFailure);
       await flutter.run(
         device: GoogleChromeDevice.kChromeDeviceId,
