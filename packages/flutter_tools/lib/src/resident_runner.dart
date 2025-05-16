@@ -114,6 +114,11 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
+      final List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
+      if (buildInfo.webEnableHotReload) {
+        // These flags are only valid to be passed when we are compiling with DDC.
+        extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
+      }
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -133,7 +138,7 @@ class FlutterDevice {
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec:
