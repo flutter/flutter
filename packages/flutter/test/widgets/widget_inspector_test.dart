@@ -1796,13 +1796,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           for (int i = 0; i < propertiesJson.length; ++i) {
             final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
-            if (propertyJson['inDisableWidgetInspectorScope']! as bool) {
-            } else {
-              expect(
-                service.toObject(propertyJson['valueId']! as String),
-                equals(getFirstVisibleNode(children[i])?.value),
-              );
-            }
+            expect(
+              service.toObject(propertyJson['valueId']! as String),
+              equals(getFirstVisibleNode(children[i])?.value),
+            );
           }
         });
       });
