@@ -2776,7 +2776,7 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
-  void _onSingleLongTapEndOrCancel(){
+  void _onSingleLongTapEndOrCancel() {
     _hideMagnifierIfSupportedByPlatform();
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
