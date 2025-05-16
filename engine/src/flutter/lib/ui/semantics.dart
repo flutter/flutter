@@ -502,22 +502,42 @@ enum SemanticsRole {
   ///   saved.
   alert,
 
-  /// A supporting section of a web page.
+  /// A supporting section that relates to the main content.
+  ///
+  /// The compelementary role is one of landmark roles. This role can be used to
+  /// describe sidebars, or call-out boxes.
+  ///
+  /// For more information, see: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/complementary_role
   complementary,
 
   /// A section for a footer, containing identifying information such as
   /// copyright information, navigation links and privacy statements.
+  ///
+  /// The contentInfo role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/contentinfo_role
   contentInfo,
 
   /// The primary content of a document.
+  ///
+  /// The section consists of content that is directly related to or expands on
+  /// the central topic of a document, or the main function of an application.
+  ///
+  /// This role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/main_role
   main,
 
   /// A region of a web page that contains navigation links.
+  ///
+  /// This role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/navigation_role
   navigation,
 
   /// A section of content sufficiently important but cannot be descrived by one
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
+  ///
+  /// For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/region_role
   region,
 }
 
