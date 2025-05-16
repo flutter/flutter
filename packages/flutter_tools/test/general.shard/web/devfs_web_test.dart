@@ -41,7 +41,7 @@ const List<int> kTransparentImage = <int>[
 ];
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late WebAssetServer webAssetServer;
   late ReleaseAssetServer releaseAssetServer;
   late Platform linux;
@@ -63,7 +63,7 @@ void main() {
     linux = FakePlatform(environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     logger = BufferLogger.test();
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         webAssetServer = WebAssetServer(
           httpServer,

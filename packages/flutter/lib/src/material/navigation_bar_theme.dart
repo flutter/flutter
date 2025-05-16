@@ -19,9 +19,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationBarThemeData] object
-/// using `NavigationBarTheme.of(context)`. Instances of
-/// [NavigationBarThemeData] can be customized with
-/// [NavigationBarThemeData.copyWith].
+/// using [NavigationBarTheme.of]. Instances of [NavigationBarThemeData] can be
+/// customized with [NavigationBarThemeData.copyWith].
 ///
 /// Typically a [NavigationBarThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.navigationBarTheme]. Alternatively, a
@@ -279,7 +278,7 @@ class NavigationBarTheme extends InheritedTheme {
   /// type values for descendant [NavigationBar] widgets.
   final NavigationBarThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [NavigationBarThemeData] from the closest ancestor [NavigationBarTheme].
   ///
   /// If there is no enclosing [NavigationBarTheme] widget, then
   /// [ThemeData.navigationBarTheme] is used.
