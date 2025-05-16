@@ -1360,13 +1360,14 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  SemanticsUpdate _getSemanticsNode(int viewId, int nodeId) {
+  _NativeSemanticsUpdate _getSemanticsNode(int viewId, int nodeId) {
     return _invokeAndReturn2<SemanticsUpdate, int, int>(
-      onGetSemanticsNode,
-      _onGetSemanticsNodeZone,
-      viewId,
-      nodeId,
-    )!;
+          onGetSemanticsNode,
+          _onGetSemanticsNodeZone,
+          viewId,
+          nodeId,
+        )!
+        as _NativeSemanticsUpdate;
   }
 
   ErrorCallback? _onError;

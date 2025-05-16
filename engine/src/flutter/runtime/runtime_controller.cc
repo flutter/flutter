@@ -404,7 +404,7 @@ bool RuntimeController::DispatchSemanticsAction(int64_t view_id,
 
 SemanticsUpdate* RuntimeController::GetSemanticsNode(int64_t view_id,
                                                      int32_t node_id) {
-  TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
+  TRACE_EVENT1("flutter", "RuntimeController::GetSemanticsNode", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
     return platform_configuration->GetSemanticsNode(view_id, node_id);

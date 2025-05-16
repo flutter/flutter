@@ -289,7 +289,7 @@ void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args
 
 @pragma('vm:entry-point')
 SemanticsUpdate _getSemanticsNode(int viewId, int nodeId) {
-  PlatformDispatcher.instance._getSemanticsNode(viewId, nodeId);
+  return PlatformDispatcher.instance._getSemanticsNode(viewId, nodeId);
 }
 
 @pragma('vm:entry-point')

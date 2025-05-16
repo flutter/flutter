@@ -487,6 +487,10 @@ void Engine::DispatchSemanticsAction(int64_t view_id,
                                                std::move(args));
 }
 
+SemanticsUpdate* Engine::GetSemanticsNode(int64_t view_id, int node_id) {
+  return runtime_controller_->GetSemanticsNode(view_id, node_id);
+}
+
 void Engine::SetSemanticsEnabled(bool enabled) {
   runtime_controller_->SetSemanticsEnabled(enabled);
 }

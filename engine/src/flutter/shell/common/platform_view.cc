@@ -43,6 +43,11 @@ void PlatformView::DispatchSemanticsAction(int64_t view_id,
                                                   std::move(args));
 }
 
+SemanticsUpdate* PlatformView::GetSemanticsNode(int64_t view_id,
+                                                int32_t node_id) {
+  return delegate_.OnPlatformViewGetSemanticsNode(view_id, node_id);
+}
+
 void PlatformView::SetSemanticsEnabled(bool enabled) {
   delegate_.OnPlatformViewSetSemanticsEnabled(enabled);
 }

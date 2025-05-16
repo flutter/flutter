@@ -412,13 +412,12 @@ SemanticsUpdate* PlatformConfiguration::GetSemanticsNode(int64_t view_id,
   std::shared_ptr<tonic::DartState> dart_state =
       get_semantics_node_.dart_state().lock();
   if (!dart_state) {
-    return;
+    return nullptr;
   }
   tonic::DartState::Scope scope(dart_state);
 
-  return tonic::DartInvoke(
-          get_semantics_node_.Get(),
-          {tonic::ToDart(view_id), tonic::ToDart(node_id)}));
+  return tonic::DartInvoke(get_semantics_node_.Get(),
+                           {tonic::ToDart(view_id), tonic::ToDart(node_id)});
 }
 
 void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,

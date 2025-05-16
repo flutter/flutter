@@ -468,8 +468,7 @@ class PlatformConfiguration final {
   ///
   /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node.
-  SemanticsUpdate* PlatformConfiguration::GetSemanticsNode(int64_t view_id,
-                                                           int32_t node_id);
+  SemanticsUpdate* GetSemanticsNode(int64_t view_id, int32_t node_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Notifies the framework that it is time to begin working on a

@@ -612,6 +612,9 @@ class Shell final : public PlatformView::Delegate,
                                              int32_t node_id,
                                              SemanticsAction action,
                                              fml::MallocMapping args) override;
+  // |PlatformView::Delegate|
+  SemanticsUpdate* OnPlatformViewGetSemanticsNode(int64_t view_id,
+                                                  int32_t node_id);
 
   // |PlatformView::Delegate|
   void OnPlatformViewSetSemanticsEnabled(bool enabled) override;
