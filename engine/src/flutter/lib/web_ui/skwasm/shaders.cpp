@@ -4,6 +4,7 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "live_objects.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
@@ -19,6 +20,7 @@ SKWASM_EXPORT SkShader* shader_createLinearGradient(
     SkTileMode tileMode,
     SkScalar* matrix33  // Can be nullptr
 ) {
+  liveShaderCount++;
   if (matrix33) {
     SkMatrix localMatrix = createMatrix(matrix33);
     return SkGradientShader::MakeLinear(endPoints, colors, stops, count,
@@ -39,6 +41,7 @@ SKWASM_EXPORT SkShader* shader_createRadialGradient(SkScalar centerX,
                                                     int count,
                                                     SkTileMode tileMode,
                                                     SkScalar* matrix33) {
+  liveShaderCount++;
   if (matrix33) {
     SkMatrix localMatrix = createMatrix(matrix33);
     return SkGradientShader::MakeRadial({centerX, centerY}, radius, colors,
@@ -60,6 +63,7 @@ SKWASM_EXPORT SkShader* shader_createConicalGradient(
     int count,
     SkTileMode tileMode,
     SkScalar* matrix33) {
+  liveShaderCount++;
   if (matrix33) {
     SkMatrix localMatrix = createMatrix(matrix33);
     return SkGradientShader::MakeTwoPointConical(
@@ -84,6 +88,7 @@ SKWASM_EXPORT SkShader* shader_createSweepGradient(SkScalar centerX,
                                                    SkScalar startAngle,
                                                    SkScalar endAngle,
                                                    SkScalar* matrix33) {
+  liveShaderCount++;
   if (matrix33) {
     SkMatrix localMatrix = createMatrix(matrix33);
     return SkGradientShader::MakeSweep(centerX, centerY, colors, stops, count,
@@ -99,10 +104,12 @@ SKWASM_EXPORT SkShader* shader_createSweepGradient(SkScalar centerX,
 }
 
 SKWASM_EXPORT void shader_dispose(SkShader* shader) {
+  liveShaderCount--;
   shader->unref();
 }
 
 SKWASM_EXPORT SkRuntimeEffect* runtimeEffect_create(SkString* source) {
+  liveRuntimeEffectCount++;
   auto result = SkRuntimeEffect::MakeForShader(*source);
   if (result.effect == nullptr) {
     printf("Failed to compile shader. Error text:\n%s",
@@ -114,6 +121,7 @@ SKWASM_EXPORT SkRuntimeEffect* runtimeEffect_create(SkString* source) {
 }
 
 SKWASM_EXPORT void runtimeEffect_dispose(SkRuntimeEffect* effect) {
+  liveRuntimeEffectCount--;
   effect->unref();
 }
 
@@ -126,6 +134,7 @@ SKWASM_EXPORT SkShader* shader_createRuntimeEffectShader(
     SkData* uniforms,
     SkShader** children,
     size_t childCount) {
+  liveShaderCount++;
   std::vector<sk_sp<SkShader>> childPointers;
   for (size_t i = 0; i < childCount; i++) {
     childPointers.emplace_back(sk_ref_sp<SkShader>(children[i]));
@@ -142,6 +151,7 @@ SKWASM_EXPORT SkShader* shader_createFromImage(SkImage* image,
                                                SkTileMode tileModeY,
                                                FilterQuality quality,
                                                SkScalar* matrix33) {
+  liveShaderCount++;
   if (matrix33) {
     SkMatrix localMatrix = createMatrix(matrix33);
     return image

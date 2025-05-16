@@ -4,6 +4,7 @@
 
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "../export.h"
+#include "../live_objects.h"
 #include "DartTypes.h"
 #include "TextStyle.h"
 #include "include/core/SkScalar.h"
@@ -11,6 +12,7 @@
 using namespace skia::textlayout;
 
 SKWASM_EXPORT void paragraph_dispose(Paragraph* paragraph) {
+  liveParagraphCount--;
   delete paragraph;
 }
 
@@ -125,6 +127,7 @@ SKWASM_EXPORT int paragraph_getLineNumberAt(Paragraph* paragraph,
 
 SKWASM_EXPORT LineMetrics* paragraph_getLineMetricsAtIndex(Paragraph* paragraph,
                                                            size_t lineNumber) {
+  liveLineMetricsCount++;
   auto metrics = new LineMetrics();
   if (paragraph->getLineMetricsAt(lineNumber, metrics)) {
     return metrics;
@@ -139,6 +142,7 @@ struct TextBoxList {
 };
 
 SKWASM_EXPORT void textBoxList_dispose(TextBoxList* list) {
+  liveTextBoxListCount--;
   delete list;
 }
 
@@ -160,12 +164,14 @@ SKWASM_EXPORT TextBoxList* paragraph_getBoxesForRange(
     int end,
     RectHeightStyle heightStyle,
     RectWidthStyle widthStyle) {
+  liveTextBoxListCount++;
   return new TextBoxList{
       paragraph->getRectsForRange(start, end, heightStyle, widthStyle)};
 }
 
 SKWASM_EXPORT TextBoxList* paragraph_getBoxesForPlaceholders(
     Paragraph* paragraph) {
+  liveTextBoxListCount++;
   return new TextBoxList{paragraph->getRectsForPlaceholders()};
 }
 

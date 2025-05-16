@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "export.h"
+#include "live_objects.h"
 
 #include "third_party/skia/include/core/SkVertices.h"
 
@@ -13,11 +14,13 @@ SKWASM_EXPORT SkVertices* vertices_create(SkVertices::VertexMode vertexMode,
                                           SkColor* colors,
                                           int indexCount,
                                           uint16_t* indices) {
+  liveVerticesCount++;
   return SkVertices::MakeCopy(vertexMode, vertexCount, positions,
                               textureCoordinates, colors, indexCount, indices)
       .release();
 }
 
 SKWASM_EXPORT void vertices_dispose(SkVertices* vertices) {
+  liveVerticesCount--;
   vertices->unref();
 }

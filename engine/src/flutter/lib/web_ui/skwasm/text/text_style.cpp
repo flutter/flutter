@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "../export.h"
+#include "../live_objects.h"
 #include "../wrappers.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
@@ -12,6 +13,7 @@ using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT TextStyle* textStyle_create() {
+  liveTextStyleCount++;
   auto style = new TextStyle();
 
   // Default color in flutter is black.
@@ -20,10 +22,12 @@ SKWASM_EXPORT TextStyle* textStyle_create() {
 }
 
 SKWASM_EXPORT TextStyle* textStyle_copy(TextStyle* style) {
+  liveTextStyleCount++;
   return new TextStyle(*style);
 }
 
 SKWASM_EXPORT void textStyle_dispose(TextStyle* style) {
+  liveTextStyleCount--;
   delete style;
 }
 
