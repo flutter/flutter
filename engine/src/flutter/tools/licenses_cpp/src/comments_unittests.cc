@@ -7,5 +7,15 @@
 #include <sstream>
 
 TEST(CommentsTest, Simple) {
+  std::string test = R"test(
+// Hello
+)test";
 
+  std::vector<std::string> comments;
+  lex(test.c_str(), test.size(), [&](const char* comment) {
+    comments.push_back(comment);
+  });
+
+  EXPECT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "// Hello");
 }

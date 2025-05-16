@@ -6,26 +6,29 @@
 
 %option reentrant
 %option noyywrap
+%option extra-type="LexerContext*"
 
 %{
-#include <string>
+#include "flutter/tools/licenses_cpp/src/comments.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
-int num_lines = 0, num_chars = 0;
-static std::string buf;
 typedef void* yyscan_t;
+
+struct LexerContext {
+  std::function<void(const char*)> callback;
+};
 %}
 
 %%
-^[ \t]*(\/\/|#)[^\n]*  { buf = yytext; }
-\n  { ++num_lines; ++num_chars; }
-.   { ++num_chars; }
+^[ \t]*(\/\/|#)[^\n]*  { yyextra->callback(yytext); }
 
 %%
 
-void lex(const char* buffer, size_t size) {
+void lex(const char* buffer, size_t size, std::function<void(const char*)> callback) {
+  LexerContext context;
+  context.callback = std::move(callback);
   yyscan_t scanner;
-  yylex_init(&scanner);
+  yylex_init_extra(&context, &scanner);
   YY_BUFFER_STATE yybuffer = yy_scan_bytes(buffer, size, scanner);
   yylex(scanner);
   yy_delete_buffer(yybuffer, scanner);
