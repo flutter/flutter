@@ -170,7 +170,7 @@ class RelativeRect {
     }
     if (b == null) {
       final double k = 1.0 - t;
-      return RelativeRect.fromLTRB(b!.left * k, b.top * k, b.right * k, b.bottom * k);
+      return RelativeRect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
     }
     return RelativeRect.fromLTRB(
       lerpDouble(a.left, b.left, t)!,
