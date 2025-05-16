@@ -9871,7 +9871,7 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
-  testWidgets('Placeholder is baseline aligned with text for varying font sizes', (
+  testWidgets('Placeholder is baseline aligned with text', (
     WidgetTester tester,
   ) async {
     const String placeholderTextContent = 'hint text';
