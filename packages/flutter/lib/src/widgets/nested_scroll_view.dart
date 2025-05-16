@@ -27,6 +27,7 @@ import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
+import 'scrollable.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 
@@ -1126,6 +1127,18 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _outerPosition?.setParent(_parent ?? PrimaryScrollController.maybeOf(_state.context));
   }
 
+  bool shouldIgnoreEnsureVisible(
+    _NestedScrollPosition target, {
+    ScrollableState? previousScrollable,
+  }) {
+    // If the target is the outer position and the previous scrollable is an inner position,
+    // we should ignore the ensureVisible call. This is because the inner position will
+    // already have been scrolled to make the target visible.
+    return target == _outerPosition &&
+        previousScrollable != null &&
+        _innerPositions.contains(previousScrollable.position);
+  }
+
   @mustCallSuper
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
@@ -1485,6 +1498,30 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     return coordinator.drag(details, dragCancelCallback);
+  }
+
+  @override
+  Future<void> ensureVisible(
+    RenderObject object, {
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
+  }) {
+    if (coordinator.shouldIgnoreEnsureVisible(this, previousScrollable: previousScrollable)) {
+      return Future<void>.value();
+    }
+    return super.ensureVisible(
+      object,
+      alignment: alignment,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+      targetRenderObject: targetRenderObject,
+      previousScrollable: previousScrollable,
+    );
   }
 }
 
