@@ -717,6 +717,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             primaryDelta: _getPrimaryValueFromOffset(resolvedDelta),
             globalPosition: position,
             localPosition: localPosition,
+            pointer: event.pointer,
           );
       }
       _recordMoveDeltaForMultitouch(event.pointer, localDelta);
@@ -830,6 +831,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
         globalPosition: correctedPosition.global,
         localPosition: correctedPosition.local,
+        pointer: pointer,
       );
     }
     // This acceptGesture might have been called only for one pointer, instead
@@ -856,6 +858,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     double? primaryDelta,
     required Offset globalPosition,
     Offset? localPosition,
+    required int pointer,
   }) {
     if (onUpdate != null) {
       final DragUpdateDetails details = DragUpdateDetails(
@@ -864,6 +867,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         primaryDelta: primaryDelta,
         globalPosition: globalPosition,
         localPosition: localPosition,
+        kind: getKindForPointer(pointer),
       );
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
     }

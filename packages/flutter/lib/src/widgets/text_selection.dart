@@ -1252,6 +1252,19 @@ class SelectionOverlay {
     if (!_canDragStartHandle) {
       return;
     }
+    // The handle drag may have been blocked before on Apple platforms and the web
+    // while the opposite handle was being dragged. Ensure that any logic that was
+    // meant to be run in onStartHandleDragStart is still run.
+    if (!_isDraggingStartHandle) {
+      _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
+      final DragStartDetails startDetails = DragStartDetails(
+        globalPosition: details.globalPosition,
+        localPosition: details.localPosition,
+        sourceTimeStamp: details.sourceTimeStamp,
+        kind: details.kind,
+      );
+      onStartHandleDragStart?.call(startDetails);
+    }
     onStartHandleDragUpdate?.call(details);
   }
 
@@ -1353,6 +1366,19 @@ class SelectionOverlay {
     }
     if (!_canDragEndHandle) {
       return;
+    }
+    // The handle drag may have been blocked before on Apple platforms and the web
+    // while the opposite handle was being dragged. Ensure that any logic that was
+    // meant to be run in onStartHandleDragStart is still run.
+    if (!_isDraggingEndHandle) {
+      _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
+      final DragStartDetails startDetails = DragStartDetails(
+        globalPosition: details.globalPosition,
+        localPosition: details.localPosition,
+        sourceTimeStamp: details.sourceTimeStamp,
+        kind: details.kind,
+      );
+      onEndHandleDragStart?.call(startDetails);
     }
     onEndHandleDragUpdate?.call(details);
   }
