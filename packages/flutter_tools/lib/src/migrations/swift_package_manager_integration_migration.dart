@@ -401,7 +401,7 @@ $newContent
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
-    final bool pacakgeFileReferenceMigrated = _isFileReferenceMigrated(
+    final bool packageFileReferenceMigrated = _isFileReferenceMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
       identifer: _flutterPluginsSwiftPackageFileIdentifer,
@@ -433,7 +433,7 @@ $newContent
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
     return buildFilesMigrated &&
-        pacakgeFileReferenceMigrated &&
+        packageFileReferenceMigrated &&
         frameworksBuildPhaseMigrated &&
         groupPluginPackageMigrated &&
         nativeTargetsMigrated &&
