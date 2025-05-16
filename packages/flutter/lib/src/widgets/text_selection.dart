@@ -1212,8 +1212,8 @@ class SelectionOverlay {
   // the the start handle cannot be dragged.
   bool get _canDragStartHandle =>
       !_isDraggingEndHandle ||
-      (defaultTargetPlatform != TargetPlatform.iOS ||
-          defaultTargetPlatform != TargetPlatform.macOS ||
+      (defaultTargetPlatform != TargetPlatform.iOS &&
+          defaultTargetPlatform != TargetPlatform.macOS &&
           !kIsWeb);
 
   /// Whether the start handle is visible.
@@ -1314,8 +1314,8 @@ class SelectionOverlay {
   // the the end handle cannot be dragged.
   bool get _canDragEndHandle =>
       !_isDraggingStartHandle ||
-      (defaultTargetPlatform != TargetPlatform.iOS ||
-          defaultTargetPlatform != TargetPlatform.macOS ||
+      (defaultTargetPlatform != TargetPlatform.iOS &&
+          defaultTargetPlatform != TargetPlatform.macOS &&
           !kIsWeb);
 
   /// Whether the end handle is visible.
