@@ -27,6 +27,11 @@ INTERNAL NOTE
 
 <!-- EDIT MADE TO LAND AN EMPTY COMMIT DUE TO https://github.com/flutter/cocoon/pull/4541 -->
 
+## Flutter 3.32 Changes
+
+### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
+Initial stable release.
+
 ## Flutter 3.29 Changes
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
