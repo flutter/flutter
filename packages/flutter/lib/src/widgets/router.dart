@@ -975,7 +975,7 @@ abstract class BackButtonDispatcher extends _CallbackHookProvider<Future<bool>> 
       <ChildBackButtonDispatcher>{} as LinkedHashSet<ChildBackButtonDispatcher>;
 
   @override
-  bool get hasCallbacks => super.hasCallbacks || (_children.isNotEmpty);
+  bool get hasCallbacks => super.hasCallbacks || _children.isNotEmpty;
 
   /// Handles a pop route request.
   ///
