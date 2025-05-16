@@ -288,12 +288,11 @@ class RawMenuAnchor extends StatefulWidget {
   /// should be skipped, and `showOverlay` should be called with the new
   /// `position` value.
   ///
-  /// When [MenuController.open] is called, the full opening sequence is:
-  /// 1. [onOpenRequested]
-  /// 2. (optional delay)
-  /// 3. `showOverlay`
-  /// 4. [onOpen]
-  /// 5. (optional animation)
+  /// A typical [onOpenRequested] consists of the following steps:
+  ///
+  ///  1. Optional delay.
+  ///  2. Call `showOverlay` (whose call chain eventually invokes [onOpen]).
+  ///  3. Optionally starts the opening animation.
   ///
   /// Once `showOverlay` is called, [MenuController.isOpen] will be set to true,
   /// and menus are expected to be interactive.
@@ -319,11 +318,10 @@ class RawMenuAnchor extends StatefulWidget {
   /// called, meaning [MenuController.isOpen] will typically be true while
   /// closing animations are running.
   ///
-  /// When [MenuController.close] is called, the full closing sequence is:
-  /// 1. [onCloseRequested]
-  /// 2. (optional animation)
-  /// 3. `hideOverlay`
-  /// 4. [onClose]
+  /// Typically, [onCloseRequested] consists of the following steps:
+  ///
+  ///  1. Optionally starts the closing animation and waits for it to complete.
+  ///  2. Call `hideOverlay` (whose call chain eventually invokes [onClose]).
   ///
   /// Throughout the closing sequence, menus should not be focusable or
   /// interactive.
