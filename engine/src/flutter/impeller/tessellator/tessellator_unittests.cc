@@ -5,10 +5,8 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
-#include "flutter/display_list/geometry/dl_path.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "impeller/geometry/geometry_asserts.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/tessellator/tessellator_libtess.h"
 
@@ -19,7 +17,9 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Zero points.
   {
     TessellatorLibtess t;
-    auto path = PathBuilder{}.TakePath(FillType::kOdd);
+    auto path = flutter::DlPathBuilder{}  //
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
     TessellatorLibtess::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -31,7 +31,10 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // One point.
   {
     TessellatorLibtess t;
-    auto path = PathBuilder{}.LineTo({0, 0}).TakePath(FillType::kOdd);
+    auto path = flutter::DlPathBuilder{}
+                    .LineTo({0, 0})
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
     TessellatorLibtess::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -43,7 +46,11 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Two points.
   {
     TessellatorLibtess t;
-    auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
+    auto path = flutter::DlPathBuilder{}
+                    .MoveTo({0, 0})
+                    .LineTo({0, 1})
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
     TessellatorLibtess::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -55,12 +62,12 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Many points.
   {
     TessellatorLibtess t;
-    PathBuilder builder;
+    flutter::DlPathBuilder builder;
     for (int i = 0; i < 1000; i++) {
       auto coord = i * 1.0f;
-      builder.AddLine({coord, coord}, {coord + 1, coord + 1});
+      builder.MoveTo({coord, coord}).LineTo({coord + 1, coord + 1});
     }
-    auto path = builder.TakePath(FillType::kOdd);
+    auto path = builder.SetFillType(FillType::kOdd).TakePath();
     TessellatorLibtess::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -72,7 +79,11 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Closure fails.
   {
     TessellatorLibtess t;
-    auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
+    auto path = flutter::DlPathBuilder{}
+                    .MoveTo({0, 0})
+                    .LineTo({0, 1})
+                    .SetFillType(FillType::kOdd)
+                    .TakePath();
     TessellatorLibtess::Result result = t.Tessellate(
         path, 1.0f,
         [](const float* vertices, size_t vertices_count,
@@ -103,9 +114,10 @@ TEST(TessellatorTest, TessellateConvex) {
     std::vector<Point> points;
     std::vector<uint16_t> indices;
     Tessellator::TessellateConvexInternal(
-        flutter::DlPath(PathBuilder{}
+        flutter::DlPath(flutter::DlPathBuilder{}
                             .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
-                            .AddRect(Rect::MakeLTRB(20, 20, 30, 30))),
+                            .AddRect(Rect::MakeLTRB(20, 20, 30, 30))
+                            .TakePath()),
         points, indices, 1.0);
 
     std::vector<Point> expected = {{0, 0},   {10, 0},  {10, 10}, {0, 10},
@@ -123,11 +135,11 @@ TEST(TessellatorTest, TessellateConvexUnclosedPath) {
   std::vector<uint16_t> indices;
 
   // Create a rectangle that lacks an explicit close.
-  Path path = PathBuilder{}
-                  .LineTo({100, 0})
-                  .LineTo({100, 100})
-                  .LineTo({0, 100})
-                  .TakePath();
+  flutter::DlPath path = flutter::DlPathBuilder{}
+                             .LineTo({100, 0})
+                             .LineTo({100, 100})
+                             .LineTo({0, 100})
+                             .TakePath();
   Tessellator::TessellateConvexInternal(flutter::DlPath(path), points, indices,
                                         1.0);
 
@@ -501,14 +513,14 @@ TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
 TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
   // This path is not technically empty (it has a size in one dimension), but
   // it contains only move commands and no actual path segment definitions.
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
-  builder.MoveTo({10, 10}, /*relative=*/true);
+  builder.MoveTo({10, 10});
 
   std::vector<Point> points;
   std::vector<uint16_t> indices;
-  Tessellator::TessellateConvexInternal(flutter::DlPath(builder), points,
-                                        indices, 3.0);
+  Tessellator::TessellateConvexInternal(builder.TakePath(), points, indices,
+                                        3.0f);
 
   EXPECT_TRUE(points.empty());
   EXPECT_TRUE(indices.empty());

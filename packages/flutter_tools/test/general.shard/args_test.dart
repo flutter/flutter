@@ -26,7 +26,7 @@ void main() {
 
   test(
     'Help for command line arguments is consistently styled and complete',
-    () => Testbed().run(() {
+    () => TestBed().run(() {
       final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
       executable.generateCommands(verboseHelp: true, verbose: true).forEach(runner.addCommand);
       verifyCommandRunner(runner);

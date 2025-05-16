@@ -827,7 +827,7 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with
-  /// 'packages/<package_name>'
+  /// `packages/<package_name>`.
   List<Font> _parsePackageFonts(
     FlutterManifest manifest,
     String packageName,

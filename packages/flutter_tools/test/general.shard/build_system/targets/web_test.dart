@@ -43,7 +43,7 @@ const List<String> _kDart2WasmLinuxArgs = <String>[
 ];
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late Environment environment;
   late FakeProcessManager processManager;
 
@@ -60,7 +60,7 @@ void main() {
   );
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: foo
@@ -195,6 +195,41 @@ name: foo
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
         contains('"useLocalCanvasKit":true'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles includes serviceWorkerSettings in flutter_bootstrap.js by default',
+    () => testbed.run(() async {
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      environment.defines[kServiceWorkerStrategy] = 'none';
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+      expect(
+        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+        contains('_flutter.loader.load();'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js when environment specifies',
+    () => testbed.run(() async {
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+      expect(
+        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+        stringContainsInOrder(<String>[
+          '_flutter.loader.load({',
+          'serviceWorkerSettings',
+          'serviceWorkerVersion',
+        ]),
       );
     }),
   );

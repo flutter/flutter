@@ -723,7 +723,7 @@ class _SnackBarState extends State<SnackBar> {
         defaults.insetPadding!;
 
     final double snackBarWidth =
-        widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
+        widget.width ?? MediaQuery.widthOf(context) - (margin.left + margin.right);
     final double actionOverflowThreshold =
         widget.actionOverflowThreshold ??
         snackBarTheme.actionOverflowThreshold ??

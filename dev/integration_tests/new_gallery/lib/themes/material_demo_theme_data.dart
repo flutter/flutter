@@ -20,7 +20,7 @@ class MaterialDemoThemeData {
       color: _colorScheme.primary,
       iconTheme: IconThemeData(color: _colorScheme.onPrimary),
     ),
-    bottomAppBarTheme: BottomAppBarTheme(color: _colorScheme.primary),
+    bottomAppBarTheme: BottomAppBarThemeData(color: _colorScheme.primary),
     checkboxTheme: CheckboxThemeData(
       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
