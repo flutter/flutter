@@ -21,9 +21,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationRailThemeData] object
-/// using `NavigationRailTheme.of(context)`. Instances of
-/// [NavigationRailThemeData] can be customized with
-/// [NavigationRailThemeData.copyWith].
+/// using [NavigationRailTheme.of]. Instances of [NavigationRailThemeData]
+/// can be customized with [NavigationRailThemeData.copyWith].
 ///
 /// Typically a [NavigationRailThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.navigationRailTheme].
@@ -311,7 +310,7 @@ class NavigationRailTheme extends InheritedTheme {
   /// [NavigationRail] widgets.
   final NavigationRailThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [NavigationRailThemeData] from the closest ancestor [NavigationRailTheme].
   ///
   /// If there is no enclosing [NavigationRailTheme] widget, then
   /// [ThemeData.navigationRailTheme] is used.

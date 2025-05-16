@@ -4,6 +4,7 @@
 
 #include "impeller/tessellator/tessellator_libtess.h"
 
+#include "impeller/tessellator/path_tessellator.h"
 #include "third_party/libtess2/Include/tesselator.h"
 
 namespace impeller {
@@ -53,21 +54,48 @@ static int ToTessWindingRule(FillType fill_type) {
   return TESS_WINDING_ODD;
 }
 
+namespace {
+
+class Polyline : public impeller::PathTessellator::VertexWriter {
+ public:
+  struct Contour {
+    const size_t start;
+    const size_t end;
+
+    size_t size() const { return end - start; }
+  };
+
+  void Write(Point point) override { points.emplace_back(point); }
+
+  void EndContour() override {
+    size_t contour_end = points.size();
+    contours.push_back({contour_start_, contour_end});
+    contour_start_ = contour_end;
+  }
+
+  std::vector<Point> points;
+  std::vector<Contour> contours;
+
+ private:
+  size_t contour_start_ = 0u;
+};
+
+}  // namespace
+
 TessellatorLibtess::Result TessellatorLibtess::Tessellate(
-    const Path& path,
+    const PathSource& source,
     Scalar tolerance,
     const BuilderCallback& callback) {
   if (!callback) {
     return TessellatorLibtess::Result::kInputError;
   }
 
-  std::unique_ptr<std::vector<Point>> point_buffer =
-      std::make_unique<std::vector<Point>>();
-  auto polyline = path.CreatePolyline(tolerance, std::move(point_buffer));
+  Polyline polyline;
+  PathTessellator::PathToFilledVertices(source, polyline, tolerance);
 
-  auto fill_type = path.GetFillType();
+  auto fill_type = source.GetFillType();
 
-  if (polyline.points->empty()) {
+  if (polyline.points.empty()) {
     return TessellatorLibtess::Result::kInputError;
   }
 
@@ -83,17 +111,12 @@ TessellatorLibtess::Result TessellatorLibtess::Tessellate(
   /// Feed contour information to the tessellator.
   ///
   static_assert(sizeof(Point) == 2 * sizeof(float));
-  for (size_t contour_i = 0; contour_i < polyline.contours.size();
-       contour_i++) {
-    size_t start_point_index, end_point_index;
-    std::tie(start_point_index, end_point_index) =
-        polyline.GetContourPointBounds(contour_i);
-
+  for (auto contour : polyline.contours) {
     ::tessAddContour(tessellator,  // the C tessellator
                      kVertexSize,  //
-                     polyline.points->data() + start_point_index,  //
-                     sizeof(Point),                                //
-                     end_point_index - start_point_index           //
+                     polyline.points.data() + contour.start,  //
+                     sizeof(Point),                           //
+                     contour.size()                           //
     );
   }
 

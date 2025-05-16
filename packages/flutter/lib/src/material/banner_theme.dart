@@ -18,7 +18,7 @@ import 'theme.dart';
 /// Defines the visual properties of [MaterialBanner] widgets.
 ///
 /// Descendant widgets obtain the current [MaterialBannerThemeData] object using
-/// `MaterialBannerTheme.of(context)`. Instances of [MaterialBannerThemeData]
+/// [MaterialBannerTheme.of]. Instances of [MaterialBannerThemeData]
 /// can be customized with [MaterialBannerThemeData.copyWith].
 ///
 /// Typically a [MaterialBannerThemeData] is specified as part of the overall

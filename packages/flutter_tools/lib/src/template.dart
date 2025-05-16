@@ -66,23 +66,23 @@ TemplatePathProvider get templatePathProvider =>
     context.get<TemplatePathProvider>() ?? const TemplatePathProvider();
 
 /// Expands templates in a directory to a destination. All files that must
-/// undergo template expansion should end with the '.tmpl' extension. All files
+/// undergo template expansion should end with the `.tmpl` extension. All files
 /// that should be replaced with the corresponding image from
-/// flutter_template_images should end with the '.img.tmpl' extension. All other
+/// `flutter_template_images` should end with the `.img.tmpl` extension. All other
 /// files are ignored. In case the contents of entire directories must be copied
-/// as is, the directory itself can end with '.tmpl' extension. Files within
-/// such a directory may also contain the '.tmpl' or '.img.tmpl' extensions and
+/// as is, the directory itself can end with `.tmpl` extension. Files within
+/// such a directory may also contain the `.tmpl` or `.img.tmpl` extensions and
 /// will be considered for expansion. In case certain files need to be copied
-/// but without template expansion (data files, etc.), the '.copy.tmpl'
+/// but without template expansion (data files, etc.), the `.copy.tmpl`
 /// extension may be used. Furthermore, templates may contain additional
 /// test files intended to run on the CI. Test files must end in `.test.tmpl`
-/// and are only included when the --implementation-tests flag is enabled.
+/// and are only included when the `--implementation-tests` flag is enabled.
 ///
 /// Folders with platform/language-specific content must be named
-/// '<platform>-<language>.tmpl'.
+/// `<platform>-<language>.tmpl`.
 ///
-/// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
-/// 'img.tmpl', or '-<language>.tmpl' extensions.
+/// Files in the destination will contain none of the `.tmpl`, `.copy.tmpl`,
+/// `img.tmpl`, or `-<language>.tmpl` extensions.
 class Template {
   factory Template(
     Directory templateSource,
@@ -205,7 +205,7 @@ class Template {
   final Map<String /* relative */, String /* absolute source */> _templateFilePaths =
       <String, String>{};
 
-  /// Render the template into [directory].
+  /// Render the template into the [destination] directory.
   ///
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
