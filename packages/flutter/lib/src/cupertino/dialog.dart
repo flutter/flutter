@@ -1078,7 +1078,6 @@ class CupertinoActionSheet extends StatefulWidget {
     this.messageScrollController,
     this.actionScrollController,
     this.cancelButton,
-    this.focusColor,
   }) : assert(
          actions != null || title != null || message != null || cancelButton != null,
          'An action sheet must have a non-null value for at least one of the following arguments: '
@@ -1115,9 +1114,6 @@ class CupertinoActionSheet extends StatefulWidget {
   /// Defaults to null, which means the [CupertinoActionSheet] will create an
   /// action scroll controller internally.
   final ScrollController? actionScrollController;
-
-  /// {@macro flutter.cupertino.CupertinoFocusTraversalGroup.focusColor}
-  final Color? focusColor;
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -1211,8 +1207,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: CupertinoFocusTraversalGroup(
-        focusColor: widget.focusColor,
+      child: CupertinoFocusTraversalGroup.onRRect(
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
         child: _ActionSheetButtonBackground(
           isCancel: true,
           pressed: _pressedIndex == _kCancelButtonIndex,
@@ -1324,7 +1320,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               contentSection: _buildContent(context),
               actions: widget.actions ?? List<Widget>.empty(),
               dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
-              focusColor: widget.focusColor,
             ),
           ),
         ),
@@ -1874,7 +1869,6 @@ class _ActionSheetMainSheet extends StatelessWidget {
     required this.actions,
     required this.contentSection,
     required this.dividerColor,
-    required this.focusColor,
   });
 
   final int? pressedIndex;
@@ -1883,7 +1877,6 @@ class _ActionSheetMainSheet extends StatelessWidget {
   final List<Widget> actions;
   final Widget? contentSection;
   final Color dividerColor;
-  final Color? focusColor;
 
   Widget _scrolledActionsSection(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(
@@ -1892,12 +1885,11 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: CupertinoFocusTraversalGroup(
-        borderRadius: CupertinoFocusTraversalGroup.defaultBorderRadius.copyWith(
+      child: CupertinoFocusTraversalGroup.onRRect(
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
           topLeft: Radius.zero,
           topRight: Radius.zero,
         ),
-        focusColor: focusColor,
         child: _ActionSheetActionSection(
           actions: actions,
           scrollController: scrollController,
