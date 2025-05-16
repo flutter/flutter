@@ -9442,6 +9442,52 @@ void main() {
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
     );
+
+    testWidgets(
+      'cancelling long press hides magnifier',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/167879
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: CupertinoTextField(
+                dragStartBehavior: DragStartBehavior.down,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                    BuildContext context,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                  ) {
+                    magnifierInfo = localMagnifierInfo;
+                    return fakeMagnifier;
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byType(CupertinoTextField)),
+        );
+
+        await tester.pumpAndSettle(kLongPressTimeout);
+
+        expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+        // Cancel the long press to hide the magnifier.
+        await gesture.cancel();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+      }),
+    );
   });
 
   group('TapRegion integration', () {
