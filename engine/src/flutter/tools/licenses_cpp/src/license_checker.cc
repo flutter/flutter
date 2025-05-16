@@ -14,7 +14,14 @@
 
 namespace fs = std::filesystem;
 
+const char* LicenseChecker::kHeaderLicenseRegex = "(.*(Copyright|License).*)";
+
 namespace {
+const std::array<std::string_view, 3> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.md"};
+const char* kIncludeFilename = "include.txt";
+const char* kExcludeFilename = "exclude.txt";
+
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
   std::vector<fs::path> result;
   result.push_back(dir);
@@ -52,8 +59,6 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(const fs::path& repo_path) {
 }
 
 absl::Status CheckLicense(const fs::path& git_repo) {
-  static std::array<std::string_view, 3> kLicenseFileNames = {
-      "LICENSE", "LICENSE.TXT", "LICENSE.md"};
   for (std::string_view license_name : kLicenseFileNames) {
     fs::path license_path = git_repo / license_name;
     if (fs::exists(license_path)) {
@@ -67,14 +72,14 @@ absl::Status CheckLicense(const fs::path& git_repo) {
 
 int LicenseChecker::Run(std::string_view working_dir,
                         std::string_view data_dir) {
-  fs::path include_path = fs::path(data_dir) / "include.txt";
+  fs::path include_path = fs::path(data_dir) / kIncludeFilename;
   absl::StatusOr<Filter> include_filter = Filter::Open(include_path.string());
   if (!include_filter.ok()) {
     std::cerr << "Can't open include.txt at " << include_path << ": "
               << include_filter.status() << std::endl;
     return 1;
   }
-  fs::path exclude_path = fs::path(data_dir) / "exclude.txt";
+  fs::path exclude_path = fs::path(data_dir) / kExcludeFilename;
   absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude_path.string());
   if (!exclude_filter.ok()) {
     std::cerr << "Can't open include.txt at " << include_path << ": "
@@ -84,7 +89,7 @@ int LicenseChecker::Run(std::string_view working_dir,
 
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
 
-  RE2 pattern("(.*(Copyright|License).*)");
+  RE2 pattern(kHeaderLicenseRegex);
   int return_code = 0;
 
   for (const fs::path& git_repo : git_repos) {

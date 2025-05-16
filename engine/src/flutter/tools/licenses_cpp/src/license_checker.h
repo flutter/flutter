@@ -9,6 +9,7 @@
 
 class LicenseChecker {
  public:
+  static const char* kHeaderLicenseRegex;
   static int Run(std::string_view working_dir, std::string_view data_dir);
 };
 
