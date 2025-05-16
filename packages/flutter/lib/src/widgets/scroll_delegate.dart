@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'automatic_keep_alive.dart';
 /// @docImport 'scroll_view.dart';
 /// @docImport 'sliver.dart';
 /// @docImport 'spacer.dart';
@@ -413,6 +414,18 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// none of the children will ever try to keep themselves alive.
   ///
   /// Defaults to true.
+  ///
+  /// {@macro flutter.widgets.AutomaticKeepAlive.example}
+  ///
+  /// {@macro flutter.widgets.KeepAlive.example}
+  ///
+  ///  * [AutomaticKeepAlive], which allows subtrees to request to be kept alive
+  ///    in lazy lists.
+  ///  * [AutomaticKeepAliveClientMixin], which is a mixin with convenience
+  ///    methods for clients of [AutomaticKeepAlive]. Used with [State]
+  ///    subclasses.
+  ///  * [KeepAlive] which marks a child as needing to stay alive even when it's
+  ///    in a lazy list that would otherwise remove it.
   /// {@endtemplate}
   final bool addAutomaticKeepAlives;
 
