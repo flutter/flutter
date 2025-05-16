@@ -393,7 +393,7 @@ void main() {
       );
       final TestGesture gesture = await tester.startGesture(
         textOffsetToPosition(paragraph, 11),
-      ); // at the 'a'
+      ); // at the 'e'.
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
@@ -464,7 +464,7 @@ void main() {
       );
       final TestGesture gesture = await tester.startGesture(
         textOffsetToPosition(paragraph, 11),
-      ); // at the 'a'
+      ); // at the 'e'.
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
@@ -535,7 +535,7 @@ void main() {
       );
       final TestGesture gesture = await tester.startGesture(
         textOffsetToPosition(paragraph, 11),
-      ); // at the 'a'
+      ); // at the 'e'.
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
