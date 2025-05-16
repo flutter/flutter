@@ -1299,7 +1299,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     };
     final VisualDensity effectiveVisualDensity = widget.visualDensity ?? theme.visualDensity;
 
-    return _DeleteButtonSemantic(
+    return _EnsureMinSemanticsSize(
       semanticSize: semanticSize + effectiveVisualDensity.baseSizeAdjustment,
       child: _wrapWithTooltip(
         tooltip:
@@ -2433,27 +2433,27 @@ bool _hitIsOnDeleteIcon({
   };
 }
 
-class _DeleteButtonSemantic extends SingleChildRenderObjectWidget {
-  const _DeleteButtonSemantic({super.child, required this.semanticSize});
+class _EnsureMinSemanticsSize extends SingleChildRenderObjectWidget {
+  const _EnsureMinSemanticsSize({super.child, required this.semanticSize});
 
   final Size semanticSize;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderDeleteButtonSemantic(semanticSize);
+    return _RenderEnsureMinSemanticsSize(semanticSize);
   }
 
   @override
   void updateRenderObject(
     BuildContext context,
-    covariant _RenderDeleteButtonSemantic renderObject,
+    covariant _RenderEnsureMinSemanticsSize renderObject,
   ) {
     renderObject.semanticSize = semanticSize;
   }
 }
 
-class _RenderDeleteButtonSemantic extends RenderProxyBox {
-  _RenderDeleteButtonSemantic(this._semanticSize, [RenderBox? child]) : super(child);
+class _RenderEnsureMinSemanticsSize extends RenderProxyBox {
+  _RenderEnsureMinSemanticsSize(this._semanticSize, [RenderBox? child]) : super(child);
 
   Size get semanticSize => _semanticSize;
   Size _semanticSize;
