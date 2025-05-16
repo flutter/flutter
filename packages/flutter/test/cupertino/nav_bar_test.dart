@@ -1656,24 +1656,35 @@ void main() {
     expect(backPressed, true);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgets('Nav bar contents text scale', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
+    const double scaleFactor = 1.18;
+    const double dampingRatio = 3.0;
+    const double iconSize = 10.0;
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery.withClampedTextScaling(
-              minScaleFactor: 99,
-              maxScaleFactor: 99,
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
               child: const CupertinoPageScaffold(
                 child: CustomScrollView(
                   slivers: <Widget>[
-                    CupertinoSliverNavigationBar(
-                      leading: Text('leading'),
-                      middle: Text('middle'),
+                    CupertinoSliverNavigationBar.search(
                       largeTitle: Text('Large Title'),
+                      leading: Text('leading'),
                       trailing: Text('trailing'),
+                      middle: Text('middle'),
+                      searchField: CupertinoSearchTextField(
+                        placeholder: 'Search',
+                        prefixIcon: Icon(CupertinoIcons.add),
+                        suffixIcon: Icon(CupertinoIcons.xmark),
+                        suffixMode: OverlayVisibilityMode.always,
+                        itemSize: iconSize,
+                      ),
                     ),
-                    SliverToBoxAdapter(child: Text('content')),
+                    SliverFillRemaining(),
                   ],
                 ),
               ),
@@ -1690,56 +1701,234 @@ void main() {
       ),
     );
 
-    final Iterable<RichText> contents = tester.widgetList<RichText>(
-      find.descendant(of: find.text('content'), matching: find.byType(RichText)),
-    );
-
     expect(barItems.length, greaterThan(0));
     expect(
-      barItems,
-      isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))),
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Large Title' &&
+            t.textScaler == const TextScaler.linear(1.0 + ((scaleFactor - 1.0) / dampingRatio)),
+      ),
+      isTrue,
     );
+    for (final String text in <String>['Search', 'leading', 'middle', 'trailing']) {
+      expect(
+        barItems.any(
+          (RichText t) =>
+              t.text.toPlainText() == text && t.textScaler == const TextScaler.linear(scaleFactor),
+        ),
+        isTrue,
+      );
+    }
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), const Size.square(scaleFactor * iconSize));
+    }
+  });
 
-    expect(contents.length, greaterThan(0));
-    expect(
-      contents,
-      isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))),
-    );
-
-    // Also works with implicitly added widgets.
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .push(
-          CupertinoPageRoute<void>(
-            title: 'title',
-            builder: (BuildContext context) {
-              return MediaQuery.withClampedTextScaling(
-                minScaleFactor: 99,
-                maxScaleFactor: 99,
-                child: const CupertinoPageScaffold(
-                  child: CustomScrollView(
-                    slivers: <Widget>[
-                      CupertinoSliverNavigationBar(previousPageTitle: 'previous title'),
-                    ],
-                  ),
+  testWidgets('Persistent nav bar text scaling clamps to upper bound', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
+    const double scaleFactor = 10.0;
+    const double maxScaleFactor = 1.235;
+    const double dampingRatio = 3.0;
+    const double iconSize = 10.0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: const CupertinoPageScaffold(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    CupertinoSliverNavigationBar.search(
+                      largeTitle: Text('Large Title'),
+                      leading: Text('leading'),
+                      trailing: Text('trailing'),
+                      middle: Text('middle'),
+                      searchField: CupertinoSearchTextField(
+                        placeholder: 'Search',
+                        prefixIcon: Icon(CupertinoIcons.add),
+                        suffixIcon: Icon(CupertinoIcons.xmark),
+                        suffixMode: OverlayVisibilityMode.always,
+                        itemSize: iconSize,
+                      ),
+                    ),
+                    SliverFillRemaining(),
+                  ],
                 ),
-              );
-            },
-          ),
-        );
+              ),
+            );
+          },
+        ),
+      ),
+    );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    final Iterable<RichText> barItems2 = tester.widgetList<RichText>(
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
       find.descendant(
         of: find.byType(CupertinoSliverNavigationBar),
         matching: find.byType(RichText),
       ),
     );
 
-    expect(barItems2.length, greaterThan(0));
-    expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems.length, greaterThan(0));
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Large Title' &&
+            t.textScaler == const TextScaler.linear(1.0 + ((scaleFactor - 1.0) / dampingRatio)),
+      ),
+      isTrue,
+    );
+    for (final String text in <String>['leading', 'middle', 'trailing']) {
+      expect(
+        barItems.any(
+          (RichText t) =>
+              t.text.toPlainText() == text &&
+              t.textScaler == const TextScaler.linear(maxScaleFactor),
+        ),
+        isTrue,
+      );
+    }
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Search' &&
+            t.textScaler == const TextScaler.linear(scaleFactor),
+      ),
+      isTrue,
+    );
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), const Size.square(scaleFactor * iconSize));
+    }
+  });
+
+  testWidgets('Nav bar text scaling clamps to lower bounds', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
+    const double scaleFactor = 0.5;
+    const double minScaleFactor = 0.9;
+    const double iconSize = 10.0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: const CupertinoPageScaffold(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    CupertinoSliverNavigationBar.search(
+                      largeTitle: Text('Large Title'),
+                      leading: Text('leading'),
+                      trailing: Text('trailing'),
+                      middle: Text('middle'),
+                      searchField: CupertinoSearchTextField(
+                        placeholder: 'Search',
+                        prefixIcon: Icon(CupertinoIcons.add),
+                        suffixIcon: Icon(CupertinoIcons.xmark),
+                        suffixMode: OverlayVisibilityMode.always,
+                        itemSize: iconSize,
+                      ),
+                    ),
+                    SliverFillRemaining(),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(barItems.length, greaterThan(0));
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Large Title' &&
+            t.textScaler == const TextScaler.linear(minScaleFactor),
+      ),
+      isTrue,
+    );
+    for (final String text in <String>['leading', 'middle', 'trailing']) {
+      expect(
+        barItems.any(
+          (RichText t) => t.text.toPlainText() == text && t.textScaler == TextScaler.noScaling,
+        ),
+        isTrue,
+      );
+    }
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Search' &&
+            t.textScaler == const TextScaler.linear(scaleFactor),
+      ),
+      isTrue,
+    );
+    for (final IconData icon in <IconData>[CupertinoIcons.add, CupertinoIcons.xmark]) {
+      expect(tester.getSize(find.byIcon(icon)), const Size.square(scaleFactor * iconSize));
+    }
+  });
+
+  testWidgets('Active search view cancel button does not text scale', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
+    const double scaleFactor = 10.0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: const CupertinoPageScaffold(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    CupertinoSliverNavigationBar.search(
+                      largeTitle: Text('Large Title'),
+                      searchField: CupertinoSearchTextField(),
+                    ),
+                    SliverFillRemaining(),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(CupertinoSearchTextField), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(barItems.length, greaterThan(0));
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Search' &&
+            t.textScaler == const TextScaler.linear(scaleFactor),
+      ),
+      isTrue,
+    );
+    expect(
+      barItems.any(
+        (RichText t) => t.text.toPlainText() == 'Cancel' && t.textScaler == TextScaler.noScaling,
+      ),
+      isTrue,
+    );
   });
 
   testWidgets(

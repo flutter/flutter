@@ -458,7 +458,8 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
     Paint background(background_objects, background_data);
     if (background.isNotNull()) {
       DlPaint dl_paint;
-      background.toDlPaint(dl_paint, DlTileMode::kDecal);
+      background.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                       DlTileMode::kDecal);
       style.background = dl_paint;
     }
   }
@@ -467,7 +468,8 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
     Paint foreground(foreground_objects, foreground_data);
     if (foreground.isNotNull()) {
       DlPaint dl_paint;
-      foreground.toDlPaint(dl_paint, DlTileMode::kDecal);
+      foreground.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                       DlTileMode::kDecal);
       style.foreground = dl_paint;
     }
   }

@@ -8642,6 +8642,108 @@ void main() {
     skip: isContextMenuProvidedByPlatform,
   );
 
+  testWidgets(
+    'Selection handles should not show when using a mouse on non-Apple platforms',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoCupertinoToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset secondBlah = textOffsetToPosition(tester, 8);
+
+      // Right click the second word using a mouse.
+      final TestGesture gesture = await tester.startGesture(
+        secondBlah,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+          expect(find.text('Cut'), findsNothing);
+          expect(find.text('Copy'), findsNothing);
+          expect(find.text('Paste'), findsOneWidget);
+          expect(find.text('Select All'), findsOneWidget);
+      }
+
+      // Press select all.
+      await tester.tap(find.text('Select All'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
+  testWidgets(
+    'Selection handles should not show when using a mouse on Apple platforms using Flutter context menu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoCupertinoToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset firstBlah = textOffsetToPosition(tester, 5);
+
+      // Click at the end of blah1.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+
+      // Right click the same position to reveal the context menu.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection.collapsed(offset: 5));
+      expectCupertinoToolbarForCollapsedSelection();
+
+      // Press select all.
+      await tester.tap(find.text('Select All'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
   group('Right click focus', () {
     testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/103228
@@ -8870,6 +8972,72 @@ void main() {
 
         expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
         expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets(
+      'iOS system context menu does not hide selection handles on onSystemHide',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: CupertinoApp(home: CupertinoTextField(controller: controller)),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+
+        // Simulate system hiding the menu.
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'ContextMenu.onDismissSystemContextMenu',
+        });
+        Object? error;
+        try {
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            'flutter/platform',
+            messageBytes,
+            (ByteData? data) {},
+          );
+        } catch (e) {
+          error = e;
+        }
+        await tester.pumpAndSettle();
+
+        expect(error, isNull);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Selection handles are not hidden.
+        final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
+            matching: find.byType(CustomPaint),
+          ),
+        );
+        expect(boxes.length, 2);
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),

@@ -449,7 +449,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 
   /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
   ///
-  /// If an overridding widget does not provide a [MenuController], then
+  /// If an overriding widget does not provide a [MenuController], then
   /// [_RawMenuAnchorBaseMixin] will create and manage its own.
   MenuController get menuController;
 
@@ -799,24 +799,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   Widget buildAnchor(BuildContext context) {
-    // Only when both `child` and `builder` are not null, can the anchor and its
-    // children have a parent-child relationship. This is useful for a11y
-    // traversal in a `MenuBar` composed of a list of `SubmenuButton`s.
-    final Widget? overlayPortal =
-        widget.child == null || widget.builder == null
-            ? null
-            : useRootOverlay
-            ? OverlayPortal.targetsRootOverlay(
-              controller: _overlayController,
-              overlayChildBuilder: _buildOverlay,
-              child: widget.child,
-            )
-            : OverlayPortal(
-              controller: _overlayController,
-              overlayChildBuilder: _buildOverlay,
-              child: widget.child,
-            );
-
     final Widget child = Shortcuts(
       includeSemantics: false,
       shortcuts: _kMenuTraversalShortcuts,
@@ -827,7 +809,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
         child: Builder(
           key: _anchorKey,
           builder: (BuildContext context) {
-            return widget.builder?.call(context, menuController, overlayPortal) ??
+            return widget.builder?.call(context, menuController, widget.child) ??
                 widget.child ??
                 const SizedBox();
           },
@@ -835,22 +817,19 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       ),
     );
 
-    if (widget.child == null || widget.builder == null) {
-      if (useRootOverlay) {
-        return OverlayPortal.targetsRootOverlay(
-          controller: _overlayController,
-          overlayChildBuilder: _buildOverlay,
-          child: child,
-        );
-      } else {
-        return OverlayPortal(
-          controller: _overlayController,
-          overlayChildBuilder: _buildOverlay,
-          child: child,
-        );
-      }
+    if (useRootOverlay) {
+      return OverlayPortal.targetsRootOverlay(
+        controller: _overlayController,
+        overlayChildBuilder: _buildOverlay,
+        child: child,
+      );
+    } else {
+      return OverlayPortal(
+        controller: _overlayController,
+        overlayChildBuilder: _buildOverlay,
+        child: child,
+      );
     }
-    return child;
   }
 
   @override
