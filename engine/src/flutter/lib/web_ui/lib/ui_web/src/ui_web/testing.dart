@@ -35,12 +35,7 @@ final class TestEnvironment {
       keepSemanticsDisabledOnUpdate = true,
       defaultToTestUrlStrategy = true;
 
-  const TestEnvironment.production()
-    : ignorePlatformMessages = false,
-      forceTestFonts = false,
-      disableFontFallbacks = false,
-      keepSemanticsDisabledOnUpdate = false,
-      defaultToTestUrlStrategy = false;
+  const TestEnvironment.production() : this();
 
   static TestEnvironment? _instance;
   static TestEnvironment get instance {
