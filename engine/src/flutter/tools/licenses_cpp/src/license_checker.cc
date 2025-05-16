@@ -14,7 +14,10 @@
 
 namespace fs = std::filesystem;
 
-const char* LicenseChecker::kHeaderLicenseRegex = "(.*(Copyright|License).*)";
+const char* LicenseChecker::kHeaderLicenseRegex = R"regex(
+(?im)^(?= *(?://|#).*\b(?:License|Copyright)\b) *(?://|#)[^\n]*
+(?:\n *(?://|#)[^\n]*)*
+)regex";
 
 namespace {
 const std::array<std::string_view, 3> kLicenseFileNames = {
