@@ -694,6 +694,16 @@ class TextSelectionOverlay {
   late double _endHandleDragTarget;
 
   // The initial selection when a selection handle drag has started.
+  //
+  // This is used on Apple platforms to:
+  //
+  // 1. Preserve a collapsed selection: if the selection was collapsed when the drag
+  // began, then it should remain collapsed throughout the entire drag.
+  // 2. Anchor the non-dragged end of a non-collapsed selection: On Apple platforms,
+  // the dragged handle always defines the selection's new extent. The drag start
+  // selection provides the original position for the selection's new base. This
+  // allows the selection handles to correctly swap their logical order (invert)
+  // during the drag.
   TextSelection? _dragStartSelection;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
@@ -716,10 +726,11 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(details.globalPosition.dx, centerOfLineGlobal),
     );
-    _dragStartSelection =
-        defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS
-            ? _selection
-            : null;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      _dragStartSelection ??= _selection;
+    }
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -873,10 +884,11 @@ class TextSelectionOverlay {
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(details.globalPosition.dx, centerOfLineGlobal),
     );
-    _dragStartSelection =
-        defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS
-            ? _selection
-            : null;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      _dragStartSelection ??= _selection;
+    }
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -1191,7 +1203,14 @@ class SelectionOverlay {
   bool get isDraggingStartHandle => _isDraggingStartHandle;
   bool _isDraggingStartHandle = false;
 
-  bool _blockStartHandleDrag = false;
+  // Whether the start handle can be dragged.
+  //
+  // On Apple and web platforms only one selection handle can be dragged at a time.
+  bool get _canDragStartHandle =>
+      !_isDraggingEndHandle ||
+      (defaultTargetPlatform != TargetPlatform.iOS ||
+          defaultTargetPlatform != TargetPlatform.macOS ||
+          !kIsWeb);
 
   /// Whether the start handle is visible.
   ///
@@ -1212,12 +1231,7 @@ class SelectionOverlay {
       _isDraggingStartHandle = false;
       return;
     }
-    if (_isDraggingEndHandle &&
-        (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.macOS ||
-            kIsWeb)) {
-      // On Apple and web platforms only one selection handle can be dragged at a time.
-      _blockStartHandleDrag = true;
+    if (!_canDragStartHandle) {
       return;
     }
     _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
@@ -1231,7 +1245,7 @@ class SelectionOverlay {
       _isDraggingStartHandle = false;
       return;
     }
-    if (_blockStartHandleDrag) {
+    if (!_canDragStartHandle) {
       return;
     }
     onStartHandleDragUpdate?.call(details);
@@ -1251,8 +1265,7 @@ class SelectionOverlay {
     if (_handles == null) {
       return;
     }
-    if (_blockStartHandleDrag) {
-      _blockStartHandleDrag = false;
+    if (!_canDragStartHandle) {
       return;
     }
     onStartHandleDragEnd?.call(details);
@@ -1290,7 +1303,14 @@ class SelectionOverlay {
   bool get isDraggingEndHandle => _isDraggingEndHandle;
   bool _isDraggingEndHandle = false;
 
-  bool _blockEndHandleDrag = false;
+  // Whether the end handle can be dragged.
+  //
+  // On Apple and web platforms only one selection handle can be dragged at a time.
+  bool get _canDragEndHandle =>
+      !_isDraggingStartHandle ||
+      (defaultTargetPlatform != TargetPlatform.iOS ||
+          defaultTargetPlatform != TargetPlatform.macOS ||
+          !kIsWeb);
 
   /// Whether the end handle is visible.
   ///
@@ -1311,12 +1331,7 @@ class SelectionOverlay {
       _isDraggingEndHandle = false;
       return;
     }
-    if (_isDraggingStartHandle &&
-        (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.macOS ||
-            kIsWeb)) {
-      // On Apple and web platforms only one selection handle can be dragged at a time.
-      _blockEndHandleDrag = true;
+    if (!_canDragEndHandle) {
       return;
     }
     _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
@@ -1330,7 +1345,7 @@ class SelectionOverlay {
       _isDraggingEndHandle = false;
       return;
     }
-    if (_blockEndHandleDrag) {
+    if (!_canDragEndHandle) {
       return;
     }
     onEndHandleDragUpdate?.call(details);
@@ -1350,8 +1365,7 @@ class SelectionOverlay {
     if (_handles == null) {
       return;
     }
-    if (_blockEndHandleDrag) {
-      _blockEndHandleDrag = false;
+    if (!_canDragEndHandle) {
       return;
     }
     onEndHandleDragEnd?.call(details);
