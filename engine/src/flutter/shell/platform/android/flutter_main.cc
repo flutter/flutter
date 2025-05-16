@@ -6,6 +6,7 @@
 
 #include <android/log.h>
 #include <sys/system_properties.h>
+#include <cstring>
 #include <optional>
 #include <string>
 #include <vector>
@@ -34,7 +35,7 @@
 
 namespace flutter {
 
-constexpr int kMinimumAndroidApiLevelForVulkan = 29;
+constexpr int kMinimumAndroidApiLevelForImpeller = 29;
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -47,6 +48,25 @@ extern const intptr_t kPlatformStrongDillSize;
 namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
+
+static const constexpr char* kAndroidHuawei = "android-huawei";
+
+/// These are SoCs that crash when using AHB imports.
+static constexpr const char* kBLC[] = {
+    // Most Exynos Series SoC
+    "exynos7870",  //
+    "exynos7880",  //
+    "exynos7872",  //
+    "exynos7884",  //
+    "exynos7885",  //
+    "exynos8890",  //
+    "exynos8895",  //
+    "exynos7904",  //
+    "exynos9609",  //
+    "exynos9610",  //
+    "exynos9611",  //
+    "exynos9810"   //
+};
 
 }  // anonymous namespace
 
@@ -238,6 +258,18 @@ bool FlutterMain::IsDeviceEmulator(std::string_view product_model) {
 }
 
 // static
+bool FlutterMain::IsKnownBadSOC(std::string_view hardware) {
+  // TODO(jonahwilliams): if the list gets too long (> 16), convert
+  // to a hash map first.
+  for (const auto& board : kBLC) {
+    if (strcmp(board, hardware.data()) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// static
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     const flutter::Settings& settings) {
   if (settings.enable_software_rendering) {
@@ -263,20 +295,38 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
 #endif
 
   if (settings.enable_impeller) {
-    // Vulkan must only be used on API level 29+, as older API levels do not
+    // Impeller must only be used on API level 29+, as older API levels do not
     // have requisite features to support platform views.
     //
     // Even if this check returns true, Impeller may determine it cannot use
     // Vulkan for some other reason, such as a missing required extension or
     // feature.
     int api_level = android_get_device_api_level();
-    if (api_level < kMinimumAndroidApiLevelForVulkan) {
-      return kVulkanUnsupportedFallback;
+    if (api_level < kMinimumAndroidApiLevelForImpeller) {
+      return AndroidRenderingAPI::kSkiaOpenGLES;
     }
     char product_model[PROP_VALUE_MAX];
     __system_property_get("ro.product.model", product_model);
     if (IsDeviceEmulator(product_model)) {
       // Avoid using Vulkan on known emulators.
+      return kVulkanUnsupportedFallback;
+    }
+
+    __system_property_get("ro.com.google.clientidbase", product_model);
+    if (strcmp(product_model, kAndroidHuawei) == 0) {
+      // Avoid using Vulkan on Huawei as AHB imports do not
+      // consistently work.
+      return kVulkanUnsupportedFallback;
+    }
+
+    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan.
+      return kVulkanUnsupportedFallback;
+    }
+
+    __system_property_get("ro.product.board", product_model);
+    if (IsKnownBadSOC(product_model)) {
+      // Avoid using Vulkan on known bad SoCs.
       return kVulkanUnsupportedFallback;
     }
 

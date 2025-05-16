@@ -30,8 +30,7 @@ class TextFrame {
   static Point ComputeSubpixelPosition(
       const TextRun::GlyphPosition& glyph_position,
       AxisAlignment alignment,
-      Point offset,
-      Scalar scale);
+      const Matrix& transform);
 
   static Scalar RoundScaledFontSize(Scalar scale);
 
@@ -83,6 +82,7 @@ class TextFrame {
   /// glyph atlas.
   void SetPerFrameData(Scalar scale,
                        Point offset,
+                       const Matrix& transform,
                        std::optional<GlyphProperties> properties);
 
   // A generation id for the glyph atlas this text run was associated
@@ -91,17 +91,21 @@ class TextFrame {
   // processed.
   std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
 
+  Scalar GetScale() const;
+
   TextFrame& operator=(TextFrame&& other) = default;
 
   TextFrame(const TextFrame& other) = default;
 
+  const Matrix& GetTransform() const { return transform_; }
+
+  Point GetOffset() const;
+
+  Matrix GetOffsetTransform() const;
+
  private:
   friend class TypographerContextSkia;
   friend class LazyGlyphAtlas;
-
-  Scalar GetScale() const;
-
-  Point GetOffset() const;
 
   std::optional<GlyphProperties> GetProperties() const;
 
@@ -123,6 +127,7 @@ class TextFrame {
   intptr_t atlas_id_ = 0;
   Point offset_;
   std::optional<GlyphProperties> properties_;
+  Matrix transform_;
 };
 
 }  // namespace impeller

@@ -817,10 +817,14 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   } else {
     auto cvg = vertices->GetCoverage(Matrix{});
     FML_CHECK(cvg.has_value());
-    src_coverage =
-        // Covered by FML_CHECK.
-        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-        vertices->GetTextureCoordinateCoverge().value_or(cvg.value());
+    auto texture_coverage = vertices->GetTextureCoordinateCoverge();
+    if (texture_coverage.has_value()) {
+      src_coverage =
+          Rect::MakeOriginSize(texture_coverage->GetOrigin(),
+                               texture_coverage->GetSize().Max({1, 1}));
+    } else {
+      src_coverage = cvg.value();
+    }
   }
   src_contents = src_paint.CreateContents();
 
@@ -832,15 +836,15 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   contents->SetAlpha(paint.color.alpha);
   contents->SetGeometry(vertices);
   contents->SetLazyTextureCoverage(src_coverage);
-  contents->SetLazyTexture(
-      [src_contents, src_coverage](const ContentContext& renderer) {
-        // Applying the src coverage as the coverage limit prevents the 1px
-        // coverage pad from adding a border that is picked up by developer
-        // specified UVs.
-        return src_contents
-            ->RenderToSnapshot(renderer, {}, Rect::Round(src_coverage))
-            ->texture;
-      });
+  contents->SetLazyTexture([src_contents,
+                            src_coverage](const ContentContext& renderer) {
+    // Applying the src coverage as the coverage limit prevents the 1px
+    // coverage pad from adding a border that is picked up by developer
+    // specified UVs.
+    auto snapshot =
+        src_contents->RenderToSnapshot(renderer, {}, Rect::Round(src_coverage));
+    return snapshot.has_value() ? snapshot->texture : nullptr;
+  });
   entity.SetContents(paint.WithFilters(std::move(contents)));
   AddRenderEntityToCurrentPass(entity);
 }
@@ -1677,16 +1681,21 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   return input_texture;
 }
 
+bool Canvas::SupportsBlitToOnscreen() const {
+  return renderer_.GetContext()
+             ->GetCapabilities()
+             ->SupportsTextureToTextureBlits() &&
+         renderer_.GetContext()->GetBackendType() !=
+             Context::BackendType::kOpenGLES;
+}
+
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
   command_buffer->SetLabel("EntityPass Root Command Buffer");
   auto offscreen_target = render_passes_.back()
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
-
-  if (renderer_.GetContext()
-          ->GetCapabilities()
-          ->SupportsTextureToTextureBlits()) {
+  if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
                        render_target_.GetRenderTargetTexture());
@@ -1729,6 +1738,24 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   }
 }
 
+bool Canvas::EnsureFinalMipmapGeneration() const {
+  if (!render_target_.GetRenderTargetTexture()->NeedsMipmapGeneration()) {
+    return true;
+  }
+  std::shared_ptr<CommandBuffer> cmd_buffer =
+      renderer_.GetContext()->CreateCommandBuffer();
+  if (!cmd_buffer) {
+    return false;
+  }
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    return false;
+  }
+  blit_pass->GenerateMipmap(render_target_.GetRenderTargetTexture());
+  blit_pass->EncodeCommands();
+  return renderer_.GetContext()->EnqueueCommandBuffer(std::move(cmd_buffer));
+}
+
 void Canvas::EndReplay() {
   FML_DCHECK(render_passes_.size() == 1u);
   render_passes_.back().inline_pass_context->GetRenderPass();
@@ -1742,7 +1769,9 @@ void Canvas::EndReplay() {
   if (requires_readback_) {
     BlitToOnscreen(/*is_onscreen_=*/is_onscreen_);
   }
-
+  if (!EnsureFinalMipmapGeneration()) {
+    VALIDATION_LOG << "Failed to generate onscreen mipmaps.";
+  }
   if (!renderer_.GetContext()->FlushCommandBuffers()) {
     // Not much we can do.
     VALIDATION_LOG << "Failed to submit command buffers";

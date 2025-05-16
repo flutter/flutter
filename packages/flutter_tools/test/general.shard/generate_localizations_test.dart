@@ -1659,6 +1659,50 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
           expect(content, contains("String get helloWorld => 'Hello {name}'"));
         },
       );
+
+      // Regression test for https://github.com/flutter/flutter/issues/163627
+      //
+      // If placeholders have no explicit type (like `int` or `String`) set
+      // their type can be inferred.
+      //
+      // Later in the pipeline it is ensured that each locales placeholder types
+      // matches the definitions in the template.
+      //
+      // If only the types of the template had been inferred,
+      // and not for the translation there would be a mismatch:
+      // in this case `num` for count and `null` (the default), which is incompatible
+      // and `getGeneratedFileContent` would throw an exception.
+      //
+      // This test ensures that both template and locale can be equally partially defined
+      // in the arb.
+      testWithoutContext(
+        'translation placeholder type definitions can be inferred for plurals',
+        () {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "helloWorld": "{count, plural, one{Hello World!} other{Hello Worlds!}}",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''',
+            'de': '''
+{
+  "helloWorld": "{count, plural, one{Hallo Welt!} other{Hallo Welten!}}",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting",
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''',
+          });
+          expect(getGeneratedFileContent(locale: 'en'), isA<String>());
+        },
+      );
     });
 
     group('DateTime tests', () {
@@ -2128,7 +2172,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 contains(
-                  'The placeholder, springStartDate, has its "type" resource attribute set to the "null" type in locale "ja", but it is "DateTime" in the template placeholder.',
+                  'The placeholder, springStartDate, has its "type" resource attribute set to the "Object" type in locale "ja", but it is "DateTime" in the template placeholder.',
                 ),
               ),
             ),
