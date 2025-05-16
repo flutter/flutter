@@ -167,13 +167,13 @@ void main() {
         const String expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
-import 'package:foo_project/src/bar.dart' as _i2;
-import 'package:foo_project/src/brightness.dart' as _i3;
-import 'dart:ui' as _i4;
-import 'package:foo_project/src/theme.dart' as _i5;
-import 'package:foo_project/src/wrapper.dart' as _i6;
-import 'package:flutter/widgets.dart' as _i7;
-import 'package:foo_project/foo.dart' as _i8;
+import 'package:foo_project/foo.dart' as _i2;
+import 'package:foo_project/src/bar.dart' as _i3;
+import 'package:foo_project/src/brightness.dart' as _i4;
+import 'dart:ui' as _i5;
+import 'package:foo_project/src/theme.dart' as _i6;
+import 'package:foo_project/src/wrapper.dart' as _i7;
+import 'package:flutter/widgets.dart' as _i8;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(builder: () => _i2.preview()),

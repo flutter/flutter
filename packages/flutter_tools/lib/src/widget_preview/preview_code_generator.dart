@@ -14,6 +14,8 @@ import '../base/file_system.dart';
 import '../project.dart';
 import 'preview_detector.dart';
 
+typedef _PreviewMappingEntry = MapEntry<PreviewPath, List<PreviewDetails>>;
+
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
 class PreviewCodeGenerator {
@@ -111,11 +113,18 @@ class PreviewCodeGenerator {
     required cb.MethodBuilder builder,
   }) {
     final List<cb.Expression> previewExpressions = <cb.Expression>[];
-    for (final MapEntry<PreviewPath, List<PreviewDetails>>(
+    // Sort the entries by URI so that the code generator assigns import prefixes in a
+    // deterministic manner, mainly for testing purposes. This also results in previews being
+    // displayed in the same order across platforms with differing path styles.
+    final List<_PreviewMappingEntry> sortedPreviews =
+        previews.entries.toList()..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
+          return a.key.uri.toString().compareTo(b.key.uri.toString());
+        });
+    for (final _PreviewMappingEntry(
           key: (path: String _, :Uri uri),
           value: List<PreviewDetails> previewMethods,
         )
-        in previews.entries) {
+        in sortedPreviews) {
       for (final PreviewDetails preview in previewMethods) {
         previewExpressions.add(
           _buildPreviewWidget(allocator: allocator, preview: preview, uri: uri),
