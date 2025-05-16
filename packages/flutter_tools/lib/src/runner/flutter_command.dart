@@ -1355,16 +1355,9 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
-    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload) &&
-        getBuildMode() == BuildMode.debug &&
-        !(argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
-            boolArg(FlutterOptions.kWebWasmFlag))) {
-      // These flags are only valid to be passed when we are compiling with DDC.
-      // There isn't a direct flag for this compiler so we try to deduce it from
-      // the debug mode, and not WASM.
-      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
-    }
+    final bool webEnableHotReload =
+        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload);
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1481,6 +1474,7 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
+      webEnableHotReload: webEnableHotReload,
     );
   }
 
