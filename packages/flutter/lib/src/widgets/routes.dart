@@ -2198,6 +2198,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
   /// {@macro flutter.widgets.RawDialogRoute.fullscreenDialog}
+  // TODO(dkwingsmt): Rename `ModalRoute.fullscreenDialog` something semantically suitable for a modal.
+  // https://github.com/flutter/flutter/issues/168949
   bool get fullscreenDialog => false;
 
   // Internals
