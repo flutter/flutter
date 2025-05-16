@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -95,34 +96,38 @@ void main() {
     });
 
     testUsingContext('can detect previews in updated files', () async {
-      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
-        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
-        PreviewDetails.test(
+      final List<PreviewDetailsMatcher> expectedPreviewDetails = <PreviewDetailsMatcher>[
+        PreviewDetailsMatcher(
+          functionName: 'previews',
+          isBuilder: false,
+          name: 'Top-level preview',
+        ),
+        PreviewDetailsMatcher(
           functionName: 'builderPreview',
           isBuilder: true,
           name: 'Builder preview',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'attributesPreview',
           isBuilder: false,
-          name: 'Attributes preview',
-          size: 'Size(width: 100.0, height: 100)',
-          textScaleFactor: '2',
+          nameSymbol: 'kAttributesPreview',
+          size: 'Size(100.0, 100)',
+          textScaleFactor: '2.0',
           wrapper: 'testWrapper',
           theme: 'theming',
           brightness: 'Brightness.dark',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'MyWidget.preview',
           isBuilder: false,
           name: 'Constructor preview',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'MyWidget.factoryPreview',
           isBuilder: false,
           name: 'Factory constructor preview',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'MyWidget.previewStatic',
           isBuilder: false,
           name: 'Static preview',
@@ -130,10 +135,12 @@ void main() {
       ];
 
       // Create two files with existing previews and one without.
-      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{
-        addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
-        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']): expectedPreviewDetails,
-      };
+      final Map<PreviewPath, List<PreviewDetailsMatcher>> expectedInitialMapping =
+          <PreviewPath, List<PreviewDetailsMatcher>>{
+            addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
+            addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']):
+                expectedPreviewDetails,
+          };
       final PreviewPath nonPreviewContainingFile = addNonPreviewContainingFile(
         projectRoot,
         <String>['baz.dart'],
@@ -142,7 +149,7 @@ void main() {
       Completer<void> completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
         // The new preview in baz.dart should be included in the preview mapping.
-        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
+        expect(updated, <PreviewPath, List<PreviewDetailsMatcher>>{
           ...expectedInitialMapping,
           nonPreviewContainingFile: expectedPreviewDetails,
         });
@@ -150,7 +157,7 @@ void main() {
       };
       // Initialize the file watcher.
       final PreviewMapping initialPreviews = await previewDetector.initialize();
-      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
+      expect(initialPreviews, expectedInitialMapping);
 
       // Update the file without an existing preview to include a preview and ensure it triggers
       // the preview detector.
@@ -160,7 +167,7 @@ void main() {
       completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
         // The removed preview in baz.dart should not longer be included in the preview mapping.
-        expect(stripNonDeterministicFields(updated), expectedInitialMapping);
+        expect(updated, expectedInitialMapping);
         completer.complete();
       };
 
@@ -171,34 +178,38 @@ void main() {
     });
 
     testUsingContext('can detect previews in newly added files', () async {
-      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
-        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
-        PreviewDetails.test(
+      final List<PreviewDetailsMatcher> expectedPreviewDetails = <PreviewDetailsMatcher>[
+        PreviewDetailsMatcher(
+          functionName: 'previews',
+          isBuilder: false,
+          name: 'Top-level preview',
+        ),
+        PreviewDetailsMatcher(
           functionName: 'builderPreview',
           isBuilder: true,
           name: 'Builder preview',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'attributesPreview',
           isBuilder: false,
-          name: 'Attributes preview',
-          size: 'Size(width: 100.0, height: 100)',
-          textScaleFactor: '2',
+          nameSymbol: 'kAttributesPreview',
+          size: 'Size(100.0, 100)',
+          textScaleFactor: '2.0',
           wrapper: 'testWrapper',
           theme: 'theming',
           brightness: 'Brightness.dark',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'MyWidget.preview',
           isBuilder: false,
           name: 'Constructor preview',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'MyWidget.factoryPreview',
           isBuilder: false,
           name: 'Factory constructor preview',
         ),
-        PreviewDetails.test(
+        PreviewDetailsMatcher(
           functionName: 'MyWidget.previewStatic',
           isBuilder: false,
           name: 'Static preview',
@@ -215,7 +226,7 @@ void main() {
           return;
         }
         // The new previews in baz.dart should be included in the preview mapping.
-        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
+        expect(updated, <PreviewPath, List<PreviewDetailsMatcher>>{
           previewContainingFilePath: expectedPreviewDetails,
         });
         completer.complete();
@@ -223,7 +234,7 @@ void main() {
 
       // Initialize the file watcher.
       final PreviewMapping initialPreviews = await previewDetector.initialize();
-      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
+      expect(initialPreviews, expectedInitialMapping);
 
       // Create baz.dart, which contains previews.
       previewContainingFilePath = addPreviewContainingFile(projectRoot, <String>['baz.dart']);
@@ -249,26 +260,106 @@ void main() {
   });
 }
 
-/// Creates a copy of [mapping] with [PreviewDetails] entries that have non-deterministic values
-/// that differ per run (e.g., temporary file paths).
-PreviewMapping stripNonDeterministicFields(PreviewMapping mapping) {
-  return mapping.map<PreviewPath, List<PreviewDetails>>((
-    PreviewPath key,
-    List<PreviewDetails> value,
+typedef _PreviewDetailsMatcherMismatchPair = ({Object? expected, Object? actual});
+
+class PreviewDetailsMatcher extends Matcher {
+  PreviewDetailsMatcher({
+    required this.functionName,
+    required this.isBuilder,
+    this.name,
+    this.nameSymbol,
+    this.size,
+    this.textScaleFactor,
+    this.wrapper,
+    this.theme,
+    this.brightness,
+  }) {
+    if (name != null && nameSymbol != null) {
+      fail('name and nameSymbol cannot both be provided.');
+    }
+  }
+
+  final String functionName;
+  final bool isBuilder;
+
+  // Proivde when the expected expression for 'name' is a literal.
+  final String? name;
+
+  // Provide when the expected expression for 'name' is not a literal.
+  final String? nameSymbol;
+  final String? size;
+  final String? textScaleFactor;
+  final String? wrapper;
+  final String? theme;
+  final String? brightness;
+
+  @override
+  Description describe(Description description) {
+    description.add('PreviewDetailsMatcher');
+    return description;
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<Object?, Object?> matchState,
+    bool verbose,
   ) {
-    return MapEntry<PreviewPath, List<PreviewDetails>>(
-      key,
-      value
-          .map(
-            (PreviewDetails details) => details.copyWith(
-              wrapperLibraryUri: '',
-              themeLibraryUri: '',
-              brightnessLibraryUri: '',
-            ),
-          )
-          .toList(),
+    mismatchDescription.add('has the following mismatches:\n\n');
+    for (final MapEntry<String, _PreviewDetailsMatcherMismatchPair>(
+          :String key,
+          value: _PreviewDetailsMatcherMismatchPair(:Object? actual, :Object? expected),
+        )
+        in matchState.cast<String, _PreviewDetailsMatcherMismatchPair>().entries) {
+      mismatchDescription.add("- $key = '$actual' differs from the expected value '$expected'\n");
+    }
+    return mismatchDescription;
+  }
+
+  @override
+  bool matches(dynamic item, Map<Object?, Object?> matchState) {
+    if (item is! PreviewDetails) {
+      return false;
+    }
+
+    bool matches = true;
+    void checkPropertyMatch({
+      required String name,
+      required Object? actual,
+      required Object? expected,
+    }) {
+      if (actual is Expression) {
+        actual = actual.toSource();
+      }
+      if (actual != expected) {
+        matchState[name] = (actual: actual, expected: expected);
+        matches = false;
+      }
+    }
+
+    checkPropertyMatch(name: 'functionName', actual: item.functionName, expected: functionName);
+    checkPropertyMatch(name: 'isBuilder', actual: item.isBuilder, expected: isBuilder);
+    checkPropertyMatch(
+      name: PreviewDetails.kName,
+      actual: item.name,
+      expected: name != null ? "'$name'" : nameSymbol,
     );
-  });
+    checkPropertyMatch(name: PreviewDetails.kSize, actual: item.size, expected: size);
+    checkPropertyMatch(
+      name: PreviewDetails.kTextScaleFactor,
+      actual: item.textScaleFactor,
+      expected: textScaleFactor,
+    );
+    checkPropertyMatch(name: PreviewDetails.kWrapper, actual: item.wrapper, expected: wrapper);
+    checkPropertyMatch(name: PreviewDetails.kTheme, actual: item.theme, expected: theme);
+    checkPropertyMatch(
+      name: PreviewDetails.kBrightness,
+      actual: item.brightness,
+      expected: brightness,
+    );
+    return matches;
+  }
 }
 
 const String previewContainingFileContents = '''
@@ -293,7 +384,8 @@ PreviewThemeData theming() => PreviewThemeData(
   cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
 );
 
-@Preview(name: 'Attributes preview', size: Size(width: 100.0, height: 100), textScaleFactor: 2, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
+const String kAttributesPreview = 'Attributes preview';
+@Preview(name: kAttributesPreview, size: Size(100.0, 100), textScaleFactor: 2.0, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
 Widget attributesPreview() {
   return Text('Attributes');
 }
