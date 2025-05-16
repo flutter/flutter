@@ -22,6 +22,9 @@ void main() {
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       final BuildContext context = tester.element(find.byType(Text));
+      if (!context.mounted) {
+        fail('BuildContext not mounted');
+      }
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
@@ -40,6 +43,9 @@ void main() {
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       final BuildContext context = tester.element(find.byType(Text));
+      if (!context.mounted) {
+        fail('BuildContext not mounted');
+      }
       // Verify that app code thinks there is a left cutout.
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
 
@@ -60,6 +66,9 @@ void main() {
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
       BuildContext context = tester.element(find.byType(Text));
+      if (!context.mounted) {
+        fail('BuildContext not mounted');
+      }
       Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
@@ -76,6 +85,9 @@ void main() {
 
       // Requery for display features after rotation.
       context = tester.element(find.byType(Text));
+      if (!context.mounted) {
+        fail('BuildContext not mounted');
+      }
       displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
@@ -116,7 +128,7 @@ Future<void> setOrientationAndWaitUntilRotation(
   }
   while (true) {
     final BuildContext context = tester.element(find.byType(Text));
-    if (expectedOrientation == MediaQuery.of(context).orientation) {
+    if (context.mounted && expectedOrientation == MediaQuery.of(context).orientation) {
       break;
     }
     await tester.pumpAndSettle();
