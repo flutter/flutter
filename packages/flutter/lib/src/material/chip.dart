@@ -1290,9 +1290,17 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         chipTheme.iconTheme?.size ??
         theme.chipTheme.iconTheme?.size ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!.size!;
-    return Semantics(
-      container: true,
-      button: true,
+
+    final MaterialTapTargetSize effectiveMaterialTapTargetSize =
+        widget.materialTapTargetSize ?? theme.materialTapTargetSize;
+    final Size semanticSize = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded => const Size.square(kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size.square(kMinInteractiveDimension - 8.0),
+    };
+    final VisualDensity effectiveVisualDensity = widget.visualDensity ?? theme.visualDensity;
+
+    return _EnsureMinSemanticsSize(
+      semanticSize: semanticSize + effectiveVisualDensity.baseSizeAdjustment,
       child: _wrapWithTooltip(
         tooltip:
             widget.deleteButtonTooltipMessage ??
@@ -2423,6 +2431,55 @@ bool _hitIsOnDeleteIcon({
     TextDirection.ltr => adjustedPosition.dx >= deflatedSize.width - accessibleDeleteButtonWidth,
     TextDirection.rtl => adjustedPosition.dx <= accessibleDeleteButtonWidth,
   };
+}
+
+class _EnsureMinSemanticsSize extends SingleChildRenderObjectWidget {
+  const _EnsureMinSemanticsSize({super.child, required this.semanticSize});
+
+  final Size semanticSize;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderEnsureMinSemanticsSize(semanticSize);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderEnsureMinSemanticsSize renderObject,
+  ) {
+    renderObject.semanticSize = semanticSize;
+  }
+}
+
+class _RenderEnsureMinSemanticsSize extends RenderProxyBox {
+  _RenderEnsureMinSemanticsSize(this._semanticSize, [RenderBox? child]) : super(child);
+
+  Size get semanticSize => _semanticSize;
+  Size _semanticSize;
+  set semanticSize(Size value) {
+    if (_semanticSize == value) {
+      return;
+    }
+    _semanticSize = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.isButton = true;
+  }
+
+  @override
+  Rect get semanticBounds {
+    return Rect.fromCenter(
+      center: paintBounds.center,
+      width: math.max(_semanticSize.width, size.width),
+      height: math.max(_semanticSize.height, size.height),
+    );
+  }
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Chip
