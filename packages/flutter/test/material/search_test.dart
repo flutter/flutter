@@ -1074,7 +1074,7 @@ void main() {
   });
 
   testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {
-    const InputDecorationTheme searchFieldDecorationTheme = InputDecorationTheme(
+    const InputDecorationThemeData searchFieldDecorationTheme = InputDecorationThemeData(
       hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
     final _TestSearchDelegate delegate = _TestSearchDelegate(
@@ -1468,7 +1468,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return theme.copyWith(
       inputDecorationTheme:
           searchFieldDecorationTheme ??
-          InputDecorationTheme(
+          InputDecorationThemeData(
             hintStyle: searchFieldStyle ?? const TextStyle(color: hintTextColor),
           ),
     );

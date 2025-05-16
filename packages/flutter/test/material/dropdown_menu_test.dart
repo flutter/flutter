@@ -48,7 +48,7 @@ void main() {
     double? menuHeight,
     Widget? leadingIcon,
     Widget? label,
-    InputDecorationTheme? decorationTheme,
+    InputDecorationThemeData? decorationTheme,
   }) {
     return MaterialApp(
       theme: themeData,
@@ -1290,34 +1290,35 @@ void main() {
     expect(iconButton, findsOneWidget);
   });
 
-  testWidgets('Trailing IconButton height respects InputDecorationTheme.suffixIconConstraints', (
-    WidgetTester tester,
-  ) async {
-    final ThemeData themeData = ThemeData();
+  testWidgets(
+    'Trailing IconButton height respects InputDecorationThemeData.suffixIconConstraints',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
 
-    // Default suffix icon constraints.
-    await tester.pumpWidget(buildTest(themeData, menuChildren));
-    await tester.pump();
+      // Default suffix icon constraints.
+      await tester.pumpWidget(buildTest(themeData, menuChildren));
+      await tester.pump();
 
-    final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
-    expect(tester.getSize(iconButton), const Size(48, 48));
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+      expect(tester.getSize(iconButton), const Size(48, 48));
 
-    // Custom suffix icon constraints.
-    await tester.pumpWidget(
-      buildTest(
-        themeData,
-        menuChildren,
-        decorationTheme: const InputDecorationTheme(
-          suffixIconConstraints: BoxConstraints(minWidth: 66, minHeight: 62),
+      // Custom suffix icon constraints.
+      await tester.pumpWidget(
+        buildTest(
+          themeData,
+          menuChildren,
+          decorationTheme: const InputDecorationThemeData(
+            suffixIconConstraints: BoxConstraints(minWidth: 66, minHeight: 62),
+          ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    expect(tester.getSize(iconButton), const Size(66, 62));
-  });
+      expect(tester.getSize(iconButton), const Size(66, 62));
+    },
+  );
 
-  testWidgets('InputDecorationTheme.isCollapsed reduces height', (WidgetTester tester) async {
+  testWidgets('InputDecorationThemeData.isCollapsed reduces height', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
 
     // Default height.
@@ -1332,7 +1333,7 @@ void main() {
       buildTest(
         themeData,
         menuChildren,
-        decorationTheme: const InputDecorationTheme(isCollapsed: true),
+        decorationTheme: const InputDecorationThemeData(isCollapsed: true),
       ),
     );
     await tester.pump();
@@ -1344,7 +1345,7 @@ void main() {
       buildTest(
         themeData,
         menuChildren,
-        decorationTheme: const InputDecorationTheme(
+        decorationTheme: const InputDecorationThemeData(
           isCollapsed: true,
           suffixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
         ),
@@ -3650,7 +3651,7 @@ void main() {
             child: DropdownMenu<int>(
               hintText: 'Hint text',
               helperText: 'Menu Helper text',
-              inputDecorationTheme: InputDecorationTheme(
+              inputDecorationTheme: InputDecorationThemeData(
                 helperMaxLines: 2,
                 helperStyle: TextStyle(fontSize: 30),
               ),

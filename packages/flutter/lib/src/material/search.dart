@@ -256,7 +256,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBarTheme], which configures the AppBar's appearance.
-  ///  * [InputDecorationTheme], which configures the appearance of the search
+  ///  * [InputDecorationThemeData], which configures the appearance of the search
   ///    text field.
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -275,7 +275,7 @@ abstract class SearchDelegate<T> {
       ),
       inputDecorationTheme:
           searchFieldDecorationTheme ??
-          InputDecorationTheme(
+          InputDecorationThemeData(
             hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
             border: InputBorder.none,
           ),
@@ -364,17 +364,17 @@ abstract class SearchDelegate<T> {
   /// The style of the [searchFieldLabel].
   ///
   /// If this value is set to null, the value of the ambient [Theme]'s
-  /// [InputDecorationTheme.hintStyle] will be used instead.
+  /// [InputDecorationThemeData.hintStyle] will be used instead.
   ///
   /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
   /// be non-null.
   final TextStyle? searchFieldStyle;
 
-  /// The [InputDecorationTheme] used to configure the search field's visuals.
+  /// The [InputDecorationThemeData] used to configure the search field's visuals.
   ///
   /// Only one of [searchFieldStyle] or [searchFieldDecorationTheme] can
   /// be non-null.
-  final InputDecorationTheme? searchFieldDecorationTheme;
+  final InputDecorationThemeData? searchFieldDecorationTheme;
 
   /// The type of action button to use for the keyboard.
   ///

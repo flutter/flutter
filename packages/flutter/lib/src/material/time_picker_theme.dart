@@ -267,7 +267,7 @@ class TimePickerThemeData with Diagnosticable {
   /// The input decoration theme for the [TextField]s in the time picker.
   ///
   /// If this is null, the time picker provides its own defaults.
-  final InputDecorationTheme? inputDecorationTheme;
+  final InputDecorationThemeData? inputDecorationTheme;
 
   /// The padding around the time picker dialog when the entry mode is
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
@@ -321,7 +321,7 @@ class TimePickerThemeData with Diagnosticable {
     ShapeBorder? hourMinuteShape,
     Color? hourMinuteTextColor,
     TextStyle? hourMinuteTextStyle,
-    InputDecorationTheme? inputDecorationTheme,
+    InputDecorationThemeData? inputDecorationTheme,
     EdgeInsetsGeometry? padding,
     ShapeBorder? shape,
     MaterialStateProperty<Color?>? timeSelectorSeparatorColor,
@@ -528,7 +528,7 @@ class TimePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
+      DiagnosticsProperty<InputDecorationThemeData>(
         'inputDecorationTheme',
         inputDecorationTheme,
         defaultValue: null,
