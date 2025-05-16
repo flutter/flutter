@@ -473,7 +473,11 @@ void _testEngineSemanticsOwner() {
     semantics().semanticsEnabled = false;
   });
 
-  void renderSemantics({String? label, String? tooltip, List<bool> flags = const <bool>[]}) {
+  void renderSemantics({
+    String? label,
+    String? tooltip,
+    ui.SemanticsFlags flags = ui.SemanticsFlags.kNone,
+  }) {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
@@ -554,7 +558,7 @@ void _testEngineSemanticsOwner() {
 </sem>''');
 
     // Update
-    renderSemantics(label: 'Hello', flags: ui.SemanticsFlags(isLink: true).toBoolList());
+    renderSemantics(label: 'Hello', flags: ui.SemanticsFlags(isLink: true));
 
     tree = owner().debugSemanticsTree!;
     expect(tree.length, 2);
@@ -769,7 +773,7 @@ void _testHeader() {
       final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
       updateNode(
         builder,
-        flags: ui.SemanticsFlags(isHeader: true).toBoolList(),
+        flags: ui.SemanticsFlags(isHeader: true),
 
         label: 'Header of the page',
         transform: Matrix4.identity().toFloat64(),
@@ -792,7 +796,7 @@ void _testHeader() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isHeader: true).toBoolList(),
+      flags: ui.SemanticsFlags(isHeader: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -811,7 +815,7 @@ void _testHeader() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isHeader: true).toBoolList(),
+      flags: ui.SemanticsFlags(isHeader: true),
       label: 'Header of the page',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1365,7 +1369,7 @@ void _testContainer() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isTextField: true).toBoolList(),
+      flags: ui.SemanticsFlags(isTextField: true),
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
     );
@@ -1648,7 +1652,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -1672,7 +1676,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -1699,7 +1703,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1724,7 +1728,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1775,7 +1779,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1826,7 +1830,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder2,
       scrollPosition: 20.0,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1866,7 +1870,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1929,7 +1933,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1952,7 +1956,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2003,7 +2007,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2054,7 +2058,7 @@ void _testHorizontalScrolling() {
     updateNode(
       builder2,
       scrollPosition: 20.0,
-      flags: ui.SemanticsFlags(hasImplicitScrolling: true).toBoolList(),
+      flags: ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -2274,7 +2278,7 @@ void _testTextField() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags: ui.SemanticsFlags(isTextField: true).toBoolList(),
+      flags: ui.SemanticsFlags(isTextField: true),
 
       value: 'hello',
       transform: Matrix4.identity().toFloat64(),
@@ -2320,14 +2324,13 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
       label: 'test label',
-      flags:
-          ui.SemanticsFlags(
-            isEnabled: true,
-            hasEnabledState: true,
-            hasToggledState: true,
-            isToggled: true,
-            isFocusable: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(
+        isEnabled: true,
+        hasEnabledState: true,
+        hasToggledState: true,
+        isToggled: true,
+        isFocusable: true,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2357,12 +2360,7 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          ui.SemanticsFlags(
-            hasEnabledState: true,
-            hasToggledState: true,
-            isToggled: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(hasEnabledState: true, hasToggledState: true, isToggled: true),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2385,12 +2383,7 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          ui.SemanticsFlags(
-            hasEnabledState: true,
-            hasToggledState: true,
-            isEnabled: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(hasEnabledState: true, hasToggledState: true, isEnabled: true),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2414,13 +2407,12 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
 
-      flags:
-          ui.SemanticsFlags(
-            isEnabled: true,
-            hasEnabledState: true,
-            hasCheckedState: true,
-            isChecked: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(
+        isEnabled: true,
+        hasEnabledState: true,
+        hasCheckedState: true,
+        isChecked: true,
+      ),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2444,12 +2436,7 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
 
-      flags:
-          ui.SemanticsFlags(
-            hasCheckedState: true,
-            hasEnabledState: true,
-            isChecked: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(hasCheckedState: true, hasEnabledState: true, isChecked: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2472,12 +2459,7 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
 
-      flags:
-          ui.SemanticsFlags(
-            hasCheckedState: true,
-            hasEnabledState: true,
-            isEnabled: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(hasCheckedState: true, hasEnabledState: true, isEnabled: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2499,14 +2481,13 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          ui.SemanticsFlags(
-            hasCheckedState: true,
-            isChecked: true,
-            isInMutuallyExclusiveGroup: true,
-            hasEnabledState: true,
-            isEnabled: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(
+        hasCheckedState: true,
+        isChecked: true,
+        isInMutuallyExclusiveGroup: true,
+        hasEnabledState: true,
+        isEnabled: true,
+      ),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2529,13 +2510,12 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          ui.SemanticsFlags(
-            hasEnabledState: true,
-            hasCheckedState: true,
-            isInMutuallyExclusiveGroup: true,
-            isChecked: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(
+        hasEnabledState: true,
+        hasCheckedState: true,
+        isInMutuallyExclusiveGroup: true,
+        isChecked: true,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2557,13 +2537,12 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          ui.SemanticsFlags(
-            hasEnabledState: true,
-            hasCheckedState: true,
-            isInMutuallyExclusiveGroup: true,
-            isEnabled: true,
-          ).toBoolList(),
+      flags: ui.SemanticsFlags(
+        hasEnabledState: true,
+        hasCheckedState: true,
+        isInMutuallyExclusiveGroup: true,
+        isEnabled: true,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3173,7 +3152,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isImage: true).toBoolList(),
+      flags: ui.SemanticsFlags(isImage: true),
       label: 'Test Image Label',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3195,7 +3174,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isImage: true).toBoolList(),
+      flags: ui.SemanticsFlags(isImage: true),
       label: 'Test Image Label',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3227,7 +3206,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isImage: true).toBoolList(),
+      flags: ui.SemanticsFlags(isImage: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3246,7 +3225,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isImage: true).toBoolList(),
+      flags: ui.SemanticsFlags(isImage: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
@@ -3307,7 +3286,7 @@ void _testLiveRegion() {
     updateNode(
       builder,
       label: 'This is a snackbar',
-      flags: ui.SemanticsFlags(isLiveRegion: true).toBoolList(),
+      flags: ui.SemanticsFlags(isLiveRegion: true),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3330,7 +3309,7 @@ void _testLiveRegion() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(isLiveRegion: true).toBoolList(),
+      flags: ui.SemanticsFlags(isLiveRegion: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3353,7 +3332,7 @@ void _testLiveRegion() {
     updateNode(
       builder,
       label: 'This is a snackbar',
-      flags: ui.SemanticsFlags(isLiveRegion: true).toBoolList(),
+      flags: ui.SemanticsFlags(isLiveRegion: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3364,7 +3343,7 @@ void _testLiveRegion() {
     updateNode(
       builder,
       label: 'This is a snackbar',
-      flags: ui.SemanticsFlags(isLiveRegion: true).toBoolList(),
+      flags: ui.SemanticsFlags(isLiveRegion: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3594,7 +3573,7 @@ void _testRoute() {
     updateNode(
       builder,
       label: 'this is a route label',
-      flags: ui.SemanticsFlags(scopesRoute: true, namesRoute: true).toBoolList(),
+      flags: ui.SemanticsFlags(scopesRoute: true, namesRoute: true),
 
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3629,7 +3608,7 @@ void _testRoute() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: ui.SemanticsFlags(scopesRoute: true, namesRoute: true).toBoolList(),
+      flags: ui.SemanticsFlags(scopesRoute: true, namesRoute: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
