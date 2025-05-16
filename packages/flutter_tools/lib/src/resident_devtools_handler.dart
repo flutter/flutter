@@ -374,7 +374,7 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   bool get printDtdUri => false;
 }
 
-/// Convert a [URI] with query parameters into a display format instead
+/// Convert the [uri] with query parameters into a display format instead
 /// of the default URI encoding.
 String urlToDisplayString(Uri uri) {
   final StringBuffer base = StringBuffer(

@@ -570,10 +570,10 @@ void main() {
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   int failures = 0;
 
-  /// A mapping of zip [file] paths to callbacks that receive the [targetDirectory].
+  /// A mapping of zip [File] paths to callbacks that receive the `targetDirectory`.
   ///
   /// Use this to have [unzip] generate an arbitrary set of [FileSystemEntity]s
-  /// under [targetDirectory].
+  /// under `targetDirectory`.
   final Map<String, void Function(Directory)> unzipCallbacks = <String, void Function(Directory)>{};
 
   @override

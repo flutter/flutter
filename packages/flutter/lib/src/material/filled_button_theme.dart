@@ -97,7 +97,7 @@ class FilledButtonTheme extends InheritedTheme {
   /// The configuration of this theme.
   final FilledButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [FilledButtonThemeData] from the closest ancestor [FilledButtonTheme].
   ///
   /// If there is no enclosing [FilledButtonTheme] widget, then
   /// [ThemeData.filledButtonTheme] is used.

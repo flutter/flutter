@@ -29,9 +29,8 @@ import 'theme_data.dart';
 /// [SwitchListTile].
 ///
 /// Descendant widgets obtain the current [ListTileThemeData] object
-/// using `ListTileTheme.of(context)`. Instances of
-/// [ListTileThemeData] can be customized with
-/// [ListTileThemeData.copyWith].
+/// using [ListTileTheme.of]. Instances of [ListTileThemeData] can be
+/// customized with [ListTileThemeData.copyWith].
 ///
 /// A [ListTileThemeData] is often specified as part of the
 /// overall [Theme] with [ThemeData.listTileTheme].

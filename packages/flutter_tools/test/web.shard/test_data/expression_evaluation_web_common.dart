@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
@@ -40,7 +41,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       // No need to start paused as all breakpoint would be eventually reached.
       await flutter.run(
         withDebugger: true,
-        chrome: true,
+        device: GoogleChromeDevice.kChromeDeviceId,
         expressionEvaluation: expressionEvaluation,
         additionalCommandArgs: <String>[
           '--verbose',
@@ -166,7 +167,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       // in the execution.
       return flutter.run(
         withDebugger: true,
-        chrome: true,
+        device: GoogleChromeDevice.kChromeDeviceId,
         expressionEvaluation: expressionEvaluation,
         startPaused: true,
         script: project.testFilePath,

@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
@@ -48,7 +49,8 @@ static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
   if (flutterApplication) {
     flutterApplication.statusBarHidden = hidden;
   } else {
-    FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
+    [FlutterLogger logWarning:@"Application based status bar styling is not available in app "
+                               "extension."];
   }
 }
 
@@ -59,7 +61,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     // in favor of delegating to the view controller.
     [flutterApplication setStatusBarStyle:style];
   } else {
-    FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
+    [FlutterLogger logWarning:@"Application based status bar styling is not available in app "
+                               "extension."];
   }
 }
 
@@ -93,8 +96,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
         objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
     if (infoValue != nil && ![infoValue isKindOfClass:[NSNumber class]]) {
-      FML_LOG(ERROR) << "The value of UIViewControllerBasedStatusBarAppearance in info.plist must "
-                        "be a Boolean type.";
+      [FlutterLogger logError:@"The value of UIViewControllerBasedStatusBarAppearance in "
+                               "Info.plist must be a Boolean type."];
     }
 #endif
     _enableViewControllerBasedStatusBarAppearance =
@@ -169,9 +172,9 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     FlutterTextInputPlugin* textInputPlugin = [self.engine textInputPlugin];
     BOOL shownEditMenu = [textInputPlugin showEditMenu:args];
     if (!shownEditMenu) {
-      FML_LOG(ERROR) << "Only text input supports system context menu for now. Ensure the system "
-                        "context menu is shown with an active text input connection. See "
-                        "https://github.com/flutter/flutter/issues/143033.";
+      [FlutterLogger logError:@"Only text input supports system context menu for now. Ensure the "
+                               "system context menu is shown with an active text input connection. "
+                               "See https://github.com/flutter/flutter/issues/143033."];
     }
   }
 }
@@ -223,7 +226,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 - (void)searchWeb:(NSString*)searchTerm {
   UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication == nil) {
-    FML_LOG(WARNING) << "SearchWeb.invoke is not availabe in app extension.";
+    [FlutterLogger logWarning:@"SearchWeb.invoke is not availabe in app extension."];
     return;
   }
 
@@ -386,8 +389,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
         rootViewController =
             [engineViewController flutterWindowSceneIfViewLoaded].keyWindow.rootViewController;
       } else {
-        FML_LOG(WARNING)
-            << "rootViewController is not available in application extension prior to iOS 15.0.";
+        [FlutterLogger logWarning:@"rootViewController is not available in application extension "
+                                   "prior to iOS 15.0."];
       }
     }
 
