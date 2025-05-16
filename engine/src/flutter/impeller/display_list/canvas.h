@@ -208,6 +208,10 @@ class Canvas {
 
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
 
+  void DrawDiffRoundRect(const RoundRect& outer,
+                         const RoundRect& inner,
+                         const Paint& paint);
+
   void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
 
   void DrawCircle(const Point& center, Scalar radius, const Paint& paint);

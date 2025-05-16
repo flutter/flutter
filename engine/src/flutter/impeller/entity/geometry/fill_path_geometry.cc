@@ -116,4 +116,12 @@ std::optional<Rect> ArcFillPathGeometry::GetCoverage(
       .TransformAndClipBounds(transform);
 }
 
+FillDiffRoundRectGeometry::FillDiffRoundRectGeometry(const RoundRect& outer,
+                                                     const RoundRect& inner)
+    : FillPathSourceGeometry(std::nullopt), source_(outer, inner) {}
+
+const PathSource& FillDiffRoundRectGeometry::GetSource() const {
+  return source_;
+}
+
 }  // namespace impeller
