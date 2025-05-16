@@ -35,6 +35,7 @@
 ../../../flutter/display_list/effects/dl_image_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_mask_filter_unittests.cc
 ../../../flutter/display_list/geometry/dl_geometry_types_unittests.cc
+../../../flutter/display_list/geometry/dl_path_builder_unittests.cc
 ../../../flutter/display_list/geometry/dl_path_unittests.cc
 ../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
@@ -174,7 +175,6 @@
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_source_unittests.cc
-../../../flutter/impeller/geometry/path_unittests.cc
 ../../../flutter/impeller/geometry/rational_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc
@@ -348,6 +348,7 @@
 ../../../flutter/shell/platform/darwin/common/availability_version_check_unittests.cc
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
+../../../flutter/shell/platform/darwin/common/framework/Source/framework_common_swift_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_context_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_surface_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/macos/README.md
@@ -1065,7 +1066,6 @@
 ../../../flutter/third_party/boringssl/src/crypto/test
 ../../../flutter/third_party/boringssl/src/crypto/thread_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/trust_token/trust_token_test.cc
-../../../flutter/third_party/boringssl/src/crypto/x509/tab_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
@@ -3764,10 +3764,12 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.cpu.ctrl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpio/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.hrtimer/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.mailbox/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/meta.json

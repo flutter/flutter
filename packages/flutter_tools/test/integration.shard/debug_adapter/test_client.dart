@@ -304,7 +304,7 @@ class DapTestClient {
   }
 
   /// Creates a [DapTestClient] that connects the server listening on
-  /// [host]:[port].
+  /// `[host]:[port]`.
   static Future<DapTestClient> connect(
     DapTestServer server, {
     bool captureVmServiceTraffic = false,
@@ -348,7 +348,7 @@ extension DapTestClientExtension on DapTestClient {
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialize) or [launch] to only
-  /// customise the [launchRequest].
+  /// customise the `launchRequest`.
   Future<List<OutputEventBody>> collectAllOutput({
     String? program,
     String? cwd,
@@ -393,7 +393,7 @@ extension DapTestClientExtension on DapTestClient {
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
   /// the whole start of the session (including initialise) or [launch] to only
-  /// customise the [launchRequest].
+  /// customise the `launchRequest`.
   Future<TestEvents> collectTestOutput({
     String? program,
     String? cwd,
@@ -418,7 +418,7 @@ extension DapTestClientExtension on DapTestClient {
     );
   }
 
-  /// Sets a breakpoint at [line] in [file].
+  /// Sets a breakpoint at [line] in the file at [filePath].
   Future<void> setBreakpoint(String filePath, int line) async {
     await sendRequest(
       SetBreakpointsArguments(
@@ -468,7 +468,7 @@ extension DapTestClientExtension on DapTestClient {
     StackTraceArguments(threadId: threadId, startFrame: startFrame, levels: numFrames),
   );
 
-  /// Clears breakpoints in [file].
+  /// Clears breakpoints in the file at [filePath].
   Future<void> clearBreakpoints(String filePath) async {
     await sendRequest(
       SetBreakpointsArguments(source: Source(path: filePath), breakpoints: <SourceBreakpoint>[]),

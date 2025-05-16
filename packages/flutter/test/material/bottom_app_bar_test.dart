@@ -205,7 +205,7 @@ void main() {
             return Theme(
               data: Theme.of(
                 context,
-              ).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+              ).copyWith(bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(onPressed: null),
                 bottomNavigationBar: BottomAppBar(),
@@ -230,7 +230,7 @@ void main() {
             return Theme(
               data: Theme.of(
                 context,
-              ).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+              ).copyWith(bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(onPressed: null),
                 bottomNavigationBar: BottomAppBar(color: Color(0xff0000ff)),
@@ -251,7 +251,7 @@ void main() {
   testWidgets('Material3 - Color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
+        theme: ThemeData(bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xffffff00))),
         home: Builder(
           builder: (BuildContext context) {
             return const Scaffold(
