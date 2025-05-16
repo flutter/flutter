@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package io.flutter.plugin.platform;
 
 import android.view.View;
@@ -5,12 +9,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.view.AccessibilityBridge;
 
-public class PlatformViewsControllersController implements PlatformViewsAccessibilityDelegate {
+public class PlatformViewsControllerDelegator implements PlatformViewsAccessibilityDelegate {
 
   PlatformViewsController platformViewsController;
   PlatformViewsController2 platformViewsController2;
 
-  public PlatformViewsControllersController(
+  public PlatformViewsControllerDelegator(
       PlatformViewsController platformViewsController,
       PlatformViewsController2 platformViewsController2) {
     this.platformViewsController = platformViewsController;
