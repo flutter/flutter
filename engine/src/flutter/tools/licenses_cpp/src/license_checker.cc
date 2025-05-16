@@ -51,11 +51,17 @@ absl::StatusOr<std::vector<std::string>> GitLsFiles(const fs::path& repo_path) {
   return files;
 }
 
-absl::Status CheckLicense(const fs::path& path) {
-  if (!fs::exists(path)) {
-    return absl::UnavailableError(absl::StrCat("Expected LICENSE at ", path));
+absl::Status CheckLicense(const fs::path& git_repo) {
+  static std::array<std::string_view, 3> kLicenseFileNames = {
+    "LICENSE", "LICENSE.TXT", "LICENSE.md"
+  };
+  for (std::string_view license_name : kLicenseFileNames) {
+    fs::path license_path = git_repo / license_name;
+    if (fs::exists(license_path)) {
+      return absl::UnimplementedError("");
+    }
   }
-  return absl::UnimplementedError("");
+  return absl::UnavailableError(absl::StrCat("Expected LICENSE at ", git_repo.string()));
 }
 }  // namespace
 
@@ -72,14 +78,14 @@ int LicenseChecker::Run(std::string_view working_dir,
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
 
   RE2 pattern("(.*Copyright.*)");
+  int return_code = 0;
 
   for (const fs::path& git_repo : git_repos) {
-    fs::path license_path = git_repo / "LICENSE";
-    absl::Status license_status = CheckLicense(license_path);
+    absl::Status license_status = CheckLicense(git_repo);
     if (!license_status.ok() &&
-        license_status.status().code() != absl::StatusCode::kUnavailableError) {
-      std::cerr << license_status.status() << std::endl;
-      return 1;
+        license_status.code() != absl::StatusCode::kUnimplemented) {
+      std::cerr << license_status << std::endl;
+      return_code = 1;
     }
 
     absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
@@ -87,18 +93,21 @@ int LicenseChecker::Run(std::string_view working_dir,
       std::cerr << git_files.status() << std::endl;
       return 1;
     }
-    bool did_print_path = false;
     for (const std::string& git_file : git_files.value()) {
-      fs::path full_path = entry / git_file;
+      bool did_find_copyright = false;
+      fs::path full_path = git_repo / git_file;
       if (!include_filter->Matches(full_path.string())) {
+        // Ignore file.
         continue;
       }
       VLOG(1) << full_path.string();
       absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
       if (!file.ok()) {
         if (file.status().code() == absl::StatusCode::kInvalidArgument) {
+          // Zero byte file.
           continue;
         } else {
+          // Failure to mmap file.
           std::cerr << full_path << " : " << file.status() << std::endl;
           return 1;
         }
@@ -106,14 +115,14 @@ int LicenseChecker::Run(std::string_view working_dir,
       re2::StringPiece input(file->GetData(), file->GetSize());
       re2::StringPiece match;
       while (RE2::FindAndConsume(&input, pattern, &match)) {
-        if (!did_print_path) {
-          std::cout << full_path << std::endl;
-          did_print_path = true;
-        }
-        std::cout << "Found match: " << match << std::endl;
+        did_find_copyright = true;
+      }
+      if (!did_find_copyright) {
+        std::cerr << "Expected copyright in " << full_path << std::endl;
+        return_code = 1;
       }
     }
   }
 
-  return 0;
+  return return_code;
 }
