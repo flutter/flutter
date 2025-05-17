@@ -202,6 +202,18 @@ class PlatformView {
         fml::MallocMapping args) = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Notifies the delegate that the platform view wants to get
+    /// semantics
+    ///             node
+    ///
+    /// @param[in]  view_id The identifier of the view that contains this node.
+    /// @param[in]  node_id The identifier of the accessibility node.
+    ///
+    virtual SemanticsUpdate* OnPlatformViewGetSemanticsNode(
+        int64_t view_id,
+        int32_t node_id) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the embedder has expressed an
     ///             opinion about whether the accessibility tree needs to be
     ///             enabled or disabled. This information needs to be forwarded
@@ -464,17 +476,28 @@ class PlatformView {
                                fml::MallocMapping args);
 
   //----------------------------------------------------------------------------
-  /// @brief      Used by embedder to notify the running isolate hosted by the
-  ///             engine on the UI thread that the accessibility tree needs to
-  ///             be generated.
+  /// @brief      Get semantics node
   ///
-  /// @attention  Subclasses may choose to override this method to perform
-  ///             platform specific functions. However, they must call the base
-  ///             class method at some point in their implementation.
+  /// @param[in]  view_id The identifier of the view.
+  /// @param[in]  node_id The identifier of the accessibility node on which to
+  ///                     perform the action.
   ///
-  /// @param[in]  enabled  Whether the accessibility tree needs to be generated.
-  ///
-  virtual void SetSemanticsEnabled(bool enabled);
+  SemanticsUpdate* GetSemanticsNode(int64_t view_id, int32_t node_id)
+
+      //----------------------------------------------------------------------------
+      /// @brief      Used by embedder to notify the running isolate hosted by
+      /// the
+      ///             engine on the UI thread that the accessibility tree needs
+      ///             to be generated.
+      ///
+      /// @attention  Subclasses may choose to override this method to perform
+      ///             platform specific functions. However, they must call the
+      ///             base class method at some point in their implementation.
+      ///
+      /// @param[in]  enabled  Whether the accessibility tree needs to be
+      /// generated.
+      ///
+      virtual void SetSemanticsEnabled(bool enabled);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the embedder to specify the features to enable in the
