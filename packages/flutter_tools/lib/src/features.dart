@@ -53,6 +53,9 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
+  /// Whether desktop multi-window is enabled.
+  bool get isMultiWindowEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -71,6 +74,7 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     swiftPackageManager,
+    multiWindowFeature,
   ];
 }
 
@@ -159,6 +163,16 @@ const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+const Feature multiWindowFeature = Feature(
+  name: 'support for multi-window on Linux, macOS, and Windows',
+  configSetting: 'enable-multi-window',
+  environmentOverride: 'FLUTTER_MULTI_WINDOW',
+  runtimeId: 'multi_window',
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
