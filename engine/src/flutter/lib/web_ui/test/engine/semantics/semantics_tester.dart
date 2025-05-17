@@ -29,7 +29,7 @@ class SemanticsTester {
     required int id,
 
     // Flags
-    int flags = 0,
+    List<bool> flags = 0,
     bool? hasCheckedState,
     bool? isChecked,
     bool? isSelectable,
