@@ -5,6 +5,8 @@ homepage: https://github.com/flutter/flutter
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   archive: 3.6.1
   args: 2.7.0

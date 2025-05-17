@@ -3,6 +3,8 @@ description: Integration testing library for Android semantics
 environment:
   sdk: ^3.7.0-0
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter
