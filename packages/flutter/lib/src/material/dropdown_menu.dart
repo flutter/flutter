@@ -562,6 +562,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   bool _menuHasEnabledItem = false;
   TextEditingController? _localTextEditingController;
   final FocusNode _internalFocudeNode = FocusNode();
+  int? _textFieldLabelIndex;
 
   @override
   void initState() {
@@ -571,6 +572,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     } else {
       _localTextEditingController = TextEditingController();
     }
+    _localTextEditingController!.addListener(() => _textFieldLabelIndex = null);
     _enableSearch = widget.enableSearch;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
@@ -583,6 +585,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         text: filteredEntries[index].label,
         selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
       );
+      _textFieldLabelIndex = index;
     }
     refreshLeadingPadding();
   }
@@ -605,6 +608,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _localTextEditingController?.dispose();
       }
       _localTextEditingController = widget.controller ?? TextEditingController();
+      _localTextEditingController!.addListener(() => _textFieldLabelIndex = null);
+      _textFieldLabelIndex = null;
     }
     if (oldWidget.enableFilter != widget.enableFilter) {
       if (!widget.enableFilter) {
@@ -622,6 +627,21 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries = widget.dropdownMenuEntries;
       buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
       _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
+      if (_textFieldLabelIndex != null) {
+        final T oldSelectionValue = oldWidget.dropdownMenuEntries[_textFieldLabelIndex!].value;
+        final int index = filteredEntries.indexWhere(
+          (DropdownMenuEntry<T> entry) => entry.value == oldSelectionValue,
+        );
+        if (index != -1) {
+          _localTextEditingController?.value = TextEditingValue(
+            text: filteredEntries[index].label,
+            selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+          );
+          _textFieldLabelIndex = index;
+        } else {
+          _textFieldLabelIndex = null;
+        }
+      }
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
@@ -635,6 +655,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           text: filteredEntries[index].label,
           selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
         );
+        _textFieldLabelIndex = index;
       }
     }
   }
@@ -825,6 +846,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       text: entry.label,
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
+                    _textFieldLabelIndex = i;
                     currentHighlight = widget.enableSearch ? i : null;
                     widget.onSelected?.call(entry.value);
                     _enableFilter = false;
@@ -917,6 +939,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           text: entry.label,
           selection: TextSelection.collapsed(offset: entry.label.length),
         );
+        _textFieldLabelIndex = currentHighlight;
         widget.onSelected?.call(entry.value);
       }
     } else {
