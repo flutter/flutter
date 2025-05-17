@@ -26,6 +26,7 @@ import 'divider.dart';
 import 'floating_action_button_location.dart';
 import 'ink_decoration.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'page.dart';
@@ -888,13 +889,23 @@ class _PackageListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Ink(
-      color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).cardColor,
-      child: ListTile(
-        title: Text(packageName),
-        subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
-        selected: isSelected,
-        onTap: onTap,
+      color: isSelected ? theme.highlightColor : theme.cardColor,
+      child: ListTileTheme(
+        data: ListTileTheme.of(context).copyWith(
+          titleTextStyle: theme.textTheme.titleMedium,
+          subtitleTextStyle: theme.textTheme.bodyMedium,
+          selectedColor: theme.colorScheme.primary,
+        ),
+        child: ListTile(
+          title: Text(packageName),
+          subtitle: Text(
+            MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses),
+          ),
+          selected: isSelected,
+          onTap: onTap,
+        ),
       ),
     );
   }
