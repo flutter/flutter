@@ -85,7 +85,9 @@ void main() {
       hourMinuteShape: RoundedRectangleBorder(side: BorderSide(color: Color(0xffffffff))),
       hourMinuteTextColor: Color(0xfffffff0),
       hourMinuteTextStyle: TextStyle(color: Color(0xfffffff1)),
-      inputDecorationTheme: InputDecorationTheme(labelStyle: TextStyle(color: Color(0xfffffff2))),
+      inputDecorationTheme: InputDecorationThemeData(
+        labelStyle: TextStyle(color: Color(0xfffffff2)),
+      ),
       padding: EdgeInsets.all(1.0),
       shape: RoundedRectangleBorder(side: BorderSide(color: Color(0xfffffff3))),
       timeSelectorSeparatorColor: WidgetStatePropertyAll<Color>(Color(0xfffffff4)),
@@ -122,7 +124,7 @@ void main() {
         'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
         'hourMinuteTextColor: ${const Color(0xfffffff0)}',
         'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
-        'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
+        'inputDecorationTheme: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
         'padding: EdgeInsets.all(1.0)',
         'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
         'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
@@ -826,7 +828,7 @@ void main() {
   });
 
   testWidgets(
-    'Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode',
+    'Time picker uses values from TimePickerThemeData when TimePickerThemeData.inputDecorationTheme is provided - input mode',
     (WidgetTester tester) async {
       final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
       final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
@@ -851,7 +853,7 @@ void main() {
   );
 
   testWidgets(
-    'Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode',
+    'Time picker uses values from TimePickerThemeData when TimePickerThemeData.inputDecorationTheme is not provided - input mode',
     (WidgetTester tester) async {
       final TimePickerThemeData timePickerTheme = _timePickerTheme();
       final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
@@ -1027,7 +1029,7 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
     dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
     inputDecorationTheme:
         includeInputDecoration
-            ? const InputDecorationTheme(
+            ? const InputDecorationThemeData(
               filled: true,
               fillColor: Colors.purple,
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
