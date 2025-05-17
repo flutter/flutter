@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html' show window;
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -446,64 +448,176 @@ class LabelAndValue extends SemanticBehavior {
   /// instead.
   LabelRepresentation preferredRepresentation;
 
+  /// Whether the current browser supports the `aria-description` attribute.
+  ///
+  /// `aria-description` is a newer ARIA attribute intended to provide additional
+  /// description information separate from `aria-label`.
+  ///
+  /// Some older browsers and screen readers do not recognize it. In those cases,
+  /// we fallback to using `aria-describedby` with a hidden element instead.
+  ///
+  /// This check is run only once and cached for performance.
+  /// It works by checking the browser version against known supported versions.
+  ///
+  /// See: https://caniuse.com/?search=aria-description
+  static bool? _supportsAriaDescription;
+
+  static bool get supportsAriaDescription {
+    if (_supportsAriaDescription == null) {
+      _supportsAriaDescription = _checkBrowserSupport();
+    }
+    return _supportsAriaDescription!;
+  }
+
+  /// Checks if the current browser supports aria-description based on version.
+  static bool _checkBrowserSupport() {
+    final userAgent = domWindow.navigator.userAgent.toLowerCase();
+
+    // Detect Chrome
+    final chromeMatch = RegExp(r'chrome/(\d+)').firstMatch(userAgent);
+    if (chromeMatch != null) {
+      final version = int.tryParse(chromeMatch.group(1) ?? '');
+      if (version != null && version >= 83) return true;
+    }
+
+    // Detect Edge (Chromium)
+    final edgeMatch = RegExp(r'edg/(\d+)').firstMatch(userAgent);
+    if (edgeMatch != null) {
+      final version = int.tryParse(edgeMatch.group(1) ?? '');
+      if (version != null && version >= 83) return true;
+    }
+
+    // Detect Opera
+    final operaMatch = RegExp(r'opr/(\d+)').firstMatch(userAgent);
+    if (operaMatch != null) {
+      final version = int.tryParse(operaMatch.group(1) ?? '');
+      if (version != null && version >= 69) return true;
+    }
+
+    // Detect Firefox
+    final firefoxMatch = RegExp(r'firefox/(\d+)').firstMatch(userAgent);
+    if (firefoxMatch != null) {
+      final version = int.tryParse(firefoxMatch.group(1) ?? '');
+      if (version != null && version >= 119) return true;
+    }
+
+    // Detect Safari (macOS or iOS)
+    final safariMatch = RegExp(r'version/(\d+(\.\d+)?) safari').firstMatch(userAgent);
+    if (safariMatch != null) {
+      final version = double.tryParse(safariMatch.group(1) ?? '');
+      if (version != null && version >= 17.4) return true;
+    }
+
+    // Detect Samsung Internet
+    final samsungMatch = RegExp(r'samsungbrowser/(\d+)').firstMatch(userAgent);
+    if (samsungMatch != null) {
+      final version = int.tryParse(samsungMatch.group(1) ?? '');
+      if (version != null && version >= 27) return true;
+    }
+
+    // Unknown or older browser → fallback
+    return false;
+  }
+
+  /// Allows tests to override the `supportsAriaDescription` value.
+  ///
+  /// This is only exposed for testing and should not be used in production code.
+  @visibleForTesting
+  static set supportsAriaDescriptionForTest(bool? value) {
+    _supportsAriaDescription = value;
+  }
+
+  /// For testing only: overrides isIncrementable value.
+  @visibleForTesting
+  static bool? testIsIncrementableOverride;
+
+  String? _describedById;
+  DomElement? _describedBySpan;
+
   @override
   void update() {
-    final String? computedLabel = _computeLabel();
-
-    if (computedLabel == null) {
-      _cleanUpDom();
-      return;
+    // 1. Always set aria-label to label (if present)
+    if (semanticsObject.hasLabel) {
+      owner.setAttribute('aria-label', semanticsObject.label!);
+    } else {
+      owner.removeAttribute('aria-label');
     }
 
-    _getEffectiveRepresentation().update(computedLabel);
-  }
-
-  LabelRepresentationBehavior? _representation;
-
-  /// Return the representation that should be used based on the current
-  /// parameters of the semantic node.
-  ///
-  /// If the node has children always use an `aria-label`. Using extra child
-  /// nodes to represent the label will cause layout shifts and confuse the
-  /// screen reader. If the are no children, use the representation preferred
-  /// by the role.
-  LabelRepresentationBehavior _getEffectiveRepresentation() {
-    final LabelRepresentation effectiveRepresentation =
-        semanticsObject.hasChildren ? LabelRepresentation.ariaLabel : preferredRepresentation;
-
-    LabelRepresentationBehavior? representation = _representation;
-    if (representation == null || representation.kind != effectiveRepresentation) {
-      representation?.cleanUp();
-      _representation = representation = effectiveRepresentation.createBehavior(owner);
+    // 2. Handle hint and tooltip
+    final String? description = _combineHintAndTooltip();
+    if (description != null && description.trim().isNotEmpty) {
+      if (supportsAriaDescription) {
+        owner.setAttribute('aria-description', description);
+        _removeDescribedBy();
+      } else {
+        _ensureDescribedBy(description);
+        owner.removeAttribute('aria-description');
+      }
+    } else {
+      owner.removeAttribute('aria-description');
+      _removeDescribedBy();
     }
-    return representation;
+
+    // 3. Handle value for non-incrementable widgets only
+    final isIncrementable = testIsIncrementableOverride ?? semanticsObject.isIncrementable;
+    if (!isIncrementable && semanticsObject.hasValue) {
+      final value = semanticsObject.value!;
+      if (num.tryParse(value) != null) {
+        owner.setAttribute('aria-valuenow', value);
+        owner.removeAttribute('aria-valuetext');
+      } else {
+        owner.setAttribute('aria-valuetext', value);
+        owner.removeAttribute('aria-valuenow');
+      }
+    } else {
+      owner.removeAttribute('aria-valuenow');
+      owner.removeAttribute('aria-valuetext');
+    }
   }
 
-  /// Computes the final label to be assigned to the node.
-  ///
-  /// The label is a concatenation of tooltip, label, hint, and value, whichever
-  /// combination is present.
-  String? _computeLabel() {
-    // If the node is incrementable the value is reported to the browser via
-    // the respective role. We do not need to also render it again here.
-    final bool shouldDisplayValue = !semanticsObject.isIncrementable && semanticsObject.hasValue;
-
-    return computeDomSemanticsLabel(
-      tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
-      label: semanticsObject.hasLabel ? semanticsObject.label : null,
-      hint: semanticsObject.hint,
-      value: shouldDisplayValue ? semanticsObject.value : null,
-    );
+  String? _combineHintAndTooltip() {
+    final hint = semanticsObject.hint;
+    final tooltip = semanticsObject.hasTooltip ? semanticsObject.tooltip : null;
+    if (hint != null && tooltip != null && hint.trim().isNotEmpty && tooltip.trim().isNotEmpty) {
+      return '$hint $tooltip';
+    }
+    if (hint != null && hint.trim().isNotEmpty) {
+      return hint;
+    }
+    if (tooltip != null && tooltip.trim().isNotEmpty) {
+      return tooltip;
+    }
+    return null;
   }
 
-  void _cleanUpDom() {
-    _representation?.cleanUp();
+  void _ensureDescribedBy(String description) {
+    _describedById ??= 'flt-hint-${semanticsObject.id}';
+    _describedBySpan ??= domDocument.createElement('span');
+    _describedBySpan!.id = _describedById!;
+    _describedBySpan!.setAttribute('hidden', '');
+    _describedBySpan!.text = description;
+    // Attach as a child of the semantics element, not document.body
+    if (_describedBySpan!.isConnected == false) {
+      owner.element.append(_describedBySpan!);
+    }
+    owner.setAttribute('aria-describedby', _describedById!);
+  }
+
+  void _removeDescribedBy() {
+    if (_describedBySpan != null) {
+      _describedBySpan!.remove();
+      _describedBySpan = null;
+    }
+    if (_describedById != null) {
+      owner.removeAttribute('aria-describedby');
+      _describedById = null;
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    _cleanUpDom();
+    _removeDescribedBy();
   }
 
   /// Moves the focus to the element that carries the semantic label.
@@ -515,38 +629,7 @@ class LabelAndValue extends SemanticBehavior {
   /// Different label representations use different DOM structures, so the
   /// actual work is delegated to [LabelRepresentationBehavior].
   void focusAsRouteDefault() {
-    _getEffectiveRepresentation().focusAsRouteDefault();
+    // Focus the main element directly, since all ARIA attributes are on it.
+    owner.element.focusWithoutScroll();
   }
-}
-
-String? computeDomSemanticsLabel({String? tooltip, String? label, String? hint, String? value}) {
-  final String? labelHintValue = _computeLabelHintValue(label: label, hint: hint, value: value);
-
-  if (tooltip == null && labelHintValue == null) {
-    return null;
-  }
-
-  final StringBuffer combinedValue = StringBuffer();
-  if (tooltip != null) {
-    combinedValue.write(tooltip);
-
-    // Separate the tooltip from the rest via a line-break (if the rest exists).
-    if (labelHintValue != null) {
-      combinedValue.writeln();
-    }
-  }
-
-  if (labelHintValue != null) {
-    combinedValue.write(labelHintValue);
-  }
-
-  return combinedValue.isNotEmpty ? combinedValue.toString() : null;
-}
-
-String? _computeLabelHintValue({String? label, String? hint, String? value}) {
-  final String combinedValue = <String?>[label, hint, value]
-      .whereType<String>() // poor man's null filter
-      .where((String element) => element.trim().isNotEmpty)
-      .join(' ');
-  return combinedValue.isNotEmpty ? combinedValue : null;
 }
