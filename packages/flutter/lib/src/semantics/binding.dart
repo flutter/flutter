@@ -26,7 +26,12 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
-      ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+      ..onAccessibilityFeaturesChanged = () {
+        Future<void>.microtask(() {
+          // Avoid execution during build time.
+          handleAccessibilityFeaturesChanged();
+        });
+      };
     _handleSemanticsEnabledChanged();
   }
 
