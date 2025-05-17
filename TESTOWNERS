@@ -12,7 +12,6 @@
 /dev/devicelab/bin/tasks/analyzer_benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart @reidbaker @flutter/engine
 /dev/devicelab/bin/tasks/android_defines_test.dart @bkonyi @flutter/tool
-/dev/devicelab/bin/tasks/android_feature_flags_test.dart @loic-sharma @flutter/android
 /dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @reidbaker @flutter/engine
@@ -203,7 +202,6 @@
 /dev/devicelab/bin/tasks/integration_ui_ios_textfield.dart @LongCatIsLooong @flutter/tool
 /dev/devicelab/bin/tasks/ios_app_with_extensions_test.dart @hellohuanlin @flutter/tool
 /dev/devicelab/bin/tasks/ios_defines_test.dart @vashworth @flutter/tool
-/dev/devicelab/bin/tasks/ios_feature_flags_test.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/ios_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/keyboard_hot_restart_ios.dart @loic-sharma @flutter/ios
@@ -274,7 +272,6 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/integration_ui_test_test_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @bkonyi @flutter/tool
-/dev/devicelab/bin/tasks/macos_feature_flags_test.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/module_custom_host_app_name_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart @bkonyi @flutter/tool
@@ -307,7 +304,6 @@
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm_st.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/windows_feature_flags_test.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/mac_desktop_impeller.dart @jonahwilliams @flutter/engine

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // ignore: implementation_imports
-import 'package:flutter/src/services/features.dart';
+import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/driver_extension.dart';
 

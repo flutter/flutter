@@ -293,13 +293,17 @@ class KernelSnapshot extends Target {
   void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
     if (globals.platform.environment[kEnabledFeatureFlags] != null) {
       throwToolExit(
-        '$kEnabledFeatureFlags is used by the framework and cannot be set in the environment.',
+        '$kEnabledFeatureFlags is used by the framework and cannot be set in the environment.'
+        '\n'
+        'Use the "flutter config" command to enable feature flags.'
       );
     }
     if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
       throwToolExit(
         '$kEnabledFeatureFlags is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}.'
+        '\n'
+        'Use the "flutter config" command to enable feature flags.'
       );
     }
 
