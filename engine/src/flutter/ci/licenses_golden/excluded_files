@@ -1069,6 +1069,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
+../../../flutter/third_party/boringssl/src/crypto/xwing/xwing_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/blowfish/blowfish_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cast/cast_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cfb/cfb_test.cc
