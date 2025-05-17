@@ -225,14 +225,14 @@ Future<void> testMain() async {
           editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
         );
 
-        editingState = editingState.copyWith(text: '今日は', baseOffset: 0, extentOffset: 3);
+        editingState = editingState.copyWith(baseOffset: 0, extentOffset: 3);
 
         expect(
           mockWithCompositionAwareMixin.determineCompositionState(editingState),
           editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
         );
 
-        editingState = editingState.copyWith(text: '寒い日', baseOffset: 3, extentOffset: 6);
+        editingState = editingState.copyWith(baseOffset: 3, extentOffset: 6);
 
         expect(
           mockWithCompositionAwareMixin.determineCompositionState(editingState),
