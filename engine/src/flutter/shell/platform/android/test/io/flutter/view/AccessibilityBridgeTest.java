@@ -66,6 +66,11 @@ import org.robolectric.annotation.Config;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityBridgeTest {
 
+  private static final int ACCESSIBILITY_FEATURE_NAVIGATION = 1 << 0;
+  private static final int ACCESSIBILITY_FEATURE_DISABLE_ANIMATIONS = 1 << 2;
+  private static final int ACCESSIBILITY_FEATURE_BOLD_TEXT = 1 << 3;
+  private static final int ACCESSIBILITY_FEATURE_NO_ANNOUNCE = 1 << 7;
+
   @Test
   public void itDescribesNonTextFieldsWithAContentDescription() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
@@ -136,6 +141,26 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itSetsNoAnnounceAccessibleFlagByDefault() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    when(mockManager.isTouchExplorationEnabled()).thenReturn(false);
+    setUpBridge(
+        /*rootAccessibilityView=*/ mockRootView,
+        /*accessibilityChannel=*/ mockChannel,
+        /*accessibilityManager=*/ mockManager,
+        /*contentResolver=*/ null,
+        /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+        /*platformViewsAccessibilityDelegate=*/ null);
+    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
+  }
+
+  @Test
   public void itSetsAccessibleNavigation() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -158,18 +183,20 @@ public class AccessibilityBridgeTest {
     verify(mockManager).addTouchExplorationStateChangeListener(listenerCaptor.capture());
 
     assertEquals(accessibilityBridge.getAccessibleNavigation(), false);
-    verify(mockChannel).setAccessibilityFeatures(0);
+    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
 
     // Simulate assistive technology accessing accessibility tree.
     accessibilityBridge.createAccessibilityNodeInfo(0);
-    verify(mockChannel).setAccessibilityFeatures(1);
+    verify(mockChannel)
+        .setAccessibilityFeatures(
+            ACCESSIBILITY_FEATURE_NAVIGATION | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     assertEquals(accessibilityBridge.getAccessibleNavigation(), true);
 
     // Simulate turning off TalkBack.
     reset(mockChannel);
     listenerCaptor.getValue().onTouchExplorationStateChanged(false);
-    verify(mockChannel).setAccessibilityFeatures(0);
+    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     assertEquals(accessibilityBridge.getAccessibleNavigation(), false);
   }
 
@@ -1157,7 +1184,9 @@ public class AccessibilityBridgeTest {
             /*accessibilityViewEmbedder=*/ mockViewEmbedder,
             /*platformViewsAccessibilityDelegate=*/ null);
 
-    verify(mockChannel).setAccessibilityFeatures(1 << 3);
+    verify(mockChannel)
+        .setAccessibilityFeatures(
+            ACCESSIBILITY_FEATURE_BOLD_TEXT | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
 
     // Now verify that clearing the BOLD_TEXT flag doesn't touch any of the other flags.
@@ -1179,7 +1208,9 @@ public class AccessibilityBridgeTest {
     // constructor, verify that the latest argument is correct
     ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
     verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(captor.capture());
-    assertEquals(1 << 2 /* DISABLE_ANIMATION */, captor.getValue().intValue());
+    assertEquals(
+        ACCESSIBILITY_FEATURE_DISABLE_ANIMATIONS | ACCESSIBILITY_FEATURE_NO_ANNOUNCE,
+        captor.getValue().intValue());
 
     // Set back to default
     Settings.Global.putFloat(null, "transition_animation_scale", 1.0f);
@@ -1874,19 +1905,21 @@ public class AccessibilityBridgeTest {
     ContentObserver observer = observerCaptor.getValue();
 
     // Initial state
-    verify(mockChannel).setAccessibilityFeatures(0);
+    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
 
     // Animations are disabled
     Settings.Global.putFloat(mockContentResolver, "transition_animation_scale", 0.0f);
     observer.onChange(false);
-    verify(mockChannel).setAccessibilityFeatures(1 << 2);
+    verify(mockChannel)
+        .setAccessibilityFeatures(
+            ACCESSIBILITY_FEATURE_DISABLE_ANIMATIONS | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
 
     // Animations are enabled
     Settings.Global.putFloat(mockContentResolver, "transition_animation_scale", 1.0f);
     observer.onChange(false);
-    verify(mockChannel).setAccessibilityFeatures(0);
+    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
   }
 
   @Test
