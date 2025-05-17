@@ -25,7 +25,6 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
 import '../../src/test_flutter_command_runner.dart';
 
@@ -155,7 +154,7 @@ void main() {
         AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: () => FakePubWithPrimedDeps(allowGet: true),
+        Pub: FakePub.new,
       },
     );
 
@@ -567,4 +566,19 @@ final class _FakeAndroidSdk with Fake implements AndroidSdk {
 final class _FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext? context,
+    required FlutterProject project,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String? flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    PubOutputMode outputMode = PubOutputMode.all,
+  }) async {}
 }

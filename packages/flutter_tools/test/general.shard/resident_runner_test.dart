@@ -33,11 +33,11 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
 import '../src/testbed.dart';
+import '../src/throwing_pub.dart';
 import 'resident_runner_helpers.dart';
 
 FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
@@ -1144,7 +1144,7 @@ flutter:
   generate: true''');
 
         // Create necessary files for [DartPluginRegistrantTarget]
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
@@ -1164,7 +1164,7 @@ flutter:
       },
       overrides: <Type, Generator>{
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -1196,7 +1196,7 @@ dependencies:
 
         // Create necessary files for [DartPluginRegistrantTarget], including a
         // plugin that will trigger generation.
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
@@ -1237,7 +1237,7 @@ flutter:
       },
       overrides: <Type, Generator>{
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
