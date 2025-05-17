@@ -15,6 +15,9 @@ class SkwasmRenderer implements Renderer {
   bool get isMultiThreaded => false;
 
   @override
+  Arena get frameArena => throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
