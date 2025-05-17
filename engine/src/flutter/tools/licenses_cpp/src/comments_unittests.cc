@@ -16,6 +16,36 @@ TEST(CommentsTest, Simple) {
     comments.push_back(comment);
   });
 
-  EXPECT_EQ(comments.size(), 1u);
+  ASSERT_EQ(comments.size(), 1u);
   EXPECT_EQ(comments[0], "// Hello");
+}
+
+TEST(CommentsTest, Nothing) {
+  std::string test = R"test(
+hello world
+)test";
+
+  std::vector<std::string> comments;
+  lex(test.c_str(), test.size(), [&](const char* comment) {
+    comments.push_back(comment);
+  });
+
+  ASSERT_EQ(comments.size(), 0u);
+}
+
+TEST(CommentsTest, Multiline) {
+  std::string test = R"test(
+/*
+hello world
+*/
+dfdd
+)test";
+
+  std::vector<std::string> comments;
+  lex(test.c_str(), test.size(), [&](const char* comment) {
+    comments.push_back(comment);
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "/*\nhello world\n*/");
 }
