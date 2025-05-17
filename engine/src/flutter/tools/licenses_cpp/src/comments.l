@@ -10,7 +10,6 @@
 
 %{
 #include "flutter/tools/licenses_cpp/src/comments.h"
-#include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
 typedef void* yyscan_t;
@@ -30,28 +29,34 @@ COMMENT_START (\/\/|#)
 
 %%
 ^[ \t]*{COMMENT_START}[^\n]* {
-  BEGIN(BLOCK); yyextra->buffer = yytext;
+  BEGIN(BLOCK);
+  yyextra->buffer.append(yytext, yyleng);
 }
 ^[ \t]*\/\* {
-  BEGIN(C_COMMENT); yyextra->buffer = yytext;
+  BEGIN(C_COMMENT);
+  yyextra->buffer.append(yytext, yyleng);
 }
 
 <C_COMMENT>{
   \*\/ {
-    BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); 
+    BEGIN(INITIAL);
+    yyextra->buffer.append(yytext, yyleng);
     yyextra->callback(yyextra->buffer.c_str());
+    yyextra->buffer.clear();
   }
   \n|. {
-    absl::StrAppend(&yyextra->buffer, yytext);
+    yyextra->buffer.append(yytext, yyleng);
   }
 }
 
 <BLOCK>{
   \n[ \t]*{COMMENT_START}[^\n]* {
-    absl::StrAppend(&yyextra->buffer, yytext);
+    yyextra->buffer.append(yytext, yyleng);
   }
   \n|. {
-    BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str());
+    BEGIN(INITIAL);
+    yyextra->callback(yyextra->buffer.c_str());
+    yyextra->buffer.clear();
   }
 }
 
@@ -62,6 +67,7 @@ void lex(const char* buffer,
          size_t size,
          std::function<void(const char*)> callback) {
   LexerContext context;
+  context.buffer.reserve(4096);
   context.callback = std::move(callback);
   yyscan_t scanner;
   yylex_init_extra(&context, &scanner);
