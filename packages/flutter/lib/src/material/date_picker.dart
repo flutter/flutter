@@ -1259,6 +1259,7 @@ Future<DateTimeRange?> showDateRangePicker({
     keyboardType: keyboardType,
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+    calendarDelegate: calendarDelegate,
   );
 
   if (textDirection != null) {
@@ -1928,7 +1929,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
         ),
         backgroundColor: dialogBackground,
-        body: _CalendarDateRangePicker(
+        body: CalendarDateRangePicker(
           initialStartDate: selectedStartDate,
           initialEndDate: selectedEndDate,
           firstDate: firstDate,
@@ -1956,9 +1957,9 @@ const double _maxCalendarWidthPortrait = 480.0;
 
 /// Displays a scrollable calendar grid that allows a user to select a range
 /// of dates.
-class _CalendarDateRangePicker extends StatefulWidget {
+class CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
-  _CalendarDateRangePicker({
+  CalendarDateRangePicker({
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -1968,6 +1969,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     required this.calendarDelegate,
+    super.key,
   }) : initialStartDate =
            initialStartDate != null ? calendarDelegate.dateOnly(initialStartDate) : null,
        initialEndDate = initialEndDate != null ? calendarDelegate.dateOnly(initialEndDate) : null,
@@ -2011,10 +2013,10 @@ class _CalendarDateRangePicker extends StatefulWidget {
   final CalendarDelegate<DateTime> calendarDelegate;
 
   @override
-  State<_CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
+  State<CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
 }
 
-class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
+class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
   final GlobalKey _scrollViewKey = GlobalKey();
   DateTime? _startDate;
   DateTime? _endDate;
