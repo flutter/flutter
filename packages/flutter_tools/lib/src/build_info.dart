@@ -50,6 +50,7 @@ class BuildInfo {
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
+    this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -176,6 +177,9 @@ class BuildInfo {
 
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
+
+  /// If set, web builds with DDC will run with support for hot reload.
+  final bool webEnableHotReload;
 
   /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(
