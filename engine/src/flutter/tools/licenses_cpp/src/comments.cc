@@ -440,7 +440,6 @@ static const flex_int16_t yy_chk[41] =
  */
 #line 12 "comments.l"
 #include "flutter/tools/licenses_cpp/src/comments.h"
-#include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
 typedef void* yyscan_t;
@@ -451,9 +450,9 @@ struct LexerContext {
   std::function<void(const char*)> callback;
   std::string buffer;
 };
-#line 454 "comments.cc"
+#line 453 "comments.cc"
 
-#line 456 "comments.cc"
+#line 455 "comments.cc"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -716,9 +715,9 @@ YY_DECL
 		}
 
 	{
-#line 31 "comments.l"
+#line 30 "comments.l"
 
-#line 721 "comments.cc"
+#line 720 "comments.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -778,33 +777,37 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 32 "comments.l"
+#line 31 "comments.l"
 {
-  BEGIN(BLOCK); yyextra->buffer = yytext;
+  BEGIN(BLOCK);
+  yyextra->buffer.append(yytext, yyleng);
 }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 35 "comments.l"
 {
-  BEGIN(C_COMMENT); yyextra->buffer = yytext;
+  BEGIN(C_COMMENT);
+  yyextra->buffer.append(yytext, yyleng);
 }
 	YY_BREAK
 
 case 3:
 YY_RULE_SETUP
-#line 40 "comments.l"
+#line 41 "comments.l"
 {
-    BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); 
+    BEGIN(INITIAL);
+    yyextra->buffer.append(yytext, yyleng);
     yyextra->callback(yyextra->buffer.c_str());
+    yyextra->buffer.clear();
   }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 44 "comments.l"
+#line 47 "comments.l"
 {
-    absl::StrAppend(&yyextra->buffer, yytext);
+    yyextra->buffer.append(yytext, yyleng);
   }
 	YY_BREAK
 
@@ -812,32 +815,34 @@ YY_RULE_SETUP
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 50 "comments.l"
+#line 53 "comments.l"
 {
-    absl::StrAppend(&yyextra->buffer, yytext);
+    yyextra->buffer.append(yytext, yyleng);
   }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 53 "comments.l"
+#line 56 "comments.l"
 {
-    BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str());
+    BEGIN(INITIAL);
+    yyextra->callback(yyextra->buffer.c_str());
+    yyextra->buffer.clear();
   }
 	YY_BREAK
 
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 58 "comments.l"
+#line 63 "comments.l"
 {}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 59 "comments.l"
+#line 64 "comments.l"
 ECHO;
 	YY_BREAK
-#line 840 "comments.cc"
+#line 845 "comments.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(C_COMMENT):
 case YY_STATE_EOF(BLOCK):
@@ -2011,13 +2016,14 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 59 "comments.l"
+#line 64 "comments.l"
 
 
 void lex(const char* buffer,
          size_t size,
          std::function<void(const char*)> callback) {
   LexerContext context;
+  context.buffer.reserve(4096);
   context.callback = std::move(callback);
   yyscan_t scanner;
   yylex_init_extra(&context, &scanner);
