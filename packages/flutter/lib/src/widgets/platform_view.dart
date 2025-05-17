@@ -977,7 +977,7 @@ class _UiKitViewState
   @override
   _UiKitPlatformView childPlatformView() {
     return _UiKitPlatformView(
-      controller: _controller!,
+      controller: _controller,
       hitTestBehavior: widget.hitTestBehavior,
       gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
     );
@@ -1004,7 +1004,7 @@ class _AppKitViewState
   @override
   _AppKitPlatformView childPlatformView() {
     return _AppKitPlatformView(
-      controller: _controller!,
+      controller: _controller,
       hitTestBehavior: widget.hitTestBehavior,
       gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
     );
@@ -1496,7 +1496,7 @@ class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
 // Displays an Android platform view via GL texture.
 class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
   const _TextureBasedAndroidViewSurface({
-    required AndroidViewController super.controller,
+    required super.controller,
     required super.hitTestBehavior,
     required super.gestureRecognizers,
   });
@@ -1518,7 +1518,7 @@ class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
 
 class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
   const _PlatformLayerBasedAndroidViewSurface({
-    required AndroidViewController super.controller,
+    required super.controller,
     required super.hitTestBehavior,
     required super.gestureRecognizers,
   });

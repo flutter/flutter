@@ -45,7 +45,7 @@ Declarer get _declarer {
       });
     });
   }
-  return _localDeclarer!;
+  return _localDeclarer;
 }
 
 Future<void> _runGroup(

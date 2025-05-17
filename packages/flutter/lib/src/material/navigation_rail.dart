@@ -457,7 +457,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
             child: Column(
               children: <Widget>[
                 _verticalSpacer,
-                if (widget.leading != null) ...<Widget>[widget.leading!, _verticalSpacer],
+                if (widget.leading != null) ...<Widget>[widget.leading, _verticalSpacer],
                 Expanded(
                   child: Align(
                     alignment: Alignment(0, groupAlignment),

@@ -194,7 +194,7 @@ void main() {
     expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, decoration);
 
     final TextStyle dataRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
@@ -204,7 +204,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
     final TextStyle headingRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
@@ -366,7 +366,7 @@ void main() {
     expect(tester.widget<Container>(tableContainerFinder).decoration, decoration);
 
     final TextStyle dataRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
@@ -376,7 +376,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
     final TextStyle headingRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
@@ -548,7 +548,7 @@ void main() {
     );
 
     final TextStyle dataRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
@@ -561,7 +561,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxLocalThemeDataRowHeight);
 
     final TextStyle headingRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,

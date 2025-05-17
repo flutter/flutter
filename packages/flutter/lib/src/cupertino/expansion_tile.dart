@@ -196,7 +196,7 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
         return OverlayPortal(
           controller: _fadeController,
           overlayChildBuilder: (BuildContext context) {
-            final BuildContext headerContext = _headerKey.currentContext!;
+            final BuildContext headerContext = _headerKey.currentContext;
             final RenderBox overlay =
                 Overlay.of(headerContext).context.findRenderObject()! as RenderBox;
             final RenderBox headerBox = headerContext.findRenderObject()! as RenderBox;

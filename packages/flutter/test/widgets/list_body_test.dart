@@ -102,7 +102,7 @@ void main() {
   });
 
   testWidgets('Limited space along main axis error', (WidgetTester tester) async {
-    final FlutterExceptionHandler oldHandler = FlutterError.onError!;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
@@ -135,7 +135,7 @@ void main() {
   });
 
   testWidgets('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
-    final FlutterExceptionHandler oldHandler = FlutterError.onError!;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {

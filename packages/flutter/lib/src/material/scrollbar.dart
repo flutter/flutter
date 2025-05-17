@@ -266,7 +266,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
         _scrollbarTheme.thumbColor?.resolve(states) ?? idleColor,
         _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor,
         _hoverAnimationController.value,
-      )!;
+      );
     });
   }
 

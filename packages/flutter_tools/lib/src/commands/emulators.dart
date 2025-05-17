@@ -51,7 +51,7 @@ class EmulatorsCommand extends FlutterCommand {
         exitCode: 1,
       );
     }
-    final ArgResults argumentResults = argResults!;
+    final ArgResults argumentResults = argResults;
     if (argumentResults.wasParsed('launch')) {
       final bool coldBoot = argumentResults.wasParsed('cold');
       await _launchEmulator(stringArg('launch')!, coldBoot: coldBoot);

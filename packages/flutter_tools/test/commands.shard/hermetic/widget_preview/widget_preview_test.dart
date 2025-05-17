@@ -205,7 +205,7 @@ flutter:
 
   @override
   late final FlutterManifest manifest =
-      FlutterManifest.createFromPath(pubspecFile.path, fileSystem: fileSystem, logger: logger)!;
+      FlutterManifest.createFromPath(pubspecFile.path, fileSystem: fileSystem, logger: logger);
 
   @override
   late FlutterProject widgetPreviewScaffoldProject = FakeFlutterProject(

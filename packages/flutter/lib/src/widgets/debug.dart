@@ -181,7 +181,7 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
     if (widget.key == null) {
       continue;
     }
-    if (!keySet.add(widget.key!)) {
+    if (!keySet.add(widget.key)) {
       return widget.key;
     }
   }

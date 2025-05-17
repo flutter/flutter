@@ -270,7 +270,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         _layoutUnstable();
     }
 
-    size = _currentSize = constraints.constrain(_animatedSize!);
+    size = _currentSize = constraints.constrain(_animatedSize);
     alignChild();
 
     if (size.width < _sizeTween.end!.width || size.height < _sizeTween.end!.height) {
@@ -305,7 +305,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         }
     }
 
-    return constraints.constrain(_animatedSize!);
+    return constraints.constrain(_animatedSize);
   }
 
   void _restartAnimation() {

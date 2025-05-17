@@ -61,7 +61,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> with RestorationMix
 
   void _onFabLocationChanged(int? value) {
     setState(() {
-      _currentFabLocation.value = value!;
+      _currentFabLocation.value = value;
     });
   }
 

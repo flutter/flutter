@@ -1281,7 +1281,7 @@ void main() {
 
     // The color of the selected text item should be the colorScheme.secondary
     final TextStyle selectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('1 item selected')).text.style!;
+        tester.renderObject<RenderParagraph>(find.text('1 item selected')).text.style;
     expect(selectedTextStyle.color, equals(selectedTextColor));
 
     await binding.setSurfaceSize(null);

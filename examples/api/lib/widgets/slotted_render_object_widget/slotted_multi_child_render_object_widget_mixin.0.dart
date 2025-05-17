@@ -137,7 +137,7 @@ class RenderDiagonal extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     // Paint the background.
     if (backgroundColor != null) {
-      context.canvas.drawRect(offset & size, Paint()..color = backgroundColor!);
+      context.canvas.drawRect(offset & size, Paint()..color = backgroundColor);
     }
 
     void paintChild(RenderBox child, PaintingContext context, Offset offset) {
