@@ -7,9 +7,10 @@
 
 #include <cstdlib>
 #include <functional>
+#include <string_view>
 
 void lex(const char* buffer,
          size_t size,
-         std::function<void(const char*)> callback);
+         std::function<void(std::string_view)> callback);
 
 #endif  // FLUTTER_TOOLS_LICENSES_CPP_SRC_LICENSE_CHECKER_H_

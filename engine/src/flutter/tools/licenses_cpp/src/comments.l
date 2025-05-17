@@ -17,7 +17,7 @@ typedef void* yyscan_t;
 #include <string>
 
 struct LexerContext {
-  std::function<void(const char*)> callback;
+  std::function<void(std::string_view)> callback;
   std::string buffer;
 };
 %}
@@ -41,7 +41,7 @@ COMMENT_START (\/\/|#)
   \*\/ {
     BEGIN(INITIAL);
     yyextra->buffer.append(yytext, yyleng);
-    yyextra->callback(yyextra->buffer.c_str());
+    yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
   \n|. {
@@ -55,7 +55,7 @@ COMMENT_START (\/\/|#)
   }
   \n|. {
     BEGIN(INITIAL);
-    yyextra->callback(yyextra->buffer.c_str());
+    yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
 }
@@ -65,7 +65,7 @@ COMMENT_START (\/\/|#)
 
 void lex(const char* buffer,
          size_t size,
-         std::function<void(const char*)> callback) {
+         std::function<void(std::string_view)> callback) {
   LexerContext context;
   context.buffer.reserve(4096);
   context.callback = std::move(callback);
