@@ -23,28 +23,43 @@ struct LexerContext {
 };
 %}
 
+COMMENT_START (\/\/|#)
+
 %x C_COMMENT
 %x BLOCK
 
 %%
-^[ \t]*(\/\/|#)[^\n]* { BEGIN(BLOCK); yyextra->buffer = yytext; }
-^[ \t]*\/\*           { BEGIN(C_COMMENT); yyextra->buffer = yytext;}
+^[ \t]*{COMMENT_START}[^\n]* {
+  BEGIN(BLOCK); yyextra->buffer = yytext;
+}
+^[ \t]*\/\* {
+  BEGIN(C_COMMENT); yyextra->buffer = yytext;
+}
 
 <C_COMMENT>{
-  \*\/                 { BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); yyextra->callback(yyextra->buffer.c_str()); }
-  \n|.                 { absl::StrAppend(&yyextra->buffer, yytext); }
+  \*\/ {
+    BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); 
+    yyextra->callback(yyextra->buffer.c_str());
+  }
+  \n|. {
+    absl::StrAppend(&yyextra->buffer, yytext);
+  }
 }
 
 <BLOCK>{
-  \n[ \t]*(\/\/|#)[^\n]* { absl::StrAppend(&yyextra->buffer, yytext); }
-  \n|.                   { BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str()); }
+  \n[ \t]*{COMMENT_START}[^\n]* {
+    absl::StrAppend(&yyextra->buffer, yytext);
+  }
+  \n|. {
+    BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str());
+  }
 }
 
 \n|. {}
 %%
 
-void lex(const char* buffer, 
-         size_t size, 
+void lex(const char* buffer,
+         size_t size,
          std::function<void(const char*)> callback) {
   LexerContext context;
   context.callback = std::move(callback);

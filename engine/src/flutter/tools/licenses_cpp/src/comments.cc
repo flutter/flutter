@@ -716,7 +716,7 @@ YY_DECL
 		}
 
 	{
-#line 29 "comments.l"
+#line 31 "comments.l"
 
 #line 721 "comments.cc"
 
@@ -778,53 +778,66 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 30 "comments.l"
-{ BEGIN(BLOCK); yyextra->buffer = yytext; }
+#line 32 "comments.l"
+{
+  BEGIN(BLOCK); yyextra->buffer = yytext;
+}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 31 "comments.l"
-{ BEGIN(C_COMMENT); yyextra->buffer = yytext;}
+#line 35 "comments.l"
+{
+  BEGIN(C_COMMENT); yyextra->buffer = yytext;
+}
 	YY_BREAK
 
 case 3:
 YY_RULE_SETUP
-#line 34 "comments.l"
-{ BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); yyextra->callback(yyextra->buffer.c_str()); }
+#line 40 "comments.l"
+{
+    BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); 
+    yyextra->callback(yyextra->buffer.c_str());
+  }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 35 "comments.l"
-{ absl::StrAppend(&yyextra->buffer, yytext); }
+#line 44 "comments.l"
+{
+    absl::StrAppend(&yyextra->buffer, yytext);
+  }
 	YY_BREAK
 
 
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 39 "comments.l"
-{ absl::StrAppend(&yyextra->buffer, yytext); }
+#line 50 "comments.l"
+{
+    absl::StrAppend(&yyextra->buffer, yytext);
+  }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 40 "comments.l"
-{ BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str()); }
+#line 53 "comments.l"
+{
+    BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str());
+  }
 	YY_BREAK
 
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 43 "comments.l"
+#line 58 "comments.l"
 {}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 44 "comments.l"
+#line 59 "comments.l"
 ECHO;
 	YY_BREAK
-#line 827 "comments.cc"
+#line 840 "comments.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(C_COMMENT):
 case YY_STATE_EOF(BLOCK):
@@ -1998,11 +2011,11 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 44 "comments.l"
+#line 59 "comments.l"
 
 
-void lex(const char* buffer, 
-         size_t size, 
+void lex(const char* buffer,
+         size_t size,
          std::function<void(const char*)> callback) {
   LexerContext context;
   context.callback = std::move(callback);
