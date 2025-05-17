@@ -42,7 +42,9 @@ TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root;
   root.id = 0;
-  root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.is_text_field = true;
+  root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -87,7 +89,9 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root;
   root.id = 0;
-  root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.is_text_field = true;
+  root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
