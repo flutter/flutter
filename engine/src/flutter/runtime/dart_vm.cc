@@ -344,11 +344,9 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
   // precompiled code only in the debug product mode.
   bool enable_asserts = !settings_.disable_dart_asserts;
 
-#if !OS_FUCHSIA
   if (IsRunningPrecompiledCode()) {
     enable_asserts = false;
   }
-#endif  // !OS_FUCHSIA
 
 #if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 #if !FML_OS_IOS && !FML_OS_MACOSX
