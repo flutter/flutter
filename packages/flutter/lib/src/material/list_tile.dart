@@ -871,9 +871,11 @@ class ListTile extends StatelessWidget {
         );
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
     final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: effectiveIconColor,
-      ).merge(IconButtonTheme.of(context).style),
+      style:
+          IconButtonTheme.of(
+            context,
+          ).style?.copyWith(foregroundColor: WidgetStatePropertyAll<Color?>(effectiveIconColor)) ??
+          IconButton.styleFrom(foregroundColor: effectiveIconColor),
     );
 
     TextStyle? leadingAndTrailingStyle;
