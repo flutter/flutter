@@ -64,6 +64,9 @@ abstract class FeatureFlags {
   /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
   bool get isOmitLegacyVersionFileEnabled;
 
+  /// Whether desktop multi-window is enabled.
+  bool get isMultiWindowEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -83,6 +86,7 @@ abstract class FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
+    multiWindowFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -201,6 +205,16 @@ const omitLegacyVersionFile = Feature(
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether desktop multi-window is enabled.
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+const multiWindowFeature = Feature(
+  name: 'support for multi-window on macOS, Linux, and Windows',
+  configSetting: 'enable-multi-window',
+  environmentOverride: 'FLUTTER_MULTI_WINDOW',
+  runtimeId: 'multi_window',
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
