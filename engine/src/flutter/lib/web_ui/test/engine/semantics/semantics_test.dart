@@ -148,6 +148,9 @@ void runSemanticsTests() {
   group('SemanticsValidationResult', () {
     _testSemanticsValidationResult();
   });
+  group('landmarks', () {
+    _testLandmarks();
+  });
 }
 
 void _testSemanticRole() {
@@ -4870,6 +4873,117 @@ void _testSemanticsValidationResult() {
   <sem id="flt-semantic-node-3" aria-invalid--missing></sem>
 </sem>''');
   });
+}
+
+void _testLandmarks() {
+  test('nodes with complementary role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.complementary,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.complementary);
+    expect(object.element.getAttribute('role'), 'complementary');
+  });
+
+  test('nodes with contentInfo role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.contentInfo,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object.element.getAttribute('role'), 'contentinfo');
+  });
+
+  test('nodes with main role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.main,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object.element.getAttribute('role'), 'main');
+  });
+
+  test('nodes with navigation role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.navigation,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.navigation);
+    expect(object.element.getAttribute('role'), 'navigation');
+  });
+
+  test('nodes with region role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Header 1',
+        role: ui.SemanticsRole.region,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.region);
+    expect(object.element.getAttribute('role'), 'region');
+    expect(object.element.getAttribute('aria-label'), 'Header 1');
+  });
+
+  semantics().semanticsEnabled = false;
 }
 
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
