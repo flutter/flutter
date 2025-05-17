@@ -30,7 +30,6 @@ import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Examples can assume:

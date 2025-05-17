@@ -36,10 +36,10 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
     sysroot = ""
   }
 } else if (is_mac) {
-  import("//build/config/apple/apple_sdk.gni")
+  import("//build/config/darwin/darwin_sdk.gni")
   sysroot = mac_sdk_path
 } else if (is_ios) {
-  import("//build/config/apple/apple_sdk.gni")
+  import("//build/config/darwin/darwin_sdk.gni")
   sysroot = ios_sdk_path
 } else {
   sysroot = ""

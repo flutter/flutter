@@ -1001,6 +1001,51 @@ void main() {
       'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
   });
+
+  testWidgets('IndexedStack does not assert with the default parameters', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(textDirection: TextDirection.ltr, child: IndexedStack()),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('IndexedStack does not assert when index is null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: null, children: <Widget>[SizedBox.shrink(), SizedBox.shrink()]),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('IndexedStack asserts when index is negative', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: -1, children: <Widget>[SizedBox.shrink(), SizedBox.shrink()]),
+      ),
+    );
+
+    expect(tester.takeException(), isA<AssertionError>());
+  });
+
+  testWidgets('IndexedStack asserts when index is not in children range', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: 2, children: <Widget>[SizedBox.shrink(), SizedBox.shrink()]),
+      ),
+    );
+
+    expect(tester.takeException(), isA<AssertionError>());
+  });
 }
 
 class _ShowVisibility extends StatelessWidget {

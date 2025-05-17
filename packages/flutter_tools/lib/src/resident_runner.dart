@@ -1108,7 +1108,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   // there is no devFS associated with the first device.
   Uri? get uri => flutterDevices.first.devFS?.baseUri;
 
-  /// Returns [true] if the resident runner exited after invoking [exit()].
+  /// Returns `true` if the resident runner exited after invoking [exit].
   bool get exited => _exited;
 
   @override
@@ -1659,7 +1659,7 @@ class TerminalHandler {
     subscription?.cancel();
   }
 
-  /// Returns [true] if the input has been handled by this function.
+  /// Returns `true` if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
     switch (character) {

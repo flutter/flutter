@@ -4238,6 +4238,47 @@ void main() {
     final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.restorationId, restorationId);
   });
+
+  testWidgets(
+    'DropdownMenu does not include the default trailing icon when showTrailingIcon is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              showTrailingIcon: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down);
+      expect(iconButton, findsNothing);
+    },
+  );
+
+  testWidgets(
+    'DropdownMenu does not include the provided trailing icon when showTrailingIcon is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              trailingIcon: const Icon(Icons.ac_unit),
+              showTrailingIcon: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.ac_unit);
+      expect(iconButton, findsNothing);
+    },
+  );
 }
 
 enum TestMenu {

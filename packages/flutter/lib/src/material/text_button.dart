@@ -516,7 +516,6 @@ class _TextButtonWithIconChild extends StatelessWidget {
         buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale =
         clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
-    final double gap = lerpDouble(8, 4, scale)!;
     final TextButtonThemeData textButtonTheme = TextButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment =
         iconAlignment ??
@@ -525,10 +524,11 @@ class _TextButtonWithIconChild extends StatelessWidget {
         IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: lerpDouble(8, 4, scale)!,
       children:
           effectiveIconAlignment == IconAlignment.start
-              ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-              : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+              ? <Widget>[icon, Flexible(child: label)]
+              : <Widget>[Flexible(child: label), icon],
     );
   }
 }

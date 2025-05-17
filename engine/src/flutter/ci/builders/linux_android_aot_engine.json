@@ -155,7 +155,11 @@
                     "parameters": [
                         "../../src/out/ci/android_release_arm64/libflutter.so",
                         "${FLUTTER_LOGS_DIR}"
-                    ]
+                    ],
+                    "upload_logs": {
+                        "name": "android-arm64-release",
+                        "uuid": "sizes"
+                    }
                 }
             ]
         },

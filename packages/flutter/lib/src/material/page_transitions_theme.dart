@@ -571,11 +571,14 @@ class _FadeForwardsPageTransition extends StatelessWidget {
         );
       },
       reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-        return FadeTransition(
-          opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
-          child: SlideTransition(
-            position: _backwardTranslationTween.animate(animation),
-            child: child,
+        return IgnorePointer(
+          ignoring: animation.status == AnimationStatus.forward,
+          child: FadeTransition(
+            opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
+            child: SlideTransition(
+              position: _backwardTranslationTween.animate(animation),
+              child: child,
+            ),
           ),
         );
       },

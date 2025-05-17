@@ -189,8 +189,7 @@ class _PredictiveBackPageTransition extends StatelessWidget {
   final Widget child;
 
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
-    final Size size = MediaQuery.sizeOf(context);
-    final double screenWidth = size.width;
+    final double screenWidth = MediaQuery.widthOf(context);
     final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
 
     final bool isCurrent = getIsCurrent();
@@ -233,8 +232,7 @@ class _PredictiveBackPageTransition extends StatelessWidget {
   }
 
   Widget _primaryAnimatedBuilder(BuildContext context, Widget? child) {
-    final Size size = MediaQuery.sizeOf(context);
-    final double screenWidth = size.width;
+    final double screenWidth = MediaQuery.widthOf(context);
     final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
 
     final Animatable<double> xShiftTween = TweenSequence<double>(<TweenSequenceItem<double>>[

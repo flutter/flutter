@@ -15,6 +15,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
 #include "flutter/testing/display_list_testing.h"
@@ -139,7 +140,7 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
     path_builder.AddCircle(DlPoint(150, 150), 150);
     path_builder.AddRoundRect(
         RoundRect::MakeRectXY(DlRect::MakeLTRB(300, 300, 600, 600), 10, 10));
-    DlPath path(path_builder);
+    DlPath path = path_builder.TakePath();
 
     // Make sure path cannot be simplified...
     EXPECT_FALSE(path.IsRect(nullptr));
@@ -167,9 +168,8 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
     // This moveTo confuses addPath into appending rather than replacing,
     // which prevents it from noticing that it's just a circle...
     path_builder.MoveTo({10, 10});
-    path_builder.AddPath(circle.GetPath());
-    path_builder.SetConvexity(Convexity::kConvex);
-    DlPath path(path_builder);
+    path_builder.AddPath(circle);
+    DlPath path = path_builder.TakePath();
 
     // Make sure path cannot be simplified...
     EXPECT_FALSE(path.IsRect(nullptr));
@@ -177,7 +177,7 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
     EXPECT_FALSE(path.IsRoundRect(nullptr));
 
     // But check that we will trigger the optimal convex code
-    EXPECT_TRUE(path.GetPath().IsConvex());
+    EXPECT_TRUE(path.IsConvex());
 
     paint.setDrawStyle(DlDrawStyle::kFill);
     builder.DrawPath(path, paint);

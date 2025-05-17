@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
-#import "flutter/fml/logging.h"
 
 #include <atomic>
+
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 
 @implementation FlutterResizeSynchronizer {
   std::atomic_bool _inResize;
@@ -29,7 +31,7 @@
       break;
     }
     if (CFAbsoluteTimeGetCurrent() - start > 1.0) {
-      FML_LOG(ERROR) << "Resize timed out.";
+      [FlutterLogger logError:@"Resize timed out."];
       break;
     }
     [FlutterRunLoop.mainRunLoop pollFlutterMessagesOnce];
@@ -43,13 +45,12 @@
   if (_inResize) {
     delay = 0;
   }
-  [FlutterRunLoop.mainRunLoop
-      performBlock:^{
-        _didReceiveFrame = YES;
-        _contentSize = size;
-        notify();
-      }
-        afterDelay:delay];
+  [FlutterRunLoop.mainRunLoop performAfterDelay:delay
+                                          block:^{
+                                            _didReceiveFrame = YES;
+                                            _contentSize = size;
+                                            notify();
+                                          }];
 }
 
 - (void)shutDown {

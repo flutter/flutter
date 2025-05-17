@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'application_package.dart';
+library;
+
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -136,7 +139,7 @@ final RegExp _certificateCommonNameExtractionPattern = RegExp(r'CN=([a-zA-Z0-9\s
 /// Throws an error if the user cancels identity selection or if no identities
 /// are found.
 ///
-/// Will return null if the `DEVELOPMENT_TEAM` or `PROVISIONING_PROFILE` are
+/// Will return `null` if the `DEVELOPMENT_TEAM` or `PROVISIONING_PROFILE` are
 /// already set in the Xcode project's build settings.
 Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
   required Map<String, String> buildSettings,
@@ -185,7 +188,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
 /// `ios-signing-cert` is not saved or invalid.
 ///
 /// If `ios-signing-profile` (manual code-signing with a provisioning profile)
-/// is saved instead, returns null.
+/// is saved instead, returns `null`.
 Future<String?> getCodeSigningIdentityDevelopmentTeam({
   required ProcessManager processManager,
   required Platform platform,

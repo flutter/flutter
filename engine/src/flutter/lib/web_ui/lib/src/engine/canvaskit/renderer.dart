@@ -96,7 +96,7 @@ class CanvasKitRenderer implements Renderer {
         canvasKit = windowFlutterCanvasKit!;
       } else if (windowFlutterCanvasKitLoaded != null) {
         // CanvasKit is being preloaded by flutter.js. Wait for it to complete.
-        canvasKit = await promiseToFuture<CanvasKit>(windowFlutterCanvasKitLoaded!);
+        canvasKit = await windowFlutterCanvasKitLoaded!.toDart;
       } else {
         canvasKit = await downloadCanvasKit();
         windowFlutterCanvasKit = canvasKit;

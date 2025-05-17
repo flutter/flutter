@@ -1443,4 +1443,29 @@ void main() {
     // The dropdown should still be open, i.e., there should be one widget with 'second' text.
     expect(find.text('second'), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157074.
+  testWidgets('DropdownButtonFormField icon is aligned with label text', (
+    WidgetTester tester,
+  ) async {
+    const String labelText = 'Label Text';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: labelText),
+              items:
+                  <String>['One', 'Two'].map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(value: value, child: Text(value));
+                  }).toList(),
+              onChanged: (String? value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.text(labelText)).dy, tester.getCenter(find.byType(Icon).last).dy);
+  });
 }

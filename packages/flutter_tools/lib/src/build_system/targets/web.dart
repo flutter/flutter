@@ -571,7 +571,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // in question.
     final String? serviceWorkerVersion =
         includeServiceWorkerSettings ? Random().nextInt(1 << 32).toString() : null;
-    bootstrapTemplate.applySubstitutions(
+    final String bootstrapContent = bootstrapTemplate.withSubstitutions(
       baseHref: '',
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
@@ -581,7 +581,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     final File outputFlutterBootstrapJs = fileSystem.file(
       fileSystem.path.join(environment.outputDir.path, 'flutter_bootstrap.js'),
     );
-    await outputFlutterBootstrapJs.writeAsString(bootstrapTemplate.content);
+    await outputFlutterBootstrapJs.writeAsString(bootstrapContent);
 
     await for (final FileSystemEntity file in webResources.list(recursive: true)) {
       if (file is File && file.basename == 'index.html') {
@@ -592,18 +592,18 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
           _emitWebTemplateWarning(environment, relativePath, warning);
         }
 
-        indexHtmlTemplate.applySubstitutions(
+        final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
           serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
-          flutterBootstrapJs: bootstrapTemplate.content,
+          flutterBootstrapJs: bootstrapContent,
         );
         final File outputIndexHtml = fileSystem.file(
           fileSystem.path.join(environment.outputDir.path, relativePath),
         );
         await outputIndexHtml.create(recursive: true);
-        await outputIndexHtml.writeAsString(indexHtmlTemplate.content);
+        await outputIndexHtml.writeAsString(indexHtmlContent);
       }
     }
   }

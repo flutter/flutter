@@ -46,13 +46,11 @@ bool FillRectGeometry::IsAxisAlignedRect() const {
   return true;
 }
 
-StrokeRectGeometry::StrokeRectGeometry(Rect rect,
-                                       Scalar stroke_width,
-                                       Join stroke_join,
-                                       Scalar miter_limit)
+StrokeRectGeometry::StrokeRectGeometry(const Rect& rect,
+                                       const StrokeParameters& stroke)
     : rect_(rect),
-      stroke_width_(stroke_width),
-      stroke_join_(AdjustStrokeJoin(stroke_join, miter_limit)) {}
+      stroke_width_(stroke.width),
+      stroke_join_(AdjustStrokeJoin(stroke)) {}
 
 StrokeRectGeometry::~StrokeRectGeometry() = default;
 
@@ -209,8 +207,10 @@ std::optional<Rect> StrokeRectGeometry::GetCoverage(
   return rect_.TransformBounds(transform);
 }
 
-Join StrokeRectGeometry::AdjustStrokeJoin(Join join, Scalar miter_limit) {
-  return (join == Join::kMiter && miter_limit < kSqrt2) ? Join::kBevel : join;
+Join StrokeRectGeometry::AdjustStrokeJoin(const StrokeParameters& stroke) {
+  return (stroke.join == Join::kMiter && stroke.miter_limit < kSqrt2)
+             ? Join::kBevel
+             : stroke.join;
 }
 
 Point* StrokeRectGeometry::AppendRoundCornerJoin(

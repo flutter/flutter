@@ -64,7 +64,7 @@ Future<int> run(
         flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object? firstError;
     StackTrace? firstStackTrace;
-    return runZoned<Future<int>>(
+    return runZonedGuarded<Future<int>>(
       () async {
         try {
           if (args.contains('--disable-analytics') && args.contains('--enable-analytics')) {
@@ -122,7 +122,7 @@ Future<int> run(
           );
         }
       },
-      onError: (Object error, StackTrace stackTrace) async {
+      (Object error, StackTrace stackTrace) async {
         // If sending a crash report throws an error into the zone, we don't want
         // to re-try sending the crash report with *that* error. Rather, we want
         // to send the original error that triggered the crash report.
@@ -138,7 +138,7 @@ Future<int> run(
           shutdownHooks,
         );
       },
-    );
+    )!;
   }, overrides: overrides);
 }
 

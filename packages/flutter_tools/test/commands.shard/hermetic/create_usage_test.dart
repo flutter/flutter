@@ -51,7 +51,7 @@ class FakePub extends Fake implements Pub {
 
 void main() {
   group('usageValues', () {
-    late Testbed testbed;
+    late TestBed testbed;
     late FakePub fakePub;
 
     setUpAll(() {
@@ -60,7 +60,7 @@ void main() {
     });
 
     setUp(() {
-      testbed = Testbed(
+      testbed = TestBed(
         setup: () {
           fakePub = FakePub();
           Cache.flutterRoot = 'flutter';

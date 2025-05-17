@@ -16,10 +16,12 @@ import android.view.ViewTreeObserver.OnWindowFocusChangeListener;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
+import io.flutter.Build;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
@@ -1084,6 +1086,7 @@ public class FlutterFragment extends Fragment
 
   @Nullable
   @Override
+  @RequiresApi(Build.API_LEVELS.API_24)
   public View onCreateView(
       LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     return delegate.onCreateView(
@@ -1142,6 +1145,7 @@ public class FlutterFragment extends Fragment
   }
 
   @Override
+  @RequiresApi(Build.API_LEVELS.API_24)
   public void onDestroyView() {
     super.onDestroyView();
     requireView()
@@ -1161,6 +1165,7 @@ public class FlutterFragment extends Fragment
   }
 
   @Override
+  @RequiresApi(Build.API_LEVELS.API_24)
   public void detachFromFlutterEngine() {
     Log.w(
         TAG,

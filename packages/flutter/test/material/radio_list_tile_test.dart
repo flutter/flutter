@@ -1645,4 +1645,513 @@ void main() {
 
     expect(widget.transform.getMaxScaleOnAxis(), scale);
   });
+
+  testWidgets('RadioListTile isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double size = 40.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme:
+            themeDataIsThreeLine != null
+                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+                : null,
+        home: Material(
+          child: ListTileTheme(
+            data:
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            child: ListView(
+              children: <Widget>[
+                RadioListTile<int>(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                  value: 0,
+                  onChanged: null,
+                  groupValue: 1,
+                ),
+                RadioListTile<int>(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                  value: 0,
+                  onChanged: null,
+                  groupValue: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 130.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 16, size, size),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, size, size),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
+  });
+
+  testWidgets('RadioListTile.adaptive isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double size = 18.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          listTileTheme:
+              themeDataIsThreeLine != null
+                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+                  : null,
+        ),
+        home: Material(
+          child: ListTileTheme(
+            data:
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            child: ListView(
+              children: <Widget>[
+                RadioListTile<int>.adaptive(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                  value: 0,
+                  onChanged: null,
+                  groupValue: 1,
+                ),
+                RadioListTile<int>.adaptive(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                  value: 0,
+                  onChanged: null,
+                  groupValue: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 141.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 27.0, size, size),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, size, size),
+      );
+      expect(
+        tester.getRect(find.byType(RadioListTile<int>).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(Radio<int>).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, size, size),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
+  });
+
+  testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
+    const Key secondaryKey = Key('secondary');
+    const double titleHeight = 50.0;
+    const double secondaryHeight = 24.0;
+    // The default vertical padding for material 3 is 8.0.
+    const double minVerticalPadding = 8.0;
+
+    Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RadioListTile<bool>(
+              titleAlignment: titleAlignment,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: true,
+              groupValue: true,
+              onChanged: (bool? newValue) {},
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              secondary: const SizedBox(key: secondaryKey, width: 24.0, height: secondaryHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    final double radioHeight = tester.getSize(find.byType(Radio<bool>)).height;
+    final double tileHeight = tester.getSize(find.byType(ListTile)).height;
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == null;
+      }),
+      findsOne,
+    );
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    Offset secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    final double centerPositionRadio = (tileHeight / 2) - (radioHeight / 2);
+    final double centerPositionSecondary = (tileHeight / 2) - (secondaryHeight / 2);
+    expect(radioOffset.dy - tileOffset.dy, centerPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.threeLine;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.titleHeight;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    expect(radioOffset.dy - tileOffset.dy, (tileHeight - radioHeight) / 2);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.top;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget. The default for material 3 is 8.0.
+    const double topPosition = minVerticalPadding;
+    expect(radioOffset.dy - tileOffset.dy, topPosition);
+    expect(secondaryOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.center;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionSecondary);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.bottom;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    final double bottomPositionRadio = tileHeight - minVerticalPadding - radioHeight;
+    final double bottomPositionSecondary = tileHeight - minVerticalPadding - secondaryHeight;
+    expect(radioOffset.dy - tileOffset.dy, bottomPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
+
+  testWidgets('titleAlignment position with title and subtitle widgets', (
+    WidgetTester tester,
+  ) async {
+    const Key secondaryKey = Key('secondary');
+    const double titleHeight = 50.0;
+    const double subtitleHeight = 50.0;
+    const double secondaryHeight = 24.0;
+    const double verticalPadding = 8.0;
+
+    Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RadioListTile<bool>(
+              titleAlignment: titleAlignment,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+              secondary: const SizedBox(key: secondaryKey, width: 24.0, height: secondaryHeight),
+              value: true,
+              groupValue: true,
+              onChanged: (bool? newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    final double tileHeight = tester.getSize(find.byType(ListTile)).height;
+    final double radioHeight = tester.getSize(find.byType(Radio<bool>)).height;
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == null;
+      }),
+      findsOne,
+    );
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    Offset secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    final double centerPositionOffsetRadio = (tileHeight / 2) - (radioHeight / 2);
+    final double centerPositionOffsetSecondary = (tileHeight / 2) - (secondaryHeight / 2);
+    expect(radioOffset.dy - tileOffset.dy, centerPositionOffsetRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.threeLine;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionOffsetRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.titleHeight;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are positioned 16.0 pixels below the
+    // top of the title widget.
+    const double titlePosition = 16.0;
+    expect(radioOffset.dy - tileOffset.dy, titlePosition);
+    expect(secondaryOffset.dy - tileOffset.dy, titlePosition);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.top;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget.
+    const double topPosition = verticalPadding;
+    expect(radioOffset.dy - tileOffset.dy, topPosition);
+    expect(secondaryOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.center;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(radioOffset.dy - tileOffset.dy, centerPositionOffsetRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, centerPositionOffsetSecondary);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is ListTile && widget.titleAlignment == ListTileTitleAlignment.bottom;
+      }),
+      findsOne,
+    );
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    radioOffset = tester.getTopLeft(find.byType(Radio<bool>));
+    secondaryOffset = tester.getTopRight(find.byKey(secondaryKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    final double bottomPositionRadio = tileHeight - verticalPadding - radioHeight;
+    final double bottomPositionSecondary = tileHeight - verticalPadding - secondaryHeight;
+    expect(radioOffset.dy - tileOffset.dy, bottomPositionRadio);
+    expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
 }
