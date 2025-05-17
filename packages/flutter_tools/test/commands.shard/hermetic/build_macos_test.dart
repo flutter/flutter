@@ -899,4 +899,57 @@ STDERR STUFF
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },
   );
+
+  testUsingContext(
+    'macos build --no-codesign skips codesigning',
+    () async {
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        logger: logger,
+        fileSystem: fileSystem,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            '/macos/Runner.xcworkspace',
+            '-configuration',
+            'Release',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            '/build/macos',
+            '-destination',
+            'platform=macOS',
+            'OBJROOT=/build/macos/Build/Intermediates.noindex',
+            'SYMROOT=/build/macos/Build/Products',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGNING_IDENTITY=""',
+          ],
+        ),
+      ]);
+      createMinimalMockProjectFiles();
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--no-pub', '--no-codesign']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.statusText, contains('Codesigning disabled with --no-codesign'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: FakePubWithPrimedDeps.new,
+      Platform: () => macosPlatform,
+    },
+  );
 }
