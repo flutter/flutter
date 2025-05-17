@@ -25,6 +25,7 @@ class BuildMacosCommand extends BuildSubCommand {
           'This can be used in CI/CD process that create an archive to avoid '
           'performing duplicate work.',
     );
+    argParser.addFlag('codesign', defaultsTo: true, help: 'Codesign the application bundle.');
   }
 
   @override
@@ -45,6 +46,8 @@ class BuildMacosCommand extends BuildSubCommand {
   bool get supported => globals.platform.isMacOS;
 
   bool get configOnly => boolArg('config-only');
+
+  bool get shouldCodesign => boolArg('codesign');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -70,6 +73,7 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       usingCISystem: usingCISystem,
+      codesign: shouldCodesign,
     );
     return FlutterCommandResult.success();
   }
