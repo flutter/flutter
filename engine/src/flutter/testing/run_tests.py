@@ -506,6 +506,15 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       xvfb.stop_virtual_x(build_name)
 
   if is_mac():
+    # macOS Desktop unit tests written in Swift.
+    run_engine_executable(
+        build_dir,
+        'flutter_desktop_darwin_swift_unittests',
+        executable_filter,
+        shuffle_flags,
+        coverage=coverage
+    )
+
     # flutter_desktop_darwin_unittests uses global state that isn't handled
     # correctly by gtest-parallel.
     # https://github.com/flutter/flutter/issues/104789

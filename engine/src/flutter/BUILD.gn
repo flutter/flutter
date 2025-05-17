@@ -269,7 +269,10 @@ group("unittests") {
       }
 
       if (is_mac) {
-        public_deps += [ "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests" ]
+        public_deps += [
+          "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_swift_unittests",
+          "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+        ]
       }
 
       if (is_win) {
