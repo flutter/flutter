@@ -12,8 +12,8 @@ TEST(CommentsTest, Simple) {
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](const char* comment) {
-    comments.push_back(comment);
+  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
   });
 
   ASSERT_EQ(comments.size(), 1u);
@@ -26,8 +26,8 @@ hello world
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](const char* comment) {
-    comments.push_back(comment);
+  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
   });
 
   ASSERT_EQ(comments.size(), 0u);
@@ -42,8 +42,8 @@ dfdd
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](const char* comment) {
-    comments.push_back(comment);
+  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
   });
 
   ASSERT_EQ(comments.size(), 1u);
@@ -59,8 +59,8 @@ daa
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](const char* comment) {
-    comments.push_back(comment);
+  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
   });
 
   ASSERT_EQ(comments.size(), 1u);

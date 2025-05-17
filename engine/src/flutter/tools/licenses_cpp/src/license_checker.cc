@@ -9,15 +9,13 @@
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
+#include "flutter/tools/licenses_cpp/src/comments.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
 #include "flutter/tools/licenses_cpp/src/mmap_file.h"
 
 namespace fs = std::filesystem;
 
-const char* LicenseChecker::kHeaderLicenseRegex = R"regex(
-(?im)^(?= *(?://|#).*\b(?:License|Copyright)\b) *(?://|#)[^\n]*
-(?:\n *(?://|#)[^\n]*)*
-)regex";
+const char* LicenseChecker::kHeaderLicenseRegex = "(License|Copyright)";
 
 namespace {
 const std::array<std::string_view, 3> kLicenseFileNames = {
@@ -128,12 +126,14 @@ int LicenseChecker::Run(std::string_view working_dir,
           return 1;
         }
       }
-      re2::StringPiece input(file->GetData(), file->GetSize());
-      re2::StringPiece match;
-      while (RE2::FindAndConsume(&input, pattern, &match)) {
-        did_find_copyright = true;
-        VLOG(1) << match;
-      }
+      lex(file->GetData(), file->GetSize(), [&](std::string_view comment) {
+        VLOG(2) << comment;
+        re2::StringPiece match;
+        if (RE2::PartialMatch(comment, pattern, &match)) {
+          did_find_copyright = true;
+          VLOG(1) << comment;
+        }
+      });
       if (!did_find_copyright) {
         std::cerr << "Expected copyright in " << full_path << std::endl;
         return_code = 1;

@@ -447,7 +447,7 @@ typedef void* yyscan_t;
 #include <string>
 
 struct LexerContext {
-  std::function<void(const char*)> callback;
+  std::function<void(std::string_view)> callback;
   std::string buffer;
 };
 #line 453 "comments.cc"
@@ -798,7 +798,7 @@ YY_RULE_SETUP
 {
     BEGIN(INITIAL);
     yyextra->buffer.append(yytext, yyleng);
-    yyextra->callback(yyextra->buffer.c_str());
+    yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
 	YY_BREAK
@@ -826,7 +826,7 @@ YY_RULE_SETUP
 #line 56 "comments.l"
 {
     BEGIN(INITIAL);
-    yyextra->callback(yyextra->buffer.c_str());
+    yyextra->callback(yyextra->buffer);
     yyextra->buffer.clear();
   }
 	YY_BREAK
@@ -2021,7 +2021,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 void lex(const char* buffer,
          size_t size,
-         std::function<void(const char*)> callback) {
+         std::function<void(std::string_view)> callback) {
   LexerContext context;
   context.buffer.reserve(4096);
   context.callback = std::move(callback);
