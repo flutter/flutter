@@ -425,6 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
+    this.statesController,
   }) : assert(isThreeLine != true || subtitle != null);
 
   /// A widget to display before the title.
@@ -762,6 +763,9 @@ class ListTile extends StatelessWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// {@macro flutter.material.inkwell.statesController}
+  final MaterialStatesController? statesController;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -970,6 +974,7 @@ class ListTile extends StatelessWidget {
       splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
+      statesController: statesController,
       child: Semantics(
         button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
         selected: selected,
