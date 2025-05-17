@@ -3501,7 +3501,7 @@ class _InspectorOverlayLayer extends Layer {
     if (!targetRect.hasNaN) {
       final Offset target = Offset(targetRect.left, targetRect.center.dy);
       const double offsetFromWidget = 9.0;
-      final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
+      final double verticalOffset = targetRect.height / 2 + offsetFromWidget;
 
       _paintDescription(
         canvas,
