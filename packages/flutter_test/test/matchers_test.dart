@@ -1556,6 +1556,33 @@ void main() {
       );
     });
   });
+
+  testWidgets('did not find any matching candidate for the first finder in the findersList', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+    late TestFailure failure;
+    try {
+      expect(
+        find.text('foo'),
+        findsAscendinglyOrderedWidgets(<Finder>[find.text('bar'), find.byType(SizedBox)]),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+    expect(failure, isNotNull);
+    final String message = failure.message!;
+    expect(
+      message,
+      contains(
+        'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+      ),
+    );
+    expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+    expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+    expect(message, contains('means none were found but multiple were expected'));
+  });
 }
 
 enum _ComparatorBehavior { returnTrue, returnFalse, throwTestFailure }
