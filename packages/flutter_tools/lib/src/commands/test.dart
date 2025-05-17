@@ -421,14 +421,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       testTimeRecorder = TestTimeRecorder(globals.logger);
     }
 
-    if (buildInfo.packageConfig['test_api'] == null) {
+    if (buildInfo.packageConfig['flutter_test'] == null) {
       throwToolExit(
-        'Error: cannot run without a dependency on either "package:flutter_test" or "package:test". '
-        'Ensure the following lines are present in your pubspec.yaml:'
+        'Error: cannot run without a dependency on either "package:flutter_test". '
+        'Run the following command to add it to pubspec.yaml:'
         '\n\n'
-        'dev_dependencies:\n'
-        '  flutter_test:\n'
-        '    sdk: flutter\n',
+        '> flutter pub add dev:flutter_test',
       );
     }
 
@@ -641,6 +639,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (experimentalFasterTesting) {
       assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
       result = await testRunner.runTestsBySpawningLightweightEngines(
+        buildInfo: buildInfo,
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,
         names: names,
