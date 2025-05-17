@@ -211,7 +211,13 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
+      className:
+          '${_capitalize(platform)}${_capitalize(iosLanguage)}${_capitalize(dependencyManager)}Plugin',
     );
+  }
+
+  static String _capitalize(String str) {
+    return str[0].toUpperCase() + str.substring(1);
   }
 
   static void addDependency({
@@ -269,6 +275,7 @@ class SwiftPackageManagerUtils {
                 'integration_test',
                 'integration_test_macos',
               ),
+      className: 'IntegrationTestPlugin',
     );
   }
 
@@ -370,11 +377,13 @@ class SwiftPackageManagerPlugin {
     required this.pluginName,
     required this.pluginPath,
     required this.platform,
+    required this.className,
   });
 
   final String pluginName;
   final String pluginPath;
   final String platform;
+  final String className;
   String get exampleAppPath => fileSystem.path.join(pluginPath, 'example');
   String get exampleAppPlatformPath => fileSystem.path.join(exampleAppPath, platform);
   String get swiftPackagePlatformPath => fileSystem.path.join(pluginPath, platform, pluginName);
