@@ -340,8 +340,8 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-#define YY_NUM_RULES 6
-#define YY_END_OF_BUFFER 7
+#define YY_NUM_RULES 8
+#define YY_END_OF_BUFFER 9
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -349,10 +349,11 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[20] =
+static const flex_int16_t yy_accept[27] =
     {   0,
-        0,    0,    0,    0,    7,    5,    5,    5,    1,    5,
-        4,    4,    2,    0,    1,    0,    1,    3,    0
+        0,    0,    0,    0,    0,    0,    9,    7,    7,    1,
+        7,    4,    4,    6,    6,    0,    1,    0,    1,    2,
+        3,    0,    5,    0,    5,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -389,37 +390,39 @@ static const YY_CHAR yy_ec[256] =
 
 static const YY_CHAR yy_meta[7] =
     {   0,
-        1,    1,    2,    1,    3,    4
+        1,    1,    2,    1,    1,    3
     } ;
 
-static const flex_int16_t yy_base[26] =
+static const flex_int16_t yy_base[34] =
     {   0,
-       21,    0,   21,   20,   24,   28,    0,    5,    0,   15,
-       28,    0,   28,    0,    0,    0,    0,   28,   28,   11,
-       15,    7,   19,    4,    1
+        0,    0,   24,   12,   12,    7,    8,   34,    5,    0,
+        7,   34,    0,   34,   12,    0,    0,    0,    0,   34,
+       34,    0,    0,    0,    0,   34,   18,   21,   24,   27,
+        2,   30,    0
     } ;
 
-static const flex_int16_t yy_def[26] =
+static const flex_int16_t yy_def[34] =
     {   0,
-       20,   20,   21,   21,   19,   19,   22,   19,   23,   22,
-       19,   24,   19,    8,   23,   25,   23,   19,    0,   19,
-       19,   19,   19,   19,   19
+       27,   27,   28,   28,   29,   29,   26,   26,   26,   30,
+       26,   26,   31,   26,   26,    9,   30,   11,   30,   26,
+       26,   15,   32,   33,   32,    0,   26,   26,   26,   26,
+       26,   26,   26
     } ;
 
-static const flex_int16_t yy_nxt[35] =
+static const flex_int16_t yy_nxt[41] =
     {   0,
-       19,    8,   19,    9,   15,   10,   14,   18,   15,   13,
-       16,    6,    6,    6,    6,   11,   11,   11,   11,   17,
-       15,   17,   17,   19,   12,   12,    7,    5,   19,   19,
-       19,   19,   19,   19
+       26,    9,   23,   10,   21,   11,   16,   26,   17,   15,
+       18,   20,   17,   22,   15,   23,   13,   24,    8,    8,
+        8,   12,   12,   12,   14,   14,   14,   19,   13,   19,
+       25,   26,   25,    7,   26,   26,   26,   26,   26,   26
     } ;
 
-static const flex_int16_t yy_chk[35] =
+static const flex_int16_t yy_chk[41] =
     {   0,
-        0,    2,    0,    2,   25,    2,    8,   24,    8,   22,
-        8,   20,   20,   20,   20,   21,   21,   21,   21,   23,
-       10,   23,   23,    5,    4,    3,    1,   19,   19,   19,
-       19,   19,   19,   19
+        0,    2,   33,    2,   31,    2,    9,    7,    9,    6,
+        9,   11,   11,   15,    5,   15,    4,   15,   27,   27,
+       27,   28,   28,   28,   29,   29,   29,   30,    3,   30,
+       32,    0,   32,   26,   26,   26,   26,   26,   26,   26
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -448,12 +451,13 @@ struct LexerContext {
   std::function<void(const char*)> callback;
   std::string buffer;
 };
-#line 451 "comments.cc"
+#line 454 "comments.cc"
 
-#line 453 "comments.cc"
+#line 456 "comments.cc"
 
 #define INITIAL 0
 #define C_COMMENT 1
+#define BLOCK 2
 
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
@@ -712,9 +716,9 @@ YY_DECL
 		}
 
 	{
-#line 28 "comments.l"
+#line 29 "comments.l"
 
-#line 717 "comments.cc"
+#line 721 "comments.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -742,13 +746,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 20 )
+				if ( yy_current_state >= 27 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 28 );
+		while ( yy_base[yy_current_state] != 34 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -774,41 +778,56 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 29 "comments.l"
-{ yyextra->callback(yytext); }
+#line 30 "comments.l"
+{ BEGIN(BLOCK); yyextra->buffer = yytext; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 30 "comments.l"
+#line 31 "comments.l"
 { BEGIN(C_COMMENT); yyextra->buffer = yytext;}
 	YY_BREAK
 
 case 3:
 YY_RULE_SETUP
-#line 33 "comments.l"
+#line 34 "comments.l"
 { BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); yyextra->callback(yyextra->buffer.c_str()); }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 34 "comments.l"
+#line 35 "comments.l"
 { absl::StrAppend(&yyextra->buffer, yytext); }
 	YY_BREAK
+
 
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 37 "comments.l"
-{}
+#line 39 "comments.l"
+{ absl::StrAppend(&yyextra->buffer, yytext); }
 	YY_BREAK
 case 6:
+/* rule 6 can match eol */
 YY_RULE_SETUP
-#line 38 "comments.l"
+#line 40 "comments.l"
+{ BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str()); }
+	YY_BREAK
+
+case 7:
+/* rule 7 can match eol */
+YY_RULE_SETUP
+#line 43 "comments.l"
+{}
+	YY_BREAK
+case 8:
+YY_RULE_SETUP
+#line 44 "comments.l"
 ECHO;
 	YY_BREAK
-#line 809 "comments.cc"
+#line 827 "comments.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(C_COMMENT):
+case YY_STATE_EOF(BLOCK):
 	yyterminate();
 
 	case YY_END_OF_BUFFER:
@@ -1107,7 +1126,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 20 )
+			if ( yy_current_state >= 27 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1136,11 +1155,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 20 )
+		if ( yy_current_state >= 27 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 19);
+	yy_is_jam = (yy_current_state == 26);
 
 	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
@@ -1979,10 +1998,12 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 38 "comments.l"
+#line 44 "comments.l"
 
 
-void lex(const char* buffer, size_t size, std::function<void(const char*)> callback) {
+void lex(const char* buffer, 
+         size_t size, 
+         std::function<void(const char*)> callback) {
   LexerContext context;
   context.callback = std::move(callback);
   yyscan_t scanner;

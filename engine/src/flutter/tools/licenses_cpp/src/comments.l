@@ -24,20 +24,28 @@ struct LexerContext {
 %}
 
 %x C_COMMENT
+%x BLOCK
 
 %%
-^[ \t]*(\/\/|#)[^\n]* { yyextra->callback(yytext); }
-\/\*                  { BEGIN(C_COMMENT); yyextra->buffer = yytext;}
+^[ \t]*(\/\/|#)[^\n]* { BEGIN(BLOCK); yyextra->buffer = yytext; }
+^[ \t]*\/\*           { BEGIN(C_COMMENT); yyextra->buffer = yytext;}
 
 <C_COMMENT>{
   \*\/                 { BEGIN(INITIAL); absl::StrAppend(&yyextra->buffer, yytext); yyextra->callback(yyextra->buffer.c_str()); }
   \n|.                 { absl::StrAppend(&yyextra->buffer, yytext); }
 }
 
+<BLOCK>{
+  \n[ \t]*(\/\/|#)[^\n]* { absl::StrAppend(&yyextra->buffer, yytext); }
+  \n|.                   { BEGIN(INITIAL); yyextra->callback(yyextra->buffer.c_str()); }
+}
+
 \n|. {}
 %%
 
-void lex(const char* buffer, size_t size, std::function<void(const char*)> callback) {
+void lex(const char* buffer, 
+         size_t size, 
+         std::function<void(const char*)> callback) {
   LexerContext context;
   context.callback = std::move(callback);
   yyscan_t scanner;
