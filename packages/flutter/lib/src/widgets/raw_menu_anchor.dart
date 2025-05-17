@@ -275,10 +275,14 @@ class RawMenuAnchor extends StatefulWidget {
   /// This callback is used by themed menu widgets to intercept open requests,
   /// typically with the intent of adding a delay or an animation.
   ///
-  /// After an open request is intercepted, handlers are responsible for
-  /// eventually calling `showOverlay` to add the menu to the widget tree. This
-  /// should typically be before an opening animation begins or after a delay
-  /// completes.
+  /// After an open request is intercepted, the handler is responsible for
+  /// eventually calling `showOverlay` to add the menu overlay to the widget
+  /// tree and start the opening animation.
+  ///
+  /// The `showOverlay` call displays the overlay and generally precedes the
+  /// opening animation, since the animation plays on the overlay itself. After
+  /// this call, [MenuController.isOpen] becomes true, and the menus are
+  /// expected to be interactive.
   ///
   /// The `position` argument is the position passed to [MenuController.open].
   /// Handlers should provide this argument to `showOverlay` so that the
@@ -293,9 +297,6 @@ class RawMenuAnchor extends StatefulWidget {
   ///  1. Optional delay.
   ///  2. Call `showOverlay` (whose call chain eventually invokes [onOpen]).
   ///  3. Optionally starts the opening animation.
-  ///
-  /// Once `showOverlay` is called, [MenuController.isOpen] will be set to true,
-  /// and menus are expected to be interactive.
   ///
   /// While [onOpenRequested] will always be called when [MenuController.open]
   /// is called, [onOpen] will only be called when a closed menu is shown, or
