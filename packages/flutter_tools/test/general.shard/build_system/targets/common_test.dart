@@ -1096,6 +1096,8 @@ class FakeFeatureFlags implements FeatureFlags {
   bool get isSwiftPackageManagerEnabled => throw UnimplementedError();
   @override
   bool get isExplicitPackageDependenciesEnabled => throw UnimplementedError();
+  @override
+  bool get isMultiWindowEnabled => throw UnimplementedError();
 
   @override
   bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;

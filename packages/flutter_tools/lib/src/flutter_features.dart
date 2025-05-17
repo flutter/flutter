@@ -54,6 +54,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isExplicitPackageDependenciesEnabled => isEnabled(explicitPackageDependencies);
+
+  @override
+  bool get isMultiWindowEnabled => isEnabled(multiWindowFeature);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {

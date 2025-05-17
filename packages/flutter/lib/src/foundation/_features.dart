@@ -4,6 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 
+/// Whether the multi-window feature  is enabled for the current application.
+///
+/// Do not use this API. Flutter can and will make breaking changes to this API.
+@internal
+bool isMultiWindowEnabled = debugEnabledFeatureFlags.contains('multi_window');
+
 /// The feature flags this app was built with.
 ///
 /// Do not use this API. Flutter can and will make breaking changes to this API.

@@ -56,6 +56,9 @@ abstract class FeatureFlags {
   /// Whether explicit package dependency management is enabled.
   bool get isExplicitPackageDependenciesEnabled => false;
 
+  /// Whether desktop multi-window is enabled.
+  bool get isMultiWindowEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -75,6 +78,7 @@ abstract class FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     explicitPackageDependencies,
+    multiWindowFeature,
   ];
 }
 
@@ -180,6 +184,16 @@ const Feature explicitPackageDependencies = Feature.fullyEnabled(
       'See also:\n'
       '* https://flutter.dev/to/flutter-plugins-configuration.\n'
       '* https://flutter.dev/to/flutter-gen-deprecation.',
+);
+
+const Feature multiWindowFeature = Feature(
+  name: 'support for multi-window on Linux, macOS, and Windows',
+  configSetting: 'enable-multi-window',
+  environmentOverride: 'FLUTTER_MULTI_WINDOW',
+  runtimeId: 'multi_window',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
