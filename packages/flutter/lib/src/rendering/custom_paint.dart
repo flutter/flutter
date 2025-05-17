@@ -990,6 +990,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.isRequired != null) {
       config.isRequired = properties.isRequired;
     }
+    if (properties.isOverlayPortal != null) {
+      config.isOverlayPortal = properties.isOverlayPortal!;
+    }
     if (properties.maxValueLength != null) {
       config.maxValueLength = properties.maxValueLength;
     }

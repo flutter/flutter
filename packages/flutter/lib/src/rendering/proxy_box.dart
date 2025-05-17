@@ -4492,6 +4492,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.isRequired != null) {
       config.isRequired = _properties.isRequired;
     }
+    if (_properties.isOverlayPortal != null) {
+      config.isOverlayPortal = _properties.isOverlayPortal;
+    }
     if (_properties.identifier != null) {
       config.identifier = _properties.identifier!;
     }

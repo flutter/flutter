@@ -1314,6 +1314,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.controlsNodes,
     this.inputType,
     this.validationResult = SemanticsValidationResult.none,
+    this.isOverlayPortal,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -2190,6 +2191,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsInputType? inputType;
 
+  final bool? isOverlayPortal;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -2198,6 +2201,9 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<bool>('isOverlayPortal', isOverlayPortal, defaultValue: null),
+    );
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
@@ -3476,6 +3482,27 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
+  List<SemanticsNode> reorderWithOverlayPortalsFirst(Set<SemanticsNode> overlayPortalNodes) {
+    final List<SemanticsNode> reversedChildren = _children!.reversed.toList();
+    final List<SemanticsNode> hitTestOrder = <SemanticsNode>[];
+
+    for (final SemanticsNode overlayPortal in overlayPortalNodes) {
+      for (final SemanticsNode child in reversedChildren) {
+        if (overlayPortal.id == child.id) {
+          hitTestOrder.add(overlayPortal);
+        }
+      }
+    }
+
+    for (final SemanticsNode child in reversedChildren) {
+      if (!overlayPortalNodes.contains(child)) {
+        hitTestOrder.add(child);
+      }
+    }
+
+    return hitTestOrder;
+  }
+
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
@@ -3487,7 +3514,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return true;
     }());
     final Int32List childrenInTraversalOrder;
-    final Int32List childrenInHitTestOrder;
+    Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
@@ -3498,11 +3525,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       for (int i = 0; i < childCount; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
-      // _children is sorted in paint order, so we invert it to get the hit test
-      // order.
+
+      final List<SemanticsNode> childrenInHitTestOrderList = _childrenInHitTestOrder();
       childrenInHitTestOrder = Int32List(childCount);
-      for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
+      for (int i = 0; i < childCount; i += 1) {
+        childrenInHitTestOrder[i] = childrenInHitTestOrderList[i].id;
       }
     }
     Int32List? customSemanticsActionIds;
@@ -3555,6 +3582,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
       inputType: data.inputType,
     );
     _dirty = false;
+  }
+
+  List<SemanticsNode> _childrenInHitTestOrder() {
+    final Set<SemanticsNode> overlayPortalNodes = <SemanticsNode>{};
+    for (final SemanticsNode child in _children!) {
+      if (child.hasFlag(SemanticsFlag.isOverlayPortal)) {
+        overlayPortalNodes.add(child);
+      }
+    }
+
+    return reorderWithOverlayPortalsFirst(overlayPortalNodes);
   }
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
@@ -3801,7 +3839,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     return switch (childOrder) {
-      DebugSemanticsDumpOrder.inverseHitTest => _children!,
+      DebugSemanticsDumpOrder.inverseHitTest => _childrenInHitTestOrder().reversed.toList(),
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
     };
   }
@@ -4212,7 +4250,10 @@ class SemanticsOwner extends ChangeNotifier {
           _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
+      // print('localDirtyNodes: ${localDirtyNodes.map((toElement) => toElement.id)}');
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+      // print('After sorting, localDirtyNodes: ${localDirtyNodes.map((toElement) => toElement.id)}');
+      // print('visitedNodes: ${visitedNodes.map((toElement) => toElement.id)}');
       visitedNodes.addAll(localDirtyNodes);
       for (final SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
@@ -4228,6 +4269,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+    // print('After sorting: visitedNodes: ${visitedNodes.map((toElement) => toElement.id)}');
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
@@ -4242,6 +4284,7 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached) {
+        // print('Dirty node: ${node.id}');
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
@@ -5649,6 +5692,11 @@ class SemanticsConfiguration {
   set isRequired(bool? value) {
     _flags = _flags.copyWith(hasRequiredState: true, isRequired: value);
     _hasBeenAnnotated = true;
+  }
+
+  bool? get isOverlayPortal => _hasFlag(SemanticsFlag.isOverlayPortal);
+  set isOverlayPortal(bool? value) {
+    _setFlag(SemanticsFlag.isOverlayPortal, value!);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts

@@ -162,6 +162,7 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  static const int _kIsOverlayPortal = 1 << 31;
   // WARNING: JavaScript can only go up to 32 bits!
 
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(
@@ -222,6 +223,10 @@ class SemanticsFlag {
     'hasRequiredState',
   );
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
+  static const SemanticsFlag isOverlayPortal = SemanticsFlag._(
+    _kIsOverlayPortal,
+    'isOverlayPortal',
+  );
 
   static const Map<int, SemanticsFlag> _kFlagById = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
