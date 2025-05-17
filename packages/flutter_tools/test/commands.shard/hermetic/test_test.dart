@@ -1615,6 +1615,25 @@ resolution: workspace
       Logger: () => logger,
     },
   );
+
+  testUsingContext(
+    'The dart test exit code should be forwarded',
+    () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(79);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      expect(
+        () => commandRunner.run(const <String>['test', '--no-pub']),
+        throwsToolExit(exitCode: 79),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
