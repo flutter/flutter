@@ -16,9 +16,7 @@ class ActionsExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Actions Sample')),
-        body: const Center(
-          child: ActionsExample(),
-        ),
+        body: const Center(child: ActionsExample()),
       ),
     );
   }
@@ -103,7 +101,7 @@ class _SaveButtonState extends State<SaveButton> {
           icon: const Icon(Icons.save),
           label: Text('$_savedValue'),
           style: ButtonStyle(
-            foregroundColor: MaterialStatePropertyAll<Color>(
+            foregroundColor: WidgetStatePropertyAll<Color>(
               widget.valueNotifier.value ? Colors.red : Colors.green,
             ),
           ),

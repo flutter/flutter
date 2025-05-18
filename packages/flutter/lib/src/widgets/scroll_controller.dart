@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'framework.dart';
+/// @docImport 'notification_listener.dart';
+/// @docImport 'page_storage.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_metrics.dart';
+/// @docImport 'scroll_notification.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -193,14 +207,11 @@ class ScrollController extends ChangeNotifier {
   /// When calling [animateTo] in widget tests, `await`ing the returned
   /// [Future] may cause the test to hang and timeout. Instead, use
   /// [WidgetTester.pumpAndSettle].
-  Future<void> animateTo(
-    double offset, {
-    required Duration duration,
-    required Curve curve,
-  }) async {
+  Future<void> animateTo(double offset, {required Duration duration, required Curve curve}) async {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     await Future.wait<void>(<Future<void>>[
-      for (int i = 0; i < _positions.length; i += 1) _positions[i].animateTo(offset, duration: duration, curve: curve),
+      for (int i = 0; i < _positions.length; i += 1)
+        _positions[i].animateTo(offset, duration: duration, curve: curve),
     ]);
   }
 
@@ -231,9 +242,7 @@ class ScrollController extends ChangeNotifier {
     assert(!_positions.contains(position));
     _positions.add(position);
     position.addListener(notifyListeners);
-    if (onAttach != null) {
-      onAttach!(position);
-    }
+    onAttach?.call(position);
   }
 
   /// Unregister the given position with this controller.
@@ -242,9 +251,7 @@ class ScrollController extends ChangeNotifier {
   /// controller will not manipulate the given position.
   void detach(ScrollPosition position) {
     assert(_positions.contains(position));
-    if (onDetach != null) {
-      onDetach!(position);
-    }
+    onDetach?.call(position);
     position.removeListener(notifyListeners);
     _positions.remove(position);
   }

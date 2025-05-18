@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -39,12 +42,14 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// Signature for building children of a [DragTarget].
 ///
 /// The `candidateData` argument contains the list of drag data that is hovering
-/// over this [DragTarget] and that has passed [DragTarget.onWillAccept]. The
-/// `rejectedData` argument contains the list of drag data that is hovering over
-/// this [DragTarget] and that will not be accepted by the [DragTarget].
+/// over this [DragTarget] and that has passed
+/// [DragTarget.onWillAcceptWithDetails]. The `rejectedData` argument contains
+/// the list of drag data that is hovering over this [DragTarget] and that will
+/// not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
+typedef DragTargetBuilder<T> =
+    Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
 
 /// Signature for when a [Draggable] is dragged across the screen.
 ///
@@ -86,7 +91,8 @@ typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 ///
 ///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
 ///    position of the touch that started the drag.
-typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
+typedef DragAnchorStrategy =
+    Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
 
 /// Display the feedback anchored at the position of the original child.
 ///
@@ -121,7 +127,11 @@ Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context
 ///
 ///  * [DragAnchorStrategy], the typedef that this function implements.
 ///  * [Draggable.dragAnchorStrategy], for which this is a built-in value.
-Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
+Offset pointerDragAnchorStrategy(
+  Draggable<Object> draggable,
+  BuildContext context,
+  Offset position,
+) {
   return Offset.zero;
 }
 
@@ -371,9 +381,13 @@ class Draggable<T extends Object> extends StatefulWidget {
   @protected
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return switch (affinity) {
-      Axis.horizontal => HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
-      Axis.vertical   => VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
-      null            => ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
+      Axis.horizontal => HorizontalMultiDragGestureRecognizer(
+        allowedButtonsFilter: allowedButtonsFilter,
+      ),
+      Axis.vertical => VerticalMultiDragGestureRecognizer(
+        allowedButtonsFilter: allowedButtonsFilter,
+      ),
+      null => ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter),
     }..onStart = onStart;
   }
 
@@ -425,7 +439,10 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer(delay: delay, allowedButtonsFilter: allowedButtonsFilter)
+    return DelayedMultiDragGestureRecognizer(
+        delay: delay,
+        allowedButtonsFilter: allowedButtonsFilter,
+      )
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart) {
@@ -517,11 +534,9 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
           _disposeRecognizerIfInactive();
         }
         if (mounted && widget.onDragEnd != null) {
-          widget.onDragEnd!(DraggableDetails(
-              wasAccepted: wasAccepted,
-              velocity: velocity,
-              offset: offset,
-          ));
+          widget.onDragEnd!(
+            DraggableDetails(wasAccepted: wasAccepted, velocity: velocity, offset: offset),
+          );
         }
         if (wasAccepted && widget.onDragCompleted != null) {
           widget.onDragCompleted!();
@@ -538,8 +553,8 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    final bool canDrag = widget.maxSimultaneousDrags == null ||
-                         _activeCount < widget.maxSimultaneousDrags!;
+    final bool canDrag =
+        widget.maxSimultaneousDrags == null || _activeCount < widget.maxSimultaneousDrags!;
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
       behavior: widget.hitTestBehavior,
@@ -562,11 +577,7 @@ class DraggableDetails {
   /// If [wasAccepted] is not specified, it will default to `false`.
   ///
   /// The [velocity] or [offset] arguments must not be `null`.
-  DraggableDetails({
-    this.wasAccepted = false,
-    required this.velocity,
-    required this.offset,
-  });
+  DraggableDetails({this.wasAccepted = false, required this.velocity, required this.offset});
 
   /// Determines whether the [DragTarget] accepted this draggable.
   final bool wasAccepted;
@@ -613,26 +624,43 @@ class DragTarget<T extends Object> extends StatefulWidget {
     @Deprecated(
       'Use onWillAcceptWithDetails instead. '
       'This callback is similar to onWillAcceptWithDetails but does not provide drag details. '
-      'This feature was deprecated after v3.14.0-0.2.pre.'
+      'This feature was deprecated after v3.14.0-0.2.pre.',
     )
     this.onWillAccept,
     this.onWillAcceptWithDetails,
     @Deprecated(
       'Use onAcceptWithDetails instead. '
       'This callback is similar to onAcceptWithDetails but does not provide drag details. '
-      'This feature was deprecated after v3.14.0-0.2.pre.'
+      'This feature was deprecated after v3.14.0-0.2.pre.',
     )
     this.onAccept,
     this.onAcceptWithDetails,
     this.onLeave,
     this.onMove,
     this.hitTestBehavior = HitTestBehavior.translucent,
-  }) : assert(onWillAccept == null || onWillAcceptWithDetails == null, "Don't pass both onWillAccept and onWillAcceptWithDetails.");
+  }) : assert(
+         onWillAccept == null || onWillAcceptWithDetails == null,
+         "Don't pass both onWillAccept and onWillAcceptWithDetails.",
+       );
 
   /// Called to build the contents of this widget.
   ///
   /// The builder can build different widgets depending on what is being dragged
   /// into this drag target.
+  ///
+  /// [onWillAccept] or [onWillAcceptWithDetails] is called when a draggable
+  /// enters the target. If true, then the data will appear in `candidateData`,
+  /// else in `rejectedData`.
+  ///
+  /// Typically the builder will check `candidateData` and `rejectedData` and
+  /// build a widget that indicates the result of dropping the `candidateData`
+  /// onto this target.
+  ///
+  /// The `candidateData` and `rejectedData` are [List] types to support multiple
+  /// simultaneous drags.
+  ///
+  /// If unexpected `null` values in `candidateData` or `rejectedData`, ensure
+  /// that the `data` argument of the [Draggable] is not `null`.
   final DragTargetBuilder<T> builder;
 
   /// Called to determine whether this widget is interested in receiving a given
@@ -648,7 +676,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   @Deprecated(
     'Use onWillAcceptWithDetails instead. '
     'This callback is similar to onWillAcceptWithDetails but does not provide drag details. '
-    'This feature was deprecated after v3.14.0-0.2.pre.'
+    'This feature was deprecated after v3.14.0-0.2.pre.',
   )
   final DragTargetWillAccept<T>? onWillAccept;
 
@@ -672,7 +700,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   @Deprecated(
     'Use onAcceptWithDetails instead. '
     'This callback is similar to onAcceptWithDetails but does not provide drag details. '
-    'This feature was deprecated after v3.14.0-0.2.pre.'
+    'This feature was deprecated after v3.14.0-0.2.pre.',
   )
   final DragTargetAccept<T>? onAccept;
 
@@ -724,13 +752,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   bool didEnter(_DragAvatar<Object> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    final bool resolvedWillAccept = (widget.onWillAccept == null &&
-                                    widget.onWillAcceptWithDetails == null) ||
-                                    (widget.onWillAccept != null &&
-                                    widget.onWillAccept!(avatar.data as T?)) ||
-                                    (widget.onWillAcceptWithDetails != null &&
-                                    avatar.data != null &&
-                                    widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
+    final bool resolvedWillAccept =
+        (widget.onWillAccept == null && widget.onWillAcceptWithDetails == null) ||
+        (widget.onWillAccept != null && widget.onWillAccept!(avatar.data as T?)) ||
+        (widget.onWillAcceptWithDetails != null &&
+            avatar.data != null &&
+            widget.onWillAcceptWithDetails!(
+              DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!),
+            ));
     if (resolvedWillAccept) {
       setState(() {
         _candidateAvatars.add(avatar);
@@ -764,9 +793,11 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    if (avatar.data != null)  {
+    if (avatar.data != null) {
       widget.onAccept?.call(avatar.data! as T);
-      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+      widget.onAcceptWithDetails?.call(
+        DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!),
+      );
     }
   }
 
@@ -782,12 +813,17 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     return MetaData(
       metaData: this,
       behavior: widget.hitTestBehavior,
-      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
+      child: widget.builder(
+        context,
+        _mapAvatarsToData<T>(_candidateAvatars),
+        _mapAvatarsToData<Object>(_rejectedAvatars),
+      ),
     );
   }
 }
 
 enum _DragEndKind { dropped, canceled }
+
 typedef _OnDragEnd = void Function(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
@@ -848,7 +884,6 @@ class _DragAvatar<T extends Object> extends Drag {
     finishDrag(_DragEndKind.dropped, _restrictVelocityAxis(details.velocity));
   }
 
-
   @override
   void cancel() {
     finishDrag(_DragEndKind.canceled);
@@ -894,16 +929,15 @@ class _DragAvatar<T extends Object> extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    final _DragTargetState<Object>? newTarget = targets.cast<_DragTargetState<Object>?>().firstWhere(
-      (_DragTargetState<Object>? target) {
-        if (target == null) {
-          return false;
-        }
-        _enteredTargets.add(target);
-        return target.didEnter(this);
-      },
-      orElse: () => null,
-    );
+    final _DragTargetState<Object>? newTarget = targets
+        .cast<_DragTargetState<Object>?>()
+        .firstWhere((_DragTargetState<Object>? target) {
+          if (target == null) {
+            return false;
+          }
+          _enteredTargets.add(target);
+          return target.didEnter(this);
+        }, orElse: () => null);
 
     // Report moves to the targets.
     for (final _DragTargetState<Object> target in _enteredTargets) {
@@ -931,7 +965,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finishDrag(_DragEndKind endKind, [ Velocity? velocity ]) {
+  void finishDrag(_DragEndKind endKind, [Velocity? velocity]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget!.didDrop(this);
@@ -953,10 +987,7 @@ class _DragAvatar<T extends Object> extends Drag {
       top: _overlayOffset.dy,
       child: ExcludeSemantics(
         excluding: ignoringFeedbackSemantics,
-        child: IgnorePointer(
-          ignoring: ignoringFeedbackPointer,
-          child: feedback,
-        ),
+        child: IgnorePointer(ignoring: ignoringFeedbackPointer, child: feedback),
       ),
     );
   }
@@ -965,15 +996,13 @@ class _DragAvatar<T extends Object> extends Drag {
     if (axis == null) {
       return velocity;
     }
-    return Velocity(
-      pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond),
-    );
+    return Velocity(pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond));
   }
 
   Offset _restrictAxis(Offset offset) {
     return switch (axis) {
       Axis.horizontal => Offset(offset.dx, 0.0),
-      Axis.vertical   => Offset(0.0, offset.dy),
+      Axis.vertical => Offset(0.0, offset.dy),
       null => offset,
     };
   }

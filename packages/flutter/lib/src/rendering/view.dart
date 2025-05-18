@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
@@ -24,16 +29,18 @@ class ViewConfiguration {
   /// and a [devicePixelRatio] of 1.0.
   ///
   /// [ViewConfiguration.fromView] is a more convenient way for deriving a
-  /// [ViewConfiguration] from a given [FlutterView].
+  /// [ViewConfiguration] from a given [ui.FlutterView].
   const ViewConfiguration({
     this.physicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.logicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.devicePixelRatio = 1.0,
   });
 
-  /// Creates a view configuration for the provided [FlutterView].
+  /// Creates a view configuration for the provided [ui.FlutterView].
   factory ViewConfiguration.fromView(ui.FlutterView view) {
-    final BoxConstraints physicalConstraints = BoxConstraints.fromViewConstraints(view.physicalConstraints);
+    final BoxConstraints physicalConstraints = BoxConstraints.fromViewConstraints(
+      view.physicalConstraints,
+    );
     final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
       physicalConstraints: physicalConstraints,
@@ -51,7 +58,7 @@ class ViewConfiguration {
   ///
   /// These constraints are enforced in [toPhysicalSize] when translating
   /// the logical size of the root render object back to physical pixels for
-  /// the [FlutterView.render] method.
+  /// the [ui.FlutterView.render] method.
   final BoxConstraints physicalConstraints;
 
   /// The pixel density of the output surface.
@@ -61,7 +68,7 @@ class ViewConfiguration {
   ///
   /// The matrix translates points from the local coordinate system of the
   /// app (in logical pixels) to the global coordinate system of the
-  /// [FlutterView] (in physical pixels).
+  /// [ui.FlutterView] (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
@@ -81,10 +88,10 @@ class ViewConfiguration {
 
   /// Transforms the provided [Size] in logical pixels to physical pixels.
   ///
-  /// The [FlutterView.render] method accepts only sizes in physical pixels, but
+  /// The [ui.FlutterView.render] method accepts only sizes in physical pixels, but
   /// the framework operates in logical pixels. This method is used to transform
   /// the logical size calculated for a [RenderView] back to a physical size
-  /// suitable to be passed to [FlutterView.render].
+  /// suitable to be passed to [ui.FlutterView.render].
   ///
   /// By default, this method just multiplies the provided [Size] with the
   /// [devicePixelRatio] and constraints the results to the
@@ -98,10 +105,10 @@ class ViewConfiguration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ViewConfiguration
-        && other.logicalConstraints == logicalConstraints
-        && other.physicalConstraints == physicalConstraints
-        && other.devicePixelRatio == devicePixelRatio;
+    return other is ViewConfiguration &&
+        other.logicalConstraints == logicalConstraints &&
+        other.physicalConstraints == physicalConstraints &&
+        other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
@@ -136,11 +143,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// [RenderView] object from configuring it. Typically, the object is created
   /// by the [View] widget and configured by the [RendererBinding] when the
   /// [RenderView] is registered with it by the [View] widget.
-  RenderView({
-    RenderBox? child,
-    ViewConfiguration? configuration,
-    required ui.FlutterView view,
-  }) : _view = view {
+  RenderView({RenderBox? child, ViewConfiguration? configuration, required ui.FlutterView view})
+    : _view = view {
     if (configuration != null) {
       this.configuration = configuration;
     }
@@ -193,12 +197,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   BoxConstraints get constraints {
     if (!hasConfiguration) {
-      throw StateError('Constraints are not available because RenderView has not been given a configuration yet.');
+      throw StateError(
+        'Constraints are not available because RenderView has not been given a configuration yet.',
+      );
     }
     return configuration.logicalConstraints;
   }
 
-  /// The [FlutterView] into which this [RenderView] will render.
+  /// The [ui.FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
   final ui.FlutterView _view;
 
@@ -244,8 +250,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// This method calls [scheduleInitialLayout] and [scheduleInitialPaint].
   void prepareInitialFrame() {
-    assert(owner != null, 'attach the RenderView to a PipelineOwner before calling prepareInitialFrame');
-    assert(_rootTransform == null, 'prepareInitialFrame must only be called once'); // set by _updateMatricesAndCreateNewRootLayer
+    assert(
+      owner != null,
+      'attach the RenderView to a PipelineOwner before calling prepareInitialFrame',
+    );
+    assert(
+      _rootTransform == null,
+      'prepareInitialFrame must only be called once',
+    ); // set by _updateMatricesAndCreateNewRootLayer
     assert(hasConfiguration, 'set a configuration before calling prepareInitialFrame');
     scheduleInitialLayout();
     scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
@@ -266,7 +278,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
   @override
-  void debugAssertDoesMeetConstraints() { assert(false); }
+  void debugAssertDoesMeetConstraints() {
+    assert(false);
+  }
 
   @override
   void performResize() {
@@ -277,9 +291,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void performLayout() {
     assert(_rootTransform != null);
     final bool sizedByChild = !constraints.isTight;
-    if (child != null) {
-      child!.layout(constraints, parentUsesSize: sizedByChild);
-    }
+    child?.layout(constraints, parentUsesSize: sizedByChild);
     _size = sizedByChild && child != null ? child!.size : constraints.smallest;
     assert(size.isFinite);
     assert(constraints.isSatisfiedBy(size));
@@ -295,10 +307,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null) {
-      child!.hitTest(BoxHitTestResult.wrap(result), position: position);
-    }
+  bool hitTest(HitTestResult result, {required Offset position}) {
+    child?.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
   }
@@ -354,7 +364,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
-          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
+          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(
+            (debugCurrentRepaintColor.hue + 2.0) % 360.0,
+          );
         }
         return true;
       }());
@@ -365,10 +377,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
-  /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with
+  /// Sends the provided [ui.SemanticsUpdate] to the [ui.FlutterView] associated with
   /// this [RenderView].
   ///
-  /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
+  /// A [ui.SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
     _view.updateSemantics(update);
@@ -465,9 +477,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       statusBarColor: definedOverlayStyle.statusBarColor,
       systemStatusBarContrastEnforced: definedOverlayStyle.systemStatusBarContrastEnforced,
       systemNavigationBarColor: isAndroid ? definedOverlayStyle.systemNavigationBarColor : null,
-      systemNavigationBarDividerColor: isAndroid ? definedOverlayStyle.systemNavigationBarDividerColor : null,
-      systemNavigationBarIconBrightness: isAndroid ? definedOverlayStyle.systemNavigationBarIconBrightness : null,
-      systemNavigationBarContrastEnforced: isAndroid ? definedOverlayStyle.systemNavigationBarContrastEnforced : null,
+      systemNavigationBarDividerColor:
+          isAndroid ? definedOverlayStyle.systemNavigationBarDividerColor : null,
+      systemNavigationBarIconBrightness:
+          isAndroid ? definedOverlayStyle.systemNavigationBarIconBrightness : null,
+      systemNavigationBarContrastEnforced:
+          isAndroid ? definedOverlayStyle.systemNavigationBarContrastEnforced : null,
     );
     SystemChrome.setSystemUIOverlayStyle(overlayStyle);
   }
@@ -487,12 +502,30 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
+      properties.add(
+        DiagnosticsNode.message(
+          'debug mode enabled - ${kIsWeb ? 'Web' : Platform.operatingSystem}',
+        ),
+      );
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('view size', _view.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _view.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(
+      DiagnosticsProperty<Size>('view size', _view.physicalSize, tooltip: 'in physical pixels'),
+    );
+    properties.add(
+      DoubleProperty(
+        'device pixel ratio',
+        _view.devicePixelRatio,
+        tooltip: 'physical pixels per logical pixel',
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<ViewConfiguration>(
+        'configuration',
+        configuration,
+        tooltip: 'in logical pixels',
+      ),
+    );
     if (_view.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
     }
@@ -540,4 +573,5 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 ///
 /// Used by [RenderView.debugAddPaintCallback] and
 /// [RenderView.debugRemovePaintCallback].
-typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);
+typedef DebugPaintCallback =
+    void Function(PaintingContext context, Offset offset, RenderView renderView);

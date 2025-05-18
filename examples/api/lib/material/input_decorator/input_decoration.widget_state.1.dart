@@ -32,31 +32,23 @@ class MaterialStateExample extends StatelessWidget {
     return Theme(
       data: themeData.copyWith(
         inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          prefixIconColor: WidgetStateColor.resolveWith(
-            (Set<WidgetState> states) {
-              if (states.contains(WidgetState.error)) {
-                return Colors.red;
-              }
-              if (states.contains(WidgetState.focused)) {
-                return Colors.blue;
-              }
-              return Colors.grey;
-            },
-          ),
+          prefixIconColor: const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+            WidgetState.error: Colors.red,
+            WidgetState.focused: Colors.blue,
+            WidgetState.any: Colors.grey,
+          }),
         ),
       ),
       child: TextFormField(
         initialValue: 'example.com',
-        decoration: const InputDecoration(
-          prefixIcon: Icon(Icons.web),
-        ),
-          autovalidateMode: AutovalidateMode.always,
-          validator: (String? text) {
-            if (text?.endsWith('.com') ?? false) {
-              return null;
-            }
-            return 'No .com tld';
+        decoration: const InputDecoration(prefixIcon: Icon(Icons.web)),
+        autovalidateMode: AutovalidateMode.always,
+        validator: (String? text) {
+          if (text?.endsWith('.com') ?? false) {
+            return null;
           }
+          return 'No .com tld';
+        },
       ),
     );
   }

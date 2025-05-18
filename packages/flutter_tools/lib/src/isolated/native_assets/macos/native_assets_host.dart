@@ -4,7 +4,7 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -16,15 +16,12 @@ import '../../../globals.dart' as globals;
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
 /// The framework must be named [name].framework and the dylib [name].
-Future<void> createInfoPlist(
-  String name,
-  Directory target, {
-  String? minimumIOSVersion,
-}) async {
+Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSVersion}) async {
   final File infoPlistFile = target.childFile('Info.plist');
   final String bundleIdentifier = 'io.flutter.flutter.native_assets.$name'.replaceAll('_', '-');
-  await infoPlistFile.writeAsString(<String>[
-    '''
+  await infoPlistFile.writeAsString(
+    <String>[
+      '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -48,15 +45,16 @@ Future<void> createInfoPlist(
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 ''',
-    if (minimumIOSVersion != null)
-      '''
+      if (minimumIOSVersion != null)
+        '''
 	<key>MinimumOSVersion</key>
 	<string>$minimumIOSVersion</string>
 ''',
-    '''
+      '''
 </dict>
-</plist>'''
-  ].join());
+</plist>''',
+    ].join(),
+  );
 }
 
 /// Combines dylibs from [sources] into a fat binary at [targetFullPath].
@@ -64,16 +62,14 @@ Future<void> createInfoPlist(
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
-Future<void> lipoDylibs(File target, List<Uri> sources) async {
-  final ProcessResult lipoResult = await globals.processManager.run(
-    <String>[
-      'lipo',
-      '-create',
-      '-output',
-      target.path,
-      for (final Uri source in sources) source.toFilePath(),
-    ],
-  );
+Future<void> lipoDylibs(File target, List<File> sources) async {
+  final ProcessResult lipoResult = await globals.processManager.run(<String>[
+    'lipo',
+    '-create',
+    '-output',
+    target.path,
+    for (final File source in sources) source.path,
+  ]);
   if (lipoResult.exitCode != 0) {
     throwToolExit('Failed to create universal binary:\n${lipoResult.stderr}');
   }
@@ -81,27 +77,61 @@ Future<void> lipoDylibs(File target, List<Uri> sources) async {
   globals.logger.printTrace(lipoResult.stderr as String);
 }
 
-/// Sets the install name in a dylib with a Mach-O format.
+/// Sets the install names in a dylib with a Mach-O format.
 ///
 /// On macOS and iOS, opening a dylib at runtime fails if the path inside the
 /// dylib itself does not correspond to the path that the file is at. Therefore,
 /// native assets copied into their final location also need their install name
 /// updated with the `install_name_tool`.
-Future<void> setInstallNameDylib(File dylibFile) async {
-  final String fileName = dylibFile.basename;
-  final ProcessResult installNameResult = await globals.processManager.run(
-    <String>[
-      'install_name_tool',
-      '-id',
-      '@rpath/$fileName.framework/$fileName',
-      dylibFile.path,
+///
+/// [oldToNewInstallNames] is a map from old to new install names, that should
+/// be applied to the dependencies of the dylib. Entries in this map for
+/// dependencies that are not present in the dylib are ignored. The install
+/// name of a dependencies needs to be updated if the location of the dependency
+/// has changed.
+Future<void> setInstallNamesDylib(
+  File dylibFile,
+  String newInstallName,
+  Map<String, String> oldToNewInstallNames,
+) async {
+  final ProcessResult setInstallNamesResult = await globals.processManager.run(<String>[
+    'install_name_tool',
+    '-id',
+    newInstallName,
+    for (final MapEntry<String, String> entry in oldToNewInstallNames.entries) ...<String>[
+      '-change',
+      entry.key,
+      entry.value,
     ],
-  );
-  if (installNameResult.exitCode != 0) {
+    dylibFile.path,
+  ]);
+  if (setInstallNamesResult.exitCode != 0) {
     throwToolExit(
-      'Failed to change the install name of $dylibFile:\n${installNameResult.stderr}',
+      'Failed to change install names in $dylibFile:\n'
+      'id -> $newInstallName\n'
+      'dependencies -> $newInstallName\n'
+      '${setInstallNamesResult.stderr}',
     );
   }
+}
+
+Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
+  final ProcessResult installNameResult = await globals.processManager.run(<String>[
+    'otool',
+    '-D',
+    dylibFile.path,
+  ]);
+  if (installNameResult.exitCode != 0) {
+    throwToolExit('Failed to get the install name of $dylibFile:\n${installNameResult.stderr}');
+  }
+
+  return <String>{
+    for (final List<String> architectureSection
+        in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
+      // For each architecture, a separate install name is reported, which are
+      // not necessarily the same.
+      architectureSection.single,
+  };
 }
 
 Future<void> codesignDylib(
@@ -124,9 +154,7 @@ Future<void> codesignDylib(
     target.path,
   ];
   globals.logger.printTrace(codesignCommand.join(' '));
-  final ProcessResult codesignResult = await globals.processManager.run(
-    codesignCommand,
-  );
+  final ProcessResult codesignResult = await globals.processManager.run(codesignCommand);
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
@@ -140,18 +168,20 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
-  final ProcessResult xcrunResult = await globals.processManager.run(
-    <String>['xcrun', 'clang', '--version'],
-  );
+Future<CCompilerConfig> cCompilerConfigMacOS() async {
+  final ProcessResult xcrunResult = await globals.processManager.run(<String>[
+    'xcrun',
+    'clang',
+    '--version',
+  ]);
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
-  final String installPath = LineSplitter.split(xcrunResult.stdout as String)
-      .firstWhere((String s) => s.startsWith('InstalledDir: '))
-      .split(' ')
-      .last;
-  return CCompilerConfigImpl(
+  final String installPath =
+      LineSplitter.split(
+        xcrunResult.stdout as String,
+      ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
+  return CCompilerConfig(
     compiler: Uri.file('$installPath/clang'),
     archiver: Uri.file('$installPath/ar'),
     linker: Uri.file('$installPath/ld'),
@@ -205,4 +235,53 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   }
   alreadyTakenNames.add(fileName);
   return Uri(path: '$fileName.framework/$fileName');
+}
+
+Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
+  // The output of `otool -D`, for example, looks like below. For each
+  // architecture, there is a separate section.
+  //
+  // /build/native_assets/ios/buz.framework/buz (architecture x86_64):
+  // @rpath/libbuz.dylib
+  // /build/native_assets/ios/buz.framework/buz (architecture arm64):
+  // @rpath/libbuz.dylib
+  //
+  // Some versions of `otool` don't print the architecture name if the
+  // binary only has one architecture:
+  //
+  // /build/native_assets/ios/buz.framework/buz:
+  // @rpath/libbuz.dylib
+
+  const Map<String, Architecture> outputArchitectures = <String, Architecture>{
+    'arm': Architecture.arm,
+    'arm64': Architecture.arm64,
+    'x86_64': Architecture.x64,
+  };
+  final RegExp architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
+  final Iterator<String> lines = output.trim().split('\n').iterator;
+  Architecture? currentArchitecture;
+  final Map<Architecture?, List<String>> architectureSections = <Architecture?, List<String>>{};
+
+  while (lines.moveNext()) {
+    final String line = lines.current;
+    final Match? architectureHeader = architectureHeaderPattern.firstMatch(line);
+    if (architectureHeader != null) {
+      if (architectureSections.containsKey(null)) {
+        throwToolExit('Expected a single architecture section in otool output: $output');
+      }
+      final String? architectureString = architectureHeader.group(2);
+      if (architectureString != null) {
+        currentArchitecture = outputArchitectures[architectureString];
+        if (currentArchitecture == null) {
+          throwToolExit('Unknown architecture in otool output: $architectureString');
+        }
+      }
+      architectureSections[currentArchitecture] = <String>[];
+      continue;
+    } else {
+      architectureSections[currentArchitecture]!.add(line.trim());
+    }
+  }
+
+  return architectureSections;
 }

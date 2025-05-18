@@ -11,7 +11,8 @@ class GenL10nProject extends Project {
   GenL10nProject({required this.useNamedParameters});
 
   @override
-  Future<void> setUpIn(Directory dir, {
+  Future<void> setUpIn(
+    Directory dir, {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) {
@@ -25,20 +26,22 @@ class GenL10nProject extends Project {
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
-    writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
-      useDeferredLoading: useDeferredLoading,
-      useSyntheticPackage: useSyntheticPackage,
-      useNamedParameters: useNamedParameters,
-    ));
+    writeFile(
+      fileSystem.path.join(dir.path, 'l10n.yaml'),
+      l10nYaml(
+        useDeferredLoading: useDeferredLoading,
+        useSyntheticPackage: useSyntheticPackage,
+        useNamedParameters: useNamedParameters,
+      ),
+    );
     return super.setUpIn(dir);
   }
-
 
   @override
   final String pubspec = '''
 name: test_l10n_project
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:
@@ -51,8 +54,7 @@ dependencies:
   String? _main;
 
   @override
-  String get main =>
-      _main ??= (useNamedParameters ? _getMainWithNamedParameters() : _getMain());
+  String get main => _main ??= (useNamedParameters ? _getMainWithNamedParameters() : _getMain());
 
   final bool useNamedParameters;
 
@@ -413,7 +415,21 @@ dependencies:
     }
   },
   "datetime1": "{today, date, ::yMd}",
-  "datetime2": "{current, time, ::jms}"
+  "datetime2": "{current, time, ::jms}",
+  "datetimeAddedFormats": "{firstDate} and {secondDate}",
+  "@datetimeAddedFormats": {
+    "description": "A message with two dates, with added formats",
+    "placeholders": {
+      "firstDate": {
+        "type": "DateTime",
+        "format": "yMd+jms"
+      },
+      "secondDate": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd+Hms+QQQQ"
+      }
+    }
+  }
 }
 ''';
 
@@ -693,6 +709,7 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural('female', 1)}",
               '${localizations.datetime1(DateTime(2023, 6, 26))}',
               '${localizations.datetime2(DateTime(2023, 6, 26, 5, 23))}',
+              '${localizations.datetimeAddedFormats(DateTime(2024, 10, 6, 23, 29, 48), DateTime(2000, 7, 4, 12, 54, 32))}',
             ]);
           },
         ),
@@ -977,6 +994,7 @@ class Home extends StatelessWidget {
               "${localizations.selectInPlural(gender: 'female', count: 1)}",
               '${localizations.datetime1(today: DateTime(2023, 6, 26))}',
               '${localizations.datetime2(current: DateTime(2023, 6, 26, 5, 23))}',
+              '${localizations.datetimeAddedFormats(firstDate: DateTime(2024, 10, 6, 23, 29, 48), secondDate: DateTime(2000, 7, 4, 12, 54, 32))}',
             ]);
           },
         ),

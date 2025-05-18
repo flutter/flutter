@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
-import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'theme.dart';
 
@@ -21,7 +23,7 @@ import 'theme.dart';
 /// default style, i.e. the [ButtonStyle] returned by
 /// [MenuItemButton.defaultStyleOf] and [SubmenuButton.defaultStyleOf]. Only the
 /// style's non-null property values or resolved non-null
-/// [MaterialStateProperty] values are used.
+/// [WidgetStateProperty] values are used.
 ///
 /// See also:
 ///
@@ -33,8 +35,8 @@ import 'theme.dart';
 /// * [MenuItemButton.styleFrom] and [SubmenuButton.styleFrom], which converts
 ///   simple values into a [ButtonStyle] that's consistent with their respective
 ///   defaults.
-/// * [MaterialStateProperty.resolve], "resolve" a material state property to a
-///   simple value based on a set of [MaterialState]s.
+/// * [WidgetStateProperty.resolve], "resolve" a material state property to a
+///   simple value based on a set of [WidgetState]s.
 /// * [ThemeData.menuButtonTheme], which can be used to override the default
 ///   [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///   [Theme].
@@ -50,7 +52,7 @@ class MenuButtonThemeData with Diagnosticable {
 
   /// Overrides for [SubmenuButton] and [MenuItemButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty] values
+  /// Non-null properties or non-null resolved [WidgetStateProperty] values
   /// override the [ButtonStyle] returned by [SubmenuButton.defaultStyleOf] or
   /// [MenuItemButton.defaultStyleOf].
   ///
@@ -103,11 +105,7 @@ class MenuButtonThemeData with Diagnosticable {
 ///   [Theme].
 class MenuButtonTheme extends InheritedTheme {
   /// Create a [MenuButtonTheme].
-  const MenuButtonTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const MenuButtonTheme({super.key, required this.data, required super.child});
 
   /// The configuration of this theme.
   final MenuButtonThemeData data;
@@ -123,7 +121,8 @@ class MenuButtonTheme extends InheritedTheme {
   /// MenuButtonThemeData theme = MenuButtonTheme.of(context);
   /// ```
   static MenuButtonThemeData of(BuildContext context) {
-    final MenuButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<MenuButtonTheme>();
+    final MenuButtonTheme? buttonTheme =
+        context.dependOnInheritedWidgetOfExactType<MenuButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).menuButtonTheme;
   }
 

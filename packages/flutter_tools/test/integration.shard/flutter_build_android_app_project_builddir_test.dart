@@ -16,16 +16,10 @@ import 'test_utils.dart';
 // project in the test.
 void main() {
   late Directory tempDir;
-  late String flutterBin;
   late Directory exampleAppDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     exampleAppDir = tempDir.childDirectory('aaa').childDirectory('example');
 
     processManager.runSync(<String>[
@@ -44,40 +38,31 @@ void main() {
 
   void checkBuildDir() {
     // The android/app/build directory should not exists
-    final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
-      exampleAppDir.path,
-      'android',
-      'app',
-      'build',
-    ));
+    final Directory appBuildDir = fileSystem.directory(
+      fileSystem.path.join(exampleAppDir.path, 'android', 'app', 'build'),
+    );
     expect(appBuildDir, isNot(exists));
   }
 
-  test(
-    'android/app/build should not exists after flutter build apk',
-    () async {
-      processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'apk',
-        '--target-platform=android-arm',
-      ], workingDirectory: exampleAppDir.path);
-      checkBuildDir();
-    },
-  );
+  test('android/app/build should not exists after flutter build apk', () async {
+    processManager.runSync(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      '--target-platform=android-arm',
+    ], workingDirectory: exampleAppDir.path);
+    checkBuildDir();
+  });
 
-  test(
-    'android/app/build should not exists after flutter build appbundle',
-    () async {
-      processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'appbundle',
-        '--target-platform=android-arm',
-      ], workingDirectory: exampleAppDir.path);
-      checkBuildDir();
-    },
-  );
+  test('android/app/build should not exists after flutter build appbundle', () async {
+    processManager.runSync(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'appbundle',
+      '--target-platform=android-arm',
+    ], workingDirectory: exampleAppDir.path);
+    checkBuildDir();
+  });
 }

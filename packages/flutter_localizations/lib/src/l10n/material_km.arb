@@ -144,7 +144,7 @@
   "menuDismissLabel": "ច្រានចោល​ម៉ឺនុយ",
   "lookUpButtonLabel": "រកមើល",
   "searchWebButtonLabel": "ស្វែងរក​លើបណ្ដាញ",
-  "shareButtonLabel": "ចែករំលែក...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "ចែករំលែក",
+  "clearButtonTooltip": "សម្អាតអក្សរ",
+  "selectedDateLabel": "បានជ្រើសរើស"
 }

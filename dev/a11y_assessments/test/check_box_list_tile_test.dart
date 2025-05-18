@@ -13,4 +13,11 @@ void main() {
     expect(find.text('a check box list title'), findsOneWidget);
     expect(find.text('a disabled check box list title'), findsOneWidget);
   });
+
+  testWidgets('check box list has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, CheckBoxListTile());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel(RegExp('CheckBoxListTile Demo'));
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

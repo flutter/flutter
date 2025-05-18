@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.superscripts].
+/// Flutter code sample for [FontFeature.superscripts].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       'The isotope 238U decays to 206Pb',
       style: TextStyle(
         fontFamily: 'Sorts Mill Goudy',
-        fontFeatures: <FontFeature>[
-          FontFeature.superscripts(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.superscripts()],
       ),
     );
   }

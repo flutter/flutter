@@ -26,7 +26,10 @@ import '../cupertino_localizations.dart';
 //
 // These classes are constructed by the [getCupertinoTranslation] method at the
 // bottom of this file, and used by the [_GlobalCupertinoLocalizationsDelegate.load]
-// method defined in `flutter_localizations/lib/src/cupertino_localizations.dart`.''';
+// method defined in `flutter_localizations/lib/src/cupertino_localizations.dart`.
+
+// TODO(goderbauer): Extend the generator to properly format the output.
+// dart format off''';
 }
 
 /// Returns the source of the constructor for a GlobalCupertinoLocalizations
@@ -41,6 +44,7 @@ String generateCupertinoConstructor(LocaleInfo locale) {
     super.localeName = '$localeName',
     required super.fullYearFormat,
     required super.dayFormat,
+    required super.weekdayFormat,
     required super.mediumDateFormat,
     required super.singleDigitHourFormat,
     required super.singleDigitMinuteFormat,
@@ -57,6 +61,7 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
   intl.DateFormat dayFormat,
+  intl.DateFormat weekdayFormat,
   intl.DateFormat mediumDateFormat,
   intl.DateFormat singleDigitHourFormat,
   intl.DateFormat singleDigitMinuteFormat,
@@ -66,7 +71,7 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
 ) {''';
 
 const String cupertinoFactoryArguments =
-    'fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat';
+    'fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat';
 
 const String cupertinoSupportedLanguagesConstant = 'kCupertinoSupportedLanguages';
 

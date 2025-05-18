@@ -4,16 +4,14 @@
 // The local repository will contain the AAR and POM files.
 
 import java.nio.file.Paths
-import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.publish.maven.MavenPublication
+
 
 void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
     if (!project.android.hasProperty("libraryVariants")) {
-        throw new GradleException("Can't generate AAR on a non Android library project.");
+        throw new GradleException("Can't generate AAR on a non Android library project.")
     }
 
     // Snapshot versions include the timestamp in the artifact name.
@@ -79,7 +77,7 @@ void configurePlugin(Project project, String outputDir) {
     configureProject(project, outputDir)
 }
 
-String getFlutterRoot(Project project) {
+static String getFlutterRoot(Project project) {
     if (!project.hasProperty("flutter-root")) {
         throw new GradleException("The `-Pflutter-root` flag must be specified.")
     }
@@ -155,6 +153,10 @@ projectsEvaluated {
         assert rootProject.hasProperty("output-dir")
         // In plugin projects, the root project is the plugin.
         configureProject(rootProject, rootProject.property("output-dir"))
+        return
+    }
+    if (rootProject.name == "gradle") {
+        // Skip the "gradle" project, we are looking only for the "android_generated" project.
         return
     }
     // The module project is the `:flutter` subproject.

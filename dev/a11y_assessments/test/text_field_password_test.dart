@@ -40,7 +40,6 @@ void main() {
       final Finder finder = find.byKey(const Key('enabled password'));
       final TextField textField = tester.widget<TextField>(finder);
       expect(textField.decoration?.hintText, isNull);
-
     }
 
     // Test the disabled password
@@ -49,5 +48,12 @@ void main() {
       final TextField textField = tester.widget<TextField>(finder);
       expect(textField.decoration?.hintText, isNull);
     }
+  });
+
+  testWidgets('text field password demo page has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, TextFieldPasswordUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField password Demo');
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
   });
 }

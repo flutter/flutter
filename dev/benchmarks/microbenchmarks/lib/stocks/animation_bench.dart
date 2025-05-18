@@ -7,35 +7,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
 
+import '../benchmark_binding.dart';
 import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
-  BenchmarkingBinding(this.stopwatch);
-
-  final Stopwatch stopwatch;
-
-  @override
-  void handleBeginFrame(Duration? rawTimeStamp) {
-    stopwatch.start();
-    super.handleBeginFrame(rawTimeStamp);
-  }
-
-  @override
-  void handleDrawFrame() {
-    super.handleDrawFrame();
-    stopwatch.stop();
-  }
-}
-
-Future<void> main() async {
+Future<void> execute(BenchmarkingBinding binding) async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   final Stopwatch wallClockWatch = Stopwatch();
-  final Stopwatch cpuWatch = Stopwatch();
-  BenchmarkingBinding(cpuWatch);
 
   int totalOpenFrameElapsedMicroseconds = 0;
   int totalOpenIterationCount = 0;
@@ -52,27 +33,27 @@ Future<void> main() async {
     bool drawerIsOpen = false;
     wallClockWatch.start();
     while (wallClockWatch.elapsed < kBenchmarkTime) {
-      cpuWatch.reset();
+      binding.drawFrameWatch.reset();
       if (drawerIsOpen) {
         await tester.tapAt(const Offset(780.0, 250.0)); // Close drawer
         await tester.pump();
         totalCloseIterationCount += 1;
-        totalCloseFrameElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
+        totalCloseFrameElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
       } else {
         await tester.tapAt(const Offset(20.0, 50.0)); // Open drawer
         await tester.pump();
         totalOpenIterationCount += 1;
-        totalOpenFrameElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
+        totalOpenFrameElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
       }
       drawerIsOpen = !drawerIsOpen;
 
       // Time how long each frame takes
-      cpuWatch.reset();
+      binding.drawFrameWatch.reset();
       while (SchedulerBinding.instance.hasScheduledFrame) {
         await tester.pump();
         totalSubsequentFramesIterationCount += 1;
       }
-      totalSubsequentFramesElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
+      totalSubsequentFramesElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
     }
   });
 
@@ -108,4 +89,11 @@ Future<void> main() async {
     );
   }
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute(BenchmarkingBinding());
 }

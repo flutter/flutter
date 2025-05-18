@@ -5,14 +5,17 @@
 import 'template.dart';
 
 class TabsTemplate extends TokenTemplate {
-  const TabsTemplate(super.blockName, super.fileName, super.tokens, {
+  const TabsTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });
 
   @override
   String generate() => '''
-class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
+class _${blockName}PrimaryDefaultsM3 extends TabBarThemeData {
   _${blockName}PrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
@@ -91,7 +94,7 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
   static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
-class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
+class _${blockName}SecondaryDefaultsM3 extends TabBarThemeData {
   _${blockName}SecondaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
@@ -160,5 +163,4 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
   static double indicatorWeight = ${getToken('md.comp.secondary-navigation-tab.active-indicator.height')};
 }
 ''';
-
 }

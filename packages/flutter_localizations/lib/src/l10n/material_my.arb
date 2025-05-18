@@ -144,7 +144,7 @@
   "menuDismissLabel": "မီနူးကိုပယ်ပါ",
   "lookUpButtonLabel": "အပေါ်ကြည့်ရန်",
   "searchWebButtonLabel": "ဝဘ်တွင်ရှာရန်",
-  "shareButtonLabel": "မျှဝေရန်...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "မျှဝေရန်",
+  "clearButtonTooltip": "စာသား ဖယ်ရှားရန်",
+  "selectedDateLabel": "ရွေးထားသည်"
 }

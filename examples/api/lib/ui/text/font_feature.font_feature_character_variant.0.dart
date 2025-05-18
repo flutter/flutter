@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.characterVariant].
+/// Flutter code sample for [FontFeature.characterVariant].
 
 void main() => runApp(const ExampleApp());
 

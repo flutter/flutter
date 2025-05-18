@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class AutoCompleteUseCase extends UseCase {
-
   @override
   String get name => 'AutoComplete';
 
@@ -26,13 +25,14 @@ class _MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<_MainWidget> {
-  static const List<String> _kOptions = <String>[
-    'apple',
-    'banana',
-    'lemon',
-  ];
+  static const List<String> _kOptions = <String>['apple', 'banana', 'lemon'];
 
-  static Widget _fieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+  static Widget _fieldViewBuilder(
+    BuildContext context,
+    TextEditingController textEditingController,
+    FocusNode focusNode,
+    VoidCallback onFieldSubmitted,
+  ) {
     return TextFormField(
       focusNode: focusNode,
       controller: textEditingController,
@@ -42,19 +42,20 @@ class _MainWidgetState extends State<_MainWidget> {
     );
   }
 
+  String pageTitle = getUseCaseName(AutoCompleteUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('AutoComplete'),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-                'Type below to autocomplete the following possible results: $_kOptions.'),
+            Text('Type below to autocomplete the following possible results: $_kOptions.'),
             Autocomplete<String>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 if (textEditingValue.text == '') {

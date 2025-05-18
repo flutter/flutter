@@ -499,7 +499,7 @@ An abbreviated URI is the portion of the URI following the name of the package c
 
 ### test folder
 
-A _test folder_ contains dart files and their curresponding golden master `.expect` files that are used to test the data in the [data file](#data-file). These files are located in a folder (conventionally named `test_fixes`) in the package directory. See the [Testing](#testing) section for more documentation.
+A _test folder_ contains dart files and their corresponding golden master `.expect` files that are used to test the data in the [data file](#data-file). These files are located in a folder (conventionally named `test_fixes`) in the package directory. See the [Testing](#testing) section for more documentation.
 
 You might find it useful to include a `README.md` file that has a link to this documentation for easy reference.
 
