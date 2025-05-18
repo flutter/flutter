@@ -198,8 +198,9 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// controller's [value] instead. Setting [text] will clear the selection
 /// and composing range.
 ///
-/// Remember to [dispose] of the [TextEditingController] when it is no longer
-/// needed. This will ensure we discard any resources used by the object.
+/// If the [TextEditingController] is instantiated in [initState], then [dispose] must
+/// be overridden to dispose of the object when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
 ///
 /// {@tool dartpad}
 /// This example creates a [TextField] with a [TextEditingController] whose
