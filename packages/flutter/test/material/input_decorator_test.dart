@@ -14421,4 +14421,42 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
     expect(box, isNot(paints..drrect()));
   });
+
+  testWidgets(
+    'InputDecorator _buildError with errorText correctly updates on BuildContext updates',
+        (WidgetTester tester) async {
+      final ValueNotifier<String?> errorTextNotifier = ValueNotifier<String?>('initial error');
+      const String helperTextValue = 'helper text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ValueListenableBuilder<String?>(
+              key: const Key('value_listenable_builder_parent'),
+              valueListenable: errorTextNotifier,
+              builder: (BuildContext context, String? value, Widget? child) {
+                return buildInputDecorator(
+                  decoration: InputDecoration(
+                    errorText: value,
+                    helperText: helperTextValue,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('initial error'), findsOneWidget);
+      expect(find.text(helperTextValue), findsNothing);
+
+      errorTextNotifier.value = null;
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('initial error'), findsNothing);
+      expect(find.text(helperTextValue), findsOneWidget);
+    },
+  );
 }
