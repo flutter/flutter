@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#include "shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
 #include <objc/objc.h>
 
@@ -19,6 +18,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
@@ -909,9 +909,9 @@ TEST_F(FlutterEngineTest, ResizeSynchronizerNotBlockingRasterThreadAfterShutdown
 
   std::thread rasterThread([&threadSynchronizer] {
     [threadSynchronizer performCommitForSize:CGSizeMake(100, 100)
+                                  afterDelay:0
                                       notify:^{
-                                      }
-                                       delay:0];
+                                      }];
   });
 
   rasterThread.join();
