@@ -78,8 +78,6 @@ group("flutter") {
     ":unittests",
     "//flutter/shell/platform/embedder:flutter_engine",
     "//flutter/sky",
-    "//flutter/tools/licenses_cpp",
-    "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
   ]
 
   # Ensure the example for a sample embedder compiles.
