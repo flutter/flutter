@@ -24,12 +24,16 @@ const std::array<std::string_view, 3> kLicenseFileNames = {
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
   std::vector<fs::path> result;
-  result.push_back(dir);
   for (const fs::directory_entry& entry :
        fs::recursive_directory_iterator(dir)) {
     if (entry.path().stem() == ".git") {
       result.push_back(entry.path().parent_path());
     }
+  }
+  // Put the query dir in there if we didn't get it yet.  This allows us to
+  // query subdirectories, like `engine`.
+  if (!result.empty() && result[0] != dir) {
+    result.push_back(dir);
   }
   return result;
 }
@@ -65,43 +69,35 @@ absl::Status CheckLicense(const fs::path& git_repo) {
       return absl::UnimplementedError("");
     }
   }
-  return absl::UnavailableError(
+  return absl::NotFoundError(
       absl::StrCat("Expected LICENSE at ", git_repo.string()));
 }
 }  // namespace
 
-int LicenseChecker::Run(std::string_view working_dir,
-                        std::string_view data_dir) {
-  absl::StatusOr<Data> data = Data::Open(data_dir);
-  if (!data.ok()) {
-    std::cerr << "Can't load data at " << data_dir << ": " << data.status()
-              << std::endl;
-    return 1;
-  }
-
+std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
+                                              const Data& data) {
+  std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
 
   RE2 pattern(kHeaderLicenseRegex);
-  int return_code = 0;
 
   for (const fs::path& git_repo : git_repos) {
     absl::Status license_status = CheckLicense(git_repo);
     if (!license_status.ok() &&
         license_status.code() != absl::StatusCode::kUnimplemented) {
-      std::cerr << license_status << std::endl;
-      return_code = 1;
+      errors.push_back(license_status);
     }
 
     absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
     if (!git_files.ok()) {
-      std::cerr << git_files.status() << std::endl;
-      return 1;
+      errors.push_back(git_files.status());
+      return errors;
     }
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
-      if (!data->include_filter.Matches(full_path.string()) ||
-          data->exclude_filter.Matches(full_path.string())) {
+      if (!data.include_filter.Matches(full_path.string()) ||
+          data.exclude_filter.Matches(full_path.string())) {
         // Ignore file.
         continue;
       }
@@ -113,8 +109,8 @@ int LicenseChecker::Run(std::string_view working_dir,
           continue;
         } else {
           // Failure to mmap file.
-          std::cerr << full_path << " : " << file.status() << std::endl;
-          return 1;
+          errors.push_back(file.status());
+          return errors;
         }
       }
       IterateComments(file->GetData(), file->GetSize(),
@@ -127,11 +123,27 @@ int LicenseChecker::Run(std::string_view working_dir,
                         }
                       });
       if (!did_find_copyright) {
-        std::cerr << "Expected copyright in " << full_path << std::endl;
-        return_code = 1;
+        errors.push_back(
+            absl::NotFoundError("Expected copyright in " + full_path.string()));
       }
     }
   }
 
-  return return_code;
+  return errors;
+}
+
+int LicenseChecker::Run(std::string_view working_dir,
+                        std::string_view data_dir) {
+  absl::StatusOr<Data> data = Data::Open(data_dir);
+  if (!data.ok()) {
+    std::cerr << "Can't load data at " << data_dir << ": " << data.status()
+              << std::endl;
+    return 1;
+  }
+  std::vector<absl::Status> errors = Run(working_dir, data.value());
+  for (const absl::Status& status : errors) {
+    std::cerr << status << std::endl;
+  }
+
+  return errors.empty() ? 0 : 1;
 }
