@@ -4,8 +4,10 @@
 
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
+#include <unistd.h>
 #include <filesystem>
 #include <vector>
+
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
@@ -72,6 +74,24 @@ absl::Status CheckLicense(const fs::path& git_repo) {
   return absl::NotFoundError(
       absl::StrCat("Expected LICENSE at ", git_repo.string()));
 }
+
+void PrintProgress(size_t idx, size_t count) {
+  std::cout << "\rprogress: [";
+  double percent = static_cast<double>(idx) / count;
+  int done = percent * 50;
+  int left = 50 - done;
+  for (int i = 0; i < done; ++i) {
+    std::cout << "o";
+  }
+  for (int i = 0; i < left; ++i) {
+    std::cout << ".";
+  }
+  std::cout << "]" << std::flush;
+}
+
+bool IsStdoutTerminal() {
+  return isatty(STDOUT_FILENO);
+}
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
@@ -81,7 +101,11 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 
   RE2 pattern(kHeaderLicenseRegex);
 
+  size_t count = 0;
   for (const fs::path& git_repo : git_repos) {
+    if (IsStdoutTerminal()) {
+      PrintProgress(count++, git_repos.size());
+    }
     absl::Status license_status = CheckLicense(git_repo);
     if (!license_status.ok() &&
         license_status.code() != absl::StatusCode::kUnimplemented) {
@@ -127,6 +151,10 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
             absl::NotFoundError("Expected copyright in " + full_path.string()));
       }
     }
+  }
+  if (IsStdoutTerminal()) {
+    PrintProgress(count++, git_repos.size());
+    std::cout << std::endl;
   }
 
   return errors;
