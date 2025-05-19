@@ -138,8 +138,8 @@ TEST_F(LicenseCheckerTest, SimpleFailure) {
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), *data);
   EXPECT_EQ(errors.size(), 2u);
-  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
-                        "Expected LICENSE at"));
+  EXPECT_TRUE(
+      FindError(errors, absl::StatusCode::kNotFound, "Expected LICENSE at"));
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
                         "Expected copyright in.*main.cc"));
 }
