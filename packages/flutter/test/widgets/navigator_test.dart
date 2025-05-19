@@ -784,6 +784,38 @@ void main() {
     FlutterMemoryAllocations.instance.removeListener(listener);
   });
 
+  testWidgets('Should not call pop invoked if onPopPage veto', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    bool called = false;
+    final List<Page<void>> pages = <Page<void>>[
+      const MaterialPage<void>(child: Text('Page 1')),
+      MaterialPage<void>(
+        child: PopScope(
+          onPopInvokedWithResult: (bool didPop, _) {
+            called = true;
+          },
+          child: const Text('Page 2'),
+        ),
+      ),
+    ];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Navigator(
+          key: key,
+          pages: pages,
+          onPopPage: (Route<dynamic> route, dynamic result) {
+            return false;
+          },
+        ),
+      ),
+    );
+
+    key.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    expect(called, isFalse);
+  });
+
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
     // Regression Test for https://github.com/flutter/flutter/issues/61346.
     Widget buildNavigator() {
