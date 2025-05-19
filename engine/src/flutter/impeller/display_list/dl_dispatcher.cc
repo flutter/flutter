@@ -12,6 +12,7 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
@@ -32,8 +33,6 @@
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -183,14 +182,14 @@ void DlDispatcherBase::setColor(flutter::DlColor color) {
 void DlDispatcherBase::setStrokeWidth(DlScalar width) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.stroke_width = width;
+  paint_.stroke.width = width;
 }
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setStrokeMiter(DlScalar limit) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.stroke_miter = limit;
+  paint_.stroke.miter_limit = limit;
 }
 
 // |flutter::DlOpReceiver|
@@ -199,13 +198,13 @@ void DlDispatcherBase::setStrokeCap(flutter::DlStrokeCap cap) {
 
   switch (cap) {
     case flutter::DlStrokeCap::kButt:
-      paint_.stroke_cap = Cap::kButt;
+      paint_.stroke.cap = Cap::kButt;
       break;
     case flutter::DlStrokeCap::kRound:
-      paint_.stroke_cap = Cap::kRound;
+      paint_.stroke.cap = Cap::kRound;
       break;
     case flutter::DlStrokeCap::kSquare:
-      paint_.stroke_cap = Cap::kSquare;
+      paint_.stroke.cap = Cap::kSquare;
       break;
   }
 }
@@ -216,13 +215,13 @@ void DlDispatcherBase::setStrokeJoin(flutter::DlStrokeJoin join) {
 
   switch (join) {
     case flutter::DlStrokeJoin::kMiter:
-      paint_.stroke_join = Join::kMiter;
+      paint_.stroke.join = Join::kMiter;
       break;
     case flutter::DlStrokeJoin::kRound:
-      paint_.stroke_join = Join::kRound;
+      paint_.stroke.join = Join::kRound;
       break;
     case flutter::DlStrokeJoin::kBevel:
-      paint_.stroke_join = Join::kBevel;
+      paint_.stroke.join = Join::kBevel;
       break;
   }
 }
@@ -441,7 +440,7 @@ void DlDispatcherBase::clipRect(const DlRect& rect,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
-  RectGeometry geom(rect);
+  FillRectGeometry geom(rect);
   GetCanvas().ClipGeometry(geom, ToClipOperation(clip_op), /*is_aa=*/is_aa);
 }
 
@@ -463,7 +462,7 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
 
   auto clip_op = ToClipOperation(sk_op);
   if (rrect.IsRect()) {
-    RectGeometry geom(rrect.GetBounds());
+    FillRectGeometry geom(rrect.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (rrect.IsOval()) {
     EllipseGeometry geom(rrect.GetBounds());
@@ -472,7 +471,7 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
     RoundRectGeometry geom(rrect.GetBounds(), rrect.GetRadii().top_left);
     GetCanvas().ClipGeometry(geom, clip_op);
   } else {
-    FillPathGeometry geom(DlPath::MakeRoundRect(rrect));
+    FillRoundRectGeometry geom(rrect);
     GetCanvas().ClipGeometry(geom, clip_op);
   }
 }
@@ -485,7 +484,7 @@ void DlDispatcherBase::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
 
   auto clip_op = ToClipOperation(sk_op);
   if (rse.IsRect()) {
-    RectGeometry geom(rse.GetBounds());
+    FillRectGeometry geom(rse.GetBounds());
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (rse.IsOval()) {
     EllipseGeometry geom(rse.GetBounds());
@@ -506,7 +505,7 @@ void DlDispatcherBase::clipPath(const DlPath& path,
 
   DlRect rect;
   if (path.IsRect(&rect)) {
-    RectGeometry geom(rect);
+    FillRectGeometry geom(rect);
     GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
   } else if (path.IsOval(&rect)) {
     EllipseGeometry geom(rect);
@@ -563,7 +562,7 @@ void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
   // apart
   if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
     Point delta = (p1 - p0) / length;  // length > 0 already tested
-    PathBuilder builder;
+    flutter::DlPathBuilder builder;
 
     Scalar consumed = 0.0f;
     while (consumed < length) {
@@ -584,7 +583,7 @@ void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
 
     Paint stroke_paint = paint_;
     stroke_paint.style = Paint::Style::kStroke;
-    GetCanvas().DrawPath(DlPath(builder), stroke_paint);
+    GetCanvas().DrawPath(builder.TakePath(), stroke_paint);
   } else {
     drawLine(p0, p1);
   }
@@ -623,11 +622,7 @@ void DlDispatcherBase::drawDiffRoundRect(const DlRoundRect& outer,
                                          const DlRoundRect& inner) {
   AUTO_DEPTH_WATCHER(1u);
 
-  PathBuilder builder;
-  builder.AddRoundRect(outer);
-  builder.AddRoundRect(inner);
-  builder.SetBounds(outer.GetBounds().Union(inner.GetBounds()));
-  GetCanvas().DrawPath(DlPath(builder, FillType::kOdd), paint_);
+  GetCanvas().DrawDiffRoundRect(outer, inner, paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -684,26 +679,8 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  if (paint_.stroke_width >
-      std::max(oval_bounds.GetWidth(), oval_bounds.GetHeight())) {
-    // This is a special case for rendering arcs whose stroke width is so large
-    // you are effectively drawing a sector of a circle.
-    // https://github.com/flutter/flutter/issues/158567
-    DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke_width / 2));
-    PathBuilder builder;
-    Paint fill_paint = paint_;
-    fill_paint.style = Paint::Style::kFill;
-    fill_paint.stroke_width = 1;
-    builder.AddArc(expanded_rect, Degrees(start_degrees),
-                   Degrees(sweep_degrees),
-                   /*use_center=*/true);
-    GetCanvas().DrawPath(DlPath(builder), fill_paint);
-  } else {
-    PathBuilder builder;
-    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                   use_center);
-    GetCanvas().DrawPath(DlPath(builder), paint_);
-  }
+  GetCanvas().DrawArc(oval_bounds, start_degrees, sweep_degrees, use_center,
+                      paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -717,10 +694,10 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
   switch (mode) {
     case flutter::DlPointMode::kPoints: {
       // Cap::kButt is also treated as a square.
-      PointStyle point_style = paint.stroke_cap == Cap::kRound
+      PointStyle point_style = paint.stroke.cap == Cap::kRound
                                    ? PointStyle::kRound
                                    : PointStyle::kSquare;
-      Scalar radius = paint.stroke_width;
+      Scalar radius = paint.stroke.width;
       if (radius > 0) {
         radius /= 2.0;
       }
@@ -1152,11 +1129,7 @@ void FirstPassDispatcher::drawTextFrame(
     DlScalar y) {
   GlyphProperties properties;
   if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = true;
-    properties.stroke_cap = paint_.stroke_cap;
-    properties.stroke_join = paint_.stroke_join;
-    properties.stroke_miter = paint_.stroke_miter;
-    properties.stroke_width = paint_.stroke_width;
+    properties.stroke = paint_.stroke;
   }
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
@@ -1171,9 +1144,9 @@ void FirstPassDispatcher::drawTextFrame(
       scale,        //
       Point(x, y),  //
       matrix_,
-      (properties.stroke || text_frame->HasColor())     //
-          ? std::optional<GlyphProperties>(properties)  //
-          : std::nullopt                                //
+      (properties.stroke.has_value() || text_frame->HasColor())  //
+          ? std::optional<GlyphProperties>(properties)           //
+          : std::nullopt                                         //
   );
 }
 
@@ -1226,25 +1199,25 @@ void FirstPassDispatcher::setColor(flutter::DlColor color) {
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::setStrokeWidth(DlScalar width) {
-  paint_.stroke_width = width;
+  paint_.stroke.width = width;
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::setStrokeMiter(DlScalar limit) {
-  paint_.stroke_miter = limit;
+  paint_.stroke.miter_limit = limit;
 }
 
 // |flutter::DlOpReceiver|
 void FirstPassDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
   switch (cap) {
     case flutter::DlStrokeCap::kButt:
-      paint_.stroke_cap = Cap::kButt;
+      paint_.stroke.cap = Cap::kButt;
       break;
     case flutter::DlStrokeCap::kRound:
-      paint_.stroke_cap = Cap::kRound;
+      paint_.stroke.cap = Cap::kRound;
       break;
     case flutter::DlStrokeCap::kSquare:
-      paint_.stroke_cap = Cap::kSquare;
+      paint_.stroke.cap = Cap::kSquare;
       break;
   }
 }
@@ -1253,13 +1226,13 @@ void FirstPassDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
 void FirstPassDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
   switch (join) {
     case flutter::DlStrokeJoin::kMiter:
-      paint_.stroke_join = Join::kMiter;
+      paint_.stroke.join = Join::kMiter;
       break;
     case flutter::DlStrokeJoin::kRound:
-      paint_.stroke_join = Join::kRound;
+      paint_.stroke.join = Join::kRound;
       break;
     case flutter::DlStrokeJoin::kBevel:
-      paint_.stroke_join = Join::kBevel;
+      paint_.stroke.join = Join::kBevel;
       break;
   }
 }

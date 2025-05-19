@@ -40,7 +40,7 @@ class BuildSystemConfig {
 
   /// The maximum number of concurrent tasks the build system will run.
   ///
-  /// If not provided, defaults to [platform.numberOfProcessors].
+  /// If not provided, defaults to [Platform.numberOfProcessors].
   final int? resourcePoolSize;
 }
 
@@ -55,7 +55,7 @@ class BuildSystemConfig {
 /// be either an md5 hash of the file contents or a timestamp.
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
-/// latter are safe to evaluate before invoking the [buildAction]. For example,
+/// latter are safe to evaluate before invoking the [build] action. For example,
 /// a wildcard output pattern requires the outputs to exist before it can
 /// glob files correctly.
 ///
@@ -69,8 +69,9 @@ class BuildSystemConfig {
 /// subsequent builds to determine which file hashes need to be checked. If the
 /// stamp file is missing, the target's action is always rerun.
 ///
-///  file: `example_target.stamp`
+///  File: `example_target.stamp`
 ///
+/// ```json
 /// {
 ///   "inputs": [
 ///      "absolute/path/foo",
@@ -81,6 +82,7 @@ class BuildSystemConfig {
 ///      "absolute/path/fizz"
 ///    ]
 /// }
+/// ```
 ///
 /// ## Code review
 ///
@@ -103,7 +105,7 @@ class BuildSystemConfig {
 ///
 /// Most targets will invoke an external binary which makes unit testing
 /// trickier. It is recommend that for unit testing that a Fake is used and
-/// provided via the dependency injection system. a [Testbed] may be used to
+/// provided via the dependency injection system. A `Testbed` may be used to
 /// set up the environment before the test is run. Unit tests should fully
 /// exercise the rule, ensuring that the existing input and output verification
 /// logic can run, as well as verifying it correctly handles provided defines
@@ -170,7 +172,7 @@ abstract class Target {
     );
   }
 
-  /// Invoke to remove the stamp file if the [buildAction] threw an exception.
+  /// Invoke to remove the stamp file if the [build] action threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
     ErrorHandlingFileSystem.deleteIfExists(stamp);
@@ -198,7 +200,7 @@ abstract class Target {
 
   /// Find the current set of declared outputs, including wildcard directories.
   ///
-  /// The [implicit] flag controls whether it is safe to evaluate [Source]s
+  /// The [Source.implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
   ResolvedFiles resolveOutputs(Environment environment) {
     return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
@@ -537,7 +539,7 @@ class Environment {
   final String? engineVersion;
 
   /// Whether to generate the Dart plugin registry.
-  /// When [true], the main entrypoint is wrapped and the wrapper becomes
+  /// When `true`, the main entrypoint is wrapped and the wrapper becomes
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
 

@@ -132,7 +132,7 @@ class WebAssetServer implements AssetReader {
     this._canaryFeatures, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
-  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref() {
+  }) : basePath = WebTemplate.baseHref(_htmlTemplate('index.html', _kDefaultIndex)) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -374,6 +374,15 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen(log);
 
+    // Retrieve connected web devices.
+    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
+    final Set<String> connectedWebDeviceIds =
+        devices
+            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
+            .map((Device d) => d.id)
+            .toSet() ??
+        <String>{};
+
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -424,10 +433,12 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Defaults to 'chrome' if deviceManager or specifiedDeviceId is null,
-      // ensuring the condition is true by default.
+      // Inject the debugging support code if connected web devices are present,
+      // and user specified a device id that matches a connected web device.
+      // If the user did not specify a device id, we use chrome as the default.
       injectDebuggingSupportCode:
-          (globals.deviceManager?.specifiedDeviceId ?? 'chrome') == 'chrome',
+          connectedWebDeviceIds.isNotEmpty &&
+          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -669,15 +680,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   String get _flutterBootstrapJsContent {
     final WebTemplate bootstrapTemplate = _getWebTemplate(
       'flutter_bootstrap.js',
-      generateDefaultFlutterBootstrapScript(),
+      generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
-    bootstrapTemplate.applySubstitutions(
+    return bootstrapTemplate.withSubstitutions(
       baseHref: '/',
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
     );
-    return bootstrapTemplate.content;
   }
 
   shelf.Response _serveFlutterBootstrapJs() {
@@ -689,16 +699,15 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   shelf.Response _serveIndexHtml() {
     final WebTemplate indexHtml = _getWebTemplate('index.html', _kDefaultIndex);
-    indexHtml.applySubstitutions(
-      // Currently, we don't support --base-href for the "run" command.
-      baseHref: '/',
-      serviceWorkerVersion: null,
-      buildConfig: _buildConfigString,
-      flutterJsFile: _flutterJsFile,
-      flutterBootstrapJs: _flutterBootstrapJsContent,
-    );
     return shelf.Response.ok(
-      indexHtml.content,
+      indexHtml.withSubstitutions(
+        // Currently, we don't support --base-href for the "run" command.
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        buildConfig: _buildConfigString,
+        flutterJsFile: _flutterJsFile,
+        flutterBootstrapJs: _flutterBootstrapJsContent,
+      ),
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
     );
   }
@@ -1375,7 +1384,11 @@ String? _stripBasePath(String path, String basePath) {
 }
 
 WebTemplate _getWebTemplate(String filename, String fallbackContent) {
-  final File template = globals.fs.currentDirectory.childDirectory('web').childFile(filename);
-  final String htmlContent = template.existsSync() ? template.readAsStringSync() : fallbackContent;
+  final String htmlContent = _htmlTemplate(filename, fallbackContent);
   return WebTemplate(htmlContent);
+}
+
+String _htmlTemplate(String filename, String fallbackContent) {
+  final File template = globals.fs.currentDirectory.childDirectory('web').childFile(filename);
+  return template.existsSync() ? template.readAsStringSync() : fallbackContent;
 }

@@ -143,6 +143,9 @@ targets:
   - name: Linux linux_fuchsia
     recipe: engine_v2/engine_v2
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       release_build: "true"
       config_name: linux_fuchsia
@@ -166,8 +169,6 @@ targets:
     # Scheduler will fail to get the platform
     drone_dimensions:
       - os=Linux
-    dimensions:
-      kvm: "1"
 
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
@@ -259,30 +260,6 @@ targets:
       # at https://github.com/flutter/flutter/issues/152186.
       cores: "8"
 
-  - name: Linux linux_host_engine_ddm
-    recipe: engine_v2/engine_v2
-    bringup: true
-    timeout: 120
-    properties:
-      release_build: "false"
-      backfill: "false"
-      config_name: linux_host_engine_ddm
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
-        ]
-    # Do not remove(https://github.com/flutter/flutter/issues/144644)
-    # Scheduler will fail to get the platform
-    drone_dimensions:
-      - os=Linux
-    dimensions:
-      # This is needed so that orchestrators that only spawn subbuilds are not
-      # assigned to the large 32 core workers when doing release builds.
-      # For more details see the issue
-      # at https://github.com/flutter/flutter/issues/152186.
-      cores: "8"
-
-
   - name: Linux linux_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 120
@@ -303,12 +280,13 @@ targets:
 
   - name: Linux linux_android_aot_engine_ddm
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
+      release_build: "true"
       config_name: linux_android_aot_engine_ddm
-      release_build: "false"
-      backfill: "false"
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
@@ -341,11 +319,12 @@ targets:
 
   - name: Linux linux_android_debug_engine_ddm
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
-      release_build: "false"
-      backfill: "false"
+      release_build: "true"
       config_name: linux_android_debug_engine_ddm
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -499,6 +478,45 @@ targets:
       - os=Mac-14
       - cpu=x86
 
+  - name: Mac mac_ios_engine_ddm
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 240
+    enabled_branches:
+      # Don't run this on release branches
+      - master
+    backfill: false
+    properties:
+      add_recipes_cq: "true"
+      config_name: mac_ios_engine_ddm
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Mac-14
+      - cpu=x86
+
+  - name: Linux windows_android_aot_engine
+    recipe: engine_v2/engine_v2
+    timeout: 120
+    # TODO(matanlurey): Remove bringup: true and add release_build: true.
+    # https://github.com/flutter/flutter/issues/168934
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      # TODO(matanlurey): Remove bringup: true and add release_build: true.
+      # release_build: "true"
+      config_name: windows_host_engine
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Linux
+
+  # TODO(matanlurey): Remove and use Linux windows_host_engine.
+  # https://github.com/flutter/flutter/issues/168934
   - name: Windows windows_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 120
@@ -511,6 +529,24 @@ targets:
     drone_dimensions:
       - os=Windows
 
+  - name: Linux windows_host_engine
+    recipe: engine_v2/engine_v2
+    timeout: 120
+    # TODO(matanlurey): Remove bringup: true and add release_build: true.
+    # https://github.com/flutter/flutter/issues/168934
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      # TODO(matanlurey): Remove bringup: true and add release_build: true.
+      # release_build: "true"
+      config_name: windows_host_engine
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Linux
+
+  # TODO(matanlurey): Remove and use Linux windows_host_engine.
+  # https://github.com/flutter/flutter/issues/168934
   - name: Windows windows_host_engine
     recipe: engine_v2/engine_v2
     timeout: 120

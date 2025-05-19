@@ -9,8 +9,7 @@
 #include "flutter/impeller/tessellator/path_tessellator.h"
 
 #include "flutter/display_list/geometry/dl_path.h"
-#include "flutter/impeller/geometry/path.h"
-#include "flutter/impeller/geometry/path_builder.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 
 namespace impeller {
 namespace testing {
@@ -23,7 +22,10 @@ class MockPathVertexWriter : public impeller::PathTessellator::VertexWriter {
 
 class MockSegmentReceiver : public impeller::PathTessellator::SegmentReceiver {
  public:
-  MOCK_METHOD(void, BeginContour, (Point origin), (override));
+  MOCK_METHOD(void,
+              BeginContour,
+              (Point origin, bool will_be_closed),
+              (override));
   MOCK_METHOD(void, RecordLine, (Point p1, Point p2), (override));
   MOCK_METHOD(void, RecordQuad, (Point p1, Point cp, Point p2), (override));
   MOCK_METHOD(void,
@@ -38,9 +40,9 @@ class MockSegmentReceiver : public impeller::PathTessellator::SegmentReceiver {
 };
 
 TEST(PathTessellatorTest, EmptyPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   PathTessellator::PathToFilledSegments(path, mock_receiver);
@@ -54,11 +56,11 @@ TEST(PathTessellatorTest, EmptyPath) {
 }
 
 TEST(PathTessellatorTest, EmptyPathMultipleMoveTo) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.MoveTo({10, 10});
   builder.MoveTo({20, 20});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   PathTessellator::PathToFilledSegments(path, mock_receiver);
@@ -72,22 +74,23 @@ TEST(PathTessellatorTest, EmptyPathMultipleMoveTo) {
 }
 
 TEST(PathTessellatorTest, SimpleClosedPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -109,22 +112,23 @@ TEST(PathTessellatorTest, SimpleClosedPath) {
 }
 
 TEST(PathTessellatorTest, SimpleUnclosedPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   // Close not really needed for filled paths
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/false));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), false));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/false));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -146,23 +150,24 @@ TEST(PathTessellatorTest, SimpleUnclosedPath) {
 }
 
 TEST(PathTessellatorTest, SimplePathTrailingMoveTo) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   builder.Close();
   builder.MoveTo({500, 100});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -184,7 +189,7 @@ TEST(PathTessellatorTest, SimplePathTrailingMoveTo) {
 }
 
 TEST(PathTessellatorTest, DegenerateSegmentsPath) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({0, 0});
   builder.LineTo({0, 0});
@@ -195,14 +200,15 @@ TEST(PathTessellatorTest, DegenerateSegmentsPath) {
   builder.CubicCurveTo({0, 0}, {0, 0}, {0, 0});
   builder.CubicCurveTo({0, 0}, {0, 0}, {0, 0});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -221,24 +227,25 @@ TEST(PathTessellatorTest, DegenerateSegmentsPath) {
 }
 
 TEST(PathTessellatorTest, QuadToLineToOptimization) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   // CP == P1
   builder.QuadraticCurveTo({0, 0}, {10, 10});
   // CP == P2
   builder.QuadraticCurveTo({20, 10}, {20, 10});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(20, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(20, 10), Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -260,7 +267,7 @@ TEST(PathTessellatorTest, QuadToLineToOptimization) {
 }
 
 TEST(PathTessellatorTest, ConicToLineToOptimization) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   // CP == P1
   builder.ConicCurveTo({0, 0}, {10, 10}, 2.0f);
@@ -269,18 +276,19 @@ TEST(PathTessellatorTest, ConicToLineToOptimization) {
   // weight == 0
   builder.ConicCurveTo({20, 0}, {10, 0}, 0.0f);
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(20, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(20, 10), Point(10, 0)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 0), Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -306,21 +314,21 @@ TEST(PathTessellatorTest, ConicToQuadToOptimization) {
   // The conic below will simplify to this quad
   PathTessellator::Quad quad{{0, 0}, {10, 0}, {0, 10}};
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo(quad.p1);
   // weight == 1
   builder.ConicCurveTo(quad.cp, quad.p2, 1.0f);
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(quad.p1));
+    EXPECT_CALL(mock_receiver, BeginContour(quad.p1, /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordQuad(quad.p1, quad.cp, quad.p2));
     EXPECT_CALL(mock_receiver, RecordLine(quad.p2, quad.p1));
-    EXPECT_CALL(mock_receiver, EndContour(quad.p1, true));
+    EXPECT_CALL(mock_receiver, EndContour(quad.p1, /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -347,23 +355,24 @@ TEST(PathTessellatorTest, ConicToQuadToOptimization) {
 }
 
 TEST(PathTessellatorTest, SimplePathMultipleMoveTo) {
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({500, 100});
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.LineTo({0, 20});
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -389,20 +398,21 @@ TEST(PathTessellatorTest, ComplexPath) {
   PathTessellator::Conic conic{{20, 10}, {30, 20}, {30, 10}, 2.0f};
   PathTessellator::Cubic cubic{{30, 10}, {40, 20}, {40, 10}, {42, 15}};
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.QuadraticCurveTo(quad.cp, quad.p2);
   builder.ConicCurveTo(conic.cp, conic.p2, conic.weight);
   builder.CubicCurveTo(cubic.cp1, cubic.cp2, cubic.p2);
   builder.Close();
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordQuad(quad.p1, quad.cp, quad.p2));
     EXPECT_CALL(mock_receiver,
@@ -410,7 +420,7 @@ TEST(PathTessellatorTest, ComplexPath) {
     EXPECT_CALL(mock_receiver,
                 RecordCubic(cubic.p1, cubic.cp1, cubic.cp2, cubic.p2));
     EXPECT_CALL(mock_receiver, RecordLine(cubic.p2, Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 
@@ -463,7 +473,7 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
   PathTessellator::Conic conic{{20, 10}, {30, 20}, {30, 10}, 2.0f};
   PathTessellator::Cubic cubic{{30, 10}, {40, 20}, {40, 10}, {42, 15}};
 
-  PathBuilder builder;
+  flutter::DlPathBuilder builder;
   builder.MoveTo({0, 0});
   builder.LineTo({10, 10});
   builder.QuadraticCurveTo(quad.cp, quad.p2);
@@ -471,13 +481,14 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
   builder.CubicCurveTo(cubic.cp1, cubic.cp2, cubic.p2);
   builder.Close();
   builder.MoveTo({500, 100});
-  flutter::DlPath path = flutter::DlPath(builder);
+  flutter::DlPath path = builder.TakePath();
 
   ::testing::StrictMock<MockSegmentReceiver> mock_receiver;
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver,
+                BeginContour(Point(0, 0), /*will_be_closed=*/true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordQuad(quad.p1, quad.cp, quad.p2));
     EXPECT_CALL(mock_receiver,
@@ -485,7 +496,7 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
     EXPECT_CALL(mock_receiver,
                 RecordCubic(cubic.p1, cubic.cp1, cubic.cp2, cubic.p2));
     EXPECT_CALL(mock_receiver, RecordLine(cubic.p2, Point(0, 0)));
-    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
+    EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), /*with_close=*/true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
 

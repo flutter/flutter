@@ -33,7 +33,7 @@ final Platform macPlatform = FakePlatform(
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=12.0',
+  '-miphoneos-version-min=13.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -132,7 +132,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=12.0',
+            '-miphonesimulator-version-min=13.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',
@@ -240,7 +240,7 @@ void main() {
           .createSync();
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -331,10 +331,7 @@ void main() {
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
       // Project info
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -419,7 +416,7 @@ void main() {
       fileSystem
           .file('pubspec.yaml')
           .writeAsStringSync('name: my_app\nflutter:\n  shaders:\n    - shader.glsl');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -500,7 +497,7 @@ void main() {
 
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
       // Plist file
       fileSystem

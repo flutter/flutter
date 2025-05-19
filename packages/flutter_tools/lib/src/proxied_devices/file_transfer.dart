@@ -372,7 +372,7 @@ class FileTransfer {
   }
 
   /// Generate the new destination file from the source file, with the
-  /// [blocks] and [binary] stream given.
+  /// [delta] and [binary] stream given.
   Future<bool> rebuildFile(File file, List<FileDeltaBlock> delta, Stream<List<int>> binary) async {
     final RandomAccessFile fileView = await file.open();
 

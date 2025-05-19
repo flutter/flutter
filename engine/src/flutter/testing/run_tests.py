@@ -462,6 +462,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('availability_version_check_unittests'),
+        make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
         make_test('gpu_surface_metal_unittests'),
@@ -505,6 +506,15 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       xvfb.stop_virtual_x(build_name)
 
   if is_mac():
+    # macOS Desktop unit tests written in Swift.
+    run_engine_executable(
+        build_dir,
+        'flutter_desktop_darwin_swift_unittests',
+        executable_filter,
+        shuffle_flags,
+        coverage=coverage
+    )
+
     # flutter_desktop_darwin_unittests uses global state that isn't handled
     # correctly by gtest-parallel.
     # https://github.com/flutter/flutter/issues/104789
@@ -1115,7 +1125,7 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
         raise RuntimeError(
             """
 The GOLDCTL environment variable is not set. This is required for Skia Gold tests.
-See https://github.com/flutter/engine/tree/main/testing/skia_gold_client#configuring-ci
+See flutter/tree/main/engine/src/flutter/testing/skia_gold_client#configuring-ci
 for more information.
 """
         )

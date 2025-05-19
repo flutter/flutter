@@ -14,7 +14,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -723,6 +723,8 @@ void main() {
                               SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.didLoseAccessibilityFocus,
                             ],
+                            inputType: ui.SemanticsInputType.text,
+                            currentValueLength: 0,
                             textDirection: TextDirection.ltr,
                           ),
                         ],
@@ -1963,6 +1965,8 @@ void main() {
                 SemanticsAction.moveCursorBackwardByWord,
               ],
               value: 'abcdefghi',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 9),
             ),
@@ -5312,6 +5316,8 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'some text',
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
                 SemanticsFlag.hasEnabledState,
@@ -5529,12 +5535,12 @@ void main() {
       ),
     );
     final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
-    // Per https://material.io/go/design-text-fields#text-fields-layout
-    // There's a 16 dps gap between the right edge of the icon and the text field's
-    // container, and the 12dps more padding between the left edge of the container
-    // and the left edge of the input and label.
-    expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
-    expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
+    // There's a 16 pixels gap between the right edge of the icon and the text field's
+    // container, and, per https://material.io/go/design-text-fields#text-fields-layout,
+    // 16 pixels more padding between the left edge of the container and the left edge
+    // of the input and label.
+    expect(iconRight + 16.0 + 16.0, equals(tester.getTopLeft(find.text('label')).dx));
+    expect(iconRight + 16.0 + 16.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
   });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
@@ -6572,6 +6578,8 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
+        inputType: ui.SemanticsInputType.text,
+        currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
@@ -6980,13 +6988,14 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
+        inputType: ui.SemanticsInputType.text,
+        currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
         maxValueLength: 10,
-        currentValueLength: 0,
       ),
     );
 
@@ -7004,6 +7013,7 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
+        inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
@@ -7032,6 +7042,8 @@ void main() {
     expect(
       semantics,
       includesNodeWith(
+        inputType: ui.SemanticsInputType.text,
+        currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
@@ -7994,6 +8006,8 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8020,6 +8034,8 @@ void main() {
               id: 1,
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8046,6 +8062,8 @@ void main() {
               id: 1,
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               textSelection: const TextSelection.collapsed(offset: 9),
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
@@ -8083,6 +8101,8 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 4),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8122,6 +8142,8 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 0),
               value: 'Schönen Feierabend',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 18,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8168,6 +8190,7 @@ void main() {
           SemanticsFlag.isEnabled,
         ],
         value: 'Hello',
+        inputType: ui.SemanticsInputType.text,
       ),
     );
 
@@ -8179,6 +8202,7 @@ void main() {
       includesNodeWith(
         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
         textDirection: TextDirection.ltr,
+        inputType: ui.SemanticsInputType.text,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
@@ -8202,6 +8226,7 @@ void main() {
           SemanticsFlag.isEnabled,
         ],
         value: 'Hello',
+        inputType: ui.SemanticsInputType.text,
       ),
     );
 
@@ -8232,6 +8257,8 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8274,6 +8301,8 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               value: 'Hello',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
@@ -8301,6 +8330,8 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               value: 'Hello',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8337,6 +8368,8 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               value: 'Hello',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8395,6 +8428,8 @@ void main() {
             TestSemantics.rootChild(
               id: inputFieldId,
               value: 'Hello',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8451,6 +8486,8 @@ void main() {
             TestSemantics.rootChild(
               id: inputFieldId,
               value: 'Hello',
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8511,6 +8548,8 @@ void main() {
               ],
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               value: textInTextField,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -8546,6 +8585,8 @@ void main() {
                 SemanticsAction.paste,
               ],
               value: textInTextField,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(
                 baseOffset: textInTextField.length,
@@ -8591,6 +8632,8 @@ void main() {
               ],
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               value: textInTextField,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -8626,6 +8669,8 @@ void main() {
                 // No paste option.
               ],
               value: textInTextField,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(
                 baseOffset: textInTextField.length,
@@ -8769,6 +8814,9 @@ void main() {
               label: 'label',
               id: 1,
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
+              maxValueLength: 10,
+              currentValueLength: 0,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8804,6 +8852,9 @@ void main() {
               id: 1,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
+              maxValueLength: 10,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8870,6 +8921,8 @@ void main() {
             TestSemantics.rootChild(
               label: 'label',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8925,6 +8978,8 @@ void main() {
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               children: <TestSemantics>[
                 TestSemantics(label: 'oh no!', textDirection: TextDirection.ltr),
               ],
@@ -11526,7 +11581,7 @@ void main() {
   );
 
   testWidgets(
-    'Toolbar hides on scroll start and re-appears on scroll end on Android and iOS',
+    'Toolbar hides on scroll start and re-appears on scroll end on Android',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
@@ -11583,10 +11638,7 @@ void main() {
       expect(renderEditable.selectionStartInViewport.value, true);
       expect(renderEditable.selectionEndInViewport.value, true);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.iOS,
-    }),
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
   testWidgets(
@@ -15865,6 +15917,106 @@ void main() {
     skip: isContextMenuProvidedByPlatform,
   );
 
+  testWidgets(
+    'Selection handles should not show when using a mouse on non-Apple platforms',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
+      await tester.pumpWidget(
+        MaterialApp(home: Material(child: TextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoMaterialToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset secondBlah = textOffsetToPosition(tester, 8);
+
+      // Right click the second word using a mouse.
+      final TestGesture gesture = await tester.startGesture(
+        secondBlah,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+          expect(find.text('Cut'), findsNothing);
+          expect(find.text('Copy'), findsNothing);
+          expect(find.text('Paste'), findsOneWidget);
+          expect(find.text('Select all'), findsOneWidget);
+      }
+
+      // Press select all.
+      await tester.tap(find.text('Select all'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
+  testWidgets(
+    'Selection handles should not show when using a mouse on Apple platforms using Flutter context menu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
+      await tester.pumpWidget(
+        MaterialApp(home: Material(child: TextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoCupertinoToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset firstBlah = textOffsetToPosition(tester, 5);
+
+      // Click at the end of blah1.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+
+      // Right click the same position to reveal the context menu.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection.collapsed(offset: 5));
+      expectCupertinoToolbarForCollapsedSelection();
+
+      // Press select all.
+      await tester.tap(find.text('Select All'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
   testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
 
@@ -16153,19 +16305,22 @@ void main() {
     testWidgets(
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
-        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
-            true;
-        _updateMediaQueryFromView(tester);
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         addTearDown(() {
-          TestWidgetsFlutterBinding.instance.platformDispatcher
-              .resetSupportsShowingSystemContextMenu();
-          _updateMediaQueryFromView(tester);
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
         });
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: TextField(controller: _textEditingController(text: 'one two three')),
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(
+                child: TextField(controller: _textEditingController(text: 'one two three')),
+              ),
             ),
           ),
         );
@@ -16182,6 +16337,74 @@ void main() {
 
         expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
         expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets(
+      'iOS system context menu does not hide selection handles on onSystemHide',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(
+                child: TextField(controller: _textEditingController(text: 'one two three')),
+              ),
+            ),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+
+        // Simulate system hiding the menu.
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'ContextMenu.onDismissSystemContextMenu',
+        });
+        Object? error;
+        try {
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            'flutter/platform',
+            messageBytes,
+            (ByteData? data) {},
+          );
+        } catch (e) {
+          error = e;
+        }
+        await tester.pumpAndSettle();
+
+        expect(error, isNull);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Selection handles are not hidden.
+        final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
+            matching: find.byType(CustomPaint),
+          ),
+        );
+        expect(boxes.length, 2);
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
@@ -16541,6 +16764,54 @@ void main() {
         // End the long press to hide the magnifier.
         await gesture.up();
         await tester.pumpAndSettle();
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+      }),
+    );
+
+    testWidgets(
+      'cancelling long press hides magnifier',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/167879
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: TextField(
+                  dragStartBehavior: DragStartBehavior.down,
+                  magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder: (
+                      BuildContext context,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byType(TextField)),
+        );
+
+        await tester.pumpAndSettle(kLongPressTimeout);
+
+        expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+        // Cancel the long press to hide the magnifier.
+        await gesture.cancel();
+        await tester.pumpAndSettle();
+
         expect(find.byKey(fakeMagnifier.key!), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -17385,6 +17656,8 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
+                          inputType: ui.SemanticsInputType.text,
+                          currentValueLength: 0,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.hasEnabledState,
@@ -17453,6 +17726,8 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
+                            inputType: ui.SemanticsInputType.text,
+                            currentValueLength: 0,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,
@@ -17716,24 +17991,4 @@ TextEditingController _textEditingController({String text = ''}) {
   final TextEditingController result = TextEditingController(text: text);
   addTearDown(result.dispose);
   return result;
-}
-
-// Trigger MediaQuery to update itself based on the View, which is not
-// recreated between tests. This is necessary when changing something on
-// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
-// TODO(justinmc): This hack can be removed if
-// https://github.com/flutter/flutter/issues/165519 is fixed.
-void _updateMediaQueryFromView(WidgetTester tester) {
-  expect(find.byType(MediaQuery), findsOneWidget);
-  final WidgetsBindingObserver widgetsBindingObserver =
-      tester.state(
-            find.ancestor(
-              of: find.byType(MediaQuery),
-              matching: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
-              ),
-            ),
-          )
-          as WidgetsBindingObserver;
-  widgetsBindingObserver.didChangeMetrics();
 }

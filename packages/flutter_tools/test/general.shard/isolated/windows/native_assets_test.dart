@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart' as code_assets;
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -15,8 +17,6 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets.dart' as native_assets_cli;
-import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -77,7 +77,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.empty(),
         },
         () async {
-          writePackageConfigFile(directory: environment.projectDir, mainLibName: 'my_app');
+          writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri =
               environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
           final File dylibAfterCompiling = fileSystem.file('bar.dll');
@@ -89,8 +89,6 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.windows,
-              architecture: Architecture.x64,
               file: dylibAfterCompiling.uri,
             ),
           ];
@@ -115,7 +113,7 @@ void main() {
             buildRunner: buildRunner,
           );
           final String expectedDirectory =
-              flutterTester ? native_assets_cli.OS.current.toString() : 'windows';
+              flutterTester ? code_assets.OS.current.toString() : 'windows';
           final Uri nativeAssetsFileUri =
               flutterTester
                   ? projectUri.resolve(
@@ -252,7 +250,7 @@ void main() {
       );
       await msvcBinDir.create(recursive: true);
 
-      final File packageConfigFile = writePackageConfigFile(
+      final File packageConfigFile = writePackageConfigFiles(
         directory: fileSystem.directory(projectUri),
         mainLibName: 'my_app',
       );

@@ -7,7 +7,6 @@ package io.flutter.view;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -564,7 +563,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  @TargetApi(API_LEVELS.API_31)
   @RequiresApi(API_LEVELS.API_31)
   private void setBoldTextFlag() {
     if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
@@ -991,6 +989,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
+          assert embeddedView != null;
+          // The embedded view is initially marked as not important at creation in the platform
+          // view controller, so we must explicitly mark it as important here.
+          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
           result.addChild(embeddedView);
           continue;
         }
@@ -1926,7 +1928,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
-  @TargetApi(API_LEVELS.API_28)
   @RequiresApi(API_LEVELS.API_28)
   private void setAccessibilityPaneTitle(String title) {
     rootAccessibilityView.setAccessibilityPaneTitle(title);
@@ -1975,7 +1976,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *
    * <p>The {@code layoutInDisplayCutoutMode} is added after API level 28.
    */
-  @TargetApi(API_LEVELS.API_28)
   @RequiresApi(API_LEVELS.API_28)
   private boolean doesLayoutInDisplayCutoutModeRequireLeftInset() {
     Context context = rootAccessibilityView.getContext();
@@ -2293,7 +2293,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Flutter ID of this {@code SemanticsNode}.
     private int id = -1;
 
-    private int flags;
+    private long flags;
     private int actions;
     private int maxValueLength;
     private int currentValueLength;
@@ -2343,7 +2343,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private TextDirection textDirection;
 
     private boolean hadPreviousConfig = false;
-    private int previousFlags;
+    private long previousFlags;
     private int previousActions;
     private int previousTextSelectionBase;
     private int previousTextSelectionExtent;
@@ -2492,7 +2492,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       previousScrollExtentMax = scrollExtentMax;
       previousScrollExtentMin = scrollExtentMin;
 
-      flags = buffer.getInt();
+      flags = buffer.getLong();
       actions = buffer.getInt();
       maxValueLength = buffer.getInt();
       currentValueLength = buffer.getInt();
