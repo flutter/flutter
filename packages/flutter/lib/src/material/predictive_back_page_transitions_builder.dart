@@ -365,10 +365,6 @@ class _PredictiveBackSharedElementPageTransitionState
   // transition between the default radius and the actual radius.
   final Tween<double> _borderRadiusTween = Tween<double>(begin: 0.0, end: _kDeviceBorderRadius);
 
-  // The overall padding for the route shrinks during the gesture and animates
-  // back to normal after commit.
-  final Tween<double> _paddingTween = Tween<double>(begin: 0, end: _kMargin);
-
   // The route fades out after commit.
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
 
@@ -522,14 +518,9 @@ class _PredictiveBackSharedElementPageTransitionState
             },
             child: Opacity(
               opacity: _opacityTween.evaluate(_commitAnimation),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: _paddingTween.evaluate(_bounceAnimation)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    _borderRadiusTween.evaluate(_bounceAnimation),
-                  ),
-                  child: child,
-                ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
+                child: child,
               ),
             ),
           ),
