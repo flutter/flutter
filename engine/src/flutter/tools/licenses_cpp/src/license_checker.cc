@@ -126,14 +126,15 @@ int LicenseChecker::Run(std::string_view working_dir,
           return 1;
         }
       }
-      lex(file->GetData(), file->GetSize(), [&](std::string_view comment) {
-        VLOG(2) << comment;
-        re2::StringPiece match;
-        if (RE2::PartialMatch(comment, pattern, &match)) {
-          did_find_copyright = true;
-          VLOG(1) << comment;
-        }
-      });
+      IterateComments(file->GetData(), file->GetSize(),
+                      [&](std::string_view comment) {
+                        VLOG(2) << comment;
+                        re2::StringPiece match;
+                        if (RE2::PartialMatch(comment, pattern, &match)) {
+                          did_find_copyright = true;
+                          VLOG(1) << comment;
+                        }
+                      });
       if (!did_find_copyright) {
         std::cerr << "Expected copyright in " << full_path << std::endl;
         return_code = 1;

@@ -3,7 +3,10 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-
+/**
+ * To regenerate comments.cc run:
+ * flex -o comments.cc comments.l
+ */
 %option reentrant
 %option noyywrap
 %option extra-type="LexerContext*"
@@ -63,9 +66,9 @@ COMMENT_START (\/\/|#)
 \n|. {}
 %%
 
-void lex(const char* buffer,
-         size_t size,
-         std::function<void(std::string_view)> callback) {
+void IterateComments(const char* buffer,
+                     size_t size,
+                     std::function<void(std::string_view)> callback) {
   LexerContext context;
   context.buffer.reserve(4096);
   context.callback = std::move(callback);

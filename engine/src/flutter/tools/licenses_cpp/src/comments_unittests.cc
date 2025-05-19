@@ -12,7 +12,7 @@ TEST(CommentsTest, Simple) {
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
     comments.push_back(std::string(comment));
   });
 
@@ -26,7 +26,7 @@ hello world
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
     comments.push_back(std::string(comment));
   });
 
@@ -42,7 +42,7 @@ dfdd
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
     comments.push_back(std::string(comment));
   });
 
@@ -59,7 +59,7 @@ daa
 )test";
 
   std::vector<std::string> comments;
-  lex(test.c_str(), test.size(), [&](std::string_view comment) {
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
     comments.push_back(std::string(comment));
   });
 
