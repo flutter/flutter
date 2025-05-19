@@ -5244,14 +5244,15 @@ void main() {
       expect(find.text(hintText), findsNothing);
     });
 
-    testWidgets('Hint uses topLeft alignment when maintainHintSize is false',
-        (WidgetTester tester) async {
+    testWidgets('Hint uses topLeft alignment when maintainHintSize is false', (
+      WidgetTester tester,
+    ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         maintainHintSize: false,
       );
 
-      await tester.pumpWidget(buildInputDecorator(decoration: decoration));
+      await tester.pumpWidget(buildInputDecorator(isEmpty: true, decoration: decoration));
 
       final Finder animatedSwitcherFinder = find.byType(AnimatedSwitcher);
       expect(animatedSwitcherFinder, findsOneWidget);
@@ -5264,6 +5265,16 @@ void main() {
 
       final Stack stack = tester.widget<Stack>(stackFinder);
       expect(stack.alignment, Alignment.topLeft);
+
+      final Finder hintTextFinder = find.text(hintText);
+      expect(hintTextFinder, findsOneWidget);
+
+      // Get the hint text box and stack box to calculate the position of the hint text.
+      final RenderBox hintTextBox = tester.renderObject<RenderBox>(hintTextFinder);
+      final RenderBox stackBox = tester.renderObject<RenderBox>(stackFinder);
+      final Offset hintTextPosition = hintTextBox.localToGlobal(Offset.zero, ancestor: stackBox);
+      expect(hintTextPosition.dx, 0.0);
+      expect(hintTextPosition.dy, 0.0);
     });
   });
 
