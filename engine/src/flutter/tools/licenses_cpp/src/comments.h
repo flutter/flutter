@@ -9,8 +9,8 @@
 #include <functional>
 #include <string_view>
 
-void lex(const char* buffer,
-         size_t size,
-         std::function<void(std::string_view)> callback);
+void IterateComments(const char* buffer,
+                     size_t size,
+                     std::function<void(std::string_view)> callback);
 
 #endif  // FLUTTER_TOOLS_LICENSES_CPP_SRC_COMMENTS_H_

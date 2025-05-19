@@ -400,7 +400,11 @@ static const flex_int16_t yy_chk[41] = {
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
-#line 12 "comments.l"
+/**
+ * To regenerate comments.cc run:
+ * flex -o comments.cc comments.l
+ */
+#line 15 "comments.l"
 #include "flutter/tools/licenses_cpp/src/comments.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -412,9 +416,9 @@ struct LexerContext {
   std::function<void(std::string_view)> callback;
   std::string buffer;
 };
-#line 453 "comments.cc"
+#line 457 "comments.cc"
 
-#line 455 "comments.cc"
+#line 459 "comments.cc"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -670,9 +674,9 @@ YY_DECL {
   }
 
   {
-#line 30 "comments.l"
+#line 33 "comments.l"
 
-#line 720 "comments.cc"
+#line 724 "comments.cc"
 
     while (/*CONSTCOND*/ 1) /* loops until end-of-file is reached */
     {
@@ -726,7 +730,7 @@ YY_DECL {
 
         case 1:
           YY_RULE_SETUP
-#line 31 "comments.l"
+#line 34 "comments.l"
           {
             BEGIN(BLOCK);
             yyextra->buffer.append(yytext, yyleng);
@@ -734,7 +738,7 @@ YY_DECL {
           YY_BREAK
         case 2:
           YY_RULE_SETUP
-#line 35 "comments.l"
+#line 38 "comments.l"
           {
             BEGIN(C_COMMENT);
             yyextra->buffer.append(yytext, yyleng);
@@ -743,7 +747,7 @@ YY_DECL {
 
         case 3:
           YY_RULE_SETUP
-#line 41 "comments.l"
+#line 44 "comments.l"
           {
             BEGIN(INITIAL);
             yyextra->buffer.append(yytext, yyleng);
@@ -754,7 +758,7 @@ YY_DECL {
         case 4:
           /* rule 4 can match eol */
           YY_RULE_SETUP
-#line 47 "comments.l"
+#line 50 "comments.l"
           {
             yyextra->buffer.append(yytext, yyleng);
           }
@@ -763,7 +767,7 @@ YY_DECL {
         case 5:
           /* rule 5 can match eol */
           YY_RULE_SETUP
-#line 53 "comments.l"
+#line 56 "comments.l"
           {
             yyextra->buffer.append(yytext, yyleng);
           }
@@ -771,7 +775,7 @@ YY_DECL {
         case 6:
           /* rule 6 can match eol */
           YY_RULE_SETUP
-#line 56 "comments.l"
+#line 59 "comments.l"
           {
             BEGIN(INITIAL);
             yyextra->callback(yyextra->buffer);
@@ -782,16 +786,16 @@ YY_DECL {
         case 7:
           /* rule 7 can match eol */
           YY_RULE_SETUP
-#line 63 "comments.l"
+#line 66 "comments.l"
           {
           }
           YY_BREAK
         case 8:
           YY_RULE_SETUP
-#line 64 "comments.l"
+#line 67 "comments.l"
           ECHO;
           YY_BREAK
-#line 845 "comments.cc"
+#line 849 "comments.cc"
         case YY_STATE_EOF(INITIAL):
         case YY_STATE_EOF(C_COMMENT):
         case YY_STATE_EOF(BLOCK):
@@ -915,8 +919,8 @@ YY_DECL {
         default:
           YY_FATAL_ERROR("fatal flex scanner internal error--no action found");
       } /* end of action switch */
-    } /* end of scanning one token */
-  } /* end of user's declarations */
+    }   /* end of scanning one token */
+  }     /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -1900,11 +1904,11 @@ void yyfree(void* ptr, yyscan_t yyscanner) {
 
 #define YYTABLES_NAME "yytables"
 
-#line 64 "comments.l"
+#line 67 "comments.l"
 
-void lex(const char* buffer,
-         size_t size,
-         std::function<void(std::string_view)> callback) {
+void IterateComments(const char* buffer,
+                     size_t size,
+                     std::function<void(std::string_view)> callback) {
   LexerContext context;
   context.buffer.reserve(4096);
   context.callback = std::move(callback);
