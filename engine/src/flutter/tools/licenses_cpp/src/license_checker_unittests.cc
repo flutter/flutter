@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 #include <filesystem>
+#include <fstream>
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
@@ -47,6 +48,19 @@ class LicenseCheckerTest : public testing::Test {
 };
 
 namespace {
+
+const char* kHeader = R"header(
+// Copyright Test
+
+void main() {
+}
+)header";
+
+const char* kLicense = R"lic(
+Test License
+v2.0
+)lic";
+
 absl::StatusOr<Data> MakeTestData() {
   std::stringstream include;
   include << ".*\\.cc" << std::endl;
@@ -65,9 +79,41 @@ absl::StatusOr<Data> MakeTestData() {
       .exclude_filter = std::move(*exclude_filter),
   };
 }
+
+absl::Status WriteFile(const char* data, const fs::path& path) {
+  std::ofstream of;
+  of.open(path.string(), std::ios::binary);
+  if (!of.good()) {
+    return absl::InternalError("can't open file");
+  }
+  of.write(data, std::strlen(data));
+  of.close();
+  return absl::OkStatus();
+}
+
 }  // namespace
 
-TEST_F(LicenseCheckerTest, Simple) {
+TEST_F(LicenseCheckerTest, SimpleFailure) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_EQ(std::system("git init"), 0);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  ASSERT_EQ(std::system("git add main.cc"), 0);
+  ASSERT_EQ(std::system("git add LICENSE"), 0);
+  ASSERT_EQ(std::system("git commit -m \"test\""), 0);
+
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), *data);
+  EXPECT_EQ(errors.size(), 0u);
+}
+
+TEST_F(LicenseCheckerTest, SimplePass) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
