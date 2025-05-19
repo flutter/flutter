@@ -1,4 +1,4 @@
-Signature: ebf1dd1fac20570e7efb3e095daf86ee
+Signature: c60421040f270e03ea28f73b8ba0aaf4
 
 ====================================================================================================
 LIBRARY: etc1
@@ -327,13 +327,13 @@ ORIGIN: ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/.bazelignore
 FILE: ../../../flutter/third_party/skia/.bazelproject
-FILE: ../../../flutter/third_party/skia/Cargo.toml
 FILE: ../../../flutter/third_party/skia/MODULE.bazel
 FILE: ../../../flutter/third_party/skia/MODULE.bazel.lock
 FILE: ../../../flutter/third_party/skia/OWNERS_build_files.android
 FILE: ../../../flutter/third_party/skia/RELEASE_NOTES.md
 FILE: ../../../flutter/third_party/skia/go.mod
 FILE: ../../../flutter/third_party/skia/go.sum
+FILE: ../../../flutter/third_party/skia/include/config/MODULE.bazel
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/catchExceptionNop.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/color.js
@@ -400,6 +400,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/precompile.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -9867,7 +9868,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPUContext.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/VulkanPrecompileShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9875,18 +9880,29 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.cpp 
 ORIGIN: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorderImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RecorderOptionsPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/include/core/SkCPUContext.h
+FILE: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h
+FILE: ../../../flutter/third_party/skia/include/core/SkRecorder.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
+FILE: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/VulkanPrecompileShader.h
 FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp
@@ -9894,16 +9910,23 @@ FILE: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.cpp
 FILE: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h
+FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorderImpl.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h
 FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RecorderOptionsPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageShader.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC
 
@@ -9939,8 +9962,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/tools.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
+FILE: ../../../flutter/third_party/skia/tools.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC.
 
