@@ -14424,7 +14424,7 @@ void main() {
 
   testWidgets(
     'InputDecorator _buildError with errorText correctly updates on BuildContext updates',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final ValueNotifier<String?> errorTextNotifier = ValueNotifier<String?>('initial error');
       const String helperTextValue = 'helper text';
 
@@ -14436,10 +14436,7 @@ void main() {
               valueListenable: errorTextNotifier,
               builder: (BuildContext context, String? value, Widget? child) {
                 return buildInputDecorator(
-                  decoration: InputDecoration(
-                    errorText: value,
-                    helperText: helperTextValue,
-                  ),
+                  decoration: InputDecoration(errorText: value, helperText: helperTextValue),
                 );
               },
             ),
