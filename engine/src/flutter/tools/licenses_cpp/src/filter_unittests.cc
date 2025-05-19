@@ -17,3 +17,16 @@ TEST(FilterTest, Simple) {
   EXPECT_TRUE(filter->Matches("foo/bar/baz.cc"));
   EXPECT_FALSE(filter->Matches("foo/bar/baz.txt"));
 }
+
+TEST(FilterTest, Comments) {
+  std::stringstream ss;
+  ss << ".*\\.dart" << std::endl;
+  ss << "# hello!" << std::endl;
+  ss << ".*\\.cc" << std::endl;
+
+  absl::StatusOr<Filter> filter = Filter::Open(ss);
+  ASSERT_TRUE(filter.ok());
+  EXPECT_TRUE(filter->Matches("foo/bar/baz.dart"));
+  EXPECT_TRUE(filter->Matches("foo/bar/baz.cc"));
+  EXPECT_FALSE(filter->Matches("foo/bar/baz.txt"));
+}
