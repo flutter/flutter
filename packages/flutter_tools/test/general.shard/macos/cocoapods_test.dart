@@ -21,9 +21,9 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 enum _StdioStream { stdout, stderr }
 
@@ -71,7 +71,7 @@ environement:
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
     );
-    writePackageConfigFile(directory: projectUnderTest.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;
@@ -440,7 +440,7 @@ environement:
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });

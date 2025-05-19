@@ -989,6 +989,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
+          assert embeddedView != null;
+          // The embedded view is initially marked as not important at creation in the platform
+          // view controller, so we must explicitly mark it as important here.
+          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
           result.addChild(embeddedView);
           continue;
         }
