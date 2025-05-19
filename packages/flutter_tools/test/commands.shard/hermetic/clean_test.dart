@@ -274,7 +274,7 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
         .createSync(recursive: true);
   }
   projectUnderTest.dartTool.createSync(recursive: true);
-  writePackageConfigFile(directory: projectUnderTest.directory, mainLibName: 'my_app');
+  writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
 
   projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
 

@@ -43,11 +43,11 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
 import '../src/package_config.dart';
 import '../src/test_build_system.dart';
+import '../src/throwing_pub.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
@@ -124,7 +124,7 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -261,7 +261,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -298,7 +298,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -326,7 +326,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -348,7 +348,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -381,7 +381,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -411,7 +411,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -454,7 +454,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -495,7 +495,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -539,7 +539,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -686,7 +686,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -720,7 +720,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -827,7 +827,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -912,7 +912,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -994,7 +994,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1107,7 +1107,7 @@ name: my_app
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   }
@@ -1143,7 +1143,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1181,7 +1181,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1222,7 +1222,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1249,7 +1249,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1280,7 +1280,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1312,7 +1312,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1389,7 +1389,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1416,7 +1416,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1448,7 +1448,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1519,7 +1519,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1567,7 +1567,7 @@ name: my_app
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1608,7 +1608,7 @@ name: my_app
 flutter:
   generate: true
 ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1626,7 +1626,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1636,7 +1636,7 @@ flutter:
     'Does not generate dart_plugin_registrant.dart',
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1683,7 +1683,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1737,7 +1737,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1756,7 +1756,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1776,7 +1776,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1795,7 +1795,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1815,7 +1815,7 @@ flutter:
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 

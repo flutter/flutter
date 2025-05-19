@@ -17,10 +17,10 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
+import '../../src/throwing_pub.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -58,7 +58,7 @@ environement:
 ''');
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    writePackageConfigFile(directory: flutterProject.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
   });
 
   testUsingContext(
@@ -133,7 +133,7 @@ environement:
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -187,7 +187,7 @@ environement:
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 

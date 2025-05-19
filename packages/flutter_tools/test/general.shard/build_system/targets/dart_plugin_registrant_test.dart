@@ -15,9 +15,9 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
+import '../../../src/throwing_pub.dart';
 
 const String _kEmptyPubspecFile = '''
 name: path_provider_example
@@ -141,7 +141,7 @@ void main() {
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -163,7 +163,7 @@ name: path_provider_example
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -184,7 +184,7 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -250,7 +250,7 @@ name: path_provider_example
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -270,7 +270,7 @@ name: path_provider_example
           },
           generateDartPluginRegistry: true,
         );
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -296,7 +296,7 @@ name: path_provider_example
 
         // Simulate a user removing everything from pubspec.yaml.
         pubspec.writeAsStringSync(_kEmptyPubspecFile);
-        writePackageConfigFile(directory: projectDir, mainLibName: 'path_provider_example');
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'path_provider_example');
 
         await DartPluginRegistrantTarget.test(testProject).build(environment);
         expect(generatedMain.existsSync(), isFalse);
@@ -304,7 +304,7 @@ name: path_provider_example
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -325,7 +325,7 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -391,7 +391,7 @@ name: path_provider_example
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });

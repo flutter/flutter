@@ -22,7 +22,6 @@ import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
-import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -58,7 +57,7 @@ Future<Plugin?> _pluginFromPackage(
   String name,
   Uri packageRoot,
   Set<String> appDependencies, {
-  required Set<String> devDependencies,
+  required bool isDevDependency,
   FileSystem? fileSystem,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
@@ -95,7 +94,7 @@ Future<Plugin?> _pluginFromPackage(
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
-    isDevDependency: devDependencies.contains(name),
+    isDevDependency: isDevDependency,
   );
 }
 
@@ -111,23 +110,28 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
     logger: globals.logger,
     throwOnError: throwOnError,
   );
-  final Set<String> devDependencies;
-  if (!featureFlags.isExplicitPackageDependenciesEnabled) {
-    devDependencies = <String>{};
-  } else {
-    devDependencies = await computeExclusiveDevDependencies(
-      pub,
-      logger: globals.logger,
-      project: project,
-    );
-  }
-  for (final Package package in packageConfig.packages) {
-    final Uri packageRoot = package.packageUriRoot.resolve('..');
+  final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
+    project,
+    packageConfig,
+    fs,
+  );
+  for (final Dependency dependency in transitiveDependencies) {
+    final String packageName = dependency.name;
+    final Package? package = packageConfig[packageName];
+    if (package == null) {
+      if (throwOnError) {
+        throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
+      } else {
+        globals.logger.printTrace('Could not locate package:$packageName');
+        continue;
+      }
+    }
     final Plugin? plugin = await _pluginFromPackage(
-      package.name,
-      packageRoot,
+      packageName,
+      dependency.rootUri,
       project.manifest.dependencies,
-      devDependencies: devDependencies,
+      isDevDependency:
+          featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -1285,7 +1289,6 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   List<Plugin> plugins = await findPlugins(project);
-
   if (releaseMode) {
     plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
   }
@@ -1509,7 +1512,6 @@ _resolvePluginImplementationsByPlatform(
 
   // Key: the plugin name, value: the plugin which provides an implementation for [platformKey].
   final Map<String, Plugin> pluginResolution = <String, Plugin>{};
-
   // Now resolve all the possible resolutions to a single option for each
   // plugin, or throw if that's not possible.
   for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
