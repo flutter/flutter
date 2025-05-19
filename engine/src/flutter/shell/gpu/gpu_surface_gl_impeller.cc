@@ -100,7 +100,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
 
   impeller::RenderTarget render_target = surface->GetRenderTarget();
 
-  SurfaceFrame::EncodeCallback encode_calback =
+  SurfaceFrame::EncodeCallback encode_callback =
       [aiks_context = aiks_context_,  //
        render_target](SurfaceFrame& surface_frame,
                       DlCanvas* canvas) mutable -> bool {
@@ -128,7 +128,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
   return std::make_unique<SurfaceFrame>(
       nullptr,                                // surface
       delegate_->GLContextFramebufferInfo(),  // framebuffer info
-      encode_calback,                         // encode callback
+      encode_callback,                        // encode callback
       fml::MakeCopyable([surface = std::move(surface)](const SurfaceFrame&) {
         return surface->Present();
       }),                         // submit callback
