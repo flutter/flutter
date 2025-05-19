@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 #include <filesystem>
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
+#include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 #include "gtest/gtest.h"
 
@@ -81,8 +82,17 @@ TEST_F(LicenseCheckerTest, Simple) {
 
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), *data);
-  for (const auto& error : errors) {
-    std::cout << error << std::endl;
-  }
-  ASSERT_EQ(errors.size(), 2u);
+  EXPECT_EQ(errors.size(), 2u);
+  EXPECT_TRUE(std::find_if(
+                  errors.begin(), errors.end(), [](const absl::Status& status) {
+                    return status.code() == absl::StatusCode::kNotFound &&
+                           status.message().find("Expected LICENSE at") !=
+                               std::string::npos;
+                  }) != errors.end());
+  EXPECT_TRUE(std::find_if(
+                  errors.begin(), errors.end(), [](const absl::Status& status) {
+                    return status.code() == absl::StatusCode::kNotFound &&
+                           RE2::PartialMatch(status.message(),
+                                             "Expected copyright in.*main.cc");
+                  }) != errors.end());
 }
