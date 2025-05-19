@@ -93,7 +93,7 @@ absl::Status WriteFile(const char* data, const fs::path& path) {
 
 }  // namespace
 
-TEST_F(LicenseCheckerTest, SimpleFailure) {
+TEST_F(LicenseCheckerTest, SimplePass) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
@@ -113,7 +113,7 @@ TEST_F(LicenseCheckerTest, SimpleFailure) {
   EXPECT_EQ(errors.size(), 0u);
 }
 
-TEST_F(LicenseCheckerTest, SimplePass) {
+TEST_F(LicenseCheckerTest, SimpleFailure) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());
 
