@@ -191,8 +191,9 @@ class Slider extends StatefulWidget {
     this.allowedInteraction,
     this.padding,
     @Deprecated(
-      'Use SliderTheme to customize the Slider appearance. '
-      'This feature was deprecated after v3.27.0-0.1.pre.',
+      'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
+      'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
+      'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.year2023,
   }) : _sliderType = _SliderType.material,
