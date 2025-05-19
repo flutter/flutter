@@ -6,13 +6,15 @@
 #define FLUTTER_TOOLS_LICENSES_CPP_SRC_LICENSE_CHECKER_H_
 
 #include <string_view>
-#include "flutter/third_party/abseil-cpp/absl/status/status.h"
 #include <vector>
+#include "flutter/third_party/abseil-cpp/absl/status/status.h"
+#include "flutter/tools/licenses_cpp/src/data.h"
 
 class LicenseChecker {
  public:
   static const char* kHeaderLicenseRegex;
-  //static std::vector<absl::Status> Run(std::string_view working_dir);
+  static std::vector<absl::Status> Run(std::string_view working_dir,
+                                       const Data& data);
   static int Run(std::string_view working_dir, std::string_view data_dir);
 };
 
