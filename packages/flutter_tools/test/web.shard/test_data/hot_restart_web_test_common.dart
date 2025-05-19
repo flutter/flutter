@@ -90,7 +90,10 @@ Future<void> _testProject(
       device: GoogleChromeDevice.kChromeDeviceId,
       additionalCommandArgs: <String>[
         '--verbose',
-        if (useDDCLibraryBundleFormat) '--web-experimental-hot-reload',
+        if (useDDCLibraryBundleFormat)
+          '--web-experimental-hot-reload'
+        else
+          '--no-web-experimental-hot-reload',
       ],
     );
     await flutter.hotRestart();
@@ -110,7 +113,10 @@ Future<void> _testProject(
         device: GoogleChromeDevice.kChromeDeviceId,
         additionalCommandArgs: <String>[
           '--verbose',
-          if (useDDCLibraryBundleFormat) '--web-experimental-hot-reload',
+          if (useDDCLibraryBundleFormat)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
         ],
       );
       project.uncommentHotReloadPrint();

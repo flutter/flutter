@@ -45,7 +45,10 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         expressionEvaluation: expressionEvaluation,
         additionalCommandArgs: <String>[
           '--verbose',
-          if (useDDCLibraryBundleFormat) '--web-experimental-hot-reload',
+          if (useDDCLibraryBundleFormat)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
         ],
       );
     }
@@ -173,7 +176,10 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         script: project.testFilePath,
         additionalCommandArgs: <String>[
           '--verbose',
-          if (useDDCLibraryBundleFormat) '--web-experimental-hot-reload',
+          if (useDDCLibraryBundleFormat)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
         ],
       );
     }
