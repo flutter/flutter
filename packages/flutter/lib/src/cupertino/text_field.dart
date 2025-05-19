@@ -1389,9 +1389,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             // if needed.
             Expanded(
               child: Directionality(
-                textDirection:
-                    widget.textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr,
-                child: _BaselineAlignedStack(placeholder: placeholder, editableText: editableText),
+                textDirection: widget.textDirection ?? Directionality.of(context),
+                child: _BaselineAlignedStack(
+                  placeholder: placeholder,
+                  editableText: editableText,
+                  textBaseline:
+                      textStyle.textBaseline ??
+                      placeholderStyle.textBaseline ??
+                      TextBaseline.alphabetic,
+                ),
               ),
             ),
             if (suffixWidget != null) suffixWidget,
@@ -1696,8 +1702,13 @@ enum _BaselineAlignedStackSlot { placeholder, editableText }
 
 class _BaselineAlignedStack
     extends SlottedMultiChildRenderObjectWidget<_BaselineAlignedStackSlot, RenderBox> {
-  const _BaselineAlignedStack({required this.editableText, this.placeholder});
+  const _BaselineAlignedStack({
+    required this.textBaseline,
+    required this.editableText,
+    this.placeholder,
+  });
 
+  final TextBaseline textBaseline;
   final Widget? placeholder;
   final Widget editableText;
 
@@ -1714,7 +1725,12 @@ class _BaselineAlignedStack
 
   @override
   _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
-    return _RenderBaselineAlignedStack();
+    return _RenderBaselineAlignedStack(textBaseline: textBaseline);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBaselineAlignedStack renderObject) {
+    renderObject.textBaseline = textBaseline;
   }
 }
 
@@ -1722,7 +1738,17 @@ class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> 
 
 class _RenderBaselineAlignedStack extends RenderBox
     with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
-  _RenderBaselineAlignedStack();
+  _RenderBaselineAlignedStack({required TextBaseline textBaseline}) : _textBaseline = textBaseline;
+
+  TextBaseline get textBaseline => _textBaseline;
+  TextBaseline _textBaseline;
+  set textBaseline(TextBaseline value) {
+    if (_textBaseline == value) {
+      return;
+    }
+    _textBaseline = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -1735,79 +1761,52 @@ class _RenderBaselineAlignedStack extends RenderBox
     return childForSlot(_BaselineAlignedStackSlot.placeholder);
   }
 
-  RenderBox? get _editableTextChild {
-    return childForSlot(_BaselineAlignedStackSlot.editableText);
-  }
-
-  @override
-  double? getDistanceToBaseline(TextBaseline baseline, {bool onlyReal = false}) {
-    final RenderBox? editableText = _editableTextChild;
-    if (editableText == null) {
-      return super.getDistanceToBaseline(baseline, onlyReal: onlyReal);
-    }
-    final double? editableTextBaseline = editableText.getDistanceToBaseline(
-      baseline,
-      onlyReal: onlyReal,
-    );
-    if (editableTextBaseline == null) {
-      return super.getDistanceToBaseline(baseline, onlyReal: onlyReal);
-    }
-    final _BaselineAlignedStackParentData editableTextParentData =
-        editableText.parentData! as _BaselineAlignedStackParentData;
-    return editableTextParentData.offset.dy + editableTextBaseline;
+  RenderBox get _editableTextChild {
+    final RenderBox? child = childForSlot(_BaselineAlignedStackSlot.editableText);
+    assert(child != null);
+    return child!;
   }
 
   @override
   void performLayout() {
     final RenderBox? placeholder = _placeholderChild;
-    final RenderBox? editableText = _editableTextChild;
-
-    if (editableText == null) {
-      size = constraints.smallest;
-      return;
-    }
+    final RenderBox editableText = _editableTextChild;
 
     size = _computeSize(constraints: constraints, layoutChild: ChildLayoutHelper.layoutChild);
-    editableText.layout(constraints, parentUsesSize: true);
-    placeholder?.layout(constraints, parentUsesSize: true);
 
     final _BaselineAlignedStackParentData editableTextParentData =
         editableText.parentData! as _BaselineAlignedStackParentData;
     final _BaselineAlignedStackParentData? placeholderParentData =
         placeholder?.parentData as _BaselineAlignedStackParentData?;
 
-    final double? editableTextBaselineValue = editableText.getDistanceToBaseline(
-      TextBaseline.alphabetic,
-    );
-    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
-      TextBaseline.alphabetic,
-    );
+    final double editableTextBaselineValue = editableText.getDistanceToBaseline(textBaseline)!;
+    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(textBaseline);
 
-    final double currentPlaceholderY =
-        editableTextBaselineValue != null && placeholderBaselineValue != null
+    assert(placeholder != null || placeholderBaselineValue == null);
+    final double placeholderY =
+        placeholderBaselineValue != null
             ? editableTextBaselineValue - placeholderBaselineValue
-            : 0;
+            : 0.0;
 
-    final double offsetYAdjustment = math.max(0, currentPlaceholderY);
+    final double offsetYAdjustment = math.max(0, placeholderY);
     editableTextParentData.offset = Offset(0, offsetYAdjustment);
-    placeholderParentData?.offset = Offset(0, currentPlaceholderY + offsetYAdjustment);
+    placeholderParentData?.offset = Offset(0, placeholderY + offsetYAdjustment);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? placeholder = _placeholderChild;
-    final RenderBox? editableText = _editableTextChild;
+    final RenderBox editableText = _editableTextChild;
 
     if (placeholder != null) {
       final _BaselineAlignedStackParentData placeholderParentData =
           placeholder.parentData! as _BaselineAlignedStackParentData;
       context.paintChild(placeholder, offset + placeholderParentData.offset);
     }
-    if (editableText != null) {
-      final _BaselineAlignedStackParentData editableTextParentData =
-          editableText.parentData! as _BaselineAlignedStackParentData;
-      context.paintChild(editableText, offset + editableTextParentData.offset);
-    }
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    context.paintChild(editableText, offset + editableTextParentData.offset);
   }
 
   @override
@@ -1820,7 +1819,7 @@ class _RenderBaselineAlignedStack extends RenderBox
     double height = constraints.minHeight;
 
     final RenderBox? placeholder = _placeholderChild;
-    final RenderBox? editableText = _editableTextChild;
+    final RenderBox editableText = _editableTextChild;
 
     if (placeholder != null) {
       final Size placeholderSize = layoutChild(placeholder, constraints);
@@ -1828,11 +1827,9 @@ class _RenderBaselineAlignedStack extends RenderBox
       height = math.max(height, placeholderSize.height);
     }
 
-    if (editableText != null) {
-      final Size editableTextSize = layoutChild(editableText, constraints);
-      width = math.max(width, editableTextSize.width);
-      height = math.max(height, editableTextSize.height);
-    }
+    final Size editableTextSize = layoutChild(editableText, constraints);
+    width = math.max(width, editableTextSize.width);
+    height = math.max(height, editableTextSize.height);
 
     final Size size = Size(width, height);
     assert(size.isFinite);
