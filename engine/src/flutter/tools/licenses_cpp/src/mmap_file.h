@@ -8,6 +8,7 @@
 #include <string_view>
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 
+/// A memory mapped file.
 class MMapFile {
  public:
   static absl::StatusOr<MMapFile> Make(std::string_view path);
