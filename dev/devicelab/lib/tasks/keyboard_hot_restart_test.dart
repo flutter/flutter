@@ -66,14 +66,22 @@ TaskFunction createKeyboardHotRestartTest({
         final String newContents = oldContents.replaceFirst(forceKeyboardOff, forceKeyboardOn);
         mainFile.writeAsStringSync(newContents);
 
-        section('Launch app and wait for keyboard to be visible');
+        section('Launch app');
 
-        TestState state = TestState.waitUntilKeyboardOpen;
+        bool success = false;
+        TestState state = TestState.waitUntilDartVmAvailable;
 
         final int exitCode = await runApp(
           options: <String>['-d', deviceIdOverride!],
           onLine: (String line, Process process) {
-            if (state == TestState.waitUntilKeyboardOpen) {
+            if (state == TestState.waitUntilDartVmAvailable) {
+              if (!line.contains('A Dart VM Service') || !line.contains('is available at')) {
+                return;
+              }
+
+              section('Wait until keyboard is visible');
+              state = TestState.waitUntilKeyboardOpen;
+            } else if (state == TestState.waitUntilKeyboardOpen) {
               if (!line.contains('flutter: Keyboard is open')) {
                 return;
               }
@@ -84,9 +92,14 @@ TaskFunction createKeyboardHotRestartTest({
                 forceKeyboardOff,
               );
               mainFile.writeAsStringSync(newContents);
-
-              section('Hot restart the app');
               process.stdin.writeln('R');
+
+              section('Wait until the app hot restarts');
+              state = TestState.waitUntilHotRestart;
+            } else if (state == TestState.waitUntilHotRestart) {
+              if (!line.contains('Restarted application in ')) {
+                return;
+              }
 
               section('Wait until the keyboard is no longer visible');
               state = TestState.waitUntilKeyboardClosed;
@@ -97,12 +110,17 @@ TaskFunction createKeyboardHotRestartTest({
 
               // Quit the app. This makes the 'flutter run' process exit.
               process.stdin.writeln('q');
+              success = true;
             }
           },
         );
 
         if (exitCode != 0) {
           return TaskResult.failure('flutter run exited with non-zero exit code: $exitCode');
+        }
+
+        if (!success) {
+          return TaskResult.failure('Test did not complete successfully');
         }
       } finally {
         mainFile.writeAsStringSync(oldContents);
@@ -113,7 +131,12 @@ TaskFunction createKeyboardHotRestartTest({
   };
 }
 
-enum TestState { waitUntilKeyboardOpen, waitUntilKeyboardClosed }
+enum TestState {
+  waitUntilDartVmAvailable,
+  waitUntilKeyboardOpen,
+  waitUntilHotRestart,
+  waitUntilKeyboardClosed,
+}
 
 Future<void> createAppProject() async {
   await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
