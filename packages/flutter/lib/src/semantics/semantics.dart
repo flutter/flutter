@@ -138,9 +138,9 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.status => _noLiveRegion,
     SemanticsRole.list => _noCheckRequired,
     SemanticsRole.listItem => _semanticsListItem,
-    SemanticsRole.complementary => _noCheckRequired,
-    SemanticsRole.contentInfo => _noCheckRequired,
-    SemanticsRole.main => _noCheckRequired,
+    SemanticsRole.complementary => _semanticsComplementary,
+    SemanticsRole.contentInfo => _semanticsContentInfo,
+    SemanticsRole.main => _semanticsMain,
     SemanticsRole.navigation => _noCheckRequired,
     SemanticsRole.region => _semanticsRegion,
     // TODO(chunhtai): add checks when the roles are used in framework.
@@ -356,6 +356,56 @@ sealed class _DebugSemanticsRoleChecks {
         "parent node ${parent.id} doesn't have the role ${SemanticsRole.list}. "
         'Please assign the ${SemanticsRole.list} to node ${parent.id}',
       );
+    }
+    return null;
+  }
+
+  static bool _isLandmarks(SemanticsNode node) {
+    if (node.role == SemanticsRole.complementary ||
+        node.role == SemanticsRole.contentInfo ||
+        node.role == SemanticsRole.main ||
+        node.role == SemanticsRole.navigation ||
+        node.role == SemanticsRole.region) {
+      return true;
+    }
+    return false;
+  }
+
+  static FlutterError? _semanticsComplementary(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarks(currentNode)) {
+        return FlutterError(
+          'The complementary landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsContentInfo(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarks(currentNode)) {
+        return FlutterError(
+          'The contentInfo landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsMain(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarks(currentNode)) {
+        return FlutterError(
+          'The main landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
     }
     return null;
   }

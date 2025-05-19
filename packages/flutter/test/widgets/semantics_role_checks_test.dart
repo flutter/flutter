@@ -684,6 +684,31 @@ void main() {
   });
 
   group('landmarks', () {
+    testWidgets('failure case, complementary role is contained by other landmark roles', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.main,
+            child: SizedBox(
+              child: Semantics(role: SemanticsRole.complementary, child: Text('some child')),
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The complementary landmark role should not contained within any other landmark roles.',
+        ),
+      );
+    });
+
     testWidgets('Success case, complementary role', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -694,6 +719,31 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('failure case, contentInro role is contained by other landmark roles', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.complementary,
+            child: SizedBox(
+              child: Semantics(role: SemanticsRole.contentInfo, child: Text('some child')),
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The contentInfo landmark role should not contained within any other landmark roles.',
+        ),
+      );
+    });
+
     testWidgets('Success case, contentInfo role', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
@@ -702,6 +752,27 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('failure case, main role is contained by other landmark roles', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.contentInfo,
+            child: SizedBox(child: Semantics(role: SemanticsRole.main, child: Text('some child'))),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('The main landmark role should not contained within any other landmark roles.'),
+      );
     });
 
     testWidgets('Success case, main role', (WidgetTester tester) async {
