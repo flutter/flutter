@@ -10,6 +10,7 @@
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/comments.h"
+#include "flutter/tools/licenses_cpp/src/data.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
 #include "flutter/tools/licenses_cpp/src/mmap_file.h"
 
@@ -20,8 +21,6 @@ const char* LicenseChecker::kHeaderLicenseRegex = "(License|Copyright)";
 namespace {
 const std::array<std::string_view, 3> kLicenseFileNames = {
     "LICENSE", "LICENSE.TXT", "LICENSE.md"};
-const char* kIncludeFilename = "include.txt";
-const char* kExcludeFilename = "exclude.txt";
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
   std::vector<fs::path> result;
@@ -73,18 +72,10 @@ absl::Status CheckLicense(const fs::path& git_repo) {
 
 int LicenseChecker::Run(std::string_view working_dir,
                         std::string_view data_dir) {
-  fs::path include_path = fs::path(data_dir) / kIncludeFilename;
-  absl::StatusOr<Filter> include_filter = Filter::Open(include_path.string());
-  if (!include_filter.ok()) {
-    std::cerr << "Can't open include.txt at " << include_path << ": "
-              << include_filter.status() << std::endl;
-    return 1;
-  }
-  fs::path exclude_path = fs::path(data_dir) / kExcludeFilename;
-  absl::StatusOr<Filter> exclude_filter = Filter::Open(exclude_path.string());
-  if (!exclude_filter.ok()) {
-    std::cerr << "Can't open include.txt at " << include_path << ": "
-              << exclude_filter.status() << std::endl;
+  absl::StatusOr<Data> data = Data::Open(data_dir);
+  if (!data.ok()) {
+    std::cerr << "Can't load data at " << data_dir << ": " << data.status()
+              << std::endl;
     return 1;
   }
 
@@ -109,8 +100,8 @@ int LicenseChecker::Run(std::string_view working_dir,
     for (const std::string& git_file : git_files.value()) {
       bool did_find_copyright = false;
       fs::path full_path = git_repo / git_file;
-      if (!include_filter->Matches(full_path.string()) ||
-          exclude_filter->Matches(full_path.string())) {
+      if (!data->include_filter.Matches(full_path.string()) ||
+          data->exclude_filter.Matches(full_path.string())) {
         // Ignore file.
         continue;
       }
