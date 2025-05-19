@@ -1,3 +1,8 @@
+# This file describes all the files we don't need to do a copyright header
+# check on.
 .*\/test\/.*
 .*\/testing\/.*
 .*\/tests\/.*
+# No need to check the header of third_party code. We just need to make sure
+# it has a LICENSE file at its root.
+.*\/third_party\/.*

@@ -1,3 +1,4 @@
+# This file describes all the files we need to do a copyright header # check on.
 .*\.cc
 .*\.cpp
 .*\.cxx

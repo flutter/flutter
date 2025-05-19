@@ -25,6 +25,10 @@ absl::StatusOr<Filter> Filter::Open(std::istream& input) {
     if (line.length() <= 0) {
       continue;
     }
+    if (line[0] == '#') {
+      // Comments.
+      continue;
+    }
     if (!first) {
       absl::StrAppend(&regex, "|");
     } else {
