@@ -1772,15 +1772,27 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox? placeholder = _placeholderChild;
     final RenderBox editableText = _editableTextChild;
 
-    size = _computeSize(constraints: constraints, layoutChild: ChildLayoutHelper.layoutChild);
-
     final _BaselineAlignedStackParentData editableTextParentData =
         editableText.parentData! as _BaselineAlignedStackParentData;
     final _BaselineAlignedStackParentData? placeholderParentData =
         placeholder?.parentData as _BaselineAlignedStackParentData?;
 
+    final Size editableTextSize = ChildLayoutHelper.layoutChild(editableText, constraints);
+    Size? placeholderSize;
+    if (placeholder != null) {
+      placeholderSize = ChildLayoutHelper.layoutChild(placeholder, constraints);
+    }
+
     final double editableTextBaselineValue = editableText.getDistanceToBaseline(textBaseline)!;
     final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(textBaseline);
+
+    size = _computeSize(
+      constraints: constraints,
+      editableTextSize: editableTextSize,
+      placeholderSize: placeholderSize,
+      editableTextBaseline: editableTextBaselineValue,
+      placeholderBaseline: placeholderBaselineValue,
+    );
 
     assert(placeholder != null || placeholderBaselineValue == null);
     final double placeholderY =
@@ -1811,26 +1823,54 @@ class _RenderBaselineAlignedStack extends RenderBox
 
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    return _computeSize(constraints: constraints, layoutChild: ChildLayoutHelper.dryLayoutChild);
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    final Size editableTextSize = ChildLayoutHelper.dryLayoutChild(editableText, constraints);
+
+    Size? placeholderSize;
+    double? placeholderBaselineValue;
+    if (placeholder != null) {
+      placeholderSize = ChildLayoutHelper.dryLayoutChild(placeholder, constraints);
+      placeholderBaselineValue = placeholder.getDryBaseline(constraints, textBaseline);
+    }
+
+    final double editableTextBaselineValue =
+        editableText.getDryBaseline(constraints, textBaseline)!;
+
+    return _computeSize(
+      constraints: constraints,
+      editableTextSize: editableTextSize,
+      placeholderSize: placeholderSize,
+      editableTextBaseline: editableTextBaselineValue,
+      placeholderBaseline: placeholderBaselineValue,
+    );
   }
 
-  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  Size _computeSize({
+    required BoxConstraints constraints,
+    required Size editableTextSize,
+    required Size? placeholderSize,
+    required double editableTextBaseline,
+    required double? placeholderBaseline,
+  }) {
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
     final RenderBox? placeholder = _placeholderChild;
-    final RenderBox editableText = _editableTextChild;
-
     if (placeholder != null) {
-      final Size placeholderSize = layoutChild(placeholder, constraints);
-      width = math.max(width, placeholderSize.width);
-      height = math.max(height, placeholderSize.height);
+      width = math.max(width, placeholderSize!.width);
+      final double placeholderDescent = placeholderSize.height - placeholderBaseline!;
+      final double editableTextDescent = editableTextSize.height - editableTextBaseline;
+      // The size is the sum of the placeholder's max ascent and descent and the
+      // editable text's max ascent and descent.
+      final double maxExtentBaseline =
+          math.max(editableTextBaseline, placeholderBaseline) +
+          math.max(editableTextDescent, placeholderDescent);
+      height = math.max(height, maxExtentBaseline);
     }
-
-    final Size editableTextSize = layoutChild(editableText, constraints);
-    width = math.max(width, editableTextSize.width);
     height = math.max(height, editableTextSize.height);
-
+    width = math.max(width, editableTextSize.width);
     final Size size = Size(width, height);
     assert(size.isFinite);
     return size;
