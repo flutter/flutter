@@ -91,6 +91,15 @@ absl::Status WriteFile(const char* data, const fs::path& path) {
   return absl::OkStatus();
 }
 
+bool FindError(const std::vector<absl::Status>& errors,
+               absl::StatusCode code,
+               std::string_view regex) {
+  return std::find_if(errors.begin(), errors.end(),
+                      [code, regex](const absl::Status& status) {
+                        return status.code() == code &&
+                               RE2::PartialMatch(status.message(), regex);
+                      }) != errors.end();
+}
 }  // namespace
 
 TEST_F(LicenseCheckerTest, SimplePass) {
@@ -129,16 +138,8 @@ TEST_F(LicenseCheckerTest, SimpleFailure) {
   std::vector<absl::Status> errors =
       LicenseChecker::Run(temp_path->string(), *data);
   EXPECT_EQ(errors.size(), 2u);
-  EXPECT_TRUE(std::find_if(
-                  errors.begin(), errors.end(), [](const absl::Status& status) {
-                    return status.code() == absl::StatusCode::kNotFound &&
-                           status.message().find("Expected LICENSE at") !=
-                               std::string::npos;
-                  }) != errors.end());
-  EXPECT_TRUE(std::find_if(
-                  errors.begin(), errors.end(), [](const absl::Status& status) {
-                    return status.code() == absl::StatusCode::kNotFound &&
-                           RE2::PartialMatch(status.message(),
-                                             "Expected copyright in.*main.cc");
-                  }) != errors.end());
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Expected LICENSE at"));
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound,
+                        "Expected copyright in.*main.cc"));
 }
