@@ -10,10 +10,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
@@ -65,6 +65,11 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
+  testWithoutContext('no dependency on KernelSnapshot', () async {
+    const DartBuildForNative target = DartBuildForNative();
+    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
+  });
+
   testWithoutContext('NativeAssets throws error if missing target platform', () async {
     iosEnvironment.defines.remove(kTargetPlatform);
     expect(
@@ -74,7 +79,7 @@ void main() {
   });
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
-    writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     iosEnvironment.defines.remove(kIosArchs);
 
@@ -91,7 +96,7 @@ void main() {
     'NativeAssets throws error if missing sdk root',
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <String>['foo'],
@@ -117,7 +122,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: isNativeAssetsEnabled),
       },
       () async {
-        writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
         await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
@@ -187,15 +192,13 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {
-      writePackageConfigFile(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
       final List<CodeAsset> codeAssets = <CodeAsset>[
         CodeAsset(
           package: 'foo',
           name: 'foo.dart',
           linkMode: DynamicLoadingBundled(),
-          os: OS.iOS,
-          architecture: Architecture.arm64,
           file: Uri.file('foo.framework/foo'),
         ),
       ];
@@ -252,7 +255,7 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       },
       () async {
-        writePackageConfigFile(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
         await fileSystem.file('libfoo.so').create();
 
         final List<CodeAsset> codeAssets = <CodeAsset>[
@@ -261,8 +264,6 @@ void main() {
               package: 'foo',
               name: 'foo.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.android,
-              architecture: Architecture.arm64,
               file: Uri.file('libfoo.so'),
             ),
         ];

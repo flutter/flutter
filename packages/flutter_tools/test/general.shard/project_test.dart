@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:yaml_edit/yaml_edit.dart';
+library;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -27,9 +30,9 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
+import '../src/throwing_pub.dart';
 
 void main() {
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
@@ -201,10 +204,7 @@ void main() {
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
         // This is not a valid Xml document
         const String invalidManifest = '<manifest></application>';
-        final FlutterProject project = await someProject(
-          androidManifestOverride: invalidManifest,
-          includePubspec: true,
-        );
+        final FlutterProject project = await someProject(androidManifestOverride: invalidManifest);
 
         expect(
           () => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore),
@@ -217,7 +217,7 @@ void main() {
       _testInMemory(
         'Project not on v2 embedding does not warn if deprecation status is irrelevant',
         () async {
-          final FlutterProject project = await someProject(includePubspec: true);
+          final FlutterProject project = await someProject();
           // The default someProject with an empty <manifest> already indicates
           // v1 embedding, as opposed to having <meta-data
           // android:name="flutterEmbedding" android:value="2" />.
@@ -228,7 +228,7 @@ void main() {
         },
       );
       _testInMemory('Android project no pubspec continues', () async {
-        final FlutterProject project = await someProject();
+        final FlutterProject project = await someProject(includePubspec: false);
         // The default someProject with an empty <manifest> already indicates
         // v1 embedding, as opposed to having <meta-data
         // android:name="flutterEmbedding" android:value="2" />.
@@ -305,7 +305,7 @@ void main() {
           FeatureFlags: disableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: () => const ThrowingPub(),
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -331,7 +331,7 @@ void main() {
           FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: ThrowingPub.new,
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -355,7 +355,7 @@ void main() {
           FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: ThrowingPub.new,
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -379,7 +379,7 @@ void main() {
           FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => FakePubWithPrimedDeps(devDependencies: <String>{'my_plugin'}),
+          Pub: ThrowingPub.new,
           FlutterProjectFactory:
               () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
@@ -576,7 +576,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(17, 0, 2));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.20')]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -604,7 +604,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.7.20')]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -632,7 +632,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.1')]);
         java = FakeJava(version: Version(11, 0, 14));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -658,13 +658,14 @@ dependencies {
         const String javaV = '17.0.2';
         const String gradleV = '6.7.3';
         const String agpV = '7.2.0';
+        const String kgpV = '2.1.0';
 
         final FakeProcessManager processManager;
         final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
         java = FakeJava(version: Version.parse(javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -682,7 +683,7 @@ dependencies {
             // Should not have the valid string
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url and gradle and agp versions.
             expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
@@ -692,6 +693,15 @@ dependencies {
             expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
             expect(value.description, contains(RegExp(javaV)));
             expect(value.description, contains(RegExp(gradleV)));
+            // On kgp/gradle eror print help url and kgp versions
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp('KGP/Gradle')));
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+            // On agp/kgp error print help url and agp and kgp versions
+            expect(value.description, contains(RegExp(agpV)));
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp('AGP/KGP')));
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
           },
           java: java,
           androidStudio: androidStudio,
@@ -703,13 +713,14 @@ dependencies {
         const String javaV = '17.0.2';
         const String gradleV = '6.7.3';
         const String agpV = '4.2.0';
+        const String kgpV = '1.7.22';
 
         final FakeProcessManager processManager;
         final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
         java = FakeJava(version: Version(17, 0, 2));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -727,7 +738,7 @@ dependencies {
             // Should not have the valid string.
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url and java and gradle versions.
             expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
@@ -747,7 +758,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.any();
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -766,12 +777,95 @@ dependencies {
             // Should not have the valid string.
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url and gradle and agp versions.
             expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
             expect(value.description, contains(RegExp(gradleV)));
             expect(value.description, contains(RegExp(agpV)));
+          },
+          java: java,
+          androidStudio: androidStudio,
+          processManager: processManager,
+          androidSdk: androidSdk,
+        );
+      });
+      group('_', () {
+        const String gradleV = '8.11';
+        const String agpV = '8.7.2';
+        const String kgpV = '2.1.10';
+
+        final FakeProcessManager processManager;
+        final Java java;
+        final AndroidStudio androidStudio;
+        final FakeAndroidSdkWithDir androidSdk;
+        final FileSystem fileSystem = getFileSystemForPlatform();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
+        java = FakeJava(version: Version(17, 0, 2));
+        androidStudio = FakeAndroidStudio();
+        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
+        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
+        _testInMemory(
+          'incompatible kgp/gradle only',
+          () async {
+            final FlutterProject? project = await configureGradleAgpForTest(
+              gradleV: gradleV,
+              agpV: agpV,
+            );
+            final CompatibilityResult value =
+                await project!.android.hasValidJavaGradleAgpVersions();
+            expect(value.success, isFalse);
+            // Should not have the valid string.
+            expect(
+              value.description,
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+            );
+            // On gradle/agp error print help url and java and gradle versions.
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp(gradleV)));
+          },
+          java: java,
+          androidStudio: androidStudio,
+          processManager: processManager,
+          androidSdk: androidSdk,
+        );
+      });
+      group('_', () {
+        const String gradleV = '8.9';
+        const String agpV = '8.7.2';
+        const String kgpV = '2.0.20';
+
+        final FakeProcessManager processManager;
+        final Java java;
+        final AndroidStudio androidStudio;
+        final FakeAndroidSdkWithDir androidSdk;
+        final FileSystem fileSystem = getFileSystemForPlatform();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
+        java = FakeJava(version: Version(17, 0, 2));
+        androidStudio = FakeAndroidStudio();
+        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
+        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
+        _testInMemory(
+          'incompatible agp/kgp only',
+          () async {
+            final FlutterProject? project = await configureGradleAgpForTest(
+              gradleV: gradleV,
+              agpV: agpV,
+            );
+            final CompatibilityResult value =
+                await project!.android.hasValidJavaGradleAgpVersions();
+            expect(value.success, isFalse);
+            // Should not have the valid string.
+            expect(
+              value.description,
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+            );
+            // On gradle/agp error print help url and java and gradle versions.
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp(agpV)));
+            expect(value.description, contains(RegExp('AGP/KGP')));
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
           },
           java: java,
           androidStudio: androidStudio,
@@ -786,7 +880,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.any();
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -804,7 +898,7 @@ dependencies {
             // Should not have the valid string.
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url null value for agp.
             expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
@@ -1508,7 +1602,7 @@ plugins {
 
     group('manifest', () {
       _testInMemory('can be replaced', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
+        final FlutterProject project = await someProject();
         final String originalPubspecContents = project.pubspecFile.readAsStringSync();
         final FlutterManifest updated =
             FlutterManifest.createFromString(validPubspecWithDependencies, logger: logger)!;
@@ -1867,10 +1961,10 @@ resolution: workspace
 
 Future<FlutterProject> someProject({
   String? androidManifestOverride,
-  bool includePubspec = false,
+  bool includePubspec = true,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
-  writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'hello');
+  writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'hello');
   if (includePubspec) {
     directory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
@@ -1887,28 +1981,19 @@ Future<FlutterProject> someProject({
 
 Future<FlutterProject> projectWithPluginDependency() async {
   final Directory directory = globals.fs.directory('some_project');
-  directory.childDirectory('.dart_tool').childFile('package_config.json')
-    ..createSync(recursive: true)
-    ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "my_plugin",
-      "rootUri": "/plugin_project",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+  writePackageConfigFiles(
+    directory: directory,
+    mainLibName: 'app_name',
+    packages: <String, String>{'my_plugin': '/plugin_project'},
+    devDependencies: <String>['my_plugin'],
+  );
   directory.childFile('pubspec.yaml')
     ..createSync(recursive: true)
     ..writeAsStringSync('''
 name: app_name
 flutter:
 
-dependencies:
+dev_dependencies:
   my_plugin:
     sdk: flutter
 ''');
@@ -1969,7 +2054,7 @@ class MyPlugin extends FluttPlugin { /* ... */ }
 
 Future<FlutterProject> aModuleProject() async {
   final Directory directory = globals.fs.directory('module_project');
-  writePackageConfigFile(mainLibName: 'my_module', directory: directory);
+  writePackageConfigFiles(mainLibName: 'my_module', directory: directory);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
 flutter:
@@ -1977,6 +2062,15 @@ flutter:
     androidPackage: com.example
 ''');
   return FlutterProject.fromDirectory(directory);
+}
+
+FakeCommand createKgpVersionCommand(String kgpV) {
+  return FakeCommand(
+    command: const <String>['./gradlew', 'kgpVersion', '-q'],
+    stdout: '''
+KGP Version: $kgpV
+''',
+  );
 }
 
 /// Executes the [testMethod] in a context where the file system
@@ -2022,12 +2116,12 @@ void _testInMemory(
   // Set up enough of the packages to satisfy the templating code.
   final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
   dummyTemplateImagesDirectory.createSync(recursive: true);
-  writePackageConfigFile(
+  writePackageConfigFiles(
     directory: testFileSystem
         .directory(Cache.flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
-    mainLibName: 'my_app',
+    mainLibName: 'app_name',
     packages: <String, String>{
       'flutter_template_images': dummyTemplateImagesDirectory.uri.toString(),
     },
@@ -2056,7 +2150,7 @@ void _testInMemory(
       // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
       // See https://github.com/flutter/flutter/issues/160257 for details.
       FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 }

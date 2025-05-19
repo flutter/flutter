@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "integration_test_macos",
     platforms: [
-        .macOS("10.14"),
+        .macOS("10.15"),
     ],
     products: [
         .library(name: "integration-test-macos", targets: ["integration_test_macos"]),

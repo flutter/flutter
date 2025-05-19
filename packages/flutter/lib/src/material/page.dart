@@ -180,7 +180,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    // Suppress previous route from transitioning if this is a fullscreenDialog route.
     return previousRoute is PageRoute && !fullscreenDialog;
   }
 

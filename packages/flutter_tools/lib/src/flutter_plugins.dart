@@ -15,13 +15,13 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
+import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
-import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -30,6 +30,14 @@ import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
+Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
+  if (!await file.exists()) {
+    return false;
+  }
+  final List<int> fileBytes = await file.readAsBytes();
+  return listEquals(fileBytes, renderedTemplate.codeUnits);
+}
+
 Future<void> _renderTemplateToFile(
   String template,
   Object? context,
@@ -37,6 +45,10 @@ Future<void> _renderTemplateToFile(
   TemplateRenderer templateRenderer,
 ) async {
   final String renderedTemplate = templateRenderer.renderString(template, context);
+  if (await _fileContentsUnchanged(file, renderedTemplate)) {
+    globals.printTrace('Skipping generating ${file.basename} because it is up-to-date.');
+    return;
+  }
   await file.create(recursive: true);
   await file.writeAsString(renderedTemplate);
 }
@@ -45,7 +57,7 @@ Future<Plugin?> _pluginFromPackage(
   String name,
   Uri packageRoot,
   Set<String> appDependencies, {
-  required Set<String> devDependencies,
+  required bool isDevDependency,
   FileSystem? fileSystem,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
@@ -82,7 +94,7 @@ Future<Plugin?> _pluginFromPackage(
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
-    isDevDependency: devDependencies.contains(name),
+    isDevDependency: isDevDependency,
   );
 }
 
@@ -98,23 +110,28 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
     logger: globals.logger,
     throwOnError: throwOnError,
   );
-  final Set<String> devDependencies;
-  if (!featureFlags.isExplicitPackageDependenciesEnabled) {
-    devDependencies = <String>{};
-  } else {
-    devDependencies = await computeExclusiveDevDependencies(
-      pub,
-      logger: globals.logger,
-      project: project,
-    );
-  }
-  for (final Package package in packageConfig.packages) {
-    final Uri packageRoot = package.packageUriRoot.resolve('..');
+  final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
+    project,
+    packageConfig,
+    fs,
+  );
+  for (final Dependency dependency in transitiveDependencies) {
+    final String packageName = dependency.name;
+    final Package? package = packageConfig[packageName];
+    if (package == null) {
+      if (throwOnError) {
+        throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
+      } else {
+        globals.logger.printTrace('Could not locate package:$packageName');
+        continue;
+      }
+    }
     final Plugin? plugin = await _pluginFromPackage(
-      package.name,
-      packageRoot,
+      packageName,
+      dependency.rootUri,
       project.manifest.dependencies,
-      devDependencies: devDependencies,
+      isDevDependency:
+          featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -183,7 +200,7 @@ const String _kFlutterPluginsDevDependencyKey = 'dev_dependency';
 /// }
 ///
 ///
-/// Finally, returns [true] if the plugins list has changed, otherwise returns [false].
+/// Finally, returns `true` if the plugins list has changed, otherwise returns `false`.
 bool _writeFlutterPluginsList(
   FlutterProject project,
   List<Plugin> plugins, {
@@ -249,14 +266,14 @@ bool _writeFlutterPluginsList(
   return pluginsChanged;
 }
 
-/// Find what has changed in the .flutter-plugins-dependencies JSON file.
+/// Find what has changed in the `.flutter-plugins-dependencies` JSON file.
 ///
-/// [pluginsChanged] is [true] if anything changed in the 'plugins' property.
-/// This indicates that platform-specific tooling like 'pod install' should be
+/// `pluginsChanged` is `true` if anything changed in the `plugins` property.
+/// This indicates that platform-specific tooling like `pod install` should be
 /// re-run.
 ///
-/// [contentsChanged] is [true] if [newJson] has changes that should be saved to
-/// disk.
+/// `contentsChanged` is `true` if [newJson] has changes that should be
+/// saved to disk.
 ({bool pluginsChanged, bool contentsChanged}) _detectFlutterPluginsListChanges(
   File pluginsFile,
   Map<String, Object> newJson,
@@ -374,10 +391,10 @@ List<Object?> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
 // TODO(franciscojma): Remove this method once deprecated.
 // https://github.com/flutter/flutter/issues/48918
 //
-/// Writes the .flutter-plugins files based on the list of plugins.
+/// Writes the `.flutter-plugins` files based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk.
 ///
-/// Finally, returns [true] if .flutter-plugins has changed, otherwise returns [false].
+/// Finally, returns `true` if `.flutter-plugins` has changed, otherwise returns `false`.
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   if (plugins.isEmpty) {
@@ -397,7 +414,7 @@ bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins
   return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 
-/// Returns the contents of [File] or [null] if that file does not exist.
+/// Returns the contents of [File] or `null` if that file does not exist.
 String? _readFileContent(File file) {
   return file.existsSync() ? file.readAsStringSync() : null;
 }
@@ -798,7 +815,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   );
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
-    'deploymentTarget': '12.0',
+    'deploymentTarget': '13.0',
     'framework': 'Flutter',
     'methodChannelPlugins': iosPlugins,
   };
@@ -1046,10 +1063,10 @@ Future<void> _writeWebPluginRegistrant(
 /// For each platform that uses them, creates symlinks within the platform
 /// directory to each plugin used on that platform.
 ///
-/// If |force| is true, the symlinks will be recreated, otherwise they will
+/// If [force] is true, the symlinks will be recreated, otherwise they will
 /// be created only if missing.
 ///
-/// This uses [project.flutterPluginsDependenciesFile], so it should only be
+/// This uses [FlutterProject.flutterPluginsDependenciesFile], so it should only be
 /// run after [refreshPluginsList] has been run since the last plugin change.
 void createPluginSymlinks(
   FlutterProject project, {
@@ -1170,10 +1187,9 @@ void _createPlatformPluginSymlinks(
 ///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 ///
-/// Unless explicitly specified, [determineDevDependencies] is disabled by
-/// default; if set to `true`, plugins that are development-only dependencies
-/// may be labeled or, depending on the platform, omitted from metadata or
-/// platform-specific artifacts.
+/// If [FeatureFlags.isExplicitPackageDependenciesEnabled] is `true`,
+/// plugins that are development-only dependencies might be labeled or,
+/// depending on the platform, omitted from metadata or platform-specific artifacts.
 Future<void> refreshPluginsList(
   FlutterProject project, {
   bool iosPlatform = false,
@@ -1273,7 +1289,6 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   List<Plugin> plugins = await findPlugins(project);
-
   if (releaseMode) {
     plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
   }
@@ -1314,7 +1329,9 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
           ),
           fileSystem: globals.fs,
+          featureFlags: featureFlags,
           logger: globals.logger,
+          analytics: globals.analytics,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: SupportedPlatform.ios);
@@ -1495,7 +1512,6 @@ _resolvePluginImplementationsByPlatform(
 
   // Key: the plugin name, value: the plugin which provides an implementation for [platformKey].
   final Map<String, Plugin> pluginResolution = <String, Plugin>{};
-
   // Now resolve all the possible resolutions to a single option for each
   // plugin, or throw if that's not possible.
   for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
@@ -1665,10 +1681,10 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   return platformInfo != null && platformInfo.dartClass != 'none';
 }
 
-/// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
-/// [pluginName].
+/// Get the resolved [Plugin] `resolution` from the [candidates] serving as
+/// implementation for [pluginName].
 ///
-/// Returns an [error] string, if failing.
+/// Returns an `error` string, if failing.
 (Plugin? resolution, String? error) _resolveImplementationOfPlugin({
   required String platformKey,
   required _PluginResolutionType pluginResolutionType,
@@ -1730,10 +1746,10 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
-/// The new entrypoint wraps [currentMainUri], adds the [_PluginRegistrant] class,
-/// and writes the file to [newMainDart].
+/// The new entrypoint wraps [currentMainUri], adds the `_PluginRegistrant` class,
+/// and writes the file to `newMainDart` at [FlutterProject.dartPluginRegistrant].
 ///
-/// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
+/// [mainFile] is the main entrypoint file, for example: `/<app>/lib/main.dart`.
 ///
 /// A successful run will create a new generate_main.dart file or update the existing file.
 /// Throws [ToolExit] if unable to generate the file.

@@ -7,7 +7,6 @@ package io.flutter.plugin.editing;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.graphics.Insets;
 import android.view.View;
 import android.view.WindowInsets;
@@ -44,7 +43,6 @@ import java.util.List;
 // dispatched again, this time avoiding any flicker since the animation is now
 // complete.
 @VisibleForTesting
-@TargetApi(API_LEVELS.API_30)
 @RequiresApi(API_LEVELS.API_30)
 @SuppressLint({"NewApi", "Override"})
 @Keep

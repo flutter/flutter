@@ -11,6 +11,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
@@ -162,8 +163,8 @@ std::shared_ptr<impeller::Context> PlatformViewIOS::GetImpellerContext() const {
 // |PlatformView|
 void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
   if (!owner_controller_) {
-    FML_LOG(WARNING) << "Could not set semantics to enabled, this "
-                        "PlatformViewIOS has no ViewController.";
+    [FlutterLogger logWarning:@"Could not set semantics to enabled, this PlatformViewIOS has no "
+                               "ViewController."];
     return;
   }
   if (enabled && !accessibility_bridge_) {
@@ -207,6 +208,7 @@ void PlatformViewIOS::OnPreEngineRestart() const {
   }
   [owner_controller_.platformViewsController reset];
   [owner_controller_.restorationPlugin reset];
+  [owner_controller_.textInputPlugin reset];
 }
 
 std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolvedLocales(

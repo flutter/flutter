@@ -12,7 +12,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
-#include "impeller/geometry/path.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/trig.h"
@@ -33,14 +32,31 @@ static constexpr size_t kPointArenaSize = 4096u;
 ///             called from multiple threads.
 ///
 class Tessellator {
- private:
+ public:
   /// Essentially just a vector of Trig objects, but supports storing a
   /// reference to either a cached vector or a locally generated vector.
   /// The constructor will fill the vector with quarter circular samples
   /// for the indicated number of equal divisions if the vector is new.
+  ///
+  /// A given instance of Trigs will always contain at least 2 entries
+  /// which is the minimum number of samples to traverse a quarter circle
+  /// in a single step. The first sample will always be (0, 1) and the last
+  /// sample will always be (1, 0).
   class Trigs {
    public:
+    explicit Trigs(Scalar pixel_radius);
+
+    // Utility forwards of the indicated vector methods.
+    size_t inline size() const { return trigs_.size(); }
+    std::vector<Trig>::iterator inline begin() const { return trigs_.begin(); }
+    std::vector<Trig>::iterator inline end() const { return trigs_.end(); }
+    const inline Trig& operator[](size_t index) const { return trigs_[index]; }
+
+   private:
+    friend class Tessellator;
+
     explicit Trigs(std::vector<Trig>& trigs, size_t divisions) : trigs_(trigs) {
+      FML_DCHECK(divisions >= 1);
       init(divisions);
       FML_DCHECK(trigs_.size() == divisions + 1);
     }
@@ -48,16 +64,11 @@ class Tessellator {
     explicit Trigs(size_t divisions)
         : local_storage_(std::make_unique<std::vector<Trig>>()),
           trigs_(*local_storage_) {
+      FML_DCHECK(divisions >= 1);
       init(divisions);
       FML_DCHECK(trigs_.size() == divisions + 1);
     }
 
-    // Utility forwards of the indicated vector methods.
-    auto inline size() const { return trigs_.size(); }
-    auto inline begin() const { return trigs_.begin(); }
-    auto inline end() const { return trigs_.end(); }
-
-   private:
     // nullptr if a cached vector is used, otherwise the actual storage
     std::unique_ptr<std::vector<Trig>> local_storage_;
 
@@ -70,7 +81,6 @@ class Tessellator {
     void init(size_t divisions);
   };
 
- public:
   enum class Result {
     kSuccess,
     kInputError,
@@ -193,27 +203,6 @@ class Tessellator {
                                 bool supports_primitive_restart = false,
                                 bool supports_triangle_fan = false);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Given a path, create a line strip primitive structure.
-  ///
-  ///             A line strip is a series of vertices that draws a line
-  ///             rendered at a specified width (in our case, always 1.0
-  ///             physical pixel) that is tessellated by the rasterizer. See
-  ///             also PrimitiveType::kLineStrip.
-  ///
-  /// @param[in]  path  The path to tessellate.
-  /// @param[in]  host_buffer  The host buffer for allocation of vertices/index
-  ///                          data.
-  /// @param[in]  tolerance  The tolerance value for conversion of the path to
-  ///                        a polyline. This value is often derived from the
-  ///                        Matrix::GetMaxBasisLengthXY of the CTM applied to
-  ///                        the path for rendering.
-  ///
-  /// @return A vertex buffer containing all data from the provided curve.
-  VertexBuffer GenerateLineStrip(const Path& path,
-                                 HostBuffer& host_buffer,
-                                 Scalar tolerance);
-
   /// Visible for testing.
   ///
   /// This method only exists for the ease of benchmarking without using the
@@ -224,13 +213,6 @@ class Tessellator {
                                        Scalar tolerance);
 
   //----------------------------------------------------------------------------
-  /// @brief      Create a temporary polyline. Only one per-process can exist at
-  ///             a time.
-  ///
-  ///             The tessellator itself is not a thread safe class and should
-  ///             only be used from the raster thread.
-  Path::Polyline CreateTempPolyline(const Path& path, Scalar tolerance);
-
   /// @brief   The pixel tolerance used by the algorighm to determine how
   ///          many divisions to create for a circle.
   ///
@@ -309,6 +291,10 @@ class Tessellator {
 
   /// Retrieve a pre-allocated arena of kPointArenaSize points.
   std::vector<Point>& GetStrokePointCache();
+
+  /// Return a vector of Trig (cos, sin pairs) structs for a 90 degree
+  /// circle quadrant of the specified pixel radius
+  Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
 
  protected:
   /// Used for polyline generation.

@@ -10,6 +10,8 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -529,7 +531,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool chrome = false,
+    String device = FlutterTesterDevices.kTesterDeviceId,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool serveObservatory = false,
@@ -538,22 +540,29 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
+    List<String> deviceArgs;
+    switch (device) {
+      case GoogleChromeDevice.kChromeDeviceId:
+        deviceArgs = <String>[
+          GoogleChromeDevice.kChromeDeviceId,
+          '--web-run-headless',
+          if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
+        ];
+      default:
+        deviceArgs = <String>[device];
+    }
+
     await _setupProcess(
       <String>[
         'run',
-        if (!chrome) '--disable-service-auth-codes',
+        if (device != GoogleChromeDevice.kChromeDeviceId) '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
         if (noDevtools) '--no-devtools',
         '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
-        if (chrome) ...<String>[
-          'chrome',
-          '--web-run-headless',
-          if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
-        ] else
-          'flutter-tester',
+        ...deviceArgs,
         if (structuredErrors) '--dart-define=flutter.inspector.structuredErrors=true',
         ...?additionalCommandArgs,
       ],

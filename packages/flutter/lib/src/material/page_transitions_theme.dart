@@ -572,11 +572,14 @@ class _FadeForwardsPageTransition extends StatelessWidget {
         );
       },
       reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-        return FadeTransition(
-          opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
-          child: SlideTransition(
-            position: _backwardTranslationTween.animate(animation),
-            child: child,
+        return IgnorePointer(
+          ignoring: animation.status == AnimationStatus.forward,
+          child: FadeTransition(
+            opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
+            child: SlideTransition(
+              position: _backwardTranslationTween.animate(animation),
+              child: child,
+            ),
           ),
         );
       },
@@ -753,8 +756,11 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Defaults to [ColorScheme.surface]
   final Color? backgroundColor;
 
+  /// The value of [transitionDuration] in milliseconds.
+  static const int kTransitionMilliseconds = 800;
+
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 800);
+  Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition =>

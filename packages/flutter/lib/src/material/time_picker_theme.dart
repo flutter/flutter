@@ -27,8 +27,8 @@ import 'theme.dart';
 /// Defines the visual properties of the widget displayed with [showTimePicker].
 ///
 /// Descendant widgets obtain the current [TimePickerThemeData] object using
-/// `TimePickerTheme.of(context)`. Instances of [TimePickerThemeData]
-/// can be customized with [TimePickerThemeData.copyWith].
+/// [TimePickerTheme.of]. Instances of [TimePickerThemeData] can be customized
+/// with [TimePickerThemeData.copyWith].
 ///
 /// Typically a [TimePickerThemeData] is specified as part of the overall
 /// [Theme] with [ThemeData.timePickerTheme].
