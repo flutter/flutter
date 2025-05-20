@@ -10,12 +10,12 @@
 #import <UIKit/UIKit.h>
 
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
-#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -432,10 +432,9 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 - (void)showLookUpViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
 
-
   FlutterTranslateController* translateController = [[FlutterTranslateController alloc] init];
   UIViewController* controller = [translateController swiftUIWrapper];
-  [engineViewController addChildViewController: controller];
+  [engineViewController addChildViewController:controller];
   [engineViewController.view addSubview:controller.view];
 
   [controller didMoveToParentViewController:engineViewController];
@@ -444,10 +443,9 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 - (void)showTranslateViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
 
-
   FlutterTranslateController* translateController = [[FlutterTranslateController alloc] init];
   UIViewController* controller = [translateController swiftUIWrapper];
-  [engineViewController addChildViewController: controller];
+  [engineViewController addChildViewController:controller];
   [engineViewController.view addSubview:controller.view];
 
   [controller didMoveToParentViewController:engineViewController];
