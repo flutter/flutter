@@ -24,20 +24,13 @@ public class FlutterTranslateController: UIViewController {
 
     addChild(swiftUIController)
     view.addSubview(swiftUIController.view)
-
-    swiftUIController.view.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint.activate([
-        swiftUIController.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-        swiftUIController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-        swiftUIController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-        swiftUIController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-    ])
     swiftUIController.didMove(toParent: self) 
   }
 
   @available(iOS 17.4, *)
   @objc public func swiftUIWrapper() -> UIViewController {
     let hostingController = UIHostingController(rootView: ContentView())
+    hostingController.view.backgroundColor = .clear
     return hostingController;
   }
 }
@@ -45,21 +38,13 @@ public class FlutterTranslateController: UIViewController {
 @available(iOS 17.4, *)
 struct ContentView: View {
   @available(iOS 17.4, *)
-  @State private var isTranslationPopoverShown = false
+  @State private var isTranslationPopoverShown = true
   private var originalText = "bienvenue"
   var body: some View {
-    VStack(spacing: 20) {
-      Text(verbatim: originalText)
-        .font(.largeTitle)
-        .padding()
+    Color.clear
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .translationPresentation(
           isPresented: $isTranslationPopoverShown, text: originalText)
-
-      Button("Show Translation") {
-        isTranslationPopoverShown.toggle()
-      }
-      .buttonStyle(.borderedProminent)
-    }
   }
 }
 

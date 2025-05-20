@@ -2094,6 +2094,7 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onSelectAll,
     required final VoidCallback? onLookUp,
     required final VoidCallback? onSearchWeb,
+    required final VoidCallback? onTranslate,
     required final VoidCallback? onShare,
     required final VoidCallback? onLiveTextInput,
   }) {
@@ -2122,6 +2123,8 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(onPressed: onLookUp, type: ContextMenuButtonType.lookUp),
         if (onSearchWeb != null)
           ContextMenuButtonItem(onPressed: onSearchWeb, type: ContextMenuButtonType.searchWeb),
+        if (onTranslate != null)
+          ContextMenuButtonItem(onPressed: onTranslate, type: ContextMenuButtonType.translate),
         if (onShare != null && !showShareBeforeSelectAll)
           ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
       ]);
@@ -2654,6 +2657,17 @@ class EditableTextState extends State<EditableText>
   }
 
   @override
+  bool get translateEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText &&
+        !textEditingValue.selection.isCollapsed &&
+        textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
   bool get shareEnabled {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -2871,6 +2885,26 @@ class EditableTextState extends State<EditableText>
     final String text = textEditingValue.selection.textInside(textEditingValue.text);
     if (text.isNotEmpty) {
       await SystemChannels.platform.invokeMethod('SearchWeb.invoke', text);
+    }
+  }
+
+  /// Launch a translation interface for the selected text.
+  ///
+  /// Currently this is only implemented for iOS.
+  ///
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> translateForSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    print("hi");
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod('Translate.invoke', text);
     }
   }
 
@@ -3127,6 +3161,7 @@ class EditableTextState extends State<EditableText>
                 searchWebEnabled
                     ? () => searchWebForSelection(SelectionChangedCause.toolbar)
                     : null,
+            onTranslate: translateEnabled ? () => translateForSelection(SelectionChangedCause.toolbar) : null,
             onShare: shareEnabled ? () => shareSelection(SelectionChangedCause.toolbar) : null,
             onLiveTextInput:
                 liveTextInputEnabled

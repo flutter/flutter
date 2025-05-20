@@ -93,6 +93,7 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
       ContextMenuButtonType.selectAll => localizations.selectAllButtonLabel,
       ContextMenuButtonType.lookUp => localizations.lookUpButtonLabel,
       ContextMenuButtonType.searchWeb => localizations.searchWebButtonLabel,
+      ContextMenuButtonType.translate => localizations.translateButtonLabel,
       ContextMenuButtonType.share => localizations.shareButtonLabel,
       ContextMenuButtonType.liveTextInput ||
       ContextMenuButtonType.delete ||
@@ -175,6 +176,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       case ContextMenuButtonType.delete:
       case ContextMenuButtonType.lookUp:
       case ContextMenuButtonType.searchWeb:
+      case ContextMenuButtonType.translate:
       case ContextMenuButtonType.share:
       case ContextMenuButtonType.custom:
       case null:
