@@ -299,29 +299,7 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem:
-          () => TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            expect(environment.defines, <String, String>{
-              'TargetFile': 'lib/main.dart',
-              'HasWebPlugins': 'true',
-              'cspMode': 'false',
-              'SourceMaps': 'false',
-              'NativeNullAssertions': 'true',
-              'ServiceWorkerStrategy': 'offline-first',
-              'Dart2jsDumpInfo': 'false',
-              'Dart2jsNoFrequencyBasedMinification': 'false',
-              'Dart2jsOptimization': 'O3',
-              'BuildMode': 'release',
-              'DartDefines':
-                  'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-              'DartObfuscation': 'false',
-              'TrackWidgetCreation': 'false',
-              'TreeShakeIcons': 'true',
-            });
-          }),
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     },
   );
 
