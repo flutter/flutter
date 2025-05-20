@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -206,28 +205,11 @@ class EngineSceneView {
     }
   }
 
-  String _generateDebugFilename() {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return 'flutter-scene-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void dumpDebugInfo() {
+  Map<String, dynamic>? dumpDebugInfo() {
     if (kDebugMode && _previousRender != null) {
-      final Map<String, Object?> debugJson = _previousRender!.scene.debugJsonDescription;
-      final String jsonString = jsonEncode(debugJson);
-      final blob = createDomBlob([jsonString], {'type': 'application/json'});
-      final url = domWindow.URL.createObjectURL(blob);
-      final element = domDocument.createElement('a');
-      element.setAttribute('href', url);
-      element.setAttribute('download', _generateDebugFilename());
-      element.click();
+      return _previousRender!.scene.debugJsonDescription;
     }
+    return null;
   }
 }
 

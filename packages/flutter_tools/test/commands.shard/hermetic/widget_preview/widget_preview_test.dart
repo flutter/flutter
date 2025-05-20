@@ -224,7 +224,7 @@ flutter:
 
   @override
   late final File packageConfig = () {
-    return writePackageConfigFile(
+    return writePackageConfigFiles(
       directory: fileSystem.directory(projectRoot),
       mainLibName: 'my_app',
     );

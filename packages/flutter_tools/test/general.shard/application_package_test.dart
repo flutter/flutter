@@ -983,7 +983,7 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 
 Future<FlutterProject> aModuleProject() async {
   final Directory directory = globals.fs.directory('module_project');
-  writePackageConfigFile(directory: directory, mainLibName: 'my_app');
+  writePackageConfigFiles(directory: directory, mainLibName: 'my_app');
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
 flutter:
