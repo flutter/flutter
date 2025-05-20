@@ -28,12 +28,6 @@ import '../src/throwing_pub.dart';
 import 'hot_shared.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
       expect(
@@ -206,7 +200,6 @@ name: my_app
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -250,7 +243,6 @@ name: my_app
           FileSystem: () => fileSystem,
           Platform: () => FakePlatform(),
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );

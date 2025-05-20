@@ -28,12 +28,6 @@ void main() {
     return TestFeatureFlags(isExplicitPackageDependenciesEnabled: false);
   }
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   testUsingContext(
     'calls buildSystem.build with blank l10n.yaml file',
     () async {
@@ -481,7 +475,6 @@ void main() {
         isNot(contains('https://flutter.dev/to/flutter-gen-deprecation')),
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
   );
 
   testUsingContext(
@@ -524,9 +517,6 @@ void main() {
         ),
       );
     },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
-    },
   );
 
   testUsingContext(
@@ -565,9 +555,6 @@ void main() {
         ),
         returnsNormally,
       );
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
     },
   );
 }

@@ -55,11 +55,6 @@ void main() {
     return command;
   }
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('Usage', () {
     late Directory tempDir;
     late FakeAnalytics analytics;
@@ -153,7 +148,6 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: FakePub.new,
       },
     );
