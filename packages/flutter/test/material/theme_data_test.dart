@@ -1329,7 +1329,7 @@ void main() {
       typography: Typography.material2018(),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
       bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.black),
@@ -1458,7 +1458,7 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
-      appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+      appBarTheme: const AppBarThemeData(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
       bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.white),
