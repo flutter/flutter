@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
@@ -275,21 +276,10 @@ Future<void> runFlutterWithDevice(
   bool withDebugger = false,
   bool startPaused = false,
   List<String> additionalCommandArgs = const <String>[],
-}) async {
-  if (chrome) {
-    await flutter.run(
-      verbose: verbose,
-      withDebugger: withDebugger,
-      startPaused: startPaused,
-      device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: additionalCommandArgs,
-    );
-  } else {
-    await flutter.run(
-      verbose: verbose,
-      withDebugger: withDebugger,
-      startPaused: startPaused,
-      additionalCommandArgs: additionalCommandArgs,
-    );
-  }
-}
+}) => flutter.run(
+  verbose: verbose,
+  withDebugger: withDebugger,
+  startPaused: startPaused,
+  device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+  additionalCommandArgs: additionalCommandArgs,
+);
