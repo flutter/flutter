@@ -752,6 +752,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
+    assert(mounted);
+    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+      return;
+    }
     if (_activeHoveringPointerDevices.isEmpty) {
       return;
     }
