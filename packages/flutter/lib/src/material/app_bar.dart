@@ -886,7 +886,7 @@ class _AppBarState extends State<AppBar> {
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final AppBarThemeData appBarTheme = AppBarTheme.of(context);
-    final AppBarTheme defaults =
+    final AppBarThemeData defaults =
         theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
@@ -2227,7 +2227,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late final AppBarThemeData appBarTheme = AppBarTheme.of(context);
-    late final AppBarTheme defaults =
+    late final AppBarThemeData defaults =
         Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final FlexibleSpaceBarSettings settings =
         context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
@@ -2445,7 +2445,7 @@ mixin _ScrollUnderFlexibleConfig {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _AppBarDefaultsM2 extends AppBarTheme {
+class _AppBarDefaultsM2 extends AppBarThemeData {
   _AppBarDefaultsM2(this.context)
     : super(
         elevation: 4.0,
@@ -2487,7 +2487,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-class _AppBarDefaultsM3 extends AppBarTheme {
+class _AppBarDefaultsM3 extends AppBarThemeData {
   _AppBarDefaultsM3(this.context)
     : super(
       elevation: 0.0,
