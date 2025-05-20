@@ -27,7 +27,7 @@ class Filter {
   Filter(Filter&&) = default;
 
  private:
-  Filter(std::string_view regex);
+  explicit Filter(std::string_view regex);
   std::unique_ptr<RE2> re_;
 };
 
