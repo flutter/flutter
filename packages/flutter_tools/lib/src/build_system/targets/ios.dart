@@ -13,6 +13,7 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
+import '../../convert.dart' show LineSplitter, utf8;
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
@@ -365,6 +366,10 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+void _printWarning(Environment environment, String path, int line, String warning) {
+  environment.logger.printWarning('$path:$line: warning: $warning');
+}
+
 class _IssueLaunchRootViewControllerAccess extends Target {
   const _IssueLaunchRootViewControllerAccess();
 
@@ -372,10 +377,40 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   Future<void> build(Environment environment) async {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     if (flutterProject.ios.appDelegateSwift.existsSync()) {
-      environment.logger.printWarning('foobar using appDelegateSwift');
+      _printWarning(
+        environment,
+        flutterProject.ios.appDelegateSwift.path,
+        0,
+        'foobar using appDelegateSwift',
+      );
     }
     if (flutterProject.ios.appDelegateObjc.existsSync()) {
-      environment.logger.printWarning('foobar using appDelegateObjc');
+      final Stream<String> lines = flutterProject.ios.appDelegateObjc
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
+
+      bool inDidFinishLaunchingWithOptions = false;
+      int lineNumber = 0;
+      await for (final String line in lines) {
+        lineNumber += 1;
+        if (!inDidFinishLaunchingWithOptions) {
+          if (line.contains('didFinishLaunchingWithOptions:')) {
+            inDidFinishLaunchingWithOptions = true;
+          }
+        } else {
+          if (line.startsWith('-') || line.startsWith('+') || line.startsWith('@end')) {
+            inDidFinishLaunchingWithOptions = false;
+          } else if (line.contains(RegExp('self.*?window.*?rootViewController'))) {
+            _printWarning(
+              environment,
+              flutterProject.ios.appDelegateObjc.path,
+              lineNumber,
+              'Accessing rootViewController in `application:didFinishLaunchingWithOptions:` may be nil.',
+            );
+          }
+        }
+      }
     }
   }
   
@@ -383,10 +418,11 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   List<Target> get dependencies => <Target>[];
   
   @override
-  List<Source> get inputs => <Source>[
-    Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift),
-    Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc),
-  ];
+  List<Source> get inputs { return <Source>[
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+    ),
+  ]; }
   
   @override
   String get name => 'IssueLaunchRootViewControllerAccess';
