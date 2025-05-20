@@ -25,6 +25,7 @@ import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
+import '../material/stretch_overscroll_effect.dart';
 
 /// A visual indication that a scroll view has overscrolled.
 ///
@@ -804,8 +805,8 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
           final double stretch = _stretchController.value;
-          double x = 1.0;
-          double y = 1.0;
+          double x = 0.0;
+          double y = 0.0;
           final double mainAxisSize;
 
           switch (widget.axis) {
@@ -817,17 +818,17 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               mainAxisSize = MediaQuery.heightOf(context);
           }
 
-          final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
-            _stretchController.stretchDirection,
-          );
+          if (_stretchController.stretchDirection == _StretchDirection.trailing) {
+            x = -x;
+            y = -y;
+          }
 
           final double viewportDimension =
               _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-          final Widget transform = Transform(
-            alignment: alignment,
-            transform: Matrix4.diagonal3Values(x, y, 1.0),
-            filterQuality: stretch == 0 ? null : FilterQuality.medium,
-            child: widget.child,
+          final Widget transform = StretchOverscrollEffect(
+            overscrollX: x,
+            overscrollY: y,
+            child: widget.child!
           );
 
           // Only clip if the viewport dimension is smaller than that of the

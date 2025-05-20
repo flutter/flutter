@@ -197,4 +197,5 @@ export 'src/material/tooltip_theme.dart';
 export 'src/material/tooltip_visibility.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
+export 'src/material/stretch_overscroll_effect.dart';
 export 'widgets.dart';
