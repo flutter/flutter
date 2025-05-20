@@ -213,10 +213,11 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
     // Remove old node if it exists
     domDocument.getElementById(id)?.remove();
 
-    final DomElement describedNode = domDocument.createElement('div')
-      ..id = id
-      ..text = hint
-      ..style.display = 'none';
+    final DomElement describedNode =
+        domDocument.createElement('div')
+          ..id = id
+          ..text = hint
+          ..style.display = 'none';
 
     domDocument.body?.append(describedNode);
     return id;
@@ -263,26 +264,28 @@ final class DomTextRepresentation extends LabelRepresentationBehavior {
 }
 
 /// A span queue for a size update.
-typedef _QueuedSizeUpdate = ({
-  // The span to be sized.
-  SizedSpanRepresentation representation,
+typedef _QueuedSizeUpdate =
+    ({
+      // The span to be sized.
+      SizedSpanRepresentation representation,
 
-  // The desired size.
-  ui.Size targetSize,
-});
+      // The desired size.
+      ui.Size targetSize,
+    });
 
 /// The size of a span as measured in the DOM.
-typedef _Measurement = ({
-  // The span that was measured.
-  SizedSpanRepresentation representation,
+typedef _Measurement =
+    ({
+      // The span that was measured.
+      SizedSpanRepresentation representation,
 
-  // The measured size of the DOM element before the size adjustment.
-  ui.Size domSize,
+      // The measured size of the DOM element before the size adjustment.
+      ui.Size domSize,
 
-  // The size of the element that the screen reader should observe after the
-  // size adjustment.
-  ui.Size targetSize,
-});
+      // The size of the element that the screen reader should observe after the
+      // size adjustment.
+      ui.Size targetSize,
+    });
 
 /// Sets the label as the text of a `<span>` child element.
 ///
@@ -557,9 +560,8 @@ class LabelAndValue extends SemanticBehavior {
   /// screen reader. If the are no children, use the representation preferred
   /// by the role.
   LabelRepresentationBehavior _getEffectiveRepresentation() {
-    final LabelRepresentation effectiveRepresentation = semanticsObject.hasChildren
-        ? LabelRepresentation.ariaLabel
-        : preferredRepresentation;
+    final LabelRepresentation effectiveRepresentation =
+        semanticsObject.hasChildren ? LabelRepresentation.ariaLabel : preferredRepresentation;
 
     LabelRepresentationBehavior? representation = _representation;
     if (representation == null || representation.kind != effectiveRepresentation) {
