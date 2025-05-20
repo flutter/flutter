@@ -211,7 +211,6 @@ TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
 
   auto flags = FlutterSemanticsFlags{
-
       .is_text_field = true,
       .is_read_only = true,
   };
