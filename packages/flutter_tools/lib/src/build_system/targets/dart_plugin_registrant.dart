@@ -68,7 +68,7 @@ class DartPluginRegistrantTarget extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 
   @override
