@@ -365,6 +365,36 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+class _IssueLaunchRootViewControllerAccess extends Target {
+  const _IssueLaunchRootViewControllerAccess();
+
+  @override
+  Future<void> build(Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    if (flutterProject.ios.appDelegateSwift.existsSync()) {
+      environment.logger.printWarning('foobar using appDelegateSwift');
+    }
+    if (flutterProject.ios.appDelegateObjc.existsSync()) {
+      environment.logger.printWarning('foobar using appDelegateObjc');
+    }
+  }
+  
+  @override
+  List<Target> get dependencies => <Target>[];
+  
+  @override
+  List<Source> get inputs => <Source>[
+    Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift),
+    Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc),
+  ];
+  
+  @override
+  String get name => 'IssueLaunchRootViewControllerAccess';
+  
+  @override
+  List<Source> get outputs => <Source>[];
+}
+
 abstract class IosLLDBInit extends Target {
   const IosLLDBInit();
 
@@ -670,6 +700,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const CheckDevDependenciesIos(),
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
+    const _IssueLaunchRootViewControllerAccess(),
     ...super.dependencies,
   ];
 }
