@@ -441,7 +441,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 - (void)showTranslateViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
 
-  FlutterTranslateController* translateController = [[FlutterTranslateController alloc] initWithTerm:term];
+  FlutterTranslateController* translateController =
+      [[FlutterTranslateController alloc] initWithTerm:term];
 
   [engineViewController addChildViewController:translateController];
   [engineViewController.view addSubview:translateController.view];

@@ -74,7 +74,7 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
-          translateSelectedText:(NSString*)selectedText;
+       translateSelectedText:(NSString*)selectedText;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTDELEGATE_H_

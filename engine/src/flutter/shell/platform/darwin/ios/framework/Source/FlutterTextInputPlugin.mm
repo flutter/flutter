@@ -889,7 +889,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)handleTranslateAction {
   [self.textInputDelegate flutterTextInputView:self
-                            translateSelectedText:[self textInRange:_selectedTextRange]];
+                         translateSelectedText:[self textInRange:_selectedTextRange]];
 }
 
 - (void)handleShareAction {

@@ -2900,8 +2900,6 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    print("hi");
-
     final String text = textEditingValue.selection.textInside(textEditingValue.text);
     if (text.isNotEmpty) {
       await SystemChannels.platform.invokeMethod('Translate.invoke', text);

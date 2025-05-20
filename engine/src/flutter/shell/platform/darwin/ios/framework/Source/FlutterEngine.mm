@@ -1059,7 +1059,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
-          translateSelectedText:(NSString*)selectedText {
+       translateSelectedText:(NSString*)selectedText {
   [self.platformPlugin showTranslateViewController:selectedText];
 }
 
