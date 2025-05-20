@@ -777,7 +777,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Whether the color should be animated.
   final bool animateColor;
 
-  bool _getEffectiveCenterTitle(ThemeData theme) {
+  bool _getEffectiveCenterTitle(ThemeData theme, AppBarThemeData appbarTheme) {
     bool platformCenter() {
       switch (theme.platform) {
         case TargetPlatform.android:
@@ -791,7 +791,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
       }
     }
 
-    return centerTitle ?? theme.appBarTheme.centerTitle ?? platformCenter();
+    return centerTitle ??
+        appbarTheme.centerTitle ??
+        theme.appBarTheme.centerTitle ??
+        platformCenter();
   }
 
   @override
@@ -882,7 +885,7 @@ class _AppBarState extends State<AppBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
-    final AppBarTheme appBarTheme = AppBarTheme.of(context);
+    final AppBarThemeData appBarTheme = AppBarTheme.of(context);
     final AppBarTheme defaults =
         theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
@@ -1119,7 +1122,7 @@ class _AppBarState extends State<AppBar> {
       leading: leading,
       middle: title,
       trailing: actions,
-      centerMiddle: widget._getEffectiveCenterTitle(theme),
+      centerMiddle: widget._getEffectiveCenterTitle(theme, appBarTheme),
       middleSpacing:
           widget.titleSpacing ?? appBarTheme.titleSpacing ?? NavigationToolbar.kMiddleSpacing,
     );
@@ -2223,7 +2226,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    late final AppBarTheme appBarTheme = AppBarTheme.of(context);
+    late final AppBarThemeData appBarTheme = AppBarTheme.of(context);
     late final AppBarTheme defaults =
         Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final FlexibleSpaceBarSettings settings =
