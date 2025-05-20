@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../dom.dart';
 import 'semantics.dart';
+import '../browser_detection.dart';
 
 /// The method used to represend a label of a leaf node in the DOM.
 ///
@@ -115,21 +118,109 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
 
   @override
   void update(String label) {
-    if (label == _previousLabel) {
-      return;
+    if (label != _previousLabel) {
+      _previousLabel = label;
+      owner.setAttribute('aria-label', label);
     }
-    owner.setAttribute('aria-label', label);
+
+    // Always update hint because it may change independently
+    final String? hint = semanticsObject.hint;
+
+    owner.removeAttribute('aria-description');
+    owner.removeAttribute('aria-describedby');
+
+    if (hint != null && hint.trim().isNotEmpty) {
+      if (supportsAriaDescription) {
+        owner.setAttribute('aria-description', hint);
+      } else {
+        final String id = _injectDescribedByNode(hint);
+        owner.setAttribute('aria-describedby', id);
+      }
+    }
   }
 
   @override
   void cleanUp() {
+    // 🔧 Remove ARIA attributes from the role's DOM element
     owner.removeAttribute('aria-label');
+    owner.removeAttribute('aria-description');
+    owner.removeAttribute('aria-describedby');
+
+    // 🧹 Remove the injected <div> used for aria-describedby (if it exists)
+    final String hintId = 'hint-${semanticsObject.id}';
+    domDocument.getElementById(hintId)?.remove();
   }
 
   // ARIA label does not introduce extra DOM elements, so focus should go to the
   // semantic node's host element.
   @override
   DomElement get focusTarget => owner.element;
+
+  /// Whether the current browser supports the `aria-description` attribute.
+  static bool? _supportsAriaDescription;
+
+  static bool get supportsAriaDescription {
+    if (_supportsAriaDescription == null) {
+      _supportsAriaDescription = _checkAriaDescriptionSupport();
+    }
+    return _supportsAriaDescription!;
+  }
+
+  /// Checks if the current browser supports the aria-description attribute.
+  ///
+  /// Chrome and Edge have supported it since 2020, so we consider them fully supported.
+  /// Safari and Firefox require version checks.
+  static bool _checkAriaDescriptionSupport() {
+    if (isChromium || isEdge) {
+      return true;
+    }
+
+    if (isSafari) {
+      // Safari 17.4+ supports aria-description
+      final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
+      final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
+      if (match != null) {
+        final int majorVersion = int.parse(match.group(1)!);
+        final int minorVersion = int.parse(match.group(2)!);
+        return majorVersion > 17 || (majorVersion == 17 && minorVersion >= 4);
+      }
+      return false;
+    }
+
+    if (isFirefox) {
+      // Firefox 119+ supports aria-description
+      final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
+      final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
+      if (match != null) {
+        final int version = int.parse(match.group(1)!);
+        return version >= 119;
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  /// Allows tests to override the `supportsAriaDescription` value.
+  @visibleForTesting
+  static set supportsAriaDescriptionForTest(bool? value) {
+    _supportsAriaDescription = value;
+  }
+
+  String _injectDescribedByNode(String hint) {
+    final String id = 'hint-${semanticsObject.id}';
+
+    // Remove old node if it exists
+    domDocument.getElementById(id)?.remove();
+
+    final DomElement describedNode = domDocument.createElement('div')
+      ..id = id
+      ..text = hint
+      ..style.display = 'none';
+
+    domDocument.body?.append(describedNode);
+    return id;
+  }
 }
 
 /// Sets the label as text inside the DOM element.
@@ -172,28 +263,26 @@ final class DomTextRepresentation extends LabelRepresentationBehavior {
 }
 
 /// A span queue for a size update.
-typedef _QueuedSizeUpdate =
-    ({
-      // The span to be sized.
-      SizedSpanRepresentation representation,
+typedef _QueuedSizeUpdate = ({
+  // The span to be sized.
+  SizedSpanRepresentation representation,
 
-      // The desired size.
-      ui.Size targetSize,
-    });
+  // The desired size.
+  ui.Size targetSize,
+});
 
 /// The size of a span as measured in the DOM.
-typedef _Measurement =
-    ({
-      // The span that was measured.
-      SizedSpanRepresentation representation,
+typedef _Measurement = ({
+  // The span that was measured.
+  SizedSpanRepresentation representation,
 
-      // The measured size of the DOM element before the size adjustment.
-      ui.Size domSize,
+  // The measured size of the DOM element before the size adjustment.
+  ui.Size domSize,
 
-      // The size of the element that the screen reader should observe after the
-      // size adjustment.
-      ui.Size targetSize,
-    });
+  // The size of the element that the screen reader should observe after the
+  // size adjustment.
+  ui.Size targetSize,
+});
 
 /// Sets the label as the text of a `<span>` child element.
 ///
@@ -468,8 +557,9 @@ class LabelAndValue extends SemanticBehavior {
   /// screen reader. If the are no children, use the representation preferred
   /// by the role.
   LabelRepresentationBehavior _getEffectiveRepresentation() {
-    final LabelRepresentation effectiveRepresentation =
-        semanticsObject.hasChildren ? LabelRepresentation.ariaLabel : preferredRepresentation;
+    final LabelRepresentation effectiveRepresentation = semanticsObject.hasChildren
+        ? LabelRepresentation.ariaLabel
+        : preferredRepresentation;
 
     LabelRepresentationBehavior? representation = _representation;
     if (representation == null || representation.kind != effectiveRepresentation) {
@@ -487,11 +577,12 @@ class LabelAndValue extends SemanticBehavior {
     // If the node is incrementable the value is reported to the browser via
     // the respective role. We do not need to also render it again here.
     final bool shouldDisplayValue = !semanticsObject.isIncrementable && semanticsObject.hasValue;
+    final bool excludeHint = _getEffectiveRepresentation() is AriaLabelRepresentation;
 
     return computeDomSemanticsLabel(
       tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
       label: semanticsObject.hasLabel ? semanticsObject.label : null,
-      hint: semanticsObject.hint,
+      hint: excludeHint ? null : semanticsObject.hint,
       value: shouldDisplayValue ? semanticsObject.value : null,
     );
   }
