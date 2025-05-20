@@ -811,7 +811,7 @@ void main() {
   );
 
   testWidgets(
-    'iOS selection handles scale with rich text (selection height style max) (default)',
+    'iOS selection handles scale with rich text (selection height style includeLineSpacingMiddle) (default)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
@@ -978,7 +978,7 @@ void main() {
   );
 
   testWidgets(
-    'iOS selection handles scale with rich text (grapheme clusters) (selection height style max) (default)',
+    'iOS selection handles scale with rich text (grapheme clusters) (selection height style includeLineSpacingMiddle) (default)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
