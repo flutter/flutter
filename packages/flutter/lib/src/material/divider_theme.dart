@@ -21,8 +21,8 @@ import 'theme.dart';
 /// between [ListTile]s, and dividers between rows in [DataTable]s.
 ///
 /// Descendant widgets obtain the current [DividerThemeData] object using
-/// `DividerTheme.of(context)`. Instances of [DividerThemeData]
-/// can be customized with [DividerThemeData.copyWith].
+/// [DividerTheme.of]. Instances of [DividerThemeData] can be customized with
+/// [DividerThemeData.copyWith].
 ///
 /// Typically a [DividerThemeData] is specified as part of the overall
 /// [Theme] with [ThemeData.dividerTheme].

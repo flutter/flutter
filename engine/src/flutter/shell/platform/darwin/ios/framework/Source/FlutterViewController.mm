@@ -15,14 +15,13 @@
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/runtime/ptrace_check.h"
 #include "flutter/shell/common/thread_host.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
@@ -182,12 +181,14 @@ typedef struct MouseState {
   if (self) {
     _viewOpaque = YES;
     if (engine.viewController) {
-      FML_LOG(ERROR) << "The supplied FlutterEngine " << [[engine description] UTF8String]
-                     << " is already used with FlutterViewController instance "
-                     << [[engine.viewController description] UTF8String]
-                     << ". One instance of the FlutterEngine can only be attached to one "
-                        "FlutterViewController at a time. Set FlutterEngine.viewController "
-                        "to nil before attaching it to another FlutterViewController.";
+      NSString* errorMessage =
+          [NSString stringWithFormat:
+                        @"The supplied FlutterEngine %@ is already used with FlutterViewController "
+                         "instance %@. One instance of the FlutterEngine can only be attached to "
+                         "one FlutterViewController at a time. Set FlutterEngine.viewController to "
+                         "nil before attaching it to another FlutterViewController.",
+                        engine.description, engine.viewController.description];
+      [FlutterLogger logError:errorMessage];
     }
     _engine = engine;
     _engineNeedsLaunch = NO;
@@ -254,33 +255,15 @@ typedef struct MouseState {
 
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
                   initialRoute:(nullable NSString*)initialRoute {
-  id appDelegate = FlutterSharedApplication.application.delegate;
-  FlutterEngine* engine;
-  if ([appDelegate respondsToSelector:@selector(takeLaunchEngine)]) {
-    if (self.nibName) {
-      // Only grab the launch engine if it was created with a nib.
-      // FlutterViewControllers created from nibs can't specify their initial
-      // routes so it's safe to take it.
-      engine = [appDelegate takeLaunchEngine];
-    } else {
-      // If we registered plugins with a FlutterAppDelegate without a xib, throw
-      // away the engine that was registered through the FlutterAppDelegate.
-      // That's not a valid usage of the API.
-      [appDelegate takeLaunchEngine];
-    }
+  // Need the project to get settings for the view. Initializing it here means
+  // the Engine class won't initialize it later.
+  if (!project) {
+    project = [[FlutterDartProject alloc] init];
   }
-  if (!engine) {
-    // Need the project to get settings for the view. Initializing it here means
-    // the Engine class won't initialize it later.
-    if (!project) {
-      project = [[FlutterDartProject alloc] init];
-    }
-
-    engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
-                                         project:project
-                          allowHeadlessExecution:self.engineAllowHeadlessExecution
-                              restorationEnabled:self.restorationIdentifier != nil];
-  }
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
+                                                      project:project
+                                       allowHeadlessExecution:self.engineAllowHeadlessExecution
+                                           restorationEnabled:self.restorationIdentifier != nil];
   if (!engine) {
     return;
   }
@@ -289,7 +272,7 @@ typedef struct MouseState {
   _engine = engine;
   _flutterView = [[FlutterView alloc] initWithDelegate:_engine
                                                 opaque:_viewOpaque
-                                       enableWideGamut:engine.project.isWideGamutEnabled];
+                                       enableWideGamut:project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
   _engineNeedsLaunch = YES;
   _ongoingTouches = [[NSMutableSet alloc] init];
@@ -1443,10 +1426,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         waitForFirstFrameSync:timeout
                      callback:^(BOOL didTimeout) {
                        if (didTimeout) {
-                         FML_LOG(INFO)
-                             << "Timeout waiting for the first frame to render. This may happen in "
-                                "unoptimized builds. If this is a release build, you should load a "
-                                "less complex frame to avoid the timeout.";
+                         [FlutterLogger logInfo:@"Timeout waiting for the first frame to render. "
+                                                 "This may happen in unoptimized builds. If this is"
+                                                 "a release build, you should load a less complex "
+                                                 "frame to avoid the timeout."];
                        }
                      }];
   }
@@ -1896,7 +1879,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       waitForFirstFrame:3.0
                callback:^(BOOL didTimeout) {
                  if (didTimeout) {
-                   FML_LOG(ERROR) << "Timeout waiting for the first frame when launching an URL.";
+                   [FlutterLogger
+                       logError:@"Timeout waiting for first frame when launching a URL."];
                    completion(NO);
                  } else {
                    // invove the method and get the result
@@ -1910,7 +1894,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                                    [result isKindOfClass:[NSNumber class]] && [result boolValue];
                                if (!success) {
                                  // Logging the error if the result is not successful
-                                 FML_LOG(ERROR) << "Failed to handle route information in Flutter.";
+                                 [FlutterLogger
+                                     logError:@"Failed to handle route information in Flutter."];
                                }
                                completion(success);
                              }];
@@ -2064,8 +2049,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       UIInterfaceOrientationMask currentInterfaceOrientation = 0;
       UIWindowScene* windowScene = self.flutterWindowSceneIfViewLoaded;
       if (!windowScene) {
-        FML_LOG(WARNING)
-            << "Accessing the interface orientation when the window scene is unavailable.";
+        [FlutterLogger
+            logWarning:
+                @"Accessing the interface orientation when the window scene is unavailable."];
         return;
       }
       currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
@@ -2199,7 +2185,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (CGFloat)textScaleFactor {
   UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication == nil) {
-    FML_LOG(WARNING) << "Dynamic content size update is not supported in app extension.";
+    [FlutterLogger logWarning:@"Dynamic content size update is not supported in app extension."];
     return 1.0;
   }
 
