@@ -431,24 +431,21 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
 - (void)showLookUpViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
-
-  FlutterTranslateController* translateController = [[FlutterTranslateController alloc] init];
-  UIViewController* controller = [translateController swiftUIWrapper];
-  [engineViewController addChildViewController:controller];
-  [engineViewController.view addSubview:controller.view];
-
-  [controller didMoveToParentViewController:engineViewController];
+  UIReferenceLibraryViewController* referenceLibraryViewController =
+      [[UIReferenceLibraryViewController alloc] initWithTerm:term];
+  [engineViewController presentViewController:referenceLibraryViewController
+                                     animated:YES
+                                   completion:nil];
 }
 
 - (void)showTranslateViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
 
-  FlutterTranslateController* translateController = [[FlutterTranslateController alloc] init];
-  UIViewController* controller = [translateController swiftUIWrapper];
-  [engineViewController addChildViewController:controller];
-  [engineViewController.view addSubview:controller.view];
+  FlutterTranslateController* translateController = [[FlutterTranslateController alloc] initWithTerm:term];
 
-  [controller didMoveToParentViewController:engineViewController];
+  [engineViewController addChildViewController:translateController];
+  [engineViewController.view addSubview:translateController.view];
+  [translateController didMoveToParentViewController:engineViewController];
 }
 
 - (UITextField*)textField {

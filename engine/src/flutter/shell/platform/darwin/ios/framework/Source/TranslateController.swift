@@ -11,16 +11,22 @@ import Translation
 @objc(FlutterTranslateController)
 public class FlutterTranslateController: UIViewController {
 
-  @available(iOS 17.4, *)
-  @objc public func showTranslateUI(word: String) {
-    print("Showing translate UI for word: \(word)")
+  private let originalText: String
 
+  @objc public init(term: String) {
+    self.originalText = term;
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  @available(*, unavailable)
+  required init?(coder aDecoder: NSCoder) {
+    self.originalText = ""
+    super.init(coder: aDecoder)
   }
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    print("Dear god print")
-    let swiftUIController = swiftUIWrapper()
+    let swiftUIController = getSwiftUITranslateController(termToTranslate: originalText)
 
     addChild(swiftUIController)
     view.addSubview(swiftUIController.view)
@@ -28,8 +34,8 @@ public class FlutterTranslateController: UIViewController {
   }
 
   @available(iOS 17.4, *)
-  @objc public func swiftUIWrapper() -> UIViewController {
-    let hostingController = UIHostingController(rootView: ContentView())
+  @objc public func getSwiftUITranslateController(termToTranslate: String) -> UIViewController {
+    let hostingController = UIHostingController(rootView: ContentView(termToTranslate: termToTranslate))
     hostingController.view.backgroundColor = .clear
     return hostingController;
   }
@@ -37,14 +43,13 @@ public class FlutterTranslateController: UIViewController {
 
 @available(iOS 17.4, *)
 struct ContentView: View {
-  @available(iOS 17.4, *)
   @State private var isTranslationPopoverShown = true
-  private var originalText = "bienvenue"
+  let termToTranslate : String;
   var body: some View {
     Color.clear
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .translationPresentation(
-          isPresented: $isTranslationPopoverShown, text: originalText)
+          isPresented: $isTranslationPopoverShown, text: termToTranslate)
   }
 }
 

@@ -1058,6 +1058,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self.platformPlugin showLookUpViewController:selectedText];
 }
 
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+          translateSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showTranslateViewController:selectedText];
+}
+
 #pragma mark - FlutterViewEngineDelegate
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView showToolbar:(int)client {
