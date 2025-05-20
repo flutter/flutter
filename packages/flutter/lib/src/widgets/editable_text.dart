@@ -2062,15 +2062,7 @@ class EditableText extends StatefulWidget {
     if (kIsWeb) {
       return ui.BoxHeightStyle.max;
     }
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return ui.BoxHeightStyle.includeLineSpacingMiddle;
-    }
+    return ui.BoxHeightStyle.includeLineSpacingMiddle;
   }
 
   /// The default value for [selectionWidthStyle].
@@ -2082,20 +2074,12 @@ class EditableText extends StatefulWidget {
   /// platforms.
   static ui.BoxWidthStyle get defaultSelectionWidthStyle {
     if (kIsWeb) {
-      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.browserIsSafari) {
+      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
         return ui.BoxWidthStyle.max;
       }
       return ui.BoxWidthStyle.tight;
     }
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return ui.BoxWidthStyle.max;
-    }
+    return ui.BoxWidthStyle.max;
   }
 
   /// The default value for [stylusHandwritingEnabled].
