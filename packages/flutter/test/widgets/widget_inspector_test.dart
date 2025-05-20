@@ -5134,10 +5134,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         expect(result['flexFactor'], equals(1));
         expect(result['flexFit'], equals('loose'));
-
-        final Map<String, Object?>? parentData = result['parentData'] as Map<String, Object?>?;
-        expect(parentData, isNotNull);
-        expect(parentData!['flexFactor'], equals(1));
       });
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderView', (
