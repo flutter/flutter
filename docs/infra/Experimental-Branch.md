@@ -10,8 +10,8 @@ system, or make system-wide flag changes that are not yet in the state where
 they can land on `master`, but are too cumbersome to use something like `led`
 for due to how many steps are required.
 
-WARNING: These branches are not officially supported, and if broken, are only
-considered a **P2** (best effort) to fix.
+> WARNING: These branches are not officially supported, and if broken, are only
+> considered a **P2** (best effort) to fix.
 
 ## Creating an experimental branch
 
@@ -30,8 +30,8 @@ targets not applicable to your experiment.
 
 For an example, see <https://github.com/flutter/flutter/pull/168860>.
 
-NOTE: _New_ targets are not supported, that is, target names must exist already
-at tip-of-tree in the `master` branch.
+> NOTE: _New_ targets are not supported, that is, target names must exist already
+> at tip-of-tree in the `master` branch.
 
 ## Testing and Submitting PRs
 
