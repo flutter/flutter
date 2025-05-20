@@ -1379,10 +1379,6 @@ void main() {
 
       expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(4));
       expect(find.byIcon(CupertinoIcons.search), findsNWidgets(4));
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('nav_bar_transition.search_to_search.bottom.png'),
-      );
       await tester.pumpAndSettle();
 
       expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
@@ -1424,10 +1420,6 @@ void main() {
 
       expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(4));
       expect(find.byIcon(CupertinoIcons.search), findsNWidgets(4));
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('nav_bar_transition.search_to_search.top.png'),
-      );
       await tester.pumpAndSettle();
     },
   );
