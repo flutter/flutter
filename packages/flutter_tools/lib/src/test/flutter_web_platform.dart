@@ -283,7 +283,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures ?? true);
+      assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
@@ -296,7 +296,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures ?? true);
+      assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
