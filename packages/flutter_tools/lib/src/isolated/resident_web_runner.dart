@@ -172,7 +172,7 @@ class ResidentWebRunner extends ResidentRunner {
       // since we still want a reload command to succeed, but to do a hot
       // restart.
       debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-      debuggingOptions.buildInfo.canaryFeatures != true;
+      !debuggingOptions.buildInfo.canaryFeatures;
 
   @override
   bool get supportsDetach => stopAppDuringCleanup;
