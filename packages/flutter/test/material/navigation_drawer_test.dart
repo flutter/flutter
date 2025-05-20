@@ -500,10 +500,7 @@ void main() {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 8,
-              children: <Widget>[
-                FlutterLogo(),
-                Text('Header'),
-              ],
+              children: <Widget>[FlutterLogo(), Text('Header')],
             ),
           ),
         ),
@@ -515,10 +512,7 @@ void main() {
         ),
         children: <Widget>[
           for (int i = 0; i < 10; i++)
-            NavigationDrawerDestination(
-              icon: const Icon(Icons.home),
-              label: Text('Item $i'),
-            ),
+            NavigationDrawerDestination(icon: const Icon(Icons.home), label: Text('Item $i')),
         ],
       ),
     );
