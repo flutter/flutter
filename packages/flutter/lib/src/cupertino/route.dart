@@ -182,7 +182,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    // Suppress previous route from transitioning if this is a fullscreenDialog route.
     return previousRoute is PageRoute && !fullscreenDialog;
   }
 
@@ -1410,6 +1410,7 @@ Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   String? barrierLabel,
+  Color? barrierColor,
   bool useRootNavigator = true,
   bool barrierDismissible = false,
   RouteSettings? routeSettings,
@@ -1422,7 +1423,7 @@ Future<T?> showCupertinoDialog<T>({
       context: context,
       barrierDismissible: barrierDismissible,
       barrierLabel: barrierLabel,
-      barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
+      barrierColor: barrierColor,
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,

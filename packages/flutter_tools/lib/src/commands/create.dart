@@ -1041,8 +1041,8 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   // Determine if the Java version specified conflicts with the template Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaAndGradle(
     globals.logger,
-    javaV: javaVersion,
-    gradleV: templateGradleVersion,
+    javaVersion: javaVersion,
+    gradleVersion: templateGradleVersion,
   );
   bool javaAgpVersionsCompatible = gradle.validateJavaAndAgp(
     globals.logger,

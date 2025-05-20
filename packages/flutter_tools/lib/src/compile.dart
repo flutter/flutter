@@ -524,11 +524,11 @@ abstract class ResidentCompiler {
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
 
-  /// If invoked for the first time, it compiles Dart script identified by
-  /// [mainPath], [invalidatedFiles] list is ignored.
+  /// If invoked for the first time, it compiles the Dart script identified by
+  /// [mainUri], [invalidatedFiles] list is ignored.
   /// On successive runs [invalidatedFiles] indicates which files need to be
-  /// recompiled. If [mainPath] is [null], previously used [mainPath] entry
-  /// point that is used for recompilation.
+  /// recompiled.
+  ///
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   ///

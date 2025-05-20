@@ -132,6 +132,11 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   );
 }
 
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 3000.0)}) {
+  tester.view.physicalSize = size;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
@@ -634,6 +639,77 @@ void main() {
     checkBackgroundBoxOffset(tester, 2, const Offset(846.12, 44.0));
   });
 
+  testWidgets('Extended large title removes bottom nav bar transition background box ', (
+    WidgetTester tester,
+  ) async {
+    setWindowToPortrait(tester);
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: const <Widget>[
+              CupertinoSliverNavigationBar(largeTitle: Text('Page 1')),
+              SliverToBoxAdapter(child: SizedBox(height: 1200.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            title: 'Page 2',
+            builder:
+                (BuildContext context) =>
+                    scaffoldForNavBar(
+                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
+                    )!,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('nav_bar_transition.large_title.expanded.png'),
+    );
+
+    await tester.pumpAndSettle();
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    scrollController.jumpTo(600.0);
+    await tester.pumpAndSettle();
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            title: 'Page 2',
+            builder:
+                (BuildContext context) =>
+                    scaffoldForNavBar(
+                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
+                    )!,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('nav_bar_transition.large_title.collapsed.png'),
+    );
+  });
+
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
@@ -666,6 +742,7 @@ void main() {
   testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -987,6 +1064,7 @@ void main() {
   });
 
   testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1045,6 +1123,7 @@ void main() {
   testWidgets('Bottom CupertinoSliverNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(
@@ -1081,6 +1160,7 @@ void main() {
   testWidgets('Bottom CupertinoNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -1117,6 +1197,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar.bottom clips its contents mid-transition when scrolled',
     (WidgetTester tester) async {
+      setWindowToPortrait(tester);
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? navigator) {
@@ -1232,7 +1313,127 @@ void main() {
     },
   );
 
+  testWidgets(
+    'CupertinoSliverNavigationBar searchable-to-searchable transition clips its contents mid-transition when scrolled',
+    (WidgetTester tester) async {
+      setWindowToPortrait(tester);
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? navigator) {
+            return navigator!;
+          },
+          home: const Placeholder(),
+        ),
+      );
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 1',
+              builder:
+                  (BuildContext context) =>
+                      scaffoldForNavBar(
+                        const CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            suffixMode: OverlayVisibilityMode.always,
+                            suffixIcon: Icon(CupertinoIcons.mic_solid),
+                          ),
+                        ),
+                      )!,
+            ),
+          );
+
+      await tester.pumpAndSettle();
+
+      final TestGesture scrollGesture1 = await tester.startGesture(
+        tester.getCenter(find.byType(CustomScrollView)),
+      );
+      await scrollGesture1.moveBy(const Offset(0, -300));
+      await scrollGesture1.up();
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsOneWidget);
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 2',
+              builder:
+                  (BuildContext context) =>
+                      scaffoldForNavBar(
+                        const CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            suffixMode: OverlayVisibilityMode.always,
+                            suffixIcon: Icon(CupertinoIcons.mic_solid),
+                          ),
+                        ),
+                      )!,
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(4));
+      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(4));
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('nav_bar_transition.search_to_search.bottom.png'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsOneWidget);
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 3',
+              builder:
+                  (BuildContext context) =>
+                      scaffoldForNavBar(
+                        const CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            suffixMode: OverlayVisibilityMode.always,
+                            suffixIcon: Icon(CupertinoIcons.mic_solid),
+                          ),
+                        ),
+                      )!,
+            ),
+          );
+
+      await tester.pumpAndSettle();
+
+      final TestGesture scrollGesture2 = await tester.startGesture(
+        tester.getCenter(find.byType(CustomScrollView)),
+      );
+      await scrollGesture2.moveBy(const Offset(0, -300));
+      await scrollGesture2.up();
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsOneWidget);
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(4));
+      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(4));
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('nav_bar_transition.search_to_search.top.png'),
+      );
+      await tester.pumpAndSettle();
+    },
+  );
+
   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1289,6 +1490,7 @@ void main() {
   testWidgets('Bottom large title and top back label transitions their font', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1397,6 +1599,7 @@ void main() {
   });
 
   testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1427,6 +1630,7 @@ void main() {
   testWidgets('Top large title fades in and slides in from the left in RTL', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1460,6 +1664,7 @@ void main() {
   ) async {
     const double horizontalPadding = 16.0; // _kNavBarEdgePadding
     const double height = 30.0;
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1503,7 +1708,7 @@ void main() {
     // The nav bar bottom is horizontally aligned to the large title.
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
+      moreOrLessEquals(largeTitleOffset.dx - horizontalPadding, epsilon: 0.01),
     );
   });
 
@@ -1581,6 +1786,7 @@ void main() {
   ) async {
     int bottomBuildTimes = 0;
     int topBuildTimes = 0;
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: CupertinoNavigationBar(
@@ -1735,5 +1941,32 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
     // Back to page 2.
     expect(find.text('Page 2'), findsOneWidget);
+  });
+
+  testWidgets('Back label is not clipped mid-transition', (WidgetTester tester) async {
+    const String label = 'backbackback';
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+      from: const CupertinoNavigationBar(),
+      to: const CupertinoNavigationBar(previousPageTitle: label),
+    );
+
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // The variant in transition and the static variant.
+    expect(find.text(label), findsNWidgets(2));
+
+    // At the end of the transition, the label in transition and the static
+    // label both have the same fully extended width.
+    expect(
+      tester.getTopRight(find.text(label).first).dx,
+      tester.getTopRight(find.text(label).last).dx,
+    );
+
+    // End the transition.
+    await tester.pumpAndSettle();
+    expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 }

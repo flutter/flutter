@@ -221,93 +221,96 @@ void main() {
   flutterJs.writeAsStringSync('(flutter.js content)');
 
   test('can parse baseHref', () {
-    expect(WebTemplate('<base href="/foo/111/">').getBaseHref(), 'foo/111');
-    expect(WebTemplate(htmlSample1).getBaseHref(), 'foo/222');
-    expect(WebTemplate(htmlSample2).getBaseHref(), ''); // Placeholder base href.
+    expect(WebTemplate.baseHref('<base href="/foo/111/">'), 'foo/111');
+    expect(WebTemplate.baseHref(htmlSample1), 'foo/222');
+    expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
   });
 
   test('handles missing baseHref', () {
-    expect(WebTemplate('').getBaseHref(), '');
-    expect(WebTemplate('<base>').getBaseHref(), '');
-    expect(WebTemplate(htmlSample3).getBaseHref(), '');
+    expect(WebTemplate.baseHref(''), '');
+    expect(WebTemplate.baseHref('<base>'), '');
+    expect(WebTemplate.baseHref(htmlSample3), '');
   });
 
   test('throws on invalid baseHref', () {
-    expect(() => WebTemplate('<base href>').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="">').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="foo/111">').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="foo/111/">').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="/foo/111">').getBaseHref(), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href>'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="">'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="foo/111">'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="foo/111/">'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="/foo/111">'), throwsToolExit());
   });
 
   test('applies substitutions', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSample2);
-    indexHtml.applySubstitutions(
-      baseHref: '/foo/333/',
-      serviceWorkerVersion: 'v123xyz',
-      flutterJsFile: flutterJs,
-    );
+    const WebTemplate indexHtml = WebTemplate(htmlSample2);
+
     expect(
-      indexHtml.content,
+      indexHtml.withSubstitutions(
+        baseHref: '/foo/333/',
+        serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+      ),
       htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
   });
 
   test('applies substitutions with legacy var version syntax', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
-    indexHtml.applySubstitutions(
-      baseHref: '/foo/333/',
-      serviceWorkerVersion: 'v123xyz',
-      flutterJsFile: flutterJs,
-    );
+    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
-      indexHtml.content,
+      indexHtml.withSubstitutions(
+        baseHref: '/foo/333/',
+        serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+      ),
       htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
   });
 
   test('applies substitutions to inline flutter.js bootstrap script', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
     expect(indexHtml.getWarnings(), isEmpty);
 
-    indexHtml.applySubstitutions(
-      baseHref: '/',
-      serviceWorkerVersion: '(service worker version)',
-      flutterJsFile: flutterJs,
-      buildConfig: '(build config)',
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: '(service worker version)',
+        flutterJsFile: flutterJs,
+        buildConfig: '(build config)',
+      ),
+      htmlSampleInlineFlutterJsBootstrapOutput,
     );
-    expect(indexHtml.content, htmlSampleInlineFlutterJsBootstrapOutput);
   });
 
   test('applies substitutions to full flutter_bootstrap.js replacement', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
     expect(indexHtml.getWarnings(), isEmpty);
 
-    indexHtml.applySubstitutions(
-      baseHref: '/',
-      serviceWorkerVersion: '(service worker version)',
-      flutterJsFile: flutterJs,
-      buildConfig: '(build config)',
-      flutterBootstrapJs: '(flutter bootstrap script)',
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: '(service worker version)',
+        flutterJsFile: flutterJs,
+        buildConfig: '(build config)',
+        flutterBootstrapJs: '(flutter bootstrap script)',
+      ),
+      htmlSampleFullFlutterBootstrapReplacementOutput,
     );
-    expect(indexHtml.content, htmlSampleFullFlutterBootstrapReplacementOutput);
   });
 
   test('re-parses after substitutions', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSample2);
-    expect(indexHtml.getBaseHref(), ''); // Placeholder base href.
+    const WebTemplate indexHtml = WebTemplate(htmlSample2);
+    expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
 
-    indexHtml.applySubstitutions(
+    final String substituted = indexHtml.withSubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
       flutterJsFile: flutterJs,
     );
     // The parsed base href should be updated after substitutions.
-    expect(indexHtml.getBaseHref(), 'foo/333');
+    expect(WebTemplate.baseHref(substituted), 'foo/333');
   });
 
   test('warns on legacy service worker patterns', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
     expect(warnings.length, 2);
 
@@ -316,7 +319,7 @@ void main() {
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
+    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
 
     expect(warnings.length, 1);

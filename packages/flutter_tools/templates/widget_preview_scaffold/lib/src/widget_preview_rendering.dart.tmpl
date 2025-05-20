@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, ValueListenable;
+import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -91,11 +91,10 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
           TextSpan(
             text: frame.location,
             style: linkTextStyle,
-            recognizer:
-                TapGestureRecognizer()
-                  ..onTap = () {
-                    // TODO(bkonyi): notify IDEs to navigate to the source location via DTD.
-                  },
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                // TODO(bkonyi): notify IDEs to navigate to the source location via DTD.
+              },
           ),
           TextSpan(text: ' ' * (longest - frame.location.length)),
           const TextSpan(text: '  '),
@@ -136,11 +135,10 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
             TextSpan(
               text: documentationUrl.toString(),
               style: linkTextStyle,
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap = () {
-                      launchUrl(documentationUrl);
-                    },
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  launchUrl(documentationUrl);
+                },
             ),
             style: style,
           ),
@@ -252,12 +250,37 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       },
     );
 
-    preview = _WidgetPreviewWrapper(
-      previewerConstraints: maxSizeConstraints,
-      child: SizedBox(
-        width: widget.preview.width,
-        height: widget.preview.height,
-        child: preview,
+    final Size? size = widget.preview.size;
+
+    // Add support for selecting only previewed widgets via the widget
+    // inspector.
+    preview = ValueListenableBuilder(
+      valueListenable:
+          WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
+      builder: (context, enableWidgetInspector, child) {
+        if (enableWidgetInspector) {
+          return WidgetInspector(
+            // TODO(bkonyi): wire up inspector controls for individual previews or
+            // the entire preview environment. This currently requires users to
+            // to enable widget selection via the Widget Inspector tool in DevTools.
+
+            // These buttons would be rendered on top of the previewed widget, so
+            // don't display them.
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: child!,
+          );
+        }
+        return child!;
+      },
+      child: _WidgetPreviewWrapper(
+        previewerConstraints: maxSizeConstraints,
+        child: SizedBox(
+          width: size?.width == double.infinity ? null : size?.width,
+          height: size?.height == double.infinity ? null : size?.height,
+          child: preview,
+        ),
       ),
     );
 
@@ -405,11 +428,11 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
     }
 
     var size = Size(
-      preview.width ?? mediaQueryData.size.width,
-      preview.height ?? mediaQueryData.size.height,
+      preview.size?.width ?? mediaQueryData.size.width,
+      preview.size?.height ?? mediaQueryData.size.height,
     );
 
-    if (preview.width != null || preview.height != null) {
+    if (preview.size != null) {
       mediaQueryData = mediaQueryData.copyWith(size: size);
     }
 
@@ -432,11 +455,8 @@ class WidgetPreviewerWindowConstraints extends InheritedWidget {
   final BoxConstraints constraints;
 
   static BoxConstraints getRootConstraints(BuildContext context) {
-    final result =
-        context
-            .dependOnInheritedWidgetOfExactType<
-              WidgetPreviewerWindowConstraints
-            >();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<WidgetPreviewerWindowConstraints>();
     assert(
       result != null,
       'No WidgetPreviewerWindowConstraints founds in context',
@@ -536,10 +556,9 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
       // the previewer. In this case, apply finite constraints (e.g., the
       // constraints for the root of the previewer). Otherwise, use the
       // widget's actual constraints.
-      _constraintOverride =
-          minInstrinsicHeight == 0
-              ? _previewerConstraints
-              : const BoxConstraints();
+      _constraintOverride = minInstrinsicHeight == 0
+          ? _previewerConstraints
+          : const BoxConstraints();
     }
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
@@ -598,6 +617,12 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  // Disable the injection of [WidgetInspector] into the widget tree built by
+  // [WidgetsApp]. [WidgetInspector] instances will be created for each
+  // individual preview so the widget inspector won't allow for users to select
+  // widgets that make up the widget preview scaffolding.
+  binding.debugExcludeRootWidgetInspector = true;
   // TODO(bkonyi): store somewhere.
   await WidgetPreviewScaffoldDtdServices().connect();
   runApp(WidgetPreviewScaffold(previews: previews));
@@ -677,18 +702,16 @@ class WidgetPreviewScaffold extends StatelessWidget {
                     IconButton(
                       onPressed: () => _toggleLayout(LayoutType.gridView),
                       icon: Icon(Icons.grid_on),
-                      color:
-                          selectedLayout == LayoutType.gridView
-                              ? Colors.blue
-                              : Colors.black,
+                      color: selectedLayout == LayoutType.gridView
+                          ? Colors.blue
+                          : Colors.black,
                     ),
                     IconButton(
                       onPressed: () => _toggleLayout(LayoutType.listView),
                       icon: Icon(Icons.view_list),
-                      color:
-                          selectedLayout == LayoutType.listView
-                              ? Colors.blue
-                              : Colors.black,
+                      color: selectedLayout == LayoutType.listView
+                          ? Colors.blue
+                          : Colors.black,
                     ),
                   ],
                 );

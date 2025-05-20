@@ -630,12 +630,12 @@ class SliderThemeData with Diagnosticable {
   /// Defaults to 6.0 pixels of gap between the active and inactive tracks.
   final double? trackGap;
 
-  /// Overrides the default value of [Slider.year2023].
+  /// Overrides the default value of [Slider.year2023] and [RangeSlider.year2023].
   ///
-  /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
+  /// When true, the [Slider] and [RangeSlider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
   ///
-  /// If this is set to false, the [Slider] will use the latest Material Design 3
+  /// If this is set to false, the [Slider] and [RangeSlider] will use the latest Material Design 3
   /// appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.

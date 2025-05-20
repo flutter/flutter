@@ -1464,6 +1464,30 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// In practice, the simplest way to deal with these notifications is to mix
 /// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
 /// for that mixin class for details.
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use the [KeepAlive] widget
+/// to preserve the state of individual list items in a [ListView] when they are
+/// scrolled out of view.
+///
+/// By default, [ListView.builder] only keeps the widgets currently visible in
+/// the viewport alive. When an item scrolls out of view, it may be disposed to
+/// free up resources. This can cause the state of [StatefulWidget]s to be lost
+/// if not explicitly preserved.
+///
+/// In this example, each item in the list is a [StatefulWidget] that maintains
+/// a counter. Tapping the "+" button increments the counter. To selectively
+/// preserve the state, each item is wrapped in a [KeepAlive] widget, with the
+/// keepAlive parameter set based on the item’s index:
+///
+/// - For even-indexed items, `keepAlive: true`, so their state is preserved
+///   even when scrolled off-screen.
+/// - For odd-indexed items, `keepAlive: false`, so their state is discarded
+///   when they are no longer visible.
+///
+/// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
+/// {@end-tool}
+///
 class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   const KeepAlive({super.key, required this.keepAlive, required super.child});

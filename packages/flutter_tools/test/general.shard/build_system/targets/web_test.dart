@@ -21,10 +21,10 @@ import 'package:flutter_tools/src/web_template.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
+import '../../../src/throwing_pub.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
@@ -43,7 +43,7 @@ const List<String> _kDart2WasmLinuxArgs = <String>[
 ];
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late Environment environment;
   late FakeProcessManager processManager;
 
@@ -60,13 +60,13 @@ void main() {
   );
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: foo
 ''');
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'foo': 'foo/'},
@@ -125,7 +125,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -195,6 +195,41 @@ name: foo
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
         contains('"useLocalCanvasKit":true'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles includes serviceWorkerSettings in flutter_bootstrap.js by default',
+    () => testbed.run(() async {
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      environment.defines[kServiceWorkerStrategy] = 'none';
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+      expect(
+        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+        contains('_flutter.loader.load();'),
+      );
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js when environment specifies',
+    () => testbed.run(() async {
+      final Directory webResources = environment.projectDir.childDirectory('web');
+      webResources.childFile('index.html').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync();
+      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+      expect(
+        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
+        stringContainsInOrder(<String>[
+          '_flutter.loader.load({',
+          'serviceWorkerSettings',
+          'serviceWorkerVersion',
+        ]),
       );
     }),
   );
@@ -310,7 +345,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -336,7 +371,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -371,7 +406,7 @@ name: foo
         Platform: () => windows,
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -404,7 +439,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -428,7 +463,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -453,7 +488,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -486,7 +521,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );

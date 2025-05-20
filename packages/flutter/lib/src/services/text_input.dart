@@ -2736,7 +2736,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// `items` specifies the buttons that appear in the menu. The buttons that
   /// appear in the menu will be exactly as given and will not automatically
-  /// udpate based on the state of the input field. See
+  /// update based on the state of the input field. See
   /// [SystemContextMenu.getDefaultItems] for the default items for a given
   /// [EditableTextState].
   ///

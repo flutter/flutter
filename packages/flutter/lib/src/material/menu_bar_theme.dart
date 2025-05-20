@@ -14,6 +14,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // late Widget child;
+// late BuildContext context;
 
 /// A data class that [MenuBarTheme] uses to define the visual properties of
 /// [MenuBar] widgets.
@@ -23,7 +24,7 @@ import 'theme.dart';
 /// [MenuButtonThemeData] instead.
 ///
 /// Descendant widgets obtain the current [MenuBarThemeData] object using
-/// `MenuBarTheme.of(context)`.
+/// [MenuBarTheme.of].
 ///
 /// Typically, a [MenuBarThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.menuBarTheme]. Otherwise, [MenuTheme] can be used to
@@ -88,16 +89,7 @@ class MenuBarTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return MenuTheme(
-  ///     data: const MenuThemeData(
-  ///       style: MenuStyle(
-  ///         backgroundColor: WidgetStatePropertyAll<Color?>(Colors.red),
-  ///       ),
-  ///     ),
-  ///     child: child,
-  ///   );
-  /// }
+  /// MenuBarThemeData theme = MenuBarTheme.of(context);
   /// ```
   static MenuBarThemeData of(BuildContext context) {
     final MenuBarTheme? menuBarTheme = context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();

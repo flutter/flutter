@@ -1708,6 +1708,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
+    this.drawerBarrierDismissible = true,
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
@@ -1735,6 +1736,14 @@ class Scaffold extends StatefulWidget {
   ///  * [extendBodyBehindAppBar], which extends the height of the body
   ///    to the top of the scaffold.
   final bool extendBody;
+
+  /// Whether the drawer can be dismissed by tapping on the barrier.
+  ///
+  /// If false, and a [drawer] is specified, then the barrier behind the drawer
+  /// will not respond to a tap event and thus remains open.
+  ///
+  /// Defaults to true, in which case the drawer will close upon the user tapping on the barrier.
+  final bool drawerBarrierDismissible;
 
   /// If true, and an [appBar] is specified, then the height of the [body] is
   /// extended to include the height of the app bar and the top of the body
@@ -2867,6 +2876,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
           isDrawerOpen: _endDrawerOpened.value,
+          drawerBarrierDismissible: widget.drawerBarrierDismissible,
           child: widget.endDrawer!,
         ),
         _ScaffoldSlot.endDrawer,
@@ -2893,6 +2903,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           edgeDragWidth: widget.drawerEdgeDragWidth,
           enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
           isDrawerOpen: _drawerOpened.value,
+          drawerBarrierDismissible: widget.drawerBarrierDismissible,
           child: widget.drawer!,
         ),
         _ScaffoldSlot.drawer,
@@ -3273,6 +3284,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   void dispose() {
+    widget.animationController.removeStatusListener(_handleStatusChange);
     widget.onDispose?.call();
     super.dispose();
   }

@@ -1741,6 +1741,7 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo result = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertNotNull(result);
     assertEquals(result.getChildCount(), 1);
+    verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     assertEquals(result.getClassName(), "android.view.View");
   }
 

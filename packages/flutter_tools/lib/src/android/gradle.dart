@@ -33,6 +33,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'gradle_utils.dart' as gradle;
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -136,7 +137,7 @@ const String androidX86DeprecationWarning =
 
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
-/// For example, when [splitPerAbi] is true, multiple APKs are created.
+/// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
@@ -286,11 +287,25 @@ class AndroidGradleBuilder implements AndroidBuilder {
     _OutputParser? outputParser,
   }) async {
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
+    final String? agpVersion = gradle.getAgpVersion(
+      project.android.hostAppGradleRoot,
+      globals.logger,
+    );
     if (usesAndroidX) {
-      _analytics.send(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle'));
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: 'app-using-android-x',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
     } else if (!usesAndroidX) {
       _analytics.send(
-        Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'),
+        Event.flutterBuildInfo(
+          label: 'app-not-using-android-x',
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
       );
 
       _logger.printStatus(
@@ -394,7 +409,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
             if (exitCode == 0) {
               final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
               _analytics.send(
-                Event.flutterBuildInfo(label: successEventLabel, buildType: 'gradle'),
+                Event.flutterBuildInfo(
+                  label: successEventLabel,
+                  buildType: 'gradle',
+                  settings: 'androidGradlePluginVersion: $agpVersion',
+                ),
               );
               return exitCode;
             }
@@ -403,7 +422,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
         }
       }
       final String usageLabel = 'gradle-${detectedGradleError!.eventLabel}-failure';
-      _analytics.send(Event.flutterBuildInfo(label: usageLabel, buildType: 'gradle'));
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: usageLabel,
+          buildType: 'gradle',
+          settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
     }
 
     return exitCode;
@@ -752,10 +777,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
   /// Builds AAR and POM files.
   ///
-  /// * [project] is typically [FlutterProject.current()].
+  /// * [project] is typically [FlutterProject.current].
   /// * [androidBuildInfo] is the build configuration.
-  /// * [outputDir] is the destination of the artifacts,
-  /// * [buildNumber] is the build number of the output aar,
+  /// * [outputDirectory] is the destination of the artifacts.
+  /// * [buildNumber] is the build number of the output aar.
   Future<void> buildGradleAar({
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
@@ -1066,7 +1091,7 @@ void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) 
   );
 }
 
-/// Returns [true] if the current app uses AndroidX.
+/// Returns `true` if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
 bool isAppUsingAndroidX(Directory androidDirectory) {
@@ -1272,9 +1297,9 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
 }
 
 /// Returns the local Maven repository for a local engine build.
-/// For example, if the engine is built locally at <home>/engine/src/out/android_release_unopt
+/// For example, if the engine is built locally at `<home>/engine/src/out/android_release_unopt`.
 /// This method generates symlinks in the temp directory to the engine artifacts
-/// following the convention specified on https://maven.apache.org/pom.html#Repositories
+/// following the convention specified on https://maven.apache.org/pom.html#Repositories.
 Directory _getLocalEngineRepo({
   required String engineOutPath,
   required AndroidBuildInfo androidBuildInfo,

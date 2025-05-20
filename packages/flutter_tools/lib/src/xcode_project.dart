@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ios/mac.dart';
+library;
+
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/template.dart';
@@ -18,6 +21,7 @@ import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
+import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
@@ -139,7 +143,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// dependencies.
   Directory get flutterPluginSwiftPackageDirectory => ephemeralDirectory
       .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage');
+      .childDirectory(kFlutterGeneratedPluginSwiftPackageName);
 
   /// The Flutter generated Swift Package manifest (Package.swift) for plugin
   /// dependencies.
@@ -150,7 +154,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// project's build settings by checking the contents of the pbxproj.
   bool get flutterPluginSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+        xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
   /// True if this project doesn't have Swift Package Manager disabled in the
@@ -159,11 +163,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// feature is enabled.
   bool get usesSwiftPackageManager {
     if (!featureFlags.isSwiftPackageManagerEnabled) {
-      return false;
-    }
-
-    // The project can disable Swift Package Manager in its pubspec.yaml.
-    if (parent.manifest.disabledSwiftPackageManager) {
       return false;
     }
 
@@ -664,7 +663,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     await _updateGeneratedXcodeConfigIfNeeded();
   }
 
-  /// Check if one the [targets] of the project is a watchOS companion app target.
+  /// Check if one the [XcodeProjectInfo.targets] of the project is
+  /// a watchOS companion app target.
   Future<bool> containsWatchCompanion({
     required XcodeProjectInfo projectInfo,
     required BuildInfo buildInfo,
