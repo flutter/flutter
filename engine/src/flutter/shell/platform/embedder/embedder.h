@@ -263,36 +263,88 @@ typedef enum {
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSemanticsFlags).
   size_t struct_size;
+  /// The semantics node has the quality of either being "checked" or
+  /// "unchecked".
   bool has_checked_state;
+  /// Whether a semantics node is checked.
   bool is_checked;
+  /// Whether a semantics node is selected.
   bool is_selected;
+  /// Whether the semantic node represents a button.
   bool is_button;
+  /// Whether the semantic node represents a text field.
   bool is_text_field;
+  /// Whether the semantic node currently holds the user's focus.
   bool is_focused;
+  /// The semantics node has the quality of either being "enabled" or
+  /// "disabled".
   bool has_enabled_state;
+  /// Whether a semantic node that hasEnabledState is currently enabled.
   bool is_enabled;
+  /// Whether a semantic node is in a mutually exclusive group.
   bool is_in_mutually_exclusive_group;
+  /// Whether a semantic node is a header that divides content into sections.
   bool is_header;
+  /// Whether the value of the semantics node is obscured.
   bool is_obscured;
+  /// Whether the semantics node is the root of a subtree for which a route name
+  /// should be announced.
   bool scopes_route;
+  /// Whether the semantics node label is the name of a visually distinct route.
   bool names_route;
+  /// Whether the semantics node is considered hidden.
   bool is_hidden;
+  /// Whether the semantics node represents an image.
   bool is_image;
+  /// Whether the semantics node is a live region.
   bool is_live_region;
+  /// The semantics node has the quality of either being "on" or "off".
   bool has_toggled_state;
+  /// If true, the semantics node is "on". If false, the semantics node is
+  /// "off".
   bool is_toggled;
+  /// Whether the platform can scroll the semantics node when the user attempts
+  /// to move the accessibility focus to an offscreen child.
+  ///
+  /// For example, a `ListView` widget has implicit scrolling so that users can
+  /// easily move the accessibility focus to the next set of children. A
+  /// `PageView` widget does not have implicit scrolling, so that users don't
+  /// navigate to the next page when reaching the end of the current one.
   bool has_implicit_scrolling;
+  /// Whether the value of the semantics node is coming from a multi-line text
+  /// field.
+  ///
+  /// This is used for text fields to distinguish single-line text fields from
+  /// multi-line ones.
   bool is_multiline;
+  /// Whether the semantic node is read only.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagIsTextField flag is on.
   bool is_read_only;
+  /// Whether the semantic node can hold the user's focus.
   bool is_focusable;
+  /// Whether the semantics node represents a link.
   bool is_link;
+  /// Whether the semantics node represents a slider.
   bool is_slider;
+  /// Whether the semantics node represents a keyboard key.
   bool is_keyboard_key;
+  /// Whether the semantics node represents a tristate checkbox in mixed state.
   bool is_check_state_mixed;
+  /// The semantics node has the quality of either being "expanded" or
+  /// "collapsed".
   bool has_expanded_state;
+  /// Whether a semantic node that hasExpandedState is currently expanded.
   bool is_expanded;
+  /// The semantics node has the quality of either being "selected" or
+  /// "not selected".
   bool has_selected_state;
+  /// Whether a semantics node has the quality of being required.
   bool has_required_state;
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
   bool is_required;
 } FlutterSemanticsFlags;
 
