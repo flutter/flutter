@@ -297,8 +297,9 @@ class TextFormField extends FormField<String> {
                undoController: undoController,
                onAppPrivateCommand: onAppPrivateCommand,
                cursorOpacityAnimates: cursorOpacityAnimates,
-               selectionHeightStyle: selectionHeightStyle,
-               selectionWidthStyle: selectionWidthStyle,
+               selectionHeightStyle:
+                   selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+               selectionWidthStyle: selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
                dragStartBehavior: dragStartBehavior,
                contentInsertionConfiguration: contentInsertionConfiguration,
                clipBehavior: clipBehavior,
