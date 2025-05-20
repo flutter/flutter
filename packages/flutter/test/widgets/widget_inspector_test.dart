@@ -5081,13 +5081,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 ))!
                 as Map<String, Object?>;
 
-        expect(result.containsKey('flexFactor'), isFalse);
-        expect(result.containsKey('flexFit'), isFalse);
-
         final Map<String, Object?>? parentData = result['parentData'] as Map<String, Object?>?;
-        if (parentData != null) {
-          expect(parentData.containsKey('flexFactor'), isFalse);
-        }
+        expect(parentData, isNotNull);
+        expect(parentData!['flexFactor'], isNull);
+        expect(parentData['flexFit'], isNull);
         expect(tester.takeException(), isNull);
       });
 
