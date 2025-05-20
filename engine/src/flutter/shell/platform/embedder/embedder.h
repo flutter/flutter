@@ -174,6 +174,10 @@ typedef enum {
 /// The set of properties that may be associated with a semantics node.
 ///
 /// Must match the `SemanticsFlag` enum in semantics.dart.
+///
+/// @deprecated     Use `FlutterSemanticsFlags` instead. No new flags will
+///                 be added to `FlutterSemanticsFlag`. New flags will
+///                 continue to be added to `FlutterSemanticsFlags`.
 typedef enum {
   /// The semantics node has the quality of either being "checked" or
   /// "unchecked".
@@ -1600,6 +1604,10 @@ typedef struct {
   /// The unique identifier for this node.
   int32_t id;
   /// The set of semantics flags associated with this node.
+  ///
+  /// @deprecated     Use `flags2` instead. No new flags will
+  ///                 be added to `FlutterSemanticsFlag`. New flags will
+  ///                 continue to be added to `FlutterSemanticsFlags`.
   FlutterSemanticsFlag flags;
   /// The set of semantics actions applicable to this node.
   FlutterSemanticsAction actions;
