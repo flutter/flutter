@@ -256,7 +256,6 @@ class KernelSnapshot extends Target {
     final String dillPath = environment.buildDir.childFile(dillName).path;
 
     final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
-    _addFeatureFlagsToDartDefines(dartDefines);
     await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
 
     final CompilerOutput? output = await compiler.compile(
@@ -287,46 +286,6 @@ class KernelSnapshot extends Target {
     );
     if (output == null || output.errorCount != 0) {
       throw Exception();
-    }
-  }
-
-  void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
-    if (globals.platform.environment[kEnabledFeatureFlags] != null) {
-      throwToolExit(
-        '$kEnabledFeatureFlags is used by the framework and cannot be set in the environment.'
-        '\n'
-        'Use the "flutter config" command to enable feature flags.'
-      );
-    }
-    if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
-      throwToolExit(
-        '$kEnabledFeatureFlags is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}.'
-        '\n'
-        'Use the "flutter config" command to enable feature flags.'
-      );
-    }
-
-    final StringBuffer enabledFeatureFlags = StringBuffer();
-    for (final Feature feature in featureFlags.allFeatures) {
-      if (!featureFlags.isEnabled(feature)) {
-        continue;
-      }
-
-      final String? runtimeId = feature.runtimeId;
-      if (runtimeId == null) {
-        continue;
-      }
-
-      if (enabledFeatureFlags.isNotEmpty) {
-        enabledFeatureFlags.write(',');
-      }
-
-      enabledFeatureFlags.write(runtimeId);
-    }
-
-    if (enabledFeatureFlags.isNotEmpty) {
-      dartDefines.add('$kEnabledFeatureFlags=$enabledFeatureFlags');
     }
   }
 
