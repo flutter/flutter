@@ -9,53 +9,57 @@ absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
 }
 
 absl::StatusOr<Catalog> Catalog::Make(
-    std::vector<std::pair<std::string_view, std::string_view>> entries) {
+    std::vector<std::vector<std::string_view>> entries) {
   RE2::Set selector(RE2::Options(), RE2::Anchor::UNANCHORED);
   std::vector<std::unique_ptr<RE2>> matchers;
-  std::vector<std::string> selector_pieces;
+  std::vector<std::string> names;
 
-  for (const std::pair<std::string_view, std::string_view>& entry : entries) {
+  for (const std::vector<std::string_view>& entry : entries) {
+    if (entry.size() != 3) {
+      return absl::InvalidArgumentError("Entry doesn't have 3 items");
+    }
     std::string err;
-    int idx = selector.Add(entry.first, &err);
-    selector_pieces.push_back(std::string(entry.first));
+    names.push_back(std::string(entry[0]));
+    int idx = selector.Add(entry[1], &err);
     if (idx < 0) {
       return absl::InvalidArgumentError(
-          absl::StrCat("Unable to add set entry: ", entry.first, " ", err));
+          absl::StrCat("Unable to add set entry: ", entry[1], " ", err));
     }
-    matchers.push_back(std::make_unique<RE2>(entry.second));
+    matchers.push_back(std::make_unique<RE2>(entry[2]));
   }
 
   bool did_compile = selector.Compile();
   if (!did_compile) {
     return absl::OutOfRangeError("RE2::Set ran out of memory.");
   }
-  return Catalog(std::move(selector), std::move(matchers),
-                 std::move(selector_pieces));
+  return Catalog(std::move(selector), std::move(matchers), std::move(names));
 }
 
 Catalog::Catalog(RE2::Set selector,
                  std::vector<std::unique_ptr<RE2>> matchers,
-                 std::vector<std::string> selector_pieces)
+                 std::vector<std::string> names)
     : selector_(std::move(selector)),
       matchers_(std::move(matchers)),
-      selector_pieces_(std::move(selector_pieces)) {}
+      names_(std::move(names)) {}
 
-absl::StatusOr<bool> Catalog::HasMatch(std::string_view query) {
+absl::StatusOr<std::string> Catalog::FindMatch(std::string_view query) {
   std::vector<int> selector_results;
   if (!selector_.Match(query, &selector_results)) {
-    return false;
+    return absl::NotFoundError("Selector didn't match.");
   }
   if (selector_results.size() > 1) {
     std::stringstream ss;
     ss << "Multiple unique matches found:" << std::endl;
     for (int idx : selector_results) {
-      ss << "  " << selector_pieces_[idx] << std::endl;
+      ss << "  " << names_[idx] << std::endl;
     }
-    return absl::InternalError(ss.str());
-  }
-  if (selector_results.size() <= 0) {
-    return false;
+    return absl::InvalidArgumentError(ss.str());
   }
 
-  return RE2::FullMatch(query, *matchers_[selector_results[0]]);
+  if (selector_results.size() == 1 &&
+      RE2::FullMatch(query, *matchers_[selector_results[0]])) {
+    return names_[selector_results[0]];
+  } else {
+    return absl::NotFoundError("Selection didn't match.");
+  }
 }
