@@ -120,6 +120,7 @@ class TextLayout {
       );
       layoutContext.font =
           '${styleToString(styledBlock.textStyle.fontStyle!)} ${weightToString(styledBlock.textStyle.fontWeight!)} ${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
+          
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(

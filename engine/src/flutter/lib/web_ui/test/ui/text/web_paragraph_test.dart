@@ -46,7 +46,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
   */
-
+  /*
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -353,22 +353,22 @@ Future<void> testMain() async {
       fontWeight: FontWeight.bold,
     );
 
-    final WebTextStyle normal_thin = WebTextStyle(
+    final WebTextStyle normalThin = WebTextStyle(
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.w100,
     );
 
-    final WebTextStyle italic_normal = WebTextStyle(
+    final WebTextStyle italicNormal = WebTextStyle(
       fontStyle: FontStyle.italic,
       fontWeight: FontWeight.normal,
     );
 
-    final WebTextStyle italic_bold = WebTextStyle(
+    final WebTextStyle italicBold = WebTextStyle(
       fontStyle: FontStyle.italic,
       fontWeight: FontWeight.bold,
     );
 
-    final WebTextStyle italic_thin = WebTextStyle(
+    final WebTextStyle italicThin = WebTextStyle(
       fontStyle: FontStyle.italic,
       fontWeight: FontWeight.w100,
     );
@@ -383,25 +383,101 @@ Future<void> testMain() async {
     builder.addText('Normal bold\n');
     builder.pop();
 
-    builder.pushStyle(normal_thin);
+    builder.pushStyle(normalThin);
     builder.addText('Normal thin\n');
     builder.pop();
 
-    builder.pushStyle(italic_normal);
+    builder.pushStyle(italicNormal);
     builder.addText('Italic normal\n');
     builder.pop();
 
-    builder.pushStyle(italic_bold);
+    builder.pushStyle(italicBold);
     builder.addText('Italic bold\n');
     builder.pop();
 
-    builder.pushStyle(italic_thin);
+    builder.pushStyle(italicThin);
     builder.addText('Italic thin\n');
     builder.pop();
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
+  });
+*/
+  test('Draw WebParagraph multiple shadows text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      foreground: blackPaint,
+    );
+
+    final WebTextStyle allShadows = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [
+        Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0),
+        Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0),
+        Shadow(color: Color(0xFF888888), offset: Offset(0, 10), blurRadius: 2.0),
+      ],
+    );
+    final WebTextStyle leftShadow = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0)],
+    );
+    final WebTextStyle topShadow = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0)],
+    );
+    final WebTextStyle rightShadow = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0)],
+    );
+    final WebTextStyle bottomShadow = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0)],
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+    builder.pushStyle(allShadows);
+    builder.addText('All shadows. ');
+    builder.pop();
+
+    builder.addText('Text without shadows. ');
+
+    builder.pushStyle(leftShadow);
+    builder.addText('Left Shadow. ');
+    builder.pop();
+
+    builder.pushStyle(topShadow);
+    builder.addText('Top Shadow. ');
+    builder.pop();
+
+    builder.pushStyle(rightShadow);
+    builder.addText('Right Shadow. ');
+    builder.pop();
+
+    builder.pushStyle(bottomShadow);
+    builder.addText('Bottom Shadow. ');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(50, 50));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
   });

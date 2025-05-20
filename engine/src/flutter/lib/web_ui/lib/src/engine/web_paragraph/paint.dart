@@ -40,6 +40,41 @@ class TextPaint {
     }
   }
 
+  void paintLineShadowsOnCanvasKit(
+    CanvasKitCanvas canvas,
+    TextLayout layout,
+    TextLine line,
+    double x,
+    double y,
+  ) {
+    // TODO(jlavrova): We need to traverse clusters in the order of visual bidi runs
+    // (by line, then by reordered visual runs)
+    WebParagraphDebug.log(
+      'paintLineShadowsOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.formattingShift}->${line.bounds.width}x${line.bounds.height}',
+    );
+    for (final LineRun run in line.visualRuns) {
+      final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
+      final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
+      final int step = run.bidiLevel.isEven ? 1 : -1;
+      for (int i = start; i != end; i += step) {
+        final clusterText = layout.textClusters[i];
+        WebParagraphDebug.log(
+          '$i: ${line.formattingShift} + ${run.shiftInsideLine} + ${clusterText.shift}',
+        );
+        paintClusterShadows(
+          canvas,
+          clusterText,
+          ui.Offset(
+            line.formattingShift + run.shiftInsideLine + clusterText.shift,
+            line.bounds.top,
+          ),
+          ui.Offset(x, y),
+          run.bidiLevel.isEven,
+        );
+      }
+    }
+  }
+
   void paintLineOnCanvasKit(
     CanvasKitCanvas canvas,
     TextLayout layout,
@@ -76,6 +111,111 @@ class TextPaint {
         );
       }
     }
+  }
+
+  void paintClusterShadows(
+    CanvasKitCanvas canvas,
+    ExtendedTextCluster webTextCluster,
+    ui.Offset clusterOffset,
+    ui.Offset lineOffset,
+    bool ltr,
+  ) {
+    final WebTextStyle textStyle = webTextCluster.textStyle!;
+    if (textStyle.shadows == null || textStyle.shadows!.isEmpty) {
+      // No shadows
+      paintContext.shadowColor = '';
+      paintContext.shadowBlur = 0;
+      paintContext.shadowOffsetX = 0;
+      paintContext.shadowOffsetY = 0;
+      return;
+    }
+
+    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
+      webTextCluster.cluster!.begin,
+      webTextCluster.cluster!.end,
+    );
+
+    // Define the text cluster bounds
+    final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
+    final ui.Rect zeroRect = ui.Rect.fromLTWH(
+      pos,
+      0,
+      webTextCluster.bounds.width,
+      rects.first.height,
+    );
+    final ui.Rect sourceRect = zeroRect;
+
+    // We shift the target rect to the correct x position inside the line and
+    // the correct y position of the line itself
+    // (and then to the paragraph.paint x and y)
+
+    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
+    final double shift = left - left.floorToDouble();
+    // TODO(jlavrova): Make translation in a single operation so it's actually an integer
+    final ui.Rect targetRect = zeroRect
+        .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
+        .translate(lineOffset.dx, lineOffset.dy)
+        .translate(-shift, 0);
+
+    final String text = paragraph.text!.substring(
+      webTextCluster.textRange.start,
+      webTextCluster.textRange.end,
+    );
+
+    paintContext.fillStyle = textStyle.foreground?.color.toCssString();
+
+    ui.Rect shadowSourceRect = sourceRect;
+    ui.Rect shadowTargetRect = targetRect;
+    WebParagraphDebug.log('source: $shadowSourceRect target: $shadowTargetRect');
+
+    for (final ui.Shadow shadow in textStyle.shadows!) {
+      paintContext.shadowColor = shadow.color.toCssString();
+      paintContext.shadowBlur = shadow.blurRadius;
+      paintContext.shadowOffsetX = shadow.offset.dx;
+      paintContext.shadowOffsetY = shadow.offset.dy;
+      WebParagraphDebug.log(
+        'Shadow: x=${shadow.offset.dx} y=${shadow.offset.dy} blur=${shadow.blurRadius} color=${shadow.color.toCssString()}',
+      );
+
+      // We fill the text cluster into a rectange [0,0,w,h]
+      // but we need to shift the y coordinate by the font ascent
+      // becase the text is drawn at the ascent, not at 0
+      paintContext.fillTextCluster(
+        webTextCluster.cluster!,
+        /*left:*/ 0,
+        /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
+        /*ignore the text cluster shift from the text run*/ {
+          'x': (paragraph.getLayout().isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
+          'y': 100,
+        },
+      );
+    }
+    WebParagraphDebug.log('paintClusterShadows1: $shadowSourceRect $shadowTargetRect');
+    shadowSourceRect = shadowSourceRect.inflate(100);
+    shadowSourceRect = shadowSourceRect.translate(100, 100);
+    shadowTargetRect = shadowTargetRect.inflate(100);
+    //shadowTargetRect = shadowTargetRect.translate(-100, -100);
+    WebParagraphDebug.log('paintClusterShadows2: $shadowSourceRect $shadowTargetRect');
+
+    final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
+
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    canvas.drawImageRect(
+      ckImage,
+      shadowSourceRect,
+      shadowTargetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+
+    // Clean the shadow context
+    paintContext.shadowColor = '';
+    paintContext.shadowBlur = 0;
+    paintContext.shadowOffsetX = 0;
+    paintContext.shadowOffsetY = 0;
   }
 
   void paintCluster(
@@ -141,6 +281,7 @@ class TextPaint {
     );
 
     paintContext.fillStyle = textStyle.foreground?.color.toCssString();
+
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent
     // becase the text is drawn at the ascent, not at 0
@@ -149,11 +290,10 @@ class TextPaint {
       /*left:*/ 0,
       /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
       /*ignore the text cluster shift from the text run*/ {
-        'x': paragraph.getLayout().isDefaultLtr ? 0 : webTextCluster.advance.width,
+        'x': (paragraph.getLayout().isDefaultLtr ? 0 : webTextCluster.advance.width),
         'y': 0,
       },
     );
-
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);

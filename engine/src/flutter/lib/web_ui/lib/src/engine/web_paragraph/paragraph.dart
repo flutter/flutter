@@ -24,6 +24,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.FontWeight? fontWeight,
     ui.Paint? foreground,
     ui.Paint? background,
+    List<ui.Shadow>? shadows,
   }) : _defaultTextStyle = WebTextStyle(
          fontFamily: fontFamily,
          fontSize: fontSize,
@@ -31,6 +32,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          fontWeight: fontWeight,
          foreground: foreground,
          background: background,
+         shadows: shadows,
        ),
        _textDirection = textDirection ?? ui.TextDirection.ltr,
        _textAlign = textAlign ?? ui.TextAlign.start;
@@ -96,6 +98,7 @@ class WebTextStyle implements ui.TextStyle {
     ui.FontWeight? fontWeight,
     ui.Paint? foreground,
     ui.Paint? background,
+    List<ui.Shadow>? shadows,
   }) {
     return WebTextStyle._(
       originalFontFamily: fontFamily ?? 'Arial',
@@ -104,6 +107,7 @@ class WebTextStyle implements ui.TextStyle {
       fontWeight: fontWeight ?? ui.FontWeight.normal,
       foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
       background: background, // ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
+      shadows: shadows,
     );
   }
 
@@ -114,6 +118,7 @@ class WebTextStyle implements ui.TextStyle {
     required this.fontWeight,
     required this.foreground,
     required this.background,
+    required this.shadows,
   });
 
   final String? originalFontFamily;
@@ -122,6 +127,7 @@ class WebTextStyle implements ui.TextStyle {
   final ui.FontWeight? fontWeight;
   final ui.Paint? foreground;
   final ui.Paint? background;
+  final List<ui.Shadow>? shadows;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -135,6 +141,7 @@ class WebTextStyle implements ui.TextStyle {
       fontWeight: other.fontWeight ?? fontWeight,
       foreground: other.foreground ?? foreground,
       background: other.background ?? background,
+      shadows: other.shadows ?? shadows,
     );
   }
 
@@ -149,12 +156,21 @@ class WebTextStyle implements ui.TextStyle {
         other.fontStyle == fontStyle &&
         other.fontWeight == fontWeight &&
         other.foreground == foreground &&
-        other.background == background;
+        other.background == background &&
+        other.shadows == shadows;
   }
 
   @override
   int get hashCode {
-    return Object.hash(originalFontFamily, fontSize, fontStyle, fontWeight, foreground, background);
+    return Object.hash(
+      originalFontFamily,
+      fontSize,
+      fontStyle,
+      fontWeight,
+      foreground,
+      background,
+      shadows,
+    );
   }
 
   @override
@@ -168,9 +184,15 @@ class WebTextStyle implements ui.TextStyle {
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
           'fontStyle: ${fontStyle != null ? fontStyle.toString() : ""} '
           'fontWeight: ${fontWeight != null ? fontWeight.toString() : ""} '
-          'foreground: ${foreground != null ? foreground.toString() : ""}'
-          'background: ${background != null ? background.toString() : ""}'
+          'foreground: ${foreground != null ? foreground.toString() : ""} '
+          'background: ${background != null ? background.toString() : ""} '
           ')';
+      if (shadows != null && shadows!.isNotEmpty) {
+        result += 'shadows(${shadows!.length}) ';
+        for (final ui.Shadow shadow in shadows!) {
+          result += '[${shadow.color} ${shadow.blurRadius} ${shadow.blurSigma}]';
+        }
+      }
       return true;
     }());
     return result;
@@ -378,6 +400,7 @@ class WebParagraph implements ui.Paragraph {
 
   void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
+      _paint.paintLineShadowsOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
