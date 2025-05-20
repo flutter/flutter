@@ -669,6 +669,11 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override;
 
   // |Engine::Delegate|
+  void OnEngineResizeView(int64_t view_id,
+                          double width,
+                          double height) override;
+
+  // |Engine::Delegate|
   void OnEngineUpdateSemantics(
       int64_t view_id,
       SemanticsNodeUpdates update,

@@ -60,6 +60,7 @@ class FontManifestAssetResolver : public AssetResolver {
 
 class MockDelegate : public Engine::Delegate {
  public:
+  MOCK_METHOD(void, OnEngineResizeView, (int64_t, double, double), (override));
   MOCK_METHOD(void,
               OnEngineUpdateSemantics,
               (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
@@ -111,6 +112,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               Render,
               (int64_t, std::unique_ptr<flutter::LayerTree>, float),
               (override));
+  MOCK_METHOD(void, ResizeView, (int64_t, double, double), (override));
   MOCK_METHOD(void,
               UpdateSemantics,
               (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),

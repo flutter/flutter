@@ -497,6 +497,30 @@ class PlatformView {
   virtual void SetAccessibilityFeatures(int32_t flags);
 
   //----------------------------------------------------------------------------
+  /// @brief      This callback is invoked by the engine when the FlutterView
+  ///             has requested a change in platform-specific view dimensions,
+  ///             in physical pixels.
+  ///
+  ///             When a Flutter application calls `FlutterView.render` with a
+  ///             content size that differs from the existing view size, the
+  ///             new view size needs to be communicated to the underlying
+  ///             platform embedder so it can resize the Flutter view. The
+  ///             engine cannot access the underlying platform directly
+  ///             because of threading considerations.
+  ///
+  ///             Currently, this callback is only supported in embedders with
+  ///             a merged UI and Platform thread. View resizing is typically
+  ///             only safe to implement on the platform task runner.
+  ///
+  /// @see        `FlutterView.render`, `Engine::Delegate::OnEngineResizeView`
+  ///
+  /// @param[in]  view_id  The ID of the view that this update is for
+  /// @param[in]  width    The requested view width in physical pixels.
+  /// @param[in]  height   The requested view height in physical pixels.
+  ///
+  virtual void ResizeView(int64_t view_id, double width, double height);
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by the framework to tell the embedder to apply the
   ///             specified semantics node updates. The default implementation
   ///             of this method does nothing.

@@ -35,6 +35,8 @@ namespace flutter {
 
 class PlatformViewEmbedder final : public PlatformView {
  public:
+  using ResizeViewCallback =
+      std::function<void(int64_t view_id, double width, double height)>;
   using UpdateSemanticsCallback =
       std::function<void(int64_t view_id,
                          flutter::SemanticsNodeUpdates update,
@@ -50,6 +52,7 @@ class PlatformViewEmbedder final : public PlatformView {
       std::function<void(const ViewFocusChangeRequest&)>;
 
   struct PlatformDispatchTable {
+    ResizeViewCallback resize_view_callback;            // optional
     UpdateSemanticsCallback update_semantics_callback;  // optional
     PlatformMessageResponseCallback
         platform_message_response_callback;             // optional
@@ -102,6 +105,9 @@ class PlatformViewEmbedder final : public PlatformView {
 #endif
 
   ~PlatformViewEmbedder() override;
+
+  // |PlatformView|
+  void ResizeView(int64_t view_id, double width, double height) override;
 
   // |PlatformView|
   void UpdateSemantics(

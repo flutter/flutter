@@ -53,6 +53,7 @@ std::vector<const LayerTreeTask*> Sorted(
 
 class MockDelegate : public Engine::Delegate {
  public:
+  MOCK_METHOD(void, OnEngineResizeView, (int64_t, double, double), (override));
   MOCK_METHOD(void,
               OnEngineUpdateSemantics,
               (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),

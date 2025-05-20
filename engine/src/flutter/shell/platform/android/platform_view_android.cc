@@ -313,6 +313,13 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 }
 
 // |PlatformView|
+void PlatformViewAndroid::ResizeView(int64_t view_id,
+                                     double width,
+                                     double height) {
+  // TODO(mboetger): https://github.com/flutter/flutter/issues/149033
+}
+
+// |PlatformView|
 void PlatformViewAndroid::UpdateSemantics(
     int64_t view_id,
     flutter::SemanticsNodeUpdates update,

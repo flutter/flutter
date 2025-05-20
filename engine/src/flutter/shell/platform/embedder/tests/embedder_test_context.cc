@@ -161,6 +161,11 @@ void EmbedderTestContext::SetViewFocusChangeRequestCallback(
   view_focus_change_request_callback_ = callback;
 }
 
+void EmbedderTestContext::SetResizeViewCallback(
+    const ResizeViewCallback& callback) {
+  resize_view_callback_ = callback;
+}
+
 void EmbedderTestContext::PlatformMessageCallback(
     const FlutterPlatformMessage* message) {
   if (platform_message_callback_) {
@@ -266,6 +271,15 @@ EmbedderTestContext::GetViewFocusChangeRequestCallbackHook() {
     auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
     if (context->view_focus_change_request_callback_) {
       context->view_focus_change_request_callback_(request);
+    }
+  };
+}
+
+FlutterResizeViewCallback EmbedderTestContext::GetResizeViewCallbackHook() {
+  return [](int64_t view_id, double width, double height, void* user_data) {
+    auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
+    if (context->resize_view_callback_) {
+      context->resize_view_callback_(view_id, width, height);
     }
   };
 }

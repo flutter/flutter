@@ -135,6 +135,32 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   class Delegate {
    public:
+    //----------------------------------------------------------------------------
+    /// @brief      This callback is invoked by the engine when the FlutterView
+    ///             has requested a change in platform-specific view dimensions,
+    ///             in physical pixels.
+    ///
+    ///             When a Flutter application calls `FlutterView.render` with a
+    ///             content size that differs from the existing view size, the
+    ///             new view size needs to be communicated to the underlying
+    ///             platform embedder so it can resize the Flutter view. The
+    ///             engine cannot access the underlying platform directly
+    ///             because of threading considerations.
+    ///
+    ///             Currently, this callback is only supported in embedders with
+    ///             a merged UI and Platform thread. View resizing is typically
+    ///             only safe to implement on the platform task runner.
+    ///
+    /// @see        `FlutterView.render`, `PlatformView::ResizeView`
+    ///
+    /// @param[in]  view_id  The ID of the view that this update is for
+    /// @param[in]  width    The requested view width in physical pixels.
+    /// @param[in]  height   The requested view height in physical pixels.
+    ///
+    virtual void OnEngineResizeView(int64_t view_id,
+                                    double width,
+                                    double height) = 0;
+
     //--------------------------------------------------------------------------
     /// @brief      When the accessibility tree has been updated by the Flutter
     ///             application, this new information needs to be conveyed to
@@ -1011,6 +1037,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void Render(int64_t view_id,
               std::unique_ptr<flutter::LayerTree> layer_tree,
               float device_pixel_ratio) override;
+
+  // |RuntimeDelegate|
+  void ResizeView(int64_t view_id, double width, double height) override;
 
   // |RuntimeDelegate|
   void UpdateSemantics(int64_t view_id,
