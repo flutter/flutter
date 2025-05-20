@@ -111,6 +111,8 @@ group("flutter") {
         "//flutter/impeller/tessellator:tessellator_shared",
 
         # path_ops
+        "//flutter/tools/licenses_cpp",
+        "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
         "//flutter/tools/path_ops",
       ]
 
