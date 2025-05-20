@@ -938,6 +938,56 @@ label hint''');
     expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
     expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: ''), isNull);
   });
+
+  test(
+    'AriaLabelRepresentation splits label and hint into aria-label and aria-description/aria-describedby',
+    () async {
+      semantics().semanticsEnabled = true;
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        // Add a dummy child to ensure this is a container node
+        children: <SemanticsNodeUpdate>[tester.updateNode(id: 1)],
+      );
+      tester.apply();
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final element = node.element;
+      expect(element.getAttribute('aria-label'), 'Label');
+
+      final originalSupportsAriaDescription = AriaLabelRepresentation.supportsAriaDescription;
+
+      AriaLabelRepresentation.supportsAriaDescriptionForTest = true;
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        children: <SemanticsNodeUpdate>[tester.updateNode(id: 1)],
+      );
+      tester.apply();
+      expect(element.getAttribute('aria-description'), 'Hint');
+      expect(element.getAttribute('aria-describedby'), isNull);
+
+      AriaLabelRepresentation.supportsAriaDescriptionForTest = false;
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        children: <SemanticsNodeUpdate>[tester.updateNode(id: 1)],
+      );
+      tester.apply();
+      expect(element.getAttribute('aria-description'), isNull);
+      final ariaDescribedBy = element.getAttribute('aria-describedby');
+      expect(ariaDescribedBy, isNotNull);
+      final describedNode = domDocument.getElementById(ariaDescribedBy!);
+      expect(describedNode, isNotNull);
+      expect(describedNode!.text, 'Hint');
+
+      AriaLabelRepresentation.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+      semantics().semanticsEnabled = false;
+    },
+  );
 }
 
 void _testContainer() {

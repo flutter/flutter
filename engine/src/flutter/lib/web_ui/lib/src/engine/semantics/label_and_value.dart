@@ -106,57 +106,70 @@ abstract final class LabelRepresentationBehavior {
   }
 }
 
-/// Sets the label as `aria-label`.
+/// Handles ARIA labeling for semantics nodes.
 ///
-/// Example:
-///
-///     <flt-semantics aria-label="Hello, World!"></flt-semantics>
+/// - `aria-label` is set to the node's label.
+/// - `aria-description` is set to the node's hint if supported, otherwise
+///   falls back to `aria-describedby` with a hidden node containing the hint.
 final class AriaLabelRepresentation extends LabelRepresentationBehavior {
   AriaLabelRepresentation._(SemanticRole owner) : super(LabelRepresentation.ariaLabel, owner);
 
-  String? _previousLabel;
-
   @override
   void update(String label) {
-    if (label != _previousLabel) {
-      _previousLabel = label;
-      owner.setAttribute('aria-label', label);
-    }
-
-    // Always update hint because it may change independently
-    final String? hint = semanticsObject.hint;
-
-    owner.removeAttribute('aria-description');
-    owner.removeAttribute('aria-describedby');
-
-    if (hint != null && hint.trim().isNotEmpty) {
-      if (supportsAriaDescription) {
-        owner.setAttribute('aria-description', hint);
-      } else {
-        final String id = _injectDescribedByNode(hint);
-        owner.setAttribute('aria-describedby', id);
-      }
-    }
+    _updateLabel(label);
+    _updateHintDescription(semanticsObject.hint);
   }
 
   @override
   void cleanUp() {
-    // 🔧 Remove ARIA attributes from the role's DOM element
     owner.removeAttribute('aria-label');
     owner.removeAttribute('aria-description');
     owner.removeAttribute('aria-describedby');
-
-    // 🧹 Remove the injected <div> used for aria-describedby (if it exists)
     final String hintId = 'hint-${semanticsObject.id}';
     domDocument.getElementById(hintId)?.remove();
   }
 
-  // ARIA label does not introduce extra DOM elements, so focus should go to the
-  // semantic node's host element.
   @override
   DomElement get focusTarget => owner.element;
 
-  /// Whether the current browser supports the `aria-description` attribute.
+  String? _previousLabel;
+
+  void _updateLabel(String label) {
+    if (label != _previousLabel) {
+      _previousLabel = label;
+      owner.setAttribute('aria-label', label);
+    }
+  }
+
+  void _updateHintDescription(String? hint) {
+    owner.removeAttribute('aria-description');
+    owner.removeAttribute('aria-describedby');
+    if (hint != null && hint.trim().isNotEmpty) {
+      _setAriaDescriptionOrDescribedBy(hint);
+    }
+  }
+
+  void _setAriaDescriptionOrDescribedBy(String hint) {
+    if (supportsAriaDescription) {
+      owner.setAttribute('aria-description', hint);
+    } else {
+      final String id = _injectDescribedByNode(hint);
+      owner.setAttribute('aria-describedby', id);
+    }
+  }
+
+  String _injectDescribedByNode(String hint) {
+    final String id = 'hint-${semanticsObject.id}';
+    domDocument.getElementById(id)?.remove();
+    final DomElement describedNode =
+        domDocument.createElement('div')
+          ..id = id
+          ..text = hint
+          ..style.display = 'none';
+    domDocument.body?.append(describedNode);
+    return id;
+  }
+
   static bool? _supportsAriaDescription;
 
   static bool get supportsAriaDescription {
@@ -166,17 +179,16 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
     return _supportsAriaDescription!;
   }
 
-  /// Checks if the current browser supports the aria-description attribute.
-  ///
-  /// Chrome and Edge have supported it since 2020, so we consider them fully supported.
-  /// Safari and Firefox require version checks.
+  @visibleForTesting
+  static set supportsAriaDescriptionForTest(bool? value) {
+    _supportsAriaDescription = value;
+  }
+
   static bool _checkAriaDescriptionSupport() {
     if (isChromium || isEdge) {
       return true;
     }
-
     if (isSafari) {
-      // Safari 17.4+ supports aria-description
       final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
       final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
       if (match != null) {
@@ -186,9 +198,7 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
       }
       return false;
     }
-
     if (isFirefox) {
-      // Firefox 119+ supports aria-description
       final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
       final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
       if (match != null) {
@@ -197,30 +207,7 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
       }
       return false;
     }
-
     return false;
-  }
-
-  /// Allows tests to override the `supportsAriaDescription` value.
-  @visibleForTesting
-  static set supportsAriaDescriptionForTest(bool? value) {
-    _supportsAriaDescription = value;
-  }
-
-  String _injectDescribedByNode(String hint) {
-    final String id = 'hint-${semanticsObject.id}';
-
-    // Remove old node if it exists
-    domDocument.getElementById(id)?.remove();
-
-    final DomElement describedNode =
-        domDocument.createElement('div')
-          ..id = id
-          ..text = hint
-          ..style.display = 'none';
-
-    domDocument.body?.append(describedNode);
-    return id;
   }
 }
 
