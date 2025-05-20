@@ -1393,10 +1393,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
                 child: _BaselineAlignedStack(
                   placeholder: placeholder,
                   editableText: editableText,
-                  textBaseline:
-                      textStyle.textBaseline ??
-                      placeholderStyle.textBaseline ??
-                      TextBaseline.alphabetic,
+                  editableTextBaseline: textStyle.textBaseline ?? TextBaseline.alphabetic,
+                  placeholderBaseline: placeholderStyle.textBaseline ?? TextBaseline.alphabetic,
                 ),
               ),
             ),
@@ -1703,12 +1701,14 @@ enum _BaselineAlignedStackSlot { placeholder, editableText }
 class _BaselineAlignedStack
     extends SlottedMultiChildRenderObjectWidget<_BaselineAlignedStackSlot, RenderBox> {
   const _BaselineAlignedStack({
-    required this.textBaseline,
+    required this.editableTextBaseline,
+    required this.placeholderBaseline,
     required this.editableText,
     this.placeholder,
   });
 
-  final TextBaseline textBaseline;
+  final TextBaseline editableTextBaseline;
+  final TextBaseline placeholderBaseline;
   final Widget? placeholder;
   final Widget editableText;
 
@@ -1725,12 +1725,17 @@ class _BaselineAlignedStack
 
   @override
   _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
-    return _RenderBaselineAlignedStack(textBaseline: textBaseline);
+    return _RenderBaselineAlignedStack(
+      editableTextBaseline: editableTextBaseline,
+      placeholderBaseline: placeholderBaseline,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderBaselineAlignedStack renderObject) {
-    renderObject.textBaseline = textBaseline;
+    renderObject
+      ..editableTextBaseline = editableTextBaseline
+      ..placeholderBaseline = placeholderBaseline;
   }
 }
 
@@ -1738,15 +1743,29 @@ class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> 
 
 class _RenderBaselineAlignedStack extends RenderBox
     with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
-  _RenderBaselineAlignedStack({required TextBaseline textBaseline}) : _textBaseline = textBaseline;
+  _RenderBaselineAlignedStack({
+    required TextBaseline editableTextBaseline,
+    required TextBaseline placeholderBaseline,
+  }) : _editableTextBaseline = editableTextBaseline,
+       _placeholderBaseline = placeholderBaseline;
 
-  TextBaseline get textBaseline => _textBaseline;
-  TextBaseline _textBaseline;
-  set textBaseline(TextBaseline value) {
-    if (_textBaseline == value) {
+  TextBaseline get editableTextBaseline => _editableTextBaseline;
+  TextBaseline _editableTextBaseline;
+  set editableTextBaseline(TextBaseline value) {
+    if (_editableTextBaseline == value) {
       return;
     }
-    _textBaseline = value;
+    _editableTextBaseline = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline get placeholderBaseline => _placeholderBaseline;
+  TextBaseline _placeholderBaseline;
+  set placeholderBaseline(TextBaseline value) {
+    if (_placeholderBaseline == value) {
+      return;
+    }
+    _placeholderBaseline = value;
     markNeedsLayout();
   }
 
@@ -1783,8 +1802,11 @@ class _RenderBaselineAlignedStack extends RenderBox
       placeholderSize = ChildLayoutHelper.layoutChild(placeholder, constraints);
     }
 
-    final double editableTextBaselineValue = editableText.getDistanceToBaseline(textBaseline)!;
-    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(textBaseline);
+    final double editableTextBaselineValue =
+        editableText.getDistanceToBaseline(editableTextBaseline)!;
+    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
+      placeholderBaseline,
+    );
 
     size = _computeSize(
       constraints: constraints,
@@ -1827,16 +1849,15 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox editableText = _editableTextChild;
 
     final Size editableTextSize = ChildLayoutHelper.dryLayoutChild(editableText, constraints);
+    final double editableTextBaselineValue =
+        editableText.getDryBaseline(constraints, editableTextBaseline)!;
 
     Size? placeholderSize;
     double? placeholderBaselineValue;
     if (placeholder != null) {
       placeholderSize = ChildLayoutHelper.dryLayoutChild(placeholder, constraints);
-      placeholderBaselineValue = placeholder.getDryBaseline(constraints, textBaseline);
+      placeholderBaselineValue = placeholder.getDryBaseline(constraints, placeholderBaseline);
     }
-
-    final double editableTextBaselineValue =
-        editableText.getDryBaseline(constraints, textBaseline)!;
 
     return _computeSize(
       constraints: constraints,
