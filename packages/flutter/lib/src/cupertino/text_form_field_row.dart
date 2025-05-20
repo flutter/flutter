@@ -240,8 +240,10 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                  placeholderStyle: placeholderStyle,
                  contextMenuBuilder: contextMenuBuilder,
                  spellCheckConfiguration: spellCheckConfiguration,
-                 selectionHeightStyle: selectionHeightStyle,
-                 selectionWidthStyle: selectionWidthStyle,
+                 selectionHeightStyle:
+                     selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+                 selectionWidthStyle:
+                     selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
                ),
              ),
            );
