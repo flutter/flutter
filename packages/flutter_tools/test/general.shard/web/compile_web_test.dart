@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -29,16 +28,6 @@ void main() {
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
   late FlutterProject flutterProject;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(
-      isExplicitPackageDependenciesEnabled: true,
-      // Assumed to be true below.
-      isWebEnabled: true,
-    );
-  }
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -132,7 +121,6 @@ environement:
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );
@@ -186,7 +174,6 @@ environement:
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );
