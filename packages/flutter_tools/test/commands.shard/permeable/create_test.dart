@@ -4326,7 +4326,7 @@ void main() {
   );
 
   for (final String template in <String>['package_ffi', 'plugin_ffi']) {
-    testWithoutContext('$template error android language', () async {
+    testUsingContext('$template error android language', () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final List<String> args = <String>[
@@ -4348,7 +4348,7 @@ void main() {
       );
     });
 
-    testWithoutContext('$template error ios language', () async {
+    testUsingContext('$template error ios language', () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       final List<String> args = <String>[
