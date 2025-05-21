@@ -8,7 +8,7 @@
 // compared to RRect.
 //
 // The fragment position is first mapped to polar coordinates within the octant
-// (theta in [0, pi/4]). A base `retraction` is computed from the angle, so that
+// (theta in [0, pi/4]). A `baseRetraction` is computed from the angle, so that
 // the shape matches a RSuperellipse when `sigma` is near zero. Then, the
 // retraction is scaled based on the radial distance from the edge (`d`),
 // reducing its influence when far away (`retractionDepth`). This reflects the
@@ -53,10 +53,12 @@ uniform FragInfo {
   float scale;
 
   float octantOffset;
-  // Angular retraction factors for two octants.
-  // [peakRadian, n, peakGap, v0]
-  vec4 factorTop;
-  vec4 factorRight;
+  // Information to compute retraction for two octants respectively.
+  // [peakRadian, n, peakGap]
+  vec3 infoTop;
+  vec3 infoRight;
+  vec4 polyTop;
+  vec4 polyRight;
   // Retraction penetration depth.
   float retractionDepth;
 }
@@ -99,32 +101,31 @@ void main() {
   /**** Start of RSuperellipse math ****/
 
   bool useTop = (centered.y - frag_info.octantOffset) > centered.x;
-  vec4 angularFactors = useTop ? frag_info.factorTop : frag_info.factorRight;
+  vec3 angularInfo = useTop ? frag_info.infoTop : frag_info.infoRight;
   float theta =
       atan(useTop ? centered.x / (centered.y - frag_info.octantOffset)
                   : centered.y / (centered.x + frag_info.octantOffset));
 
-  float peakRadian = angularFactors[0];
-  float n = angularFactors[1];
-  float peakGap = angularFactors[2];
-  float v0 = angularFactors[3];
+  float peakRadian = angularInfo[0];
+  float n = angularInfo[1];
+  float peakGap = angularInfo[2];
 
-  float retraction;
+  float baseRetraction;
   if (theta < peakRadian) {
     float a = useTop ? frag_info.center.x : frag_info.center.y;
-    retraction = (1.0 - POW(1.0 + POW(tan(theta), n), -1.0 / n)) * a;
+    baseRetraction = (1.0 - POW(1.0 + POW(tan(theta), n), -1.0 / n)) * a;
   } else {
     float t = (theta - peakRadian) / (kPiOverFour - peakRadian);
     float tt = t * t;
     float ttt = tt * t;
-    // A polynomial that satisfies f(0) = 1, f'(0) = v0, f(1) = 0, f'(1) = 0
-    float retProg = ((v0 + 2.0) * ttt + (-2.0 * v0 - 3.0) * tt + v0 * t + 1.0);
+    float retProg = dot(vec4(ttt, tt, t, 1),
+                        useTop ? frag_info.polyTop : frag_info.polyRight);
     // Squaring `retProg` improves results empirically by boosting values > 1
     // and dampening values < 1.
-    retraction = retProg * retProg * peakGap;
+    baseRetraction = retProg * retProg * peakGap;
   }
   float depthProg = smoothstep(-frag_info.retractionDepth, 0., d);
-  d += retraction * depthProg;
+  d += baseRetraction * depthProg;
 
   /**** End of RSuperellipse math ****/
 

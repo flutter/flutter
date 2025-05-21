@@ -52,18 +52,30 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   RoundSuperellipseParam param =
       RoundSuperellipseParam::MakeBoundsRadius(rect, radius);
 
-  auto compute_factor = [radius](RoundSuperellipseParam::Octant& octant) {
+  frag_info.octantOffset = (rect.GetHeight() - rect.GetWidth()) / 2;
+
+  auto compute_info = [radius](RoundSuperellipseParam::Octant& octant) {
     Scalar n = octant.se_n;
     Point point_peak = Point(octant.se_a - radius, octant.se_a);
     Scalar peak_radian = std::atan2(point_peak.x, point_peak.y);
     Scalar peak_gap =
         (1 - pow(1 + pow(tan(peak_radian), n), -1 / n)) * octant.se_a;
-    Scalar v0 = radius / octant.se_a * 3;
-    return Vector4(peak_radian, n, peak_gap, v0);
+    return Vector3(peak_radian, n, peak_gap);
   };
-  frag_info.octantOffset = (rect.GetHeight() - rect.GetWidth()) / 2;
-  frag_info.factorTop = compute_factor(param.top_right.top);
-  frag_info.factorRight = compute_factor(param.top_right.right);
+  frag_info.infoTop = compute_info(param.top_right.top);
+  frag_info.infoRight = compute_info(param.top_right.right);
+
+  auto compute_poly = [radius](RoundSuperellipseParam::Octant& octant) {
+    // Imperical formula that decreases the initial slope as the a/r ratio
+    // increases.
+    Scalar v0 = radius / octant.se_a * 3;
+    // A polynomial that satisfies f(0) = 1, f'(0) = v0, f(1) = 0, f'(1) = 0
+    return Vector4(v0 + 2.0, -2.0 * v0 - 3.0, v0, 1.0);
+  };
+  frag_info.polyTop = compute_poly(param.top_right.top);
+  frag_info.polyRight = compute_poly(param.top_right.right);
+
+  // A polynomial that satisfies f(0) = 1, f'(0) = v0, f(1) = 0, f'(1) = 0
   frag_info.retractionDepth = radius;
 
   // Back to pass setup.
