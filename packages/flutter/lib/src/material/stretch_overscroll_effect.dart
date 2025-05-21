@@ -79,6 +79,7 @@ class _StretchOverscrollEffectShader {
       ui.FragmentProgram.fromAsset('shaders/stretch_overscroll.frag').then((ui.FragmentProgram program) {
         _program = program;
         _initialized = true;
+        notifyListeners();
       });
       _initCalled = true;
     }
