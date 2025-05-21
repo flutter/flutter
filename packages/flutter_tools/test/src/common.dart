@@ -377,7 +377,7 @@ bool analyticsTimingEventExists({
   final Map<String, String> lookup = <String, String>{
     'workflow': workflow,
     'variableName': variableName,
-    if (label != null) 'label': label,
+    'label': ?label,
   };
 
   for (final Event e in sentEvents) {

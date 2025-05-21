@@ -67,7 +67,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     final List<String> processArgs = <String>[
       ...toolArgs,
       ...?args.toolArgs,
-      if (program != null) program,
+      ?program,
       ...?args.args,
     ];
 

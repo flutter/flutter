@@ -167,8 +167,8 @@ class FlutterProject {
       final String? applicationId = android.applicationId;
       final String? group = android.group;
       candidates.addAll(<String>[
-        if (applicationId != null) applicationId,
-        if (group != null) group,
+        ?applicationId,
+        ?group,
       ]);
     }
     if (example.android.existsSync()) {
@@ -420,8 +420,8 @@ class FlutterProject {
     final String? buildNumber = manifest.buildNumber;
     final Map<String, String> versionFileJson = <String, String>{
       'app_name': manifest.appName,
-      if (buildName != null) 'version': buildName,
-      if (buildNumber != null) 'build_number': buildNumber,
+      'version': ?buildName,
+      'build_number': ?buildNumber,
       'package_name': manifest.appName,
     };
     return jsonEncode(versionFileJson);

@@ -677,8 +677,8 @@ class FlutterValidator extends DoctorValidator {
     final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
     final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
     return <ValidationMessage>[
-      if (flutterWarning != null) flutterWarning,
-      if (dartWarning != null) dartWarning,
+      ?flutterWarning,
+      ?dartWarning,
     ];
   }
 

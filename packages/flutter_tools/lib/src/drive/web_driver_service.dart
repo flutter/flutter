@@ -314,7 +314,7 @@ Map<String, dynamic> getDesiredCapabilities(
       async_io.LogType.performance: 'ALL',
     },
     'goog:chromeOptions': <String, dynamic>{
-      if (chromeBinary != null) 'binary': chromeBinary,
+      'binary': ?chromeBinary,
       'w3c': true,
       'args': <String>[
         '--bwsi',

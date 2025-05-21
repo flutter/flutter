@@ -203,7 +203,7 @@ abstract class FlutterVersion {
         '-n',
         '1',
         '--pretty=format:%ar',
-        if (revision != null) revision,
+        ?revision,
       ]).join(' '),
       globals.processUtils,
       flutterRoot,

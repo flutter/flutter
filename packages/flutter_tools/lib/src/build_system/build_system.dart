@@ -227,7 +227,7 @@ abstract class Target {
       'dependencies': <String>[for (final Target target in dependencies) target.name],
       'inputs': <String>[for (final File file in resolveInputs(environment).sources) file.path],
       'outputs': <String>[for (final File file in resolveOutputs(environment).sources) file.path],
-      if (key != null) 'buildKey': key,
+      'buildKey': ?key,
       'stamp': _findStampFile(environment).absolute.path,
     };
   }

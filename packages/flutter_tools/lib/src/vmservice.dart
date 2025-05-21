@@ -798,7 +798,7 @@ class FlutterVmService {
   }) async {
     final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, Object?>{if (isolateId != null) 'isolateId': isolateId, ...?args},
+      args: <String, Object?>{'isolateId': ?isolateId, ...?args},
     );
     return response?.json;
   }

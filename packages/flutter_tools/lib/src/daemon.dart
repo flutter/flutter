@@ -286,7 +286,7 @@ class DaemonConnection {
     final Map<String, Object?> data = <String, Object?>{
       'id': id,
       'method': method,
-      if (params != null) 'params': params,
+      'params': ?params,
     };
     _logger.printTrace('-> Sending to daemon, id = $id, method = $method');
     _daemonStreams.send(data, binary);
@@ -295,7 +295,7 @@ class DaemonConnection {
 
   /// Sends a response to the other end of the connection.
   void sendResponse(Object id, [Object? result]) {
-    _daemonStreams.send(<String, Object?>{'id': id, if (result != null) 'result': result});
+    _daemonStreams.send(<String, Object?>{'id': id, 'result': ?result});
   }
 
   /// Sends an error response to the other end of the connection.
@@ -307,7 +307,7 @@ class DaemonConnection {
   void sendEvent(String name, [Object? params, List<int>? binary]) {
     _daemonStreams.send(<String, Object?>{
       'event': name,
-      if (params != null) 'params': params,
+      'params': ?params,
     }, binary);
   }
 
