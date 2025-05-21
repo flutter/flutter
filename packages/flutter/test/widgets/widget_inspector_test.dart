@@ -5137,6 +5137,44 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         },
       );
 
+      testWidgets('getLayoutExplorerNode omits flexFactor when flex is null', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox(width: 14, height: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        final Element boxElement = tester.element(find.byType(ColoredBox).first);
+        service.setSelection(boxElement, group);
+
+        final String id = service.toId(boxElement, group)!;
+        final Map<String, Object?> result =
+            (await service.testExtension(
+                  WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+                  <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+                ))!
+                as Map<String, Object?>;
+
+        final Map<String, Object?>? parentData = result['parentData'] as Map<String, Object?>?;
+        expect(parentData, isNotNull);
+        expect(parentData!['flexFactor'], isNull);
+        expect(parentData['flexFit'], isNull);
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData', (
         WidgetTester tester,
       ) async {
@@ -5180,8 +5218,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         expect(result['flexFactor'], equals(1));
         expect(result['flexFit'], equals('loose'));
-
-        expect(result['parentData'], isNull);
       });
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderView', (
