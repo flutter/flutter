@@ -10,14 +10,12 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -25,12 +23,6 @@ void main() {
   late BufferLogger logger;
   late Artifacts artifacts;
   late FakeProcessManager processManager;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   setUpAll(() {
     Cache.disableLocking();
@@ -71,7 +63,6 @@ void main() {
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -144,7 +135,6 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
     },
   );
 
@@ -216,7 +206,6 @@ flutter:
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -293,7 +282,6 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -330,7 +318,6 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -379,7 +366,6 @@ format: true
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -418,7 +404,6 @@ format: false
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -479,7 +464,6 @@ untranslated-messages-file: lib/l10n/untranslated.json
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -530,7 +514,6 @@ format: true
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
   );
 
   testUsingContext(
@@ -564,7 +547,6 @@ format: true
       );
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -706,7 +688,6 @@ format: true
         expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
       },
       overrides: <Type, Generator>{
-        FeatureFlags: enableExplicitPackageDependencies,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },

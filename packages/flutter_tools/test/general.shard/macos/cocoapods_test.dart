@@ -34,12 +34,6 @@ void main() {
   late BufferLogger logger;
   late FakeAnalytics fakeAnalytics;
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   void pretendPodVersionFails() {
     fakeProcessManager.addCommand(
       const FakeCommand(command: <String>['pod', '--version'], exitCode: 1),
@@ -439,7 +433,6 @@ environement:
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: ThrowingPub.new,
       },
     );
