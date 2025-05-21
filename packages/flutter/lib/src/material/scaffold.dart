@@ -1697,6 +1697,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
     this.persistentFooterAlignment = AlignmentDirectional.centerEnd,
+    this.persistentFooterDecoration,
     this.drawer,
     this.onDrawerChanged,
     this.endDrawer,
@@ -1813,6 +1814,17 @@ class Scaffold extends StatefulWidget {
   ///
   /// Defaults to [AlignmentDirectional.centerEnd].
   final AlignmentDirectional persistentFooterAlignment;
+
+  /// Decoration for the container that holds the [persistentFooterButtons].
+  ///
+  /// By default, this container has a top border with a width of 1.0, created by
+  /// [Divider.createBorderSide].
+  ///
+  /// See also:
+  ///
+  ///  * [persistentFooterButtons], which defines the buttons to show in the footer.
+  ///  * [persistentFooterAlignment], which defines the alignment of the footer buttons.
+  final BoxDecoration? persistentFooterDecoration;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
@@ -3058,9 +3070,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       _addIfNonNull(
         children,
         Container(
-          decoration: BoxDecoration(
-            border: Border(top: Divider.createBorderSide(context, width: 1.0)),
-          ),
+          decoration:
+              widget.persistentFooterDecoration ??
+              BoxDecoration(border: Border(top: Divider.createBorderSide(context, width: 1.0))),
           child: SafeArea(
             top: false,
             child: IntrinsicHeight(
