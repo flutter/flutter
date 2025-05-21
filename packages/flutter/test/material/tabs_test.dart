@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -154,6 +154,23 @@ void main() {
     );
 
     expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
+  });
+
+  testWidgets('tab semanitcs role test', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/169175
+    final _TestImageProvider imageProvider2 = _TestImageProvider();
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBar(tabs: <Widget>[Tab(icon: Image(image: imageProvider2))]),
+        ),
+      ),
+    );
+    debugDumpSemanticsTree();
+
+    expect(find.byType(Tab), findsOneWidget);
   });
 
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
@@ -9134,4 +9151,23 @@ void main() {
       (focus: false, index: 2), // Third tab loses focus
     ]);
   });
+}
+
+class _TestImageProvider extends ImageProvider<Object> {
+  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
+    _streamCompleter = streamCompleter ?? OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  late ImageStreamCompleter _streamCompleter;
+
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+    return _streamCompleter;
+  }
 }

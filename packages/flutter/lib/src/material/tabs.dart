@@ -1961,18 +1961,13 @@ class _TabBarState extends State<TabBar> {
             widget.splashBorderRadius ??
             tabBarTheme.splashBorderRadius ??
             _defaults.splashBorderRadius,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: widget.indicatorWeight),
-          child: Stack(
-            children: <Widget>[
-              wrappedTabs[index],
-              Semantics(
-                role: SemanticsRole.tab,
-                selected: index == _currentIndex,
-                label:
-                    kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
-              ),
-            ],
+        child: Semantics(
+          role: SemanticsRole.tab,
+          selected: index == _currentIndex,
+          label: kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: widget.indicatorWeight),
+            child: wrappedTabs[index],
           ),
         ),
       );
