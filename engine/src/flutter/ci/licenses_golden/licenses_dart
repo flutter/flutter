@@ -1,4 +1,4 @@
-Signature: a9f3f768e280e179f4f8c4d77ded23b6
+Signature: 9df4f5ffbdfba668ec891657f9c07972
 
 ====================================================================================================
 LIBRARY: dart
@@ -4233,9 +4233,12 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/observatory/lib/src/elements/h
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/list_queue.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/lockers.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/so_writer.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/so_writer.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
@@ -4248,9 +4251,12 @@ FILE: ../../../flutter/third_party/dart/runtime/observatory/lib/src/elements/hel
 FILE: ../../../flutter/third_party/dart/runtime/platform/list_queue.h
 FILE: ../../../flutter/third_party/dart/runtime/platform/lockers.h
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
+FILE: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S
+FILE: ../../../flutter/third_party/dart/runtime/vm/so_writer.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/so_writer.h
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart
 ----------------------------------------------------------------------------------------------------
@@ -4870,7 +4876,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/a1db62a5dd14123acd48c5898d8c4e50d1e52a11
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/dc446df30f4e4b0c5c266043351201fcabfa8d15
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
