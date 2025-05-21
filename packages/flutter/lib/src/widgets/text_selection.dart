@@ -733,13 +733,15 @@ class TextSelectionOverlay {
       _dragStartSelection ??= _selection;
     }
 
-    _selectionOverlay.showMagnifier(
-      _buildMagnifier(
-        currentTextPosition: position,
-        globalGesturePosition: details.globalPosition,
-        renderEditable: renderObject,
-      ),
-    );
+    if (!_selectionOverlay._magnifierController.shown) {
+      _selectionOverlay.showMagnifier(
+        _buildMagnifier(
+          currentTextPosition: position,
+          globalGesturePosition: details.globalPosition,
+          renderEditable: renderObject,
+        ),
+      );
+    }
   }
 
   /// Given a handle position and drag position, returns the position of handle
@@ -892,13 +894,15 @@ class TextSelectionOverlay {
       _dragStartSelection ??= _selection;
     }
 
-    _selectionOverlay.showMagnifier(
-      _buildMagnifier(
-        currentTextPosition: position,
-        globalGesturePosition: details.globalPosition,
-        renderEditable: renderObject,
-      ),
-    );
+    if (!_selectionOverlay._magnifierController.shown) {
+      _selectionOverlay.showMagnifier(
+        _buildMagnifier(
+          currentTextPosition: position,
+          globalGesturePosition: details.globalPosition,
+          renderEditable: renderObject,
+        ),
+      );
+    }
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -999,15 +1003,19 @@ class TextSelectionOverlay {
     final bool draggingHandles =
         _selectionOverlay.isDraggingStartHandle || _selectionOverlay.isDraggingEndHandle;
     if (selectionControls is! TextSelectionHandleControls) {
-      _selectionOverlay.hideMagnifier();
-      if (!_selection.isCollapsed && !draggingHandles) {
-        _selectionOverlay.showToolbar();
+      if (!draggingHandles) {
+        _selectionOverlay.hideMagnifier();
+        if (!_selection.isCollapsed) {
+          _selectionOverlay.showToolbar();
+        }
       }
       return;
     }
-    _selectionOverlay.hideMagnifier();
-    if (!_selection.isCollapsed && !draggingHandles) {
-      _selectionOverlay.showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
+    if (!draggingHandles) {
+      _selectionOverlay.hideMagnifier();
+      if (!_selection.isCollapsed) {
+        _selectionOverlay.showToolbar(context: context, contextMenuBuilder: contextMenuBuilder);
+      }
     }
   }
 
@@ -1201,8 +1209,12 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  // Whether a drag is in progress on the start handle. This differs from
+  // `_isDraggingStartHandle` in that it is not blocked by `_canDragStartHandle`.
+  bool _startHandleDragInProgress = false;
+
   /// Whether the selection start handle is currently being dragged.
-  bool get isDraggingStartHandle => _isDraggingStartHandle;
+  bool get isDraggingStartHandle => _isDraggingStartHandle || _startHandleDragInProgress;
   bool _isDraggingStartHandle = false;
 
   // Whether the start handle can be dragged.
@@ -1235,6 +1247,7 @@ class SelectionOverlay {
       _isDraggingStartHandle = false;
       return;
     }
+    _startHandleDragInProgress = true;
     if (!_canDragStartHandle) {
       return;
     }
@@ -1282,6 +1295,7 @@ class SelectionOverlay {
     if (_handles == null) {
       return;
     }
+    _startHandleDragInProgress = false;
     if (!_canDragStartHandle) {
       return;
     }
@@ -1316,8 +1330,12 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  // Whether a drag is in progress on the start handle. This differs from
+  // `_isDraggingEndHandle` in that it is not blocked by `_canDragEndHandle`.
+  bool _endHandleDragInProgress = false;
+
   /// Whether the selection end handle is currently being dragged.
-  bool get isDraggingEndHandle => _isDraggingEndHandle;
+  bool get isDraggingEndHandle => _isDraggingEndHandle || _endHandleDragInProgress;
   bool _isDraggingEndHandle = false;
 
   // Whether the end handle can be dragged.
@@ -1350,6 +1368,7 @@ class SelectionOverlay {
       _isDraggingEndHandle = false;
       return;
     }
+    _endHandleDragInProgress = true;
     if (!_canDragEndHandle) {
       return;
     }
@@ -1397,6 +1416,7 @@ class SelectionOverlay {
     if (_handles == null) {
       return;
     }
+    _endHandleDragInProgress = false;
     if (!_canDragEndHandle) {
       return;
     }

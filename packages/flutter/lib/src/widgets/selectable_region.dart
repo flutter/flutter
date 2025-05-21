@@ -1126,13 +1126,13 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionOverlay != null &&
         (_selectionOverlay!.isDraggingStartHandle || _selectionOverlay!.isDraggingEndHandle);
     if (widget.selectionControls is! TextSelectionHandleControls) {
-      _selectionOverlay!.hideMagnifier();
       if (!draggingHandles) {
+        _selectionOverlay!.hideMagnifier();
         _selectionOverlay!.showToolbar();
       }
     } else {
-      _selectionOverlay!.hideMagnifier();
       if (!draggingHandles) {
+        _selectionOverlay!.hideMagnifier();
         _selectionOverlay!.showToolbar(
           context: context,
           contextMenuBuilder: (BuildContext context) {
