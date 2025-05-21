@@ -191,7 +191,9 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
-              builders: {TargetPlatform.android: ZoomPageTransitionsBuilder()},
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: ZoomPageTransitionsBuilder(),
+              },
             ),
           ),
           onGenerateRoute: (RouteSettings settings) {
@@ -275,7 +277,9 @@ void main() {
             theme: ThemeData(
               useMaterial3: false,
               pageTransitionsTheme: const PageTransitionsTheme(
-                builders: {TargetPlatform.android: ZoomPageTransitionsBuilder()},
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
               ),
             ),
             onGenerateRoute: (RouteSettings settings) {
@@ -324,7 +328,9 @@ void main() {
             debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
             theme: ThemeData(
               pageTransitionsTheme: const PageTransitionsTheme(
-                builders: {TargetPlatform.android: ZoomPageTransitionsBuilder()},
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
               ),
             ),
             onGenerateRoute: (RouteSettings settings) {
