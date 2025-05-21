@@ -1204,14 +1204,9 @@ class SelectableRegionState extends State<SelectableRegion>
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionStartHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
 
-    if (_selectionOverlay != null && !_selectionOverlay!.magnifierIsVisible) {
-      _selectionOverlay!.showMagnifier(
-        _buildInfoForMagnifier(
-          details.globalPosition,
-          _selectionDelegate.value.startSelectionPoint!,
-        ),
-      );
-    }
+    _selectionOverlay!.showMagnifier(
+      _buildInfoForMagnifier(details.globalPosition, _selectionDelegate.value.startSelectionPoint!),
+    );
     _updateSelectedContentIfNeeded();
   }
 
@@ -1237,11 +1232,9 @@ class SelectableRegionState extends State<SelectableRegion>
     final Matrix4 globalTransform = _selectable!.getTransformTo(null);
     _selectionEndHandleDragPosition = MatrixUtils.transformPoint(globalTransform, localPosition);
 
-    if (_selectionOverlay != null && !_selectionOverlay!.magnifierIsVisible) {
-      _selectionOverlay!.showMagnifier(
-        _buildInfoForMagnifier(details.globalPosition, _selectionDelegate.value.endSelectionPoint!),
-      );
-    }
+    _selectionOverlay!.showMagnifier(
+      _buildInfoForMagnifier(details.globalPosition, _selectionDelegate.value.endSelectionPoint!),
+    );
     _updateSelectedContentIfNeeded();
   }
 

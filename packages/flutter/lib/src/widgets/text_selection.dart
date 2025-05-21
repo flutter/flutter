@@ -733,15 +733,13 @@ class TextSelectionOverlay {
       _dragStartSelection ??= _selection;
     }
 
-    if (!_selectionOverlay._magnifierController.shown) {
-      _selectionOverlay.showMagnifier(
-        _buildMagnifier(
-          currentTextPosition: position,
-          globalGesturePosition: details.globalPosition,
-          renderEditable: renderObject,
-        ),
-      );
-    }
+    _selectionOverlay.showMagnifier(
+      _buildMagnifier(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ),
+    );
   }
 
   /// Given a handle position and drag position, returns the position of handle
@@ -894,15 +892,13 @@ class TextSelectionOverlay {
       _dragStartSelection ??= _selection;
     }
 
-    if (!_selectionOverlay._magnifierController.shown) {
-      _selectionOverlay.showMagnifier(
-        _buildMagnifier(
-          currentTextPosition: position,
-          globalGesturePosition: details.globalPosition,
-          renderEditable: renderObject,
-        ),
-      );
-    }
+    _selectionOverlay.showMagnifier(
+      _buildMagnifier(
+        currentTextPosition: position,
+        globalGesturePosition: details.globalPosition,
+        renderEditable: renderObject,
+      ),
+    );
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -1143,6 +1139,10 @@ class SelectionOverlay {
   /// [MagnifierController.shown].
   /// {@endtemplate}
   void showMagnifier(MagnifierInfo initialMagnifierInfo) {
+    // Do not show the magnifier if one already exists.
+    if (_magnifierController.overlayEntry != null) {
+      return;
+    }
     if (toolbarIsVisible) {
       hideToolbar();
     }
