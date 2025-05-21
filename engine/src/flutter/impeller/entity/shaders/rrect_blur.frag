@@ -6,6 +6,9 @@
 // post "Blurred rounded rectangles":
 // https://web.archive.org/web/20231103044404/https://raphlinus.github.io/graphics/2020/04/21/blurred-rounded-rects.html
 
+// NOTICE: Changes made to this file should be mirrored to
+// rsuperellipse_blur.frag, which is based on this algorithm.
+
 precision highp float;
 
 #include <impeller/gaussian.glsl>

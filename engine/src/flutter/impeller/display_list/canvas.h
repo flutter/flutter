@@ -22,6 +22,8 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/matrix.h"
@@ -32,6 +34,8 @@
 #include "impeller/typographer/text_frame.h"
 
 namespace impeller {
+
+class SolidRRectLikeBlurContents;
 
 struct BackdropData {
   size_t backdrop_count = 0;
@@ -279,6 +283,32 @@ class Canvas {
   bool EnsureFinalMipmapGeneration() const;
 
  private:
+  class RRectLikeBlurShape {
+   public:
+    virtual ~RRectLikeBlurShape() = default;
+    virtual std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() = 0;
+    virtual Geometry& BuildGeometry(Rect rect, Scalar radius) = 0;
+  };
+
+  class RRectBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundRectGeometry> geom_;  // optional stack allocation
+  };
+
+  class RSuperellipseBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundSuperellipseGeometry>
+        geom_;  // optional stack allocation
+  };
+
   ContentContext& renderer_;
   RenderTarget render_target_;
   const bool is_onscreen_;
@@ -368,6 +398,15 @@ class Canvas {
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  bool AttemptDrawBlurredRSuperellipse(const Rect& rect,
+                                       Size corner_radii,
+                                       const Paint& paint);
+
+  bool AttemptDrawBlurredRRectLike(const Rect& rect,
+                                   Size corner_radii,
+                                   const Paint& paint,
+                                   RRectLikeBlurShape& shape);
 
   /// For simple DrawImageRect calls, optimize any draws with a color filter
   /// into the corresponding atlas draw.
