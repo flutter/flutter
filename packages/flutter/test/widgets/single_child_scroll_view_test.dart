@@ -1120,6 +1120,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isFalse);
 
+    // ScrollViewKeyboardDismissBehavior.onScroll doesn't dismiss keyboard on programmatic scroll
+    await boilerplate(ScrollViewKeyboardDismissBehavior.onScroll);
+
+    finder = find.byType(TextField).last;
+    textField = tester.widget(finder);
+
+    final lastFocusNode = focusNodes.last;
+    lastFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+
     // ScrollViewKeyboardDismissBehavior.manual does no dismiss the keyboard
     await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
 

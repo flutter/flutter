@@ -119,6 +119,12 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// correction.
   factory ViewportOffset.zero() = _FixedViewportOffset.zero;
 
+  /// Whether the current offset change was due to programmatic scroll.
+  ///
+  /// The [isProgrammaticScroll] value turns true only when [moveTo] is
+  /// called.
+  bool isProgrammaticScroll = false;
+
   /// The number of pixels to offset the children in the opposite of the axis direction.
   ///
   /// For example, if the axis direction is down, then the pixel value
@@ -225,11 +231,15 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// like [ScrollPosition] handle it by adjusting [to] to prevent over or
   /// underscroll.
   Future<void> moveTo(double to, {Duration? duration, Curve? curve, bool? clamp}) {
+    isProgrammaticScroll = true;
     if (duration == null || duration == Duration.zero) {
       jumpTo(to);
+      isProgrammaticScroll = false;
       return Future<void>.value();
     } else {
-      return animateTo(to, duration: duration, curve: curve ?? Curves.ease);
+      final Future<void> future = animateTo(to, duration: duration, curve: curve ?? Curves.ease);
+      future.whenComplete(() => isProgrammaticScroll = false);
+      return future;
     }
   }
 

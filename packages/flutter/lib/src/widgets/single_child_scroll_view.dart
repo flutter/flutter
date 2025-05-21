@@ -299,7 +299,9 @@ class SingleChildScrollView extends StatelessWidget {
         child: scrollable,
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode currentScope = FocusScope.of(context);
-          if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+          if (!currentScope.hasPrimaryFocus &&
+              currentScope.hasFocus &&
+              !notification.programmatic) {
             FocusManager.instance.primaryFocus?.unfocus();
           }
           return false;
