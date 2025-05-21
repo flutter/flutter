@@ -693,7 +693,7 @@ void main() {
           child: Semantics(
             role: SemanticsRole.main,
             child: SizedBox(
-              child: Semantics(role: SemanticsRole.complementary, child: Text('some child')),
+              child: Semantics(role: SemanticsRole.complementary, child: const Text('some child')),
             ),
           ),
         ),
@@ -728,7 +728,7 @@ void main() {
           child: Semantics(
             role: SemanticsRole.complementary,
             child: SizedBox(
-              child: Semantics(role: SemanticsRole.contentInfo, child: Text('some child')),
+              child: Semantics(role: SemanticsRole.contentInfo, child: const Text('some child')),
             ),
           ),
         ),
@@ -762,7 +762,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Semantics(
             role: SemanticsRole.contentInfo,
-            child: SizedBox(child: Semantics(role: SemanticsRole.main, child: Text('some child'))),
+            child: SizedBox(child: Semantics(role: SemanticsRole.main, child: const Text('some child'))),
           ),
         ),
       );
