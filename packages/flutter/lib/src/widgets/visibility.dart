@@ -218,7 +218,7 @@ class Visibility extends StatelessWidget {
   /// true, then touch events will nonetheless be passed through.
   final bool maintainInteractivity;
 
-  /// Wether to allow the widget to receive focus when hidden.
+  /// Whether to allow the widget to receive focus when hidden. Only in effect if [visible] is false.
   ///
   /// Defaults to false.
   final bool maintainFocusability;
