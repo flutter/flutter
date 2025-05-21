@@ -53,10 +53,7 @@ void main() {
 
   testUsingContext(
     'does not throw if clang not present but no native assets present',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
@@ -81,7 +78,6 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager:
           () => FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(

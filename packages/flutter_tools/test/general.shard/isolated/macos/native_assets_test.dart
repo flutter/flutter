@@ -84,7 +84,6 @@ void main() {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
           ProcessManager:
               () => FakeProcessManager.list(<FakeCommand>[
                 if (flutterTester) ...<FakeCommand>[
@@ -371,7 +370,6 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager:
           () => FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(

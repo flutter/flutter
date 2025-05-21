@@ -178,7 +178,6 @@ void main() {
         },
         overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         },
       );
     });

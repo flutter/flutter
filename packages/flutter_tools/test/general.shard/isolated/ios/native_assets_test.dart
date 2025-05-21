@@ -52,7 +52,6 @@ void main() {
     testUsingContext(
       'build with assets $buildMode',
       overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         ProcessManager:
             () => FakeProcessManager.list(<FakeCommand>[
               const FakeCommand(

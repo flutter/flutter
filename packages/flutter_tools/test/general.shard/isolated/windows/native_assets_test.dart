@@ -72,10 +72,7 @@ void main() {
 
       testUsingContext(
         'build with assets $buildMode$testName',
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-          ProcessManager: () => FakeProcessManager.empty(),
-        },
+        overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
         () async {
           writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri =
@@ -165,7 +162,6 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager:
           () => FakeProcessManager.list(<FakeCommand>[
             FakeCommand(
