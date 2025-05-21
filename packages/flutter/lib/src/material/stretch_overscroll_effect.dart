@@ -35,18 +35,28 @@ class StretchOverscrollEffect extends StatefulWidget {
 }
 
 class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
+  ui.FragmentShader? _fragmentShader;
+
+  @override
+  void dispose() {
+    _fragmentShader?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_StretchOverscrollEffectShader._initialized) {
+      _fragmentShader?.dispose();
+      _fragmentShader = _StretchOverscrollEffectShader._program!.fragmentShader();
+
       final bool isShaderNeeded = widget.overscrollX != 0.0 || widget.overscrollY != 0.0;
-      final ui.FragmentShader shader = _StretchOverscrollEffectShader._program!.fragmentShader();
-      shader.setFloat(2, 1.0);
-      shader.setFloat(3, widget.overscrollX);
-      shader.setFloat(4, widget.overscrollY);
-      shader.setFloat(5, 0.7);
+      _fragmentShader!.setFloat(2, 1.0);
+      _fragmentShader!.setFloat(3, widget.overscrollX);
+      _fragmentShader!.setFloat(4, widget.overscrollY);
+      _fragmentShader!.setFloat(5, 0.7);
 
       return ImageFiltered(
-        imageFilter: ui.ImageFilter.shader(shader),
+        imageFilter: ui.ImageFilter.shader(_fragmentShader!),
         enabled: isShaderNeeded,
         // A nearly-transparent box is used to ensure the shader gets applied,
         // even when the child is visually transparent or has no paint operations.
@@ -57,11 +67,13 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
         _StretchOverscrollEffectShader.initializeShader();
       }
 
-      _StretchOverscrollEffectShader.addListener(
-        () => setState(() {
-          // Updates the widget state to use [ImageFiltered] after the fragment shader is loaded.
-        }),
-      );
+      _StretchOverscrollEffectShader.addListener(() {
+        if (mounted) {
+          setState(() {
+            // Updates the widget state to use [ImageFiltered] after the fragment shader is loaded.
+          });
+        }
+      });
     }
 
     return widget.child;
