@@ -114,6 +114,10 @@ abstract final class LabelRepresentationBehavior {
 final class AriaLabelRepresentation extends LabelRepresentationBehavior {
   AriaLabelRepresentation._(SemanticRole owner) : super(LabelRepresentation.ariaLabel, owner);
 
+  String? _previousLabel;
+  String? _describedById;
+  DomElement? _describedBySpan;
+
   @override
   void update(String label) {
     _updateLabel(label);
@@ -125,14 +129,15 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
     owner.removeAttribute('aria-label');
     owner.removeAttribute('aria-description');
     owner.removeAttribute('aria-describedby');
+    _describedBySpan?.remove();
+    _describedBySpan = null;
+    _describedById = null;
     final String hintId = 'hint-${semanticsObject.id}';
     domDocument.getElementById(hintId)?.remove();
   }
 
   @override
   DomElement get focusTarget => owner.element;
-
-  String? _previousLabel;
 
   void _updateLabel(String label) {
     if (label != _previousLabel) {
@@ -153,21 +158,22 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
     if (supportsAriaDescription) {
       owner.setAttribute('aria-description', hint);
     } else {
-      final String id = _injectDescribedByNode(hint);
+      final String id = _ensureDescribedBy(hint);
       owner.setAttribute('aria-describedby', id);
     }
   }
 
-  String _injectDescribedByNode(String hint) {
-    final String id = 'hint-${semanticsObject.id}';
-    domDocument.getElementById(id)?.remove();
-    final DomElement describedNode =
-        domDocument.createElement('div')
-          ..id = id
-          ..text = hint
-          ..style.display = 'none';
-    domDocument.body?.append(describedNode);
-    return id;
+  String _ensureDescribedBy(String hint) {
+    _describedById ??= 'flt-hint-${semanticsObject.id}';
+    _describedBySpan ??= domDocument.createElement('span');
+    _describedBySpan!.id = _describedById!;
+    _describedBySpan!.setAttribute('hidden', '');
+    _describedBySpan!.text = hint;
+    // Attach as a child of the semantics element, not document.body
+    if (_describedBySpan!.isConnected != true) {
+      owner.element.append(_describedBySpan!);
+    }
+    return _describedById!;
   }
 
   static bool? _supportsAriaDescription;
