@@ -106,113 +106,33 @@ abstract final class LabelRepresentationBehavior {
   }
 }
 
-/// Handles ARIA labeling for semantics nodes.
+/// Sets the label as `aria-label`.
 ///
-/// - `aria-label` is set to the node's label.
-/// - `aria-description` is set to the node's hint if supported, otherwise
-///   falls back to `aria-describedby` with a hidden node containing the hint.
+/// Example:
+///
+///     <flt-semantics aria-label="Hello, World!"></flt-semantics>
 final class AriaLabelRepresentation extends LabelRepresentationBehavior {
   AriaLabelRepresentation._(SemanticRole owner) : super(LabelRepresentation.ariaLabel, owner);
 
   String? _previousLabel;
-  String? _describedById;
-  DomElement? _describedBySpan;
 
   @override
   void update(String label) {
-    _updateLabel(label);
-    _updateHintDescription(semanticsObject.hint);
+    if (label == _previousLabel) {
+      return;
+    }
+    owner.setAttribute('aria-label', label);
   }
 
   @override
   void cleanUp() {
     owner.removeAttribute('aria-label');
-    owner.removeAttribute('aria-description');
-    owner.removeAttribute('aria-describedby');
-    _describedBySpan?.remove();
-    _describedBySpan = null;
-    _describedById = null;
-    final String hintId = 'hint-${semanticsObject.id}';
-    domDocument.getElementById(hintId)?.remove();
   }
 
+  // ARIA label does not introduce extra DOM elements, so focus should go to the
+  // semantic node's host element.
   @override
   DomElement get focusTarget => owner.element;
-
-  void _updateLabel(String label) {
-    if (label != _previousLabel) {
-      _previousLabel = label;
-      owner.setAttribute('aria-label', label);
-    }
-  }
-
-  void _updateHintDescription(String? hint) {
-    owner.removeAttribute('aria-description');
-    owner.removeAttribute('aria-describedby');
-    if (hint != null && hint.trim().isNotEmpty) {
-      _setAriaDescriptionOrDescribedBy(hint);
-    }
-  }
-
-  void _setAriaDescriptionOrDescribedBy(String hint) {
-    if (supportsAriaDescription) {
-      owner.setAttribute('aria-description', hint);
-    } else {
-      final String id = _ensureDescribedBy(hint);
-      owner.setAttribute('aria-describedby', id);
-    }
-  }
-
-  String _ensureDescribedBy(String hint) {
-    _describedById ??= 'flt-hint-${semanticsObject.id}';
-    _describedBySpan ??= domDocument.createElement('span');
-    _describedBySpan!.id = _describedById!;
-    _describedBySpan!.setAttribute('hidden', '');
-    _describedBySpan!.text = hint;
-    // Attach as a child of the semantics element, not document.body
-    if (_describedBySpan!.isConnected != true) {
-      owner.element.append(_describedBySpan!);
-    }
-    return _describedById!;
-  }
-
-  static bool? _supportsAriaDescription;
-
-  static bool get supportsAriaDescription {
-    _supportsAriaDescription ??= _checkAriaDescriptionSupport();
-    return _supportsAriaDescription!;
-  }
-
-  @visibleForTesting
-  static set supportsAriaDescriptionForTest(bool? value) {
-    _supportsAriaDescription = value;
-  }
-
-  static bool _checkAriaDescriptionSupport() {
-    if (isChromium || isEdge) {
-      return true;
-    }
-    if (isSafari) {
-      final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
-      final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
-      if (match != null) {
-        final int majorVersion = int.parse(match.group(1)!);
-        final int minorVersion = int.parse(match.group(2)!);
-        return majorVersion > 17 || (majorVersion == 17 && minorVersion >= 4);
-      }
-      return false;
-    }
-    if (isFirefox) {
-      final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
-      final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
-      if (match != null) {
-        final int version = int.parse(match.group(1)!);
-        return version >= 119;
-      }
-      return false;
-    }
-    return false;
-  }
 }
 
 /// Sets the label as text inside the DOM element.
@@ -529,6 +449,9 @@ class LabelAndValue extends SemanticBehavior {
   /// instead.
   LabelRepresentation preferredRepresentation;
 
+  String? _describedById;
+  DomElement? _describedBySpan;
+
   @override
   void update() {
     final String? computedLabel = _computeLabel();
@@ -539,6 +462,7 @@ class LabelAndValue extends SemanticBehavior {
     }
 
     _getEffectiveRepresentation().update(computedLabel);
+    _updateHintDescription(semanticsObject.hint);
   }
 
   LabelRepresentationBehavior? _representation;
@@ -564,23 +488,100 @@ class LabelAndValue extends SemanticBehavior {
 
   /// Computes the final label to be assigned to the node.
   ///
-  /// The label is a concatenation of tooltip, label, hint, and value, whichever
+  /// The label is a concatenation of tooltip, label, and value, whichever
   /// combination is present.
   String? _computeLabel() {
     // If the node is incrementable the value is reported to the browser via
     // the respective role. We do not need to also render it again here.
     final bool shouldDisplayValue = !semanticsObject.isIncrementable && semanticsObject.hasValue;
-    final bool excludeHint = _getEffectiveRepresentation() is AriaLabelRepresentation;
 
     return computeDomSemanticsLabel(
       tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
       label: semanticsObject.hasLabel ? semanticsObject.label : null,
-      hint: excludeHint ? null : semanticsObject.hint,
       value: shouldDisplayValue ? semanticsObject.value : null,
     );
   }
 
+  void _updateHintDescription(String? hint) {
+    owner.removeAttribute('aria-description');
+    owner.removeAttribute('aria-describedby');
+    if (hint != null && hint.trim().isNotEmpty) {
+      _setAriaDescriptionOrDescribedBy(hint);
+    }
+  }
+
+  void _setAriaDescriptionOrDescribedBy(String hint) {
+    if (supportsAriaDescription) {
+      owner.setAttribute('aria-description', hint);
+    } else {
+      final String id = _ensureDescribedBy(hint);
+      owner.setAttribute('aria-describedby', id);
+    }
+  }
+
+  String _ensureDescribedBy(String hint) {
+    _describedById ??= 'flt-hint-${semanticsObject.id}';
+    _describedBySpan ??= domDocument.createElement('span');
+    _describedBySpan!.id = _describedById!;
+    _describedBySpan!.setAttribute('hidden', '');
+    _describedBySpan!.text = hint;
+    // Attach as a child of the semantics element, not document.body
+    if (_describedBySpan!.isConnected != true) {
+      owner.element.append(_describedBySpan!);
+    }
+    return _describedById!;
+  }
+
+  static bool? _supportsAriaDescription;
+
+  static bool get supportsAriaDescription {
+    _supportsAriaDescription ??= _checkAriaDescriptionSupport();
+    return _supportsAriaDescription!;
+  }
+
+  @visibleForTesting
+  static set supportsAriaDescriptionForTest(bool? value) {
+    _supportsAriaDescription = value;
+  }
+
+  static bool _checkAriaDescriptionSupport() {
+    if (isChromium || isEdge) {
+      return true;
+    }
+    if (isSafari) {
+      final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
+      final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
+      if (match != null) {
+        final int majorVersion = int.parse(match.group(1)!);
+        final int minorVersion = int.parse(match.group(2)!);
+        return majorVersion > 17 || (majorVersion == 17 && minorVersion >= 4);
+      }
+      return false;
+    }
+    if (isFirefox) {
+      final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
+      final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
+      if (match != null) {
+        final int version = int.parse(match.group(1)!);
+        return version >= 119;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  void _cleanUpDescriptionOrDescribedBy() {
+    owner.removeAttribute('aria-description');
+    owner.removeAttribute('aria-describedby');
+    _describedBySpan?.remove();
+    _describedBySpan = null;
+    _describedById = null;
+    final String hintId = 'hint-${semanticsObject.id}';
+    domDocument.getElementById(hintId)?.remove();
+  }
+
   void _cleanUpDom() {
+    _cleanUpDescriptionOrDescribedBy();
     _representation?.cleanUp();
   }
 
@@ -603,10 +604,10 @@ class LabelAndValue extends SemanticBehavior {
   }
 }
 
-String? computeDomSemanticsLabel({String? tooltip, String? label, String? hint, String? value}) {
-  final String? labelHintValue = _computeLabelHintValue(label: label, hint: hint, value: value);
+String? computeDomSemanticsLabel({String? tooltip, String? label, String? value}) {
+  final String? labelValue = _computeLabelValue(label: label, value: value);
 
-  if (tooltip == null && labelHintValue == null) {
+  if (tooltip == null && labelValue == null) {
     return null;
   }
 
@@ -615,20 +616,20 @@ String? computeDomSemanticsLabel({String? tooltip, String? label, String? hint, 
     combinedValue.write(tooltip);
 
     // Separate the tooltip from the rest via a line-break (if the rest exists).
-    if (labelHintValue != null) {
+    if (labelValue != null) {
       combinedValue.writeln();
     }
   }
 
-  if (labelHintValue != null) {
-    combinedValue.write(labelHintValue);
+  if (labelValue != null) {
+    combinedValue.write(labelValue);
   }
 
   return combinedValue.isNotEmpty ? combinedValue.toString() : null;
 }
 
-String? _computeLabelHintValue({String? label, String? hint, String? value}) {
-  final String combinedValue = <String?>[label, hint, value]
+String? _computeLabelValue({String? label, String? value}) {
+  final String combinedValue = <String?>[label, value]
       .whereType<String>() // poor man's null filter
       .where((String element) => element.trim().isNotEmpty)
       .join(' ');

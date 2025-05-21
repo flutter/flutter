@@ -905,26 +905,22 @@ void _testLongestIncreasingSubsequence() {
 }
 
 void _testLabels() {
-  test('computeDomSemanticsLabel combines tooltip, label, value, and hint', () {
+  test('computeDomSemanticsLabel combines tooltip, label, and value', () {
     expect(computeDomSemanticsLabel(tooltip: 'tooltip'), 'tooltip');
     expect(computeDomSemanticsLabel(label: 'label'), 'label');
     expect(computeDomSemanticsLabel(value: 'value'), 'value');
-    expect(computeDomSemanticsLabel(hint: 'hint'), 'hint');
-    expect(
-      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint', value: 'value'),
-      '''
-tooltip
-label hint value''',
-    );
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', hint: 'hint', value: 'value'), '''
-tooltip
-hint value''');
     expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
 tooltip
 label value''');
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint'), '''
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', value: 'value'), '''
 tooltip
-label hint''');
+value''');
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
+tooltip
+label value''');
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label'), '''
+tooltip
+label''');
   });
 
   test('computeDomSemanticsLabel collapses empty labels to null', () {
@@ -932,11 +928,10 @@ label hint''');
     expect(computeDomSemanticsLabel(tooltip: ''), isNull);
     expect(computeDomSemanticsLabel(label: ''), isNull);
     expect(computeDomSemanticsLabel(value: ''), isNull);
-    expect(computeDomSemanticsLabel(hint: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', hint: '', value: ''), isNull);
     expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', value: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', label: ''), isNull);
   });
 
   test(
@@ -956,9 +951,9 @@ label hint''');
       final element = node.element;
       expect(element.getAttribute('aria-label'), 'Label');
 
-      final originalSupportsAriaDescription = AriaLabelRepresentation.supportsAriaDescription;
+      final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
 
-      AriaLabelRepresentation.supportsAriaDescriptionForTest = true;
+      LabelAndValue.supportsAriaDescriptionForTest = true;
       tester.updateNode(
         id: 0,
         label: 'Label',
@@ -969,7 +964,7 @@ label hint''');
       expect(element.getAttribute('aria-description'), 'Hint');
       expect(element.getAttribute('aria-describedby'), isNull);
 
-      AriaLabelRepresentation.supportsAriaDescriptionForTest = false;
+      LabelAndValue.supportsAriaDescriptionForTest = false;
       tester.updateNode(
         id: 0,
         label: 'Label',
@@ -984,7 +979,7 @@ label hint''');
       expect(describedNode, isNotNull);
       expect(describedNode!.text, 'Hint');
 
-      AriaLabelRepresentation.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+      LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
       semantics().semanticsEnabled = false;
     },
   );
