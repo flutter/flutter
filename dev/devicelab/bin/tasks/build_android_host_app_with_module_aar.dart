@@ -222,7 +222,7 @@ class ModuleTest {
       }
 
       section('Flutter build aar succeeds');
-      
+
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
