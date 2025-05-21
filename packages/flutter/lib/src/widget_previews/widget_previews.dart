@@ -16,6 +16,9 @@ typedef PreviewTheme = PreviewThemeData Function();
 /// Signature for callbacks that wrap a [Widget] with another [Widget] when creating a [Preview].
 typedef WidgetWrapper = Widget Function(Widget);
 
+/// Signature for callbacks that build localization data used when creating a [Preview].
+typedef PreviewLocalizations = PreviewLocalizationsData Function();
+
 /// Annotation used to mark functions that return a widget preview.
 ///
 /// NOTE: this interface is not stable and **will change**.
@@ -68,6 +71,7 @@ base class Preview {
     this.wrapper,
     this.theme,
     this.brightness,
+    this.localizations,
   });
 
   /// A description to be displayed alongside the preview.
@@ -114,6 +118,152 @@ base class Preview {
   ///
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
+
+  /// A callback to return a localization configuration to be applied to the
+  /// previewed [Widget].
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
+  final PreviewLocalizations? localizations;
+}
+
+/// A collection of localization objects and callbacks for use in widget previews.
+base class PreviewLocalizationsData {
+  /// Creates a collection of localization objects and callbacks for use in
+  /// widget previews.
+  const PreviewLocalizationsData({
+    this.locale,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+  });
+
+  // TODO(bkonyi): this is mostly duplicated
+  /// {@template flutter.widgets.widgetsApp.locale}
+  /// The initial locale for this app's [Localizations] widget is based
+  /// on this value.
+  ///
+  /// If the 'locale' is null then the system's locale value is used.
+  ///
+  /// The value of [Localizations.locale] will equal this locale if
+  /// it matches one of the [supportedLocales]. Otherwise it will be
+  /// the first element of [supportedLocales].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], which can override the default
+  ///    [supportedLocales] matching algorithm.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  final Locale? locale;
+
+  // TODO(bkonyi): this is mostly duplicated
+  /// {@template flutter.widgets.widgetsApp.localeListResolutionCallback}
+  /// This callback is responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// When a [localeListResolutionCallback] is provided, Flutter will first
+  /// attempt to resolve the locale with the provided
+  /// [localeListResolutionCallback]. If the callback or result is null, it will
+  /// fallback to trying the [localeResolutionCallback]. If both
+  /// [localeResolutionCallback] and [localeListResolutionCallback] are left
+  /// null or fail to resolve (return null), basic fallback algorithm will
+  /// be used.
+  ///
+  /// The priority of each available fallback is:
+  ///
+  ///  1. [localeListResolutionCallback] is attempted.
+  ///  2. [localeResolutionCallback] is attempted.
+  ///  3. Flutter's basic resolution algorithm, as described in
+  ///     [supportedLocales], is attempted last.
+  ///
+  /// Properly localized projects should provide a more advanced algorithm than
+  /// the basic method from [supportedLocales], as it does not implement a
+  /// complete algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
+  /// and is optimized for speed at the detriment of some uncommon edge-cases.
+  /// {@endtemplate}
+  ///
+  /// This callback considers the entire list of preferred locales.
+  ///
+  /// This algorithm should be able to handle a null or empty list of preferred locales,
+  /// which indicates Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
+  ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final List<Locale> supportedLocales;
+
+  // TODO(bkonyi): this is mostly duplicated
+  /// {@template flutter.widgets.widgetsApp.localizationsDelegates}
+  /// The delegates for this app's [Localizations] widget.
+  ///
+  /// The delegates collectively define all of the localized resources
+  /// for this application's [Localizations] widget.
+  /// {@endtemplate}
+  final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
+
+  // TODO(bkonyi): this is mostly duplicated
+  /// {@template flutter.widgets.widgetsApp.localeListResolutionCallback}
+  /// This callback is responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// When a [localeListResolutionCallback] is provided, Flutter will first
+  /// attempt to resolve the locale with the provided
+  /// [localeListResolutionCallback]. If the callback or result is null, it will
+  /// fallback to trying the [localeResolutionCallback]. If both
+  /// [localeResolutionCallback] and [localeListResolutionCallback] are left
+  /// null or fail to resolve (return null), basic fallback algorithm will
+  /// be used.
+  ///
+  /// The priority of each available fallback is:
+  ///
+  ///  1. [localeListResolutionCallback] is attempted.
+  ///  2. [localeResolutionCallback] is attempted.
+  ///  3. Flutter's basic resolution algorithm, as described in
+  ///     [supportedLocales], is attempted last.
+  ///
+  /// Properly localized projects should provide a more advanced algorithm than
+  /// the basic method from [supportedLocales], as it does not implement a
+  /// complete algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
+  /// and is optimized for speed at the detriment of some uncommon edge-cases.
+  /// {@endtemplate}
+  ///
+  /// This callback considers the entire list of preferred locales.
+  ///
+  /// This algorithm should be able to handle a null or empty list of preferred locales,
+  /// which indicates Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
+  ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleListResolutionCallback? localeListResolutionCallback;
+
+  // TODO(bkonyi): this is mostly duplicated
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback considers only the default locale, which is the first locale
+  /// in the preferred locales list. It is preferred to set [localeListResolutionCallback]
+  /// over [localeResolutionCallback] as it provides the full preferred locales list.
+  ///
+  /// This algorithm should be able to handle a null locale, which indicates
+  /// Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
+  ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleResolutionCallback? localeResolutionCallback;
 }
 
 /// A collection of [ThemeData] and [CupertinoThemeData] instances for use in

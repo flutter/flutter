@@ -28,6 +28,7 @@ class WidgetPreview {
     this.textScaleFactor,
     this.brightness,
     this.theme,
+    this.localizations,
   });
 
   /// A description to be displayed alongside the preview.
@@ -63,12 +64,20 @@ class WidgetPreview {
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
 
+  final PreviewLocalizationsData? localizations;
+
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
       ..add(DiagnosticsProperty<String>('name', name, ifNull: 'not set'))
       ..add(DiagnosticsProperty<Size>('size', size))
       ..add(DiagnosticsProperty<double>('textScaleFactor', textScaleFactor))
       ..add(DiagnosticsProperty<PreviewThemeData>('theme', theme))
-      ..add(DiagnosticsProperty<Brightness>('brightness', brightness));
+      ..add(DiagnosticsProperty<Brightness>('brightness', brightness))
+      ..add(
+        DiagnosticsProperty<PreviewLocalizationsData>(
+          'localizations',
+          localizations,
+        ),
+      );
   }
 }
