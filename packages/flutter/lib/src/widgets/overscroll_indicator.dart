@@ -19,6 +19,7 @@ import 'package:flutter/physics.dart' show Tolerance, nearEqual;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../material/stretch_overscroll_effect.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
@@ -26,7 +27,6 @@ import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
-import '../material/stretch_overscroll_effect.dart';
 
 /// A visual indication that a scroll view has overscrolled.
 ///
@@ -832,7 +832,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             transform = StretchOverscrollEffect(
               overscrollX: x,
               overscrollY: y,
-              child: widget.child!
+              child: widget.child!,
             );
           } else {
             final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
