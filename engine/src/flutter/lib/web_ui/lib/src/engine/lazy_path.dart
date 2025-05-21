@@ -677,6 +677,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
         break;
       }
     }
+    renderer.frameArena.add(this);
   }
 
   DisposablePathMetric builtMetricAtIndex(int index) {
