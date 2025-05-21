@@ -113,9 +113,9 @@ class JsCompilerConfig extends WebCompilerConfig {
   ///
   /// Includes the contents of [toSharedCommandOptions].
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     ...toSharedCommandOptions(buildMode),
     '-O${optimizationLevelForBuildMode(buildMode)}',
-    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     if (dumpInfo) '--stage=dump-info-all',
     if (noFrequencyBasedMinification) '--no-frequency-based-minification',
     if (csp) '--csp',
