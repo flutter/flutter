@@ -8,13 +8,15 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 
 /// Implements the Android native overscroll effect identically in Flutter.
+/// 
+/// This widget only supported with Impeller rendering engine.
 class StretchOverscrollEffect extends StatefulWidget {
   const StretchOverscrollEffect({
     super.key,
     this.overscrollX = 0,
     this.overscrollY = 0,
     required this.child
-  });
+  }) : assert(ui.ImageFilter.isShaderFilterSupported);
 
   /// The horizontal overscroll amount applied for stretching effect,
   /// and value should be between -1 and 1 inclusive.
@@ -50,7 +52,9 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
         _StretchOverscrollEffectShader.initializeShader();
       }
 
-      _StretchOverscrollEffectShader.addListener(() => setState(() {}));
+      _StretchOverscrollEffectShader.addListener(() => setState(() {
+        // Updates the widget state to use [ImageFiltered] after the fragment shader is loaded.
+      }));
     }
 
     return widget.child;

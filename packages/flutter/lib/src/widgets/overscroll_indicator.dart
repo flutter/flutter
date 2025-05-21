@@ -12,6 +12,7 @@ library;
 
 import 'dart:async' show Timer;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart' show Tolerance, nearEqual;
@@ -825,11 +826,26 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
           final double viewportDimension =
               _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-          final Widget transform = StretchOverscrollEffect(
-            overscrollX: x,
-            overscrollY: y,
-            child: widget.child!
-          );
+          final Widget transform;
+          
+          if (ui.ImageFilter.isShaderFilterSupported) {
+            transform = StretchOverscrollEffect(
+              overscrollX: x,
+              overscrollY: y,
+              child: widget.child!
+            );
+          } else {
+            final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
+              _stretchController.stretchDirection,
+            );
+
+            transform = Transform(
+              alignment: alignment,
+              transform: Matrix4.diagonal3Values(1.0 + x, 1.0 + y, 1.0),
+              filterQuality: stretch == 0 ? null : FilterQuality.medium,
+              child: widget.child,
+            );
+          }
 
           // Only clip if the viewport dimension is smaller than that of the
           // screen size in the main axis. If the viewport takes up the whole
