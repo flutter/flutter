@@ -1570,9 +1570,8 @@ class SemanticsObject {
   void updateSelf(SemanticsNodeUpdate update) {
     // Update all field values and their corresponding dirty flags before
     // applying the updates to the DOM.
-    final updatedFlags = ui.SemanticsFlags.fromBoolList(update.flags);
-    if (_flags != updatedFlags) {
-      _flags = updatedFlags;
+    if (_flags != update.flags) {
+      _flags = update.flags;
       _markFlagsDirty();
     }
 

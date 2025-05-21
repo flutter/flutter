@@ -585,42 +585,6 @@ class SemanticsFlags {
     ];
   }
 
-  List<bool> toBoolList() {
-    return <bool>[
-      hasCheckedState,
-      isChecked,
-      isSelected,
-      isButton,
-      isTextField,
-      isFocused,
-      hasEnabledState,
-      isEnabled,
-      isInMutuallyExclusiveGroup,
-      isHeader,
-      isObscured,
-      scopesRoute,
-      namesRoute,
-      isHidden,
-      isImage,
-      isLiveRegion,
-      hasToggledState,
-      isToggled,
-      hasImplicitScrolling,
-      isMultiline,
-      isReadOnly,
-      isFocusable,
-      isLink,
-      isSlider,
-      isKeyboardKey,
-      isCheckStateMixed,
-      hasExpandedState,
-      isExpanded,
-      hasSelectedState,
-      hasRequiredState,
-      isRequired,
-    ];
-  }
-
   bool hasRepeatedFlags(SemanticsFlags other) {
     return (hasCheckedState && other.hasCheckedState) ||
         (isChecked && other.isChecked) ||
@@ -745,7 +709,7 @@ class SemanticsUpdateBuilder {
   final List<engine.SemanticsNodeUpdate> _nodeUpdates = <engine.SemanticsNodeUpdate>[];
   void updateNode({
     required int id,
-    required List<bool> flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
