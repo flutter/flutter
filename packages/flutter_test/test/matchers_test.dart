@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1557,7 +1558,7 @@ void main() {
     });
   });
 
-  testWidgets('did not find any matching candidate for the first finder in the findersList', (
+  testWidgets('does not find any matching candidate for the first finder in the findersList', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
@@ -1581,7 +1582,91 @@ void main() {
     );
     expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
     expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
-    expect(message, contains('means none were found but multiple were expected'));
+    expect(message, contains('means none were found but some were expected'));
+  });
+
+  testWidgets('finds a matching candidate only for the first finder in the findersList: 1', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+    late TestFailure failure;
+    try {
+      expect(
+        find.text('foo'),
+        findsAscendinglyOrderedWidgets(<Finder>[find.text('foo'), find.byType(SizedBox)]),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+    expect(failure, isNotNull);
+    final String message = failure.message!;
+    expect(
+      message,
+      contains(
+        'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+      ),
+    );
+    expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+    expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+    expect(message, contains('means one was found but some were expected'));
+  });
+
+  testWidgets('finds a matching candidate only for the first finder in the findersList: 2', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+    late TestFailure failure;
+    try {
+      expect(
+        find.bySubtype<Widget>(),
+        findsAscendinglyOrderedWidgets(<Finder>[find.text('foo'), find.byType(SizedBox)]),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+    expect(failure, isNotNull);
+    final String message = failure.message!;
+    expect(
+      message,
+      contains(
+        'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+      ),
+    );
+    expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+    expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+    expect(message, contains('means one was found but some were expected'));
+  });
+
+  testWidgets('finds a matching candidate only for the first finder in the findersList: 3', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Column(children: <Widget>[const Text('foo', textDirection: TextDirection.ltr), Container()]),
+    );
+
+    late TestFailure failure;
+    try {
+      expect(
+        find.bySubtype<Widget>(),
+        findsAscendinglyOrderedWidgets(<Finder>[find.text('foo'), find.byType(SizedBox)]),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+    expect(failure, isNotNull);
+    final String message = failure.message!;
+    expect(
+      message,
+      contains(
+        'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+      ),
+    );
+    expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+    expect(message, contains('Text("foo"'));
+    expect(message, contains('Container'));
+    expect(message, contains('means one was found but some were expected'));
   });
 }
 

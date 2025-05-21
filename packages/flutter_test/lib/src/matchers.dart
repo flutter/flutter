@@ -1192,9 +1192,13 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
 
   @override
   bool matches(covariant FinderBase<dynamic> finder, Map<dynamic, dynamic> matchState) {
-    final Iterator<dynamic> expected = findersList.elementAt(0).evaluate().iterator;
-    if (!expected.moveNext()) {
-      return false;
+    for (int i = 0; i < findersList.length; i++) {
+      final Iterator<dynamic> expected = findersList.elementAt(i).evaluate().iterator;
+      if (!expected.moveNext()) {
+        matchState[findersList.elementAt(i)] = false;
+        return false;
+      }
+      matchState[findersList.elementAt(i)] = true;
     }
     return true;
   }
@@ -1206,7 +1210,15 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    return mismatchDescription.add('means none were found but multiple were expected');
+    final Iterable<MapEntry<dynamic, dynamic>> entries = matchState.entries;
+    final Iterable<MapEntry<dynamic, dynamic>> found = entries.where(
+      (MapEntry<dynamic, dynamic> me) => me.value as bool,
+    );
+    if (found.isEmpty) {
+      return mismatchDescription.add('means none were found but some were expected');
+    } else {
+      return mismatchDescription.add('means one was found but some were expected');
+    }
   }
 }
 
