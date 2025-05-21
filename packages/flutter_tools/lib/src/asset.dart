@@ -52,7 +52,7 @@ const List<Map<String, Object>> kMaterialFonts = <Map<String, Object>>[
 
 const List<String> kMaterialShaders = <String>[
   'shaders/ink_sparkle.frag',
-  'shaders/stretch_overscroll.frag'
+  'shaders/stretch_overscroll.frag',
 ];
 
 /// Injected factory class for spawning [AssetBundle] instances.
