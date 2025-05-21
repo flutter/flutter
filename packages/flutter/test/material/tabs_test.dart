@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
@@ -158,14 +157,14 @@ void main() {
 
   testWidgets('tab semantics role test', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/169175
-    final _TestImageProvider imageProvider = _TestImageProvider();
-    addTearDown(() => imageProvider.fail(Object(), null));
-    // Creates an image widget that never complete, which will have zero size.
+    // Creates an image semantics node with zero size.
     await tester.pumpWidget(
       boilerplate(
         child: DefaultTabController(
           length: 1,
-          child: TabBar(tabs: <Widget>[Tab(icon: Image(image: imageProvider))]),
+          child: TabBar(
+            tabs: <Widget>[Tab(icon: Semantics(image: true, child: const SizedBox.shrink()))],
+          ),
         ),
       ),
     );
@@ -9150,27 +9149,4 @@ void main() {
       (focus: false, index: 2), // Third tab loses focus
     ]);
   });
-}
-
-class _TestImageProvider extends ImageProvider<Object> {
-  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
-    _streamCompleter = streamCompleter ?? OneFrameImageStreamCompleter(_completer.future);
-  }
-
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-  late ImageStreamCompleter _streamCompleter;
-
-  @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<_TestImageProvider>(this);
-  }
-
-  @override
-  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
-    return _streamCompleter;
-  }
-
-  void fail(Object exception, StackTrace? stackTrace) {
-    _completer.completeError(exception, stackTrace);
-  }
 }
