@@ -168,8 +168,6 @@ void main() {
         ),
       ),
     );
-    debugDumpSemanticsTree();
-
     expect(find.byType(Tab), findsOneWidget);
   });
 
