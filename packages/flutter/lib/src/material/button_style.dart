@@ -262,7 +262,7 @@ class ButtonStyle with Diagnosticable {
   /// reduced by 8 pixels on both dimensions.
   ///
   /// When visual density is [VisualDensity.comfortable], the minimum size is
-  /// [minimumSize] reduced by 4 pixels on both dimensions..
+  /// [minimumSize] reduced by 4 pixels on both dimensions.
   ///
   /// When visual density is [VisualDensity.standard], the minimum size is
   /// [minimumSize].
