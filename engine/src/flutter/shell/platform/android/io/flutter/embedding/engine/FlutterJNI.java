@@ -258,20 +258,6 @@ public class FlutterJNI {
   }
 
   /**
-   * VM Service URI for the VM instance.
-   *
-   * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long, int)} is run.
-   *
-   * @deprecated replaced by {@link #getVMServiceUri()}.
-   */
-  @Deprecated
-  @Nullable
-  public static String getObservatoryUri() {
-    return vmServiceUri;
-  }
-
-  /**
    * Notifies the engine about the refresh rate of the display when the API level is below 30.
    *
    * <p>For API 30 and above, this value is ignored.

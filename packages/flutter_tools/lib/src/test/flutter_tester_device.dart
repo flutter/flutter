@@ -189,23 +189,10 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        final FlutterVmService vmService = await connectToVmServiceImpl(
-          forwardingUri!,
-          compileExpression: compileExpression,
-          logger: logger,
-        );
         logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
-        if (debuggingOptions.serveObservatory) {
-          try {
-            await vmService.callMethodWrapper('_serveObservatory');
-          } on vm_service.RPCError {
-            logger.printWarning('Unable to enable Observatory');
-          }
-        }
-
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
-          await _startDevTools(forwardingUri, _ddsLauncher);
+          await _startDevTools(forwardingUri!, _ddsLauncher);
           logger.printStatus('');
           logger.printStatus(
             'The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.',

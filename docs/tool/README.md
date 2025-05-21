@@ -78,8 +78,8 @@ To run or debug the tests in IDE, make sure `FLUTTER_ROOT` directory is set up.
 For example, in Android Studio, select the configuration for the test, click "Edit Configurations...",
 under "Environment Variables" section, enter `FLUTTER_ROOT=directory_to_your_flutter_framework_repo`.
 
-The pre-built flutter tool runs in release mode with the observatory off by default.
-To enable debugging mode and the observatory on the `flutter` tool, uncomment the
+The pre-built flutter tool runs in release mode with the Dart VM service off by default.
+To enable debugging mode and Dart DevTools for the `flutter` tool, uncomment the
 `FLUTTER_TOOL_ARGS` line in the `bin/flutter` (or `bin/flutter-dev`) shell script.
 
 ## Debugging the `flutter` command-line tool in VS Code

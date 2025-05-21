@@ -557,7 +557,7 @@ class FuchsiaRemoteConnection {
     final List<int> ports = getVmServicePortFromInspectSnapshot(inspectOutputJson);
 
     if (ports.length > 1) {
-      throw StateError('More than one Flutter observatory port found');
+      throw StateError('More than one Dart VM service port found');
     }
     return ports;
   }

@@ -13,6 +13,6 @@ The strings in these files are used in `dev/bots/test.dart`.
 
 The tests in this folder must be run with `flutter test --enable-vmservice`,
 since they test that trace data is written to the timeline by connecting to
-the observatory.
+the VM service.
 
 These tests will fail if run without this flag.

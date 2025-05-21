@@ -612,17 +612,17 @@ class FlutterTesterOptions():
       self,
       multithreaded=False,
       enable_impeller=False,
-      enable_observatory=False,
+      enable_vm_service=False,
       expect_failure=False
   ):
     self.multithreaded = multithreaded
     self.enable_impeller = enable_impeller
-    self.enable_observatory = enable_observatory
+    self.enable_vm_service = enable_vm_service
     self.expect_failure = expect_failure
 
   def apply_args(self, command_args):
-    if not self.enable_observatory:
-      command_args.append('--disable-observatory')
+    if not self.enable_vm_service:
+      command_args.append('--disable-vm-service')
 
     if self.enable_impeller:
       command_args += ['--enable-impeller', '--enable-flutter-gpu']
@@ -867,15 +867,15 @@ def gather_dart_tests(build_dir, test_filter):
       cwd=dart_tests_dir,
   )
 
-  dart_observatory_tests = glob.glob('%s/observatory/*_test.dart' % dart_tests_dir)
+  dart_vm_service_tests = glob.glob('%s/vm_service/*_test.dart' % dart_tests_dir)
   dart_tests = glob.glob('%s/*_test.dart' % dart_tests_dir)
 
   if 'release' not in build_dir:
-    for dart_test_file in dart_observatory_tests:
+    for dart_test_file in dart_vm_service_tests:
       if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
         logger.info("Skipping '%s' due to filter.", dart_test_file)
       else:
-        logger.info("Gathering dart test '%s' with observatory enabled", dart_test_file)
+        logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
           for enable_impeller in [False, True]:
             yield gather_dart_test(
@@ -883,7 +883,7 @@ def gather_dart_tests(build_dir, test_filter):
                 FlutterTesterOptions(
                     multithreaded=multithreaded,
                     enable_impeller=enable_impeller,
-                    enable_observatory=True
+                    enable_vm_service=True
                 )
             )
 

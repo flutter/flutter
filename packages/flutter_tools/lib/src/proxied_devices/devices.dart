@@ -365,9 +365,7 @@ class ProxiedDevice extends Device {
       }),
     );
     final bool started = _cast<bool>(result['started']);
-    // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
-    final String? vmServiceUriStr =
-        _cast<String?>(result['vmServiceUri']) ?? _cast<String?>(result['observatoryUri']);
+    final String? vmServiceUriStr = _cast<String?>(result['vmServiceUri']);
     final Uri? vmServiceUri = vmServiceUriStr == null ? null : Uri.parse(vmServiceUriStr);
     if (started) {
       if (vmServiceUri != null) {

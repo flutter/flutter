@@ -412,16 +412,6 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, readonly) FlutterBasicMessageChannel* keyEventChannel;
 
 /**
- * The depcreated `NSURL` of the Dart VM Service for the service isolate.
- *
- * This is only set in debug and profile runtime modes, and only after the
- * Dart VM Service is ready. In release mode or before the Dart VM Service has
- * started, it returns `nil`.
- */
-@property(nonatomic, readonly, nullable)
-    NSURL* observatoryUrl FLUTTER_DEPRECATED("Use vmServiceUrl instead");
-
-/**
  * The `NSURL` of the Dart VM Service for the service isolate.
  *
  * This is only set in debug and profile runtime modes, and only after the

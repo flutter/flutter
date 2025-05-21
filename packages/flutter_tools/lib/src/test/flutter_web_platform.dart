@@ -999,6 +999,7 @@ class _BrowserEnvironment implements Environment {
   @override
   final bool supportsDebugging = true;
 
+  // TODO(bkonyi): update package:test_core to no longer reference Observatory.
   @override
   final Uri? observatoryUrl;
 
