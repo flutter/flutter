@@ -1130,10 +1130,6 @@ exit code: 66
         completes,
       );
     },
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
-    },
   );
 
   testWithoutContext('Pub error handling', () async {

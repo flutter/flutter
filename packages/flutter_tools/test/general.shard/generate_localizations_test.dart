@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -15,7 +14,6 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
 
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
@@ -68,11 +66,6 @@ flutter:
 }
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   late MemoryFileSystem fs;
   late BufferLogger logger;
   late Artifacts artifacts;
@@ -845,69 +838,31 @@ class FooEn extends Foo {
 ''');
     });
 
-    testUsingContext(
-      'throws exception on missing flutter: generate: true flag',
-      () async {
-        _standardFlutterDirectoryL10nSetup(fs);
+    testUsingContext('throws exception on missing flutter: generate: true flag', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
 
-        // Missing flutter: generate: true should throw exception.
-        fs.file('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+      // Missing flutter: generate: true should throw exception.
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 flutter:
   uses-material-design: true
 ''');
 
-        final LocalizationOptions options = LocalizationOptions(
-          header: 'HEADER',
-          headerFile: Uri.file('header', windows: false).path,
-          arbDir: Uri.file('arb', windows: false).path,
-          useDeferredLoading: true,
-          outputClass: 'Foo',
-          outputLocalizationFile: Uri.file('bar', windows: false).path,
-          preferredSupportedLocales: <String>['en_US'],
-          templateArbFile: Uri.file('example.arb', windows: false).path,
-          untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
-        );
+      final LocalizationOptions options = LocalizationOptions(
+        header: 'HEADER',
+        headerFile: Uri.file('header', windows: false).path,
+        arbDir: Uri.file('arb', windows: false).path,
+        useDeferredLoading: true,
+        outputClass: 'Foo',
+        outputLocalizationFile: Uri.file('bar', windows: false).path,
+        preferredSupportedLocales: <String>['en_US'],
+        templateArbFile: Uri.file('example.arb', windows: false).path,
+        untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
+      );
 
-        expect(
-          () => generateLocalizations(
-            fileSystem: fs,
-            options: options,
-            logger: BufferLogger.test(),
-            projectDir: fs.currentDirectory,
-            dependenciesDir: fs.currentDirectory,
-            artifacts: artifacts,
-            processManager: FakeProcessManager.any(),
-          ),
-          throwsToolExit(
-            message:
-                'Attempted to generate localizations code without having the '
-                'flutter: generate flag turned on.',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
-    );
-
-    testUsingContext(
-      'uses the same line terminator as pubspec.yaml',
-      () async {
-        _standardFlutterDirectoryL10nSetup(fs);
-
-        fs.file('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-flutter:\r
-  generate: true\r
-''');
-
-        final LocalizationOptions options = LocalizationOptions(
-          arbDir: fs.path.join('lib', 'l10n'),
-          outputClass: defaultClassNameString,
-          outputLocalizationFile: defaultOutputFileString,
-        );
-        await generateLocalizations(
+      expect(
+        () => generateLocalizations(
           fileSystem: fs,
           options: options,
           logger: BufferLogger.test(),
@@ -915,12 +870,42 @@ flutter:\r
           dependenciesDir: fs.currentDirectory,
           artifacts: artifacts,
           processManager: FakeProcessManager.any(),
-        );
-        final String content = getInPackageGeneratedFileContent(locale: 'en');
-        expect(content, contains('\r\n'));
-      },
-      overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
-    );
+        ),
+        throwsToolExit(
+          message:
+              'Attempted to generate localizations code without having the '
+              'flutter: generate flag turned on.',
+        ),
+      );
+    });
+
+    testUsingContext('uses the same line terminator as pubspec.yaml', () async {
+      _standardFlutterDirectoryL10nSetup(fs);
+
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+flutter:\r
+  generate: true\r
+''');
+
+      final LocalizationOptions options = LocalizationOptions(
+        arbDir: fs.path.join('lib', 'l10n'),
+        outputClass: defaultClassNameString,
+        outputLocalizationFile: defaultOutputFileString,
+      );
+      await generateLocalizations(
+        fileSystem: fs,
+        options: options,
+        logger: BufferLogger.test(),
+        projectDir: fs.currentDirectory,
+        dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+      );
+      final String content = getInPackageGeneratedFileContent(locale: 'en');
+      expect(content, contains('\r\n'));
+    });
 
     testWithoutContext('blank lines generated nicely', () async {
       _standardFlutterDirectoryL10nSetup(fs);

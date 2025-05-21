@@ -77,12 +77,6 @@ class _PluginPlatformInfo {
 }
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is removed.
   // See https://github.com/flutter/flutter/issues/48918 for details.
   FeatureFlags disableExplicitPackageDependencies() {
@@ -439,7 +433,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -456,7 +449,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -496,7 +488,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -519,7 +510,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: FakeProcessManager.empty,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -684,7 +674,6 @@ dependencies:
           // Not necessary, you can observe this bug by calling `generateLegacyPlugins: false`,
           // but since this flag is about to be enabled, and enabling it implicitly sets that
           // argument to false, this is a more "honest" test.
-          FeatureFlags: enableExplicitPackageDependencies,
         },
       );
 
@@ -756,7 +745,6 @@ dependencies:
           // Not necessary, you can observe this bug by calling `generateLegacyPlugins: false`,
           // but since this flag is about to be enabled, and enabling it implicitly sets that
           // argument to false, this is a more "honest" test.
-          FeatureFlags: enableExplicitPackageDependencies,
         },
       );
 
@@ -842,7 +830,6 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -894,7 +881,6 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -946,7 +932,6 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -998,7 +983,6 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1021,7 +1005,6 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1050,7 +1033,6 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1087,7 +1069,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1119,7 +1100,6 @@ dependencies:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1151,7 +1131,6 @@ dependencies:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1181,7 +1160,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1212,7 +1190,6 @@ dependencies:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1243,7 +1220,6 @@ dependencies:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1274,7 +1250,6 @@ dependencies:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1289,7 +1264,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1337,7 +1311,6 @@ dependencies:
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: () => FakeProcessManager.any(),
-            FeatureFlags: enableExplicitPackageDependencies,
             Pub: ThrowingPub.new,
           },
         );
@@ -1408,7 +1381,6 @@ dependencies:
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: () => FakeProcessManager.any(),
-            FeatureFlags: enableExplicitPackageDependencies,
             Pub: ThrowingPub.new,
           },
         );
@@ -1439,7 +1411,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1474,7 +1445,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1499,7 +1469,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1536,7 +1505,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1575,7 +1543,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1607,7 +1574,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1636,7 +1602,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1699,7 +1664,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1772,7 +1736,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1803,7 +1766,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1835,7 +1797,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1868,7 +1829,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1899,7 +1859,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1925,7 +1884,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1955,7 +1913,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1987,7 +1944,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -2018,7 +1974,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -2051,7 +2006,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fsWindows,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -2076,7 +2030,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -2096,7 +2049,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -2690,7 +2642,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: () => const ThrowingPub(),
         },
       );
@@ -2735,7 +2686,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: () => const ThrowingPub(),
         },
       );
@@ -2772,7 +2722,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: () => const ThrowingPub(),
         },
       );
@@ -2823,7 +2772,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: () => const ThrowingPub(),
         },
       );
@@ -2868,7 +2816,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: () => const ThrowingPub(),
         },
       );
