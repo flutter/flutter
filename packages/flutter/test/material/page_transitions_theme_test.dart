@@ -75,7 +75,7 @@ void main() {
   );
 
   testWidgets(
-    'Default PageTransitionsTheme builds a _ZoomPageTransition for android',
+    'Default PageTransitionsTheme builds a _FadeForwardsPageTransition for android',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/':
@@ -92,11 +92,11 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(routes: routes));
 
-      Finder findZoomPageTransition() {
+      Finder findFadeForwardsPageTransition() {
         return find.descendant(
           of: find.byType(MaterialApp),
           matching: find.byWidgetPredicate(
-            (Widget w) => '${w.runtimeType}' == '_ZoomPageTransition',
+            (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
           ),
         );
       }
@@ -105,12 +105,12 @@ void main() {
         Theme.of(tester.element(find.text('push'))).platform,
         debugDefaultTargetPlatformOverride,
       );
-      expect(findZoomPageTransition(), findsOneWidget);
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
 
       await tester.tap(find.text('push'));
       await tester.pumpAndSettle();
       expect(find.text('page b'), findsOneWidget);
-      expect(findZoomPageTransition(), findsOneWidget);
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
@@ -1045,7 +1045,7 @@ void main() {
       return find.descendant(
         of: find.byType(PrimaryScrollController),
         matching: find.byWidgetPredicate(
-          (Widget w) => '${w.runtimeType}' == '_PredictiveBackPageTransition',
+          (Widget w) => '${w.runtimeType}' == '_PredictiveBackSharedElementPageTransition',
         ),
       );
     }
@@ -1053,7 +1053,9 @@ void main() {
     Finder findFallbackPageTransition() {
       return find.descendant(
         of: find.byType(PrimaryScrollController),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
+        matching: find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
+        ),
       );
     }
 
