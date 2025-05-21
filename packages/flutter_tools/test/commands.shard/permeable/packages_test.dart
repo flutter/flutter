@@ -30,12 +30,6 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   late FakeStdio mockStdio;
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   // TODO(matanlurey): Remove after `flutter_gen` is removed.
   // See https://github.com/flutter/flutter/issues/102983 for details.
   FeatureFlags disableExplicitPackageDependencies() {
@@ -701,7 +695,6 @@ flutter:
               platform: globals.platform,
               stdio: mockStdio,
             ),
-        FeatureFlags: enableExplicitPackageDependencies,
       },
     );
 
@@ -736,7 +729,6 @@ flutter:
               platform: globals.platform,
               stdio: mockStdio,
             ),
-        FeatureFlags: enableExplicitPackageDependencies,
       },
     );
 
@@ -759,7 +751,6 @@ flutter:
         expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
       },
       overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
         Stdio: () => mockStdio,
         Pub:
             () => Pub.test(
