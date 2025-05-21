@@ -2,12 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-abstract class DisposablePath implements ui.Path {
+abstract class DisposablePath implements ScenePath {
+  @override
+  DisposablePathMetrics computeMetrics({bool forceClosed = false});
+
+  void dispose();
+}
+
+abstract class DisposablePathMetricIterator implements Iterator<ui.PathMetric> {
+  @override
+  DisposablePathMetric get current;
+
+  void dispose();
+}
+
+abstract class DisposablePathMetrics implements ui.PathMetrics {
+  @override
+  DisposablePathMetricIterator get iterator;
+}
+
+abstract class DisposablePathMetric implements ui.PathMetric {
+  @override
+  DisposablePath extractPath(double start, double end, {bool startWithMoveTo = true});
+
   void dispose();
 }
 
@@ -332,7 +355,7 @@ abstract class DisposablePathConstructors {
   );
 }
 
-class LazyPath implements ui.Path, Collectable {
+class LazyPath implements ScenePath, Collectable {
   factory LazyPath(DisposablePathConstructors constructors) =>
       LazyPath._(constructors, () => constructors.createNew());
   LazyPath._(this.constructors, this.initializer)
@@ -364,6 +387,17 @@ class LazyPath implements ui.Path, Collectable {
       pathCopy1.constructors,
       () =>
           pathCopy1.constructors.combinePaths(operation, pathCopy1.builtPath, pathCopy2.builtPath),
+    );
+  }
+  LazyPath extracted(
+    LazyPathMetric pathMetric,
+    double start,
+    double end, {
+    bool startWithMoveTo = true,
+  }) {
+    return LazyPath._(
+      constructors,
+      () => pathMetric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo),
     );
   }
 
@@ -564,8 +598,8 @@ class LazyPath implements ui.Path, Collectable {
   }
 
   @override
-  ui.PathMetrics computeMetrics({bool forceClosed = false}) {
-    return builtPath.computeMetrics(forceClosed: forceClosed);
+  LazyPathMetrics computeMetrics({bool forceClosed = false}) {
+    return LazyPathMetrics(path: this, forceClosed: forceClosed);
   }
 
   @override
@@ -573,4 +607,111 @@ class LazyPath implements ui.Path, Collectable {
     _cachedPath?.dispose();
     _cachedPath = null;
   }
+
+  @override
+  String toSvgString() {
+    return builtPath.toSvgString();
+  }
+}
+
+class LazyPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
+  LazyPathMetrics({required this.path, required this.forceClosed});
+
+  LazyPath path;
+  bool forceClosed;
+
+  @override
+  LazyPathMetricIterator get iterator {
+    return LazyPathMetricIterator(path, forceClosed);
+  }
+}
+
+class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
+  LazyPathMetricIterator(this.path, this.forceClosed);
+
+  final LazyPath path;
+  final bool forceClosed;
+  int _nextIndex = 0;
+  DisposablePathMetricIterator? _cachedIterator;
+  final List<DisposablePathMetric> _metrics = [];
+
+  @override
+  ui.PathMetric get current {
+    assert(_nextIndex > 0);
+    return LazyPathMetric(this, _nextIndex - 1);
+  }
+
+  @override
+  bool moveNext() {
+    buildIterator();
+    _nextIndex++;
+    assert(_nextIndex == _metrics.length);
+    if (_cachedIterator!.moveNext()) {
+      _metrics.add(_cachedIterator!.current);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  void collect() {
+    _cachedIterator?.dispose();
+    _cachedIterator = null;
+
+    for (final metric in _metrics) {
+      metric.dispose();
+    }
+    _metrics.clear();
+  }
+
+  void buildIterator() {
+    if (_cachedIterator != null) {
+      return;
+    }
+    _cachedIterator = path.builtPath.computeMetrics(forceClosed: forceClosed).iterator;
+    for (int i = 0; i < _nextIndex; i++) {
+      if (_cachedIterator!.moveNext()) {
+        _metrics.add(_cachedIterator!.current);
+      } else {
+        break;
+      }
+    }
+  }
+
+  DisposablePathMetric builtMetricAtIndex(int index) {
+    buildIterator();
+    return _metrics[index];
+  }
+}
+
+class LazyPathMetric implements ui.PathMetric {
+  LazyPathMetric(this.iterator, this.contourIndex);
+
+  final LazyPathMetricIterator iterator;
+
+  @override
+  final int contourIndex;
+
+  DisposablePathMetric get builtMetric => iterator.builtMetricAtIndex(contourIndex);
+
+  @override
+  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
+    return iterator.path.extracted(this, start, end, startWithMoveTo: startWithMoveTo);
+  }
+
+  DisposablePath buildExtractedPath(double start, double end, {required bool startWithMoveTo}) {
+    return builtMetric.extractPath(start, end, startWithMoveTo: startWithMoveTo);
+  }
+
+  @override
+  ui.Tangent? getTangentForOffset(double distance) {
+    return builtMetric.getTangentForOffset(distance);
+  }
+
+  @override
+  bool get isClosed => builtMetric.isClosed;
+
+  @override
+  double get length => builtMetric.length;
 }
