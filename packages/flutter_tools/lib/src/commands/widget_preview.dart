@@ -530,6 +530,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         trackWidgetCreation: true,
         projectRootPath: widgetPreviewScaffoldProject.directory.path,
       );
+      app.runner.residentDevtoolsHandler!.launchDevToolsInBrowser(
+        flutterDevices: app.runner.flutterDevices,
+      );
     } on Exception catch (error) {
       throwToolExit(error.toString());
     }
