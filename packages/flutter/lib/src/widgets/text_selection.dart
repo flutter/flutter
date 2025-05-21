@@ -584,6 +584,9 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.magnifierIsVisible}
   bool get magnifierIsVisible => _selectionOverlay.magnifierIsVisible;
 
+  /// {@macro flutter.widgets.SelectionOverlay.magnifierExists}
+  bool get magnifierExists => _selectionOverlay.magnifierExists;
+
   /// Whether the spell check menu is currently visible.
   ///
   /// See also:
@@ -1123,10 +1126,18 @@ class SelectionOverlay {
         : _toolbar != null || _spellCheckToolbarController.isShown;
   }
 
-  /// {@template flutter.widgets.SelectionOverlay.toolbarIsVisible}
+  /// {@template flutter.widgets.SelectionOverlay.magnifierIsVisible}
   /// Whether the magnifier is currently visible.
   /// {@endtemplate}
   bool get magnifierIsVisible => _magnifierController.shown;
+
+  /// {@template flutter.widgets.SelectionOverlay.magnifierExists}
+  /// Whether the magnifier currently exists.
+  ///
+  /// This differs from [magnifierIsVisible] in that the magnifier may exist
+  /// in the overlay, but not be shown.
+  /// {@endtemplate}
+  bool get magnifierExists => _magnifierController.overlayEntry != null;
 
   /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
   /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
