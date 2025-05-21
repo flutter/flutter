@@ -263,7 +263,7 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ToggleButtonsThemeData] from the closest ancestor [ToggleButtonsTheme].
   ///
   /// If there is no enclosing [ToggleButtonsTheme] widget, then
   /// [ThemeData.toggleButtonsTheme] is used.

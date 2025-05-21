@@ -754,7 +754,7 @@ exit code: 66
           '--example',
         ],
         onRun:
-            (_) => writePackageConfigFile(
+            (_) => writePackageConfigFiles(
               directory: fileSystem.currentDirectory,
               mainLibName: 'my_app',
             ),
@@ -910,7 +910,7 @@ exit code: 66
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
         onRun:
-            (_) => writePackageConfigFile(
+            (_) => writePackageConfigFiles(
               directory: fileSystem.currentDirectory,
               mainLibName: 'my_app',
             ),
@@ -1129,10 +1129,6 @@ exit code: 66
         pub.get(project: FlutterProject.fromDirectoryTest(pkg), context: PubContext.flutterTests),
         completes,
       );
-    },
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
     },
   );
 

@@ -493,7 +493,7 @@ class Chromium {
   @visibleForTesting
   Process get process => _process;
 
-  /// Gets the first [chrome] tab in order to verify that the connection to
+  /// Gets the first Chrome tab in order to verify that the connection to
   /// the Chrome debug protocol is working properly.
   ///
   /// Retries getting tabs from Chrome for a few seconds and retries finding

@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#include "shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
 #include <objc/objc.h>
 
@@ -18,6 +17,8 @@
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
@@ -210,7 +211,8 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
                     CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = YES; }));
 
   // Replace stdout stream buffer with our own.
-  StreamCapture stdout_capture(&std::cout);
+  FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  FlutterLogger.outputWriter = writer;
 
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
@@ -221,10 +223,8 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 
-  stdout_capture.Stop();
-
   // Verify hello world was written to stdout.
-  EXPECT_TRUE(stdout_capture.GetOutput().find("Hello logging") != std::string::npos);
+  EXPECT_TRUE([writer.lastLine containsString:@"Hello logging"]);
 }
 
 TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
@@ -909,9 +909,9 @@ TEST_F(FlutterEngineTest, ResizeSynchronizerNotBlockingRasterThreadAfterShutdown
 
   std::thread rasterThread([&threadSynchronizer] {
     [threadSynchronizer performCommitForSize:CGSizeMake(100, 100)
+                                  afterDelay:0
                                       notify:^{
-                                      }
-                                       delay:0];
+                                      }];
   });
 
   rasterThread.join();
