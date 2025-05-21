@@ -12,5 +12,4 @@ linter:
     public_member_api_docs: false # Tool does not have any public API.
     unawaited_futures: true
     unintended_html_in_doc_comment: true
-    unnecessary_ignore: true
     use_null_aware_elements: true
