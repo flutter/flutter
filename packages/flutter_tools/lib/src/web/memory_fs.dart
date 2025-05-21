@@ -14,9 +14,15 @@ import '../convert.dart';
 /// will output web sources, sourcemaps, and metadata to concatenated single files
 /// with an additional manifest file containing the correct offsets.
 class WebMemoryFS {
-  final Map<String, Uint8List> metadataFiles = <String, Uint8List>{};
-  final Map<String, Uint8List> files = <String, Uint8List>{};
-  final Map<String, Uint8List> sourcemaps = <String, Uint8List>{};
+  final Map<String, Uint8List> _metadataFiles = <String, Uint8List>{};
+  Uint8List? metadataFile(String path) => _metadataFiles[path];
+
+  final Map<String, Uint8List> _files = <String, Uint8List>{};
+  void writeFile(String path, Uint8List contents) => _files[path] = contents;
+  Uint8List? getFile(String path) => _files[path];
+
+  final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  Uint8List? sourceMap(String path) => _sourcemaps[path];
 
   String? get mergedMetadata => _mergedMetadata;
   String? _mergedMetadata;
@@ -47,7 +53,7 @@ class WebMemoryFS {
       }
       final Uint8List byteView = Uint8List.view(codeBytes.buffer, codeStart, codeEnd - codeStart);
       final String fileName = filePath.startsWith('/') ? filePath.substring(1) : filePath;
-      files[fileName] = byteView;
+      _files[fileName] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
@@ -60,7 +66,7 @@ class WebMemoryFS {
         sourcemapEnd - sourcemapStart,
       );
       final String sourcemapName = '$fileName.map';
-      sourcemaps[sourcemapName] = sourcemapView;
+      _sourcemaps[sourcemapName] = sourcemapView;
 
       final int metadataStart = metadataOffsets[0];
       final int metadataEnd = metadataOffsets[1];
@@ -73,12 +79,12 @@ class WebMemoryFS {
         metadataEnd - metadataStart,
       );
       final String metadataName = '$fileName.metadata';
-      metadataFiles[metadataName] = metadataView;
+      _metadataFiles[metadataName] = metadataView;
 
       modules.add(fileName);
     }
 
-    _mergedMetadata = metadataFiles.values
+    _mergedMetadata = _metadataFiles.values
         .map((Uint8List encoded) => utf8.decode(encoded))
         .join('\n');
 

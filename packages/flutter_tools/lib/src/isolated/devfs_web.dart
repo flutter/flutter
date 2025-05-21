@@ -140,10 +140,6 @@ class WebAssetServer implements AssetReader {
     }
   }
 
-  // Fallback to "application/octet-stream" on null which
-  // makes no claims as to the structure of the data.
-  static const String _kDefaultMimeType = 'application/octet-stream';
-
   final Map<String, String> _modules;
   final Map<String, String> _digests;
 
@@ -174,7 +170,7 @@ class WebAssetServer implements AssetReader {
       final String name = moduleName.replaceAll('.lib.js', '');
       final String path = moduleName.replaceAll('.js', '');
       _modules[name] = path;
-      _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
+      _digests[name] = getFile(moduleName).hashCode.toString();
     }
     if (writeRestartScripts) {
       final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
@@ -211,8 +207,7 @@ class WebAssetServer implements AssetReader {
     final List<Map<String, Object>> moduleToLibrary = <Map<String, Object>>[];
     for (final String module in modules) {
       final ModuleMetadata metadata = ModuleMetadata.fromJson(
-        json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
-            as Map<String, dynamic>,
+        json.decode(utf8.decode(getMetadata('$module.metadata')!.toList())) as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
@@ -362,10 +357,7 @@ class WebAssetServer implements AssetReader {
         if (request.url.path.endsWith('dwds/src/injected/client.js')) {
           final Uri uri = directory.uri.resolve('src/injected/client.js');
           final String result = await globals.fs.file(uri.toFilePath()).readAsString();
-          return shelf.Response.ok(
-            result,
-            headers: <String, String>{HttpHeaders.contentTypeHeader: 'application/javascript'},
-          );
+          return jsResponse(result);
         }
         return innerHandler(request);
       };
@@ -474,13 +466,13 @@ class WebAssetServer implements AssetReader {
   HttpHeaders get defaultResponseHeaders => _httpServer.defaultResponseHeaders;
 
   @visibleForTesting
-  Uint8List? getFile(String path) => _webMemoryFS.files[path];
+  Uint8List? getFile(String path) => _webMemoryFS.getFile(path);
 
   @visibleForTesting
-  Uint8List? getSourceMap(String path) => _webMemoryFS.sourcemaps[path];
+  Uint8List? getSourceMap(String path) => _webMemoryFS.sourceMap(path);
 
   @visibleForTesting
-  Uint8List? getMetadata(String path) => _webMemoryFS.metadataFiles[path];
+  Uint8List? getMetadata(String path) => _webMemoryFS.metadataFile(path);
 
   /// The base path to serve from.
   ///
@@ -509,7 +501,7 @@ class WebAssetServer implements AssetReader {
     }
 
     if (requestPath == 'flutter_bootstrap.js') {
-      return _serveFlutterBootstrapJs();
+      return jsResponse(_flutterBootstrapJsContent);
     }
 
     final Map<String, String> headers = <String, String>{};
@@ -521,9 +513,10 @@ class WebAssetServer implements AssetReader {
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
     final String webServerPath = requestPath.replaceFirst('.dart.js', '.dart.lib.js');
-    if (_webMemoryFS.files.containsKey(requestPath) ||
-        _webMemoryFS.files.containsKey(webServerPath)) {
-      final List<int>? bytes = getFile(requestPath) ?? getFile(webServerPath);
+    final Uint8List? requestBytes = getFile(requestPath);
+    final Uint8List? webServerBytes = getFile(webServerPath);
+    if (requestBytes != null || webServerBytes != null) {
+      final Uint8List? bytes = requestBytes ?? webServerBytes;
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.
@@ -537,28 +530,28 @@ class WebAssetServer implements AssetReader {
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
-    if (_webMemoryFS.sourcemaps.containsKey(requestPath)) {
-      final List<int>? bytes = getSourceMap(requestPath);
-      final String etag = bytes.hashCode.toString();
+    final Uint8List? sourceMapBytes = getSourceMap(requestPath);
+    if (sourceMapBytes != null) {
+      final String etag = sourceMapBytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
       headers[HttpHeaders.etagHeader] = etag;
-      return shelf.Response.ok(bytes, headers: headers);
+      return shelf.Response.ok(sourceMapBytes, headers: headers);
     }
 
     // If this is a metadata file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
-    if (_webMemoryFS.metadataFiles.containsKey(requestPath)) {
-      final List<int>? bytes = getMetadata(requestPath);
-      final String etag = bytes.hashCode.toString();
+    final Uint8List? metadataBytes = getMetadata(requestPath);
+    if (metadataBytes != null) {
+      final String etag = metadataBytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
       }
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
       headers[HttpHeaders.etagHeader] = etag;
-      return shelf.Response.ok(bytes, headers: headers);
+      return shelf.Response.ok(metadataBytes, headers: headers);
     }
 
     File file = _resolveDartFile(requestPath);
@@ -615,12 +608,10 @@ class WebAssetServer implements AssetReader {
     // Attempt to determine the file's mime type. if this is not provided some
     // browsers will refuse to render images/show video etc. If the tool
     // cannot determine a mime type, fall back to application/octet-stream.
-    final String mimeType =
-        mime.lookupMimeType(
-          file.path,
-          headerBytes: await file.openRead(0, mime.defaultMagicNumbersMaxLength).first,
-        ) ??
-        _kDefaultMimeType;
+    final String mimeType = _mimeType(
+      file.path,
+      await file.openRead(0, mime.defaultMagicNumbersMaxLength).first,
+    );
 
     headers[HttpHeaders.contentLengthHeader] = length.toString();
     headers[HttpHeaders.contentTypeHeader] = mimeType;
@@ -642,7 +633,7 @@ class WebAssetServer implements AssetReader {
   }
 
   void writeBytes(String filePath, Uint8List contents) {
-    _webMemoryFS.files[filePath] = contents;
+    _webMemoryFS.writeFile(filePath, contents);
   }
 
   /// Determines what rendering backed to use.
@@ -690,16 +681,9 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     );
   }
 
-  shelf.Response _serveFlutterBootstrapJs() {
-    return shelf.Response.ok(
-      _flutterBootstrapJsContent,
-      headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
-    );
-  }
-
   shelf.Response _serveIndexHtml() {
     final WebTemplate indexHtml = _getWebTemplate('index.html', _kDefaultIndex);
-    return shelf.Response.ok(
+    return simpleResponse(
       indexHtml.withSubstitutions(
         // Currently, we don't support --base-href for the "run" command.
         baseHref: '/',
@@ -708,7 +692,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
       ),
-      headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
+      'text/html',
     );
   }
 
@@ -801,7 +785,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   @override
   Future<String> sourceMapContents(String serverPath) async {
     serverPath = _stripBasePath(serverPath, basePath)!;
-    return utf8.decode(_webMemoryFS.sourcemaps[serverPath]!);
+    return utf8.decode(getSourceMap(serverPath)!);
   }
 
   @override
@@ -810,8 +794,9 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     if (resultPath == 'main_module.ddc_merged_metadata') {
       return _webMemoryFS.mergedMetadata;
     }
-    if (_webMemoryFS.metadataFiles.containsKey(resultPath)) {
-      return utf8.decode(_webMemoryFS.metadataFiles[resultPath]!);
+    final Uint8List? content = getMetadata(resultPath!);
+    if (content != null) {
+      return utf8.decode(content);
     }
     throw Exception('Could not find metadata contents for $serverPath');
   }
@@ -1162,11 +1147,11 @@ class WebDevFS implements DevFS {
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
-    late File codeFile;
+    File codeFile;
     File manifestFile;
     File sourcemapFile;
     File metadataFile;
-    late List<String> modules;
+    List<String> modules;
     try {
       final Directory parentDirectory = globals.fs.directory(outputDirectoryPath);
       codeFile = parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
@@ -1325,8 +1310,7 @@ class ReleaseAssetServer {
       final Uint8List bytes = file.readAsBytesSync();
       // Fallback to "application/octet-stream" on null which
       // makes no claims as to the structure of the data.
-      final String mimeType =
-          mime.lookupMimeType(file.path, headerBytes: bytes) ?? 'application/octet-stream';
+      final String mimeType = _mimeType(file.path, bytes);
       return shelf.Response.ok(
         bytes,
         headers: <String, String>{
@@ -1392,3 +1376,9 @@ String _htmlTemplate(String filename, String fallbackContent) {
   final File template = globals.fs.currentDirectory.childDirectory('web').childFile(filename);
   return template.existsSync() ? template.readAsStringSync() : fallbackContent;
 }
+
+String _mimeType(String filePath, List<int> headerBytes) =>
+    mime.lookupMimeType(filePath, headerBytes: headerBytes) ??
+    // Fallback to "application/octet-stream" on null which
+    // makes no claims as to the structure of the data.
+    'application/octet-stream';

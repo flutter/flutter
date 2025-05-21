@@ -21,7 +21,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -316,93 +315,59 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   Future<shelf.Response> _handleTestRequest(shelf.Request request) async {
     if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
-      return shelf.Response.ok(
+      return jsResponse(
         generateTestBootstrapFileContents(
           '/main.dart.bootstrap.js',
           'require.js',
           'dart_stack_trace_mapper.js',
         ),
-        headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
     }
     if (request.url.path.endsWith('main.dart.bootstrap.js')) {
-      return shelf.Response.ok(
+      return jsResponse(
         generateMainModule(
           nativeNullAssertions: true,
           bootstrapModule: 'main.dart.bootstrap',
           entrypoint: '/main.dart.js',
         ),
-        headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
       );
     }
     if (request.url.path.endsWith('.dart.js')) {
       final String path = request.url.path.split('.dart.js')[0];
-      return shelf.Response.ok(
-        webMemoryFS.files['$path.dart.lib.js'],
-        headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/javascript'},
-      );
+      webMemoryFS.getFile('$path.dart.lib.js');
+      return jsResponse(webMemoryFS.getFile('$path.dart.lib.js'));
     }
     if (request.url.path.endsWith('.lib.js.map')) {
-      return shelf.Response.ok(
-        webMemoryFS.sourcemaps[request.url.path],
-        headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/plain'},
-      );
+      return simpleResponse(webMemoryFS.sourceMap(request.url.path), 'text/plain');
     }
     return shelf.Response.notFound('');
   }
 
   Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
     if (request.requestedUri.path.contains('require.js')) {
-      return shelf.Response.ok(
-        _requireJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_requireJs.openRead());
     } else if (request.requestedUri.path.contains('ddc_module_loader.js')) {
-      return shelf.Response.ok(
-        _ddcModuleLoaderJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_ddcModuleLoaderJs.openRead());
     } else if (request.requestedUri.path.contains('ahem.ttf')) {
-      return shelf.Response.ok(_ahem.openRead());
+      return simpleResponse(_ahem.openRead(), 'font/ttf');
     } else if (request.requestedUri.path.contains('dart_sdk.js')) {
-      return shelf.Response.ok(
-        _dartSdk.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_dartSdk.openRead());
     } else if (request.requestedUri.path.contains('dart_sdk.js.map')) {
-      return shelf.Response.ok(
-        _dartSdkSourcemaps.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return simpleResponse(_dartSdkSourcemaps.openRead(), 'text/plain');
     } else if (request.requestedUri.path.contains('dart_stack_trace_mapper.js')) {
-      return shelf.Response.ok(
-        _stackTraceMapper.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_stackTraceMapper.openRead());
     } else if (request.requestedUri.path.contains('static/dart.js')) {
-      return shelf.Response.ok(
-        _testDartJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_testDartJs.openRead());
     } else if (request.requestedUri.path.contains('host.dart.js')) {
-      return shelf.Response.ok(
-        _testHostDartJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_testHostDartJs.openRead());
     } else if (request.requestedUri.path.contains('flutter.js')) {
-      return shelf.Response.ok(
-        _flutterJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_flutterJs.openRead());
     } else if (request.requestedUri.path.contains('main.dart.mjs')) {
-      return shelf.Response.ok(
-        _buildDirectory.childFile('main.dart.mjs').openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
+      return jsResponse(_buildDirectory.childFile('main.dart.mjs').openRead());
     } else if (request.requestedUri.path.contains('main.dart.wasm')) {
-      return shelf.Response.ok(
+      return simpleResponse(
         _buildDirectory.childFile('main.dart.wasm').openRead(),
-        headers: <String, String>{'Content-Type': 'application/wasm'},
+        'application/wasm',
       );
     } else {
       return shelf.Response.notFound('Not Found');
@@ -448,17 +413,20 @@ class FlutterWebPlatform extends PlatformPlugin {
       if (body.containsKey('bytes')) {
         bytes = base64.decode(body['bytes']! as String);
       } else {
-        return shelf.Response.ok('Request must contain bytes in the body.');
+        return shelf.Response.badRequest(body: 'Request must contain bytes in the body.');
       }
       if (updateGoldens) {
         return switch (await _testGoldenComparator.update(testUri, bytes, goldenKey)) {
           TestGoldenUpdateDone() => shelf.Response.ok('true'),
-          TestGoldenUpdateError(error: final String error) => shelf.Response.ok(error),
+          TestGoldenUpdateError(error: final String error) => shelf.Response.internalServerError(
+            body: error,
+          ),
         };
       } else {
         return switch (await _testGoldenComparator.compare(testUri, bytes, goldenKey)) {
           TestGoldenComparisonDone(matched: final bool matched) => shelf.Response.ok('$matched'),
-          TestGoldenComparisonError(error: final String error) => shelf.Response.ok(error),
+          TestGoldenComparisonError(error: final String error) => shelf
+              .Response.internalServerError(body: error),
         };
       }
     } else {
@@ -489,10 +457,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
 
     final File canvasKitFile = _canvasKitFile(relativePath);
-    return shelf.Response.ok(
-      canvasKitFile.openRead(),
-      headers: <String, Object>{HttpHeaders.contentTypeHeader: contentType},
-    );
+    return simpleResponse(canvasKitFile.openRead(), contentType);
   }
 
   String _makeBuildConfigString() {

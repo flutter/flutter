@@ -172,7 +172,7 @@ class IconTreeShaker {
     }
     final String? mimeType = mime.lookupMimeType(
       input.path,
-      headerBytes: await input.openRead(0, 12).first,
+      headerBytes: await input.openRead(0, mime.defaultMagicNumbersMaxLength).first,
     );
     if (!kTtfMimeTypes.contains(mimeType)) {
       return false;
