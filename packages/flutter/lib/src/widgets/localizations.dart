@@ -727,6 +727,12 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   void update({
     required Locale? locale,
     required LocaleListResolutionCallback? localeListResolutionCallback,
