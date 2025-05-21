@@ -273,7 +273,7 @@ class SemanticsNodeUpdate {
   final int id;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final List<bool> flags;
+  final ui.SemanticsFlags flags;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int actions;

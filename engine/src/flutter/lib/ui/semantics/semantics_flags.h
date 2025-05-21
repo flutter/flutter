@@ -95,7 +95,7 @@ class NativeSemanticsFlags
                                  bool isRequired);
 
   //----------------------------------------------------------------------------
-  /// Returns the c++ representataion of sSemanticsFlags.
+  /// Returns the c++ representataion of SemanticsFlags.
 
   const SemanticsFlags GetFlags() const;
 
