@@ -1491,6 +1491,7 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool fullscreenDialog = false,
   bool? requestFocus,
   AnimationStyle? animationStyle,
 }) {
@@ -1520,6 +1521,7 @@ Future<T?> showDialog<T>({
       traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
       requestFocus: requestFocus,
       animationStyle: animationStyle,
+      fullscreenDialog: fullscreenDialog,
     ),
   );
 }
@@ -1658,6 +1660,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
+    super.fullscreenDialog,
     AnimationStyle? animationStyle,
   }) : _animationStyle = animationStyle,
        super(

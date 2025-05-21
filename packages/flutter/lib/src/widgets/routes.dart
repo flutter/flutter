@@ -2170,6 +2170,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
+  /// {@macro flutter.widgets.RawDialogRoute.fullscreenDialog}
+  // TODO(dkwingsmt): Rename `ModalRoute.fullscreenDialog` something semantically suitable for a modal.
+  // https://github.com/flutter/flutter/issues/168949
+  bool get fullscreenDialog => false;
+
   // Internals
 
   final GlobalKey<_ModalScopeState<T>> _scopeKey = GlobalKey<_ModalScopeState<T>>();
@@ -2497,6 +2502,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     this.anchorPoint,
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
+    this.fullscreenDialog = false,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
@@ -2526,6 +2532,17 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
+
+  /// {@template flutter.widgets.RawDialogRoute.fullscreenDialog}
+  /// Whether this route is a full-screen dialog.
+  ///
+  /// In Material and Cupertino, being fullscreen has the effects of making
+  /// the app bars have a close button instead of a back button. On
+  /// iOS, dialogs transitions animate differently and are also not closeable
+  /// with the back swipe gesture.
+  /// {@endtemplate}
+  @override
+  final bool fullscreenDialog;
 
   @override
   Widget buildPage(
@@ -2646,6 +2663,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   Duration transitionDuration = const Duration(milliseconds: 200),
   RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
+  bool fullscreenDialog = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   bool? requestFocus,
@@ -2662,6 +2680,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
+      fullscreenDialog: fullscreenDialog,
     ),
   );
 }
