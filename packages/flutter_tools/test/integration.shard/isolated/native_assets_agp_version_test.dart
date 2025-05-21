@@ -30,10 +30,6 @@ void main() {
     return;
   }
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   for (final String agpVersion in agpVersions) {
     for (final String buildMode in buildModes) {
       testWithoutContext(

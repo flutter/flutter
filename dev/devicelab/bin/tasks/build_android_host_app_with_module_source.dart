@@ -66,13 +66,6 @@ class ModuleTest {
 
       section('Create package with native assets');
 
-      await flutter(
-        'config',
-        options: <String>['--enable-native-assets'],
-        output: stdout,
-        stderr: stderr,
-      );
-
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 

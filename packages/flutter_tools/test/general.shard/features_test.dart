@@ -312,9 +312,9 @@ void main() {
       expect(
         nativeAssets,
         allOf(<Matcher>[
-          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('master', available: true, enabledByDefault: true),
           _onChannelIs('stable', available: false, enabledByDefault: false),
-          _onChannelIs('beta', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: true),
         ]),
       );
     });
