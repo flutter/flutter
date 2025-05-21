@@ -19,15 +19,15 @@
 // RSuperellipse curves at a given angle `theta`.
 //
 // The range is divided at the point where the RRect transitions from a straight
-// edge to a rounded corner (marked as `peakRadian`), since this is where the
+// edge to a rounded corner (marked as `splitRadian`), since this is where the
 // shape difference becomes most noticeable.
 //
-// For theta < peakRadian, the RRect edge is a straight line and the
+// For theta < splitRadian, the RRect edge is a straight line and the
 // RSuperellipse has a known superellipse formula, so we can directly compute
 // the distance between them.
 //
-// For theta > peakRadian, the exact expressions for both curves are too complex
-// to evaluate efficiently. Instead, we approximate the distance using a
+// For theta > splitRadian, the exact expressions for both curves are too
+// complex to evaluate efficiently. Instead, we approximate the distance using a
 // heuristic polynomial fit. This is based on the observation that the
 // difference curve rises, then falls smoothly, eventually reaching zero with
 // zero slope.
@@ -54,9 +54,9 @@ uniform FragInfo {
 
   float octantOffset;
   // Information to compute retraction for two octants respectively.
-  // [peakRadian, n, peakGap]
-  vec3 infoTop;
-  vec3 infoRight;
+  // [splitRadian, splitGap, n, nInvNeg]
+  vec4 infoTop;
+  vec4 infoRight;
   vec4 polyTop;
   vec4 polyRight;
   // Retraction penetration depth.
@@ -101,30 +101,31 @@ void main() {
   /**** Start of RSuperellipse math ****/
 
   bool useTop = (centered.y - frag_info.octantOffset) > centered.x;
-  vec3 angularInfo = useTop ? frag_info.infoTop : frag_info.infoRight;
+  vec4 angularInfo = useTop ? frag_info.infoTop : frag_info.infoRight;
   float theta =
       atan(useTop ? centered.x / (centered.y - frag_info.octantOffset)
                   : centered.y / (centered.x + frag_info.octantOffset));
 
-  float peakRadian = angularInfo[0];
-  float n = angularInfo[1];
-  float peakGap = angularInfo[2];
+  float splitRadian = angularInfo[0];
+  float splitGap = angularInfo[1];
+  float n = angularInfo[2];
+  float nInvNeg = angularInfo[3];
 
   float baseRetraction;
-  if (theta < peakRadian) {
+  if (theta < splitRadian) {
     float a = useTop ? frag_info.center.x : frag_info.center.y;
-    baseRetraction = (1.0 - POW(1.0 + POW(tan(theta), n), -1.0 / n)) * a;
+    baseRetraction = (1.0 - POW(1.0 + POW(tan(theta), n), nInvNeg)) * a;
   } else {
-    float t = (theta - peakRadian) / (kPiOverFour - peakRadian);
+    float t = (theta - splitRadian) / (kPiOverFour - splitRadian);
     float tt = t * t;
     float ttt = tt * t;
-    float retProg = dot(vec4(ttt, tt, t, 1),
+    float retProg = dot(vec4(ttt, tt, t, 1.0),
                         useTop ? frag_info.polyTop : frag_info.polyRight);
     // Squaring `retProg` improves results empirically by boosting values > 1
     // and dampening values < 1.
-    baseRetraction = retProg * retProg * peakGap;
+    baseRetraction = retProg * retProg * splitGap;
   }
-  float depthProg = smoothstep(-frag_info.retractionDepth, 0., d);
+  float depthProg = smoothstep(-frag_info.retractionDepth, 0.0, -abs(d));
   d += baseRetraction * depthProg;
 
   /**** End of RSuperellipse math ****/

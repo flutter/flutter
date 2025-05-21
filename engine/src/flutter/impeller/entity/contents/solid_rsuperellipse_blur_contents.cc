@@ -55,12 +55,19 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   frag_info.octantOffset = (rect.GetHeight() - rect.GetWidth()) / 2;
 
   auto compute_info = [radius](RoundSuperellipseParam::Octant& octant) {
+    if (octant.se_n < 1) {  // A rectangular corner
+      // Use a large split_radian, which is equivalent to kPiOver4 but avoids
+      // floating errors.
+      const Scalar kLargeSplitRadian = kPiOver2;
+      const Scalar kReallyLargeN = 1e10;
+      return Vector4(kLargeSplitRadian, 0, kReallyLargeN, -1.0 / kReallyLargeN);
+    }
     Scalar n = octant.se_n;
-    Point point_peak = Point(octant.se_a - radius, octant.se_a);
-    Scalar peak_radian = std::atan2(point_peak.x, point_peak.y);
-    Scalar peak_gap =
-        (1 - pow(1 + pow(tan(peak_radian), n), -1 / n)) * octant.se_a;
-    return Vector3(peak_radian, n, peak_gap);
+    Point split_point = Point(octant.se_a - radius, octant.se_a);
+    Scalar split_radian = std::atan2(split_point.x, split_point.y);
+    Scalar split_retraction =
+        (1 - pow(1 + pow(tan(split_radian), n), -1.0 / n)) * octant.se_a;
+    return Vector4(split_radian, split_retraction, n, -1.0 / n);
   };
   frag_info.infoTop = compute_info(param.top_right.top);
   frag_info.infoRight = compute_info(param.top_right.right);
@@ -75,8 +82,8 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   frag_info.polyTop = compute_poly(param.top_right.top);
   frag_info.polyRight = compute_poly(param.top_right.right);
 
-  // A polynomial that satisfies f(0) = 1, f'(0) = v0, f(1) = 0, f'(1) = 0
-  frag_info.retractionDepth = radius;
+  // Avoid 0-division error when radius is 0.
+  frag_info.retractionDepth = fmax(radius, 0.001);
 
   // Back to pass setup.
   auto& host_buffer = renderer.GetTransientsBuffer();
