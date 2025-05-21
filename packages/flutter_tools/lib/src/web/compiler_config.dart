@@ -69,18 +69,6 @@ class JsCompilerConfig extends WebCompilerConfig {
     required WebRendererMode renderer,
   }) : this(nativeNullAssertions: nativeNullAssertions, renderer: renderer);
 
-  /// Build environment flag for [dumpInfo].
-  static const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
-
-  /// Build environment flag for [noFrequencyBasedMinification].
-  static const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
-
-  /// Build environment flag for [csp].
-  static const String kCspMode = 'cspMode';
-
-  /// Build environment flag for [nativeNullAssertions].
-  static const String kNativeNullAssertions = 'NativeNullAssertions';
-
   /// Whether to disable dynamic generation code to satisfy CSP policies.
   final bool csp;
 

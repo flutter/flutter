@@ -1019,8 +1019,8 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.datePickerTheme] if it doesn't
-  ///    find a [DatePickerTheme] ancestor, instead of returning null.
+  ///  * [of], which will return the data from [ThemeData.datePickerTheme] if
+  ///    it doesn't find a [DatePickerTheme] ancestor, instead of returning null.
   ///  * [defaults], which will return the default properties used when no
   ///    other [DatePickerTheme] has been provided.
   static DatePickerThemeData? maybeOf(BuildContext context) {
@@ -1034,8 +1034,8 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.datePickerTheme] if it doesn't
-  ///    find a [DatePickerTheme] ancestor, instead of returning null.
+  ///  * [of], which will return the data from [ThemeData.datePickerTheme] if
+  ///    it doesn't find a [DatePickerTheme] ancestor, instead of returning null.
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [DatePickerTheme] ancestor.
   static DatePickerThemeData defaults(BuildContext context) {

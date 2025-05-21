@@ -25,7 +25,6 @@
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/vector.h"
@@ -201,7 +200,17 @@ class Canvas {
 
   void DrawOval(const Rect& rect, const Paint& paint);
 
+  void DrawArc(const Rect& oval_bounds,
+               Scalar start_degrees,
+               Scalar sweep_degrees,
+               bool use_center,
+               const Paint& paint);
+
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
+
+  void DrawDiffRoundRect(const RoundRect& outer,
+                         const RoundRect& inner,
+                         const Paint& paint);
 
   void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
 

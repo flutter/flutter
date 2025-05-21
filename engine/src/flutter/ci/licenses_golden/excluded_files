@@ -35,6 +35,7 @@
 ../../../flutter/display_list/effects/dl_image_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_mask_filter_unittests.cc
 ../../../flutter/display_list/geometry/dl_geometry_types_unittests.cc
+../../../flutter/display_list/geometry/dl_path_builder_unittests.cc
 ../../../flutter/display_list/geometry/dl_path_unittests.cc
 ../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
@@ -174,7 +175,6 @@
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_source_unittests.cc
-../../../flutter/impeller/geometry/path_unittests.cc
 ../../../flutter/impeller/geometry/rational_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc
@@ -348,6 +348,7 @@
 ../../../flutter/shell/platform/darwin/common/availability_version_check_unittests.cc
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
+../../../flutter/shell/platform/darwin/common/framework/Source/framework_common_swift_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_context_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_surface_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/macos/README.md
@@ -3008,7 +3009,6 @@
 ../../../flutter/third_party/skia/PRESUBMIT_test_mocks.py
 ../../../flutter/third_party/skia/README
 ../../../flutter/third_party/skia/README.chromium
-../../../flutter/third_party/skia/WORKSPACE.bazel
 ../../../flutter/third_party/skia/bazel
 ../../../flutter/third_party/skia/bench
 ../../../flutter/third_party/skia/codereview.settings
@@ -3055,7 +3055,6 @@
 ../../../flutter/third_party/skia/gn/run_sksllex.py
 ../../../flutter/third_party/skia/gn/skqp_gn_args.py
 ../../../flutter/third_party/skia/gn/toolchain/num_cpus.py
-../../../flutter/third_party/skia/go_repositories.bzl
 ../../../flutter/third_party/skia/include/BUILD.bazel
 ../../../flutter/third_party/skia/include/OWNERS
 ../../../flutter/third_party/skia/include/android/BUILD.bazel
@@ -3284,9 +3283,7 @@
 ../../../flutter/third_party/skia/third_party/README
 ../../../flutter/third_party/skia/third_party/etc1/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/etc1/README.google
-../../../flutter/third_party/skia/third_party/expat/include/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/freetype2
-../../../flutter/third_party/skia/third_party/harfbuzz/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/harfbuzz/README
 ../../../flutter/third_party/skia/third_party/icu
 ../../../flutter/third_party/skia/third_party/libgrapheme/generate_headers.py
