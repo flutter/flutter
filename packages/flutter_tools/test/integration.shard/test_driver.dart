@@ -10,7 +10,8 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice, WebServerDevice;
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -530,7 +531,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    String device = 'flutter-tester',
+    String device = FlutterTesterDevices.kTesterDeviceId,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool serveObservatory = false,
@@ -547,10 +548,8 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
           '--web-run-headless',
           if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
         ];
-      case WebServerDevice.kWebServerDeviceId:
-        deviceArgs = <String>[WebServerDevice.kWebServerDeviceId];
       default:
-        deviceArgs = <String>['flutter-tester'];
+        deviceArgs = <String>[device];
     }
 
     await _setupProcess(

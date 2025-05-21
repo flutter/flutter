@@ -27,9 +27,9 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
   'hooks':
-      '0.19.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.19.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'hooks_runner':
-      '0.19.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.20.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
   'test': '1.25.15', // https://github.com/dart-lang/test/issues/2498
   'test_api': '0.7.4', // https://github.com/dart-lang/test/issues/2498

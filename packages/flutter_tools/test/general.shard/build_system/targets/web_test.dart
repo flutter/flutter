@@ -530,7 +530,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with csp',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      environment.defines[JsCompilerConfig.kCspMode] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -750,7 +749,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode with native null assertions',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      environment.defines[JsCompilerConfig.kNativeNullAssertions] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -1081,7 +1079,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with dump-info',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      environment.defines[JsCompilerConfig.kDart2jsDumpInfo] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -1128,7 +1125,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with no-frequency-based-minification',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      environment.defines[JsCompilerConfig.kDart2jsNoFrequencyBasedMinification] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[

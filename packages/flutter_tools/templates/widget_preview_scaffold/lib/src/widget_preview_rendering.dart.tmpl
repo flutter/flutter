@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -148,6 +148,33 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   }
 }
 
+class Preview extends StatelessWidget {
+  const Preview({super.key, required this.preview, required this.child});
+
+  final WidgetPreview preview;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  @override
+  String toStringShort() {
+    final StringBuffer buffer = StringBuffer('@Preview');
+    if (preview.name != null) {
+      buffer.write('(name: "${preview.name}")');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    preview.debugFillProperties(properties);
+  }
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({super.key, required this.preview});
 
@@ -226,7 +253,12 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             key: key,
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
-              child: widget.preview.builder(),
+              child: EnableWidgetInspectorScope(
+                child: Preview(
+                  preview: widget.preview,
+                  child: widget.preview.builder(),
+                ),
+              ),
             ),
           );
           if (performRestart) {
@@ -625,7 +657,13 @@ Future<void> mainImpl() async {
   binding.debugExcludeRootWidgetInspector = true;
   // TODO(bkonyi): store somewhere.
   await WidgetPreviewScaffoldDtdServices().connect();
-  runApp(WidgetPreviewScaffold(previews: previews));
+  runWidget(
+    DisableWidgetInspectorScope(
+      child: binding.wrapWithDefaultView(
+        WidgetPreviewScaffold(previews: previews),
+      ),
+    ),
+  );
 }
 
 /// Define the Enum for Layout Types
