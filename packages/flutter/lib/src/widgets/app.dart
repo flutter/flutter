@@ -1475,6 +1475,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _defaultRouteInformationProvider?.dispose();
+    _localizationsResolver.dispose();
     super.dispose();
   }
 

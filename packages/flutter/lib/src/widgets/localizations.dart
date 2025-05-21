@@ -10,11 +10,11 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'app.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 
@@ -806,6 +806,9 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     // Both callbacks failed, falling back to default algorithm.
     return basicLocaleListResolution(preferredLocales, supportedLocales);
   }
+
+  @override
+  String toString() => '$LocalizationsResolver';
 
   bool _debugCheckLocalizations(Locale locale) {
     assert(() {
