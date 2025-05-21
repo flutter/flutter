@@ -999,7 +999,7 @@ void main() {
   }
 }
 ''');
-        await CheckForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
+        await checkForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
         expect(
           logger.warningText,
           startsWith(
@@ -1022,7 +1022,7 @@ void main() {
   }
 }
 ''');
-        await CheckForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
+        await checkForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
         expect(logger.warningText, equals(''));
       });
 
@@ -1039,7 +1039,7 @@ void main() {
 
 @end
 ''');
-        await CheckForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+        await checkForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
         expect(
           logger.warningText,
           startsWith('AppDelegate.m:6: warning: Flutter deprecation: Accessing rootViewController'),
@@ -1062,7 +1062,7 @@ void main() {
 
 @end
 ''');
-        await CheckForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+        await checkForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
         expect(logger.warningText, equals(''));
       });
     });

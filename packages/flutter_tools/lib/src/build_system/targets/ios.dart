@@ -404,7 +404,10 @@ Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
   }
 }
 
-Future<void> CheckForLaunchRootViewControllerAccessDeprecationObjc(
+/// Checks [file] representing objc code for deprecated usage of the
+/// rootViewController and writes it to [logger].
+@visibleForTesting
+Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(
   Logger logger,
   File file,
 ) async => _CheckForLaunchRootViewControllerAccessDeprecation(
@@ -414,7 +417,10 @@ Future<void> CheckForLaunchRootViewControllerAccessDeprecationObjc(
   RegExp('^}')
 );
 
-Future<void> CheckForLaunchRootViewControllerAccessDeprecationSwift(
+/// Checks [file] representing swift code for deprecated usage of the
+/// rootViewController and writes it to [logger].
+@visibleForTesting
+Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
   Logger logger,
   File file,
 ) async => _CheckForLaunchRootViewControllerAccessDeprecation(
@@ -435,13 +441,13 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   Future<void> build(Environment environment) async {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     if (flutterProject.ios.appDelegateSwift.existsSync()) {
-      await CheckForLaunchRootViewControllerAccessDeprecationSwift(
+      await checkForLaunchRootViewControllerAccessDeprecationSwift(
         environment.logger,
         flutterProject.ios.appDelegateSwift,
       );
     }
     if (flutterProject.ios.appDelegateObjc.existsSync()) {
-      await CheckForLaunchRootViewControllerAccessDeprecationObjc(
+      await checkForLaunchRootViewControllerAccessDeprecationObjc(
         environment.logger,
         flutterProject.ios.appDelegateObjc,
       );
