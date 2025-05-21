@@ -64,9 +64,6 @@ class BuildAarCommand extends BuildSubCommand {
   final String name = 'aar';
 
   @override
-  bool get reportNullSafety => false;
-
-  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
   };

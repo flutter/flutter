@@ -374,6 +374,15 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen(log);
 
+    // Retrieve connected web devices.
+    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
+    final Set<String> connectedWebDeviceIds =
+        devices
+            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
+            .map((Device d) => d.id)
+            .toSet() ??
+        <String>{};
+
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -424,10 +433,12 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Defaults to 'chrome' if deviceManager or specifiedDeviceId is null,
-      // ensuring the condition is true by default.
+      // Inject the debugging support code if connected web devices are present,
+      // and user specified a device id that matches a connected web device.
+      // If the user did not specify a device id, we use chrome as the default.
       injectDebuggingSupportCode:
-          (globals.deviceManager?.specifiedDeviceId ?? 'chrome') == 'chrome',
+          connectedWebDeviceIds.isNotEmpty &&
+          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {

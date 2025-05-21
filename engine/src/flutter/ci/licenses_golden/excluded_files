@@ -1069,6 +1069,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
+../../../flutter/third_party/boringssl/src/crypto/xwing/xwing_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/blowfish/blowfish_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cast/cast_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cfb/cfb_test.cc
@@ -3009,7 +3010,6 @@
 ../../../flutter/third_party/skia/PRESUBMIT_test_mocks.py
 ../../../flutter/third_party/skia/README
 ../../../flutter/third_party/skia/README.chromium
-../../../flutter/third_party/skia/WORKSPACE.bazel
 ../../../flutter/third_party/skia/bazel
 ../../../flutter/third_party/skia/bench
 ../../../flutter/third_party/skia/codereview.settings
@@ -3056,7 +3056,6 @@
 ../../../flutter/third_party/skia/gn/run_sksllex.py
 ../../../flutter/third_party/skia/gn/skqp_gn_args.py
 ../../../flutter/third_party/skia/gn/toolchain/num_cpus.py
-../../../flutter/third_party/skia/go_repositories.bzl
 ../../../flutter/third_party/skia/include/BUILD.bazel
 ../../../flutter/third_party/skia/include/OWNERS
 ../../../flutter/third_party/skia/include/android/BUILD.bazel
@@ -3285,9 +3284,7 @@
 ../../../flutter/third_party/skia/third_party/README
 ../../../flutter/third_party/skia/third_party/etc1/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/etc1/README.google
-../../../flutter/third_party/skia/third_party/expat/include/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/freetype2
-../../../flutter/third_party/skia/third_party/harfbuzz/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/harfbuzz/README
 ../../../flutter/third_party/skia/third_party/icu
 ../../../flutter/third_party/skia/third_party/libgrapheme/generate_headers.py
