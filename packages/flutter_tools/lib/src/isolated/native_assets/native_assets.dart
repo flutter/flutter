@@ -661,7 +661,7 @@ Future<DartBuildResult> _runDartBuild({
     globals.logger.printTrace(
       'Note: You are using the dart build hooks feature which is currently '
       'in preview. Please see '
-      'https://github.com/flutter/flutter/issues/129757 for more details.',
+      'https://dart.dev/interop/c-interop#native-assets for more details.',
     );
   }
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
