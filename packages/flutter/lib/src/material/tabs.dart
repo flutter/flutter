@@ -1961,16 +1961,22 @@ class _TabBarState extends State<TabBar> {
             widget.splashBorderRadius ??
             tabBarTheme.splashBorderRadius ??
             _defaults.splashBorderRadius,
-        child: Semantics(
-          role: SemanticsRole.tab,
-          selected: index == _currentIndex,
-          label: kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: widget.indicatorWeight),
-            child: wrappedTabs[index],
+        child: Padding(
+          padding: EdgeInsets.only(bottom: widget.indicatorWeight),
+          child: Stack(
+            children: <Widget>[
+              wrappedTabs[index],
+              Semantics(
+                role: SemanticsRole.tab,
+                selected: index == _currentIndex,
+                label:
+                    kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
+              ),
+            ],
           ),
         ),
       );
+      wrappedTabs[index] = MergeSemantics(child: wrappedTabs[index]);
       if (!widget.isScrollable && effectiveTabAlignment == TabAlignment.fill) {
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
       }
