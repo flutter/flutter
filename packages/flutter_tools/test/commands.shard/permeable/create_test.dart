@@ -4326,49 +4326,61 @@ void main() {
   );
 
   for (final String template in <String>['package_ffi', 'plugin_ffi']) {
-    testUsingContext('$template error android language', () async {
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<String> args = <String>[
-        'create',
-        '--no-pub',
-        '--template=$template',
-        '-a',
-        'kotlin',
-        if (template == 'plugin_ffi') '--platforms=android',
-        projectDir.path,
-      ];
+    testUsingContext(
+      '$template error android language',
+      () async {
+        final CreateCommand command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        final List<String> args = <String>[
+          'create',
+          '--no-pub',
+          '--template=$template',
+          '-a',
+          'kotlin',
+          if (template == 'plugin_ffi') '--platforms=android',
+          projectDir.path,
+        ];
 
-      await expectLater(
-        runner.run(args),
-        throwsToolExit(
-          message:
-              'The "android-language" option is not supported with the $template template: the language will always be C or C++.',
-        ),
-      );
-    });
+        await expectLater(
+          runner.run(args),
+          throwsToolExit(
+            message:
+                'The "android-language" option is not supported with the $template template: the language will always be C or C++.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      },
+    );
 
-    testUsingContext('$template error ios language', () async {
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<String> args = <String>[
-        'create',
-        '--no-pub',
-        '--template=$template',
-        '--ios-language',
-        'swift',
-        if (template == 'plugin_ffi') '--platforms=ios',
-        projectDir.path,
-      ];
+    testUsingContext(
+      '$template error ios language',
+      () async {
+        final CreateCommand command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        final List<String> args = <String>[
+          'create',
+          '--no-pub',
+          '--template=$template',
+          '--ios-language',
+          'swift',
+          if (template == 'plugin_ffi') '--platforms=ios',
+          projectDir.path,
+        ];
 
-      await expectLater(
-        runner.run(args),
-        throwsToolExit(
-          message:
-              'The "ios-language" option is not supported with the $template template: the language will always be C or C++.',
-        ),
-      );
-    });
+        await expectLater(
+          runner.run(args),
+          throwsToolExit(
+            message:
+                'The "ios-language" option is not supported with the $template template: the language will always be C or C++.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+      },
+    );
   }
 
   testUsingContext('FFI plugins error web platform', () async {
