@@ -156,10 +156,10 @@ void main() {
     expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
   });
 
-  testWidgets('tab semanitcs role test', (WidgetTester tester) async {
+  testWidgets('tab semantics role test', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/169175
     final _TestImageProvider imageProvider2 = _TestImageProvider();
-
+    // Creates an image widget that never complete, which will have zero size.
     await tester.pumpWidget(
       boilerplate(
         child: DefaultTabController(
