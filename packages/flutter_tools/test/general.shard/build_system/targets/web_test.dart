@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -21,10 +20,9 @@ import 'package:flutter_tools/src/web_template.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../../src/fake_pub_deps.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
+import '../../../src/throwing_pub.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
@@ -43,15 +41,9 @@ const List<String> _kDart2WasmLinuxArgs = <String>[
 ];
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late Environment environment;
   late FakeProcessManager processManager;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   final Platform linux = FakePlatform(environment: <String, String>{});
   final Platform windows = FakePlatform(
@@ -60,13 +52,13 @@ void main() {
   );
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
 name: foo
 ''');
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'foo': 'foo/'},
@@ -124,8 +116,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -344,8 +335,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -370,8 +360,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -405,8 +394,7 @@ name: foo
       overrides: <Type, Generator>{
         Platform: () => windows,
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -438,8 +426,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -462,8 +449,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -487,8 +473,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -520,8 +505,7 @@ name: foo
       },
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -530,7 +514,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with csp',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      environment.defines[JsCompilerConfig.kCspMode] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -750,7 +733,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode with native null assertions',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
-      environment.defines[JsCompilerConfig.kNativeNullAssertions] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -1081,7 +1063,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with dump-info',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      environment.defines[JsCompilerConfig.kDart2jsDumpInfo] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -1128,7 +1109,6 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with no-frequency-based-minification',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
-      environment.defines[JsCompilerConfig.kDart2jsNoFrequencyBasedMinification] = 'true';
       processManager.addCommand(
         FakeCommand(
           command: <String>[

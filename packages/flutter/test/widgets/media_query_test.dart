@@ -222,7 +222,7 @@ void main() {
       expect(data.hashCode, data.copyWith().hashCode);
       expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
       expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-      expect(data.textScaler, TextScaler.linear(tester.platformDispatcher.textScaleFactor));
+      expect(data.textScaler, isSystemTextScaler(withScaleFactor: 123));
       expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
       expect(
         data.padding,
@@ -360,7 +360,7 @@ void main() {
       expect(outerData, isNull);
       expect(data.size, tester.view.physicalSize / tester.view.devicePixelRatio);
       expect(data.devicePixelRatio, tester.view.devicePixelRatio);
-      expect(data.textScaler, TextScaler.linear(tester.platformDispatcher.textScaleFactor));
+      expect(data.textScaler, isSystemTextScaler(withScaleFactor: 123));
       expect(data.platformBrightness, tester.platformDispatcher.platformBrightness);
       expect(
         data.padding,
@@ -437,10 +437,10 @@ void main() {
     expect(outerData, isNull);
     expect(rebuildCount, 1);
 
-    expect(data.textScaler, const TextScaler.linear(123));
+    expect(data.textScaler.scale(10), 10 * 123);
     tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
-    expect(data.textScaler, const TextScaler.linear(456));
+    expect(data.textScaler.scale(10), 10 * 456);
     expect(rebuildCount, 2);
 
     expect(data.platformBrightness, Brightness.dark);
@@ -498,10 +498,10 @@ void main() {
 
     expect(rebuildCount, 1);
 
-    expect(data.textScaler, const TextScaler.linear(44));
+    expect(data.textScaler.scale(10), 10 * 44);
     tester.platformDispatcher.textScaleFactorTestValue = 456;
     await tester.pump();
-    expect(data.textScaler, const TextScaler.linear(44));
+    expect(data.textScaler.scale(10), 10 * 44);
     expect(rebuildCount, 1);
 
     expect(data.platformBrightness, Brightness.dark);
@@ -1096,7 +1096,7 @@ void main() {
       ),
     );
 
-    expect(outsideTextScaler, TextScaler.noScaling);
+    expect(outsideTextScaler, isSystemTextScaler(withScaleFactor: 1.0));
     expect(insideTextScaler, const TextScaler.linear(4.0));
   });
 
@@ -1223,6 +1223,15 @@ void main() {
 
     expect(mediaQueryInside, isNotNull);
     expect(mediaQueryOutside, isNot(mediaQueryInside));
+  });
+
+  testWidgets('MediaQuery.fromView creates a SystemTextScaler', (WidgetTester tester) async {
+    addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+    tester.platformDispatcher.textScaleFactorTestValue = 123.0;
+    expect(
+      MediaQueryData.fromView(tester.view).textScaler,
+      isSystemTextScaler(withScaleFactor: 123.0),
+    );
   });
 
   testWidgets('MediaQueryData.fromWindow is created using window values', (
@@ -1576,6 +1585,10 @@ void main() {
       values: <_MediaQueryAspectCase>[
         const _MediaQueryAspectCase(MediaQuery.sizeOf, MediaQueryData(size: Size(1, 1))),
         const _MediaQueryAspectCase(MediaQuery.maybeSizeOf, MediaQueryData(size: Size(1, 1))),
+        const _MediaQueryAspectCase(MediaQuery.widthOf, MediaQueryData(size: Size(1, 0))),
+        const _MediaQueryAspectCase(MediaQuery.maybeWidthOf, MediaQueryData(size: Size(1, 0))),
+        const _MediaQueryAspectCase(MediaQuery.heightOf, MediaQueryData(size: Size(0, 1))),
+        const _MediaQueryAspectCase(MediaQuery.maybeHeightOf, MediaQueryData(size: Size(0, 1))),
         const _MediaQueryAspectCase(MediaQuery.orientationOf, MediaQueryData(size: Size(2, 1))),
         const _MediaQueryAspectCase(
           MediaQuery.maybeOrientationOf,
@@ -1732,4 +1745,79 @@ void main() {
       ],
     ),
   );
+
+  testWidgets('MediaQuery width and height can be listened to independently', (
+    WidgetTester tester,
+  ) async {
+    MediaQueryData data = const MediaQueryData(size: Size(800, 600));
+
+    int widthBuildCount = 0;
+    int heightBuildCount = 0;
+
+    final Widget showWidth = Builder(
+      builder: (BuildContext context) {
+        widthBuildCount++;
+        return Text('width: ${MediaQuery.widthOf(context).toStringAsFixed(1)}');
+      },
+    );
+
+    final Widget showHeight = Builder(
+      builder: (BuildContext context) {
+        heightBuildCount++;
+        return Text('height: ${MediaQuery.heightOf(context).toStringAsFixed(1)}');
+      },
+    );
+
+    final Widget page = StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return MediaQuery(
+          data: data,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                showWidth,
+                showHeight,
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
+                    });
+                  },
+                  child: const Text('Increase width by 100'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
+                    });
+                  },
+                  child: const Text('Increase height by 100'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(home: page));
+    expect(find.text('width: 800.0'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 1);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase width by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('height: 600.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(heightBuildCount, 1);
+
+    await tester.tap(find.text('Increase height by 100'));
+    await tester.pumpAndSettle();
+    expect(find.text('width: 900.0'), findsOneWidget);
+    expect(find.text('height: 700.0'), findsOneWidget);
+    expect(widthBuildCount, 2);
+    expect(heightBuildCount, 2);
+  });
 }

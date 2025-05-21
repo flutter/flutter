@@ -776,7 +776,7 @@ FlutterViewId fl_engine_add_view(FlEngine* self,
   // will be updated in a following FlutterWindowMetricsEvent
   FlutterEngineDisplayId display_id = 0;
 
-  FlutterWindowMetricsEvent metrics;
+  FlutterWindowMetricsEvent metrics = {};
   metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
   metrics.width = width;
   metrics.height = height;

@@ -1154,7 +1154,7 @@ void main() {
           // device.startApp() asynchronously calls throwToolExit, so we
           // catch it in a zone.
           unawaited(
-            runZoned<Future<void>?>(
+            runZonedGuarded<Future<void>?>(
               () {
                 unawaited(
                   device.startApp(
@@ -1166,7 +1166,7 @@ void main() {
                 );
                 return null;
               },
-              onError: (Object error, StackTrace stack) {
+              (Object error, StackTrace stack) {
                 expect(error.toString(), contains(jITCrashFailureInstructions('iOS 18.4')));
                 completer.complete();
               },

@@ -19,8 +19,9 @@ class DepfileService {
 
   /// Given an [depfile] File, write the depfile contents.
   ///
-  /// If both [inputs] and [outputs] are empty, ensures the file does not
-  /// exist. This can be overridden with the [writeEmpty] parameter when
+  /// If both [depfile] and [Depfile.outputs] are empty,
+  /// ensures the file does not exist.
+  /// This can be overridden with the [writeEmpty] parameter when
   /// both static and runtime dependencies exist and it is not desired
   /// to force a rerun due to no depfile.
   void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {
@@ -99,7 +100,7 @@ class DepfileService {
 
 /// A class for representing depfile formats.
 class Depfile {
-  /// Create a [Depfile] from a list of [input] files and [output] files.
+  /// Create a [Depfile] from a list of [inputs] and [outputs].
   const Depfile(this.inputs, this.outputs);
 
   /// The input files for this depfile.

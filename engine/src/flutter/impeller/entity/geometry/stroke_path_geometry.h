@@ -8,15 +8,9 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_source.h"
+#include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
-
-struct StrokeParameters {
-  Scalar stroke_width;
-  Scalar miter_limit;
-  Cap stroke_cap;
-  Join stroke_join;
-};
 
 /// @brief An abstract Geometry base class that produces fillable vertices
 ///        representing the stroked outline from any |PathSource| provided
@@ -42,6 +36,9 @@ class StrokePathSourceGeometry : public Geometry {
   /// outline vertices.
   virtual const PathSource& GetSource() const = 0;
 
+  std::optional<Rect> GetStrokeCoverage(const Matrix& transform,
+                                        const Rect& path_bounds) const;
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
@@ -57,7 +54,7 @@ class StrokePathSourceGeometry : public Geometry {
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
       const PathSource& source,
-      const StrokeParameters& parameters,
+      const StrokeParameters& stroke,
       Scalar scale);
 
   friend class ImpellerBenchmarkAccessor;
@@ -65,7 +62,7 @@ class StrokePathSourceGeometry : public Geometry {
 
   bool SkipRendering() const;
 
-  const StrokeParameters parameters_;
+  const StrokeParameters stroke_;
 
   StrokePathSourceGeometry(const StrokePathSourceGeometry&) = delete;
 
@@ -73,13 +70,11 @@ class StrokePathSourceGeometry : public Geometry {
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
-///        stroked outline of a |DlPath| or |impeller::Path| object using
-///        the |StrokePathSourceGeometry| base class and a |DlPath| object
+///        stroked outline of a |DlPath| object using the
+///        |StrokePathSourceGeometry| base class and a |DlPath| object
 ///        to perform path iteration.
 class StrokePathGeometry final : public StrokePathSourceGeometry {
  public:
-  StrokePathGeometry(const Path& path, const StrokeParameters& parameters);
-
   StrokePathGeometry(const flutter::DlPath& path,
                      const StrokeParameters& parameters);
 
@@ -88,6 +83,47 @@ class StrokePathGeometry final : public StrokePathSourceGeometry {
 
  private:
   const flutter::DlPath path_;
+};
+
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a |DlPath| object representing an arc with
+///        the provided oval bounds using the |StrokePathSourceGeometry|
+///        base class and a |DlPath| object to perform path iteration.
+///
+/// Note that this class will override the bounds to enforce the arc bounds
+/// since paths constructed from arcs sometimes have control opints outside
+/// the arc bounds, but don't draw pixels outside those bounds.
+class ArcStrokePathGeometry final : public StrokePathSourceGeometry {
+ public:
+  ArcStrokePathGeometry(const flutter::DlPath& path,
+                        const Rect& oval_bounds,
+                        const StrokeParameters& parameters);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const flutter::DlPath path_;
+  const Rect oval_bounds_;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+};
+
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a pair of nested |RoundRect| objects using
+///        the |StrokePathSourceGeometry| base class.
+class StrokeDiffRoundRectGeometry final : public StrokePathSourceGeometry {
+ public:
+  explicit StrokeDiffRoundRectGeometry(const RoundRect& outer,
+                                       const RoundRect& inner,
+                                       const StrokeParameters& parameters);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const DiffRoundRectPathSource source_;
 };
 
 }  // namespace impeller
