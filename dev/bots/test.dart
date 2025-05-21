@@ -61,6 +61,7 @@ import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_framework_coverage_tests.dart';
 import 'suite_runners/run_framework_tests.dart';
 import 'suite_runners/run_fuchsia_precache.dart';
+import 'suite_runners/run_gradle_lock_files_check.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_test_harness_tests.dart';
 import 'suite_runners/run_verify_binaries_codesigned_tests.dart';
@@ -149,6 +150,7 @@ Future<void> main(List<String> args) async {
       'snippets': _runSnippetsTests,
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
+      'gradle_lock_files_check': runGradleLockFilesCheck,
       kTestHarnessShardName:
           testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
