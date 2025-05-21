@@ -158,13 +158,14 @@ void main() {
 
   testWidgets('tab semantics role test', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/169175
-    final _TestImageProvider imageProvider2 = _TestImageProvider();
+    final _TestImageProvider imageProvider = _TestImageProvider();
+    addTearDown(() => imageProvider.fail(Object(), null));
     // Creates an image widget that never complete, which will have zero size.
     await tester.pumpWidget(
       boilerplate(
         child: DefaultTabController(
           length: 1,
-          child: TabBar(tabs: <Widget>[Tab(icon: Image(image: imageProvider2))]),
+          child: TabBar(tabs: <Widget>[Tab(icon: Image(image: imageProvider))]),
         ),
       ),
     );
@@ -9167,5 +9168,9 @@ class _TestImageProvider extends ImageProvider<Object> {
   @override
   ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     return _streamCompleter;
+  }
+
+  void fail(Object exception, StackTrace? stackTrace) {
+    _completer.completeError(exception, stackTrace);
   }
 }
