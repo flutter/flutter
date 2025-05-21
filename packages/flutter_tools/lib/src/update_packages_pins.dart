@@ -31,9 +31,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'hooks_runner':
       '0.20.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
-  'leak_tracker': '11.0.1', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_testing': '3.0.2', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '3.0.10', // https://github.com/flutter/devtools/issues/3951
   'test': '1.25.15', // https://github.com/dart-lang/test/issues/2498
   'test_api': '0.7.4', // https://github.com/dart-lang/test/issues/2498
   'test_core': '0.6.8', // https://github.com/dart-lang/test/issues/2498
