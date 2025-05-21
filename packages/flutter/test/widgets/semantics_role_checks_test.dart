@@ -762,7 +762,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Semantics(
             role: SemanticsRole.contentInfo,
-            child: SizedBox(child: Semantics(role: SemanticsRole.main, child: const Text('some child'))),
+            child: SizedBox(
+              child: Semantics(role: SemanticsRole.main, child: const Text('some child')),
+            ),
           ),
         ),
       );
