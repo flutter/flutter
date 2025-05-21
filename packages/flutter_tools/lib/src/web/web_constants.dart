@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:shelf/shelf.dart' as shelf;
+
+import '../base/io.dart';
 
 const String kWasmMoreInfo = 'See https://flutter.dev/to/wasm for more information.';
 
