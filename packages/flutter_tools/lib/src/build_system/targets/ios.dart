@@ -367,12 +367,14 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
-// TODO(gaaclarke): Remove this after a reasonable amount of time after the
-// UISceneDelegate migration has landed on stable.
+// TODO(gaaclarke): Remove this after a reasonable amount of time where the
+// UISceneDelegate migration being on stable. This incurs a minor build time
+// cost.
 Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
   Logger logger,
   File file,
-  RegExp usage,
+  Pattern usage,
+  Pattern terminator,
 ) async {
   final Stream<String> lines = file
       .openRead()
@@ -388,7 +390,7 @@ Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
         inDidFinishLaunchingWithOptions = true;
       }
     } else {
-      if (line.startsWith('}')) {
+      if (line.startsWith(terminator)) {
         inDidFinishLaunchingWithOptions = false;
       } else if (line.contains(usage)) {
         _printWarning(
@@ -409,6 +411,7 @@ Future<void> CheckForLaunchRootViewControllerAccessDeprecationObjc(
   logger,
   file,
   RegExp('self.*?window.*?rootViewController'),
+  RegExp('^}')
 );
 
 Future<void> CheckForLaunchRootViewControllerAccessDeprecationSwift(
@@ -417,7 +420,8 @@ Future<void> CheckForLaunchRootViewControllerAccessDeprecationSwift(
 ) async => _CheckForLaunchRootViewControllerAccessDeprecation(
   logger,
   file,
-  RegExp('self.*?window.*?rootViewController'),
+  'window?.rootViewController',
+  RegExp(r'^.*?func\s*?\S*?\(')
 );
 
 void _printWarning(Logger logger, String path, int line, String warning) {
