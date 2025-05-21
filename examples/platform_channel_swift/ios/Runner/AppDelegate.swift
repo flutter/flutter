@@ -27,11 +27,9 @@ enum MyFlutterErrorCode {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-    guard let controller = window?.rootViewController as? FlutterViewController else {
-      fatalError("rootViewController is not type FlutterViewController")
-    }
+    let registry = self.registrar(forPlugin: "battery")
     let batteryChannel = FlutterMethodChannel(name: ChannelName.battery,
-                                              binaryMessenger: controller.binaryMessenger)
+                                              binaryMessenger: registry!.messenger())
     batteryChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
       guard call.method == "getBatteryLevel" else {
@@ -42,7 +40,7 @@ enum MyFlutterErrorCode {
     })
 
     let chargingChannel = FlutterEventChannel(name: ChannelName.charging,
-                                              binaryMessenger: controller.binaryMessenger)
+                                              binaryMessenger: registry!.messenger())
     chargingChannel.setStreamHandler(self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
