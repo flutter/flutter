@@ -33,31 +33,25 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
 import '../src/testbed.dart';
+import '../src/throwing_pub.dart';
 import 'resident_runner_helpers.dart';
 
 FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
   late FakeDevice device;
   FakeVmServiceHost? fakeVmServiceHost;
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.file(globals.fs.path.join('build', 'app.dill'))
           ..createSync(recursive: true)
@@ -1126,64 +1120,57 @@ void main() {
 
   testUsingContext(
     'ResidentRunner can run source generation',
-    () => testbed.run(
-      () async {
-        final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
-          ..createSync(recursive: true);
-        arbFile.writeAsStringSync('''
+    () => testbed.run(() async {
+      final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
 {
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-        globals.fs.file('l10n.yaml').createSync();
-        globals.fs.file('pubspec.yaml').writeAsStringSync('''
+      globals.fs.file('l10n.yaml').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 flutter:
   generate: true''');
 
-        // Create necessary files for [DartPluginRegistrantTarget]
-        writePackageConfigFile(
-          directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
-          packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
-        );
+      // Create necessary files for [DartPluginRegistrantTarget]
+      writePackageConfigFiles(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+      );
 
-        // Start from an empty dart_plugin_registrant.dart file.
-        globals.fs
-            .directory('.dart_tool')
-            .childDirectory('flutter_build')
-            .childFile('dart_plugin_registrant.dart')
-            .createSync(recursive: true);
+      // Start from an empty dart_plugin_registrant.dart file.
+      globals.fs
+          .directory('.dart_tool')
+          .childDirectory('flutter_build')
+          .childFile('dart_plugin_registrant.dart')
+          .createSync(recursive: true);
 
-        await residentRunner.runSourceGenerators();
+      await residentRunner.runSourceGenerators();
 
-        expect(testLogger.errorText, isEmpty);
-        expect(testLogger.statusText, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
-      },
-    ),
+      expect(testLogger.errorText, isEmpty);
+      expect(testLogger.statusText, isEmpty);
+    }, overrides: <Type, Generator>{Pub: ThrowingPub.new}),
   );
 
   testUsingContext(
     'generated main uses correct target',
-    () => testbed.run(
-      () async {
-        final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
-          ..createSync(recursive: true);
-        arbFile.writeAsStringSync('''
+    () => testbed.run(() async {
+      final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true);
+      arbFile.writeAsStringSync('''
 {
   "helloWorld": "Hello, World!",
   "@helloWorld": {
     "description": "Sample description"
   }
 }''');
-        globals.fs.file('l10n.yaml').createSync();
-        globals.fs.file('pubspec.yaml').writeAsStringSync('''
+      globals.fs.file('l10n.yaml').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 flutter:
   generate: true
@@ -1194,18 +1181,18 @@ dependencies:
   path_provider_linux: 1.0.0
 ''');
 
-        // Create necessary files for [DartPluginRegistrantTarget], including a
-        // plugin that will trigger generation.
-        writePackageConfigFile(
-          directory: globals.fs.currentDirectory,
-          mainLibName: 'my_app',
-          packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
-        );
+      // Create necessary files for [DartPluginRegistrantTarget], including a
+      // plugin that will trigger generation.
+      writePackageConfigFiles(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+      );
 
-        final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
-        final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
-        pluginPubspec.createSync(recursive: true);
-        pluginPubspec.writeAsStringSync('''
+      final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
+      final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
+      pluginPubspec.createSync(recursive: true);
+      pluginPubspec.writeAsStringSync('''
 name: path_provider_linux
 
 flutter:
@@ -1216,30 +1203,25 @@ flutter:
         dartPluginClass: PathProviderLinux
 ''');
 
-        residentRunner = HotRunner(
-          <FlutterDevice>[flutterDevice],
-          stayResident: false,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          target: 'custom_main.dart',
-          devtoolsHandler: createNoOpHandler,
-          analytics: fakeAnalytics,
-        );
-        await residentRunner.runSourceGenerators();
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'custom_main.dart',
+        devtoolsHandler: createNoOpHandler,
+        analytics: fakeAnalytics,
+      );
+      await residentRunner.runSourceGenerators();
 
-        final File generatedMain = globals.fs
-            .directory('.dart_tool')
-            .childDirectory('flutter_build')
-            .childFile('dart_plugin_registrant.dart');
+      final File generatedMain = globals.fs
+          .directory('.dart_tool')
+          .childDirectory('flutter_build')
+          .childFile('dart_plugin_registrant.dart');
 
-        expect(generatedMain.existsSync(), isTrue);
-        expect(testLogger.errorText, isEmpty);
-        expect(testLogger.statusText, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
-      },
-    ),
+      expect(generatedMain.existsSync(), isTrue);
+      expect(testLogger.errorText, isEmpty);
+      expect(testLogger.statusText, isEmpty);
+    }, overrides: <Type, Generator>{Pub: ThrowingPub.new}),
   );
 
   testUsingContext(
@@ -1306,7 +1288,6 @@ flutter:
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
     }),
-    overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
   );
 
   testUsingContext(

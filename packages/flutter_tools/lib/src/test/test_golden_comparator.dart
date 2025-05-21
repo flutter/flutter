@@ -15,7 +15,8 @@ import '../convert.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 
-/// Runs a [GoldenFileComparator] (that may depend on `dart:ui`) in a `flutter_tester`.
+/// Runs a [`GoldenFileComparator`](https://api.flutter.dev/flutter/flutter_test/GoldenFileComparator-class.html)
+/// (that might depend on `dart:ui`) in a `flutter_tester`.
 ///
 /// The [`goldenFileComparator`](https://api.flutter.dev/flutter/flutter_test/goldenFileComparator.html)
 /// is configured using [`flutter_test_config.dart`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
@@ -23,7 +24,7 @@ import 'test_config.dart';
 ///
 /// This proxying comparator creates a minimal application that runs on a
 /// `flutter_tester` instance, runs a golden comparison, and then returns the
-/// results through [compareGoldens].
+/// results through [compare].
 ///
 /// ## Example
 ///

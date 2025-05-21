@@ -40,13 +40,22 @@ _flutter_framework_headers = [
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
 source_set("InternalFlutterSwift") {
-  visibility = [ ":*" ]
+  # Targets should only ever depend on the framework target.
+  # This allows code in this target to use types declared in the bridging
+  # header, but defined in the framework, while avoiding linking errors.
+  visibility = [ ":flutter_framework_source" ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
-
+  include_dirs = [
+    "//flutter/shell/platform/darwin/common/framework/Headers",
+    "//flutter/shell/platform/darwin/ios/framework/Headers",
+    "//flutter/shell/platform/darwin/ios/framework",  # For module.modulemap
+  ]
+  bridge_header = "InternalFlutterSwift-Bridging-Header.h"
   sources = [
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/UIPressProxy.swift",
   ]
+  public = _flutter_framework_headers + framework_common_headers
 }
 
 source_set("flutter_framework_source") {
@@ -179,7 +188,6 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
-    ":InternalFlutterSwift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -189,7 +197,6 @@ source_set("flutter_framework_source") {
     "//flutter/shell/common",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/darwin/common",
-    "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon",
     "//flutter/shell/platform/darwin/common:framework_common",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
@@ -197,6 +204,7 @@ source_set("flutter_framework_source") {
     "//flutter/third_party/icu",
     "//flutter/third_party/spring_animation",
   ]
+  public_deps = [ ":InternalFlutterSwift" ]
 }
 
 if (enable_ios_unittests) {
@@ -209,7 +217,7 @@ if (enable_ios_unittests) {
       "framework/Source/FakeUIPressProxy.swift",
     ]
     frameworks = [ "XCTest.framework" ]
-    deps = [ ":InternalFlutterSwift" ]
+    deps = [ ":flutter_framework_source" ]
   }
 
   shared_library("ios_test_flutter") {
@@ -270,14 +278,12 @@ if (enable_ios_unittests) {
       "platform_message_handler_ios_test.mm",
     ]
     deps = [
-      ":InternalFlutterSwift",
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",
       ":ios_test_flutter_swift",
       "//flutter/common:common",
       "//flutter/lib/ui:ui",
-      "//flutter/shell/platform/darwin/common:InternalFlutterSwiftCommon",
       "//flutter/shell/platform/darwin/common:framework_common",
       "//flutter/shell/platform/embedder:embedder_as_internal_library",
       "//flutter/shell/platform/embedder:embedder_test_utils",
@@ -303,10 +309,7 @@ shared_library("create_flutter_framework_dylib") {
 
   public = _flutter_framework_headers
 
-  deps = [
-    ":InternalFlutterSwift",
-    ":flutter_framework_source",
-  ]
+  deps = [ ":flutter_framework_source" ]
 
   public_configs = [ "//flutter:config" ]
   configs += [ "//build/config/ios:ios_application_extension" ]

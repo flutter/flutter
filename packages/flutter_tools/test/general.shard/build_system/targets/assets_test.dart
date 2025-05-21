@@ -64,7 +64,7 @@ flutter:
   testUsingContext(
     'includes LICENSE file inputs in dependencies',
     () async {
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'example',
         packages: <String, String>{'foo': 'bar'},
@@ -95,7 +95,7 @@ flutter:
   testUsingContext(
     'Copies files to correct asset directory',
     () async {
-      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
       await const CopyAssets().build(environment);
 
       expect(
@@ -144,7 +144,7 @@ flutter:
         flavors:
           - strawberry
   ''');
-          writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
+          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
           fileSystem.file('assets/common/image.png').createSync(recursive: true);
           fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
@@ -193,7 +193,7 @@ flutter:
         flavors:
           - strawberry
   ''');
-          writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
+          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
           fileSystem.file('assets/common/image.png').createSync(recursive: true);
           fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
@@ -257,7 +257,7 @@ flutter:
           args: ["-a", "-b", "--color", "green"]
 ''');
 
-      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)
@@ -344,7 +344,7 @@ flutter:
           args: ["-a", "-b", "--color", "green"]
 ''');
 
-      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
       await fileSystem.file('input.txt').create(recursive: true);
 
@@ -440,7 +440,7 @@ flutter:
           - package: my_capitalizer_transformer
   ''');
 
-      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)
