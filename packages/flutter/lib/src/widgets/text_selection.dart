@@ -581,8 +581,8 @@ class TextSelectionOverlay {
   ///     specifically is visible.
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
 
-  /// Whether the magnifier is currently visible.
-  bool get magnifierIsVisible => _selectionOverlay._magnifierController.shown;
+  /// {@macro flutter.widgets.SelectionOverlay.magnifierIsVisible}
+  bool get magnifierIsVisible => _selectionOverlay.magnifierIsVisible;
 
   /// Whether the spell check menu is currently visible.
   ///
@@ -1126,6 +1126,11 @@ class SelectionOverlay {
         ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
         : _toolbar != null || _spellCheckToolbarController.isShown;
   }
+
+  /// {@template flutter.widgets.SelectionOverlay.toolbarIsVisible}
+  /// Whether the magnifier is currently visible.
+  /// {@endtemplate}
+  bool get magnifierIsVisible => _magnifierController.shown;
 
   /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
   /// Shows the magnifier, and hides the toolbar if it was showing when [showMagnifier]
