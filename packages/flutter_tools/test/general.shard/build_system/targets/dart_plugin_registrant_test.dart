@@ -10,12 +10,10 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/throwing_pub.dart';
 
@@ -57,12 +55,6 @@ environment:
 ''';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('Dart plugin registrant', () {
     late FileSystem fileSystem;
 
@@ -162,7 +154,6 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: ThrowingPub.new,
       },
     );
@@ -249,7 +240,6 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: ThrowingPub.new,
       },
     );
@@ -303,7 +293,6 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: ThrowingPub.new,
       },
     );
@@ -390,7 +379,6 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
         Pub: ThrowingPub.new,
       },
     );
