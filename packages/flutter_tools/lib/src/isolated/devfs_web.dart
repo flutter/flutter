@@ -794,9 +794,12 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     if (resultPath == 'main_module.ddc_merged_metadata') {
       return _webMemoryFS.mergedMetadata;
     }
-    final Uint8List? content = getMetadata(resultPath!);
-    if (content != null) {
-      return utf8.decode(content);
+
+    if (resultPath != null) {
+      final Uint8List? content = getMetadata(resultPath);
+      if (content != null) {
+        return utf8.decode(content);
+      }
     }
     throw Exception('Could not find metadata contents for $serverPath');
   }
