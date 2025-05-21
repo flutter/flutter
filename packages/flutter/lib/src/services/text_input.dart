@@ -538,6 +538,8 @@ class TextInputConfiguration {
 
   /// The ID of the view that the text input belongs to.
   ///
+  /// It is mandatory to provide a non-null [viewId] on Windows and macOS.
+  ///
   /// See also:
   ///
   /// * [FlutterView], which is the view that the ID points to.
