@@ -986,6 +986,46 @@ void main() {
       );
     });
 
+    testWithoutContext('CheckForLaunchRootViewControllerAccessDeprecationObjc Positive', () async {
+      final File file = fileSystem.file('AppDelegate.m');
+      file.writeAsStringSync('''
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+}
+
+@end
+''');
+      await CheckForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+      expect(
+        logger.warningText,
+        startsWith('AppDelegate.m:6: warning: Flutter deprecation: Accessing rootViewController'),
+      );
+    });
+
+    testWithoutContext('CheckForLaunchRootViewControllerAccessDeprecationObjc Negative', () async {
+      final File file = fileSystem.file('AppDelegate.m');
+      file.writeAsStringSync('''
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+}
+
+- (void)doIt {
+ FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+}
+
+@end
+''');
+      await CheckForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+      expect(logger.warningText, equals(''));
+    });
+
     testWithoutContext('skips thin framework', () async {
       binary.createSync(recursive: true);
 

@@ -10,6 +10,7 @@ import '../../base/build.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart' show Logger;
 import '../../base/process.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
@@ -366,8 +367,61 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
-void _printWarning(Environment environment, String path, int line, String warning) {
-  environment.logger.printWarning('$path:$line: warning: $warning');
+// TODO(gaaclarke): Remove this after a reasonable amount of time after the
+// UISceneDelegate migration has landed on stable.
+Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
+  Logger logger,
+  File file,
+  RegExp usage,
+) async {
+  final Stream<String> lines = file
+      .openRead()
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
+
+  bool inDidFinishLaunchingWithOptions = false;
+  int lineNumber = 0;
+  await for (final String line in lines) {
+    lineNumber += 1;
+    if (!inDidFinishLaunchingWithOptions) {
+      if (line.contains('didFinishLaunchingWithOptions')) {
+        inDidFinishLaunchingWithOptions = true;
+      }
+    } else {
+      if (line.startsWith('}')) {
+        inDidFinishLaunchingWithOptions = false;
+      } else if (line.contains(usage)) {
+        _printWarning(
+          logger,
+          file.path,
+          lineNumber,
+          'Flutter deprecation: Accessing rootViewController in `application:didFinishLaunchingWithOptions:`.',
+        );
+      }
+    }
+  }
+}
+
+Future<void> CheckForLaunchRootViewControllerAccessDeprecationObjc(
+  Logger logger,
+  File file,
+) async => _CheckForLaunchRootViewControllerAccessDeprecation(
+  logger,
+  file,
+  RegExp('self.*?window.*?rootViewController'),
+);
+
+Future<void> CheckForLaunchRootViewControllerAccessDeprecationSwift(
+  Logger logger,
+  File file,
+) async => _CheckForLaunchRootViewControllerAccessDeprecation(
+  logger,
+  file,
+  RegExp('self.*?window.*?rootViewController'),
+);
+
+void _printWarning(Logger logger, String path, int line, String warning) {
+  logger.printWarning('$path:$line: warning: $warning');
 }
 
 class _IssueLaunchRootViewControllerAccess extends Target {
@@ -377,40 +431,16 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   Future<void> build(Environment environment) async {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     if (flutterProject.ios.appDelegateSwift.existsSync()) {
-      _printWarning(
-        environment,
-        flutterProject.ios.appDelegateSwift.path,
-        0,
-        'foobar using appDelegateSwift',
+      await CheckForLaunchRootViewControllerAccessDeprecationSwift(
+        environment.logger,
+        flutterProject.ios.appDelegateSwift,
       );
     }
     if (flutterProject.ios.appDelegateObjc.existsSync()) {
-      final Stream<String> lines = flutterProject.ios.appDelegateObjc
-          .openRead()
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
-
-      bool inDidFinishLaunchingWithOptions = false;
-      int lineNumber = 0;
-      await for (final String line in lines) {
-        lineNumber += 1;
-        if (!inDidFinishLaunchingWithOptions) {
-          if (line.contains('didFinishLaunchingWithOptions:')) {
-            inDidFinishLaunchingWithOptions = true;
-          }
-        } else {
-          if (line.startsWith('-') || line.startsWith('+') || line.startsWith('@end')) {
-            inDidFinishLaunchingWithOptions = false;
-          } else if (line.contains(RegExp('self.*?window.*?rootViewController'))) {
-            _printWarning(
-              environment,
-              flutterProject.ios.appDelegateObjc.path,
-              lineNumber,
-              'Accessing rootViewController in `application:didFinishLaunchingWithOptions:` may be nil.',
-            );
-          }
-        }
-      }
+      await CheckForLaunchRootViewControllerAccessDeprecationObjc(
+        environment.logger,
+        flutterProject.ios.appDelegateObjc,
+      );
     }
   }
   
