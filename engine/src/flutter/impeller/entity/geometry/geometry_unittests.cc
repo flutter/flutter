@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "flutter/display_list/geometry/dl_path.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
@@ -14,7 +14,6 @@
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/testing/mocks.h"
 
 inline ::testing::AssertionResult SolidVerticesNear(
@@ -76,7 +75,9 @@ TEST(EntityGeometryTest, RectGeometryCoversArea) {
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
-  auto path = PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath();
+  auto path = flutter::DlPathBuilder{}
+                  .AddRect(Rect::MakeLTRB(0, 0, 100, 100))
+                  .TakePath();
   auto geometry = Geometry::MakeFillPath(
       path, /* inner rect */ Rect::MakeLTRB(0, 0, 100, 100));
   ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
@@ -86,7 +87,9 @@ TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
-  auto path = PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath();
+  auto path = flutter::DlPathBuilder{}
+                  .AddRect(Rect::MakeLTRB(0, 0, 100, 100))
+                  .TakePath();
   auto geometry = Geometry::MakeFillPath(path);
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
@@ -168,27 +171,36 @@ TEST(EntityGeometryTest, GeometryResultHasReasonableDefaults) {
 
 TEST(EntityGeometryTest, AlphaCoverageStrokePaths) {
   auto matrix = Matrix::MakeScale(Vector2{3.0, 3.0});
-  EXPECT_EQ(Geometry::MakeStrokePath({}, 0.5)->ComputeAlphaCoverage(matrix), 1);
-  EXPECT_NEAR(Geometry::MakeStrokePath({}, 0.1)->ComputeAlphaCoverage(matrix),
+  EXPECT_EQ(Geometry::MakeStrokePath({}, {.width = 0.5f})
+                ->ComputeAlphaCoverage(matrix),
+            1.0f);
+  EXPECT_NEAR(Geometry::MakeStrokePath({}, {.width = 0.1f})
+                  ->ComputeAlphaCoverage(matrix),
               0.6, 0.05);
-  EXPECT_NEAR(Geometry::MakeStrokePath({}, 0.05)->ComputeAlphaCoverage(matrix),
+  EXPECT_NEAR(Geometry::MakeStrokePath({}, {.width = 0.05})
+                  ->ComputeAlphaCoverage(matrix),
               0.3, 0.05);
-  EXPECT_NEAR(Geometry::MakeStrokePath({}, 0.01)->ComputeAlphaCoverage(matrix),
+  EXPECT_NEAR(Geometry::MakeStrokePath({}, {.width = 0.01})
+                  ->ComputeAlphaCoverage(matrix),
               0.1, 0.1);
-  EXPECT_NEAR(
-      Geometry::MakeStrokePath({}, 0.0000005)->ComputeAlphaCoverage(matrix),
-      1e-05, 0.001);
-  EXPECT_EQ(Geometry::MakeStrokePath({}, 0)->ComputeAlphaCoverage(matrix), 1);
-  EXPECT_EQ(Geometry::MakeStrokePath({}, 40)->ComputeAlphaCoverage(matrix), 1);
+  EXPECT_NEAR(Geometry::MakeStrokePath({}, {.width = 0.0000005f})
+                  ->ComputeAlphaCoverage(matrix),
+              1e-05, 0.001);
+  EXPECT_EQ(Geometry::MakeStrokePath({}, {.width = 0.0f})
+                ->ComputeAlphaCoverage(matrix),
+            1.0f);
+  EXPECT_EQ(Geometry::MakeStrokePath({}, {.width = 40.0f})
+                ->ComputeAlphaCoverage(matrix),
+            1.0f);
 }
 
 TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesButtCap) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.MoveTo({120, 20});
   path_builder.LineTo({130, 20});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -224,12 +236,12 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesButtCap) {
 }
 
 TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesRoundCap) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.MoveTo({120, 20});
   path_builder.LineTo({130, 20});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -312,12 +324,12 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesRoundCap) {
 }
 
 TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesSquareCap) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.MoveTo({120, 20});
   path_builder.LineTo({130, 20});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -363,11 +375,11 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesSquareCap) {
 }
 
 TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.LineTo({30, 30});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -397,11 +409,11 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
 }
 
 TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.LineTo({30, 10});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -431,11 +443,11 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
 }
 
 TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesMiterJoin) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.LineTo({30, 30});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -468,11 +480,11 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesMiterJoin) {
 }
 
 TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.LineTo({30, 20});
   path_builder.LineTo({30, 10});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -505,10 +517,10 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
 }
 
 TEST(EntityGeometryTest, TinyQuadGeneratesCaps) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.QuadraticCurveTo({20.125, 20}, {20.250, 20});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -542,10 +554,10 @@ TEST(EntityGeometryTest, TinyQuadGeneratesCaps) {
 }
 
 TEST(EntityGeometryTest, TinyConicGeneratesCaps) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.ConicCurveTo({20.125, 20}, {20.250, 20}, 0.6);
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -579,10 +591,10 @@ TEST(EntityGeometryTest, TinyConicGeneratesCaps) {
 }
 
 TEST(EntityGeometryTest, TinyCubicGeneratesCaps) {
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo({20, 20});
   path_builder.CubicCurveTo({20.0625, 20}, {20.125, 20}, {20.250, 20});
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
       path,
@@ -638,11 +650,11 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
       Radians r_between(between);
       Scalar limit = 1.0f / std::sin(r_between.radians / 2.0f);
 
-      PathBuilder path_builder;
+      flutter::DlPathBuilder path_builder;
       path_builder.MoveTo(Point(20, 20));
       path_builder.LineTo(Point(30, 20));
       path_builder.LineTo(Point(30, 20) + pixel_delta * 10.0f);
-      flutter::DlPath path(path_builder);
+      flutter::DlPath path = path_builder.TakePath();
 
       // Miter limit too small (99% of required) to allow a miter
       auto points1 =
@@ -681,11 +693,11 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
 
 TEST(EntityGeometryTest, TwoLineSegments180DegreeJoins) {
   // First, create a path that doubles back on itself.
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo(Point(10, 10));
   path_builder.LineTo(Point(100, 10));
   path_builder.LineTo(Point(10, 10));
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
@@ -730,10 +742,10 @@ TEST(EntityGeometryTest, TwoLineSegments180DegreeJoins) {
 TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
   // First, create a mild quadratic that helps us verify how many points
   // should normally be on a quad with 2 legs of length 90.
-  PathBuilder path_builder_refrence;
+  flutter::DlPathBuilder path_builder_refrence;
   path_builder_refrence.MoveTo(Point(10, 10));
   path_builder_refrence.QuadraticCurveTo(Point(100, 10), Point(100, 100));
-  flutter::DlPath path_reference(path_builder_refrence);
+  flutter::DlPath path_reference = path_builder_refrence.TakePath();
 
   auto points_bevel_reference =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
@@ -749,10 +761,10 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
   EXPECT_EQ(points_bevel_reference.size(), 74u);
 
   // Now create a path that doubles back on itself with a quadratic.
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo(Point(10, 10));
   path_builder.QuadraticCurveTo(Point(100, 10), Point(10, 10));
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
@@ -797,10 +809,10 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
 TEST(EntityGeometryTest, TightConic180DegreeJoins) {
   // First, create a mild conic that helps us verify how many points
   // should normally be on a quad with 2 legs of length 90.
-  PathBuilder path_builder_refrence;
+  flutter::DlPathBuilder path_builder_refrence;
   path_builder_refrence.MoveTo(Point(10, 10));
   path_builder_refrence.ConicCurveTo(Point(100, 10), Point(100, 100), 0.9f);
-  flutter::DlPath path_reference(path_builder_refrence);
+  flutter::DlPath path_reference = path_builder_refrence.TakePath();
 
   auto points_bevel_reference =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
@@ -816,10 +828,10 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
   EXPECT_EQ(points_bevel_reference.size(), 78u);
 
   // Now create a path that doubles back on itself with a conic.
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo(Point(10, 10));
   path_builder.QuadraticCurveTo(Point(100, 10), Point(10, 10));
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
@@ -864,11 +876,11 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
 TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
   // First, create a mild cubic that helps us verify how many points
   // should normally be on a quad with 3 legs of length ~50.
-  PathBuilder path_builder_reference;
+  flutter::DlPathBuilder path_builder_reference;
   path_builder_reference.MoveTo(Point(10, 10));
   path_builder_reference.CubicCurveTo(Point(60, 10), Point(100, 40),
                                       Point(100, 90));
-  flutter::DlPath path_reference(path_builder_reference);
+  flutter::DlPath path_reference = path_builder_reference.TakePath();
 
   auto points_reference =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
@@ -884,10 +896,10 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
   EXPECT_EQ(points_reference.size(), 80u);
 
   // Now create a path that doubles back on itself with a cubic.
-  PathBuilder path_builder;
+  flutter::DlPathBuilder path_builder;
   path_builder.MoveTo(Point(10, 10));
   path_builder.CubicCurveTo(Point(60, 10), Point(100, 40), Point(60, 10));
-  flutter::DlPath path(path_builder);
+  flutter::DlPath path = path_builder.TakePath();
 
   auto points_bevel =
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(

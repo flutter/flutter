@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -205,12 +206,9 @@ void CanvasPath::addRRect(const RRect& rrect) {
 
 void CanvasPath::addRSuperellipse(const RSuperellipse* rsuperellipse) {
   DlPathBuilder builder;
-  builder.SetConvexity(impeller::Convexity::kConvex);
-  builder.SetBounds(rsuperellipse->bounds());
   builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
       rsuperellipse->bounds(), rsuperellipse->radii()));
-  sk_path_.addPath(DlPath(builder.TakePath()).GetSkPath(),
-                   SkPath::kAppend_AddPathMode);
+  sk_path_.addPath(builder.TakePath().GetSkPath(), SkPath::kAppend_AddPathMode);
 
   resetVolatility();
 }
