@@ -35,12 +35,6 @@ import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   FeatureFlags disableExplicitPackageDependencies() {
     // ignore: avoid_redundant_argument_values
     return TestFeatureFlags(isExplicitPackageDependenciesEnabled: false);
@@ -328,7 +322,6 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
@@ -352,7 +345,6 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
@@ -376,7 +368,6 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: enableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
@@ -2147,9 +2138,6 @@ void _testInMemory(
           ),
       FlutterProjectFactory:
           () => FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
-      // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-      // See https://github.com/flutter/flutter/issues/160257 for details.
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
       Pub: ThrowingPub.new,
     },
   );
