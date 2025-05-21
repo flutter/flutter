@@ -37,7 +37,8 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   @override
   Widget build(BuildContext context) {
     if (_StretchOverscrollEffectShader._initialized) {
-      final shader = _StretchOverscrollEffectShader._program!.fragmentShader();
+      final bool isShaderNeeded = widget.overscrollX != 0.0 || widget.overscrollY != 0.0;
+      final ui.FragmentShader shader = _StretchOverscrollEffectShader._program!.fragmentShader();
       shader.setFloat(2, 1.0);
       shader.setFloat(3, widget.overscrollX);
       shader.setFloat(4, widget.overscrollY);
@@ -45,7 +46,13 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
 
       return ImageFiltered(
         imageFilter: ui.ImageFilter.shader(shader),
-        child: widget.child,
+        enabled: isShaderNeeded,
+        // A nearly-transparent box is used to ensure the shader gets applied,
+        // even when the child is visually transparent or has no paint operations.
+        child: ColoredBox(
+          color: Color.fromRGBO(0, 0, 0, 0.0000001),
+          child: widget.child,
+        ),
       );
     } else {
       if (!_StretchOverscrollEffectShader._initCalled) {

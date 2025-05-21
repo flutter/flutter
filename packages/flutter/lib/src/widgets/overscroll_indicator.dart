@@ -819,16 +819,16 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               mainAxisSize = MediaQuery.heightOf(context);
           }
 
-          if (_stretchController.stretchDirection == _StretchDirection.trailing) {
-            x = -x;
-            y = -y;
-          }
-
           final double viewportDimension =
               _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
           final Widget transform;
-          
+
           if (ui.ImageFilter.isShaderFilterSupported) {
+            if (_stretchController.stretchDirection == _StretchDirection.trailing) {
+              x = -x;
+              y = -y;
+            }
+
             transform = StretchOverscrollEffect(
               overscrollX: x,
               overscrollY: y,
