@@ -370,7 +370,7 @@ class DebugUnpackIOS extends UnpackIOS {
 // TODO(gaaclarke): Remove this after a reasonable amount of time where the
 // UISceneDelegate migration being on stable. This incurs a minor build time
 // cost.
-Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
+Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
   Logger logger,
   File file,
   Pattern usage,
@@ -397,7 +397,15 @@ Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
           logger,
           file.path,
           lineNumber,
-          'Flutter deprecation: Accessing rootViewController in `application:didFinishLaunchingWithOptions:`.',
+          // TODO(gaaclarke): Add a link to the migration guide when it's written.
+          'Flutter deprecation: Accessing rootViewController in `application:didFinishLaunchingWithOptions:` [flutter-launch-rootvc].\n'
+          '\tnote: \n' // The space after `note:` is meaningful, it is required associate the note with the warning in Xcode.
+          '\tAfter the UISceneDelegate migration the `UIApplicationDelegate.window` and '
+          '`UIWindow.rootViewController` properties will not be set in '
+          '`application:didFinishLaunchingWithOptions:`. If you are relying on on that '
+          'in order to register platform channels at application launch use the '
+          '`FlutterPluginRegistry` API instead. Other setup can be moved to a '
+          'FlutterViewController subclass (ex: `awakeFromNib`).',
         );
       }
     }
@@ -410,7 +418,7 @@ Future<void> _CheckForLaunchRootViewControllerAccessDeprecation(
 Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(
   Logger logger,
   File file,
-) async => _CheckForLaunchRootViewControllerAccessDeprecation(
+) async => _checkForLaunchRootViewControllerAccessDeprecation(
   logger,
   file,
   RegExp('self.*?window.*?rootViewController'),
@@ -423,7 +431,7 @@ Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(
 Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
   Logger logger,
   File file,
-) async => _CheckForLaunchRootViewControllerAccessDeprecation(
+) async => _checkForLaunchRootViewControllerAccessDeprecation(
   logger,
   file,
   'window?.rootViewController',
