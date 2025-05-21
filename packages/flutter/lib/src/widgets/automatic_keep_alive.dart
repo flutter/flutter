@@ -37,8 +37,6 @@ import 'sliver.dart';
 /// The same `addAutomaticKeepAlives` feature is supported by
 /// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
 ///
-/// {@template flutter.widgets.AutomaticKeepAlive.example}
-///
 /// {@tool dartpad}
 /// This sample demonstrates how to use the [AutomaticKeepAlive] widget in
 /// combination with the [AutomaticKeepAliveClientMixin] to selectively preserve
@@ -61,7 +59,6 @@ import 'sliver.dart';
 ///
 /// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive.0.dart **
 /// {@end-tool}
-/// {@endtemplate}
 ///
 /// See also:
 ///

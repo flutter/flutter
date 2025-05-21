@@ -1463,7 +1463,6 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// may be mixed into a [State] subclass. Further details are available in the
 /// documentation for [AutomaticKeepAliveClientMixin].
 ///
-/// {@template flutter.widgets.KeepAlive.example}
 /// {@tool dartpad}
 /// This sample demonstrates how to use the [KeepAlive] widget
 /// to preserve the state of individual list items in a [ListView] when they are
@@ -1486,7 +1485,6 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 ///
 /// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
 /// {@end-tool}
-/// {@endtemplate}
 ///
 /// See also:
 ///
