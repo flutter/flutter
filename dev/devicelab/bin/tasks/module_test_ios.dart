@@ -68,8 +68,6 @@ Future<void> main() async {
 
       section('Create package with native assets');
 
-      await flutter('config', options: <String>['--enable-native-assets']);
-
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 

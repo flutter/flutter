@@ -189,7 +189,6 @@ void main() {
               ],
             ),
           ]),
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {
       writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
@@ -252,7 +251,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       },
       () async {
         writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');

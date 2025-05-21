@@ -657,7 +657,13 @@ Future<DartBuildResult> _runDartBuild({
       dependencies.addAll(linkResult.dependencies);
     }
   }
-
+  if (codeAssets.isNotEmpty) {
+    globals.logger.printTrace(
+      'Note: You are using the dart build hooks feature which is currently '
+      'in preview. Please see '
+      'https://dart.dev/interop/c-interop#native-assets for more details.',
+    );
+  }
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }
