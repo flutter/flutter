@@ -6,9 +6,9 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../browser_detection.dart';
 import '../dom.dart';
 import 'semantics.dart';
-import '../browser_detection.dart';
 
 /// The method used to represend a label of a leaf node in the DOM.
 ///
@@ -179,9 +179,7 @@ final class AriaLabelRepresentation extends LabelRepresentationBehavior {
   static bool? _supportsAriaDescription;
 
   static bool get supportsAriaDescription {
-    if (_supportsAriaDescription == null) {
-      _supportsAriaDescription = _checkAriaDescriptionSupport();
-    }
+    _supportsAriaDescription ??= _checkAriaDescriptionSupport();
     return _supportsAriaDescription!;
   }
 
