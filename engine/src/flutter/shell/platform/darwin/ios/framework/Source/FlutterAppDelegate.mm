@@ -9,6 +9,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
@@ -20,9 +21,33 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
+@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
+@property(nonatomic, strong, nullable) UIWindow* window;
+@end
+
+@implementation FlutterSceneDelegate
+
+- (void)scene:(UIScene*)scene
+    willConnectToSession:(UISceneSession*)session
+                 options:(UISceneConnectionOptions*)connectionOptions {
+  NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
+  if (appDelegate.window.rootViewController) {
+    // If this is not nil we are running into a case where someone is manually
+    // performing root view controller setup in the UIApplicationDelegate.
+    UIWindowScene* windowScene = (UIWindowScene*)scene;
+    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+    self.window.rootViewController = appDelegate.window.rootViewController;
+    appDelegate.window = self.window;
+    [self.window makeKeyAndVisible];
+  }
+}
+
+@end
+
 @interface FlutterAppDelegate ()
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
+@property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
 @end
 
 @implementation FlutterAppDelegate
@@ -30,8 +55,13 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (instancetype)init {
   if (self = [super init]) {
     _lifeCycleDelegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+    _launchEngine = [[FlutterLaunchEngine alloc] init];
   }
   return self;
+}
+
+- (nullable FlutterEngine*)takeLaunchEngine {
+  return [self.launchEngine takeEngine];
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -233,7 +263,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return nil;
+  return [self.launchEngine.engine registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -241,7 +271,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return false;
+  return [self.launchEngine.engine hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -249,7 +279,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return nil;
+  return [self.launchEngine.engine valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling
@@ -339,6 +369,33 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                                     error:&error];
   NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
   return [fileDate timeIntervalSince1970];
+}
+
+- (UISceneConfiguration*)application:(UIApplication*)application
+    configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
+                                   options:(UISceneConnectionOptions*)options {
+  NSDictionary* sceneManifest =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
+  NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
+
+  if (sceneConfigs.count > 0) {
+    return connectingSceneSession.configuration;
+  } else {
+    UISceneConfiguration* config =
+        [UISceneConfiguration configurationWithName:@"flutter"
+                                        sessionRole:connectingSceneSession.role];
+    config.delegateClass = [FlutterSceneDelegate class];
+
+    NSString* mainStoryboard =
+        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIMainStoryboardFile"];
+
+    if (mainStoryboard) {
+      UIStoryboard* storyboard = [UIStoryboard storyboardWithName:mainStoryboard
+                                                           bundle:[NSBundle mainBundle]];
+      config.storyboard = storyboard;
+    }
+    return config;
+  }
 }
 
 @end
