@@ -48,7 +48,7 @@ void main() {
     double? menuHeight,
     Widget? leadingIcon,
     Widget? label,
-    InputDecorationThemeData? decorationTheme,
+    InputDecorationTheme? decorationTheme,
   }) {
     return MaterialApp(
       theme: themeData,
@@ -1291,7 +1291,7 @@ void main() {
   });
 
   testWidgets(
-    'Trailing IconButton height respects InputDecorationThemeData.suffixIconConstraints',
+    'Trailing IconButton height respects InputDecorationTheme.suffixIconConstraints',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData();
 
@@ -1307,7 +1307,7 @@ void main() {
         buildTest(
           themeData,
           menuChildren,
-          decorationTheme: const InputDecorationThemeData(
+          decorationTheme: const InputDecorationTheme(
             suffixIconConstraints: BoxConstraints(minWidth: 66, minHeight: 62),
           ),
         ),
@@ -1318,7 +1318,7 @@ void main() {
     },
   );
 
-  testWidgets('InputDecorationThemeData.isCollapsed reduces height', (WidgetTester tester) async {
+  testWidgets('InputDecorationTheme.isCollapsed reduces height', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
 
     // Default height.
@@ -1333,7 +1333,7 @@ void main() {
       buildTest(
         themeData,
         menuChildren,
-        decorationTheme: const InputDecorationThemeData(isCollapsed: true),
+        decorationTheme: const InputDecorationTheme(isCollapsed: true),
       ),
     );
     await tester.pump();
@@ -1345,7 +1345,7 @@ void main() {
       buildTest(
         themeData,
         menuChildren,
-        decorationTheme: const InputDecorationThemeData(
+        decorationTheme: const InputDecorationTheme(
           isCollapsed: true,
           suffixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
         ),
@@ -3479,7 +3479,7 @@ void main() {
             child: DropdownMenu<int>(
               hintText: 'Hint text',
               helperText: 'Menu Helper text',
-              inputDecorationTheme: InputDecorationThemeData(
+              inputDecorationTheme: InputDecorationTheme(
                 helperMaxLines: 2,
                 helperStyle: TextStyle(fontSize: 30),
               ),
