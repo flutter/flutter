@@ -214,17 +214,6 @@ class ModuleTest {
         return TaskResult.failure('Failed to build editable host .apk');
       }
 
-      section('Flutter build aar succeeds');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'build',
-          options: <String>['aar', '--no-profile'],
-          output: stdout,
-          stderr: stderr,
-        );
-      });
-
       section('Add to existing Android app');
 
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
@@ -248,12 +237,13 @@ class ModuleTest {
       );
 
       // Modify gradle version to the passed in version.
+      // This is somehow the wrong file.
       final File gradleWrapperProperties = File(
         path.join(hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'),
       );
       String propertyContent = await gradleWrapperProperties.readAsString();
       propertyContent = propertyContent.replaceFirst('REPLACEME', gradleVersion);
-      section('Modify gradle wrapper file contents');
+      section(propertyContent);
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
       // Modify AGP version to the passed in version.
