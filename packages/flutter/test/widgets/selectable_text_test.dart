@@ -5584,7 +5584,7 @@ void main() {
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(
-      'iOS uses the system context menu by default if supported',
+      'iOS does not use the system context menu by default even when supported',
       (WidgetTester tester) async {
         tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         addTearDown(() {
