@@ -956,6 +956,10 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external String direction;
   external set lineWidth(num? value);
 
+  @JS('setLineDash')
+  external void _setLineDash(JSFloat32Array? value);
+  void setLineDash(Float32List? value) => _setLineDash(value?.toJS);
+
   @JS('strokeStyle')
   external set _strokeStyle(JSAny? value);
 
@@ -1058,6 +1062,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void resetTransform();
 
   external void restore();
+  external void reset();
 
   external void setTransform(num a, num b, num c, num d, num e, num f);
   external void transform(num a, num b, num c, num d, num e, num f);

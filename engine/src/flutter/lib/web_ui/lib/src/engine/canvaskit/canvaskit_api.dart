@@ -1965,6 +1965,7 @@ extension BidiRegionExtension on BidiRegion {
 @staticInterop
 class BidiIndex {}
 
+// TODO(jlavrova): it's really just an array of integer, no need to wrap it in a struct
 extension BidiIndexExtension on BidiIndex {
   @JS('index')
   external JSNumber get _index;

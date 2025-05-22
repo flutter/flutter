@@ -25,6 +25,10 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Paint? foreground,
     ui.Paint? background,
     List<ui.Shadow>? shadows,
+    ui.TextDecoration? decoration,
+    ui.Color? decorationColor,
+    ui.TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
   }) : _defaultTextStyle = WebTextStyle(
          fontFamily: fontFamily,
          fontSize: fontSize,
@@ -33,6 +37,10 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          foreground: foreground,
          background: background,
          shadows: shadows,
+         decoration: decoration,
+         decorationColor: decorationColor,
+         decorationStyle: decorationStyle,
+         decorationThickness: decorationThickness,
        ),
        _textDirection = textDirection ?? ui.TextDirection.ltr,
        _textAlign = textAlign ?? ui.TextAlign.start;
@@ -99,6 +107,10 @@ class WebTextStyle implements ui.TextStyle {
     ui.Paint? foreground,
     ui.Paint? background,
     List<ui.Shadow>? shadows,
+    ui.TextDecoration? decoration,
+    ui.Color? decorationColor,
+    ui.TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
   }) {
     return WebTextStyle._(
       originalFontFamily: fontFamily ?? 'Arial',
@@ -108,6 +120,10 @@ class WebTextStyle implements ui.TextStyle {
       foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
       background: background, // ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
       shadows: shadows,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationStyle: decorationStyle,
+      decorationThickness: decorationThickness,
     );
   }
 
@@ -119,6 +135,10 @@ class WebTextStyle implements ui.TextStyle {
     required this.foreground,
     required this.background,
     required this.shadows,
+    required this.decoration,
+    required this.decorationColor,
+    required this.decorationStyle,
+    required this.decorationThickness,
   });
 
   final String? originalFontFamily;
@@ -128,6 +148,10 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Paint? foreground;
   final ui.Paint? background;
   final List<ui.Shadow>? shadows;
+  final ui.TextDecoration? decoration;
+  final ui.Color? decorationColor;
+  final ui.TextDecorationStyle? decorationStyle;
+  final double? decorationThickness;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -142,6 +166,10 @@ class WebTextStyle implements ui.TextStyle {
       foreground: other.foreground ?? foreground,
       background: other.background ?? background,
       shadows: other.shadows ?? shadows,
+      decoration: other.decoration ?? decoration,
+      decorationColor: other.decorationColor ?? decorationColor,
+      decorationStyle: other.decorationStyle ?? decorationStyle,
+      decorationThickness: other.decorationThickness ?? decorationThickness,
     );
   }
 
@@ -157,7 +185,11 @@ class WebTextStyle implements ui.TextStyle {
         other.fontWeight == fontWeight &&
         other.foreground == foreground &&
         other.background == background &&
-        other.shadows == shadows;
+        other.shadows == shadows &&
+        other.decoration == decoration &&
+        other.decorationColor == decorationColor &&
+        other.decorationStyle == decorationStyle &&
+        other.decorationThickness == decorationThickness;
   }
 
   @override
@@ -170,6 +202,10 @@ class WebTextStyle implements ui.TextStyle {
       foreground,
       background,
       shadows,
+      decoration,
+      decorationColor,
+      decorationStyle,
+      decorationThickness,
     );
   }
 
@@ -192,6 +228,13 @@ class WebTextStyle implements ui.TextStyle {
         for (final ui.Shadow shadow in shadows!) {
           result += '[${shadow.color} ${shadow.blurRadius} ${shadow.blurSigma}]';
         }
+      }
+      if (decoration != null && decoration! != ui.TextDecoration.none) {
+        result +=
+            'decoration: $decoration'
+            'decorationColor: ${decorationColor != null ? decorationColor.toString() : ""} '
+            'decorationStyle: ${decorationStyle != null ? decorationStyle.toString() : ""} '
+            'decorationThickness: ${decorationThickness != null ? decorationThickness.toString() : ""} ';
       }
       return true;
     }());
@@ -400,7 +443,6 @@ class WebParagraph implements ui.Paragraph {
 
   void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
-      _paint.paintLineShadowsOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
     }
   }

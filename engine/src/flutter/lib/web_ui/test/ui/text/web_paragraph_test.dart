@@ -405,7 +405,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
   });
-*/
+
   test('Draw WebParagraph multiple shadows text', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -479,6 +479,73 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 400));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(50, 50));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
+    await matchGoldenFile('web_paragraph_multishadows.png', region: region);
+  });
+  */
+
+  test('Draw WebParagraph multiple decorations on text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    const Color redColor = Color(0xFFFF0000);
+    const Color blueColor = Color(0xFF0000FF);
+    const Color greenColor = Color(0xFF00FF00);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      foreground: blackPaint,
+    );
+
+    final WebTextStyle underlined = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      decoration: TextDecoration.underline,
+      decorationStyle: TextDecorationStyle.solid,
+      decorationThickness: 1,
+      decorationColor: redColor,
+    );
+
+    final WebTextStyle through = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      decoration: TextDecoration.lineThrough,
+      decorationThickness: 1,
+      decorationStyle: TextDecorationStyle.dashed,
+      decorationColor: blueColor,
+    );
+
+    final WebTextStyle overlined = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      decoration: TextDecoration.overline,
+      decorationThickness: 1,
+      decorationStyle: TextDecorationStyle.double,
+      decorationColor: greenColor,
+    );
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+    builder.pushStyle(underlined);
+    builder.addText('Underlined solid red decoration. ');
+    builder.pop();
+
+    builder.pushStyle(through);
+    builder.addText('Through dotted blue decoration. ');
+    builder.pop();
+
+    builder.pushStyle(overlined);
+    builder.addText('Overlined double green decoration. ');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multidecorated.png', region: region);
   });
 }
