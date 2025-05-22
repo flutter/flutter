@@ -27,8 +27,14 @@ import 'theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
+// Current M2 implementation is not compliant with the M2 specification.
+// Instead of a 42 pixels row height it should be 40 with a 2 pixels inner padding.
+// See: https://m2.material.io/components/date-pickers#specs.
 const double _dayPickerRowHeightM2 = 42.0;
+// For M3, row height is 48 pxiels with 4 pixels inner padding.
+// See: https://m3.material.io/components/date-pickers/specs#2d53890e-a08f-4c63-a0d9-abd9e95b4245.
 const double _dayPickerRowHeightM3 = 48.0;
+
 const int _maxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // One extra row for the day-of-week header.
 const double _maxDayPickerHeightM2 = _dayPickerRowHeightM2 * (_maxDayPickerRowCount + 1);
