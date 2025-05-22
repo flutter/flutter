@@ -356,7 +356,7 @@ class LocalizationOptions {
        syntheticPackage = syntheticPackage ?? !featureFlags.isExplicitPackageDependenciesEnabled,
        requiredResourceAttributes = requiredResourceAttributes ?? false,
        nullableGetter = nullableGetter ?? true,
-       format = format ?? false,
+       format = format ?? true,
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,
@@ -374,7 +374,7 @@ class LocalizationOptions {
 
   /// The `--template-arb-file` argument.
   ///
-  /// This path is relative to [arbDirectory].
+  /// This path is relative to [arbDir].
   final String templateArbFile;
 
   /// The `--output-localization-file` argument.

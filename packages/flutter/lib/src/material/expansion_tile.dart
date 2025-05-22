@@ -394,9 +394,9 @@ class ExpansionTile extends StatefulWidget {
 
   /// If provided, the controller can be used to expand and collapse tiles.
   ///
-  /// In cases were control over the tile's state is needed from a callback triggered
-  /// by a widget within the tile, [ExpansionTileController.of] may be more convenient
-  /// than supplying a controller.
+  /// In cases where control over the tile's state is needed from a callback
+  /// triggered by a widget within the tile, [ExpansibleController.of] may be
+  /// more convenient than supplying a controller.
   final ExpansionTileController? controller;
 
   /// {@macro flutter.material.ListTile.dense}

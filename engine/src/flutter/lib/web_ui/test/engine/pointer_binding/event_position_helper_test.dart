@@ -133,6 +133,61 @@ void doTests() {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/167805
+    test('Returns the correct offset when event.target is equal to eventTarget', () async {
+      textEditing.strategy
+        ..enable(
+          InputConfiguration(viewId: view.viewId, inputType: const MultilineInputType()),
+          onChange: (_, _) {},
+          onAction: (_) {},
+        )
+        ..updateElementPlacement(
+          EditableTextGeometry(
+            width: 150,
+            height: 100,
+            globalTransform: Matrix4.identity().storage,
+          ),
+        );
+      addTearDown(() {
+        textEditing.strategy.disable();
+      });
+
+      final DomHTMLElement textarea = textEditing.strategy.activeDomElement;
+      textarea.style.margin = '0px';
+
+      final DomRect textareaBoundingRect = textarea.getBoundingClientRect();
+      expect(textareaBoundingRect.width, 150);
+      expect(textareaBoundingRect.height, 100);
+      expect(textareaBoundingRect.top, 0);
+      expect(textareaBoundingRect.left, 0);
+
+      final DomElement div = createDomElement('div');
+      div.style
+        ..position = 'absolute'
+        ..width = '150px'
+        ..height = '300px'
+        ..top = '-125px'
+        ..left = '-5px';
+      rootElement.append(div);
+
+      final DomPointerEvent moveEvent = createDomPointerEvent('pointermove', <String, Object>{
+        'bubbles': true,
+        'clientX': 40,
+        'clientY': 190,
+      });
+
+      div.dispatchEvent(moveEvent);
+      // The event.target has to be div.
+      expect(moveEvent.target, div);
+      expect(moveEvent.offsetX, 45);
+      expect(moveEvent.offsetY, 315);
+
+      // Compute offset with div event.target and textarea eventTarget.
+      final ui.Offset offset = computeEventOffsetToTarget(moveEvent, view, eventTarget: textarea);
+
+      expect(offset, const ui.Offset(40, 190));
+    });
+
     test('Event dispatched by TalkBack gets a computed offset', () async {
       // Fill this in to test _computeOffsetForTalkbackEvent
 

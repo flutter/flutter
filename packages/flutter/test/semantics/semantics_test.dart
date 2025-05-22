@@ -597,15 +597,15 @@ void main() {
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
-      ' ├─SemanticsNode#2\n'
+      ' ├─SemanticsNode#1\n'
       ' │   STALE\n'
       ' │   owner: null\n'
-      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
-      ' └─SemanticsNode#1\n'
+      ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n',
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     final SemanticsNode child3 = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
@@ -664,30 +664,30 @@ void main() {
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
       ' │\n'
-      ' ├─SemanticsNode#4\n'
-      ' │ │ STALE\n'
-      ' │ │ owner: null\n'
-      ' │ │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
-      ' │ │\n'
-      ' │ ├─SemanticsNode#6\n'
-      ' │ │   STALE\n'
-      ' │ │   owner: null\n'
-      ' │ │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
-      ' │ │\n'
-      ' │ └─SemanticsNode#5\n'
-      ' │     STALE\n'
-      ' │     owner: null\n'
-      ' │     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
       ' ├─SemanticsNode#2\n'
       ' │   STALE\n'
       ' │   owner: null\n'
       ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
       ' │\n'
-      ' └─SemanticsNode#1\n'
-      '     STALE\n'
-      '     owner: null\n'
-      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n',
+      ' └─SemanticsNode#4\n'
+      '   │ STALE\n'
+      '   │ owner: null\n'
+      '   │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   ├─SemanticsNode#5\n'
+      '   │   STALE\n'
+      '   │   owner: null\n'
+      '   │   Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   └─SemanticsNode#6\n'
+      '       STALE\n'
+      '       owner: null\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
   });
 
@@ -763,7 +763,7 @@ void main() {
         '   merge boundary ⛔️\n'
         '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
         '   actions: longPress, scrollUp, showOnScreen\n'
-        '   flags: hasCheckedState, hasSelectedState, isSelected, isButton\n'
+        '   flags: hasCheckedState, isSelected, isButton, hasSelectedState\n'
         '   label: "Use all the properties"\n'
         '   textDirection: rtl\n'
         '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n',
@@ -775,7 +775,7 @@ void main() {
       'Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), '
       '[1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], '
       'actions: [longPress, scrollUp, showOnScreen], '
-      'flags: [hasCheckedState, hasSelectedState, isSelected, isButton], '
+      'flags: [hasCheckedState, isSelected, isButton, hasSelectedState], '
       'label: "Use all the properties", textDirection: rtl)',
     );
 
@@ -916,6 +916,26 @@ void main() {
     newNode.attach(owner);
     // Id is reused.
     expect(newNode.id, expectId);
+  });
+
+  test('performActionAt can hit test on merged semantics node', () {
+    bool tapped = false;
+    final SemanticsOwner owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+    final SemanticsNode root = SemanticsNode.root(owner: owner)
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final SemanticsNode merged = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final SemanticsConfiguration mergeConfig =
+        SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true
+          ..onTap = () => tapped = true;
+    final SemanticsConfiguration rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
+
+    merged.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[]);
+    root.updateWith(config: rootConfig, childrenInInversePaintOrder: <SemanticsNode>[merged]);
+
+    owner.performActionAt(const Offset(5, 5), SemanticsAction.tap);
+    expect(tapped, isTrue);
   });
 
   test('Tags show up in debug properties', () {

@@ -78,7 +78,10 @@ public class FlutterJNITest {
     Configuration config = mock(Configuration.class);
     DartExecutor dartExecutor = mock(DartExecutor.class);
     LocaleList localeList =
-        new LocaleList(new Locale("es", "MX"), new Locale("zh", "CN"), new Locale("en", "US"));
+        new LocaleList(
+            new Locale.Builder().setLanguage("es").setRegion("MX").build(),
+            new Locale.Builder().setLanguage("zh").setRegion("CN").build(),
+            new Locale.Builder().setLanguage("en").setRegion("US").build());
     when(context.getResources()).thenReturn(resources);
     when(resources.getConfiguration()).thenReturn(config);
     when(config.getLocales()).thenReturn(localeList);

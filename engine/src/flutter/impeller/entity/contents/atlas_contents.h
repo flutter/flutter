@@ -14,6 +14,8 @@
 
 namespace impeller {
 
+struct VertexBuffer;
+
 // Interface wrapper to allow usage of DL pointer data without copying (or
 // circular imports).
 class AtlasGeometry {

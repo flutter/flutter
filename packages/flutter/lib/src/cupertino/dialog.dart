@@ -1320,8 +1320,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       if (widget.cancelButton != null) _buildCancelButton(),
     ];
     final double actionSheetWidth = switch (MediaQuery.orientationOf(context)) {
-      Orientation.portrait => MediaQuery.sizeOf(context).width,
-      Orientation.landscape => MediaQuery.sizeOf(context).height,
+      Orientation.portrait => MediaQuery.widthOf(context),
+      Orientation.landscape => MediaQuery.heightOf(context),
     };
 
     return SafeArea(
