@@ -28,7 +28,8 @@ mixin SemanticsBinding on BindingBase {
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
       ..onAccessibilityFeaturesChanged = () {
-        // TODO(chunhtai): https://github.com/flutter/flutter/issues/158399
+        // TODO(chunhtai): Web should not notify accessibility feature changes during updateSemantics
+        // https://github.com/flutter/flutter/issues/158399
         if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
           SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
             handleAccessibilityFeaturesChanged();
