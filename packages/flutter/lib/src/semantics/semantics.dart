@@ -371,15 +371,18 @@ sealed class _DebugSemanticsRoleChecks {
     return false;
   }
 
-  static int _sameRoleCount(SemanticsNode semanticsNode) {
+  static bool _isSameRoleExisted(SemanticsNode semanticsNode) {
     final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
     int sameRoleCount = 0;
     for (final int id in treeNodes.keys) {
       if (treeNodes[id]?.role == semanticsNode.role) {
         sameRoleCount++;
+        if (sameRoleCount > 1) {
+          return true;
+        }
       }
     }
-    return sameRoleCount;
+    return false;
   }
 
   static FlutterError? _semanticsComplementary(SemanticsNode node) {
@@ -392,7 +395,7 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode.parent;
     }
-    if (_sameRoleCount(node) > 1 && node.label.isEmpty) {
+    if (_isSameRoleExisted(node) && node.label.isEmpty) {
       return FlutterError(
         'The complementary landmark role should have a unique label as it is used more than once.',
       );
@@ -410,7 +413,7 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode.parent;
     }
-    if (_sameRoleCount(node) > 1 && node.label.isEmpty) {
+    if (_isSameRoleExisted(node) && node.label.isEmpty) {
       return FlutterError(
         'The contentInfo landmark role should have a unique label as it is used more than once.',
       );
@@ -428,7 +431,7 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode.parent;
     }
-    if (_sameRoleCount(node) > 1 && node.label.isEmpty) {
+    if (_isSameRoleExisted(node) && node.label.isEmpty) {
       return FlutterError(
         'The main landmark role should have a unique label as it is used more than once.',
       );
@@ -437,7 +440,7 @@ sealed class _DebugSemanticsRoleChecks {
   }
 
   static FlutterError? _semanticsNavigation(SemanticsNode node) {
-    if (_sameRoleCount(node) > 1 && node.label.isEmpty) {
+    if (_isSameRoleExisted(node) && node.label.isEmpty) {
       return FlutterError(
         'The navigation landmark role should have a unique label as it is used more than once.',
       );
