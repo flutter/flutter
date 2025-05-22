@@ -5,9 +5,9 @@
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
 namespace {
-FlutterSemanticsFlags ConvertToFlutterSemanticsFlags(
+std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
     const flutter::SemanticsFlags& source) {
-  return {
+  return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
       .has_checked_state = source.hasCheckedState,
       .is_checked = source.isChecked,
       .is_selected = source.isSelected,
@@ -39,7 +39,7 @@ FlutterSemanticsFlags ConvertToFlutterSemanticsFlags(
       .has_selected_state = source.hasSelectedState,
       .has_required_state = source.hasRequiredState,
       .is_required = source.isRequired,
-  };
+  });
 }
 }  // namespace
 
@@ -65,6 +65,9 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
   };
 }
 
+// This function is for backward compatibility and contains only a subset of
+// the flags. New flags will be added only to `FlutterSemanticsFlags`, not
+// `FlutterSemanticsFlag`.
 FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   int result = 0;
 
@@ -278,8 +281,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       CreateStringAttributes(node.increasedValueAttributes);
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
-  FlutterSemanticsFlags flags = ConvertToFlutterSemanticsFlags(node.flags);
-  flags_.push_back(flags);
+  flags_.emplace_back(ConvertToFlutterSemanticsFlags(node.flags));
 
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
@@ -321,7 +323,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
-      &flags_.back(),
+      flags_.back().get(),
   });
 }
 

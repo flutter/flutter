@@ -1608,7 +1608,7 @@ typedef struct {
   /// @deprecated     Use `flags2` instead. No new flags will
   ///                 be added to `FlutterSemanticsFlag`. New flags will
   ///                 continue to be added to `FlutterSemanticsFlags`.
-  FlutterSemanticsFlag flags;
+  FlutterSemanticsFlag flags__deprecated__;
   /// The set of semantics actions applicable to this node.
   FlutterSemanticsAction actions;
   /// The position at which the text selection originates.
