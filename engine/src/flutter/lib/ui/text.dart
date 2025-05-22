@@ -3622,9 +3622,12 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
         byteOffset += FontVariation._kEncodedSize;
       }
     }
-
-    if (style.foreground) {}
-    if (style.background) {}
+    if (style._foreground != null) {
+      _copyBytes(style._foreground!, _getForegroundPaintByteData());
+    }
+    if (style._background != null) {
+      _copyBytes(style._background!, _getBackgroundPaintByteData());
+    }
 
     _pushStyle(
       encoded,
@@ -3750,6 +3753,17 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'ParagraphBuilder::build')
   external void _build(_NativeParagraph outParagraph);
+
+  void _copyBytes(Paint paint, Uint8List dst) {
+    final Uint8List src = paint._data.buffer.asUint8List();
+    dst.setAll(0, src);
+  }
+
+  @Native<Handle Function(Pointer<Void>)>(symbol: 'ParagraphBuilder::GetForegroundPaintByteData')
+  external Uint8List _getForegroundPaintByteData();
+
+  @Native<Handle Function(Pointer<Void>)>(symbol: 'ParagraphBuilder::GetBackgroundPaintByteData')
+  external Uint8List _getBackgroundPaintByteData();
 
   @override
   String toString() => 'ParagraphBuilder';

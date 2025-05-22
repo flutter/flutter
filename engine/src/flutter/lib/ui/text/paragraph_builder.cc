@@ -381,10 +381,8 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
                                  const std::string& locale,
                                  Dart_Handle background_objects,
                                  bool has_background_objects,
-                                 Dart_Handle background_data,
                                  Dart_Handle foreground_objects,
                                  bool has_foreground_objects,
-                                 Dart_Handle foreground_data,
                                  Dart_Handle shadows_data,
                                  Dart_Handle font_features_data,
                                  Dart_Handle font_variations_data) {
@@ -461,24 +459,19 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
   }
 
   if (mask & kTSBackgroundMask) {
-    Paint background(background_objects, background_data);
-    if (background.isNotNull()) {
-      DlPaint dl_paint;
-      background.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
-                       DlTileMode::kDecal);
-      style.background = dl_paint;
-    }
+    DlPaint dl_paint;
+    CreatePaint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                DlTileMode::kDecal, background_objects, has_background_objects,
+                background_data_);
+    style.background = dl_paint;
   }
 
   if (mask & kTSForegroundMask) {
-    Paint foreground(foreground_objects, foreground_data);
-    if (foreground.isNotNull()) {
-      DlPaint dl_paint;
-      CreatePaint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
-                  DlTileMode::kDecal, foreground_objects,
-                  Dart_IsNull(foreground_objects), foreground_data);
-      style.foreground = dl_paint;
-    }
+    DlPaint dl_paint;
+    CreatePaint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                DlTileMode::kDecal, foreground_objects, has_foreground_objects,
+                foreground_data_);
+    style.foreground = dl_paint;
   }
 
   if (mask & kTSTextShadowsMask) {
