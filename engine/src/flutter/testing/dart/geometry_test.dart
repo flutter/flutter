@@ -704,6 +704,20 @@ void main() {
     checkDiagnalPoints(const Offset(21.05, -20.92));
     checkDiagnalPoints(const Offset(40.0, 5.68));
   });
+
+  test('RSuperellipse.contains is correct for points outside of a sharp corner', () {
+    expect(
+      RSuperellipse.fromLTRBAndCorners(
+        196.0,
+        0.0,
+        294.0,
+        28.0,
+        topRight: const Radius.circular(3.0),
+        bottomRight: const Radius.circular(3.0),
+      ).contains(const Offset(147.0, 14.0)),
+      isFalse,
+    );
+  });
 }
 
 void checkPointWithOffset(RSuperellipse rse, Offset inPoint, Offset outwardOffset) {
