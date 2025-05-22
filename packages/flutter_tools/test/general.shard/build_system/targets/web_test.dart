@@ -555,6 +555,47 @@ name: foo
   );
 
   test(
+    'Dart2JSTarget calls dart2js with expected args with minify false',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ..._kDart2jsLinuxArgs,
+            '-Ddart.vm.product=true',
+            '-DFLUTTER_WEB_USE_SKIA=true',
+            '-DFLUTTER_WEB_USE_SKWASM=false',
+            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '-o',
+            environment.buildDir.childFile('app.dill').absolute.path,
+            '--packages=/.dart_tool/package_config.json',
+            '--cfe-only',
+            environment.buildDir.childFile('main.dart').absolute.path,
+          ],
+        ),
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ..._kDart2jsLinuxArgs,
+            '-Ddart.vm.product=true',
+            '-DFLUTTER_WEB_USE_SKIA=true',
+            '-DFLUTTER_WEB_USE_SKWASM=false',
+            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--no-minify',
+            '-O4',
+            '-o',
+            environment.buildDir.childFile('main.dart.js').absolute.path,
+            environment.buildDir.childFile('app.dill').absolute.path,
+          ],
+        ),
+      );
+
+      await Dart2JSTarget(const JsCompilerConfig(minify: false)).build(environment);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  test(
     'Dart2JSTarget ignores frontend server starter path option when calling dart2js',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
@@ -716,6 +757,7 @@ name: foo
             '-DFLUTTER_WEB_USE_SKIA=true',
             '-DFLUTTER_WEB_USE_SKWASM=false',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--minify',
             '--no-source-maps',
             '-O4',
             '-o',
@@ -759,6 +801,7 @@ name: foo
             '-DFLUTTER_WEB_USE_SKIA=true',
             '-DFLUTTER_WEB_USE_SKWASM=false',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--minify',
             '--native-null-assertions',
             '--no-source-maps',
             '-O4',
@@ -804,6 +847,7 @@ name: foo
             '-DFLUTTER_WEB_USE_SKIA=true',
             '-DFLUTTER_WEB_USE_SKWASM=false',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--minify',
             '--no-source-maps',
             '-O3',
             '-o',
@@ -851,6 +895,7 @@ name: foo
             '-DFLUTTER_WEB_USE_SKIA=true',
             '-DFLUTTER_WEB_USE_SKWASM=false',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--minify',
             '--no-source-maps',
             '-O4',
             '-o',
@@ -909,6 +954,7 @@ name: foo
             '-DFLUTTER_WEB_USE_SKIA=true',
             '-DFLUTTER_WEB_USE_SKWASM=false',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--minify',
             '--no-source-maps',
             '-O4',
             '-o',
@@ -951,6 +997,7 @@ name: foo
             '-DFLUTTER_WEB_USE_SKIA=true',
             '-DFLUTTER_WEB_USE_SKWASM=false',
             '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+            '--minify',
             '-O4',
             '-o',
             environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -1251,6 +1298,7 @@ name: foo
       JsCompilerConfig(optimizationLevel: 0),
       JsCompilerConfig(noFrequencyBasedMinification: true),
       JsCompilerConfig(sourceMaps: false),
+      JsCompilerConfig(minify: false),
 
       // All properties non-default
       JsCompilerConfig(
