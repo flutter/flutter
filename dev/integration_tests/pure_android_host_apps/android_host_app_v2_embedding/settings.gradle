@@ -2,18 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url = uri("https://storage.googleapis.com/download.flutter.io")
-        }
-        maven {
-            url = uri("../hello/build/host/outputs/repo")
-        }
-    }
-}
-
 include ':app'
+setBinding(new Binding([gradle: this]))
+evaluate(new File(settingsDir.parentFile, 'hello/.android/include_flutter.groovy'))

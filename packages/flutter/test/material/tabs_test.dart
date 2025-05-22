@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -154,6 +152,22 @@ void main() {
     );
 
     expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
+  });
+
+  testWidgets('tab semantics role test', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/169175
+    // Creates an image semantics node with zero size.
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBar(
+            tabs: <Widget>[Tab(icon: Semantics(image: true, child: const SizedBox.shrink()))],
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(Tab), findsOneWidget);
   });
 
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
