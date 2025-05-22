@@ -39,10 +39,11 @@ precision highp float;
 
 #include <impeller/gaussian.glsl>
 #include <impeller/math.glsl>
+#include <impeller/rrect.glsl>
 #include <impeller/types.glsl>
 
 uniform FragInfo {
-  f16vec4 color;
+  vec4 color;
   vec2 center;
   vec2 adjust;
   float minEdge;
@@ -71,32 +72,9 @@ out f16vec4 frag_color;
 const float kTwoOverSqrtPi = 2.0 / sqrt(3.1415926);
 const float kPiOverFour = 3.1415926 / 4.0;
 
-float maxXY(vec2 v) {
-  return max(v.x, v.y);
-}
-
-// use crate::math::compute_erf7;
-float computeErf7(float x) {
-  x *= kTwoOverSqrtPi;
-  float xx = x * x;
-  x = x + (0.24295 + (0.03395 + 0.0104 * xx) * xx) * (x * xx);
-  return x / sqrt(1.0 + x * x);
-}
-
-// The length formula, but with an exponent other than 2
-float powerDistance(vec2 p) {
-  float xp = POW(p.x, frag_info.exponent);
-  float yp = POW(p.y, frag_info.exponent);
-  return POW(xp + yp, frag_info.exponentInv);
-}
-
 void main() {
   vec2 centered = abs(v_position - frag_info.center);
-  vec2 adjusted = centered - frag_info.adjust;
-
-  float dPos = powerDistance(max(adjusted, 0.0));
-  float dNeg = min(maxXY(adjusted), 0.0);
-  float d = dPos + dNeg - frag_info.r1;
+  float d = computeRRectDistance(centered, frag_info.adjust, frag_info.r1);
 
   /**** Start of RSuperellipse math ****/
 
@@ -130,9 +108,7 @@ void main() {
 
   /**** End of RSuperellipse math ****/
 
-  float z =
-      frag_info.scale * (computeErf7(frag_info.sInv * (frag_info.minEdge + d)) -
-                         computeErf7(frag_info.sInv * d));
+  float z = computeRRectFade(d, frag_info.sInv, frag_info.minEdge, frag_info.scale);
 
   frag_color = frag_info.color * float16_t(z);
 }
