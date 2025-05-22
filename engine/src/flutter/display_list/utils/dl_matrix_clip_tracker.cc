@@ -41,8 +41,11 @@ bool DisplayListMatrixClipState::mapAndClipRect(const DlRect& src,
     dl_mapped = src.TransformAndClipBounds(matrix_);
   }
   impeller::Rect dl_intersected = dl_mapped.FastIntersection(cull_rect_);
-  *mapped = dl_intersected;
-  return true;
+  if (!dl_intersected.IsEmpty()) {
+    *mapped = dl_intersected;
+    return true;
+  }
+  return false;
 }
 
 void DisplayListMatrixClipState::clipRect(const DlRect& rect,
