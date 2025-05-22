@@ -4897,7 +4897,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'complementary');
   });
 
-  test('nodes with multiple complementary roles in tree', () {
+  test('nodes with complementary role and label in tree', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -4916,6 +4916,7 @@ void _testLandmarks() {
         tester.updateNode(
           id: 2,
           role: ui.SemanticsRole.complementary,
+          label: 'complementary 2',
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
         tester.updateNode(
@@ -4925,6 +4926,7 @@ void _testLandmarks() {
             tester.updateNode(
               id: 4,
               role: ui.SemanticsRole.complementary,
+              label: 'complementary 4',
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
             ),
           ],
@@ -4940,12 +4942,12 @@ void _testLandmarks() {
     final SemanticsObject object2 = tester.getSemanticsObject(2);
     expect(object2.semanticRole?.kind, EngineSemanticsRole.complementary);
     expect(object2.element.getAttribute('role'), 'complementary');
-    expect(object2.element.getAttribute('aria-label'), 'flt-semantic-node-2');
+    expect(object2.element.getAttribute('aria-label'), 'complementary 2');
 
     final SemanticsObject object4 = tester.getSemanticsObject(4);
     expect(object4.semanticRole?.kind, EngineSemanticsRole.complementary);
     expect(object4.element.getAttribute('role'), 'complementary');
-    expect(object4.element.getAttribute('aria-label'), 'flt-semantic-node-4');
+    expect(object4.element.getAttribute('aria-label'), 'complementary 4');
   });
 
   test('nodes with contentInfo role', () {
@@ -4969,7 +4971,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'contentinfo');
   });
 
-  test('nodes with multiple contentInfo roles in tree', () {
+  test('node with contentInfo role and label in tree', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -4985,23 +4987,6 @@ void _testLandmarks() {
           label: 'contentInfo 1',
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
-        tester.updateNode(
-          id: 2,
-          role: ui.SemanticsRole.contentInfo,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-        ),
-        tester.updateNode(
-          id: 3,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              role: ui.SemanticsRole.contentInfo,
-              label: 'contentInfo 4',
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-            ),
-          ],
-        ),
       ],
     );
     tester.apply();
@@ -5009,16 +4994,6 @@ void _testLandmarks() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
     expect(object.element.getAttribute('role'), 'contentinfo');
     expect(object.element.getAttribute('aria-label'), 'contentInfo 1');
-
-    final SemanticsObject object2 = tester.getSemanticsObject(2);
-    expect(object2.semanticRole?.kind, EngineSemanticsRole.contentInfo);
-    expect(object2.element.getAttribute('role'), 'contentinfo');
-    expect(object2.element.getAttribute('aria-label'), 'flt-semantic-node-2');
-
-    final SemanticsObject object4 = tester.getSemanticsObject(4);
-    expect(object4.semanticRole?.kind, EngineSemanticsRole.contentInfo);
-    expect(object4.element.getAttribute('role'), 'contentinfo');
-    expect(object4.element.getAttribute('aria-label'), 'contentInfo 4');
   });
 
   test('nodes with main role', () {
@@ -5042,7 +5017,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'main');
   });
 
-  test('nodes with multiple main roles in tree', () {
+  test('node with main role and label in tree', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5054,24 +5029,9 @@ void _testLandmarks() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
+          label: 'main 1',
           role: ui.SemanticsRole.main,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-        ),
-        tester.updateNode(
-          id: 2,
-          role: ui.SemanticsRole.main,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-        ),
-        tester.updateNode(
-          id: 3,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              role: ui.SemanticsRole.main,
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-            ),
-          ],
         ),
       ],
     );
@@ -5079,17 +5039,7 @@ void _testLandmarks() {
     final SemanticsObject object = tester.getSemanticsObject(1);
     expect(object.semanticRole?.kind, EngineSemanticsRole.main);
     expect(object.element.getAttribute('role'), 'main');
-    expect(object.element.getAttribute('aria-label'), 'flt-semantic-node-1');
-
-    final SemanticsObject object2 = tester.getSemanticsObject(2);
-    expect(object2.semanticRole?.kind, EngineSemanticsRole.main);
-    expect(object2.element.getAttribute('role'), 'main');
-    expect(object2.element.getAttribute('aria-label'), 'flt-semantic-node-2');
-
-    final SemanticsObject object4 = tester.getSemanticsObject(4);
-    expect(object4.semanticRole?.kind, EngineSemanticsRole.main);
-    expect(object4.element.getAttribute('role'), 'main');
-    expect(object4.element.getAttribute('aria-label'), 'flt-semantic-node-4');
+    expect(object.element.getAttribute('aria-label'), 'main 1');
   });
 
   test('nodes with navigation role', () {
@@ -5113,7 +5063,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'navigation');
   });
 
-  test('nodes with multiple navigation roles in tree', () {
+  test('nodes with navigation role and label in tree', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5135,18 +5085,6 @@ void _testLandmarks() {
           label: 'navigation 2',
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
-        tester.updateNode(
-          id: 3,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              role: ui.SemanticsRole.navigation,
-              label: 'navigation 4',
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-            ),
-          ],
-        ),
       ],
     );
     tester.apply();
@@ -5159,11 +5097,6 @@ void _testLandmarks() {
     expect(object2.semanticRole?.kind, EngineSemanticsRole.navigation);
     expect(object2.element.getAttribute('role'), 'navigation');
     expect(object2.element.getAttribute('aria-label'), 'navigation 2');
-
-    final SemanticsObject object4 = tester.getSemanticsObject(4);
-    expect(object4.semanticRole?.kind, EngineSemanticsRole.navigation);
-    expect(object4.element.getAttribute('role'), 'navigation');
-    expect(object4.element.getAttribute('aria-label'), 'navigation 4');
   });
 
   test('nodes with region role', () {
@@ -5189,7 +5122,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('aria-label'), 'Header 1');
   });
 
-  test('nodes with multiple region roles in tree', () {
+  test('node with region role and label in tree', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5201,24 +5134,9 @@ void _testLandmarks() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
+          label: 'region 1',
           role: ui.SemanticsRole.region,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-        ),
-        tester.updateNode(
-          id: 2,
-          role: ui.SemanticsRole.region,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-        ),
-        tester.updateNode(
-          id: 3,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              role: ui.SemanticsRole.region,
-              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-            ),
-          ],
         ),
       ],
     );
@@ -5226,17 +5144,7 @@ void _testLandmarks() {
     final SemanticsObject object = tester.getSemanticsObject(1);
     expect(object.semanticRole?.kind, EngineSemanticsRole.region);
     expect(object.element.getAttribute('role'), 'region');
-    expect(object.element.getAttribute('aria-label'), 'flt-semantic-node-1');
-
-    final SemanticsObject object2 = tester.getSemanticsObject(2);
-    expect(object2.semanticRole?.kind, EngineSemanticsRole.region);
-    expect(object2.element.getAttribute('role'), 'region');
-    expect(object2.element.getAttribute('aria-label'), 'flt-semantic-node-2');
-
-    final SemanticsObject object4 = tester.getSemanticsObject(4);
-    expect(object4.semanticRole?.kind, EngineSemanticsRole.region);
-    expect(object4.element.getAttribute('role'), 'region');
-    expect(object4.element.getAttribute('aria-label'), 'flt-semantic-node-4');
+    expect(object.element.getAttribute('aria-label'), 'region 1');
   });
 
   semantics().semanticsEnabled = false;
