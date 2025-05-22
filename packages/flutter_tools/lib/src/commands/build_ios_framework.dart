@@ -486,12 +486,6 @@ end
     const String appFrameworkName = 'App.framework';
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     final List<Directory> frameworks = <Directory>[];
-
-    // Dev dependencies are removed from release builds if the explicit package
-    // dependencies flag is on.
-    final bool devDependenciesEnabled =
-        !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
-
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
         final Directory outputBuildDirectory = switch (sdkType) {
@@ -514,7 +508,7 @@ end
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
-            kDevDependenciesEnabled: devDependenciesEnabled.toString(),
+            kDevDependenciesEnabled: '${!buildInfo.mode.isRelease}',
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,

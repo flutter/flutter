@@ -234,10 +234,6 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     try {
-      // Dev dependencies are removed from release builds if the explicit package
-      // dependencies flag is on.
-      final bool devDependenciesEnabled =
-          !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
         packageConfigPath: packageConfigPath(),
@@ -251,7 +247,7 @@ end
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
           ).map((DarwinArch e) => e.name).join(' '),
-          kDevDependenciesEnabled: devDependenciesEnabled.toString(),
+          kDevDependenciesEnabled: '${!buildInfo.mode.isRelease}',
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
