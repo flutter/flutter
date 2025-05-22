@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "AppDelegate.h"
+#import <Flutter/Flutter.h>
 
-@implementation AppDelegate
+@interface TextureViewController : FlutterViewController
 @end
