@@ -25,6 +25,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_web_browser_detection_io.dart' if (dart.library.js_util) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
@@ -63,7 +64,6 @@ import 'text_selection_toolbar_anchors.dart';
 import 'ticker_provider.dart';
 import 'undo_history.dart';
 import 'view.dart';
-import 'web_browser_detection.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/services.dart'
