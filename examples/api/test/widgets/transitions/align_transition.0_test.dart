@@ -14,7 +14,7 @@ void main() {
         of: find.byType(example.AlignTransitionExample),
         matching: find.byType(ColoredBox),
       ),
-        findsOneWidget,
+      findsOneWidget,
     );
     expect(
       find.byWidgetPredicate(

@@ -18,7 +18,10 @@ void main() {
     await gesture.addPointer();
     await gesture.down(
       tester.getCenter(
-        find.descendant(of: find.byType(example.ListenerExample), matching: find.byType(ColoredBox)),
+        find.descendant(
+          of: find.byType(example.ListenerExample),
+          matching: find.byType(ColoredBox),
+        ),
       ),
     );
     await tester.pump();
