@@ -337,9 +337,7 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
-  /// Called when the visible item changes.
-  ///
-  /// The [index] is the new visible item's index.
+  /// Called when the current item changes.
   final ValueChanged<int>? onItemChanged;
 
   @override
