@@ -13,11 +13,12 @@
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
-  NSObject<FlutterPluginRegistrar>* registrar = [self registrarForPlugin:@"battery"];
+  FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
 
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
       methodChannelWithName:@"samples.flutter.io/battery"
-            binaryMessenger:registrar.messenger];
+            binaryMessenger:controller];
   __weak typeof(self) weakSelf = self;
   [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResult result) {
@@ -37,7 +38,7 @@
 
   FlutterEventChannel* chargingChannel = [FlutterEventChannel
       eventChannelWithName:@"samples.flutter.io/charging"
-           binaryMessenger:registrar.messenger];
+           binaryMessenger:controller];
   [chargingChannel setStreamHandler:self];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }

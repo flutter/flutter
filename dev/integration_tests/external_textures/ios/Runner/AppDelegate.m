@@ -21,15 +21,13 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  id<FlutterPluginRegistrar> registrar = [self registrarForPlugin:@"external_texture_test"];
+  FlutterViewController* flutterController =
+      (FlutterViewController*)self.window.rootViewController;
   FlutterMethodChannel* channel =
       [FlutterMethodChannel methodChannelWithName:@"texture"
-                                  binaryMessenger:registrar.messenger];
+                                  binaryMessenger:flutterController];
   [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       if ([@"start" isEqualToString:call.method]) {
-        FlutterViewController* flutterController =
-            (FlutterViewController*)self.window.rootViewController;
-        _textureId = [flutterController registerTexture:self];
         _framesProduced = 0;
         _framesConsumed = 0;
         _frameRate = 1.0 / [(NSNumber*) call.arguments intValue];
@@ -52,7 +50,7 @@
         result(FlutterMethodNotImplemented);
       }
   }];
-
+  _textureId = [flutterController registerTexture:self];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
