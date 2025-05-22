@@ -21,7 +21,7 @@ TEST(DisplayListStorage, Allocation) {
   EXPECT_NE(storage.allocate(10u), nullptr);
   EXPECT_NE(storage.base(), nullptr);
   EXPECT_EQ(storage.size(), 10u);
-  EXPECT_EQ(storage.capacity(), DisplayListStorage::kDLPageSize);
+  EXPECT_EQ(storage.capacity(), 8192);
 }
 
 TEST(DisplayListStorage, PostMove) {
@@ -40,7 +40,7 @@ TEST(DisplayListStorage, PostMove) {
 
   EXPECT_NE(moved.base(), nullptr);
   EXPECT_EQ(moved.size(), 10u);
-  EXPECT_EQ(moved.capacity(), DisplayListStorage::kDLPageSize);
+  EXPECT_EQ(moved.capacity(), 8192);
 }
 
 }  // namespace testing

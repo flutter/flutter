@@ -793,7 +793,7 @@ TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
   state.setIdentity();
 
   // transform2DAffine recomputes translate-scale state.
-  state.transform2DAffine(2, 0, 0, 2, 10, 10);
+  state.transform2DAffine(2, 0, 10, 0, 2, 10);
   EXPECT_TRUE(state.IsTranslateScale());
 
   state.transform2DAffine(1, 0.5, 0.5, 1, 0, 0);
