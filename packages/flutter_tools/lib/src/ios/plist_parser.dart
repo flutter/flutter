@@ -132,7 +132,7 @@ class PlistParser {
   Map<String, Object> _parseXml(String xmlContent) {
     final XmlDocument document = XmlDocument.parse(xmlContent);
     // First element child is <plist>. The first element child of plist is <dict>.
-    final XmlElement dictObject = document.firstElementChild!.firstElementChild!;
+    final XmlElement dictObject = document.firstElementChild!.firstElementChild;
     return _parseXmlDict(dictObject);
   }
 

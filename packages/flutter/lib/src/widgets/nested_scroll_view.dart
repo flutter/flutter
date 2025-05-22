@@ -1770,7 +1770,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver
       return;
     }
     child!.layout(constraints, parentUsesSize: true);
-    final SliverGeometry childLayoutGeometry = child!.geometry!;
+    final SliverGeometry childLayoutGeometry = child!.geometry;
     geometry = childLayoutGeometry.copyWith(
       scrollExtent:
           childLayoutGeometry.scrollExtent - childLayoutGeometry.maxScrollObstructionExtent,

@@ -53,7 +53,7 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
 
   void _setBackgroundColor(Color? color) {
     setState(() {
-      _backgroundColor = color!;
+      _backgroundColor = color;
     });
   }
 

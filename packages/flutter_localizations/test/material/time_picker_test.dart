@@ -749,7 +749,7 @@ void main() {
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels12To11,
     );
@@ -759,7 +759,7 @@ void main() {
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels12To11,
     );
@@ -779,7 +779,7 @@ void main() {
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels12To11,
     );
@@ -789,7 +789,7 @@ void main() {
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels12To11,
     );
@@ -809,7 +809,7 @@ void main() {
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels00To23TwoDigit,
     );
@@ -819,7 +819,7 @@ void main() {
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels00To23TwoDigit,
     );
@@ -839,7 +839,7 @@ void main() {
     expect(
       primaryLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels00To22TwoDigit,
     );
@@ -849,7 +849,7 @@ void main() {
     expect(
       selectedLabels.map<String>(
         // ignore: avoid_dynamic_calls
-        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text,
       ),
       labels00To22TwoDigit,
     );

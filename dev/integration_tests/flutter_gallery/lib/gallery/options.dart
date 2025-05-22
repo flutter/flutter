@@ -401,7 +401,7 @@ class _PlatformItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Platform mechanics'),
                 Text(
-                  _platformLabel(options!.platform!),
+                  _platformLabel(options!.platform),
                   style: Theme.of(context).primaryTextTheme.bodyMedium,
                 ),
               ],

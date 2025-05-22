@@ -109,7 +109,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver
         calculateCacheOffset(constraints, from: from, to: to);
 
     assert(this.resolvedPadding != null);
-    final EdgeInsets resolvedPadding = this.resolvedPadding!;
+    final EdgeInsets resolvedPadding = this.resolvedPadding;
     final double beforePadding = this.beforePadding;
     final double afterPadding = this.afterPadding;
     final double mainAxisPadding = this.mainAxisPadding;

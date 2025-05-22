@@ -2104,7 +2104,7 @@ class _LocalizedShortcutLabeler {
       keySeparator = '+';
     }
     if (serialized.trigger != null) {
-      final LogicalKeyboardKey trigger = serialized.trigger!;
+      final LogicalKeyboardKey trigger = serialized.trigger;
       final List<String> modifiers = <String>[
         if (_usesSymbolicModifiers) ...<String>[
           // macOS/iOS platform convention uses this ordering, with ⌘ always last.
@@ -2869,7 +2869,7 @@ class _MenuItemLabel extends StatelessWidget {
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
             child: Text(
               _LocalizedShortcutLabeler.instance.getShortcutLabel(
-                shortcut!,
+                shortcut,
                 MaterialLocalizations.of(context),
               ),
             ),
@@ -3324,7 +3324,7 @@ class _Submenu extends StatelessWidget {
     final VisualDensity visualDensity =
         effectiveValue((MenuStyle? style) => style?.visualDensity) ??
         Theme.of(context).visualDensity;
-    final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
+    final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment);
     final EdgeInsetsGeometry padding =
         resolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ?? EdgeInsets.zero;
     final Offset densityAdjustment = visualDensity.baseSizeAdjustment;

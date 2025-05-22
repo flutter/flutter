@@ -486,7 +486,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     _screenshotCanvas = Canvas(_screenshotRecorder!);
     _data.containerLayer.append(_screenshotCurrentLayer!);
     if (_data.includeInRegularContext) {
-      _multicastCanvas = _MulticastCanvas(main: super.canvas, screenshot: _screenshotCanvas!);
+      _multicastCanvas = _MulticastCanvas(main: super.canvas, screenshot: _screenshotCanvas);
     } else {
       _multicastCanvas = null;
     }
@@ -597,11 +597,11 @@ class _ScreenshotPaintingContext extends PaintingContext {
   }) async {
     RenderObject repaintBoundary = renderObject;
     while (!repaintBoundary.isRepaintBoundary) {
-      repaintBoundary = repaintBoundary.parent!;
+      repaintBoundary = repaintBoundary.parent;
     }
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
     final _ScreenshotPaintingContext context = _ScreenshotPaintingContext(
-      containerLayer: repaintBoundary.debugLayer!,
+      containerLayer: repaintBoundary.debugLayer,
       estimatedBounds: repaintBoundary.paintBounds,
       screenshotData: data,
     );
@@ -610,7 +610,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // Painting the existing repaint boundary to the screenshot is sufficient.
       // We don't just take a direct screenshot of the repaint boundary as we
       // want to capture debugPaint information as well.
-      data.containerLayer.append(_ProxyLayer(repaintBoundary.debugLayer!));
+      data.containerLayer.append(_ProxyLayer(repaintBoundary.debugLayer));
       data.foundTarget = true;
       final OffsetLayer offsetLayer = repaintBoundary.debugLayer! as OffsetLayer;
       data.screenshotOffset = offsetLayer.offset;
@@ -2224,7 +2224,7 @@ mixin WidgetInspectorService {
     }
 
     if (renderObject.debugNeedsLayout) {
-      final PipelineOwner owner = renderObject.owner!;
+      final PipelineOwner owner = renderObject.owner;
       assert(!owner.debugDoingLayout);
       owner
         ..flushLayout()
@@ -2992,7 +2992,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
 
     final RenderIgnorePointer ignorePointer =
         _ignorePointerKey.currentContext!.findRenderObject()! as RenderIgnorePointer;
-    final RenderObject userRender = ignorePointer.child!;
+    final RenderObject userRender = ignorePointer.child;
     final List<RenderObject> selected = hitTest(position, userRender);
 
     selection.candidates = selected;
@@ -3031,7 +3031,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
       return;
     }
     if (_lastPointerLocation != null) {
-      _inspectAt(_lastPointerLocation!);
+      _inspectAt(_lastPointerLocation);
       WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
   }
@@ -3514,7 +3514,7 @@ class _InspectorOverlayLayer extends Layer {
       return;
     }
 
-    final RenderObject selected = selection.current!;
+    final RenderObject selected = selection.current;
 
     if (!_isInInspectorRenderObjectTree(selected)) {
       return;

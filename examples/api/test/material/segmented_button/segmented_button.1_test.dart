@@ -12,7 +12,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.SegmentedButtonApp());
 
-    final Color unselectedBackgroundColor = Colors.grey[200]!;
+    final Color unselectedBackgroundColor = Colors.grey[200];
     const Color unselectedForegroundColor = Colors.red;
     const Color selectedBackgroundColor = Colors.green;
     const Color selectedForegroundColor = Colors.white;

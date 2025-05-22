@@ -230,7 +230,7 @@ class Badge extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        child!,
+        child,
         Positioned.fill(
           child: _Badge(
             alignment: effectiveAlignment,
@@ -411,7 +411,7 @@ class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
   }
 
   Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
-    final RenderBox child = this.child!;
+    final RenderBox child = this.child;
     final Size childSize = layoutChild(child, _childConstraints(child, constraints));
     if (childSize.height > childSize.width) {
       return Size(childSize.height, childSize.height);
@@ -427,7 +427,7 @@ class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox child = this.child!;
+    final RenderBox child = this.child;
     return child.getDryBaseline(_childConstraints(child, constraints), baseline);
   }
 

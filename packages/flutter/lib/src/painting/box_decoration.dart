@@ -411,10 +411,10 @@ class _BoxDecorationPainter extends BoxPainter {
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = Paint();
       if (_decoration.backgroundBlendMode != null) {
-        paint.blendMode = _decoration.backgroundBlendMode!;
+        paint.blendMode = _decoration.backgroundBlendMode;
       }
       if (_decoration.color != null) {
-        paint.color = _decoration.color!;
+        paint.color = _decoration.color;
       }
       if (_decoration.gradient != null) {
         paint.shader = _decoration.gradient!.createShader(rect, textDirection: textDirection);
@@ -537,7 +537,7 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_decoration.image == null) {
       return;
     }
-    _imagePainter ??= _decoration.image!.createPainter(onChanged!);
+    _imagePainter ??= _decoration.image!.createPainter(onChanged);
     Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:

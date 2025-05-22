@@ -450,7 +450,7 @@ void main() {
               isolate.toJson()
                 ..['id'] = '2'
                 ..['extensionRPCs'] = <String>[otherExtensionName],
-            )!;
+            );
 
         final FlutterView fakeFlutterView2 = FlutterView(id: '2', uiIsolate: isolate2);
 

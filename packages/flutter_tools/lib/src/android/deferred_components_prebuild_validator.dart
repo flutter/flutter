@@ -155,7 +155,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
           final String? name = element.getAttribute('name');
           if (requiredEntriesMap.containsKey(name)) {
             if (element.innerText != requiredEntriesMap[name]) {
-              element.innerText = requiredEntriesMap[name]!;
+              element.innerText = requiredEntriesMap[name];
               modified = true;
             }
             requiredEntriesMap.remove(name);

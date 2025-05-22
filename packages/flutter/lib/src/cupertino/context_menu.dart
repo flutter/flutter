@@ -120,7 +120,7 @@ class CupertinoContextMenu extends StatefulWidget {
   CupertinoContextMenu({
     super.key,
     required this.actions,
-    required Widget this.child,
+    required this.child,
     this.enableHapticFeedback = false,
   }) : assert(actions.isNotEmpty),
        builder = ((BuildContext context, Animation<double> animation) => child);
@@ -471,7 +471,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       barrierLabel: CupertinoLocalizations.of(context).menuDismissLabel,
       filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
       contextMenuLocation: _contextMenuLocation,
-      previousChildRect: _decoyChildEndRect!,
+      previousChildRect: _decoyChildEndRect,
       scaleFactor: _scaleFactor,
       builder: (BuildContext context, Animation<double> animation) {
         if (widget.child == null) {
@@ -481,7 +481,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           ).animate(animation);
           return widget.builder(context, localAnimation);
         }
-        return _defaultPreviewBuilder(context, animation, widget.child!);
+        return _defaultPreviewBuilder(context, animation, widget.child);
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route!);

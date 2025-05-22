@@ -911,7 +911,7 @@ void main() {
 
           createSharedGradleFiles();
           final File aabFile = createAabFile(BuildMode.release);
-          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
           processManager.addCommand(
             FakeCommand(
@@ -1029,7 +1029,7 @@ void main() {
           createSharedGradleFiles();
           final File aabFile = createAabFile(BuildMode.release);
 
-          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
           processManager.addCommand(
             FakeCommand(
@@ -1098,7 +1098,7 @@ void main() {
           createSharedGradleFiles();
           final File aabFile = createAabFile(BuildMode.release);
 
-          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
           processManager.addCommand(
             FakeCommand(

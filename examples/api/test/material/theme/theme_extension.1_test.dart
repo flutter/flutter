@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(const example.ThemeExtensionExampleApp());
 
     final ThemeData theme = Theme.of(tester.element(find.byType(example.Home)));
-    final example.MyColors colors = theme.extension<example.MyColors>()!;
+    final example.MyColors colors = theme.extension<example.MyColors>();
 
     expect(colors.brandColor, equals(const Color(0xFF1E88E5)));
     expect(colors.danger, equals(const Color(0xFFE53935)));
@@ -21,7 +21,7 @@ void main() {
     await tester.pumpWidget(const example.ThemeExtensionExampleApp());
 
     ThemeData theme = Theme.of(tester.element(find.byType(example.Home)));
-    example.MyColors colors = theme.extension<example.MyColors>()!;
+    example.MyColors colors = theme.extension<example.MyColors>();
 
     expect(colors.brandColor, equals(const Color(0xFF1E88E5)));
     expect(colors.danger, equals(const Color(0xFFE53935)));
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpAndSettle();
 
     theme = Theme.of(tester.element(find.byType(example.Home)));
-    colors = theme.extension<example.MyColors>()!;
+    colors = theme.extension<example.MyColors>();
 
     expect(colors.brandColor, equals(const Color(0xFF90CAF9)));
     expect(colors.danger, equals(const Color(0xFFEF9A9A)));
