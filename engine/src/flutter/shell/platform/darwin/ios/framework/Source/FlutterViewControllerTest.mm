@@ -13,7 +13,6 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
@@ -117,10 +116,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @interface FlutterEmbedderKeyResponder (Tests)
 @property(nonatomic, copy, readonly) FlutterSendKeyEvent sendEvent;
-@end
-
-@interface NSObject (Tests)
-@property(nonatomic, strong) FlutterEngine* mockLaunchEngine;
 @end
 
 @interface FlutterViewController (Tests)
@@ -2474,30 +2469,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
-}
-
-- (void)testGrabLaunchEngine {
-  id appDelegate = [[UIApplication sharedApplication] delegate];
-  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
-  [appDelegate setMockLaunchEngine:self.mockEngine];
-  UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
-  XCTAssertTrue(storyboard);
-  FlutterViewController* viewController =
-      (FlutterViewController*)[storyboard instantiateInitialViewController];
-  XCTAssertTrue(viewController);
-  XCTAssertTrue([viewController isKindOfClass:[FlutterViewController class]]);
-  XCTAssertEqual(viewController.engine, self.mockEngine);
-  [appDelegate setMockLaunchEngine:nil];
-}
-
-- (void)testDoesntGrabLaunchEngine {
-  id appDelegate = [[UIApplication sharedApplication] delegate];
-  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
-  [appDelegate setMockLaunchEngine:self.mockEngine];
-  FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
-  XCTAssertNotNil(flutterViewController.engine);
-  XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
-  [appDelegate setMockLaunchEngine:nil];
 }
 
 @end

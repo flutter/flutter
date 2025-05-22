@@ -86,36 +86,38 @@ const UInt8 PAIR = 129;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
-  id<FlutterPluginRegistrar> registrar = [self registrarForPlugin:@"platform-channel-test"];
+  FlutterViewController *flutterController =
+      (FlutterViewController *)self.window.rootViewController;
+
   ExtendedReaderWriter* extendedReaderWriter = [ExtendedReaderWriter new];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"binary-msg"
-                                       binaryMessenger:registrar.messenger
+                                       binaryMessenger:flutterController
                                                  codec:[FlutterBinaryCodec sharedInstance]]];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"string-msg"
-                                       binaryMessenger:registrar.messenger
+                                       binaryMessenger:flutterController
                                                  codec:[FlutterStringCodec sharedInstance]]];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"json-msg"
-                                       binaryMessenger:registrar.messenger
+                                       binaryMessenger:flutterController
                                                  codec:[FlutterJSONMessageCodec sharedInstance]]];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"std-msg"
-                                       binaryMessenger:registrar.messenger
+                                       binaryMessenger:flutterController
                                                  codec:[FlutterStandardMessageCodec codecWithReaderWriter:extendedReaderWriter]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"json-method"
-                                binaryMessenger:registrar.messenger
+                                binaryMessenger:flutterController
                                           codec:[FlutterJSONMethodCodec sharedInstance]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"std-method"
-                                binaryMessenger:registrar.messenger
+                                binaryMessenger:flutterController
                                           codec:[FlutterStandardMethodCodec codecWithReaderWriter:extendedReaderWriter]]];
 
   [[FlutterBasicMessageChannel
       messageChannelWithName:@"std-echo"
-             binaryMessenger:registrar.messenger
+             binaryMessenger:flutterController
                        codec:[FlutterStandardMessageCodec
                                  codecWithReaderWriter:extendedReaderWriter]]
       setMessageHandler:^(id message, FlutterReply reply) {

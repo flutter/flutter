@@ -96,6 +96,14 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Passes "--dump-info" to the Javascript compiler which generates '
           'information about the generated code in main.dart.js.info.json.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'minify',
+      help:
+          'Generate minified output. '
+          'If not explicitly set, uses the compilation mode (debug, profile, release).',
+      hide: !verboseHelp,
     );
     argParser.addFlag(
       'no-frequency-based-minification',
@@ -103,6 +111,7 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Disables the frequency based minifier. '
           'Useful for comparing the output between builds.',
+      hide: !verboseHelp,
     );
 
     //
@@ -176,6 +185,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
 
     final bool sourceMaps = boolArg('source-maps');
+    final bool minify = boolArg('minify');
 
     final String? dynamicModuleInterface = stringArg('dynamic-module-interface');
     final String? dynamicModuleEntryPoint = stringArg('dynamic-module-entrypoint');
@@ -202,10 +212,11 @@ class BuildWebCommand extends BuildSubCommand {
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
-          optimizationLevel: jsOptimizationLevel,
           dumpInfo: boolArg('dump-info'),
+          minify: minify,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
         ),
       ];
@@ -213,10 +224,11 @@ class BuildWebCommand extends BuildSubCommand {
       compilerConfigs = <WebCompilerConfig>[
         JsCompilerConfig(
           csp: boolArg('csp'),
-          optimizationLevel: jsOptimizationLevel,
           dumpInfo: boolArg('dump-info'),
+          minify: minify,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
         ),
