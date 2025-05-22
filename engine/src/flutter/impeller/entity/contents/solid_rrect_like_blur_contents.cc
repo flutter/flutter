@@ -190,4 +190,8 @@ bool SolidRRectLikeBlurContents::ApplyColorFilter(
   return true;
 }
 
+Vector4 SolidRRectLikeBlurContents::Concat(Vector2& a, Vector2& b) {
+  return {a.x, a.y, b.x, b.y};
+}
+
 }  // namespace impeller

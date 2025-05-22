@@ -30,16 +30,21 @@ float powerDistance(vec2 p, float exponent, float exponentInv) {
 
 float computeRRectDistance(vec2 position,
                            vec2 adjust,
-                           float r1,
-                           float exponent,
-                           float exponentInv) {
+                           vec3 r1_exponent_exponentInv) {
+  float r1 = r1_exponent_exponentInv[0];
+  float exponent = r1_exponent_exponentInv[1];
+  float exponentInv = r1_exponent_exponentInv[2];
+
   vec2 adjusted = position - adjust;
   float dPos = powerDistance(max(adjusted, 0.0), exponent, exponentInv);
   float dNeg = min(maxXY(adjusted), 0.0);
   return dPos + dNeg - r1;
 }
 
-float computeRRectFade(float d, float sInv, float minEdge, float scale) {
+float computeRRectFade(float d, vec3 sInv_minEdge_scale) {
+  float sInv = sInv_minEdge_scale[0];
+  float minEdge = sInv_minEdge_scale[1];
+  float scale = sInv_minEdge_scale[2];
   return scale * (computeErf7(sInv * (minEdge + d)) - computeErf7(sInv * d));
 }
 

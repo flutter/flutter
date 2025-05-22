@@ -18,14 +18,9 @@ precision highp float;
 
 uniform FragInfo {
   vec4 color;
-  vec2 center;
-  vec2 adjust;
-  float minEdge;
-  float r1;
-  float exponent;
-  float sInv;
-  float exponentInv;
-  float scale;
+  vec4 center_adjust;
+  vec3 r1_exponent_exponentInv;
+  vec3 sInv_minEdge_scale;
 }
 frag_info;
 
@@ -34,11 +29,13 @@ in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  vec2 centered = abs(v_position - frag_info.center);
-  float d = computeRRectDistance(centered, frag_info.adjust, frag_info.r1,
-                                 frag_info.exponent, frag_info.exponentInv);
-  float z =
-      computeRRectFade(d, frag_info.sInv, frag_info.minEdge, frag_info.scale);
+  vec2 center = frag_info.center_adjust.xy;
+  vec2 adjust = frag_info.center_adjust.zw;
+
+  vec2 centered = abs(v_position - center);
+  float d =
+      computeRRectDistance(centered, adjust, frag_info.r1_exponent_exponentInv);
+  float z = computeRRectFade(d, frag_info.sInv_minEdge_scale);
 
   frag_color = frag_info.color * float16_t(z);
 }

@@ -66,6 +66,8 @@ class SolidRRectLikeBlurContents : public Contents {
   Scalar GetCornerRadius() const { return corner_radius_; }
   Sigma GetSigma() const { return sigma_; }
 
+  static Vector4 Concat(Vector2& a, Vector2& b);
+
  private:
   static bool PopulateFragContext(PassContext& pass_context,
                                   Scalar blurSigma,

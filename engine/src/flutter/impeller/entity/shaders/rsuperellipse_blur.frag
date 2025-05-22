@@ -44,24 +44,18 @@ precision highp float;
 
 uniform FragInfo {
   vec4 color;
-  vec2 center;
-  vec2 adjust;
-  float minEdge;
-  float r1;
-  float exponent;
-  float sInv;
-  float exponentInv;
-  float scale;
+  vec4 center_adjust;
+  vec3 r1_exponent_exponentInv;
+  vec3 sInv_minEdge_scale;
 
-  float octantOffset;
+  vec4 halfAxes_axisDiff_retractionDepth;
   // Information to compute retraction for two octants respectively.
   // [splitRadian, splitGap, n, nInvNeg]
   vec4 infoTop;
   vec4 infoRight;
+  // Polynomial coeffs
   vec4 polyTop;
   vec4 polyRight;
-  // Retraction penetration depth.
-  float retractionDepth;
 }
 frag_info;
 
@@ -72,17 +66,23 @@ out vec4 frag_color;
 const float kPiOverFour = 3.1415926 / 4.0;
 
 void main() {
-  vec2 centered = abs(v_position - frag_info.center);
-  float d = computeRRectDistance(centered, frag_info.adjust, frag_info.r1,
-                                 frag_info.exponent, frag_info.exponentInv);
+  vec2 center = frag_info.center_adjust.xy;
+  vec2 adjust = frag_info.center_adjust.zw;
+
+  vec2 centered = abs(v_position - center);
+  float d =
+      computeRRectDistance(centered, adjust, frag_info.r1_exponent_exponentInv);
 
   /**** Start of RSuperellipse math ****/
 
-  bool useTop = (centered.y - frag_info.octantOffset) > centered.x;
+  vec2 halfAxes = frag_info.halfAxes_axisDiff_retractionDepth.xy;
+  float axisDiff = frag_info.halfAxes_axisDiff_retractionDepth[2];
+  float retractionDepth = frag_info.halfAxes_axisDiff_retractionDepth[3];
+
+  bool useTop = (centered.y - axisDiff) > centered.x;
   vec4 angularInfo = useTop ? frag_info.infoTop : frag_info.infoRight;
-  float theta =
-      atan(useTop ? centered.x / (centered.y - frag_info.octantOffset)
-                  : centered.y / (centered.x + frag_info.octantOffset));
+  float theta = atan(useTop ? centered.x / (centered.y - axisDiff)
+                            : centered.y / (centered.x + axisDiff));
 
   float splitRadian = angularInfo[0];
   float splitGap = angularInfo[1];
@@ -91,7 +91,7 @@ void main() {
 
   float baseRetraction;
   if (theta < splitRadian) {
-    float a = useTop ? frag_info.center.x : frag_info.center.y;
+    float a = useTop ? halfAxes.x : halfAxes.y;
     baseRetraction = (1.0 - POW(1.0 + POW(tan(theta), n), nInvNeg)) * a;
   } else {
     float t = (theta - splitRadian) / (kPiOverFour - splitRadian);
@@ -103,13 +103,12 @@ void main() {
     // and dampening values < 1.
     baseRetraction = retProg * retProg * splitGap;
   }
-  float depthProg = smoothstep(-frag_info.retractionDepth, 0.0, -abs(d));
+  float depthProg = smoothstep(-retractionDepth, 0.0, -abs(d));
   d += baseRetraction * depthProg;
 
   /**** End of RSuperellipse math ****/
 
-  float z =
-      computeRRectFade(d, frag_info.sInv, frag_info.minEdge, frag_info.scale);
+  float z = computeRRectFade(d, frag_info.sInv_minEdge_scale);
 
   frag_color = frag_info.color * float16_t(z);
 }

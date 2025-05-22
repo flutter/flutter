@@ -15,6 +15,12 @@
 
 namespace impeller {
 
+namespace {
+Vector4 Concat(Size a, Scalar b, Scalar c) {
+  return {a.width, a.height, b, c};
+}
+}  // namespace
+
 SolidRSuperellipseBlurContents::SolidRSuperellipseBlurContents() = default;
 
 SolidRSuperellipseBlurContents::~SolidRSuperellipseBlurContents() = default;
@@ -27,14 +33,11 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
 
   FS::FragInfo frag_info;
   frag_info.color = GetColor();
-  frag_info.center = pass_context.center;
-  frag_info.adjust = pass_context.adjust;
-  frag_info.minEdge = pass_context.minEdge;
-  frag_info.r1 = pass_context.r1;
-  frag_info.exponent = pass_context.exponent;
-  frag_info.sInv = pass_context.sInv;
-  frag_info.exponentInv = pass_context.exponentInv;
-  frag_info.scale = pass_context.scale;
+  frag_info.center_adjust = Concat(pass_context.center, pass_context.adjust);
+  frag_info.r1_exponent_exponentInv =
+      Vector3(pass_context.r1, pass_context.exponent, pass_context.exponentInv);
+  frag_info.sInv_minEdge_scale =
+      Vector3(pass_context.sInv, pass_context.minEdge, pass_context.scale);
 
   // Additional math for RSuperellipse. See the frag file for explanation.
   Scalar radius = GetCornerRadius();
@@ -42,7 +45,13 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   RoundSuperellipseParam param =
       RoundSuperellipseParam::MakeBoundsRadius(rect, radius);
 
-  frag_info.octantOffset = (rect.GetHeight() - rect.GetWidth()) / 2;
+  Scalar axisDiff = (rect.GetHeight() - rect.GetWidth()) / 2;
+
+  // Avoid 0-division error when radius is 0.
+  Scalar retractionDepth = fmax(radius, 0.001);
+
+  frag_info.halfAxes_axisDiff_retractionDepth =
+      ::impeller::Concat(rect.GetSize() / 2, axisDiff, retractionDepth);
 
   auto compute_info = [radius](RoundSuperellipseParam::Octant& octant) {
     if (octant.se_n < 1) {  // A rectangular corner
@@ -71,9 +80,6 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   };
   frag_info.polyTop = compute_poly(param.top_right.top);
   frag_info.polyRight = compute_poly(param.top_right.right);
-
-  // Avoid 0-division error when radius is 0.
-  frag_info.retractionDepth = fmax(radius, 0.001);
 
   // Back to pass setup.
   auto& host_buffer = renderer.GetTransientsBuffer();

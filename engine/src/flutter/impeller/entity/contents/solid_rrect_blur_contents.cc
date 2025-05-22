@@ -21,14 +21,11 @@ bool SolidRRectBlurContents::SetPassInfo(RenderPass& pass,
 
   FS::FragInfo frag_info;
   frag_info.color = GetColor();
-  frag_info.center = pass_context.center;
-  frag_info.adjust = pass_context.adjust;
-  frag_info.minEdge = pass_context.minEdge;
-  frag_info.r1 = pass_context.r1;
-  frag_info.exponent = pass_context.exponent;
-  frag_info.sInv = pass_context.sInv;
-  frag_info.exponentInv = pass_context.exponentInv;
-  frag_info.scale = pass_context.scale;
+  frag_info.center_adjust = Concat(pass_context.center, pass_context.adjust);
+  frag_info.r1_exponent_exponentInv =
+      Vector3(pass_context.r1, pass_context.exponent, pass_context.exponentInv);
+  frag_info.sInv_minEdge_scale =
+      Vector3(pass_context.sInv, pass_context.minEdge, pass_context.scale);
 
   auto& host_buffer = renderer.GetTransientsBuffer();
   pass.SetCommandLabel("RRect Shadow");
