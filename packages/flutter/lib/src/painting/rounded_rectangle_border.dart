@@ -212,8 +212,9 @@ class _RoundedRectangleToCircleBorder extends _ShapeToCircleBorder<RoundedRectan
 class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
   /// Creates a rounded rectangle border.
   ///
-  /// The `borderRadius` defaults to [BorderRadius.zero].
-  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
+  /// If `borderRadius` is not specified or null, it defaults to
+  /// [BorderRadius.zero].
+  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry borderRadius})
     : borderRadius = borderRadius ?? BorderRadius.zero;
 
   /// The radii for each corner.
