@@ -755,6 +755,31 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('Success case, complementary role is used more than once', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: [
+              Semantics(
+                label: 'complementary 1',
+                role: SemanticsRole.complementary,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'complementary 2',
+                role: SemanticsRole.complementary,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('failure case, multiple nodes have the same contentInfo role', (
       WidgetTester tester,
     ) async {
@@ -826,6 +851,31 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('Success case, contentInfo role is used more than once', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: [
+              Semantics(
+                label: 'contentInfo 1',
+                role: SemanticsRole.contentInfo,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'contentInfo 2',
+                role: SemanticsRole.contentInfo,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('failure case, multiple nodes have the same main role', (
       WidgetTester tester,
     ) async {
@@ -892,6 +942,29 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('Success case, main role is used more than once', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: [
+              Semantics(
+                label: 'main 1',
+                role: SemanticsRole.main,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'main 2',
+                role: SemanticsRole.main,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('failure case, multiple nodes have the same navigation role', (
       WidgetTester tester,
     ) async {
@@ -930,6 +1003,31 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Semantics(role: SemanticsRole.navigation, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, navigation role is used more than once', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: [
+              Semantics(
+                label: 'navigation 1',
+                role: SemanticsRole.navigation,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'navigation 2',
+                role: SemanticsRole.navigation,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
         ),
       );
       expect(tester.takeException(), isNull);
