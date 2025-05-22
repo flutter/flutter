@@ -17,17 +17,7 @@ namespace impeller {
 bool SolidRRectBlurContents::SetPassInfo(RenderPass& pass,
                                          const ContentContext& renderer,
                                          PassContext& pass_context) const {
-  using VS = RRectBlurPipeline::VertexShader;
   using FS = RRectBlurPipeline::FragmentShader;
-
-  std::array<VS::PerVertexData, 4> vertices = {
-      VS::PerVertexData{pass_context.vertices[0]},
-      VS::PerVertexData{pass_context.vertices[1]},
-      VS::PerVertexData{pass_context.vertices[2]},
-      VS::PerVertexData{pass_context.vertices[3]},
-  };
-  VS::FrameInfo frame_info;
-  frame_info.mvp = pass_context.transform;
 
   FS::FragInfo frag_info;
   frag_info.color = GetColor();
@@ -43,9 +33,7 @@ bool SolidRRectBlurContents::SetPassInfo(RenderPass& pass,
   auto& host_buffer = renderer.GetTransientsBuffer();
   pass.SetCommandLabel("RRect Shadow");
   pass.SetPipeline(renderer.GetRRectBlurPipeline(pass_context.opts));
-  pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
-  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   return true;
 }

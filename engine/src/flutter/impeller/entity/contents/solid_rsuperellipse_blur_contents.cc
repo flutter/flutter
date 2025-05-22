@@ -23,17 +23,7 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
     RenderPass& pass,
     const ContentContext& renderer,
     PassContext& pass_context) const {
-  using VS = RSuperellipseBlurPipeline::VertexShader;
   using FS = RSuperellipseBlurPipeline::FragmentShader;
-
-  std::array<VS::PerVertexData, 4> vertices = {
-      VS::PerVertexData{pass_context.vertices[0]},
-      VS::PerVertexData{pass_context.vertices[1]},
-      VS::PerVertexData{pass_context.vertices[2]},
-      VS::PerVertexData{pass_context.vertices[3]},
-  };
-  VS::FrameInfo frame_info;
-  frame_info.mvp = pass_context.transform;
 
   FS::FragInfo frag_info;
   frag_info.color = GetColor();
@@ -89,9 +79,7 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   auto& host_buffer = renderer.GetTransientsBuffer();
   pass.SetCommandLabel("RSuperellipse Shadow");
   pass.SetPipeline(renderer.GetRSuperellipseBlurPipeline(pass_context.opts));
-  pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 
-  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   return true;
 }

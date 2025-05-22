@@ -44,10 +44,7 @@ class SolidRRectLikeBlurContents : public Contents {
  protected:
   struct PassContext {
     // General info
-    std::array<Point, 4> vertices;
     ContentContextOptions opts;
-    // Frame info
-    Matrix transform;
     // Frag info
     Point center;
     Point adjust;

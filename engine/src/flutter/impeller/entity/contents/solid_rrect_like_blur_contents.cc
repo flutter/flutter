@@ -115,6 +115,8 @@ std::optional<Rect> SolidRRectLikeBlurContents::GetCoverage(
 bool SolidRRectLikeBlurContents::Render(const ContentContext& renderer,
                                         const Entity& entity,
                                         RenderPass& pass) const {
+  using VS = RrectLikeBlurVertexShader;
+
   Matrix basis_invert = entity.GetTransform().Basis().Invert();
   Vector2 max_sigmas =
       Vector2((basis_invert * Vector2(500.f, 0.f)).GetLength(),
@@ -141,19 +143,15 @@ bool SolidRRectLikeBlurContents::Render(const ContentContext& renderer,
     color = Color::White();
   }
 
+  std::array<VS::PerVertexData, 4> vertices = {
+      VS::PerVertexData{Point(left, top)},
+      VS::PerVertexData{Point(right, top)},
+      VS::PerVertexData{Point(left, bottom)},
+      VS::PerVertexData{Point(right, bottom)},
+  };
+
   PassContext pass_context = {
-      .vertices =
-          {
-              Point(left, top),
-              Point(right, top),
-              Point(left, bottom),
-              Point(right, bottom),
-          },
       .opts = opts,
-      .transform = Entity::GetShaderTransform(
-          entity.GetShaderClipDepth(), pass,
-          entity.GetTransform() *
-              Matrix::MakeTranslation(positive_rect.GetOrigin())),
   };
 
   Scalar radius = std::min(std::clamp(corner_radius_, kEhCloseEnough,
@@ -168,6 +166,16 @@ bool SolidRRectLikeBlurContents::Render(const ContentContext& renderer,
   if (!SetPassInfo(pass, renderer, pass_context)) {
     return true;
   }
+
+  VS::FrameInfo frame_info;
+  frame_info.mvp = Entity::GetShaderTransform(
+      entity.GetShaderClipDepth(), pass,
+      entity.GetTransform() *
+          Matrix::MakeTranslation(positive_rect.GetOrigin()));
+
+  auto& host_buffer = renderer.GetTransientsBuffer();
+  pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
+  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
   if (!pass.Draw().ok()) {
     return false;
