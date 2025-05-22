@@ -7,11 +7,15 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  final bool isImpeller = ui.ImageFilter.isShaderFilterSupported;
+
   Widget buildTest(
     GlobalKey box1Key,
     GlobalKey box2Key,
@@ -176,12 +180,18 @@ void main() {
     // Overscroll the start
     await gesture.moveBy(const Offset(0.0, 200.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(255.0));
-    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(510.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dy, greaterThan(255.0));
+      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(510.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.vertical.start.stretched.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.vertical.start.stretched.impeller.png'
+            : 'overscroll_stretch.vertical.start.stretched.png',
+      ),
     );
 
     await gesture.up();
@@ -208,12 +218,18 @@ void main() {
     // Overscroll the end
     await gesture.moveBy(const Offset(0.0, -200.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-165));
-    expect(box2.localToGlobal(Offset.zero).dy, lessThan(90.0));
-    expect(box3.localToGlobal(Offset.zero).dy, lessThan(350.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-165));
+      expect(box2.localToGlobal(Offset.zero).dy, lessThan(90.0));
+      expect(box3.localToGlobal(Offset.zero).dy, lessThan(350.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.vertical.end.stretched.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.vertical.end.stretched.impeller.png'
+            : 'overscroll_stretch.vertical.end.stretched.png',
+      ),
     );
 
     await gesture.up();
@@ -251,12 +267,18 @@ void main() {
     // Overscroll
     await gesture.moveBy(const Offset(0.0, -200.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dy, lessThan(350.0));
-    expect(box2.localToGlobal(Offset.zero).dy, lessThan(100.0));
-    expect(box3.localToGlobal(Offset.zero).dy, lessThan(-150.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dy, lessThan(350.0));
+      expect(box2.localToGlobal(Offset.zero).dy, lessThan(100.0));
+      expect(box3.localToGlobal(Offset.zero).dy, lessThan(-150.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.vertical.reverse.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.vertical.reverse.impeller.png'
+            : 'overscroll_stretch.vertical.reverse.png',
+      ),
     );
   });
 
@@ -288,12 +310,18 @@ void main() {
     // Overscroll
     await gesture.moveBy(const Offset(-200.0, 0.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dx, lessThan(500.0));
-    expect(box2.localToGlobal(Offset.zero).dx, lessThan(200.0));
-    expect(box3.localToGlobal(Offset.zero).dx, lessThan(-100.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dx, lessThan(500.0));
+      expect(box2.localToGlobal(Offset.zero).dx, lessThan(200.0));
+      expect(box3.localToGlobal(Offset.zero).dx, lessThan(-100.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.reverse.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.horizontal.reverse.impeller.png'
+            : 'overscroll_stretch.horizontal.reverse.png',
+      ),
     );
   });
 
@@ -340,12 +368,18 @@ void main() {
     await gesture.moveBy(const Offset(200.0, 0.0));
     await tester.pumpAndSettle();
 
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
-    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
+      expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.start.stretched.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.horizontal.reverse.rtl.start.stretched.impeller.png'
+            : 'overscroll_stretch.horizontal.reverse.rtl.start.stretched.png',
+      ),
     );
 
     await gesture.up();
@@ -372,12 +406,18 @@ void main() {
     // Overscroll the end
     await gesture.moveBy(const Offset(-200.0, 0.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dx, lessThan(-116.0));
-    expect(box2.localToGlobal(Offset.zero).dx, lessThan(190.0));
-    expect(box3.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dx, lessThan(-116.0));
+      expect(box2.localToGlobal(Offset.zero).dx, lessThan(190.0));
+      expect(box3.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.reverse.rtl.end.stretched.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.horizontal.reverse.rtl.end.stretched.impeller.png'
+            : 'overscroll_stretch.horizontal.reverse.rtl.end.stretched.png',
+      ),
     );
 
     await gesture.up();
@@ -421,12 +461,18 @@ void main() {
     // Overscroll the start
     await gesture.moveBy(const Offset(200.0, 0.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
-    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dx, greaterThan(305.0));
+      expect(box3.localToGlobal(Offset.zero).dx, greaterThan(610.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.start.stretched.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.horizontal.start.stretched.impeller.png'
+            : 'overscroll_stretch.horizontal.start.stretched.png',
+      ),
     );
 
     await gesture.up();
@@ -453,12 +499,18 @@ void main() {
     // Overscroll the end
     await gesture.moveBy(const Offset(-200.0, 0.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dx, lessThan(-116.0));
-    expect(box2.localToGlobal(Offset.zero).dx, lessThan(190.0));
-    expect(box3.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dx, lessThan(-116.0));
+      expect(box2.localToGlobal(Offset.zero).dx, lessThan(190.0));
+      expect(box3.localToGlobal(Offset.zero).dx, lessThan(500.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
-      matchesGoldenFile('overscroll_stretch.horizontal.end.stretched.png'),
+      matchesGoldenFile(
+        isImpeller
+            ? 'overscroll_stretch.horizontal.end.stretched.impeller.png'
+            : 'overscroll_stretch.horizontal.end.stretched.png',
+      ),
     );
 
     await gesture.up();
@@ -505,9 +557,11 @@ void main() {
     // Overscroll
     await gesture.moveBy(const Offset(-200.0, 0.0));
     await tester.pumpAndSettle();
-    expect(box1.localToGlobal(Offset.zero).dx, lessThan(500.0));
-    expect(box2.localToGlobal(Offset.zero).dx, lessThan(200.0));
-    expect(box3.localToGlobal(Offset.zero).dx, lessThan(-100.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dx, lessThan(500.0));
+      expect(box2.localToGlobal(Offset.zero).dx, lessThan(200.0));
+      expect(box3.localToGlobal(Offset.zero).dx, lessThan(-100.0));
+    }
     await expectLater(
       find.byType(CustomScrollView),
       matchesGoldenFile('overscroll_stretch.horizontal.rtl.png'),
@@ -761,7 +815,7 @@ void main() {
         ),
       ),
     );
-    const double maxStretchLocation = 52.63178407049861;
+    final double maxStretchLocation = isImpeller ? 51.0 : 52.63178407049861;
 
     expect(find.text('Index 1'), findsOneWidget);
     expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
@@ -821,23 +875,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
     double lastStretchedLocation = tester.getCenter(find.text('Index 1')).dy;
-    expect(lastStretchedLocation, greaterThan(51.0));
+    if (!isImpeller) {
+      expect(lastStretchedLocation, greaterThan(51.0));
+    }
 
     final TestGesture pointer2 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Add overscroll from an additional pointer
     await pointer2.moveBy(const Offset(0.0, 210.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
-    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(lastStretchedLocation));
-    lastStretchedLocation = tester.getCenter(find.text('Index 1')).dy;
+    if (!isImpeller) {
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(lastStretchedLocation));
+      lastStretchedLocation = tester.getCenter(find.text('Index 1')).dy;
+    }
 
     final TestGesture pointer3 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Add overscroll from an additional pointer, exceeding the max stretch (600)
     await pointer3.moveBy(const Offset(0.0, 210.0));
     await tester.pumpAndSettle();
     expect(find.text('Index 1'), findsOneWidget);
-    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(lastStretchedLocation));
-    lastStretchedLocation = tester.getCenter(find.text('Index 1')).dy;
+    if (!isImpeller) {
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(lastStretchedLocation));
+      lastStretchedLocation = tester.getCenter(find.text('Index 1')).dy;
+    }
 
     final TestGesture pointer4 = await tester.startGesture(tester.getCenter(find.text('Index 1')));
     // Since we have maxed out the overscroll, it should not have stretched
@@ -897,9 +957,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // The boxes should now be at different locations because of the scaling.
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(103.0));
-    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(206.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dy, greaterThan(103.0));
+      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(206.0));
+    }
 
     // Move the pointer up a miniscule amount to trigger a directional change.
     await gesture.moveBy(const Offset(0.0, -20.0));
@@ -907,17 +969,21 @@ void main() {
 
     // The boxes should remain roughly at the same locations, since the pointer
     // didn't move far.
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(103.0));
-    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(206.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dy, greaterThan(103.0));
+      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(206.0));
+    }
 
     // Now make the pointer overscroll to the end
     await gesture.moveBy(const Offset(0.0, -1200.0));
     await tester.pumpAndSettle();
 
-    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-19.0));
-    expect(box2.localToGlobal(Offset.zero).dy, lessThan(85.0));
-    expect(box3.localToGlobal(Offset.zero).dy, lessThan(188.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-19.0));
+      expect(box2.localToGlobal(Offset.zero).dy, lessThan(85.0));
+      expect(box3.localToGlobal(Offset.zero).dy, lessThan(188.0));
+    }
 
     // Release the pointer
     await gesture.up();
@@ -973,9 +1039,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // The boxes should now be at different locations because of the scaling.
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(102.0));
-    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(205.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dx, greaterThan(102.0));
+      expect(box3.localToGlobal(Offset.zero).dx, greaterThan(205.0));
+    }
 
     // Move the pointer up a miniscule amount to trigger a directional change.
     await gesture.moveBy(const Offset(-20.0, 0.0));
@@ -983,17 +1051,21 @@ void main() {
 
     // The boxes should remain roughly at the same locations, since the pointer
     // didn't move far.
-    expect(box1.localToGlobal(Offset.zero), Offset.zero);
-    expect(box2.localToGlobal(Offset.zero).dx, greaterThan(102.0));
-    expect(box3.localToGlobal(Offset.zero).dx, greaterThan(205.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero), Offset.zero);
+      expect(box2.localToGlobal(Offset.zero).dx, greaterThan(102.0));
+      expect(box3.localToGlobal(Offset.zero).dx, greaterThan(205.0));
+    }
 
     // Now make the pointer overscroll to the end
     await gesture.moveBy(const Offset(-1200.0, 0.0));
     await tester.pumpAndSettle();
 
-    expect(box1.localToGlobal(Offset.zero).dx, lessThan(-19.0));
-    expect(box2.localToGlobal(Offset.zero).dx, lessThan(85.0));
-    expect(box3.localToGlobal(Offset.zero).dx, lessThan(188.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dx, lessThan(-19.0));
+      expect(box2.localToGlobal(Offset.zero).dx, lessThan(85.0));
+      expect(box3.localToGlobal(Offset.zero).dx, lessThan(188.0));
+    }
 
     // Release the pointer
     await gesture.up();
@@ -1034,9 +1106,11 @@ void main() {
 
     // The boxes should now be at different locations because of the scaling.
     expect(controller.offset, 150.0);
-    expect(box1.localToGlobal(Offset.zero).dy, lessThan(-160.0));
-    expect(box2.localToGlobal(Offset.zero).dy, lessThan(93.0));
-    expect(box3.localToGlobal(Offset.zero).dy, lessThan(347.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-160.0));
+      expect(box2.localToGlobal(Offset.zero).dy, lessThan(93.0));
+      expect(box3.localToGlobal(Offset.zero).dy, lessThan(347.0));
+    }
 
     await tester.pumpAndSettle();
 
@@ -1088,9 +1162,11 @@ void main() {
 
     // The boxes should now be at different locations because of the scaling.
     expect(controller.offset, 0.0);
-    expect(box1.localToGlobal(Offset.zero).dy, 0.0);
-    expect(box2.localToGlobal(Offset.zero).dy, greaterThan(254.0));
-    expect(box3.localToGlobal(Offset.zero).dy, greaterThan(508.0));
+    if (!isImpeller) {
+      expect(box1.localToGlobal(Offset.zero).dy, 0.0);
+      expect(box2.localToGlobal(Offset.zero).dy, greaterThan(254.0));
+      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(508.0));
+    }
 
     await tester.pumpAndSettle();
 
@@ -1133,9 +1209,11 @@ void main() {
       await gesture.moveBy(const Offset(0.0, -200.0));
       await tester.pumpAndSettle();
 
-      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-25.0));
-      expect(box2.localToGlobal(Offset.zero).dy, lessThan(185.0));
-      expect(box3.localToGlobal(Offset.zero).dy, lessThan(392.0));
+      if (!isImpeller) {
+        expect(box1.localToGlobal(Offset.zero).dy, lessThan(-25.0));
+        expect(box2.localToGlobal(Offset.zero).dy, lessThan(185.0));
+        expect(box3.localToGlobal(Offset.zero).dy, lessThan(392.0));
+      }
 
       // This will trigger the recede animation
       // The y offset of the boxes should be increasing, since the boxes were stretched
@@ -1145,17 +1223,21 @@ void main() {
 
       // Explicitly check that the box1 offset is not 0.0, since this would probably mean that
       // the stretch direction is wrong.
-      expect(box1.localToGlobal(Offset.zero).dy, isNot(0.0));
+      if (!isImpeller) {
+        expect(box1.localToGlobal(Offset.zero).dy, isNot(0.0));
 
-      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-12.0));
-      expect(box2.localToGlobal(Offset.zero).dy, lessThan(197.0));
-      expect(box3.localToGlobal(Offset.zero).dy, lessThan(407.0));
+        expect(box1.localToGlobal(Offset.zero).dy, lessThan(-12.0));
+        expect(box2.localToGlobal(Offset.zero).dy, lessThan(197.0));
+        expect(box3.localToGlobal(Offset.zero).dy, lessThan(407.0));
+      }
 
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-6.0));
-      expect(box2.localToGlobal(Offset.zero).dy, lessThan(201.0));
-      expect(box3.localToGlobal(Offset.zero).dy, lessThan(408.0));
+      if (!isImpeller) {
+        expect(box1.localToGlobal(Offset.zero).dy, lessThan(-6.0));
+        expect(box2.localToGlobal(Offset.zero).dy, lessThan(201.0));
+        expect(box3.localToGlobal(Offset.zero).dy, lessThan(408.0));
+      }
 
       await tester.pumpAndSettle();
 
@@ -1233,7 +1315,7 @@ void main() {
 
       // We fling to the trailing edge and let it settle.
       await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 10000.0);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
       // We are now at the trailing edge
       expect(overscrollNotification.velocity, lessThan(25));
