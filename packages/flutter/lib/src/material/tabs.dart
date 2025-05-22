@@ -1976,6 +1976,7 @@ class _TabBarState extends State<TabBar> {
           ),
         ),
       );
+      wrappedTabs[index] = MergeSemantics(child: wrappedTabs[index]);
       if (!widget.isScrollable && effectiveTabAlignment == TabAlignment.fill) {
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
       }
