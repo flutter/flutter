@@ -812,12 +812,12 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
 
-    // The duration of a MaterialPageRoute's transition is 300ms.
-    // At 150ms Hero 'a' is mid-flight.
-    await tester.pump(const Duration(milliseconds: 150));
-    final double height150ms = tester.getSize(find.byKey(secondKey)).height;
-    expect(height150ms, greaterThan(initialHeight));
-    expect(height150ms, lessThan(finalHeight));
+    await tester.pump(
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds ~/ 2),
+    );
+    final double heightMidFlight = tester.getSize(find.byKey(secondKey)).height;
+    expect(heightMidFlight, greaterThan(initialHeight));
+    expect(heightMidFlight, lessThan(finalHeight));
 
     // Pop route '/two' before the push transition to '/two' has finished.
     await tester.tap(find.text('pop'));
@@ -830,7 +830,7 @@ Future<void> main() async {
     // be smaller than it was, but bigger than its initial size.
     await tester.pump(const Duration(milliseconds: 50));
     final double height100ms = tester.getSize(find.byKey(secondKey)).height;
-    expect(height100ms, lessThan(height150ms));
+    expect(height100ms, lessThan(heightMidFlight));
     expect(finalHeight, greaterThan(height100ms));
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
@@ -843,7 +843,9 @@ Future<void> main() async {
     );
 
     // The flight is finished. We're back to where we started.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds),
+    );
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
@@ -933,7 +935,9 @@ Future<void> main() async {
       );
 
       // The flight is finished. We're back to where we started.
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(
+        const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds),
+      );
       expect(find.byKey(secondKey), isOnstage);
       expect(find.byKey(secondKey), isInCard);
       expect(find.byKey(firstKey), findsNothing);
@@ -1158,7 +1162,9 @@ Future<void> main() async {
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(75.0));
 
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds),
+    );
     await tester.pump();
     final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(finalHeroY, 75.0); // 100 less 25 for the scroll
@@ -1451,7 +1457,9 @@ Future<void> main() async {
     expect(find.text('456'), findsOneWidget);
 
     // Push flight finished.
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds),
+    );
     expect(find.text('456'), findsOneWidget);
 
     // Pop route.
@@ -1464,7 +1472,9 @@ Future<void> main() async {
     expect(find.text('456'), findsOneWidget);
 
     // Pop flight finished
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(
+      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds),
+    );
     expect(find.text('456'), findsOneWidget);
   });
 
