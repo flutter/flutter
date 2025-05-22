@@ -1319,8 +1319,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.settings] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.settings] changes.
   static RouteSettings? settingsOf(BuildContext context) =>
       _of(context, _ModalRouteAspect.settings)?.settings;
 
@@ -1329,8 +1330,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.isActive] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.isActive] changes.
   static bool? isActiveOf(BuildContext context) =>
       _of(context, _ModalRouteAspect.isActive)?.isActive;
 
@@ -1339,8 +1341,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.isFirst] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.isFirst] changes.
   static bool? isFirstOf(BuildContext context) => _of(context, _ModalRouteAspect.isFirst)?.isFirst;
 
   /// Returns [ModalRoute.opaque] for the modal route most closely associated
@@ -1348,8 +1351,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.opaque] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.opaque] changes.
   static bool? opaqueOf(BuildContext context) => _of(context, _ModalRouteAspect.opaque)?.opaque;
 
   /// Returns [ModalRoute.popDisposition] for the modal route most closely associated
@@ -1357,8 +1361,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.popDisposition] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.popDisposition] changes.
   static RoutePopDisposition? popDispositionOf(BuildContext context) =>
       _of(context, _ModalRouteAspect.popDisposition)?.popDisposition;
 
