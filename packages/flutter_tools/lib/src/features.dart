@@ -60,29 +60,29 @@ abstract class FeatureFlags {
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature);
-}
 
-/// All current Flutter feature flags.
-const List<Feature> allFeatures = <Feature>[
-  flutterWebFeature,
-  flutterLinuxDesktopFeature,
-  flutterMacOSDesktopFeature,
-  flutterWindowsDesktopFeature,
-  flutterAndroidFeature,
-  flutterIOSFeature,
-  flutterFuchsiaFeature,
-  flutterCustomDevicesFeature,
-  cliAnimation,
-  nativeAssets,
-  swiftPackageManager,
-  explicitPackageDependencies,
-];
+  /// All current Flutter feature flags.
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+    explicitPackageDependencies,
+  ];
+}
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
 Iterable<Feature> get allConfigurableFeatures =>
-    allFeatures.where((Feature feature) => feature.configSetting != null);
+    featureFlags.allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -197,6 +197,7 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
@@ -208,6 +209,7 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -238,6 +240,12 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no config setting.
   final String? configSetting;
+
+  /// The unique identifier for this feature at runtime.
+  ///
+  /// If not `null`, the Flutter framework's enabled feature flags will
+  /// contain this value if this feature is enabled.
+  final String? runtimeId;
 
   /// Additional text to add to the end of the help message.
   ///

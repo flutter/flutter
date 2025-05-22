@@ -13,6 +13,7 @@ import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
+import '../../features.dart';
 import '../../globals.dart' as globals show platform, xcode;
 import '../../project.dart';
 import '../../runner/flutter_command.dart';

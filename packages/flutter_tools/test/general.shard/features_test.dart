@@ -124,6 +124,39 @@ void main() {
         FileSystem: createFsWithPubspec,
       },
     );
+
+    testUsingContext('Test feature flags match feature flags', () {
+      final FeatureFlags testFeatureFlags = TestFeatureFlags();
+
+      expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
+
+      final List<String> featureNames =
+          featureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+      final List<String> testFeatureNames =
+          testFeatureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+
+      expect(featureNames, unorderedEquals(testFeatureNames));
+    });
+
+    testUsingContext('Feature runtime IDs are valid', () {
+      // Verify features' runtime IDs can be encoded into a Dart define.
+      final RegExp runtimeIdPattern = RegExp(r'^[a-zA-Z_]+$');
+      assert(runtimeIdPattern.hasMatch('multi_window'));
+      assert(!runtimeIdPattern.hasMatch('multi-window'));
+
+      for (final Feature feature in featureFlags.allFeatures) {
+        final String? runtimeId = feature.runtimeId;
+        if (runtimeId == null) {
+          continue;
+        }
+
+        expect(
+          runtimeId,
+          matches(runtimeIdPattern),
+          reason: 'Feature runtime ID must contain only alphabetical or underscore characters',
+        );
+      }
+    });
   });
 
   group('Linux Destkop', () {
@@ -459,4 +492,7 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
   bool isEnabled(Feature feature) {
     return feature == shouldInvoke;
   }
+
+  @override
+  List<Feature> get allFeatures => throw UnimplementedError();
 }

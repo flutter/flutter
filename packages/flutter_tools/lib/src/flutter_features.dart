@@ -56,7 +56,7 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isExplicitPackageDependenciesEnabled => isEnabled(explicitPackageDependencies);
 }
 
-interface class FlutterFeatureFlags with FlutterFeatureFlagsIsEnabled implements FeatureFlags {
+interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
   FlutterFeatureFlags({
     required FlutterVersion flutterVersion,
     required FlutterFeaturesConfig featuresConfig,
