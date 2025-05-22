@@ -545,7 +545,7 @@ class LocalizationsGenerator {
     String? headerFile,
     bool useDeferredLoading = false,
     String? inputsAndOutputsListPath,
-    bool useSyntheticPackage = true,
+    bool useSyntheticPackage = false,
     String? projectPathString,
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,

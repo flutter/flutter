@@ -61,7 +61,7 @@ On Cocoon (Flutter's internal CI/CD) we _often_ set
 | `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_                |
 | `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | `commit.sha`                      |
 | `stable` or `beta`        | N/A[^3]      | N/A[^1]            | N/A[^3]                           |
-| _anything else_[^2]       | `commit.sha` | _Uses normal flow_ | _Uses presubmit engine artifacts_ |
+| _anything else_[^2]       | `commit.sha` | _Uses normal flow_ | _Uses postsubmit engine artifacts_ |
 
 > IMPORTANT: `engine.version` is intentionally ignored in release candidate
 > post-submit builds.
