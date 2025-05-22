@@ -16,8 +16,8 @@
 namespace impeller {
 
 namespace {
-Vector4 Concat(Size a, Scalar b, Scalar c) {
-  return {a.width, a.height, b, c};
+Vector3 Concat(Size a, Scalar b) {
+  return {a.width, a.height, b};
 }
 }  // namespace
 
@@ -45,13 +45,11 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   RoundSuperellipseParam param =
       RoundSuperellipseParam::MakeBoundsRadius(rect, radius);
 
-  Scalar axisDiff = (rect.GetHeight() - rect.GetWidth()) / 2;
-
   // Avoid 0-division error when radius is 0.
   Scalar retractionDepth = fmax(radius, 0.001);
 
-  frag_info.halfAxes_axisDiff_retractionDepth =
-      ::impeller::Concat(rect.GetSize() / 2, axisDiff, retractionDepth);
+  frag_info.halfAxes_retractionDepth =
+      ::impeller::Concat(rect.GetSize() / 2, retractionDepth);
 
   auto compute_info = [radius](RoundSuperellipseParam::Octant& octant) {
     if (octant.se_n < 1) {  // A rectangular corner

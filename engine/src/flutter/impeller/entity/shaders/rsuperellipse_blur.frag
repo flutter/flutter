@@ -48,7 +48,7 @@ uniform FragInfo {
   vec3 r1_exponent_exponentInv;
   vec3 sInv_minEdge_scale;
 
-  vec4 halfAxes_axisDiff_retractionDepth;
+  vec4 halfAxes_retractionDepth;
   // Information to compute retraction for two octants respectively.
   // [splitRadian, splitGap, n, nInvNeg]
   vec4 infoTop;
@@ -75,14 +75,14 @@ void main() {
 
   /**** Start of RSuperellipse math ****/
 
-  vec2 halfAxes = frag_info.halfAxes_axisDiff_retractionDepth.xy;
-  float axisDiff = frag_info.halfAxes_axisDiff_retractionDepth[2];
-  float retractionDepth = frag_info.halfAxes_axisDiff_retractionDepth[3];
+  vec2 halfAxes = frag_info.halfAxes_retractionDepth.xy;
+  float retractionDepth = frag_info.halfAxes_retractionDepth[2];
+  float octantOffset = halfAxes.y - halfAxes.x;
 
-  bool useTop = (centered.y - axisDiff) > centered.x;
+  bool useTop = (centered.y - octantOffset) > centered.x;
   vec4 angularInfo = useTop ? frag_info.infoTop : frag_info.infoRight;
-  float theta = atan(useTop ? centered.x / (centered.y - axisDiff)
-                            : centered.y / (centered.x + axisDiff));
+  float theta = atan(useTop ? centered.x / (centered.y - octantOffset)
+                            : centered.y / (centered.x + octantOffset));
 
   float splitRadian = angularInfo[0];
   float splitGap = angularInfo[1];
