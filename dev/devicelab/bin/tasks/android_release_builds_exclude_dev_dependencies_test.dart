@@ -15,10 +15,6 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
-        utils.section(
-          'Configure plugins to be marked as dev dependencies in .flutter-plugins-dependencies file',
-        );
-
         // Create dev_dependency plugin to use for test.
         final Directory tempDir = Directory.systemTemp.createTempSync(
           'android_release_builds_exclude_dev_dependencies_test.',
@@ -88,12 +84,11 @@ Future<void> main() async {
 
           // Ensure that release builds have no reference to the dev dependency plugin and make sure
           // that it is included with expected transitive dependencies for debug, profile builds.
-          final bool appIncludesDevDependencyAsExpected =
-              isTestingReleaseMode
-                  ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
-                  : appDependencies.contains(
-                    regExpToMatchDevDependencyPluginWithTransitiveDependencies,
-                  );
+          final bool appIncludesDevDependencyAsExpected = isTestingReleaseMode
+              ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
+              : appDependencies.contains(
+                  regExpToMatchDevDependencyPluginWithTransitiveDependencies,
+                );
           if (!appIncludesDevDependencyAsExpected) {
             throw TaskResult.failure(
               'Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin as a dependency of the app built in $buildMode mode but did${isTestingReleaseMode ? '' : ' not'}.',
