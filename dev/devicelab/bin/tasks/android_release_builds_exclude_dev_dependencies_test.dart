@@ -19,48 +19,73 @@ Future<void> main() async {
         final Directory tempDir = Directory.systemTemp.createTempSync(
           'android_release_builds_exclude_dev_dependencies_test.',
         );
-        const String devDependencyPluginOrg = 'com.example.dev_dependency_plugin';
+        const String devDependencyPluginOrg =
+            'com.example.dev_dependency_plugin';
 
-        utils.section('Create plugin dev_dependency_plugin that supports Android');
+        utils.section(
+          'Create plugin dev_dependency_plugin that supports Android',
+        );
 
         await FlutterPluginProject.create(
           tempDir,
           'dev_dependency_plugin',
-          options: <String>['--platforms=android', '--org=$devDependencyPluginOrg'],
+          options: <String>[
+            '--platforms=android',
+            '--org=$devDependencyPluginOrg',
+          ],
         );
 
-        utils.section('Add dev_dependency_plugin as a dev dependency to the Flutter app project');
+        utils.section(
+          'Add dev_dependency_plugin as a dev dependency to the Flutter app project',
+        );
 
         // Add devDependencyPlugin as dependency of flutterProject.
         await flutterProject.addPlugin(
           'dev:dev_dependency_plugin',
-          options: <String>['--path', path.join(tempDir.path, 'dev_dependency_plugin')],
+          options: <String>[
+            '--path',
+            path.join(tempDir.path, 'dev_dependency_plugin'),
+          ],
         );
 
         utils.section(
           'Verify the app includes/excludes dev_dependency_plugin as dependency in each build mode as expected',
         );
-        final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
+        final List<String> buildModesToTest = <String>[
+          'debug',
+          'profile',
+          'release',
+        ];
         for (final String buildMode in buildModesToTest) {
           final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-          final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+          final String gradlewExecutable = Platform.isWindows
+              ? '.\\$gradlew'
+              : './$gradlew';
           final RegExp regExpToMatchDevDependencyPlugin = RegExp(
             r'--- project :dev_dependency_plugin',
           );
-          final RegExp regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(
+          final RegExp
+          regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(
             r'--- project :dev_dependency_plugin\n(\s)*\+--- org.jetbrains.kotlin.*\s\(\*\)\n(\s)*\\---\sio.flutter:flutter_embedding_' +
                 buildMode,
           );
-          const String stringToMatchFlutterEmbedding = '+--- io.flutter:flutter_embedding_release:';
+          const String stringToMatchFlutterEmbedding =
+              '+--- io.flutter:flutter_embedding_release:';
           final bool isTestingReleaseMode = buildMode == 'release';
 
-          utils.section('Query the dependencies of the app built with $buildMode');
+          utils.section(
+            'Query the dependencies of the app built with $buildMode',
+          );
 
-          final String appDependencies = await utils.eval(gradlewExecutable, <String>[
-            'app:dependencies',
-            '--configuration',
-            '${buildMode}RuntimeClasspath',
-          ], workingDirectory: flutterProject.androidPath);
+          final String appDependencies = await utils.eval(
+            gradlewExecutable,
+            <String>[
+              'app:dependencies',
+              '--configuration',
+              '${buildMode}RuntimeClasspath',
+            ],
+            workingDirectory: flutterProject.androidPath,
+          );
 
           if (isTestingReleaseMode) {
             utils.section(
