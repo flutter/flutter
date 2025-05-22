@@ -7,10 +7,10 @@
 #include "display_list/dl_color.h"
 #include "display_list/dl_paint.h"
 #include "display_list/geometry/dl_geometry_types.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
 #include "flutter/impeller/display_list/testing/rmse.h"
-#include "flutter/impeller/geometry/path_builder.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
@@ -209,7 +209,7 @@ TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
     auto add_corner = [](DlPathBuilder& path_builder, DlPoint corner,
                          DlVector2 relative_from, DlVector2 relative_to,
                          bool first) {
-      static const auto magic = impeller::PathBuilder::kArcApproximationMagic;
+      static const auto magic = DlPathBuilder::kArcApproximationMagic;
 
       if (first) {
         path_builder.MoveTo(corner + relative_from);
@@ -236,7 +236,7 @@ TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
                DlVector2(rx, 0.0f), DlVector2(0.0f, -ry), false);
     add_corner(path_builder, rect.GetLeftTop(),  //
                DlVector2(0.0f, ry), DlVector2(rx, 0.0f), false);
-    return DlPath(path_builder);
+    return path_builder.TakePath();
   };
 
   for (size_t i = 0; i < blur_sigmas.size(); i++) {
@@ -314,7 +314,7 @@ TEST_P(DlGoldenTest, DashedLinesTest) {
     path_builder.LineTo(DlPoint(325.0f, 275.0f));
     path_builder.LineTo(DlPoint(275.0f, 325.0f));
     path_builder.LineTo(DlPoint(225.0f, 275.0f));
-    canvas->ClipPath(DlPath(path_builder));
+    canvas->ClipPath(path_builder.TakePath());
     canvas->DrawColor(DlColor::kYellow());
     draw_one(DlStrokeCap::kRound, 275.0f, 275.0f, 15.0f, 10.0f);
     canvas->Restore();

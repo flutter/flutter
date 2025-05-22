@@ -61,6 +61,7 @@ void main() {
     TextDirection textDirection = TextDirection.ltr,
     bool useMaterial3 = false,
     SelectableDayForRangePredicate? selectableDayPredicate,
+    CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(
@@ -106,6 +107,7 @@ void main() {
       builder: (BuildContext context, Widget? child) {
         return Directionality(textDirection: textDirection, child: child ?? const SizedBox());
       },
+      calendarDelegate: calendarDelegate,
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -1243,6 +1245,31 @@ void main() {
         expect(tester.takeException(), null);
       });
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/140311.
+    testWidgets('Text field stays visible when orientation is portrait and height is reduced', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = const Size(720, 1280);
+      tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+
+      // Text fields and header are visible by default.
+      await preparePicker(tester, useMaterial3: true, (Future<DateTimeRange?> range) async {
+        expect(find.byType(TextField), findsNWidgets(2));
+        expect(find.text('Select range'), findsOne);
+      });
+
+      // Simulate the portait mode on a device with a small display when the virtual
+      // keyboard is visible.
+      tester.view.viewInsets = const FakeViewPadding(bottom: 1000);
+      await tester.pumpAndSettle();
+
+      // Text fields are visible and header is hidden
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.text('Select range'), findsNothing);
+    });
   });
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
@@ -1841,6 +1868,49 @@ void main() {
 
       final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
       expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('showDateRangePicker uses gregorian calendar delegate by default', (
+      WidgetTester tester,
+    ) async {
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final Finder helpText = find.text('Select range');
+        final Finder firstDateHeaderText = find.text('Jan 15');
+        final Finder lastDateHeaderText = find.text('Jan 25, 2016');
+        final Finder saveText = find.text('Save');
+
+        expect(helpText, findsOneWidget);
+        expect(firstDateHeaderText, findsOneWidget);
+        expect(lastDateHeaderText, findsOneWidget);
+        expect(saveText, findsOneWidget);
+
+        final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+        expect(dialog.calendarDelegate, isA<GregorianCalendarDelegate>());
+      }, useMaterial3: true);
+    });
+
+    testWidgets('showDateRangePicker using custom calendar delegate implementation', (
+      WidgetTester tester,
+    ) async {
+      await preparePicker(
+        tester,
+        (Future<DateTimeRange?> range) async {
+          final Finder helpText = find.text('Select range');
+          final Finder firstDateHeaderText = find.text('Jan 15');
+          final Finder lastDateHeaderText = find.text('Jan 25, 2016');
+          final Finder saveText = find.text('Save');
+
+          expect(helpText, findsOneWidget);
+          expect(firstDateHeaderText, findsOneWidget);
+          expect(lastDateHeaderText, findsOneWidget);
+          expect(saveText, findsOneWidget);
+
+          final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+          expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
+        },
+        useMaterial3: true,
+        calendarDelegate: const TestCalendarDelegate(),
+      );
     });
 
     testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {

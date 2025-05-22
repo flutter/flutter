@@ -68,6 +68,10 @@ impeller_shaders("shader_fixtures") {
     "texture.vert",
   ]
 
+  if (impeller_enable_vulkan) {
+    vulkan_exclusions = [ "half.frag" ]
+  }
+
   if (impeller_enable_opengles) {
     gles_exclusions = [
       "sample.comp",
@@ -79,6 +83,7 @@ impeller_shaders("shader_fixtures") {
 }
 
 impellerc("runtime_stages") {
+  mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
     "runtime_stage_example.frag",

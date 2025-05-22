@@ -503,7 +503,7 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.vertical => constraints.maxHeight,
         };
         _itemExtent =
-            _itemExtent == null ? _itemExtent : clampDouble(_itemExtent!, 0, mainAxisExtent);
+            widget.itemExtent == null ? null : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
 
         return Scrollable(
           axisDirection: axisDirection,
@@ -844,6 +844,11 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   // The given `index` is compared with `_firstVisibleItemIndex` to know how
   // many items are placed before the current one in the view.
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
+    // If constraints.viewportMainAxisExtent is 0, firstChildExtent will be 0 and cause division error.
+    if (constraints.viewportMainAxisExtent == 0) {
+      return 0;
+    }
+
     double extent;
     if (index == _firstVisibleItemIndex) {
       extent = math.max(_distanceToLeadingEdge, effectiveShrinkExtent);
@@ -905,6 +910,10 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   // (with weight 7), we leave some space before item 0 assuming there is another
   // item -1 as the first visible item.
   int get _firstVisibleItemIndex {
+    // If constraints.viewportMainAxisExtent is 0, firstChildExtent will be 0 and cause division error.
+    if (constraints.viewportMainAxisExtent == 0.0) {
+      return 0;
+    }
     int smallerWeightCount = 0;
     for (final int weight in weights) {
       if (weight == weights.max) {
@@ -928,6 +937,10 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   // item. It informs them how much the first item has moved off-screen,
   // enabling them to adjust their sizes (grow or shrink) accordingly.
   double get _firstVisibleItemOffscreenExtent {
+    // If constraints.viewportMainAxisExtent is 0, firstChildExtent will be 0 and cause division error.
+    if (constraints.viewportMainAxisExtent == 0.0) {
+      return 0;
+    }
     int index;
     final double actual = constraints.scrollOffset / firstChildExtent;
     final int round = (constraints.scrollOffset / firstChildExtent).round();
@@ -1405,7 +1418,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     if (_itemExtent == value) {
       return;
     }
-    if (hasPixels && _itemExtent != null) {
+    if (hasPixels && _itemExtent != null && viewportDimension != 0.0) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
       final double newPixel = getPixelsFromItem(leadingItem, flexWeights, value);
       forcePixels(newPixel);
@@ -1472,6 +1485,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
   double getPixelsFromItem(double item, List<int>? flexWeights, double? itemExtent) {
     double fraction;
+    if (viewportDimension == 0.0) {
+      return 0.0;
+    }
     if (itemExtent != null) {
       fraction = itemExtent / viewportDimension;
     } else {
@@ -1510,6 +1526,18 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       return false;
     }
     return result;
+  }
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+
+    if (other is! _CarouselPosition) {
+      return;
+    }
+
+    _cachedItem = other._cachedItem;
+    _itemExtent = other._itemExtent;
   }
 
   @override

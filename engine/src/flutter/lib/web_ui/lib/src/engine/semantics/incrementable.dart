@@ -41,7 +41,7 @@ class SemanticIncrementable extends SemanticRole {
           return;
         }
         _pendingResync = true;
-        final int newInputValue = int.parse(_element.value!);
+        final int newInputValue = int.parse(_element.value);
         if (newInputValue > _currentSurrogateValue) {
           _currentSurrogateValue += 1;
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(

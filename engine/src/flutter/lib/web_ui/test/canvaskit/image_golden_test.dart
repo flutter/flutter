@@ -96,7 +96,7 @@ class BitmapTestCodec extends TestFileCodec {
   Future<ui.Codec> createCodecFromTestFile(String testFile) async {
     final DomHTMLImageElement imageElement = createDomHTMLImageElement();
     imageElement.src = testFile;
-    setJsProperty<String>(imageElement, 'decoding', 'async');
+    imageElement.decoding = 'async';
 
     await imageElement.decode();
 

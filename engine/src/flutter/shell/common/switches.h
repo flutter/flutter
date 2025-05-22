@@ -294,6 +294,11 @@ DEF_SWITCH(EnableEmbedderAPI,
 DEF_SWITCH(EnablePlatformIsolates,
            "enable-platform-isolates",
            "Enable support for isolates that run on the platform thread.")
+DEF_SWITCH(MergedPlatformUIThread,
+           "merged-platform-ui-thread",
+           "Sets whether the ui thread and platform thread should be merged.")
+// This is a legacy flag that has been superseded by merged-platform-ui-thread.
+// TODO(163064): remove this when users have been migrated.
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
            "Merge the ui thread and platform thread.")

@@ -34,10 +34,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (UIScreen*)screen {
-  if (@available(iOS 13.0, *)) {
-    return self.window.windowScene.screen;
-  }
-  return UIScreen.mainScreen;
+  return self.window.windowScene.screen;
 }
 
 - (MTLPixelFormat)pixelFormat {
