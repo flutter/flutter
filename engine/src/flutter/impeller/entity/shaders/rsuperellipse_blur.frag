@@ -67,7 +67,7 @@ frag_info;
 
 in vec2 v_position;
 
-out f16vec4 frag_color;
+out vec4 frag_color;
 
 const float kPiOverFour = 3.1415926 / 4.0;
 

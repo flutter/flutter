@@ -5,6 +5,8 @@
 #ifndef RRECT_GLSL_
 #define RRECT_GLSL_
 
+#include <impeller/math.glsl>
+
 const float kTwoOverSqrtPi = 2.0 / sqrt(3.1415926);
 
 float maxXY(vec2 v) {

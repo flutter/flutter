@@ -18,6 +18,7 @@
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
@@ -34,8 +35,6 @@
 #include "impeller/typographer/text_frame.h"
 
 namespace impeller {
-
-class SolidRRectLikeBlurContents;
 
 struct BackdropData {
   size_t backdrop_count = 0;
