@@ -1126,7 +1126,7 @@ void main() {
     finder = find.byType(TextField).last;
     textField = tester.widget(finder);
 
-    final lastFocusNode = focusNodes.last;
+    final FocusNode lastFocusNode = focusNodes.last;
     lastFocusNode.requestFocus();
     await tester.pumpAndSettle();
 
