@@ -4280,7 +4280,7 @@ void main() {
     },
   );
 
-  testWidgets('The controller provided to DropdownMenu should be able to call dispose.', (
+  testWidgets('Explicitly provided controllers should not be disposed when switched out.', (
     WidgetTester tester,
   ) async {
     final TextEditingController controller1 = TextEditingController();
