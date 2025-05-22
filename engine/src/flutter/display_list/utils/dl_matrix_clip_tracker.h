@@ -173,6 +173,11 @@ class DisplayListMatrixClipState {
       const DlMatrix& matrix,
       const DlRect& cull_bounds);
 
+  /// @brief Whether the current matrix is only scale translate.
+  ///
+  /// This allows simplification of certain clipping and mapping computations.
+  bool IsTranslateScale() const { return is_translate_scale_; }
+
  private:
   DlRect cull_rect_;
   DlMatrix matrix_;

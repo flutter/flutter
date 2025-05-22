@@ -27,6 +27,7 @@ bool DisplayListMatrixClipState::inverseTransform(
     const DisplayListMatrixClipState& tracker) {
   if (tracker.is_matrix_invertable()) {
     matrix_ = matrix_ * tracker.matrix_.Invert();
+    is_translate_scale_ = matrix_.IsTranslationScaleOnly();
     return true;
   }
   return false;
