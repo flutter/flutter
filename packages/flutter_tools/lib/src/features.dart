@@ -56,33 +56,37 @@ abstract class FeatureFlags {
   /// Whether explicit package dependency management is enabled.
   bool get isExplicitPackageDependenciesEnabled => false;
 
+  /// Whether desktop multi-window is enabled.
+  bool get isMultiWindowEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature);
-}
 
-/// All current Flutter feature flags.
-const List<Feature> allFeatures = <Feature>[
-  flutterWebFeature,
-  flutterLinuxDesktopFeature,
-  flutterMacOSDesktopFeature,
-  flutterWindowsDesktopFeature,
-  flutterAndroidFeature,
-  flutterIOSFeature,
-  flutterFuchsiaFeature,
-  flutterCustomDevicesFeature,
-  cliAnimation,
-  nativeAssets,
-  swiftPackageManager,
-  explicitPackageDependencies,
-];
+  /// All current Flutter feature flags.
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+    explicitPackageDependencies,
+    multiWindowFeature,
+  ];
+}
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
 Iterable<Feature> get allConfigurableFeatures =>
-    allFeatures.where((Feature feature) => feature.configSetting != null);
+    featureFlags.allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -183,6 +187,16 @@ const Feature explicitPackageDependencies = Feature.fullyEnabled(
       '* https://flutter.dev/to/flutter-gen-deprecation.',
 );
 
+const Feature multiWindowFeature = Feature(
+  name: 'support for multi-window on Linux, macOS, and Windows',
+  configSetting: 'enable-multi-window',
+  environmentOverride: 'FLUTTER_MULTI_WINDOW',
+  runtimeId: 'multi_window',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -197,6 +211,7 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
@@ -208,6 +223,7 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -238,6 +254,12 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no config setting.
   final String? configSetting;
+
+  /// The unique identifier for this feature at runtime.
+  ///
+  /// If not `null`, the Flutter framework's enabled feature flags will
+  /// contain this value if this feature is enabled.
+  final String? runtimeId;
 
   /// Additional text to add to the end of the help message.
   ///

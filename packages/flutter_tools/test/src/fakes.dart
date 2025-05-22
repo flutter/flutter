@@ -494,6 +494,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isExplicitPackageDependenciesEnabled = false,
+    this.isMultiWindowEnabled = false,
   });
 
   @override
@@ -533,6 +534,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isExplicitPackageDependenciesEnabled;
 
   @override
+  final bool isMultiWindowEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -546,9 +550,27 @@ class TestFeatureFlags implements FeatureFlags {
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
       explicitPackageDependencies => isExplicitPackageDependenciesEnabled,
+      multiWindowFeature => isMultiWindowEnabled,
       _ => false,
     };
   }
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+    explicitPackageDependencies,
+    multiWindowFeature,
+  ];
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
