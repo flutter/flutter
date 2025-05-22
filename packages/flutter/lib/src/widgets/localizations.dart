@@ -708,13 +708,36 @@ class _LocalizationsState extends State<Localizations> {
   }
 }
 
+/// A helper class used to manage localization resolution.
+///
+/// See also:
+///   * [WidgetsApp], which utilizes [LocalizationsResolver] to handle locales.
 class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
+  /// Creates a [LocalizationsResolver] that determines the best-fit locale from the set of
+  /// [supportedLocales].
+  ///
+  /// If provided, locale resolution will attempt to use [locale] as the current locale rather
+  /// than the system locale.
+  ///
+  /// Locale resolution behavior can be overridden by providing [localeListResolutionCallback]
+  /// or [localeResolutionCallback].
+  ///
+  /// The delegates set via [localizationsDelegates] collectively define all of the localized
+  /// resources for a [Localizations] widget.
+  ///
+  /// See also:
+  ///
+  ///  * [LocalizationsResolver.localeListResolutionCallback] and
+  ///    [LocalizationsResolver.localeResolutionCallback] for more details on locale resolution
+  ///    behavior.
+  ///  * [LocalizationsDelegate] for more details about providing localized resources to a
+  ///    [Localizations] widget.
   LocalizationsResolver({
+    required Iterable<Locale> supportedLocales,
     Locale? locale,
     LocaleListResolutionCallback? localeListResolutionCallback,
     LocaleResolutionCallback? localeResolutionCallback,
-    Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
-    required Iterable<Locale> supportedLocales,
+    Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
   }) : _locale = locale,
        _localeListResolutionCallback = localeListResolutionCallback,
        _localeResolutionCallback = localeResolutionCallback,
@@ -733,11 +756,13 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     super.dispose();
   }
 
+  /// Replace one or more of the properties used for localization resolution and re-resolve the
+  /// locale.
   void update({
     required Locale? locale,
     required LocaleListResolutionCallback? localeListResolutionCallback,
     required LocaleResolutionCallback? localeResolutionCallback,
-    required Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
+    required Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
     required Iterable<Locale> supportedLocales,
   }) {
     _locale = locale;
@@ -745,8 +770,12 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     _localeResolutionCallback = localeResolutionCallback;
     _localizationsDelegates = localizationsDelegates;
     _supportedLocales = supportedLocales;
+    // Re-resolve the locale based on the new settings.
+    didChangeLocales(WidgetsBinding.instance.platformDispatcher.locales);
   }
 
+  /// The currently resolved [Locale] based on the current platform locale and
+  /// the provided set of [supportedLocales].
   Locale get locale {
     final Locale appLocale =
         _locale != null ? _resolveLocales(<Locale>[_locale!], supportedLocales) : _resolvedLocale!;
@@ -754,26 +783,42 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     return appLocale;
   }
 
-  Iterable<LocalizationsDelegate<dynamic>> get localizationsDelegates {
+  /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
+  Iterable<LocalizationsDelegate<Object?>> get localizationsDelegates {
     // Combine the Localizations for Widgets with the ones contributed
     // by the localizationsDelegates parameter, if any. Only the first delegate
     // of a particular LocalizationsDelegate.type is loaded so the
     // localizationsDelegate parameter can be used to override
     // WidgetsLocalizations.delegate.
-    return <LocalizationsDelegate<dynamic>>[
+    return <LocalizationsDelegate<Object?>>[
       if (_localizationsDelegates != null) ..._localizationsDelegates!,
       DefaultWidgetsLocalizations.delegate,
     ];
   }
 
-  Iterable<LocalizationsDelegate<dynamic>>? _localizationsDelegates;
+  Iterable<LocalizationsDelegate<Object?>>? _localizationsDelegates;
 
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// See also:
+  ///
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
   LocaleListResolutionCallback? get localeListResolutionCallback => _localeListResolutionCallback;
   LocaleListResolutionCallback? _localeListResolutionCallback;
 
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
   LocaleResolutionCallback? get localeResolutionCallback => _localeResolutionCallback;
   LocaleResolutionCallback? _localeResolutionCallback;
 
+  /// {@macro flutter.widgets.widgetsApp.supportedLocales}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], an app callback that resolves the app's locale
+  ///    when the device's locale changes.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
   Iterable<Locale> get supportedLocales => _supportedLocales;
   Iterable<Locale> _supportedLocales;
 
