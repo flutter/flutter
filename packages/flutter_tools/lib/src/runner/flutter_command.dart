@@ -1435,6 +1435,16 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
+    if (globals.platform.environment[kAppFlavor] != null) {
+      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
+      throwToolExit(
+        '$kAppFlavor is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
+    dartDefines.add('$kAppFlavor=$flavor');
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
 
     return BuildInfo(

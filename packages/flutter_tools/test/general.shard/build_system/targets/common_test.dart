@@ -440,57 +440,6 @@ void main() {
   );
 
   testUsingContext(
-    "tool exits when $kAppFlavor is already set in user's environment",
-    () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      final Future<void> buildResult = const KernelSnapshot().build(
-        androidEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.android)
-          ..defines[kBuildMode] = BuildMode.debug.cliName
-          ..defines[kFlavor] = 'strawberry'
-          ..defines[kTrackWidgetCreation] = 'false',
-      );
-
-      expect(
-        buildResult,
-        throwsToolExit(
-          message: '$kAppFlavor is used by the framework and cannot be set in the environment.',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      Platform: () => FakePlatform(environment: <String, String>{kAppFlavor: 'I was already set'}),
-    },
-  );
-
-  testUsingContext(
-    'tool exits when $kAppFlavor is set in --dart-define or --dart-define-from-file',
-    () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      final Future<void> buildResult = const KernelSnapshot().build(
-        androidEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.android)
-          ..defines[kBuildMode] = BuildMode.debug.cliName
-          ..defines[kFlavor] = 'strawberry'
-          ..defines[kDartDefines] = encodeDartDefines(<String>[kAppFlavor, 'strawberry'])
-          ..defines[kTrackWidgetCreation] = 'false',
-      );
-
-      expect(
-        buildResult,
-        throwsToolExit(
-          message:
-              '$kAppFlavor is used by the framework and cannot be set using --dart-define or --dart-define-from-file',
-        ),
-      );
-    },
-  );
-
-  testUsingContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
