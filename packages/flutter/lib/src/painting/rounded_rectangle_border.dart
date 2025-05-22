@@ -214,7 +214,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
   ///
   /// If `borderRadius` is not specified or null, it defaults to
   /// [BorderRadius.zero].
-  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry borderRadius})
+  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
     : borderRadius = borderRadius ?? BorderRadius.zero;
 
   /// The radii for each corner.

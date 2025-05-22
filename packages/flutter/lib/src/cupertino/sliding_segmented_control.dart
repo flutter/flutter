@@ -269,14 +269,12 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
         return Padding(
           padding: _kSeparatorInset,
           child: DecoratedBox(
-            // Although the separator might technically be an RSuperellipse, we
-            // still use an RRect (implicily with BoxDecoration.borderRadius)
-            // here since the radius is too small to make enough visual
-            // difference.
             decoration: BoxDecoration(
               color: _kSeparatorColor.withOpacity(
                 _kSeparatorColor.opacity * separatorOpacityController.value,
               ),
+              // Use RRect instead of RSuperellipse here since the radius is too
+              // small to make enough visual difference.
               borderRadius: const BorderRadius.all(_kSeparatorRadius),
             ),
             child: child,
