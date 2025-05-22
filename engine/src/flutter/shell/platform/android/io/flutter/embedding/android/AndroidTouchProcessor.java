@@ -13,7 +13,6 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-
 import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
