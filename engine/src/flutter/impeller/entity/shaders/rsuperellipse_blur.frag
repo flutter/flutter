@@ -2,38 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This approximate algorithm is based on the RRect blur algorithm
-// (rrect_blur.frag), with adjustments to match the RSuperellipse shape. The key
-// difference is that RSuperellipse curves are slightly retracted inward
-// compared to RRect.
+// This algorithm is an adaptation of the RRect blur technique
+// (`rrect_blur.frag`), tailored specifically for the RSuperellipse shape. The
+// core distinction lies in how RSuperellipse curves are slightly drawn inward
+// compared to RRect's.
 //
-// The fragment position is first mapped to polar coordinates within the octant
-// (theta in [0, pi/4]). A `baseRetraction` is computed from the angle, so that
-// the shape matches a RSuperellipse when `sigma` is near zero. Then, the
-// retraction is scaled based on the radial distance from the edge (`d`),
-// reducing its influence when far away (`retractionDepth`). This reflects the
-// idea that for large sigma, small geometric differences like retraction become
-// visually negligible.
+// We begin by mapping the fragment's position to polar coordinates within the
+// octant, with the angle `theta` ranging from 0 to pi/4. From this angle, we
+// calculate a `baseRetraction`. This `baseRetraction` is crucial because it
+// ensures the shape precisely matches an RSuperellipse when the blur `sigma` is
+// very small.
 //
-// The base retraction is the actual distance between the RRect and
-// RSuperellipse curves at a given angle `theta`.
+// As we move further away from the edge (indicated by `d`, the radial
+// distance), this retraction is progressively scaled down by `retractionDepth`.
+// This scaling diminishes the influence of the retraction when the blur is
+// significant, reflecting the idea that for larger blur values, subtle
+// geometric differences like this retraction become visually insignificant.
 //
-// The range is divided at the point where the RRect transitions from a straight
-// edge to a rounded corner (marked as `splitRadian`), since this is where the
-// shape difference becomes most noticeable.
+// Essentially, the `baseRetraction` represents the exact distance between the
+// RRect and RSuperellipse curves at a given `theta`.
 //
-// For theta < splitRadian, the RRect edge is a straight line and the
-// RSuperellipse has a known superellipse formula, so we can directly compute
-// the distance between them.
+// We split the angular range at `splitRadian`. This is a critical point because
+// the RRect's geometry, and thus its formula, changes significantly: one side
+// is a straight edge, the other a rounded corner. Our retraction calculation
+// must adapt to these distinct behaviors.
 //
-// For theta > splitRadian, the exact expressions for both curves are too
-// complex to evaluate efficiently. Instead, we approximate the distance using a
-// heuristic polynomial fit. This is based on the observation that the
-// difference curve rises, then falls smoothly, eventually reaching zero with
-// zero slope.
+// When `theta` is less than `splitRadian`, the RRect's edge is a straight line,
+// and the RSuperellipse follows a well-defined superellipse formula. This
+// allows us to directly compute the distance between the two curves.
 //
-// See the `RoundSuperellipseShadowComparison` test for a visual preview of
-// this algorithm's effect.
+// However, for `theta` greater than `splitRadian`, the exact mathematical
+// expressions for both curves become too complex to evaluate efficiently. In
+// these cases, we approximate the distance using a heuristic polynomial fit.
+// This approximation is based on the observed behavior of the difference curve:
+// it smoothly rises, then falls, eventually reaching zero with a zero slope.
+//
+// To see a visual representation of how this algorithm affects the shadow,
+// refer to the `RoundSuperellipseShadowComparison` playground.
+//
+// (Note that the `theta` used throughout this file is distinct from the `theta`
+// variable used in `RoundSuperellipseParam`.)
 
 precision highp float;
 
