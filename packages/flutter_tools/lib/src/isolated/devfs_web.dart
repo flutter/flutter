@@ -215,7 +215,8 @@ class WebAssetServer implements AssetReader {
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
+      final String moduleUri = baseUri != null ? '$baseUri/$module' : module;
+      moduleToLibrary.add(<String, Object>{'src': moduleUri, 'libraries': libraries});
     }
     writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
   }
