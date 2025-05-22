@@ -8919,7 +8919,7 @@ void main() {
     final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
       fontFamily: 'Roboto',
       fontSize: 14.0, // default.
-      height: 3.0, // Slightly increase height from default so style is noticeable. 
+      height: 3.0, // Slightly increase height from default so style is noticeable.
     );
 
     await tester.pumpWidget(
