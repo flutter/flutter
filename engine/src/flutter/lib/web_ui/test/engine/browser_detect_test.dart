@@ -91,8 +91,7 @@ void testMain() {
     test('Determine Android if user agent contains Android', () {
       expectOs(
         ui_web.OperatingSystem.android,
-        ua:
-            'Mozilla/5.0 (Linux; U; Android 2.2) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
+        ua: 'Mozilla/5.0 (Linux; U; Android 2.2) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
       );
     });
 

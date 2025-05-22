@@ -299,8 +299,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
     final Map<String, dynamic> googleFontsResult =
         jsonDecode(response.body) as Map<String, dynamic>;
-    final List<Map<String, dynamic>> fontDatas =
-        (googleFontsResult['items'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<Map<String, dynamic>> fontDatas = (googleFontsResult['items'] as List<dynamic>)
+        .cast<Map<String, dynamic>>();
     for (final Map<String, Object?> fontData in fontDatas) {
       final String family = fontData['family']! as String;
       if (requestedFonts.contains(family)) {
@@ -560,10 +560,9 @@ class _Font {
   String get shortName =>
       _shortName + String.fromCharCodes('$index'.codeUnits.map((int ch) => ch - 48 + 0x2080));
 
-  String get _shortName =>
-      info.family.startsWith('Noto Sans ')
-          ? info.family.substring('Noto Sans '.length)
-          : info.family;
+  String get _shortName => info.family.startsWith('Noto Sans ')
+      ? info.family.substring('Noto Sans '.length)
+      : info.family;
 }
 
 /// The boundary of a range of a font.

@@ -141,10 +141,9 @@ class PlatformViewManager {
     _viewIdToType[viewId] = viewType;
 
     return _contents.putIfAbsent(viewId, () {
-      final DomElement wrapper =
-          domDocument.createElement('flt-platform-view')
-            ..id = getPlatformViewDomId(viewId)
-            ..setAttribute('slot', slotName);
+      final DomElement wrapper = domDocument.createElement('flt-platform-view')
+        ..id = getPlatformViewDomId(viewId)
+        ..setAttribute('slot', slotName);
 
       final Function factoryFunction = _factories[viewType]!;
       final DomElement content;

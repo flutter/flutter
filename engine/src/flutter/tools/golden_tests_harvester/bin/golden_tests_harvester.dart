@@ -12,14 +12,13 @@ final bool _isLocalEnvWithoutSkiaGold =
     !SkiaGoldClient.isAvailable(environment: io.Platform.environment) ||
     !SkiaGoldClient.isLuciEnv(environment: io.Platform.environment);
 
-final ArgParser _argParser =
-    ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false, help: 'Prints this usage information.')
-      ..addFlag(
-        'dry-run',
-        defaultsTo: _isLocalEnvWithoutSkiaGold,
-        help: 'Do not upload images to Skia Gold.',
-      );
+final ArgParser _argParser = ArgParser()
+  ..addFlag('help', abbr: 'h', negatable: false, help: 'Prints this usage information.')
+  ..addFlag(
+    'dry-run',
+    defaultsTo: _isLocalEnvWithoutSkiaGold,
+    help: 'Do not upload images to Skia Gold.',
+  );
 
 Future<void> main(List<String> args) async {
   final ArgResults results = _argParser.parse(args);

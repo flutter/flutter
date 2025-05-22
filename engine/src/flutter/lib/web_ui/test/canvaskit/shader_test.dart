@@ -55,8 +55,9 @@ void testMain() {
     });
 
     test('Image shader initialize/dispose cycle', () {
-      final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!.makeImageAtCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
+        kTransparentImage,
+      )!.makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader =
           ui.ImageShader(
@@ -81,8 +82,9 @@ void testMain() {
     });
 
     test('Image shader withQuality', () {
-      final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!.makeImageAtCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
+        kTransparentImage,
+      )!.makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader =
           ui.ImageShader(

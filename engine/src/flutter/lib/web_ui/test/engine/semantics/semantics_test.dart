@@ -3329,11 +3329,10 @@ void _testPlatformView() {
 
     ui_web.platformViewRegistry.registerViewFactory(
       'test-platform-view',
-      (int viewId) =>
-          createDomHTMLDivElement()
-            ..id = 'view-0'
-            ..style.width = '100%'
-            ..style.height = '100%',
+      (int viewId) => createDomHTMLDivElement()
+        ..id = 'view-0'
+        ..style.width = '100%'
+        ..style.height = '100%',
     );
     await createPlatformView(0, 'test-platform-view');
 

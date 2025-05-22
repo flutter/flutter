@@ -325,8 +325,8 @@ void main() {
     expect((fontSize * text.length).truncate(), isNot(fontSize * text.length));
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize));
     builder.addText(text);
-    final Paragraph paragraph =
-        builder.build()..layout(const ParagraphConstraints(width: text.length * fontSize));
+    final Paragraph paragraph = builder.build()
+      ..layout(const ParagraphConstraints(width: text.length * fontSize));
     expect(paragraph.maxIntrinsicWidth, text.length * fontSize);
     switch (paragraph.computeLineMetrics()) {
       case [LineMetrics(width: final double width)]:

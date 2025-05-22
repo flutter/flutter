@@ -365,8 +365,9 @@ class CanvasKitCanvas implements ui.Canvas {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final Uint32List? colorBuffer =
-        (colors == null || colors.isEmpty) ? null : toFlatColors(colors);
+    final Uint32List? colorBuffer = (colors == null || colors.isEmpty)
+        ? null
+        : toFlatColors(colors);
 
     _drawAtlas(
       paint,

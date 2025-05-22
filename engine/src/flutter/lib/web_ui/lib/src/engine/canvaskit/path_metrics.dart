@@ -19,8 +19,9 @@ class CkPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetric
 
   /// The [CkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
   @override
-  late final Iterator<ui.PathMetric> iterator =
-      _path.isEmpty ? const CkPathMetricIteratorEmpty._() : CkContourMeasureIter(this);
+  late final Iterator<ui.PathMetric> iterator = _path.isEmpty
+      ? const CkPathMetricIteratorEmpty._()
+      : CkContourMeasureIter(this);
 }
 
 class CkContourMeasureIter implements Iterator<ui.PathMetric> {

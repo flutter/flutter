@@ -40,10 +40,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
 
     final RawPointArray endPoints = scope.convertPointArrayToNative(<ui.Offset>[from, to]);
     final RawColorArray nativeColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> stops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> stops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateLinearGradient(
       endPoints,
       nativeColors,
@@ -69,10 +71,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
     }());
 
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateRadialGradient(
       center.dx,
       center.dy,
@@ -103,10 +107,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
 
     final RawPointArray endPoints = scope.convertPointArrayToNative(<ui.Offset>[focal, center]);
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateConicalGradient(
       endPoints,
       focalRadius,
@@ -135,10 +141,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
     }());
 
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateSweepGradient(
       center.dx,
       center.dy,

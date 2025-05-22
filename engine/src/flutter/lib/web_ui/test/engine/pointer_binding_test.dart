@@ -3253,19 +3253,18 @@ class _PointerEventContext extends _BasicEventContext
     if (coalescedEvents != null) {
       // There's no JS API for setting coalesced events, so we need to
       // monkey-patch the `getCoalescedEvents` method to return what we want.
-      final coalescedEventJs =
-          coalescedEvents
-              .map(
-                (_CoalescedTouchDetails details) => _moveWithFullDetails(
-                  pointer: details.pointer,
-                  button: button,
-                  buttons: buttons,
-                  clientX: details.clientX,
-                  clientY: details.clientY,
-                  pointerType: 'touch',
-                ),
-              )
-              .toJSAnyDeep;
+      final coalescedEventJs = coalescedEvents
+          .map(
+            (_CoalescedTouchDetails details) => _moveWithFullDetails(
+              pointer: details.pointer,
+              button: button,
+              buttons: buttons,
+              clientX: details.clientX,
+              clientY: details.clientY,
+              pointerType: 'touch',
+            ),
+          )
+          .toJSAnyDeep;
 
       js_util.setProperty(
         event,

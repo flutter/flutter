@@ -43,7 +43,8 @@ Future<int> uploadDirectoryToCipd({
   bool isDryRun = false,
   bool isVerbose = false,
 }) async {
-  final String cipdConfig = '''
+  final String cipdConfig =
+      '''
 package: $packageName
 description: $description
 preserve_writable: true
