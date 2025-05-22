@@ -348,6 +348,46 @@ void main() {
     expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
   });
 
+  testWithoutContext('flutter test supports test files in an @file as the last argument', () async {
+    final File argsFile = fileSystem.file(
+      fileSystem.path.join(fileSystem.systemTempDirectory.path, 'myargsfile.txt'),
+    );
+    final File testFile = fileSystem.file(
+      fileSystem.path.join(flutterTestDirectory, 'trivial_test.dart'),
+    );
+    // Include some blank lines to ensure they do not cause errors.
+    fileSystem.file(argsFile).writeAsStringSync('\n\r\n${testFile.path}\r\n');
+    final ProcessResult result = await _runFlutterTest(
+      null,
+      automatedTestsDirectory,
+      null,
+      extraArguments: <String>['@${argsFile.path}'],
+    );
+    expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
+  });
+
+  testWithoutContext(
+    'flutter test supports arbitrary args in an @file as the last argument',
+    () async {
+      final File argsFile = fileSystem.file(
+        fileSystem.path.join(fileSystem.systemTempDirectory.path, 'mytestfile.txt'),
+      );
+      fileSystem.file(argsFile).writeAsStringSync('--help');
+      final ProcessResult result = await _runFlutterTest(
+        null,
+        automatedTestsDirectory,
+        null,
+        extraArguments: <String>['@${argsFile.path}'],
+      );
+      expect(
+        result,
+        ProcessResultMatcher(
+          stdoutPattern: RegExp(r'^Run Flutter unit tests for the current project\.'),
+        ),
+      );
+    },
+  );
+
   testWithoutContext('flutter test should test runs to completion', () async {
     final ProcessResult result = await _runFlutterTest(
       'trivial',
@@ -665,19 +705,19 @@ List<String> _removeMacFontServerWarning(List<String> output) {
 Future<ProcessResult> _runFlutterTest(
   String? testName,
   String workingDirectory,
-  String testDirectory, {
+  String? testDirectory, {
   List<String> extraArguments = const <String>[],
   String? query,
 }) async {
-  String testPath;
-  if (testName == null) {
+  String? testPath;
+  if (testDirectory != null && testName == null) {
     // Test everything in the directory.
     testPath = testDirectory;
     final Directory directoryToTest = fileSystem.directory(testPath);
     if (!directoryToTest.existsSync()) {
       fail('missing test directory: $directoryToTest');
     }
-  } else {
+  } else if (testDirectory != null && testName != null) {
     // Test just a specific test file.
     testPath = fileSystem.path.join(testDirectory, '${testName}_test.dart');
     final File testFile = fileSystem.file(testPath);
@@ -694,7 +734,8 @@ Future<ProcessResult> _runFlutterTest(
     '--reporter',
     'compact',
     ...extraArguments,
-    if (query != null) Uri.file(testPath).replace(query: query).toString() else testPath,
+    if (testPath != null)
+      if (query != null) Uri.file(testPath).replace(query: query).toString() else testPath,
   ];
 
   return Process.run(
