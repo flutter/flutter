@@ -8,6 +8,7 @@ library;
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -194,7 +195,7 @@ abstract class Pub {
   });
 }
 
-final class _DefaultPub implements Pub {
+class _DefaultPub implements Pub {
   _DefaultPub({
     required FileSystem fileSystem,
     required Logger logger,
@@ -341,7 +342,7 @@ final class _DefaultPub implements Pub {
       flutterRootOverride: flutterRootOverride,
       outputMode: outputMode,
     );
-    await _updateVersion(project);
+    await _updateVersionAndPackageConfig(project);
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -541,6 +542,7 @@ final class _DefaultPub implements Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
+    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     await _runWithStdioInherited(
@@ -551,7 +553,7 @@ final class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     if (touchesPackageConfig && project != null) {
-      await _updateVersion(project);
+      await _updateVersionAndPackageConfig(project);
     }
   }
 
@@ -655,12 +657,15 @@ final class _DefaultPub implements Pub {
     return environment;
   }
 
-  /// Updates the `.dart_tool/version` file to be equal to current Flutter
+  /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
+  ///
+  /// Calls [_updatePackageConfig] for [project] and [FlutterProject.example]
+  /// (if it exists).
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
-  Future<void> _updateVersion(FlutterProject project) async {
+  Future<void> _updateVersionAndPackageConfig(FlutterProject project) async {
     final File? packageConfig = findPackageConfigFile(project.directory);
     if (packageConfig == null) {
       throwToolExit(
@@ -674,5 +679,45 @@ final class _DefaultPub implements Pub {
       _fileSystem.path.join(Cache.flutterRoot!, 'version'),
     );
     lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
+
+    await _updatePackageConfig(project, packageConfig);
+    if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+      final File? examplePackageConfig = findPackageConfigFile(project.example.directory);
+      if (examplePackageConfig == null) {
+        throwToolExit(
+          '${project.directory}: pub did not create example/.dart_tools/package_config.json file.',
+        );
+      }
+      await _updatePackageConfig(project.example, examplePackageConfig);
+    }
+  }
+
+  /// Update the package configuration file in [project].
+  ///
+  /// Creates a corresponding `package_config_subset` file that is used by the
+  /// build system to avoid rebuilds caused by an updated pub timestamp.
+  Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: _logger,
+    );
+
+    packageConfigFile.parent
+        .childFile('package_config_subset')
+        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
+  }
+
+  // Subset the package config file to only the parts that are relevant for
+  // rerunning the dart compiler.
+  String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
+    final StringBuffer buffer = StringBuffer();
+    for (final Package package in packageConfig.packages) {
+      buffer.writeln(package.name);
+      buffer.writeln(package.languageVersion);
+      buffer.writeln(package.root);
+      buffer.writeln(package.packageUriRoot);
+    }
+    buffer.writeln(packageConfig.version);
+    return buffer.toString();
   }
 }
