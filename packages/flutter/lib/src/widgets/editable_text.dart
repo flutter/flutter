@@ -5011,10 +5011,10 @@ class EditableTextState extends State<EditableText>
   }
 
   /// Shows the magnifier at the position given by `positionToShow`,
-  /// if there is no magnifier visible.
+  /// if no magnifier exists.
   ///
   /// Updates the magnifier to the position given by `positionToShow`,
-  /// if there is a magnifier visible.
+  /// if a magnifier exits.
   ///
   /// Does nothing if a magnifier couldn't be shown, such as when the selection
   /// overlay does not currently exist.
@@ -5023,22 +5023,20 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    if (_selectionOverlay!.magnifierIsVisible) {
+    if (_selectionOverlay!.magnifierExists) {
       _selectionOverlay!.updateMagnifier(positionToShow);
     } else {
       _selectionOverlay!.showMagnifier(positionToShow);
     }
   }
 
-  /// Hides the magnifier if it is visible.
+  /// Hides the magnifier.
   void hideMagnifier() {
     if (_selectionOverlay == null) {
       return;
     }
 
-    if (_selectionOverlay!.magnifierIsVisible) {
-      _selectionOverlay!.hideMagnifier();
-    }
+    _selectionOverlay!.hideMagnifier();
   }
 
   // Tracks the location a [_ScribblePlaceholder] should be rendered in the
