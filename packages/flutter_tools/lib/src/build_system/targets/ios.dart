@@ -466,20 +466,22 @@ class _IssueLaunchRootViewControllerAccess extends Target {
       );
     }
   }
-  
+
   @override
   List<Target> get dependencies => <Target>[];
-  
+
   @override
-  List<Source> get inputs { return <Source>[
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
-    ),
-  ]; }
-  
+  List<Source> get inputs {
+    return <Source>[
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+      ),
+    ];
+  }
+
   @override
   String get name => 'IssueLaunchRootViewControllerAccess';
-  
+
   @override
   List<Source> get outputs => <Source>[];
 }
