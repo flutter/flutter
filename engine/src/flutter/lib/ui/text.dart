@@ -3623,6 +3623,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
       }
     }
 
+    if (style.foreground) {}
+    if (style.background) {}
+
     _pushStyle(
       encoded,
       fullFontFamilies,
@@ -3633,9 +3636,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
       style._decorationThickness ?? 0,
       _encodeLocale(style._locale),
       style._background?._objects,
-      style._background?._data,
+      style._background?._objects != null,
       style._foreground?._objects,
-      style._foreground?._data,
+      style._foreground?._objects != null,
       Shadow._encodeShadows(style._shadows),
       encodedFontFeatures,
       encodedFontVariations,
@@ -3654,9 +3657,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
       Double,
       Handle,
       Handle,
+      Bool,
       Handle,
-      Handle,
-      Handle,
+      Bool,
       Handle,
       Handle,
       Handle,
@@ -3672,9 +3675,9 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     double decorationThickness,
     String locale,
     List<Object?>? backgroundObjects,
-    ByteData? backgroundData,
+    bool hasBackgroundObjects,
     List<Object?>? foregroundObjects,
-    ByteData? foregroundData,
+    bool hasForegroundObjects,
     ByteData shadowsData,
     ByteData? fontFeaturesData,
     ByteData? fontVariationsData,

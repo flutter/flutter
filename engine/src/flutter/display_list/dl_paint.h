@@ -127,12 +127,17 @@ class DlPaint {
     return color_source_;
   }
   const DlColorSource* getColorSourcePtr() const { return color_source_.get(); }
-  DlPaint& setColorSource(std::shared_ptr<const DlColorSource> source) {
-    color_source_ = std::move(source);
+
+  DlPaint& setColorSource(std::nullptr_t source) {
+    color_source_ = nullptr;
     return *this;
   }
   DlPaint& setColorSource(const DlColorSource* source) {
     color_source_ = source ? source->shared() : nullptr;
+    return *this;
+  }
+  DlPaint& setColorSource(std::shared_ptr<const DlColorSource> source) {
+    color_source_ = std::move(source);
     return *this;
   }
 
@@ -140,12 +145,17 @@ class DlPaint {
     return color_filter_;
   }
   const DlColorFilter* getColorFilterPtr() const { return color_filter_.get(); }
-  DlPaint& setColorFilter(const std::shared_ptr<const DlColorFilter>& filter) {
-    color_filter_ = filter;
+
+  DlPaint& setColorFilter(std::nullptr_t filter) {
+    color_filter_ = nullptr;
     return *this;
   }
   DlPaint& setColorFilter(const DlColorFilter* filter) {
     color_filter_ = filter ? filter->shared() : nullptr;
+    return *this;
+  }
+  DlPaint& setColorFilter(const std::shared_ptr<const DlColorFilter>& filter) {
+    color_filter_ = filter;
     return *this;
   }
 
@@ -153,12 +163,17 @@ class DlPaint {
     return image_filter_;
   }
   const DlImageFilter* getImageFilterPtr() const { return image_filter_.get(); }
-  DlPaint& setImageFilter(const std::shared_ptr<DlImageFilter>& filter) {
-    image_filter_ = filter;
+
+  DlPaint& setImageFilter(std::nullptr_t filter) {
+    image_filter_ = nullptr;
     return *this;
   }
   DlPaint& setImageFilter(const DlImageFilter* filter) {
     image_filter_ = filter ? filter->shared() : nullptr;
+    return *this;
+  }
+  DlPaint& setImageFilter(const std::shared_ptr<DlImageFilter>& filter) {
+    image_filter_ = filter;
     return *this;
   }
 
@@ -166,12 +181,17 @@ class DlPaint {
     return mask_filter_;
   }
   const DlMaskFilter* getMaskFilterPtr() const { return mask_filter_.get(); }
-  DlPaint& setMaskFilter(const std::shared_ptr<DlMaskFilter>& filter) {
-    mask_filter_ = filter;
+
+  DlPaint& setMaskFilter(std::nullptr_t filter) {
+    mask_filter_ = nullptr;
     return *this;
   }
   DlPaint& setMaskFilter(const DlMaskFilter* filter) {
     mask_filter_ = filter ? filter->shared() : nullptr;
+    return *this;
+  }
+  DlPaint& setMaskFilter(const std::shared_ptr<DlMaskFilter>& filter) {
+    mask_filter_ = filter;
     return *this;
   }
 

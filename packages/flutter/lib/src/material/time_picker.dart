@@ -33,7 +33,6 @@ import 'text_button.dart';
 import 'text_form_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'time.dart';
 import 'time_picker_theme.dart';
 
@@ -2035,6 +2034,12 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
         FocusNode()..addListener(() {
           setState(() {
             // Rebuild when focus changes.
+            if (kIsWeb && focusNode.hasFocus && primaryFocus?.context != null) {
+              Actions.maybeInvoke(
+                primaryFocus!.context!,
+                const SelectAllTextIntent(SelectionChangedCause.keyboard),
+              );
+            }
           });
         });
   }

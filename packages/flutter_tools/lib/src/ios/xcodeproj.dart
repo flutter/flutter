@@ -176,8 +176,8 @@ class XcodeProjectInterpreter {
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
   ///
-  /// If [scheme] is null, xcodebuild will return build settings for the first discovered
-  /// target (by default this is Runner).
+  /// If [XcodeProjectBuildContext.scheme] is `null`, `xcodebuild` will
+  /// return build settings for the first discovered target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
     required XcodeProjectBuildContext buildContext,

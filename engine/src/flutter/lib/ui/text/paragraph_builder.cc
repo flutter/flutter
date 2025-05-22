@@ -19,6 +19,7 @@
 #include "flutter/txt/src/txt/text_baseline.h"
 #include "flutter/txt/src/txt/text_decoration.h"
 #include "flutter/txt/src/txt/text_style.h"
+#include "lib/ui/painting/paint.h"
 #include "third_party/icu/source/common/unicode/ustring.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -31,6 +32,7 @@ namespace flutter {
 namespace {
 
 const double kTextHeightNone = 0.0;
+static constexpr size_t kPaintBytes = 68;
 
 // TextStyle
 
@@ -232,7 +234,9 @@ ParagraphBuilder::ParagraphBuilder(
     double fontSize,
     double height,
     const std::u16string& ellipsis,
-    const std::string& locale) {
+    const std::string& locale)
+    : foreground_data_(std::vector<uint8_t>(kPaintBytes)),
+      background_data_(std::vector<uint8_t>(kPaintBytes)) {
   int32_t mask = 0;
   txt::ParagraphStyle style;
   {
@@ -376,8 +380,10 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
                                  double decorationThickness,
                                  const std::string& locale,
                                  Dart_Handle background_objects,
+                                 bool has_background_objects,
                                  Dart_Handle background_data,
                                  Dart_Handle foreground_objects,
+                                 bool has_foreground_objects,
                                  Dart_Handle foreground_data,
                                  Dart_Handle shadows_data,
                                  Dart_Handle font_features_data,
@@ -455,21 +461,24 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
   }
 
   if (mask & kTSBackgroundMask) {
-    // Paint background(background_objects, background_data);
-    // if (background.isNotNull()) {
-    //   DlPaint dl_paint;
-    //   background.toDlPaint(dl_paint, DlTileMode::kDecal);
-    //   style.background = dl_paint;
-    // }
+    Paint background(background_objects, background_data);
+    if (background.isNotNull()) {
+      DlPaint dl_paint;
+      background.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                       DlTileMode::kDecal);
+      style.background = dl_paint;
+    }
   }
 
   if (mask & kTSForegroundMask) {
-    // Paint foreground(foreground_objects, foreground_data);
-    // if (foreground.isNotNull()) {
-    //   DlPaint dl_paint;
-    //   foreground.toDlPaint(dl_paint, DlTileMode::kDecal);
-    //   style.foreground = dl_paint;
-    // }
+    Paint foreground(foreground_objects, foreground_data);
+    if (foreground.isNotNull()) {
+      DlPaint dl_paint;
+      CreatePaint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+                  DlTileMode::kDecal, foreground_objects,
+                  Dart_IsNull(foreground_objects), foreground_data);
+      style.foreground = dl_paint;
+    }
   }
 
   if (mask & kTSTextShadowsMask) {
@@ -534,6 +543,16 @@ void ParagraphBuilder::build(Dart_Handle paragraph_handle) {
   Paragraph::Create(paragraph_handle, m_paragraph_builder_->Build());
   m_paragraph_builder_.reset();
   ClearDartWrapper();
+}
+
+Dart_Handle ParagraphBuilder::GetForegroundPaintByteData() {
+  return Dart_NewExternalTypedData(
+      Dart_TypedData_kUint8, foreground_data_.data(), foreground_data_.size());
+}
+
+Dart_Handle ParagraphBuilder::GetBackgroundPaintByteData() {
+  return Dart_NewExternalTypedData(
+      Dart_TypedData_kUint8, background_data_.data(), background_data_.size());
 }
 
 }  // namespace flutter

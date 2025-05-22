@@ -631,9 +631,9 @@ class _Tile extends StatelessWidget {
         heightFactor: 1,
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          spacing: 8,
           children: <Widget>[
             icon,
-            const SizedBox(width: 8),
             // Flexible lets the overflow property of
             // label to work and IntrinsicWidth gives label a
             // reasonable width preventing extra space before it.
@@ -1167,7 +1167,7 @@ class _Bar extends StatelessWidget {
       alignedChild = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
-        child: SizedBox(width: MediaQuery.sizeOf(context).height, child: child),
+        child: SizedBox(width: MediaQuery.heightOf(context), child: child),
       );
     }
     return Material(elevation: elevation, color: color, child: alignedChild);

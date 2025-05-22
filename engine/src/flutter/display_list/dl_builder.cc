@@ -12,7 +12,9 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "fml/logging.h"
 
@@ -1268,11 +1270,9 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
         Push<DrawRoundSuperellipseOp>(0, rse);
       } else {
         DlPathBuilder builder;
-        builder.SetConvexity(impeller::Convexity::kConvex);
-        builder.SetBounds(rse.GetBounds());
         builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
             rse.GetBounds(), rse.GetRadii()));
-        Push<DrawPathOp>(0, DlPath(builder.TakePath()));
+        Push<DrawPathOp>(0, builder.TakePath());
       }
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
@@ -1802,7 +1802,6 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   if (flags.is_geometric()) {
     bool is_stroked = flags.is_stroked(current_.getDrawStyle());
 
-    // Path effect occurs before stroking...
     DisplayListSpecialGeometryFlags special_flags =
         flags.GeometryFlags(is_stroked);
 

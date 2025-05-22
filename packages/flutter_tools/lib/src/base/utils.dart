@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'terminal.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -226,9 +229,9 @@ const int kMinColumnWidth = 10;
 ///          [arguments]
 /// ```
 ///
-/// If [outputPreferences.wrapText] is false, then the text will be returned
+/// If [OutputPreferences.wrapText] is false, then the text will be returned
 /// unchanged. If [shouldWrap] is specified, then it overrides the
-/// [outputPreferences.wrapText] setting.
+/// [OutputPreferences.wrapText] setting.
 ///
 /// If the amount of indentation (from the text, [indent], and [hangingIndent])
 /// is such that less than [kMinColumnWidth] characters can fit in the
@@ -321,14 +324,14 @@ class _AnsiRun {
 ///
 /// If [columnWidth] is not specified, then the column width will be the width of the
 /// terminal window by default. If the stdout is not a terminal window, then the
-/// default will be [outputPreferences.wrapColumn].
+/// default will be [OutputPreferences.wrapColumn].
 ///
 /// The [columnWidth] is clamped to [kMinColumnWidth] at minimum (so passing negative
 /// widths is fine, for instance).
 ///
-/// If [outputPreferences.wrapText] is false, then the text will be returned
+/// If [OutputPreferences.wrapText] is false, then the text will be returned
 /// split at the newlines, but not wrapped. If [shouldWrap] is specified,
-/// then it overrides the [outputPreferences.wrapText] setting.
+/// then it overrides the [OutputPreferences.wrapText] setting.
 List<String> _wrapTextAsLines(
   String text, {
   int start = 0,
@@ -421,8 +424,8 @@ List<String> _wrapTextAsLines(
   return result;
 }
 
-/// Returns true if the code unit at [index] in [text] is a whitespace
-/// character.
+/// Returns `true` if the code unit at the specified [run] is a
+/// whitespace character.
 ///
 /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 bool _isWhitespace(_AnsiRun run) {

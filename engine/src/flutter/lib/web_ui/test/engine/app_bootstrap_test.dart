@@ -5,6 +5,8 @@
 @TestOn('browser')
 library;
 
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:js_util';
 
 import 'package:test/bootstrap/browser.dart';
@@ -102,13 +104,12 @@ void testMain() {
       final Object appInitializer = await promiseToFuture<Object>(
         callMethod<Object>(engineInitializer, 'initializeEngine', <Object?>[]),
       );
-      final Object maybeApp = await promiseToFuture<Object>(
+      final FlutterApp maybeApp = await promiseToFuture<FlutterApp>(
         callMethod<Object>(appInitializer, 'runApp', <Object?>[]),
       );
 
-      expect(maybeApp, isA<FlutterApp>());
-      expect(getJsProperty<dynamic>(maybeApp, 'addView'), isA<Function>());
-      expect(getJsProperty<dynamic>(maybeApp, 'removeView'), isA<Function>());
+      expect(maybeApp['addView'].isA<JSFunction>(), isTrue);
+      expect(maybeApp['removeView'].isA<JSFunction>(), isTrue);
     });
     test('addView/removeView respectively adds/removes view', () async {
       final AppBootstrap bootstrap = AppBootstrap(initializeEngine: mockInit, runApp: mockRunApp);

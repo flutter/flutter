@@ -43,9 +43,9 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
                  double decorationThickness,
                  const std::string& locale,
                  Dart_Handle background_objects,
-                 Dart_Handle background_data,
+                 bool has_background_objects,
                  Dart_Handle foreground_objects,
-                 Dart_Handle foreground_data,
+                 bool has_foreground_objects,
                  Dart_Handle shadows_data,
                  Dart_Handle font_features_data,
                  Dart_Handle font_variations_data);
@@ -68,6 +68,18 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
 
   void build(Dart_Handle paragraph_handle);
 
+  /// @brief Retrieve a Dart external typed data backed by the foreground_data_
+  ///        member.
+  ///
+  /// This is used to more efficiently copy Paint data out of the Dart heap.
+  Dart_Handle GetForegroundPaintByteData();
+
+  /// @brief Retrieve a Dart external typed data backed by the background_data_
+  ///        member.
+  ///
+  /// This is used to more efficiently copy Paint data out of the Dart heap.
+  Dart_Handle GetBackgroundPaintByteData();
+
  private:
   explicit ParagraphBuilder(Dart_Handle encoded,
                             Dart_Handle strutData,
@@ -79,6 +91,8 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
                             const std::string& locale);
 
   std::unique_ptr<txt::ParagraphBuilder> m_paragraph_builder_;
+  std::vector<uint8_t> foreground_data_;
+  std::vector<uint8_t> background_data_;
 };
 
 }  // namespace flutter

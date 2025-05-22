@@ -4,7 +4,7 @@
 
 assert(is_ios)
 
-import("//build/config/ios/ios_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
@@ -20,20 +20,6 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_gl = false
   enable_vulkan = false
   enable_metal = true
-}
-
-config("config_ios") {
-  include_dirs = [ target_gen_dir ]
-}
-
-config("config_swift") {
-  configs = [ ":config_ios" ]
-  lib_dirs = ios_swift_lib_paths
-
-  # Allow use of @testable imports in debug builds and when tests are enabled.
-  if (enable_ios_unittests) {
-    swiftflags = [ "-enable-testing" ]
-  }
 }
 
 # The headers that will be copied to the Flutter.framework and be accessed
@@ -54,10 +40,22 @@ _flutter_framework_headers = [
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
 source_set("InternalFlutterSwift") {
-  visibility = [ ":*" ]
-  configs += [ ":config_swift" ]
-
-  sources = [ "framework/Source/UIPressProxy.swift" ]
+  # Targets should only ever depend on the framework target.
+  # This allows code in this target to use types declared in the bridging
+  # header, but defined in the framework, while avoiding linking errors.
+  visibility = [ ":flutter_framework_source" ]
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
+  include_dirs = [
+    "//flutter/shell/platform/darwin/common/framework/Headers",
+    "//flutter/shell/platform/darwin/ios/framework/Headers",
+    "//flutter/shell/platform/darwin/ios/framework",  # For module.modulemap
+  ]
+  bridge_header = "InternalFlutterSwift-Bridging-Header.h"
+  sources = [
+    "framework/Source/ConnectionCollection.swift",
+    "framework/Source/UIPressProxy.swift",
+  ]
+  public = _flutter_framework_headers + framework_common_headers
 }
 
 source_set("flutter_framework_source") {
@@ -70,9 +68,8 @@ source_set("flutter_framework_source") {
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
-
   configs += [
-    ":config_ios",
+    "//flutter/shell/platform/darwin/common:config",
     "//build/config/ios:ios_application_extension",
   ]
 
@@ -139,8 +136,6 @@ source_set("flutter_framework_source") {
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
-    "framework/Source/connection_collection.h",
-    "framework/Source/connection_collection.mm",
     "framework/Source/overlay_layer_pool.h",
     "framework/Source/overlay_layer_pool.mm",
     "framework/Source/platform_message_response_darwin.h",
@@ -190,7 +185,6 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
-    ":InternalFlutterSwift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -207,19 +201,20 @@ source_set("flutter_framework_source") {
     "//flutter/third_party/icu",
     "//flutter/third_party/spring_animation",
   ]
+  public_deps = [ ":InternalFlutterSwift" ]
 }
 
 if (enable_ios_unittests) {
-  platform_frameworks_path =
-      rebase_path("$ios_sdk_path/../../Library/Frameworks/")
-
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [ ":config_swift" ]
-
-    sources = [ "framework/Source/FakeUIPressProxy.swift" ]
-    deps = [ ":InternalFlutterSwift" ]
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    sources = [
+      "framework/Source/ConnectionCollectionTest.swift",
+      "framework/Source/FakeUIPressProxy.swift",
+    ]
+    frameworks = [ "XCTest.framework" ]
+    deps = [ ":flutter_framework_source" ]
   }
 
   shared_library("ios_test_flutter") {
@@ -230,20 +225,20 @@ if (enable_ios_unittests) {
     cflags_objcc = flutter_cflags_objcc
     cflags = [
       "-fvisibility=default",
-      "-F$platform_frameworks_path",
       "-mios-simulator-version-min=$ios_testing_deployment_target",
     ]
 
-    ldflags = [
-      "-F$platform_frameworks_path",
-      "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
-    ]
+    ldflags =
+        [ "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib" ]
     frameworks = [ "XCTest.framework" ]
-    configs += [ ":config_ios" ]
+    include_dirs = [ target_gen_dir ]
+
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     configs -= [
       "//build/config/gcc:symbol_visibility_hidden",
       "//build/config:symbol_visibility_hidden",
     ]
+
     sources = [
       "framework/Source/FlutterAppDelegateTest.mm",
       "framework/Source/FlutterChannelKeyResponderTest.mm",
@@ -274,13 +269,11 @@ if (enable_ios_unittests) {
       "framework/Source/VsyncWaiterIosTest.mm",
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
-      "framework/Source/connection_collection_test.mm",
       "ios_context_noop_unittests.mm",
       "ios_surface_noop_unittests.mm",
       "platform_message_handler_ios_test.mm",
     ]
     deps = [
-      ":InternalFlutterSwift",
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",
@@ -312,10 +305,7 @@ shared_library("create_flutter_framework_dylib") {
 
   public = _flutter_framework_headers
 
-  deps = [
-    ":InternalFlutterSwift",
-    ":flutter_framework_source",
-  ]
+  deps = [ ":flutter_framework_source" ]
 
   public_configs = [ "//flutter:config" ]
   configs += [ "//build/config/ios:ios_application_extension" ]
@@ -360,6 +350,8 @@ action("copy_framework_info_plist") {
     rebase_path(outputs[0]),
     "--minversion",
     ios_deployment_target,
+    "--buildmode",
+    flutter_runtime_mode,
   ]
 }
 

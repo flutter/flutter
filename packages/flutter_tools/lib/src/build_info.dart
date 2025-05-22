@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build_system/build_system.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -967,7 +970,7 @@ const String kBuildName = 'BuildName';
 const String kFlavor = 'Flavor';
 
 /// Environment variable of the flavor to be set in dartDefines to be accessed
-/// by the [appFlavor] service.
+/// by the `appFlavor` service.
 const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
 
 /// The Xcode configuration used to build the project.

@@ -62,7 +62,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   @visibleForTesting
   final List<StreamSubscription<String>> subscriptions = <StreamSubscription<String>>[];
 
-  /// Listen to [process]' stdout and stderr, decode them using [SystemEncoding]
+  /// Listen to [process]' stdout and stderr, decode them using [encoding]
   /// and add each decoded line to [logLines].
   ///
   /// However, [logLines] will not be done when the [process]' stdout and stderr
@@ -331,11 +331,8 @@ class CustomDeviceAppSession {
   /// Start the app on the device.
   /// Needs the app to be installed on the device and not running already.
   ///
-  /// [mainPath], [route], [debuggingOptions], [platformArgs] and
-  /// [userIdentifier] may be null.
-  ///
-  /// [ipv6] may not be respected since it depends on the device config whether
-  /// it uses ipv6 or ipv4
+  /// ipv6 may not be respected since it depends on the device config whether
+  /// it uses ipv6 or ipv4.
   Future<LaunchResult> start({
     String? mainPath,
     String? route,
@@ -488,11 +485,11 @@ class CustomDevice extends Device {
   ///
   /// If the process finishes with an exit code != 0, false will be returned and
   /// the error (with the process' stdout and stderr) will be logged using
-  /// [_logger.printError].
+  /// [Logger.printError].
   ///
   /// If [timeout] is not null and the process doesn't finish in time,
   /// it will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryPing({
     Duration? timeout,
@@ -525,7 +522,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time, it
   /// will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> _tryPostBuild({
     required String appName,
@@ -556,7 +553,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time, it
   /// will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryUninstall({
     required String appName,
