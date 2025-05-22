@@ -323,9 +323,6 @@ class _MyNestedNavigatorState extends State<_MyNestedNavigator> with Restoration
         });
         // It's possible to remove more than one page at a time, but at least
         // one page must be removed.
-        print(
-          'justin onDidRemovePage $page. Is it in _pages? ${_pages.value.contains(pageConfiguration)}. nextPages length ${nextPages.length} vs _pages.length ${_pages.value.length}. Are the pages and nxt pages equal? ${nextPages == _pages.value}. What is in _pages? ${_pages.value.first}.',
-        );
         assert(nextPages.length < _pages.value.length);
         _pages.value = nextPages;
       },
