@@ -601,7 +601,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      if (widget.controller != null) {
+      if (widget.controller != null && oldWidget.controller == null) {
         _localTextEditingController?.dispose();
       }
       _localTextEditingController = widget.controller ?? TextEditingController();
