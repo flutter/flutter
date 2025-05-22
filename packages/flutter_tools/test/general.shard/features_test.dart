@@ -356,24 +356,6 @@ void main() {
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
     });
   });
-
-  group('Explicit Package Dependencies', () {
-    test('is fully enabled', () {
-      expect(explicitPackageDependencies, _isFullyEnabled);
-    });
-
-    test('can be configured', () {
-      expect(explicitPackageDependencies.configSetting, 'explicit-package-dependencies');
-      expect(explicitPackageDependencies.environmentOverride, isNull);
-    });
-
-    test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: explicitPackageDependencies,
-      );
-      expect(checkFlags.isExplicitPackageDependenciesEnabled, isTrue);
-    });
-  });
 }
 
 final class _FakeFeaturesConfig implements FlutterFeaturesConfig {
