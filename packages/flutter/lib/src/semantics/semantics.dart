@@ -141,7 +141,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.complementary => _semanticsComplementary,
     SemanticsRole.contentInfo => _semanticsContentInfo,
     SemanticsRole.main => _semanticsMain,
-    SemanticsRole.navigation => _noCheckRequired,
+    SemanticsRole.navigation => _semanticsNavigation,
     SemanticsRole.region => _semanticsRegion,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
@@ -371,6 +371,17 @@ sealed class _DebugSemanticsRoleChecks {
     return false;
   }
 
+  static Set<int> _sameRoleIds(SemanticsNode semanticsNode) {
+    final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
+    final Set<int> sameRoleIds = <int>{};
+    for (final int id in treeNodes.keys) {
+      if (treeNodes[id]?.role == semanticsNode.role) {
+        sameRoleIds.add(id);
+      }
+    }
+    return sameRoleIds;
+  }
+
   static FlutterError? _semanticsComplementary(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
@@ -380,6 +391,11 @@ sealed class _DebugSemanticsRoleChecks {
         );
       }
       currentNode = currentNode.parent;
+    }
+    if (_sameRoleIds(node).length > 1 && node.label.isEmpty) {
+      return FlutterError(
+        'The complementary landmark role should have a unique label as it is used more than once.',
+      );
     }
     return null;
   }
@@ -394,6 +410,11 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode.parent;
     }
+    if (_sameRoleIds(node).length > 1 && node.label.isEmpty) {
+      return FlutterError(
+        'The contentInfo landmark role should have a unique label as it is used more than once.',
+      );
+    }
     return null;
   }
 
@@ -406,6 +427,20 @@ sealed class _DebugSemanticsRoleChecks {
         );
       }
       currentNode = currentNode.parent;
+    }
+    if (_sameRoleIds(node).length > 1 && node.label.isEmpty) {
+      return FlutterError(
+        'The main landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsNavigation(SemanticsNode node) {
+    if (_sameRoleIds(node).length > 1 && node.label.isEmpty) {
+      return FlutterError(
+        'The navigation landmark role should have a unique label as it is used more than once.',
+      );
     }
     return null;
   }

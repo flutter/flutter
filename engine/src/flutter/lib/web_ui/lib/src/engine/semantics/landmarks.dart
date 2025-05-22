@@ -24,39 +24,13 @@ class SemanticComplementary extends SemanticRole {
   void update() {
     super.update();
 
-    final Set<int> complementaryIds = _sameRoleIds(semanticsObject);
-
-    if (complementaryIds.length > 1) {
-      _updateUniqueLabels(complementaryIds, semanticsObject);
-    } else if (semanticsObject.label != null) {
+    if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
   }
 
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
-}
-
-Set<int> _sameRoleIds(SemanticsObject semanticsObject) {
-  final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
-  final Set<int> sameRoleIds = {};
-  for (final int id in tree.keys) {
-    if (tree[id]?.role == semanticsObject.role) {
-      sameRoleIds.add(id);
-    }
-  }
-  return sameRoleIds;
-}
-
-void _updateUniqueLabels(Set<int> ids, SemanticsObject semanticsObject) {
-  final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
-  for (final int id in ids) {
-    String label = tree[id]?.label ?? '';
-    if (label == '') {
-      label = 'flt-semantic-node-$id';
-    }
-    tree[id]?.semanticRole?.setAttribute('aria-label', label);
-  }
 }
 
 /// Indicates a content info element.
@@ -78,11 +52,7 @@ class SemanticContentInfo extends SemanticRole {
   void update() {
     super.update();
 
-    final Set<int> contentInfoIds = _sameRoleIds(semanticsObject);
-
-    if (contentInfoIds.length > 1) {
-      _updateUniqueLabels(contentInfoIds, semanticsObject);
-    } else if (semanticsObject.label != null) {
+    if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
   }
@@ -110,11 +80,7 @@ class SemanticMain extends SemanticRole {
   void update() {
     super.update();
 
-    final Set<int> mainIds = _sameRoleIds(semanticsObject);
-
-    if (mainIds.length > 1) {
-      _updateUniqueLabels(mainIds, semanticsObject);
-    } else if (semanticsObject.label != null) {
+    if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
   }
@@ -142,11 +108,7 @@ class SemanticNavigation extends SemanticRole {
   void update() {
     super.update();
 
-    final Set<int> navigationIds = _sameRoleIds(semanticsObject);
-
-    if (navigationIds.length > 1) {
-      _updateUniqueLabels(navigationIds, semanticsObject);
-    } else if (semanticsObject.label != null) {
+    if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
   }
@@ -173,13 +135,7 @@ class SemanticRegion extends SemanticRole {
   @override
   void update() {
     super.update();
-    final Set<int> regionIds = _sameRoleIds(semanticsObject);
-
-    if (regionIds.length > 1) {
-      _updateUniqueLabels(regionIds, semanticsObject);
-    } else {
-      setAttribute('aria-label', semanticsObject.label ?? '');
-    }
+    setAttribute('aria-label', semanticsObject.label ?? '');
   }
 
   @override
