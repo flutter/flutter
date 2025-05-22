@@ -10,6 +10,7 @@ library;
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
@@ -27,10 +28,14 @@ mixin SemanticsBinding on BindingBase {
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
       ..onAccessibilityFeaturesChanged = () {
-        Future<void>.microtask(() {
-          // Avoid execution during build time.
+        // TODO(chunhtai): https://github.com/flutter/flutter/issues/158399
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+          SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+            handleAccessibilityFeaturesChanged();
+          }, debugLabel: 'SemanticsBinding.handleAccessibilityFeaturesChanged');
+        } else {
           handleAccessibilityFeaturesChanged();
-        });
+        }
       };
     _handleSemanticsEnabledChanged();
   }
