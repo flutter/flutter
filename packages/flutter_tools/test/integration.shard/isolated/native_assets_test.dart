@@ -53,10 +53,6 @@ void main() {
     return;
   }
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   for (final String device in devices) {
     for (final String buildMode in buildModes) {
       if (device == 'flutter-tester' && buildMode != 'debug') {

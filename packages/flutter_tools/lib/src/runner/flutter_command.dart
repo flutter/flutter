@@ -865,9 +865,6 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
-
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false) &&
         (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
@@ -1897,11 +1894,11 @@ abstract class FlutterCommand extends Command<void> {
     return runCommand();
   }
 
-  /// Whether to run [regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
   ///
   /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
   /// builds sequentially in one-go) may choose to override this and provide `false`, instead
-  /// calling [regeneratePlatformSpecificTooling] manually when applicable.
+  /// calling [FlutterProject.regeneratePlatformSpecificTooling] manually when applicable.
   @visibleForOverriding
   bool get regeneratePlatformSpecificToolingDuringVerify => true;
 

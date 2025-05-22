@@ -158,7 +158,7 @@ abstract class CheckDevDependencies extends Target {
 abstract class UnpackDarwin extends Target {
   const UnpackDarwin();
 
-  /// Copies the [framework] artifact using `rsync` to the [environment.outputDir].
+  /// Copies the [framework] artifact using `rsync` to the [Environment.outputDir].
   /// Throws an error if copy fails.
   @protected
   Future<void> copyFramework(

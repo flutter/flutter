@@ -54,7 +54,7 @@ class FirstRunMessenger {
   /// This is implemented by caching a hash of the previous license terms. This
   /// does not update the cache hash value.
   ///
-  /// The persistent tool state setting [PersistentToolState.redisplayWelcomeMessage]
+  /// The persistent tool state setting [PersistentToolState.shouldRedisplayWelcomeMessage]
   /// can also be used to make this return false. This is primarily used to ensure
   /// that the license terms are not printed during a `flutter upgrade`, until the
   /// user manually runs the tool.

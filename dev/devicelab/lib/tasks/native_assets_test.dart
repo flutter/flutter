@@ -29,8 +29,6 @@ TaskFunction createNativeAssetsTest({
       deviceIdOverride = device.deviceId;
     }
 
-    await enableNativeAssets();
-
     for (final String buildMode in _buildModes) {
       if (buildMode != 'debug' && isIosSimulator) {
         continue;
@@ -148,18 +146,6 @@ Future<int> runFlutter({
 }
 
 final String _flutterBin = path.join(flutterDirectory.path, 'bin', 'flutter');
-
-Future<void> enableNativeAssets() async {
-  print('Enabling configs for native assets...');
-  final int configResult = await exec(_flutterBin, <String>[
-    'config',
-    '-v',
-    '--enable-native-assets',
-  ], canFail: true);
-  if (configResult != 0) {
-    print('Failed to enable configuration, tasks may not run.');
-  }
-}
 
 Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
   await exec(_flutterBin, <String>[

@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface_noop.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
@@ -23,7 +24,7 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
     if ([layer isKindOfClass:[CAMetalLayer class]]) {
       switch (context->GetBackend()) {
         case IOSRenderingBackend::kSkia:
-          FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+          [FlutterLogger logFatal:@"Impeller opt-out unavailable."];
           return nullptr;
         case IOSRenderingBackend::kImpeller:
           return std::make_unique<IOSSurfaceMetalImpeller>(

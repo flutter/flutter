@@ -545,7 +545,6 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
-      explicitPackageDependencies => isExplicitPackageDependenciesEnabled,
       _ => false,
     };
   }

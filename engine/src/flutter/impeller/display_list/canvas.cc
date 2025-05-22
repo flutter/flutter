@@ -14,7 +14,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -49,7 +49,6 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/rstransform.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -607,6 +606,46 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   }
 }
 
+void Canvas::DrawArc(const Rect& oval_bounds,
+                     Scalar start_degrees,
+                     Scalar sweep_degrees,
+                     bool use_center,
+                     const Paint& paint) {
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kStroke &&
+      paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
+    // This is a special case for rendering arcs whose stroke width is so large
+    // you are effectively drawing a sector of a circle.
+    // https://github.com/flutter/flutter/issues/158567
+    Rect expanded_rect = oval_bounds.Expand(Size(paint.stroke.width * 0.5f));
+
+    flutter::DlPathBuilder builder;
+    builder.AddArc(expanded_rect, Degrees(start_degrees),
+                   Degrees(sweep_degrees), /*use_center=*/true);
+
+    Paint fill_paint = paint;
+    fill_paint.style = Paint::Style::kFill;
+
+    ArcFillPathGeometry geom(builder.TakePath(), expanded_rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    flutter::DlPathBuilder builder;
+    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
+                   use_center);
+
+    if (paint.style == Paint::Style::kFill) {
+      ArcFillPathGeometry geom(builder.TakePath(), oval_bounds);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    } else {
+      ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    }
+  }
+}
+
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   auto& rect = round_rect.GetBounds();
   auto& radii = round_rect.GetRadii();
@@ -639,6 +678,22 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   }
 }
 
+void Canvas::DrawDiffRoundRect(const RoundRect& outer,
+                               const RoundRect& inner,
+                               const Paint& paint) {
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kFill) {
+    FillDiffRoundRectGeometry geom(outer, inner);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    StrokeDiffRoundRectGeometry geom(outer, inner, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
+}
+
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                                    const Paint& paint) {
   if (paint.style == Paint::Style::kFill) {
@@ -654,10 +709,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
     return;
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
+  auto path = flutter::DlPathBuilder{}  //
                   .AddRoundSuperellipse(rse)
-                  .SetBounds(rse.GetBounds())
                   .TakePath();
   DrawPath(flutter::DlPath(path), paint);
 }

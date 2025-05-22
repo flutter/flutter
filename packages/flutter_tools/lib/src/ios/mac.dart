@@ -165,7 +165,6 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
-      features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -714,7 +713,7 @@ Future<void> diagnoseXcodeBuildFailure(
   }
 }
 
-/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+/// `xcodebuild <buildaction>` parameter (see `man xcodebuild` for details).
 ///
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }

@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 
-#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
@@ -175,7 +175,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                    }
                                  }];
   } else {
-    FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+    [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;
   }
   return YES;

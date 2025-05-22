@@ -51,7 +51,7 @@ const Map<String, HardwareType> kKnownHardware = <String, HardwareType>{
 
 /// A physical Android device or emulator.
 ///
-/// While [isEmulator] attempts to distinguish between the device categories,
+/// While [isLocalEmulator] attempts to distinguish between the device categories,
 /// this is a best effort process and not a guarantee; certain physical devices
 /// identify as emulators. These device identifiers may be added to the [kKnownHardware]
 /// map to specify that they are actually physical devices.
@@ -843,7 +843,7 @@ class AndroidDevice extends Device {
     multiLine: true,
   );
 
-  /// Return the most recent timestamp in the Android log or [null] if there is
+  /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   @visibleForTesting
   Future<String?> lastLogcatTimestamp() async {

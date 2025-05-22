@@ -198,7 +198,16 @@ Widget preview() => Text('Foo');''';
 
     const String expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'widget_preview.dart' as _i1;import 'package:flutter_project/foo.dart' as _i2;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(name: 'preview', builder: () => _i2.preview(), )];''';
+import 'widget_preview.dart' as _i1;
+import 'package:flutter_project/foo.dart' as _i2;
+
+List<_i1.WidgetPreview> previews() => [
+      _i1.WidgetPreview(
+        name: 'preview',
+        builder: () => _i2.preview(),
+      )
+    ];
+''';
 
     testUsingContext(
       'start finds existing previews and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
@@ -268,7 +277,7 @@ import 'widget_preview.dart' as _i1;import 'package:flutter_project/foo.dart' as
     );
 
     testUsingContext(
-      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);

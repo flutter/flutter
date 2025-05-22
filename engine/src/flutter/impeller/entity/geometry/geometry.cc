@@ -59,22 +59,19 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 }
 
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
-    const Path& path,
+    const flutter::DlPath& path,
     std::optional<Rect> inner_rect) {
   return std::make_unique<FillPathGeometry>(path, inner_rect);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
-                                                   Scalar stroke_width,
-                                                   Scalar miter_limit,
-                                                   Cap stroke_cap,
-                                                   Join stroke_join) {
+std::unique_ptr<Geometry> Geometry::MakeStrokePath(
+    const flutter::DlPath& path,
+    const StrokeParameters& stroke) {
   // Skia behaves like this.
-  if (miter_limit < 0) {
-    miter_limit = 4.0;
+  StrokeParameters parameters = stroke;
+  if (parameters.miter_limit < 0) {
+    parameters.miter_limit = 4.0;
   }
-  StrokeParameters parameters{stroke_width, stroke_cap, stroke_join,
-                              miter_limit};
   return std::make_unique<StrokePathGeometry>(path, parameters);
 }
 

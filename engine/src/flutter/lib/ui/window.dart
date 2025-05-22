@@ -931,7 +931,6 @@ class AccessibilityFeatures {
   static const int _kReduceMotionIndex = 1 << 4;
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
-  static const int _kNoAnnounceIndex = 1 << 7;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -969,20 +968,6 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
-  /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are allowed on the current platform.
-  ///
-  /// Returns `false` on Android, where platform announcements are deprecated
-  /// by the underlying platform.
-  ///
-  /// Returns `true` on all other platforms (iOS, web, desktop) where such
-  /// announcements are generally supported without discouragement.
-  ///
-  /// Use this flag to conditionally avoid making announcements on Android.
-  // This is an inverted check on _index since there are many more platforms
-  // that support announce whereas don't.
-  bool get announce => _kNoAnnounceIndex & _index == 0;
-
   @override
   String toString() {
     final List<String> features = <String>[];
@@ -1006,9 +991,6 @@ class AccessibilityFeatures {
     }
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
-    }
-    if (announce) {
-      features.add('announce');
     }
     return 'AccessibilityFeatures$features';
   }

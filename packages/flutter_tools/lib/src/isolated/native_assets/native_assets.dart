@@ -274,16 +274,32 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   Future<BuildResult?> build({
     required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
-  }) {
-    return _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
+  }) async {
+    final Result<BuildResult, HooksRunnerFailure> result = await _buildRunner.build(
+      linkingEnabled: linkingEnabled,
+      extensions: extensions,
+    );
+    if (result.isSuccess) {
+      return result.success;
+    } else {
+      return null;
+    }
   }
 
   @override
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
-  }) {
-    return _buildRunner.link(extensions: extensions, buildResult: buildResult);
+  }) async {
+    final Result<LinkResult, HooksRunnerFailure> result = await _buildRunner.link(
+      extensions: extensions,
+      buildResult: buildResult,
+    );
+    if (result.isSuccess) {
+      return result.success;
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -641,7 +657,13 @@ Future<DartBuildResult> _runDartBuild({
       dependencies.addAll(linkResult.dependencies);
     }
   }
-
+  if (codeAssets.isNotEmpty) {
+    globals.logger.printTrace(
+      'Note: You are using the dart build hooks feature which is currently '
+      'in preview. Please see '
+      'https://dart.dev/interop/c-interop#native-assets for more details.',
+    );
+  }
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }

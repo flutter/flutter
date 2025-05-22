@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../localizations/gen_l10n.dart';
+library;
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -153,15 +156,6 @@ abstract class Pub {
     PubOutputMode outputMode = PubOutputMode.all,
   });
 
-  /// Runs, parses, and returns `pub deps --json` for [project].
-  ///
-  /// While it is guaranteed that, if successful, that the result are a valid
-  /// JSON object, the exact contents returned are _not_ validated, and are left
-  /// as a responsibility of the caller.
-  ///
-  /// If `null` is returned, it should be assumed deps could not be determined.
-  Future<Map<String, Object?>?> deps(FlutterProject project);
-
   /// Runs pub in 'batch' mode.
   ///
   /// forwarding complete lines written by pub to its stdout/stderr streams to
@@ -183,7 +177,7 @@ abstract class Pub {
 
   /// Runs pub in 'interactive' mode.
   ///
-  /// This will run the pub process with StdioInherited (unless [_stdio] is set
+  /// This will run the pub process with StdioInherited (unless `stdio` is set
   /// for testing).
   ///
   /// The pub process will be run in current working directory, so `--directory`
@@ -355,55 +349,13 @@ class _DefaultPub implements Pub {
     await _updateVersionAndPackageConfig(project);
   }
 
-  @override
-  Future<Map<String, Object?>?> deps(FlutterProject project) async {
-    final List<String> pubCommand = <String>[..._pubCommand, 'deps', '--json'];
-    final RunResult runResult;
-
-    // Don't treat this command as terminal if it fails.
-    // See https://github.com/flutter/flutter/issues/166648
-    try {
-      runResult = await _processUtils.run(
-        pubCommand,
-        workingDirectory: project.directory.path,
-        throwOnError: true,
-      );
-    } on io.ProcessException catch (e) {
-      _logger.printWarning('${pubCommand.join(' ')} ${e.message}');
-      return null;
-    }
-
-    Never fail([String? reason]) {
-      final String stdout = runResult.stdout;
-      if (stdout.isNotEmpty) {
-        _logger.printTrace(stdout);
-      }
-      final String stderr = runResult.stderr;
-      throw StateError(
-        '${pubCommand.join(' ')} ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
-        '${stderr.isNotEmpty ? '\n$stderr' : ''}',
-      );
-    }
-
-    // Guard against dart pub deps having explicitly invalid output.
-    try {
-      final Object? result = json.decode(runResult.stdout);
-      if (result is! Map<String, Object?>) {
-        fail('Not a JSON object');
-      }
-      return result;
-    } on FormatException catch (e) {
-      fail('$e');
-    }
-  }
-
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
   ///
-  /// Uses [ProcessStartMode.normal] and [Pub._stdio] if [Pub.test] constructor
+  /// Uses [ProcessStartMode.normal] and [_stdio] if [Pub.test] constructor
   /// was used.
   ///
   /// Prints the stdout and stderr of the whole run, unless silenced using
-  /// [printProgress].
+  /// [outputMode].
   ///
   /// Sends an analytics event.
   Future<void> _runWithStdioInherited(
@@ -667,10 +619,10 @@ class _DefaultPub implements Pub {
     return null;
   }
 
-  /// Load any package-files stored in FLUTTER_ROOT/.pub-preload-cache into the
-  /// pub cache if it exists.
+  /// Load any package-files stored in `FLUTTER_ROOT/.pub-preload-cache` into
+  /// the pub cache if it exists.
   ///
-  /// Deletes the [preloadCacheDir].
+  /// Deletes the `.pub-preload-cache` directory.
   void _preloadPubCache() {
     final String flutterRootPath = Cache.flutterRoot!;
     final Directory flutterRoot = _fileSystem.directory(flutterRootPath);
@@ -712,8 +664,8 @@ class _DefaultPub implements Pub {
   /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
   ///
-  /// Calls [_updatePackageConfig] for [project] and [project.example] (if it
-  /// exists).
+  /// Calls [_updatePackageConfig] for [project] and [FlutterProject.example]
+  /// (if it exists).
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
@@ -756,7 +708,7 @@ class _DefaultPub implements Pub {
   /// pubspec.yaml
   ///
   /// For more information, see:
-  ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
+  ///   * [generateLocalizations]
   Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
