@@ -61,15 +61,25 @@ if (enable_unittests) {
     shader_bundle_output = "test.shaderbundle"
   }
 
+  impellerc("stretch_overscroll") {
+    shaders = [ "//flutter/impeller/fixtures/stretch_overscroll.frag" ]
+    shader_target_flags = [ "--sksl" ]
+    intermediates_subdir = "iplr"
+    sl_file_extension = "iplr"
+    iplr = true
+  }
+
   test_fixtures("fixtures") {
     deps = [
       ":flutter_gpu_shaders",
       ":ink_sparkle",
       ":ink_sparkle_web",
       ":sampler_order_fixture",
+      ":stretch_overscroll",
     ]
     fixtures = get_target_outputs(":ink_sparkle") +
-               get_target_outputs(":flutter_gpu_shaders")
+               get_target_outputs(":flutter_gpu_shaders") +
+               get_target_outputs(":stretch_overscroll")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }
