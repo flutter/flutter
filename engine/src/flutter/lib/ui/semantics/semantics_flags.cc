@@ -56,8 +56,39 @@ void NativeSemanticsFlags::initSemanticsFlags(
   auto native_semantics_flags = fml::MakeRefCounted<NativeSemanticsFlags>();
   native_semantics_flags->AssociateWithDartWrapper(semantics_flags_handle);
 
-  native_semantics_flags->flags_ =
-      SemanticsFlags{.hasCheckedState = hasCheckedState};
+  native_semantics_flags->flags_ = SemanticsFlags{
+      .hasCheckedState = hasCheckedState,
+      .isChecked = isChecked,
+      .isSelected = isSelected,
+      .isButton = isButton,
+      .isTextField = isTextField,
+      .isFocused = isFocused,
+      .hasEnabledState = hasEnabledState,
+      .isEnabled = isEnabled,
+      .isInMutuallyExclusiveGroup = isInMutuallyExclusiveGroup,
+      .isHeader = isHeader,
+      .isObscured = isObscured,
+      .scopesRoute = scopesRoute,
+      .namesRoute = namesRoute,
+      .isHidden = isHidden,
+      .isImage = isImage,
+      .isLiveRegion = isLiveRegion,
+      .hasToggledState = hasToggledState,
+      .isToggled = isToggled,
+      .hasImplicitScrolling = hasImplicitScrolling,
+      .isMultiline = isMultiline,
+      .isReadOnly = isReadOnly,
+      .isFocusable = isFocusable,
+      .isLink = isLink,
+      .isSlider = isSlider,
+      .isKeyboardKey = isKeyboardKey,
+      .isCheckStateMixed = isCheckStateMixed,
+      .hasExpandedState = hasExpandedState,
+      .isExpanded = isExpanded,
+      .hasSelectedState = hasSelectedState,
+      .hasRequiredState = hasRequiredState,
+      .isRequired = isRequired,
+  };
 }
 
 const SemanticsFlags NativeSemanticsFlags::GetFlags() const {

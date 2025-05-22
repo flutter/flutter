@@ -1139,7 +1139,7 @@ void main() {
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1245,7 +1245,7 @@ void main() {
       }
 
       final SemanticsData emptyData = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1368,7 +1368,7 @@ void main() {
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
         attributedLabel: AttributedString('a'),

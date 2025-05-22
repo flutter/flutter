@@ -10,11 +10,6 @@
 
 namespace flutter {
 
-struct SemanticsFlags;
-
-using SemanticsFlagsPtr = std::shared_ptr<flutter::SemanticsFlags>;
-using SemanticsFlagsPtrList = std::vector<SemanticsFlagsPtr>;
-
 struct SemanticsFlags {
   bool hasCheckedState = false;
   bool isChecked = false;

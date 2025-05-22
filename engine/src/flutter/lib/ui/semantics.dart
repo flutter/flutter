@@ -1171,7 +1171,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
   );
 
   /// The set of semantics flags with every flag set to false.
-  static SemanticsFlags kNone = SemanticsFlags();
+  static SemanticsFlags none = SemanticsFlags();
 
   /// {@macro dart.ui.semantics.hasCheckedState}
   final bool hasCheckedState;
