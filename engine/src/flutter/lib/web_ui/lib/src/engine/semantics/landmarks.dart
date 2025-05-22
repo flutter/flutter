@@ -23,7 +23,6 @@ class SemanticComplementary extends SemanticRole {
   @override
   void update() {
     super.update();
-
     if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
@@ -51,7 +50,6 @@ class SemanticContentInfo extends SemanticRole {
   @override
   void update() {
     super.update();
-
     if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
@@ -79,7 +77,6 @@ class SemanticMain extends SemanticRole {
   @override
   void update() {
     super.update();
-
     if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
@@ -107,7 +104,6 @@ class SemanticNavigation extends SemanticRole {
   @override
   void update() {
     super.update();
-
     if (semanticsObject.label != null) {
       setAttribute('aria-label', semanticsObject.label!);
     }
@@ -135,7 +131,9 @@ class SemanticRegion extends SemanticRole {
   @override
   void update() {
     super.update();
-    setAttribute('aria-label', semanticsObject.label ?? '');
+    if (semanticsObject.label != null) {
+      setAttribute('aria-label', semanticsObject.label!);
+    }
   }
 
   @override
