@@ -502,7 +502,7 @@ void _testEngineSemanticsOwner() {
   void renderSemantics({
     String? label,
     String? tooltip,
-    ui.SemanticsFlags flags = ui.SemanticsFlags.kNone,
+    ui.SemanticsFlags flags = ui.SemanticsFlags.none,
   }) {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
