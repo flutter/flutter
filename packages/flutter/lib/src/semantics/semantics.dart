@@ -360,16 +360,12 @@ sealed class _DebugSemanticsRoleChecks {
     return null;
   }
 
-  static bool _isLandmarks(SemanticsNode node) {
-    if (node.role == SemanticsRole.complementary ||
-        node.role == SemanticsRole.contentInfo ||
-        node.role == SemanticsRole.main ||
-        node.role == SemanticsRole.navigation ||
-        node.role == SemanticsRole.region) {
-      return true;
-    }
-    return false;
-  }
+  static bool _isLandmarkRole(SemanticsNode node) =>
+      node.role == SemanticsRole.complementary ||
+      node.role == SemanticsRole.contentInfo ||
+      node.role == SemanticsRole.main ||
+      node.role == SemanticsRole.navigation ||
+      node.role == SemanticsRole.region;
 
   static bool _isSameRoleExisted(SemanticsNode semanticsNode) {
     final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
@@ -388,7 +384,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsComplementary(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      if (_isLandmarks(currentNode)) {
+      if (_isLandmarkRole(currentNode)) {
         return FlutterError(
           'The complementary landmark role should not contained within any other landmark roles.',
         );
@@ -406,7 +402,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsContentInfo(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      if (_isLandmarks(currentNode)) {
+      if (_isLandmarkRole(currentNode)) {
         return FlutterError(
           'The contentInfo landmark role should not contained within any other landmark roles.',
         );
@@ -424,7 +420,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsMain(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      if (_isLandmarks(currentNode)) {
+      if (_isLandmarkRole(currentNode)) {
         return FlutterError(
           'The main landmark role should not contained within any other landmark roles.',
         );
