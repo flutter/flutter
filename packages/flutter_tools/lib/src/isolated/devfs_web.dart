@@ -191,7 +191,8 @@ class WebAssetServer implements AssetReader {
   /// contains a list of objects each with two fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
-  /// bundle.
+  /// bundle. To support embedded libraries, the path should include the
+  /// `baseUri` of the web server.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
   ///
@@ -199,7 +200,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "<file_name>",
+  ///     "src": "<baseUri>/<file_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
   /// ]
