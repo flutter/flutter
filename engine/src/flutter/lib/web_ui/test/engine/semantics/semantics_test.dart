@@ -4897,7 +4897,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'complementary');
   });
 
-  test('nodes with complementary role and label in tree', () {
+  test('nodes with the same complementary role have labels', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -4971,7 +4971,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'contentinfo');
   });
 
-  test('node with contentInfo role and label in tree', () {
+  test('nodes with the same contentInfo role have labels', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -4987,6 +4987,12 @@ void _testLandmarks() {
           label: 'contentInfo 1',
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
+        tester.updateNode(
+          id: 2,
+          role: ui.SemanticsRole.contentInfo,
+          label: 'contentInfo 2',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
       ],
     );
     tester.apply();
@@ -4994,6 +5000,11 @@ void _testLandmarks() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
     expect(object.element.getAttribute('role'), 'contentinfo');
     expect(object.element.getAttribute('aria-label'), 'contentInfo 1');
+
+    final SemanticsObject object = tester.getSemanticsObject(2);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object.element.getAttribute('role'), 'contentinfo');
+    expect(object.element.getAttribute('aria-label'), 'contentInfo 2');
   });
 
   test('nodes with main role', () {
@@ -5017,7 +5028,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'main');
   });
 
-  test('node with main role and label in tree', () {
+  test('node with the same main role have labels', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5033,6 +5044,12 @@ void _testLandmarks() {
           role: ui.SemanticsRole.main,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
+        tester.updateNode(
+          id: 2,
+          label: 'main 2',
+          role: ui.SemanticsRole.main,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
       ],
     );
     tester.apply();
@@ -5040,6 +5057,11 @@ void _testLandmarks() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.main);
     expect(object.element.getAttribute('role'), 'main');
     expect(object.element.getAttribute('aria-label'), 'main 1');
+
+    final SemanticsObject object = tester.getSemanticsObject(2);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object.element.getAttribute('role'), 'main');
+    expect(object.element.getAttribute('aria-label'), 'main 2');
   });
 
   test('nodes with navigation role', () {
@@ -5063,7 +5085,7 @@ void _testLandmarks() {
     expect(object.element.getAttribute('role'), 'navigation');
   });
 
-  test('nodes with navigation role and label in tree', () {
+  test('nodes with the same navigation role have labels', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5120,31 +5142,6 @@ void _testLandmarks() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.region);
     expect(object.element.getAttribute('role'), 'region');
     expect(object.element.getAttribute('aria-label'), 'Header 1');
-  });
-
-  test('node with region role and label in tree', () {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final SemanticsTester tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          label: 'region 1',
-          role: ui.SemanticsRole.region,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-        ),
-      ],
-    );
-    tester.apply();
-    final SemanticsObject object = tester.getSemanticsObject(1);
-    expect(object.semanticRole?.kind, EngineSemanticsRole.region);
-    expect(object.element.getAttribute('role'), 'region');
-    expect(object.element.getAttribute('aria-label'), 'region 1');
   });
 
   semantics().semanticsEnabled = false;
