@@ -20,22 +20,25 @@ float computeErf7(float x) {
 }
 
 // The length formula, but with an exponent other than 2
-float powerDistance(vec2 p) {
-  float xp = POW(p.x, frag_info.exponent);
-  float yp = POW(p.y, frag_info.exponent);
-  return POW(xp + yp, frag_info.exponentInv);
+float powerDistance(vec2 p, float exponent, float exponentInv) {
+  float xp = POW(p.x, exponent);
+  float yp = POW(p.y, exponent);
+  return POW(xp + yp, exponentInv);
 }
 
-float computeRRectDistance(vec2 position, vec2 adjust, float r1) {
-  vec2 adjusted = position - frag_info.adjust;
-  float dPos = powerDistance(max(adjusted, 0.0));
+float computeRRectDistance(vec2 position,
+                           vec2 adjust,
+                           float r1,
+                           float exponent,
+                           float exponentInv) {
+  vec2 adjusted = position - adjust;
+  float dPos = powerDistance(max(adjusted, 0.0), exponent, exponentInv);
   float dNeg = min(maxXY(adjusted), 0.0);
-  return dPos + dNeg - frag_info.r1;
+  return dPos + dNeg - r1;
 }
 
 float computeRRectFade(float d, float sInv, float minEdge, float scale) {
-  return scale * (computeErf7(sInv * (minEdge + d)) -
-                         computeErf7(sInv * d));
+  return scale * (computeErf7(sInv * (minEdge + d)) - computeErf7(sInv * d));
 }
 
 #endif  // RRECT_GLSL_

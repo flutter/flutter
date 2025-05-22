@@ -69,12 +69,12 @@ in vec2 v_position;
 
 out f16vec4 frag_color;
 
-const float kTwoOverSqrtPi = 2.0 / sqrt(3.1415926);
 const float kPiOverFour = 3.1415926 / 4.0;
 
 void main() {
   vec2 centered = abs(v_position - frag_info.center);
-  float d = computeRRectDistance(centered, frag_info.adjust, frag_info.r1);
+  float d = computeRRectDistance(centered, frag_info.adjust, frag_info.r1,
+                                 frag_info.exponent, frag_info.exponentInv);
 
   /**** Start of RSuperellipse math ****/
 
@@ -108,7 +108,8 @@ void main() {
 
   /**** End of RSuperellipse math ****/
 
-  float z = computeRRectFade(d, frag_info.sInv, frag_info.minEdge, frag_info.scale);
+  float z =
+      computeRRectFade(d, frag_info.sInv, frag_info.minEdge, frag_info.scale);
 
   frag_color = frag_info.color * float16_t(z);
 }
