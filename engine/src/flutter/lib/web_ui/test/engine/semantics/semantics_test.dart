@@ -934,55 +934,58 @@ label''');
     expect(computeDomSemanticsLabel(tooltip: '', label: ''), isNull);
   });
 
-  test(
-    'AriaLabelRepresentation splits label and hint into aria-label and aria-description/aria-describedby',
-    () async {
-      semantics().semanticsEnabled = true;
+  test('LabelAndValue splits label and hint for all representations', () async {
+    semantics().semanticsEnabled = true;
+    final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+
+    for (final representation in LabelRepresentation.values) {
       final SemanticsTester tester = SemanticsTester(owner());
+      // For container nodes, children force ariaLabel, so test as a leaf node (no children)
       tester.updateNode(
         id: 0,
         label: 'Label',
         hint: 'Hint',
-        // Add a dummy child to ensure this is a container node
-        children: <SemanticsNodeUpdate>[tester.updateNode(id: 1)],
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
       final element = node.element;
-      expect(element.getAttribute('aria-label'), 'Label');
 
-      final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+      // Set the preferred representation directly (simulate what a custom role would do)
+      node.semanticRole?.labelAndValue?.preferredRepresentation = representation;
+      node.semanticRole?.labelAndValue?.update();
 
+      // Check label is present in the correct place
+      switch (representation) {
+        case LabelRepresentation.ariaLabel:
+          expect(element.getAttribute('aria-label'), 'Label');
+        case LabelRepresentation.domText:
+          expect(element.text, 'Label');
+        case LabelRepresentation.sizedSpan:
+          final span = element.querySelector('span');
+          expect(span, isNotNull);
+          expect(span!.text, 'Label');
+      }
+
+      // Check hint is present as aria-description or aria-describedby
       LabelAndValue.supportsAriaDescriptionForTest = true;
-      tester.updateNode(
-        id: 0,
-        label: 'Label',
-        hint: 'Hint',
-        children: <SemanticsNodeUpdate>[tester.updateNode(id: 1)],
-      );
-      tester.apply();
+      node.semanticRole?.labelAndValue?.update();
       expect(element.getAttribute('aria-description'), 'Hint');
       expect(element.getAttribute('aria-describedby'), isNull);
 
       LabelAndValue.supportsAriaDescriptionForTest = false;
-      tester.updateNode(
-        id: 0,
-        label: 'Label',
-        hint: 'Hint',
-        children: <SemanticsNodeUpdate>[tester.updateNode(id: 1)],
-      );
-      tester.apply();
+      node.semanticRole?.labelAndValue?.update();
       expect(element.getAttribute('aria-description'), isNull);
       final ariaDescribedBy = element.getAttribute('aria-describedby');
       expect(ariaDescribedBy, isNotNull);
       final describedNode = domDocument.getElementById(ariaDescribedBy!);
       expect(describedNode, isNotNull);
       expect(describedNode!.text, 'Hint');
+    }
 
-      LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
-      semantics().semanticsEnabled = false;
-    },
-  );
+    LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testContainer() {
