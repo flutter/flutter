@@ -415,15 +415,16 @@ Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
 /// Checks [file] representing objc code for deprecated usage of the
 /// rootViewController and writes it to [logger].
 @visibleForTesting
-Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(
-  Logger logger,
-  File file,
-) async => _checkForLaunchRootViewControllerAccessDeprecation(
-  logger,
-  file,
-  RegExp('self.*?window.*?rootViewController'),
-  RegExp('^}')
-);
+Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(Logger logger, File file) async {
+  try {
+    await _checkForLaunchRootViewControllerAccessDeprecation(
+      logger,
+      file,
+      RegExp('self.*?window.*?rootViewController'),
+      RegExp('^}'),
+    );
+  } on Exception catch (_) {}
+}
 
 /// Checks [file] representing swift code for deprecated usage of the
 /// rootViewController and writes it to [logger].
@@ -431,12 +432,16 @@ Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(
 Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
   Logger logger,
   File file,
-) async => _checkForLaunchRootViewControllerAccessDeprecation(
-  logger,
-  file,
-  'window?.rootViewController',
-  RegExp(r'^.*?func\s*?\S*?\(')
-);
+) async {
+  try {
+    await _checkForLaunchRootViewControllerAccessDeprecation(
+      logger,
+      file,
+      'window?.rootViewController',
+      RegExp(r'^.*?func\s*?\S*?\('),
+    );
+  } on Exception catch (_) {}
+}
 
 void _printWarning(Logger logger, String path, int line, String warning) {
   logger.printWarning('$path:$line: warning: $warning');
