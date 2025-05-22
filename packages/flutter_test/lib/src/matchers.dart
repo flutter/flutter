@@ -1260,8 +1260,9 @@ class _IsSystemTextScaler extends Matcher {
 
   @override
   Description describe(Description description) {
-    final String scaleFactorExpectation =
-        expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
+    final String scaleFactorExpectation = expectedUserTextScaleFactor == null
+        ? ''
+        : '(${expectedUserTextScaleFactor}x)';
     return description.add(
       'A SystemTextScaler that reflects the font scale settings in the system user preference $scaleFactorExpectation',
     );
@@ -2525,10 +2526,9 @@ class _MatchesSemanticsData extends Matcher {
            SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
          if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,
        },
-       hintOverrides =
-           onTapHint == null && onLongPressHint == null
-               ? null
-               : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
+       hintOverrides = onTapHint == null && onLongPressHint == null
+           ? null
+           : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
 
   final String? identifier;
   final String? label;
@@ -2604,16 +2604,14 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with inputType: $inputType');
     }
     if (actions.isNotEmpty) {
-      final List<SemanticsAction> expectedActions =
-          actions.entries
-              .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
-              .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
-              .toList();
-      final List<SemanticsAction> notExpectedActions =
-          actions.entries
-              .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
-              .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
-              .toList();
+      final List<SemanticsAction> expectedActions = actions.entries
+          .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
+          .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+          .toList();
+      final List<SemanticsAction> notExpectedActions = actions.entries
+          .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
+          .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+          .toList();
 
       if (expectedActions.isNotEmpty) {
         description.add(' with actions: ${_createEnumsSummary(expectedActions)} ');
@@ -2623,16 +2621,14 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> expectedFlags =
-          flags.entries
-              .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
-              .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
-              .toList();
-      final List<SemanticsFlag> notExpectedFlags =
-          flags.entries
-              .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
-              .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
-              .toList();
+      final List<SemanticsFlag> expectedFlags = flags.entries
+          .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
+          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+          .toList();
+      final List<SemanticsFlag> notExpectedFlags = flags.entries
+          .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
+          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+          .toList();
 
       if (expectedFlags.isNotEmpty) {
         description.add(' with flags: ${_createEnumsSummary(expectedFlags)} ');

@@ -22,51 +22,53 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route<void> _createHomeRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Column(
-              children: <Widget>[
-                Text(localizations.demoSharedZAxisTitle),
-                Text(
-                  '(${localizations.demoSharedZAxisDemoInstructions})',
-                  style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
+            return Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                title: Column(
+                  children: <Widget>[
+                    Text(localizations.demoSharedZAxisTitle),
+                    Text(
+                      '(${localizations.demoSharedZAxisDemoInstructions})',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  Navigator.of(context).push<void>(_createSettingsRoute());
-                },
+                actions: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () {
+                      Navigator.of(context).push<void>(_createSettingsRoute());
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-          body: const _RecipePage(),
-        );
-      },
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return SharedAxisTransition(
-          fillColor: Colors.transparent,
-          transitionType: SharedAxisTransitionType.scaled,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+              body: const _RecipePage(),
+            );
+          },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return SharedAxisTransition(
+              fillColor: Colors.transparent,
+              transitionType: SharedAxisTransitionType.scaled,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
     );
   }
 
@@ -78,20 +80,21 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
             Animation<double> animation,
             Animation<double> secondaryAnimation,
           ) => const _SettingsPage(),
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return SharedAxisTransition(
-          fillColor: Colors.transparent,
-          transitionType: SharedAxisTransitionType.scaled,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return SharedAxisTransition(
+              fillColor: Colors.transparent,
+              transitionType: SharedAxisTransitionType.scaled,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
     );
   }
 }

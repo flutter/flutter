@@ -204,10 +204,9 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
           final String version = name.substring(id.length + 1);
           String? installPath;
           try {
-            installPath =
-                fileSystem
-                    .file(fileSystem.path.join(dir.path, 'system', '.home'))
-                    .readAsStringSync();
+            installPath = fileSystem
+                .file(fileSystem.path.join(dir.path, 'system', '.home'))
+                .readAsStringSync();
           } on FileSystemException {
             // ignored
           }
@@ -236,8 +235,9 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
           final String version = name.substring(id.length);
           String? installPath;
           try {
-            installPath =
-                fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
+            installPath = fileSystem
+                .file(fileSystem.path.join(dir.path, '.home'))
+                .readAsStringSync();
           } on FileSystemException {
             // ignored
           }
@@ -326,10 +326,9 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
           final String version = name.substring(id.length + 1);
           String? installPath;
           try {
-            installPath =
-                fileSystem
-                    .file(fileSystem.path.join(dir.path, 'system', '.home'))
-                    .readAsStringSync();
+            installPath = fileSystem
+                .file(fileSystem.path.join(dir.path, 'system', '.home'))
+                .readAsStringSync();
           } on FileSystemException {
             // ignored
           }
@@ -354,8 +353,9 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
           final String version = name.substring(id.length);
           String? installPath;
           try {
-            installPath =
-                fileSystem.file(fileSystem.path.join(dir.path, '.home')).readAsStringSync();
+            installPath = fileSystem
+                .file(fileSystem.path.join(dir.path, '.home'))
+                .readAsStringSync();
           } on FileSystemException {
             // ignored
           }
@@ -454,14 +454,13 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     try {
-      final Iterable<Directory> installDirs =
-          installPaths
-              .map(fileSystem.directory)
-              .map<List<FileSystemEntity>>(
-                (Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[],
-              )
-              .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
-              .whereType<Directory>();
+      final Iterable<Directory> installDirs = installPaths
+          .map(fileSystem.directory)
+          .map<List<FileSystemEntity>>(
+            (Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[],
+          )
+          .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
+          .whereType<Directory>();
       for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
         if (!dir.path.endsWith('.app')) {

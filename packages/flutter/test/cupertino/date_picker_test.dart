@@ -2167,13 +2167,10 @@ void main() {
             mode: CupertinoDatePickerMode.monthYear,
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2196,13 +2193,10 @@ void main() {
             mode: CupertinoDatePickerMode.date,
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2225,13 +2219,10 @@ void main() {
             mode: CupertinoDatePickerMode.time,
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2253,13 +2244,10 @@ void main() {
           child: CupertinoDatePicker(
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2281,13 +2269,10 @@ void main() {
           child: CupertinoTimerPicker(
             onTimerDurationChanged: (Duration duration) {},
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2310,13 +2295,10 @@ void main() {
             onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.ms,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2339,13 +2321,10 @@ void main() {
             onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.hm,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return selectionOverlay;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return selectionOverlay;
+                },
           ),
         ),
       ),
@@ -2364,13 +2343,10 @@ void main() {
           child: CupertinoDatePicker(
             onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return null;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return null;
+                },
           ),
         ),
       ),
@@ -2389,13 +2365,10 @@ void main() {
             onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.hm,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
-            selectionOverlayBuilder: (
-              BuildContext context, {
-              required int selectedIndex,
-              required int columnCount,
-            }) {
-              return null;
-            },
+            selectionOverlayBuilder:
+                (BuildContext context, {required int selectedIndex, required int columnCount}) {
+                  return null;
+                },
           ),
         ),
       ),
@@ -2471,8 +2444,9 @@ void main() {
       color: CupertinoColors.label,
     );
 
-    final List<double> widths =
-        testWords.map((String word) => getColumnWidth(word, textStyle, context)).toList();
+    final List<double> widths = testWords
+        .map((String word) => getColumnWidth(word, textStyle, context))
+        .toList();
 
     final double largestWidth = widths.reduce(math.max);
 

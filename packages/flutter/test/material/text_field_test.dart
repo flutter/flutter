@@ -88,7 +88,9 @@ void main() {
     final Widget app = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(
-        body: Center(child: TextField(key: key, controller: controller, focusNode: focusNode)),
+        body: Center(
+          child: TextField(key: key, controller: controller, focusNode: focusNode),
+        ),
       ),
     );
 
@@ -241,7 +243,9 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -314,7 +318,9 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -468,7 +474,9 @@ void main() {
 
       final TextEditingController controller = _textEditingController(text: 'Test ');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
@@ -517,7 +525,9 @@ void main() {
 
       final TextEditingController controller = _textEditingController(text: 'Test ');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
@@ -566,7 +576,9 @@ void main() {
 
       final TextEditingController controller = _textEditingController(text: 'Test ');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
@@ -693,7 +705,11 @@ void main() {
       final SemanticsTester semantics = SemanticsTester(tester);
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final FocusNode focusNode = _focusNode();
-      await tester.pumpWidget(MaterialApp(home: Material(child: TextField(focusNode: focusNode))));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(child: TextField(focusNode: focusNode)),
+        ),
+      );
       expect(
         semantics,
         hasSemantics(
@@ -761,7 +777,9 @@ void main() {
     void onEditingComplete() {}
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: TextField(onEditingComplete: onEditingComplete))),
+      MaterialApp(
+        home: Material(child: TextField(onEditingComplete: onEditingComplete)),
+      ),
     );
 
     final Finder editableTextFinder = find.byType(EditableText);
@@ -900,7 +918,9 @@ void main() {
 
   testWidgets('Cursor blinks', (WidgetTester tester) async {
     await tester.pumpWidget(
-      overlay(child: const TextField(decoration: InputDecoration(hintText: 'Placeholder'))),
+      overlay(
+        child: const TextField(decoration: InputDecoration(hintText: 'Placeholder')),
+      ),
     );
     await tester.showKeyboard(find.byType(TextField));
 
@@ -1501,7 +1521,9 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
-        child: overlay(child: TextField(key: textFieldKey, controller: controller, maxLines: null)),
+        child: overlay(
+          child: TextField(key: textFieldKey, controller: controller, maxLines: null),
+        ),
       ),
     );
     expect(controller.selection.baseOffset, -1);
@@ -1558,10 +1580,9 @@ void main() {
     await tester.pump();
 
     final double inputWidth = findRenderEditable(tester).size.width;
-    final Offset cursorOffsetSpaces =
-        findRenderEditable(
-          tester,
-        ).getLocalRectForCaret(const TextPosition(offset: testValueSpaces.length)).bottomRight;
+    final Offset cursorOffsetSpaces = findRenderEditable(
+      tester,
+    ).getLocalRectForCaret(const TextPosition(offset: testValueSpaces.length)).bottomRight;
 
     expect(cursorOffsetSpaces.dx, inputWidth - kCaretGap);
   });
@@ -1583,10 +1604,9 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValueSpaces.length));
     await tester.pump();
 
-    final Offset cursorOffsetSpaces =
-        findRenderEditable(
-          tester,
-        ).getLocalRectForCaret(const TextPosition(offset: testValueSpaces.length)).topLeft;
+    final Offset cursorOffsetSpaces = findRenderEditable(
+      tester,
+    ).getLocalRectForCaret(const TextPosition(offset: testValueSpaces.length)).topLeft;
 
     expect(cursorOffsetSpaces.dx >= 0, isTrue);
   });
@@ -1797,10 +1817,9 @@ void main() {
       await tester.pumpWidget(
         overlay(
           child: TextField(
-            controller:
-                controller = TextEditingController.fromValue(
-                  const TextEditingValue(selection: TextSelection(baseOffset: 0, extentOffset: 0)),
-                ),
+            controller: controller = TextEditingController.fromValue(
+              const TextEditingValue(selection: TextSelection(baseOffset: 0, extentOffset: 0)),
+            ),
           ),
         ),
       );
@@ -1920,11 +1939,10 @@ void main() {
         ),
       ),
     );
-    final List<String> orders =
-        tester.semantics
-            .simulatedAccessibilityTraversal(startNode: find.semantics.byLabel('prefix1'))
-            .map((SemanticsNode node) => node.label + node.value)
-            .toList();
+    final List<String> orders = tester.semantics
+        .simulatedAccessibilityTraversal(startNode: find.semantics.byLabel('prefix1'))
+        .map((SemanticsNode node) => node.label + node.value)
+        .toList();
     expect(orders, <String>['prefix1', 'abc', 'suffix1', 'prefix2', 'def', 'suffix2']);
   });
 
@@ -2083,14 +2101,15 @@ void main() {
     TextEditingController controller = _textEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
-        return Center(child: Material(child: TextField(controller: controller, readOnly: true)));
+        return Center(
+          child: Material(child: TextField(controller: controller, readOnly: true)),
+        );
       },
     );
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
     await tester.pumpWidget(overlayWithEntry(entry));
     const int dIndex = 3;
@@ -2141,15 +2160,16 @@ void main() {
       final OverlayEntry entry = OverlayEntry(
         builder: (BuildContext context) {
           return Center(
-            child: Material(child: TextField(controller: controller, readOnly: readOnly)),
+            child: Material(
+              child: TextField(controller: controller, readOnly: readOnly),
+            ),
           );
         },
       );
       addTearDown(
-        () =>
-            entry
-              ..remove()
-              ..dispose(),
+        () => entry
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(overlayWithEntry(entry));
       await tester.tap(find.byType(TextField));
@@ -2180,15 +2200,16 @@ void main() {
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
         return Center(
-          child: Material(child: TextField(controller: controller, readOnly: readOnly)),
+          child: Material(
+            child: TextField(controller: controller, readOnly: readOnly),
+          ),
         );
       },
     );
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
     await tester.pumpWidget(overlayWithEntry(entry));
     await tester.tap(find.byType(TextField));
@@ -2211,15 +2232,16 @@ void main() {
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
         return Center(
-          child: Material(child: TextField(controller: controller, readOnly: readOnly)),
+          child: Material(
+            child: TextField(controller: controller, readOnly: readOnly),
+          ),
         );
       },
     );
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
     await tester.pumpWidget(overlayWithEntry(entry));
     await tester.tap(find.byType(TextField));
@@ -2260,7 +2282,11 @@ void main() {
   testWidgets('Selection updates on tap down (Desktop platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
@@ -2292,7 +2318,11 @@ void main() {
     final TextEditingController controller = _textEditingController();
     final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
@@ -3496,7 +3526,9 @@ void main() {
     addTearDown(feedback.dispose);
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
-      overlay(child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller)),
+      overlay(
+        child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller),
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -3548,7 +3580,9 @@ void main() {
     addTearDown(feedback.dispose);
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
-      overlay(child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller)),
+      overlay(
+        child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller),
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -3599,7 +3633,9 @@ void main() {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
-      overlay(child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller)),
+      overlay(
+        child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller),
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -4358,7 +4394,9 @@ void main() {
 
     final TextEditingController controller = _textEditingController();
     Widget buildFrame(bool obscureText) {
-      return overlay(child: TextField(controller: controller, obscureText: obscureText));
+      return overlay(
+        child: TextField(controller: controller, obscureText: obscureText),
+      );
     }
 
     // Obscure text and don't enable or disable selection.
@@ -4709,8 +4747,9 @@ void main() {
         maxLines: null,
         decoration: const InputDecoration(counterText: 'I am counter'),
       );
-      final Widget widget =
-          wrapInIntrinsic ? IntrinsicHeight(key: intrinsicHeightKey, child: textField) : textField;
+      final Widget widget = wrapInIntrinsic
+          ? IntrinsicHeight(key: intrinsicHeightKey, child: textField)
+          : textField;
       return boilerplate(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[widget]),
       );
@@ -5339,7 +5378,9 @@ void main() {
 
     await tester.pumpWidget(
       overlay(
-        child: TextField(decoration: InputDecoration(suffixText: '.com', suffixStyle: suffixStyle)),
+        child: TextField(
+          decoration: InputDecoration(suffixText: '.com', suffixStyle: suffixStyle),
+        ),
       ),
     );
 
@@ -5502,7 +5543,10 @@ void main() {
         child: Column(
           children: <Widget>[
             const TextField(decoration: InputDecoration(labelText: 'First')),
-            TextField(key: secondKey, decoration: const InputDecoration(labelText: 'Second')),
+            TextField(
+              key: secondKey,
+              decoration: const InputDecoration(labelText: 'Second'),
+            ),
           ],
         ),
       ),
@@ -5916,7 +5960,9 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
-        child: overlay(child: SizedBox(width: 100.0, child: TextField(controller: controller))),
+        child: overlay(
+          child: SizedBox(width: 100.0, child: TextField(controller: controller)),
+        ),
       ),
     );
 
@@ -5983,7 +6029,9 @@ void main() {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
-      overlay(child: SizedBox(width: 100.0, child: TextField(controller: controller))),
+      overlay(
+        child: SizedBox(width: 100.0, child: TextField(controller: controller)),
+      ),
     );
 
     await tester.tap(find.byType(TextField));
@@ -6011,7 +6059,10 @@ void main() {
           selectionColor: selectionColor,
           cursorColor: cursorColor,
           child: Column(
-            children: <Widget>[TextField(key: key1, controller: controller1), TextField(key: key2)],
+            children: <Widget>[
+              TextField(key: key1, controller: controller1),
+              TextField(key: key2),
+            ],
           ),
         ),
       ),
@@ -6479,7 +6530,9 @@ void main() {
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(maxLength: 10)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(maxLength: 10))),
+      ),
     );
 
     expect(find.text('0/10'), findsOneWidget);
@@ -6494,7 +6547,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(maxLength: 10)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(maxLength: 10))),
+      ),
     );
 
     expect(find.text('0/10'), findsOneWidget);
@@ -6510,7 +6565,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(maxLength: 10)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(maxLength: 10))),
+      ),
     );
 
     expect(find.text('0/10'), findsOneWidget);
@@ -6527,7 +6584,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: TextField(maxLength: TextField.noMaxLength))),
+        home: Material(
+          child: Center(child: TextField(maxLength: TextField.noMaxLength)),
+        ),
       ),
     );
 
@@ -6545,14 +6604,15 @@ void main() {
         home: Material(
           child: Center(
             child: TextField(
-              buildCounter: (
-                BuildContext context, {
-                required int currentLength,
-                int? maxLength,
-                required bool isFocused,
-              }) {
-                return Text('$currentLength of $maxLength');
-              },
+              buildCounter:
+                  (
+                    BuildContext context, {
+                    required int currentLength,
+                    int? maxLength,
+                    required bool isFocused,
+                  }) {
+                    return Text('$currentLength of $maxLength');
+                  },
               maxLength: 10,
             ),
           ),
@@ -6572,7 +6632,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(maxLength: 10)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(maxLength: 10))),
+      ),
     );
 
     expect(
@@ -6769,7 +6831,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: Material(child: Center(child: TextField(controller: controller, enabled: false))),
+        home: Material(
+          child: Center(child: TextField(controller: controller, enabled: false)),
+        ),
       ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -6791,7 +6855,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Material(child: Center(child: TextField(controller: controller, enabled: false))),
+        home: Material(
+          child: Center(child: TextField(controller: controller, enabled: false)),
+        ),
       ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -6981,7 +7047,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextField(controller: controller, maxLength: 10))),
+        home: Material(
+          child: Center(child: TextField(controller: controller, maxLength: 10)),
+        ),
       ),
     );
 
@@ -7292,7 +7360,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: KeyboardListener(focusNode: focusNode, child: textField)),
+          home: Material(
+            child: KeyboardListener(focusNode: focusNode, child: textField),
+          ),
         ),
       );
       focusNode.requestFocus();
@@ -7366,7 +7436,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: KeyboardListener(focusNode: focusNode, child: textField)),
+          home: Material(
+            child: KeyboardListener(focusNode: focusNode, child: textField),
+          ),
         ),
       );
       focusNode.requestFocus();
@@ -7416,7 +7488,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: KeyboardListener(focusNode: focusNode, child: textField)),
+          home: Material(
+            child: KeyboardListener(focusNode: focusNode, child: textField),
+          ),
         ),
       );
       focusNode.requestFocus();
@@ -7478,7 +7552,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: KeyboardListener(focusNode: focusNode, child: textField)),
+          home: Material(
+            child: KeyboardListener(focusNode: focusNode, child: textField),
+          ),
         ),
       );
       focusNode.requestFocus();
@@ -7523,7 +7599,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: KeyboardListener(focusNode: focusNode, child: textField)),
+          home: Material(
+            child: KeyboardListener(focusNode: focusNode, child: textField),
+          ),
         ),
       );
       focusNode.requestFocus();
@@ -7996,7 +8074,11 @@ void main() {
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
-    await tester.pumpWidget(overlay(child: TextField(key: key, controller: controller)));
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(key: key, controller: controller),
+      ),
+    );
 
     expect(
       semantics,
@@ -8291,7 +8373,11 @@ void main() {
     final TextEditingController controller = _textEditingController()..text = 'Hello';
     final Key key = UniqueKey();
 
-    await tester.pumpWidget(overlay(child: TextField(key: key, controller: controller)));
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(key: key, controller: controller),
+      ),
+    );
 
     expect(
       semantics,
@@ -8408,7 +8494,11 @@ void main() {
     final TextEditingController controller = _textEditingController()..text = 'Hello';
     final Key key = UniqueKey();
 
-    await tester.pumpWidget(overlay(child: TextField(key: key, controller: controller)));
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(key: key, controller: controller),
+      ),
+    );
 
     // Focus the text field
     await tester.tap(find.byKey(key));
@@ -8530,7 +8620,11 @@ void main() {
     final TextEditingController controller = _textEditingController()..text = textInTextField;
     final Key key = UniqueKey();
 
-    await tester.pumpWidget(overlay(child: TextField(key: key, controller: controller)));
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(key: key, controller: controller),
+      ),
+    );
 
     const int inputFieldId = 1;
 
@@ -8614,7 +8708,11 @@ void main() {
     // Clear the clipboard.
     await Clipboard.setData(const ClipboardData(text: ''));
 
-    await tester.pumpWidget(overlay(child: TextField(key: key, controller: controller)));
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(key: key, controller: controller),
+      ),
+    );
 
     const int inputFieldId = 1;
 
@@ -9304,7 +9402,9 @@ void main() {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
         theme: themeData,
-        home: Material(child: Center(child: TextField(style: style))),
+        home: Material(
+          child: Center(child: TextField(style: style)),
+        ),
       );
     }
 
@@ -9344,7 +9444,9 @@ void main() {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
         theme: themeData,
-        home: Material(child: Center(child: TextField(style: style))),
+        home: Material(
+          child: Center(child: TextField(style: style)),
+        ),
       );
     }
 
@@ -9427,7 +9529,9 @@ void main() {
 
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
-      return MaterialApp(home: Material(child: TextField(style: style)));
+      return MaterialApp(
+        home: Material(child: TextField(style: style)),
+      );
     }
 
     await tester.pumpWidget(
@@ -9452,7 +9556,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -9479,7 +9587,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -9507,7 +9619,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -9539,7 +9655,11 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset pos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'.
@@ -9577,7 +9697,9 @@ void main() {
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(controller: controller, maxLines: 2))),
+          home: Material(
+            child: Center(child: TextField(controller: controller, maxLines: 2)),
+          ),
         ),
       );
 
@@ -9661,7 +9783,11 @@ void main() {
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
@@ -9721,7 +9847,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
@@ -9753,7 +9883,11 @@ void main() {
 
   testWidgets('iOS selectWordEdge works correctly', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Initially, the menu is not shown and there is no selection.
     expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
@@ -9824,7 +9958,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -10293,7 +10431,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(useMaterial3: false),
-            home: Material(child: Center(child: TextField(controller: controller))),
+            home: Material(
+              child: Center(child: TextField(controller: controller)),
+            ),
           ),
         );
 
@@ -10363,7 +10503,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(useMaterial3: false),
-            home: Material(child: Center(child: TextField(controller: controller, maxLines: null))),
+            home: Material(
+              child: Center(child: TextField(controller: controller, maxLines: null)),
+            ),
           ),
         );
 
@@ -10426,7 +10568,9 @@ void main() {
       final TextEditingController controller = _textEditingController(text: testValueA);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(controller: controller, maxLines: null))),
+          home: Material(
+            child: Center(child: TextField(controller: controller, maxLines: null)),
+          ),
         ),
       );
 
@@ -10519,7 +10663,9 @@ void main() {
       final TextEditingController controller = _textEditingController(text: testValueA);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(controller: controller, maxLines: null))),
+          home: Material(
+            child: Center(child: TextField(controller: controller, maxLines: null)),
+          ),
         ),
       );
 
@@ -10567,7 +10713,9 @@ void main() {
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          MaterialApp(
+            home: Material(child: TextField(controller: controller)),
+          ),
         );
 
         final Offset firstLinePos =
@@ -10984,7 +11132,9 @@ void main() {
         final TextEditingController controller = _textEditingController(text: testValueA);
         await tester.pumpWidget(
           MaterialApp(
-            home: Material(child: Center(child: TextField(controller: controller, maxLines: null))),
+            home: Material(
+              child: Center(child: TextField(controller: controller, maxLines: null)),
+            ),
           ),
         );
 
@@ -11050,7 +11200,9 @@ void main() {
         final TextEditingController controller = _textEditingController(text: testValueA);
         await tester.pumpWidget(
           MaterialApp(
-            home: Material(child: Center(child: TextField(controller: controller, maxLines: null))),
+            home: Material(
+              child: Center(child: TextField(controller: controller, maxLines: null)),
+            ),
           ),
         );
 
@@ -11150,7 +11302,9 @@ void main() {
         final TextEditingController controller = _textEditingController(text: testValueA);
         await tester.pumpWidget(
           MaterialApp(
-            home: Material(child: Center(child: TextField(controller: controller, maxLines: null))),
+            home: Material(
+              child: Center(child: TextField(controller: controller, maxLines: null)),
+            ),
           ),
         );
 
@@ -11236,7 +11390,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       // Tap to put the cursor after the "w".
@@ -11273,7 +11431,11 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       // Double tap on the same location shows the selection menu.
@@ -11299,7 +11461,11 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       // Long press shows the selection menu.
@@ -11321,7 +11487,11 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       // Long press shows the selection menu.
@@ -11343,7 +11513,9 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -11389,7 +11561,9 @@ void main() {
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(autofocus: true, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(autofocus: true, controller: controller)),
+          ),
         ),
       );
       // This extra pump allows the selection set by autofocus to propagate to
@@ -11413,7 +11587,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -11456,7 +11634,11 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
@@ -11501,7 +11683,9 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(autofocus: true, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(autofocus: true, controller: controller)),
+          ),
         ),
       );
 
@@ -11532,7 +11716,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -11559,7 +11747,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -11587,7 +11779,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
@@ -11602,8 +11798,9 @@ void main() {
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
 
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
-      final Finder contextMenuButtonFinder =
-          targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS
+          ? find.byType(CupertinoButton)
+          : find.byType(TextButton);
       // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
       // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
       final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
@@ -11676,8 +11873,9 @@ void main() {
       // Long press should select word at position and show toolbar.
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
-      final Finder contextMenuButtonFinder =
-          targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS
+          ? find.byType(CupertinoButton)
+          : find.byType(TextButton);
       // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
       // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
       final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
@@ -11742,8 +11940,9 @@ void main() {
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
 
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
-      final Finder contextMenuButtonFinder =
-          targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS
+          ? find.byType(CupertinoButton)
+          : find.byType(TextButton);
       // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
       // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
       final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
@@ -11874,8 +12073,9 @@ void main() {
       // Long press should select word at position and show toolbar.
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
-      final Finder contextMenuButtonFinder =
-          targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS
+          ? find.byType(CupertinoButton)
+          : find.byType(TextButton);
       // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
       // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
       final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
@@ -11923,7 +12123,9 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(autofocus: true, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(autofocus: true, controller: controller)),
+          ),
         ),
       );
 
@@ -11962,7 +12164,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 18));
@@ -12019,7 +12225,9 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(autofocus: true, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(autofocus: true, controller: controller)),
+          ),
         ),
       );
 
@@ -12075,7 +12283,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -12129,7 +12341,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -12214,7 +12428,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -12297,7 +12513,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(autofocus: true, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(autofocus: true, controller: controller)),
+          ),
         ),
       );
 
@@ -12379,7 +12597,11 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(controller: controller)),
+        ),
+      ),
     );
     final Size screenSize = MediaQuery.of(tester.element(find.byType(TextField))).size;
     // Just testing the test and making sure that the last character is off
@@ -12434,7 +12656,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -12572,7 +12796,9 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(maxLines: 2, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(maxLines: 2, controller: controller)),
+          ),
         ),
       );
 
@@ -12632,7 +12858,9 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextField(maxLines: 2, controller: controller))),
+        home: Material(
+          child: Center(child: TextField(maxLines: 2, controller: controller)),
+        ),
       ),
     );
 
@@ -12701,7 +12929,11 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
@@ -12746,7 +12978,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(autofocus: true, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(autofocus: true, controller: controller)),
+          ),
         ),
       );
 
@@ -12790,7 +13024,11 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(controller: controller)),
+        ),
+      ),
     );
 
     final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
@@ -12832,7 +13070,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -12887,7 +13127,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(TextField));
@@ -12956,7 +13200,9 @@ void main() {
       final TextEditingController controller = _textEditingController(text: ' blah blah  \n  blah');
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(maxLines: null, controller: controller))),
+          home: Material(
+            child: Center(child: TextField(maxLines: null, controller: controller)),
+          ),
         ),
       );
 
@@ -13021,7 +13267,11 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: ' blah blah');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       expect(controller.value.selection, isNotNull);
@@ -13076,7 +13326,11 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: ' blah blah');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       expect(controller.value.selection, isNotNull);
@@ -13148,7 +13402,9 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 9.0);
@@ -13194,7 +13450,9 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final Offset offset = tester.getTopLeft(find.byType(TextField)) + const Offset(150.0, 9.0);
@@ -13240,7 +13498,9 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -13285,7 +13545,9 @@ void main() {
       );
       await tester.pumpWidget(Container(key: GlobalKey()));
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
@@ -13336,11 +13598,10 @@ void main() {
 
     const TextField().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -13375,11 +13636,10 @@ void main() {
       hintLocales: <Locale>[Locale('en'), Locale('fr')],
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'enabled: false',
@@ -13429,7 +13689,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-        home: const Material(child: Center(child: TextField(style: TextStyle(fontSize: 20)))),
+        home: const Material(
+          child: Center(child: TextField(style: TextStyle(fontSize: 20))),
+        ),
       ),
     );
 
@@ -13669,7 +13931,11 @@ void main() {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = _textEditingController(text: testText);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
@@ -13678,18 +13944,15 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<FadeTransition> transitions =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-              ),
-              matching: find.byType(FadeTransition),
-            )
-            .evaluate()
-            .map((Element e) => e.widget)
-            .cast<FadeTransition>()
-            .toList();
+    final List<FadeTransition> transitions = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+          matching: find.byType(FadeTransition),
+        )
+        .evaluate()
+        .map((Element e) => e.widget)
+        .cast<FadeTransition>()
+        .toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
@@ -13704,23 +13967,25 @@ void main() {
       final TextEditingController controller = _textEditingController(text: testText);
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
-      final RenderEditable renderEditable =
-          tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+      final RenderEditable renderEditable = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
 
       await tester.tapAt(const Offset(20, 10));
       renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       await tester.pumpAndSettle();
 
-      final List<FadeTransition> transitions =
-          find
-              .byType(FadeTransition)
-              .evaluate()
-              .map((Element e) => e.widget)
-              .cast<FadeTransition>()
-              .toList();
+      final List<FadeTransition> transitions = find
+          .byType(FadeTransition)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .cast<FadeTransition>()
+          .toList();
       expect(transitions.length, 2);
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
@@ -13741,7 +14006,9 @@ void main() {
       final TextEditingController controller = _textEditingController(text: testText);
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       await tester.showKeyboard(find.byType(EditableText));
@@ -13754,13 +14021,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final List<FadeTransition> transitions =
-          find
-              .byType(FadeTransition)
-              .evaluate()
-              .map((Element e) => e.widget)
-              .cast<FadeTransition>()
-              .toList();
+      final List<FadeTransition> transitions = find
+          .byType(FadeTransition)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .cast<FadeTransition>()
+          .toList();
       expect(transitions.length, 2);
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
@@ -13774,7 +14040,11 @@ void main() {
   testWidgets('Tap shows handles but not toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Tap to trigger the text field.
     await tester.tap(find.byType(TextField));
@@ -13790,7 +14060,11 @@ void main() {
   ) async {
     final TextEditingController controller = _textEditingController();
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Tap to trigger the text field.
     await tester.tap(find.byType(TextField));
@@ -13804,7 +14078,11 @@ void main() {
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Long press to trigger the text field.
     await tester.longPress(find.byType(TextField));
@@ -13823,7 +14101,11 @@ void main() {
   ) async {
     final TextEditingController controller = _textEditingController();
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Tap to trigger the text field.
     await tester.longPress(find.byType(TextField));
@@ -13840,7 +14122,11 @@ void main() {
   testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Double tap to trigger the text field.
     await tester.tap(find.byType(TextField));
@@ -13861,7 +14147,11 @@ void main() {
   ) async {
     final TextEditingController controller = _textEditingController();
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Double tap to trigger the text field.
     await tester.tap(find.byType(TextField));
@@ -13880,7 +14170,11 @@ void main() {
   testWidgets('Mouse tap does not show handles nor toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Long press to trigger the text field.
     final Offset textFieldPos = tester.getCenter(find.byType(TextField));
@@ -13901,7 +14195,11 @@ void main() {
   testWidgets('Mouse long press does not show handles nor toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Long press to trigger the text field.
     final Offset textFieldPos = tester.getCenter(find.byType(TextField));
@@ -13922,7 +14220,11 @@ void main() {
   testWidgets('Mouse double tap does not show handles nor toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Double tap to trigger the text field.
     final Offset textFieldPos = tester.getCenter(find.byType(TextField));
@@ -13949,7 +14251,11 @@ void main() {
   ) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Interact with the text field to establish the input connection.
     final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
@@ -13985,7 +14291,11 @@ void main() {
   testWidgets('Tapping selection handles toggles the toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'abc def ghi');
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: TextField(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(controller: controller)),
+      ),
+    );
 
     // Tap to position the cursor and show the selection handles.
     final Offset ePos = textOffsetToPosition(tester, 5); // Index of 'e'.
@@ -14111,7 +14421,10 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(theme: ThemeData(), home: const Scaffold(body: Center(child: TextField()))),
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(body: Center(child: TextField())),
+        ),
       );
 
       final RenderBox renderBox = tester.renderObject(find.byType(TextField));
@@ -14124,7 +14437,9 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(),
-            home: const Scaffold(body: Center(child: TextField(style: TextStyle(fontSize: 2.0)))),
+            home: const Scaffold(
+              body: Center(child: TextField(style: TextStyle(fontSize: 2.0))),
+            ),
           ),
         );
 
@@ -14360,10 +14675,9 @@ void main() {
 
     late final OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     await tester.pumpWidget(
@@ -14379,9 +14693,8 @@ void main() {
                 child: Overlay(
                   initialEntries: <OverlayEntry>[
                     overlayEntry = OverlayEntry(
-                      builder:
-                          (BuildContext context) =>
-                              Center(child: TextField(controller: controller)),
+                      builder: (BuildContext context) =>
+                          Center(child: TextField(controller: controller)),
                     ),
                   ],
                 ),
@@ -14404,7 +14717,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       bool calledGetData = false;
@@ -14708,11 +15025,10 @@ void main() {
 
     // The cursor is on the right of the input because it's RTL.
     RenderEditable editable = findRenderEditable(tester);
-    double cursorRight =
-        editable
-            .getLocalRectForCaret(TextPosition(offset: controller.value.text.length))
-            .topRight
-            .dx;
+    double cursorRight = editable
+        .getLocalRectForCaret(TextPosition(offset: controller.value.text.length))
+        .topRight
+        .dx;
     double inputWidth = editable.size.width;
     expect(inputWidth, narrowWidth);
     expect(cursorRight, inputWidth - kCaretGap);
@@ -14723,11 +15039,10 @@ void main() {
     await tester.enterText(find.byType(TextField), text);
     await tester.pump();
     editable = findRenderEditable(tester);
-    cursorRight =
-        editable
-            .getLocalRectForCaret(TextPosition(offset: controller.value.text.length))
-            .topRight
-            .dx;
+    cursorRight = editable
+        .getLocalRectForCaret(TextPosition(offset: controller.value.text.length))
+        .topRight
+        .dx;
     inputWidth = editable.size.width;
     expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - caretWidth);
 
@@ -14739,11 +15054,10 @@ void main() {
     });
     await tester.pump();
     editable = findRenderEditable(tester);
-    cursorRight =
-        editable
-            .getLocalRectForCaret(TextPosition(offset: controller.value.text.length))
-            .topRight
-            .dx;
+    cursorRight = editable
+        .getLocalRectForCaret(TextPosition(offset: controller.value.text.length))
+        .topRight
+        .dx;
     inputWidth = editable.size.width;
     expect(inputWidth, wideWidth);
     expect(cursorRight, inputWidth - kCaretGap - text.length * 10 - caretWidth);
@@ -14756,11 +15070,14 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
-      final String selectAll =
-          defaultTargetPlatform == TargetPlatform.macOS ? 'Select All' : 'Select all';
+      final String selectAll = defaultTargetPlatform == TargetPlatform.macOS
+          ? 'Select All'
+          : 'Select all';
 
       expect(find.text(selectAll), findsNothing);
       expect(find.text('Copy'), findsNothing);
@@ -14859,7 +15176,9 @@ void main() {
             errorStyle: TextStyle(color: Colors.green),
           ),
         ),
-        home: const Scaffold(body: TextField(decoration: InputDecoration(errorText: 'error'))),
+        home: const Scaffold(
+          body: TextField(decoration: InputDecoration(errorText: 'error')),
+        ),
       );
     }
 
@@ -14874,7 +15193,9 @@ void main() {
 
     Future<void> setupWidget(WidgetTester tester, MaxLengthEnforcement? enforcement) async {
       final Widget widget = MaterialApp(
-        home: Material(child: TextField(maxLength: maxLength, maxLengthEnforcement: enforcement)),
+        home: Material(
+          child: TextField(maxLength: maxLength, maxLengthEnforcement: enforcement),
+        ),
       );
 
       await tester.pumpWidget(widget);
@@ -15132,7 +15453,11 @@ void main() {
   testWidgets('TextField at rest does not push any layers with alwaysNeedsAddToScene', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: TextField()))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: TextField())),
+      ),
+    );
 
     expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   });
@@ -15142,7 +15467,11 @@ void main() {
   ) async {
     final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextField(focusNode: focusNode)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(focusNode: focusNode)),
+        ),
+      ),
     );
     await tester.showKeyboard(find.byType(TextField));
 
@@ -15155,7 +15484,11 @@ void main() {
     (WidgetTester tester) async {
       final FocusNode focusNode = _focusNode();
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(focusNode: focusNode)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(focusNode: focusNode)),
+          ),
+        ),
       );
 
       await tester.showKeyboard(find.byType(TextField));
@@ -15189,7 +15522,10 @@ void main() {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: TickerMode(enabled: tickerMode, child: TextField(focusNode: focusNode)),
+            child: TickerMode(
+              enabled: tickerMode,
+              child: TextField(focusNode: focusNode),
+            ),
           ),
         ),
       );
@@ -15270,7 +15606,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       await tester.tapAt(textOffsetToPosition(tester, 13));
@@ -15314,7 +15654,11 @@ void main() {
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       await tester.tapAt(textOffsetToPosition(tester, 13));
@@ -15361,7 +15705,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Center(child: TextField(controller: controller, focusNode: focusNode)),
+          child: Center(
+            child: TextField(controller: controller, focusNode: focusNode),
+          ),
         ),
       ),
     );
@@ -15413,7 +15759,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -15522,7 +15870,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -15633,7 +15983,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -15741,7 +16093,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Material(child: Center(child: TextField(controller: controller))),
+          home: Material(
+            child: Center(child: TextField(controller: controller)),
+          ),
         ),
       );
 
@@ -15848,7 +16202,9 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -15923,7 +16279,9 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/pull/168252.
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -15983,7 +16341,9 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/pull/168252.
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -16200,7 +16560,9 @@ void main() {
         final TextEditingController controller = _textEditingController();
         await tester.pumpWidget(
           MaterialApp(
-            home: Material(child: Column(children: <Widget>[TextField(controller: controller)])),
+            home: Material(
+              child: Column(children: <Widget>[TextField(controller: controller)]),
+            ),
           ),
         );
 
@@ -16231,12 +16593,10 @@ void main() {
                 children: <Widget>[
                   TextField(
                     controller: controller,
-                    contextMenuBuilder: (
-                      BuildContext context,
-                      EditableTextState editableTextState,
-                    ) {
-                      return Placeholder(key: key);
-                    },
+                    contextMenuBuilder:
+                        (BuildContext context, EditableTextState editableTextState) {
+                          return Placeholder(key: key);
+                        },
                   ),
                 ],
               ),
@@ -16265,7 +16625,11 @@ void main() {
         final GlobalKey key = GlobalKey();
         final TextEditingController controller = _textEditingController();
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(key: key, controller: controller))),
+          MaterialApp(
+            home: Material(
+              child: TextField(key: key, controller: controller),
+            ),
+          ),
         );
 
         await tester.pump(); // Wait for autofocus to take effect.
@@ -16538,14 +16902,15 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
             magnifierConfiguration: TextMagnifierConfiguration(
-              magnifierBuilder: (
-                BuildContext context,
-                MagnifierController controller,
-                ValueNotifier<MagnifierInfo> localMagnifierInfo,
-              ) {
-                magnifierInfo = localMagnifierInfo;
-                return fakeMagnifier;
-              },
+              magnifierBuilder:
+                  (
+                    BuildContext context,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                  ) {
+                    magnifierInfo = localMagnifierInfo;
+                    return fakeMagnifier;
+                  },
             ),
           ),
         ),
@@ -16603,14 +16968,15 @@ void main() {
                   dragStartBehavior: DragStartBehavior.down,
                   controller: controller,
                   magnifierConfiguration: TextMagnifierConfiguration(
-                    magnifierBuilder: (
-                      BuildContext context,
-                      MagnifierController controller,
-                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                    ) {
-                      magnifierInfo = localMagnifierInfo;
-                      return fakeMagnifier;
-                    },
+                    magnifierBuilder:
+                        (
+                          BuildContext context,
+                          MagnifierController controller,
+                          ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                        ) {
+                          magnifierInfo = localMagnifierInfo;
+                          return fakeMagnifier;
+                        },
                   ),
                 ),
               ),
@@ -16712,14 +17078,15 @@ void main() {
                   dragStartBehavior: DragStartBehavior.down,
                   controller: controller,
                   magnifierConfiguration: TextMagnifierConfiguration(
-                    magnifierBuilder: (
-                      BuildContext context,
-                      MagnifierController controller,
-                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                    ) {
-                      magnifierInfo = localMagnifierInfo;
-                      return fakeMagnifier;
-                    },
+                    magnifierBuilder:
+                        (
+                          BuildContext context,
+                          MagnifierController controller,
+                          ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                        ) {
+                          magnifierInfo = localMagnifierInfo;
+                          return fakeMagnifier;
+                        },
                   ),
                 ),
               ),
@@ -16783,14 +17150,15 @@ void main() {
                 child: TextField(
                   dragStartBehavior: DragStartBehavior.down,
                   magnifierConfiguration: TextMagnifierConfiguration(
-                    magnifierBuilder: (
-                      BuildContext context,
-                      MagnifierController controller,
-                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                    ) {
-                      magnifierInfo = localMagnifierInfo;
-                      return fakeMagnifier;
-                    },
+                    magnifierBuilder:
+                        (
+                          BuildContext context,
+                          MagnifierController controller,
+                          ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                        ) {
+                          magnifierInfo = localMagnifierInfo;
+                          return fakeMagnifier;
+                        },
                   ),
                 ),
               ),
@@ -16831,14 +17199,15 @@ void main() {
                 padding: const EdgeInsets.all(20),
                 child: TextField(
                   magnifierConfiguration: TextMagnifierConfiguration(
-                    magnifierBuilder: (
-                      BuildContext context,
-                      MagnifierController controller,
-                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                    ) {
-                      magnifierInfo = localMagnifierInfo;
-                      return fakeMagnifier;
-                    },
+                    magnifierBuilder:
+                        (
+                          BuildContext context,
+                          MagnifierController controller,
+                          ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                        ) {
+                          magnifierInfo = localMagnifierInfo;
+                          return fakeMagnifier;
+                        },
                   ),
                   onTapOutside: (PointerDownEvent event) {
                     FocusManager.instance.primaryFocus?.unfocus();
@@ -17223,7 +17592,11 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: Center(child: TextField(controller: controller)))),
+        MaterialApp(
+          home: Scaffold(
+            body: Center(child: TextField(controller: controller)),
+          ),
+        ),
       );
 
       expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
@@ -17276,7 +17649,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Long press to put the cursor after the "F".
@@ -17320,7 +17695,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(obscureText: true, controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(obscureText: true, controller: controller)),
+        ),
       );
 
       // Long press to put the cursor after the "F".
@@ -17363,7 +17740,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Open the text selection toolbar.
@@ -17399,7 +17778,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Long press to put the cursor after the "F".
@@ -17450,7 +17831,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(controller: controller)),
+        ),
       );
 
       // Long press to put the cursor after the "F".
@@ -17501,7 +17884,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: TextField(readOnly: true, controller: controller))),
+        MaterialApp(
+          home: Material(child: TextField(readOnly: true, controller: controller)),
+        ),
       );
 
       // Long press to put the cursor after the "F".
@@ -17637,7 +18022,11 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextField(focusNode: focusNode)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(focusNode: focusNode)),
+        ),
+      ),
     );
     expect(
       semantics,
@@ -17705,7 +18094,9 @@ void main() {
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(focusNode: focusNode, enabled: false))),
+          home: Material(
+            child: Center(child: TextField(focusNode: focusNode, enabled: false)),
+          ),
         ),
       );
       expect(
@@ -17774,7 +18165,11 @@ void main() {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(home: Material(child: Center(child: TextField(focusNode: focusNode)))),
+        MaterialApp(
+          home: Material(
+            child: Center(child: TextField(focusNode: focusNode)),
+          ),
+        ),
       );
       focusNode.requestFocus();
       await tester.pumpAndSettle();
@@ -17800,7 +18195,9 @@ void main() {
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Center(child: TextField(focusNode: focusNode, readOnly: true))),
+          home: Material(
+            child: Center(child: TextField(focusNode: focusNode, readOnly: true)),
+          ),
         ),
       );
       focusNode.requestFocus();
@@ -17821,7 +18218,9 @@ void main() {
   testWidgets('hintLocales is passed to EditableText', (WidgetTester tester) async {
     const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: TextField(hintLocales: hintLocales))),
+      const MaterialApp(
+        home: Material(child: TextField(hintLocales: hintLocales)),
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -17850,10 +18249,9 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
               children: <Widget>[
                 TextField(obscureText: _obscureText, controller: widget.controller),
                 ElevatedButton(
-                  onPressed:
-                      () => setState(() {
-                        _obscureText = !_obscureText;
-                      }),
+                  onPressed: () => setState(() {
+                    _obscureText = !_obscureText;
+                  }),
                   child: const SizedBox.shrink(),
                 ),
               ],
@@ -17911,10 +18309,9 @@ Widget overlay({required Widget child}) {
     },
   );
   addTearDown(
-    () =>
-        entry
-          ..remove()
-          ..dispose(),
+    () => entry
+      ..remove()
+      ..dispose(),
   );
   return overlayWithEntry(entry);
 }

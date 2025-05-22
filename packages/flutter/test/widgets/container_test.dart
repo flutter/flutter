@@ -746,7 +746,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      RepaintBoundary(child: Padding(padding: const EdgeInsets.all(30.0), child: container)),
+      RepaintBoundary(
+        child: Padding(padding: const EdgeInsets.all(30.0), child: container),
+      ),
     );
 
     await expectLater(

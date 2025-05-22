@@ -129,10 +129,9 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // When the widget is larger, we increase the font size.
-        TextStyle? headlineStyle =
-            constraints.maxHeight >= pieChartMaxSize
-                ? textTheme.headlineSmall!.copyWith(fontSize: 70)
-                : textTheme.headlineSmall;
+        TextStyle? headlineStyle = constraints.maxHeight >= pieChartMaxSize
+            ? textTheme.headlineSmall!.copyWith(fontSize: 70)
+            : textTheme.headlineSmall;
 
         // With a large text scale factor, we set a max font size.
         if (GalleryOptions.of(context).textScaleFactor(context) > 1.0) {

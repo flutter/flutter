@@ -103,10 +103,9 @@ void main() {
 
       // This target is document as producing foo.dart but does not actually
       // output this value.
-      final Target badTarget =
-          TestTarget((Environment environment) async {})
-            ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
-            ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/out')];
+      final Target badTarget = TestTarget((Environment environment) async {})
+        ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+        ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/out')];
       final BuildResult result = await buildSystem.build(badTarget, environment);
 
       expect(result.hasException, false);
@@ -153,15 +152,14 @@ void main() {
   });
 
   group('BuildResult.outputs filtering', () {
-    final TestTarget allFilesTarget =
-        TestTarget((Environment environment) async {})
-          ..name = 'allTextFiles'
-          ..inputs = const <Source>[
-            Source.pattern('{PROJECT_DIR}/*'),
-            Source.pattern('{PROJECT_DIR}/*/*'),
-          ]
-          ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/out')]
-          ..dependencies = <Target>[];
+    final TestTarget allFilesTarget = TestTarget((Environment environment) async {})
+      ..name = 'allTextFiles'
+      ..inputs = const <Source>[
+        Source.pattern('{PROJECT_DIR}/*'),
+        Source.pattern('{PROJECT_DIR}/*/*'),
+      ]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/out')]
+      ..dependencies = <Target>[];
     late BuildSystem buildSystem;
 
     setUp(() {

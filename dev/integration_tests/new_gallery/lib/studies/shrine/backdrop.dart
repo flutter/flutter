@@ -81,21 +81,19 @@ class _BackdropTitle extends AnimatedWidget {
       AssetImage('packages/shrine_images/slanted_menu.png'),
     );
 
-    final Widget directionalSlantedMenuIcon =
-        Directionality.of(context) == TextDirection.ltr
-            ? slantedMenuIcon
-            : Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.rotationY(pi),
-              child: slantedMenuIcon,
-            );
+    final Widget directionalSlantedMenuIcon = Directionality.of(context) == TextDirection.ltr
+        ? slantedMenuIcon
+        : Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationY(pi),
+            child: slantedMenuIcon,
+          );
 
-    final String? menuButtonTooltip =
-        animation.isCompleted
-            ? GalleryLocalizations.of(context)!.shrineTooltipOpenMenu
-            : animation.isDismissed
-            ? GalleryLocalizations.of(context)!.shrineTooltipCloseMenu
-            : null;
+    final String? menuButtonTooltip = animation.isCompleted
+        ? GalleryLocalizations.of(context)!.shrineTooltipOpenMenu
+        : animation.isDismissed
+        ? GalleryLocalizations.of(context)!.shrineTooltipCloseMenu
+        : null;
 
     return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.titleLarge!,
@@ -132,11 +130,10 @@ class _BackdropTitle extends AnimatedWidget {
           Stack(
             children: <Widget>[
               Opacity(
-                opacity:
-                    CurvedAnimation(
-                      parent: ReverseAnimation(animation),
-                      curve: const Interval(0.5, 1),
-                    ).value,
+                opacity: CurvedAnimation(
+                  parent: ReverseAnimation(animation),
+                  curve: const Interval(0.5, 1),
+                ).value,
                 child: FractionalTranslation(
                   translation: Tween<Offset>(
                     begin: Offset.zero,
@@ -282,15 +279,13 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             excluding: !_frontLayerVisible,
             child: AnimatedBuilder(
               animation: PageStatus.of(context)!.cartController,
-              builder:
-                  (BuildContext context, Widget? child) => AnimatedBuilder(
-                    animation: PageStatus.of(context)!.menuController,
-                    builder:
-                        (BuildContext context, Widget? child) => _FrontLayer(
-                          onTap: menuPageIsVisible(context) ? _toggleBackdropLayerVisibility : null,
-                          child: widget.frontLayer,
-                        ),
-                  ),
+              builder: (BuildContext context, Widget? child) => AnimatedBuilder(
+                animation: PageStatus.of(context)!.menuController,
+                builder: (BuildContext context, Widget? child) => _FrontLayer(
+                  onTap: menuPageIsVisible(context) ? _toggleBackdropLayerVisibility : null,
+                  child: widget.frontLayer,
+                ),
+              ),
             ),
           ),
         ),
@@ -326,11 +321,13 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     );
     return AnimatedBuilder(
       animation: PageStatus.of(context)!.cartController,
-      builder:
-          (BuildContext context, Widget? child) => ExcludeSemantics(
-            excluding: cartPageIsVisible(context),
-            child: Scaffold(appBar: appBar, body: LayoutBuilder(builder: _buildStack)),
-          ),
+      builder: (BuildContext context, Widget? child) => ExcludeSemantics(
+        excluding: cartPageIsVisible(context),
+        child: Scaffold(
+          appBar: appBar,
+          body: LayoutBuilder(builder: _buildStack),
+        ),
+      ),
     );
   }
 }

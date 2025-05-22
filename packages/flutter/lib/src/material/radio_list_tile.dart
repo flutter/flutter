@@ -564,18 +564,17 @@ class RadioListTile<T> extends StatelessWidget {
         shape: shape,
         tileColor: tileColor,
         selectedTileColor: selectedTileColor,
-        onTap:
-            onChanged != null
-                ? () {
-                  if (toggleable && checked) {
-                    onChanged!(null);
-                    return;
-                  }
-                  if (!checked) {
-                    onChanged!(value);
-                  }
+        onTap: onChanged != null
+            ? () {
+                if (toggleable && checked) {
+                  onChanged!(null);
+                  return;
                 }
-                : null,
+                if (!checked) {
+                  onChanged!(value);
+                }
+              }
+            : null,
         selected: selected,
         autofocus: autofocus,
         contentPadding: contentPadding,

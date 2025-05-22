@@ -132,14 +132,13 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects =>
-      manifest.workspace
-          .map(
-            (String entry) => FlutterProject.fromDirectory(
-              directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-            ),
-          )
-          .toList();
+  List<FlutterProject> get workspaceProjects => manifest.workspace
+      .map(
+        (String entry) => FlutterProject.fromDirectory(
+          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
+        ),
+      )
+      .toList();
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -694,10 +693,9 @@ class AndroidProject extends FlutterProjectPlatform {
     return ProjectValidatorResult(
       name: visibleName,
       value: validJavaGradleAgpVersions.description,
-      status:
-          validJavaGradleAgpVersions.success
-              ? StatusProjectValidator.success
-              : StatusProjectValidator.error,
+      status: validJavaGradleAgpVersions.success
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
     );
   }
 
@@ -747,11 +745,11 @@ class AndroidProject extends FlutterProjectPlatform {
 
     // Begin description formatting.
     if (!compatibleGradleAgp) {
-      final String gradleDescription =
-          agpVersion != null
-              ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
-              : '';
-      description = '''
+      final String gradleDescription = agpVersion != null
+          ? 'Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion)}".'
+          : '';
+      description =
+          '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
 $gradleDescription\n
@@ -761,7 +759,8 @@ $gradleAgpCompatUrl
     }
     if (!compatibleJavaGradle) {
       // Should contain the agp error (if present) but not the valid String.
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible Java/Gradle versions.
 Java Version: $javaVersion, Gradle Version: $gradleVersion\n
@@ -770,7 +769,8 @@ $javaGradleCompatUrl
 ''';
     }
     if (!compatibleKgpGradle) {
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible KGP/Gradle versions.
 Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
@@ -779,7 +779,8 @@ See the link below for more information:
 ''';
     }
     if (!compatibleAgpKgp) {
-      description = '''
+      description =
+          '''
 ${compatibleGradleAgp ? '' : description}
 Incompatible AGP/KGP versions.
 AGP Version: $agpVersion, KGP Version: $kgpVersion\n

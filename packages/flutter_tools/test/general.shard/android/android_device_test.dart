@@ -237,8 +237,8 @@ flutter:
         ),
       ]),
       id: 'emulator-5555',
-      androidConsoleSocketFactory:
-          (String host, int port) async => FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
     );
 
     expect(await device.emulatorId, equals('dummyEmulatorId'));
@@ -309,8 +309,8 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]',
         ),
       ]),
-      androidConsoleSocketFactory:
-          (String host, int port) async => FakeUnresponsiveAndroidConsoleSocket(),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeUnresponsiveAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);
@@ -324,8 +324,8 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]',
         ),
       ]),
-      androidConsoleSocketFactory:
-          (String host, int port) async => FakeDisconnectingAndroidConsoleSocket(),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeDisconnectingAndroidConsoleSocket(),
     );
 
     expect(await device.emulatorId, isNull);

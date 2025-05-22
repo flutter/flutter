@@ -276,10 +276,9 @@ class WebAssetServer implements AssetReader {
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
         if (tlsCertPath != null && tlsCertKeyPath != null) {
-          final SecurityContext serverContext =
-              SecurityContext()
-                ..useCertificateChain(tlsCertPath)
-                ..usePrivateKey(tlsCertKeyPath);
+          final SecurityContext serverContext = SecurityContext()
+            ..useCertificateChain(tlsCertPath)
+            ..usePrivateKey(tlsCertKeyPath);
           httpServer = await HttpServer.bindSecure(address, port, serverContext);
         } else {
           httpServer = await HttpServer.bind(address, port);
@@ -392,36 +391,35 @@ class WebAssetServer implements AssetReader {
         return chromium.chromeConnection;
       },
       toolConfiguration: ToolConfiguration(
-        loadStrategy:
-            ddcModuleSystem
-                ? FrontendServerDdcLibraryBundleStrategyProvider(
-                  ReloadConfiguration.none,
-                  server,
-                  PackageUriMapper(packageConfig),
-                  digestProvider,
-                  BuildSettings(
-                    appEntrypoint: packageConfig.toPackageUri(
-                      globals.fs.file(entrypoint).absolute.uri,
-                    ),
+        loadStrategy: ddcModuleSystem
+            ? FrontendServerDdcLibraryBundleStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                  appEntrypoint: packageConfig.toPackageUri(
+                    globals.fs.file(entrypoint).absolute.uri,
                   ),
-                  packageConfigPath: buildInfo.packageConfigPath,
-                  hotReloadSourcesUri: server._baseUri!.replace(
-                    pathSegments: List<String>.from(server._baseUri!.pathSegments)
-                      ..add(_reloadScriptsFileName),
+                ),
+                packageConfigPath: buildInfo.packageConfigPath,
+                hotReloadSourcesUri: server._baseUri!.replace(
+                  pathSegments: List<String>.from(server._baseUri!.pathSegments)
+                    ..add(_reloadScriptsFileName),
+                ),
+              ).strategy
+            : FrontendServerRequireStrategyProvider(
+                ReloadConfiguration.none,
+                server,
+                PackageUriMapper(packageConfig),
+                digestProvider,
+                BuildSettings(
+                  appEntrypoint: packageConfig.toPackageUri(
+                    globals.fs.file(entrypoint).absolute.uri,
                   ),
-                ).strategy
-                : FrontendServerRequireStrategyProvider(
-                  ReloadConfiguration.none,
-                  server,
-                  PackageUriMapper(packageConfig),
-                  digestProvider,
-                  BuildSettings(
-                    appEntrypoint: packageConfig.toPackageUri(
-                      globals.fs.file(entrypoint).absolute.uri,
-                    ),
-                  ),
-                  packageConfigPath: buildInfo.packageConfigPath,
-                ).strategy,
+                ),
+                packageConfigPath: buildInfo.packageConfigPath,
+              ).strategy,
         debugSettings: DebugSettings(
           enableDebugExtension: true,
           urlEncoder: urlTunneller,
@@ -754,15 +752,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     }
 
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-    final Directory dartSdkParent =
-        globals.fs
-            .directory(
-              globals.artifacts!.getArtifactPath(
-                Artifact.engineDartSdkPath,
-                platform: TargetPlatform.web_javascript,
-              ),
-            )
-            .parent;
+    final Directory dartSdkParent = globals.fs
+        .directory(
+          globals.artifacts!.getArtifactPath(
+            Artifact.engineDartSdkPath,
+            platform: TargetPlatform.web_javascript,
+          ),
+        )
+        .parent;
     final File dartSdkFile = globals.fs.file(dartSdkParent.uri.resolve(path));
     if (dartSdkFile.existsSync()) {
       return dartSdkFile;
@@ -777,14 +774,16 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
+        ? kDdcLibraryBundleDartSdkJsArtifactMap
+        : kAmdDartSdkJsArtifactMap;
     return globals.fs.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
+        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
+        : kAmdDartSdkJsMapArtifactMap;
     return globals.fs.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
@@ -929,10 +928,9 @@ class WebDevFS implements DevFS {
     _connectedApps = dwds.connectedApps.listen(
       (AppConnection appConnection) async {
         try {
-          final DebugConnection debugConnection =
-              useDebugExtension
-                  ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
-                  : await dwds.debugConnection(appConnection);
+          final DebugConnection debugConnection = useDebugExtension
+              ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
+              : await dwds.debugConnection(appConnection);
           if (foundFirstConnection) {
             appConnection.runMain();
           } else {
@@ -1079,17 +1077,17 @@ class WebDevFS implements DevFS {
         'main.dart.js',
         ddcModuleSystem
             ? generateDDCLibraryBundleBootstrapScript(
-              entrypoint: entrypoint,
-              ddcModuleLoaderUrl: 'ddc_module_loader.js',
-              mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
-              isWindows: isWindows,
-            )
+                entrypoint: entrypoint,
+                ddcModuleLoaderUrl: 'ddc_module_loader.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: enableDwds,
+                isWindows: isWindows,
+              )
             : generateBootstrapScript(
-              requireUrl: 'require.js',
-              mapperUrl: 'stack_trace_mapper.js',
-              generateLoadingIndicator: enableDwds,
-            ),
+                requireUrl: 'require.js',
+                mapperUrl: 'stack_trace_mapper.js',
+                generateLoadingIndicator: enableDwds,
+              ),
       );
       const String onLoadEndBootstrap = 'on_load_end_bootstrap.js';
       if (ddcModuleSystem) {
@@ -1099,15 +1097,15 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
-              entrypoint: entrypoint,
-              nativeNullAssertions: nativeNullAssertions,
-              onLoadEndBootstrap: onLoadEndBootstrap,
-            )
+                entrypoint: entrypoint,
+                nativeNullAssertions: nativeNullAssertions,
+                onLoadEndBootstrap: onLoadEndBootstrap,
+              )
             : generateMainModule(
-              entrypoint: entrypoint,
-              nativeNullAssertions: nativeNullAssertions,
-              loaderRootDirectory: baseUri.toString(),
-            ),
+                entrypoint: entrypoint,
+                nativeNullAssertions: nativeNullAssertions,
+                loaderRootDirectory: baseUri.toString(),
+              ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to
       // be shared.

@@ -317,41 +317,38 @@ void main() {
                     CupertinoRadio<int>(
                       key: radioKey0,
                       value: 0,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                       autofocus: true,
                     ),
                     CupertinoRadio<int>(
                       key: radioKey1,
                       value: 1,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                     ),
                     CupertinoRadio<int>(
                       key: radioKey2,
                       value: 2,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                       focusNode: focusNode2,
                     ),
@@ -440,15 +437,9 @@ void main() {
     Widget buildRadio(bool show) {
       return CupertinoApp(
         home: Center(
-          child:
-              show
-                  ? CupertinoRadio<bool>(
-                    key: key,
-                    value: true,
-                    groupValue: false,
-                    onChanged: (_) {},
-                  )
-                  : Container(),
+          child: show
+              ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (_) {})
+              : Container(),
         ),
       );
     }

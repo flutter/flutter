@@ -98,10 +98,9 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent > 0),
        assert(squeeze > 0),
-       childDelegate =
-           looping
-               ? ListWheelChildLoopingListDelegate(children: children)
-               : ListWheelChildListDelegate(children: children);
+       childDelegate = looping
+           ? ListWheelChildLoopingListDelegate(children: children)
+           : ListWheelChildListDelegate(children: children);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -332,7 +331,10 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       ),
     );
 
-    return DecoratedBox(decoration: BoxDecoration(color: resolvedBackgroundColor), child: result);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: resolvedBackgroundColor),
+      child: result,
+    );
   }
 }
 

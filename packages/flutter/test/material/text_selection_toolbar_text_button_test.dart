@@ -85,11 +85,13 @@ void main() {
       final TextButton textButton = tester.widget(find.byType(TextButton));
       // The foreground color is hardcoded to black or white by default, not the
       // default value from ColorScheme.onSurface.
-      expect(textButton.style!.foregroundColor!.resolve(<MaterialState>{}), switch (colorScheme
-          .brightness) {
-        Brightness.light => const Color(0xff000000),
-        Brightness.dark => const Color(0xffffffff),
-      });
+      expect(
+        textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
+        switch (colorScheme.brightness) {
+          Brightness.light => const Color(0xff000000),
+          Brightness.dark => const Color(0xffffffff),
+        },
+      );
     });
 
     testWidgets('custom foreground color', (WidgetTester tester) async {

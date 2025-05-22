@@ -141,8 +141,8 @@ void main() {
             jsonDecode(rootProject.widgetPreviewScaffoldProject.packageConfig.readAsStringSync())
                 as Map<String, Object?>;
         expect(packageConfig.containsKey('packages'), true);
-        final List<Map<String, Object?>> packages =
-            (packageConfig['packages']! as List<dynamic>).cast<Map<String, Object?>>();
+        final List<Map<String, Object?>> packages = (packageConfig['packages']! as List<dynamic>)
+            .cast<Map<String, Object?>>();
         expect(packages.length, 2);
         expect(packages.last, WidgetPreviewStartCommand.flutterGenPackageConfigEntry);
       },
@@ -204,8 +204,11 @@ flutter:
   final Logger logger;
 
   @override
-  late final FlutterManifest manifest =
-      FlutterManifest.createFromPath(pubspecFile.path, fileSystem: fileSystem, logger: logger)!;
+  late final FlutterManifest manifest = FlutterManifest.createFromPath(
+    pubspecFile.path,
+    fileSystem: fileSystem,
+    logger: logger,
+  )!;
 
   @override
   late FlutterProject widgetPreviewScaffoldProject = FakeFlutterProject(

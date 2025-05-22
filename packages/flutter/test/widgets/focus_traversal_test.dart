@@ -26,8 +26,14 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                Focus(key: key2, child: SizedBox(key: key3, width: 100, height: 100)),
-                Focus(key: key4, child: SizedBox(key: key5, width: 100, height: 100)),
+                Focus(
+                  key: key2,
+                  child: SizedBox(key: key3, width: 100, height: 100),
+                ),
+                Focus(
+                  key: key4,
+                  child: SizedBox(key: key5, width: 100, height: 100),
+                ),
               ],
             ),
           ),
@@ -63,8 +69,14 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                Focus(key: key2, child: SizedBox(key: key3, width: 100, height: 100)),
-                Focus(key: key4, child: SizedBox(key: key5, width: 100, height: 100)),
+                Focus(
+                  key: key2,
+                  child: SizedBox(key: key3, width: 100, height: 100),
+                ),
+                Focus(
+                  key: key4,
+                  child: SizedBox(key: key5, width: 100, height: 100),
+                ),
               ],
             ),
           ),
@@ -319,8 +331,14 @@ void main() {
                   key: key2,
                   child: Column(
                     children: <Widget>[
-                      Focus(key: key3, child: Container(key: key4)),
-                      Focus(key: key5, child: Container(key: key6)),
+                      Focus(
+                        key: key3,
+                        child: Container(key: key4),
+                      ),
+                      Focus(
+                        key: key5,
+                        child: Container(key: key6),
+                      ),
                     ],
                   ),
                 ),
@@ -494,15 +512,16 @@ void main() {
       await tester.pumpWidget(
         FocusTraversalGroup(
           policy: WidgetOrderTraversalPolicy(
-            requestFocusCallback: (
-              FocusNode node, {
-              double? alignment,
-              ScrollPositionAlignmentPolicy? alignmentPolicy,
-              Curve? curve,
-              Duration? duration,
-            }) {
-              calledCallback = true;
-            },
+            requestFocusCallback:
+                (
+                  FocusNode node, {
+                  double? alignment,
+                  ScrollPositionAlignmentPolicy? alignmentPolicy,
+                  Curve? curve,
+                  Duration? duration,
+                }) {
+                  calledCallback = true;
+                },
           ),
           child: FocusScope(
             debugLabel: 'key1',
@@ -626,8 +645,14 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                Focus(key: key2, child: SizedBox(key: key3, width: 100, height: 100)),
-                Focus(key: key4, child: SizedBox(key: key5, width: 100, height: 100)),
+                Focus(
+                  key: key2,
+                  child: SizedBox(key: key3, width: 100, height: 100),
+                ),
+                Focus(
+                  key: key4,
+                  child: SizedBox(key: key5, width: 100, height: 100),
+                ),
               ],
             ),
           ),
@@ -818,8 +843,14 @@ void main() {
                   key: key2,
                   child: Column(
                     children: <Widget>[
-                      Focus(key: key3, child: Container(key: key4)),
-                      Focus(key: key5, child: Container(key: key6)),
+                      Focus(
+                        key: key3,
+                        child: Container(key: key4),
+                      ),
+                      Focus(
+                        key: key5,
+                        child: Container(key: key6),
+                      ),
                     ],
                   ),
                 ),
@@ -1111,15 +1142,16 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(
-              requestFocusCallback: (
-                FocusNode node, {
-                double? alignment,
-                ScrollPositionAlignmentPolicy? alignmentPolicy,
-                Curve? curve,
-                Duration? duration,
-              }) {
-                calledCallback = true;
-              },
+              requestFocusCallback:
+                  (
+                    FocusNode node, {
+                    double? alignment,
+                    ScrollPositionAlignmentPolicy? alignmentPolicy,
+                    Curve? curve,
+                    Duration? duration,
+                  }) {
+                    calledCallback = true;
+                  },
             ),
             child: FocusScope(
               debugLabel: 'key1',
@@ -1583,15 +1615,16 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(
-              requestFocusCallback: (
-                FocusNode node, {
-                double? alignment,
-                ScrollPositionAlignmentPolicy? alignmentPolicy,
-                Curve? curve,
-                Duration? duration,
-              }) {
-                calledCallback = true;
-              },
+              requestFocusCallback:
+                  (
+                    FocusNode node, {
+                    double? alignment,
+                    ScrollPositionAlignmentPolicy? alignmentPolicy,
+                    Curve? curve,
+                    Duration? duration,
+                  }) {
+                    calledCallback = true;
+                  },
             ),
             child: FocusScope(
               debugLabel: 'key1',
@@ -2480,11 +2513,10 @@ void main() {
       'Focus traversal inside a vertical scrollable scrolls to stay visible.',
       (WidgetTester tester) async {
         final List<int> items = List<int>.generate(11, (int index) => index).toList();
-        final List<FocusNode> nodes =
-            List<FocusNode>.generate(
-              11,
-              (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
-            ).toList();
+        final List<FocusNode> nodes = List<FocusNode>.generate(
+          11,
+          (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
+        ).toList();
         addTearDown(() {
           for (final FocusNode node in nodes) {
             node.dispose();
@@ -2505,10 +2537,9 @@ void main() {
                 Expanded(
                   child: ListView(
                     controller: controller,
-                    children:
-                        items.map<Widget>((int item) {
-                          return Focus(focusNode: nodes[item], child: Container(height: 100));
-                        }).toList(),
+                    children: items.map<Widget>((int item) {
+                      return Focus(focusNode: nodes[item], child: Container(height: 100));
+                    }).toList(),
                   ),
                 ),
                 Focus(focusNode: bottomNode, child: Container(height: 100)),
@@ -2606,11 +2637,10 @@ void main() {
       'Focus traversal inside a horizontal scrollable scrolls to stay visible.',
       (WidgetTester tester) async {
         final List<int> items = List<int>.generate(11, (int index) => index).toList();
-        final List<FocusNode> nodes =
-            List<FocusNode>.generate(
-              11,
-              (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
-            ).toList();
+        final List<FocusNode> nodes = List<FocusNode>.generate(
+          11,
+          (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
+        ).toList();
         addTearDown(() {
           for (final FocusNode node in nodes) {
             node.dispose();
@@ -2632,10 +2662,9 @@ void main() {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     controller: controller,
-                    children:
-                        items.map<Widget>((int item) {
-                          return Focus(focusNode: nodes[item], child: Container(width: 100));
-                        }).toList(),
+                    children: items.map<Widget>((int item) {
+                      return Focus(focusNode: nodes[item], child: Container(width: 100));
+                    }).toList(),
                   ),
                 ),
                 Focus(focusNode: rightNode, child: Container(width: 100)),
@@ -2901,7 +2930,9 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: ListTile(title: Text('title')))),
+        const MaterialApp(
+          home: Scaffold(body: ListTile(title: Text('title'))),
+        ),
       );
       final FocusNode? initialFocus = primaryFocus;
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -2917,17 +2948,17 @@ void main() {
         await tester.pumpWidget(
           WidgetsApp(
             color: Colors.white,
-            onGenerateRoute:
-                (RouteSettings settings) => PageRouteBuilder<void>(
-                  settings: settings,
-                  pageBuilder: (
+            onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder:
+                  (
                     BuildContext context,
                     Animation<double> animation1,
                     Animation<double> animation2,
                   ) {
                     return const Placeholder();
                   },
-                ),
+            ),
           ),
         );
 
@@ -2956,15 +2987,16 @@ void main() {
       await tester.pumpWidget(
         FocusTraversalGroup(
           policy: ReadingOrderTraversalPolicy(
-            requestFocusCallback: (
-              FocusNode node, {
-              double? alignment,
-              ScrollPositionAlignmentPolicy? alignmentPolicy,
-              Curve? curve,
-              Duration? duration,
-            }) {
-              calledCallback = true;
-            },
+            requestFocusCallback:
+                (
+                  FocusNode node, {
+                  double? alignment,
+                  ScrollPositionAlignmentPolicy? alignmentPolicy,
+                  Curve? curve,
+                  Duration? duration,
+                }) {
+                  calledCallback = true;
+                },
           ),
           child: FocusScope(
             debugLabel: 'key1',
@@ -3027,7 +3059,11 @@ void main() {
             descendantsAreFocusable: false,
             child: Focus(
               onFocusChange: (bool focused) => gotFocus = focused,
-              child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
+              child: Focus(
+                key: key1,
+                focusNode: focusNode,
+                child: Container(key: key2),
+              ),
             ),
           ),
         );
@@ -3191,7 +3227,11 @@ void main() {
                 descendantsAreFocusable: false,
                 child: Focus(
                   onFocusChange: (bool focused) => gotFocus = focused,
-                  child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
+                  child: Focus(
+                    key: key1,
+                    focusNode: focusNode,
+                    child: Container(key: key2),
+                  ),
                 ),
               ),
             ],
@@ -3304,7 +3344,10 @@ void main() {
             children: <Widget>[
               Focus(autofocus: true, focusNode: node1, child: Container()),
               ExcludeFocusTraversal(
-                child: Focus(focusNode: node2, child: Focus(focusNode: node3, child: Container())),
+                child: Focus(
+                  focusNode: node2,
+                  child: Focus(focusNode: node3, child: Container()),
+                ),
               ),
               Focus(focusNode: node4, child: Container()),
             ],

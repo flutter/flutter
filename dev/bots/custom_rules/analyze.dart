@@ -41,10 +41,9 @@ Future<void> analyzeWithRules(
       <String>[path.canonicalize(flutterRootDirectory)];
   final AnalysisContextCollection collection = AnalysisContextCollection(
     includedPaths: includes.toList(),
-    excludedPaths:
-        excludePaths
-            ?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'))
-            .toList(),
+    excludedPaths: excludePaths
+        ?.map((String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'))
+        .toList(),
   );
 
   final List<String> analyzerErrors = <String>[];

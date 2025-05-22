@@ -194,8 +194,9 @@ void main() {
           ),
         ),
       );
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
       position.animateTo(
         delegate.maxExtent - 20.0,
         curve: Curves.linear,
@@ -236,8 +237,9 @@ void main() {
           ),
         ),
       );
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
       position.animateTo(
         delegate.maxExtent + 20.0,
         curve: Curves.linear,
@@ -272,8 +274,9 @@ void main() {
           ),
         ),
       );
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
       position.animateTo(
         delegate.maxExtent + 300.0,
         curve: Curves.linear,

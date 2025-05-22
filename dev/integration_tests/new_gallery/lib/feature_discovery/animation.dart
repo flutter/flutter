@@ -120,7 +120,10 @@ class Animations {
         );
       case FeatureDiscoveryStatus.tap:
         return Tween<double>(begin: 1.0, end: 0).animate(
-          CurvedAnimation(parent: tapController, curve: const Interval(0, 0.4, curve: Curves.ease)),
+          CurvedAnimation(
+            parent: tapController,
+            curve: const Interval(0, 0.4, curve: Curves.ease),
+          ),
         );
       case FeatureDiscoveryStatus.dismiss:
         return Tween<double>(begin: 1.0, end: 0).animate(

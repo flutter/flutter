@@ -152,8 +152,8 @@ void main() {
       ),
     );
 
-    final Iterable<RenderClipRRect> renderClips =
-        tester.allRenderObjects.whereType<RenderClipRRect>();
+    final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects
+        .whereType<RenderClipRRect>();
     expect(renderClips, isEmpty);
   });
 

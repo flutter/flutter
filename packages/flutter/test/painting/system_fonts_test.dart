@@ -209,7 +209,9 @@ void main() {
 
   testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Slider(value: 0.0, onChanged: (double value) {}))),
+      MaterialApp(
+        home: Material(child: Slider(value: 0.0, onChanged: (double value) {})),
+      ),
     );
     // _RenderSlider is the last render object in the tree.
     final RenderObject renderObject = tester.allRenderObjects.last;

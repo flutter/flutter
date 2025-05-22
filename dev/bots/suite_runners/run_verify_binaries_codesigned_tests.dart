@@ -289,8 +289,10 @@ Future<List<String>> findBinaryPaths(
     '-type',
     'f',
   ]);
-  final List<String> allFiles =
-      (result.stdout as String).split('\n').where((String s) => s.isNotEmpty).toList();
+  final List<String> allFiles = (result.stdout as String)
+      .split('\n')
+      .where((String s) => s.isNotEmpty)
+      .toList();
 
   await Future.forEach(allFiles, (String filePath) async {
     if (await isBinary(filePath, processManager: processManager)) {
@@ -314,8 +316,9 @@ Future<List<String>> findXcframeworksPaths(
     '-name',
     '*xcframework',
   ]);
-  final List<String> allXcframeworkPaths =
-      LineSplitter.split(result.stdout as String).where((String s) => s.isNotEmpty).toList();
+  final List<String> allXcframeworkPaths = LineSplitter.split(
+    result.stdout as String,
+  ).where((String s) => s.isNotEmpty).toList();
   for (final String path in allXcframeworkPaths) {
     print('Found: $path\n');
   }

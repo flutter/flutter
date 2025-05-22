@@ -101,10 +101,16 @@ class StartCommand extends Command<void> {
 
   @visibleForTesting
   StartContext createContext(ArgResults argumentResults) {
-    final String frameworkUpstream =
-        getValueFromEnvOrArgs(kFrameworkUpstreamOption, argumentResults, platform.environment)!;
-    final String githubUsername =
-        getValueFromEnvOrArgs(kGithubUsernameOption, argumentResults, platform.environment)!;
+    final String frameworkUpstream = getValueFromEnvOrArgs(
+      kFrameworkUpstreamOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String githubUsername = getValueFromEnvOrArgs(
+      kGithubUsernameOption,
+      argumentResults,
+      platform.environment,
+    )!;
     final String frameworkMirror =
         getValueFromEnvOrArgs(
           kFrameworkMirrorOption,
@@ -113,10 +119,16 @@ class StartCommand extends Command<void> {
           allowNull: true,
         ) ??
         'git@github.com:$githubUsername/flutter.git';
-    final String candidateBranch =
-        getValueFromEnvOrArgs(kCandidateOption, argumentResults, platform.environment)!;
-    final String releaseChannel =
-        getValueFromEnvOrArgs(kReleaseOption, argumentResults, platform.environment)!;
+    final String candidateBranch = getValueFromEnvOrArgs(
+      kCandidateOption,
+      argumentResults,
+      platform.environment,
+    )!;
+    final String releaseChannel = getValueFromEnvOrArgs(
+      kReleaseOption,
+      argumentResults,
+      platform.environment,
+    )!;
     final String? dartRevision = getValueFromEnvOrArgs(
       kDartRevisionOption,
       argumentResults,
@@ -252,21 +264,18 @@ class StartContext extends Context {
     final String workingBranchName = 'cherrypicks-$candidateBranch';
 
     final String frameworkHead = await framework.reverseParse('HEAD');
-    state.framework =
-        (pb.Repository.create()
-          ..candidateBranch = candidateBranch
-          ..workingBranch = workingBranchName
-          ..startingGitHead = frameworkHead
-          ..currentGitHead = frameworkHead
-          ..checkoutPath = (await framework.checkoutDirectory).path
-          ..upstream =
-              (pb.Remote.create()
-                ..name = 'upstream'
-                ..url = framework.upstreamRemote.url)
-          ..mirror =
-              (pb.Remote.create()
-                ..name = 'mirror'
-                ..url = framework.mirrorRemote!.url));
+    state.framework = (pb.Repository.create()
+      ..candidateBranch = candidateBranch
+      ..workingBranch = workingBranchName
+      ..startingGitHead = frameworkHead
+      ..currentGitHead = frameworkHead
+      ..checkoutPath = (await framework.checkoutDirectory).path
+      ..upstream = (pb.Remote.create()
+        ..name = 'upstream'
+        ..url = framework.upstreamRemote.url)
+      ..mirror = (pb.Remote.create()
+        ..name = 'mirror'
+        ..url = framework.mirrorRemote!.url));
 
     if (dartRevision != null && dartRevision!.isNotEmpty) {
       // In the monorepo, the DEPS file is in flutter/flutter

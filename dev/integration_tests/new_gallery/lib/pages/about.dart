@@ -49,11 +49,10 @@ class _AboutDialog extends StatelessWidget {
           children: <Widget>[
             FutureBuilder<String>(
               future: getVersionNumber(),
-              builder:
-                  (BuildContext context, AsyncSnapshot<String> snapshot) => SelectableText(
-                    snapshot.hasData ? '$name ${snapshot.data}' : name,
-                    style: textTheme.headlineMedium!.apply(color: colorScheme.onPrimary),
-                  ),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) => SelectableText(
+                snapshot.hasData ? '$name ${snapshot.data}' : name,
+                style: textTheme.headlineMedium!.apply(color: colorScheme.onPrimary),
+              ),
             ),
             const SizedBox(height: 24),
             SelectableText.rich(
@@ -63,14 +62,13 @@ class _AboutDialog extends StatelessWidget {
                   TextSpan(
                     style: bodyTextStyle.copyWith(color: colorScheme.primary),
                     text: repoText,
-                    recognizer:
-                        TapGestureRecognizer()
-                          ..onTap = () async {
-                            final Uri url = Uri.parse('https://github.com/flutter/gallery/');
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(url);
-                            }
-                          },
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        final Uri url = Uri.parse('https://github.com/flutter/gallery/');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        }
+                      },
                   ),
                   TextSpan(style: bodyTextStyle, text: seeSourceSecond),
                 ],
@@ -86,18 +84,13 @@ class _AboutDialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder:
-                    (BuildContext context) => Theme(
-                      data: Theme.of(context).copyWith(
-                        textTheme:
-                            Typography.material2018(platform: Theme.of(context).platform).black,
-                        cardColor: Colors.white,
-                      ),
-                      child: const LicensePage(
-                        applicationName: name,
-                        applicationLegalese: legalese,
-                      ),
-                    ),
+                builder: (BuildContext context) => Theme(
+                  data: Theme.of(context).copyWith(
+                    textTheme: Typography.material2018(platform: Theme.of(context).platform).black,
+                    cardColor: Colors.white,
+                  ),
+                  child: const LicensePage(applicationName: name, applicationLegalese: legalese),
+                ),
               ),
             );
           },

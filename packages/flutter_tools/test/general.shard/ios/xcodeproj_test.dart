@@ -1138,9 +1138,9 @@ Information about project "Runner":
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          final Directory podXcodeProject = project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .childDirectory('Pods.xcodeproj')..createSync(recursive: true);
+          final Directory podXcodeProject =
+              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+                ..createSync(recursive: true);
 
           final String buildDirectory = fileSystem.path.absolute('build', 'ios');
           fakeProcessManager.addCommands(<FakeCommand>[
@@ -1206,9 +1206,9 @@ Build settings for action build and target plugin2:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          final Directory podXcodeProject = project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .childDirectory('Pods.xcodeproj')..createSync(recursive: true);
+          final Directory podXcodeProject =
+              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+                ..createSync(recursive: true);
 
           final String buildDirectory = fileSystem.path.absolute('build', 'ios');
           fakeProcessManager.addCommands(<FakeCommand>[
@@ -1262,9 +1262,9 @@ Build settings for action build and target plugin2:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          final Directory podXcodeProject = project.ios.hostAppRoot
-            .childDirectory('Pods')
-            .childDirectory('Pods.xcodeproj')..createSync(recursive: true);
+          final Directory podXcodeProject =
+              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+                ..createSync(recursive: true);
 
           final String buildDirectory = fileSystem.path.absolute('build', 'ios');
           fakeProcessManager.addCommands(<FakeCommand>[
@@ -1387,11 +1387,10 @@ Build settings for action build and target plugin2:
         expect(buildPhaseScriptContents.contains('export "ARCHS=arm64"'), isTrue);
       },
       overrides: <Type, Generator>{
-        Artifacts:
-            () => Artifacts.testLocalEngine(
-              localEngine: 'out/host_profile_arm64',
-              localEngineHost: 'out/host_release',
-            ),
+        Artifacts: () => Artifacts.testLocalEngine(
+          localEngine: 'out/host_profile_arm64',
+          localEngineHost: 'out/host_release',
+        ),
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1429,11 +1428,10 @@ Build settings for action build and target plugin2:
         expect(buildPhaseScriptContents.contains('export "ARCHS=x86_64"'), isTrue);
       },
       overrides: <Type, Generator>{
-        Artifacts:
-            () => Artifacts.testLocalEngine(
-              localEngine: 'out/host_profile',
-              localEngineHost: 'out/host_release',
-            ),
+        Artifacts: () => Artifacts.testLocalEngine(
+          localEngine: 'out/host_profile',
+          localEngineHost: 'out/host_release',
+        ),
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1553,11 +1551,10 @@ Build settings for action build and target plugin2:
           expect(buildPhaseScriptContents.contains('ARCHS=x86_64'), isTrue);
         },
         overrides: <Type, Generator>{
-          Artifacts:
-              () => Artifacts.testLocalEngine(
-                localEngine: 'out/ios_debug_sim_unopt',
-                localEngineHost: 'out/host_debug_unopt',
-              ),
+          Artifacts: () => Artifacts.testLocalEngine(
+            localEngine: 'out/ios_debug_sim_unopt',
+            localEngineHost: 'out/host_debug_unopt',
+          ),
           Platform: () => macOS,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
@@ -1592,11 +1589,10 @@ Build settings for action build and target plugin2:
           expect(buildPhaseScriptContents.contains('ARCHS=arm64'), isTrue);
         },
         overrides: <Type, Generator>{
-          Artifacts:
-              () => Artifacts.testLocalEngine(
-                localEngine: 'out/ios_debug_sim_arm64',
-                localEngineHost: 'out/host_debug_unopt',
-              ),
+          Artifacts: () => Artifacts.testLocalEngine(
+            localEngine: 'out/ios_debug_sim_arm64',
+            localEngineHost: 'out/host_debug_unopt',
+          ),
           Platform: () => macOS,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
@@ -1605,12 +1601,11 @@ Build settings for action build and target plugin2:
     });
 
     String? propertyFor(String key, File file) {
-      final List<String> properties =
-          file
-              .readAsLinesSync()
-              .where((String line) => line.startsWith('$key='))
-              .map((String line) => line.split('=')[1])
-              .toList();
+      final List<String> properties = file
+          .readAsLinesSync()
+          .where((String line) => line.startsWith('$key='))
+          .map((String line) => line.split('=')[1])
+          .toList();
       return properties.isEmpty ? null : properties.first;
     }
 

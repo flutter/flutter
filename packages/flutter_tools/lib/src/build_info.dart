@@ -433,8 +433,10 @@ String? validatedBuildNumberForPlatform(
     if (tmpBuildNumber.isEmpty) {
       return null;
     }
-    final List<String> segments =
-        tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildNumber
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
@@ -485,8 +487,10 @@ String? validatedBuildNameForPlatform(
     if (tmpBuildName.isEmpty) {
       return null;
     }
-    final List<String> segments =
-        tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildName
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
     while (segments.length < 3) {
       segments.add('0');
     }
@@ -753,8 +757,9 @@ DarwinArch getCurrentDarwinArch() {
   return switch (globals.os.hostPlatform) {
     HostPlatform.darwin_arm64 => DarwinArch.arm64,
     HostPlatform.darwin_x64 => DarwinArch.x86_64,
-    final HostPlatform unsupported =>
-      throw Exception('Unsupported Darwin host platform "$unsupported"'),
+    final HostPlatform unsupported => throw Exception(
+      'Unsupported Darwin host platform "$unsupported"',
+    ),
   };
 }
 
@@ -830,8 +835,9 @@ String getWebBuildDirectory() {
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
-  final String arch =
-      (targetPlatform == null) ? _getCurrentHostPlatformArchName() : targetPlatform.simpleName;
+  final String arch = (targetPlatform == null)
+      ? _getCurrentHostPlatformArchName()
+      : targetPlatform.simpleName;
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }

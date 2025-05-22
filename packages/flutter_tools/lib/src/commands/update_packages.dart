@@ -156,22 +156,21 @@ class UpdatePackagesCommand extends FlutterCommand {
       ..writeAsBytesSync(data, flush: true);
   }
 
-  late final Directory _syntheticPackageDir =
-      (() {
-        final String? optionPath = stringArg('synthetic-package-path');
-        if (optionPath == null) {
-          return globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
-        }
-        final Directory syntheticPackageDir = globals.fs.directory(optionPath);
-        if (!syntheticPackageDir.existsSync()) {
-          syntheticPackageDir.createSync(recursive: true);
-        }
-        globals.printStatus(
-          'The synthetic package with all pub dependencies across the repo will '
-          'be written to ${syntheticPackageDir.absolute.path}.',
-        );
-        return syntheticPackageDir;
-      })();
+  late final Directory _syntheticPackageDir = (() {
+    final String? optionPath = stringArg('synthetic-package-path');
+    if (optionPath == null) {
+      return globals.fs.systemTempDirectory.createTempSync('flutter_update_packages.');
+    }
+    final Directory syntheticPackageDir = globals.fs.directory(optionPath);
+    if (!syntheticPackageDir.existsSync()) {
+      syntheticPackageDir.createSync(recursive: true);
+    }
+    globals.printStatus(
+      'The synthetic package with all pub dependencies across the repo will '
+      'be written to ${syntheticPackageDir.absolute.path}.',
+    );
+    return syntheticPackageDir;
+  })();
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -101,8 +101,9 @@ class _OverviewGrid extends StatelessWidget {
             isDisplayDesktop(context) &&
             constraints.maxWidth > minWidthForTwoColumns &&
             textScaleFactor <= 2;
-        final double boxWidth =
-            hasMultipleColumns ? constraints.maxWidth / 2 - spacing / 2 : double.infinity;
+        final double boxWidth = hasMultipleColumns
+            ? constraints.maxWidth / 2 - spacing / 2
+            : double.infinity;
 
         return Wrap(
           runSpacing: spacing,

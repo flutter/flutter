@@ -126,6 +126,9 @@ class Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(color: color, child: ListTile(textColor: Colors.white, title: Text(title)));
+    return Card(
+      color: color,
+      child: ListTile(textColor: Colors.white, title: Text(title)),
+    );
   }
 }

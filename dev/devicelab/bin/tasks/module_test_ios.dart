@@ -306,7 +306,8 @@ dependencies:
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );
         }
-        podfileContent = '''
+        podfileContent =
+            '''
 $podfileContent
 
 post_install do |installer|
@@ -541,8 +542,9 @@ end
 
       section('Run platform unit tests');
 
-      final String resultBundleTemp =
-          Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
+      final String resultBundleTemp = Directory.systemTemp
+          .createTempSync('flutter_module_test_ios_xcresult.')
+          .path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -713,7 +715,8 @@ Future<void> _createFakeDartPlugin(String name, Directory parent) async {
   // Add the Dart registration hook that the build will generate a call to.
   final File dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
   content = await dartCode.readAsString();
-  content = '''
+  content =
+      '''
 $content
 
 class $dartPluginClass {

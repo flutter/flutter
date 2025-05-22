@@ -1267,7 +1267,8 @@ void main() {
                 final List<String> settingsBeforeMigration = <String>[
                   ..._allSectionsUnmigrated(platform),
                 ];
-                settingsBeforeMigration[_frameworksBuildPhaseSectionIndex] = '''
+                settingsBeforeMigration[_frameworksBuildPhaseSectionIndex] =
+                    '''
 /* Begin PBXFrameworksBuildPhase section */
 /* End PBXFrameworksBuildPhase section */
 /* Begin NonExistant section */
@@ -1653,7 +1654,8 @@ void main() {
                 final List<String> settingsBeforeMigration = <String>[
                   ..._allSectionsUnmigrated(platform),
                 ];
-                settingsBeforeMigration[_groupSectionIndex] = '''
+                settingsBeforeMigration[_groupSectionIndex] =
+                    '''
 /* Begin PBXGroup section */
 /* End PBXGroup section */
 /* Begin NonExistant section */
@@ -1943,7 +1945,8 @@ void main() {
                 final List<String> settingsBeforeMigration = <String>[
                   ..._allSectionsUnmigrated(platform),
                 ];
-                settingsBeforeMigration[_nativeTargetSectionIndex] = '''
+                settingsBeforeMigration[_nativeTargetSectionIndex] =
+                    '''
 /* Begin PBXNativeTarget section */
 /* End PBXNativeTarget section */
 /* Begin NonExistant section */
@@ -2260,7 +2263,8 @@ void main() {
                 final List<String> settingsBeforeMigration = <String>[
                   ..._allSectionsUnmigrated(platform),
                 ];
-                settingsBeforeMigration[_projectSectionIndex] = '''
+                settingsBeforeMigration[_projectSectionIndex] =
+                    '''
 /* Begin PBXProject section */
 /* End PBXProject section */
 /* Begin NonExistant section */
@@ -3180,7 +3184,8 @@ String _validBuildActions(
   }
   String preActions = '';
   if (hasFrameworkScript) {
-    preActions = '''
+    preActions =
+        '''
 \n      <PreActions>
          <ExecutionAction
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
@@ -3207,7 +3212,8 @@ String _validBuildActions(
 
   String buildEntries = '';
   if (hasBuildEntries) {
-    buildEntries = '''
+    buildEntries =
+        '''
 \n      <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"

@@ -437,6 +437,8 @@ dev dependencies:
 transitive dependencies:
 - platform 3.1.0
 - process 4.2.4 [file path platform]
-'''.split('\n').forEach(filter!);
+'''
+        .split('\n')
+        .forEach(filter!);
   }
 }

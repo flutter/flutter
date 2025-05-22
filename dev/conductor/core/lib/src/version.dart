@@ -78,16 +78,20 @@ class Version {
     Match? match = versionPatterns[VersionType.stable]!.firstMatch(versionString);
     if (match != null) {
       // parse stable
-      final List<int> parts =
-          match.groups(<int>[1, 2, 3]).map((String? s) => int.parse(s!)).toList();
+      final List<int> parts = match
+          .groups(<int>[1, 2, 3])
+          .map((String? s) => int.parse(s!))
+          .toList();
       return Version(x: parts[0], y: parts[1], z: parts[2], type: VersionType.stable);
     }
     // development tag
     match = versionPatterns[VersionType.development]!.firstMatch(versionString);
     if (match != null) {
       // parse development
-      final List<int> parts =
-          match.groups(<int>[1, 2, 3, 4, 5]).map((String? s) => int.parse(s!)).toList();
+      final List<int> parts = match
+          .groups(<int>[1, 2, 3, 4, 5])
+          .map((String? s) => int.parse(s!))
+          .toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -101,8 +105,10 @@ class Version {
     match = versionPatterns[VersionType.latest]!.firstMatch(versionString);
     if (match != null) {
       // parse latest
-      final List<int> parts =
-          match.groups(<int>[1, 2, 3, 4, 5, 6]).map((String? s) => int.parse(s!)).toList();
+      final List<int> parts = match
+          .groups(<int>[1, 2, 3, 4, 5, 6])
+          .map((String? s) => int.parse(s!))
+          .toList();
       return Version(
         x: parts[0],
         y: parts[1],

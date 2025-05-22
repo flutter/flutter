@@ -214,8 +214,9 @@ class PreviewDetector {
       final PreviewMapping filePreviewsMapping = await findPreviewFunctions(
         fs.file(Uri.file(event.path)),
       );
-      final bool hasExistingPreviews =
-          _pathToPreviews.keys.where((PreviewPath e) => e.path == event.path).isNotEmpty;
+      final bool hasExistingPreviews = _pathToPreviews.keys
+          .where((PreviewPath e) => e.path == event.path)
+          .isNotEmpty;
       if (filePreviewsMapping.isEmpty && !hasExistingPreviews) {
         // No previews found or removed, nothing to do.
         return;

@@ -82,11 +82,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ChipThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -119,11 +118,10 @@ void main() {
       deleteIconBoxConstraints: BoxConstraints.tightForFinite(),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -621,41 +619,43 @@ void main() {
   });
 
   testWidgets('ChipThemeData lerps correctly', (WidgetTester tester) async {
-    final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
-      secondaryColor: Colors.black,
-      brightness: Brightness.dark,
-      labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.black),
-    ).copyWith(
-      elevation: 1.0,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-      shape: const StadiumBorder(),
-      side: const BorderSide(),
-      pressElevation: 4.0,
-      shadowColor: Colors.black,
-      surfaceTintColor: Colors.black,
-      selectedShadowColor: Colors.black,
-      showCheckmark: false,
-      checkmarkColor: Colors.black,
-      iconTheme: const IconThemeData(size: 26.0),
-    );
-    final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
-      secondaryColor: Colors.white,
-      brightness: Brightness.light,
-      labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.white),
-    ).copyWith(
-      padding: const EdgeInsets.all(2.0),
-      labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      shape: const BeveledRectangleBorder(),
-      side: const BorderSide(color: Colors.white),
-      elevation: 5.0,
-      pressElevation: 10.0,
-      shadowColor: Colors.white,
-      surfaceTintColor: Colors.white,
-      selectedShadowColor: Colors.white,
-      showCheckmark: true,
-      checkmarkColor: Colors.white,
-      iconTheme: const IconThemeData(size: 22.0),
-    );
+    final ChipThemeData chipThemeBlack =
+        ChipThemeData.fromDefaults(
+          secondaryColor: Colors.black,
+          brightness: Brightness.dark,
+          labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.black),
+        ).copyWith(
+          elevation: 1.0,
+          labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+          shape: const StadiumBorder(),
+          side: const BorderSide(),
+          pressElevation: 4.0,
+          shadowColor: Colors.black,
+          surfaceTintColor: Colors.black,
+          selectedShadowColor: Colors.black,
+          showCheckmark: false,
+          checkmarkColor: Colors.black,
+          iconTheme: const IconThemeData(size: 26.0),
+        );
+    final ChipThemeData chipThemeWhite =
+        ChipThemeData.fromDefaults(
+          secondaryColor: Colors.white,
+          brightness: Brightness.light,
+          labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.white),
+        ).copyWith(
+          padding: const EdgeInsets.all(2.0),
+          labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          shape: const BeveledRectangleBorder(),
+          side: const BorderSide(color: Colors.white),
+          elevation: 5.0,
+          pressElevation: 10.0,
+          shadowColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          selectedShadowColor: Colors.white,
+          showCheckmark: true,
+          checkmarkColor: Colors.white,
+          iconTheme: const IconThemeData(size: 22.0),
+        );
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5)!;
     const Color middleGrey = Color(0xff7f7f7f);
@@ -1237,8 +1237,12 @@ void main() {
   ) async {
     Widget buildChip({OutlinedBorder? shape, BorderSide? side}) {
       return MaterialApp(
-        theme: ThemeData(chipTheme: ChipThemeData(shape: shape, side: side)),
-        home: const Material(child: Center(child: RawChip(label: Text('RawChip')))),
+        theme: ThemeData(
+          chipTheme: ChipThemeData(shape: shape, side: side),
+        ),
+        home: const Material(
+          child: Center(child: RawChip(label: Text('RawChip'))),
+        ),
       );
     }
 

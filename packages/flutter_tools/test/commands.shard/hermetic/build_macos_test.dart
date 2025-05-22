@@ -307,8 +307,8 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -335,8 +335,8 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -361,8 +361,8 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -387,10 +387,9 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            setUpFakeXcodeBuildHandler('Debug', verbose: true),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler('Debug', verbose: true),
+      ]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -415,8 +414,8 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Profile')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Profile')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
@@ -442,8 +441,8 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -476,8 +475,9 @@ STDERR STUFF
         '--dart-define=fizz.far=3',
         '--tree-shake-icons',
       ]);
-      final List<String> contents =
-          fileSystem.file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig').readAsLinesSync();
+      final List<String> contents = fileSystem
+          .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
+          .readAsLinesSync();
 
       expect(
         contents,
@@ -502,8 +502,8 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -593,18 +593,17 @@ STDERR STUFF
         '--build-name=1.2.3',
         '--build-number=42',
       ]);
-      final String contents =
-          fileSystem
-              .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
-              .readAsStringSync();
+      final String contents = fileSystem
+          .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
+          .readAsStringSync();
 
       expect(contents, contains('FLUTTER_BUILD_NAME=1.2.3'));
       expect(contents, contains('FLUTTER_BUILD_NUMBER=42'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
+      ProcessManager: () =>
+          FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -624,8 +623,10 @@ STDERR STUFF
         ),
       );
 
-      final bool supported =
-          BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
+      final bool supported = BuildMacosCommand(
+        logger: BufferLogger.test(),
+        verboseHelp: false,
+      ).supported;
       expect(
         () => runner.run(<String>['build', 'macos', '--no-pub']),
         supported ? throwsToolExit() : throwsA(isA<UsageException>()),
@@ -689,11 +690,10 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            // we never generate code size snapshot here
-            setUpFakeXcodeBuildHandler('Release'),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // we never generate code size snapshot here
+        setUpFakeXcodeBuildHandler('Release'),
+      ]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -730,16 +730,15 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            // These are generated by gen_snapshot because flutter assemble passes
-            // extra flags specifying this output path
-            setUpFakeXcodeBuildHandler(
-              'Release',
-              onRun: (_) {
-                fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
-                  ..createSync(recursive: true)
-                  ..writeAsStringSync('''
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        // These are generated by gen_snapshot because flutter assemble passes
+        // extra flags specifying this output path
+        setUpFakeXcodeBuildHandler(
+          'Release',
+          onRun: (_) {
+            fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 [
   {
     "l": "dart:_internal",
@@ -748,12 +747,12 @@ STDERR STUFF
     "s": 2400
   }
 ]''');
-                fileSystem.file('build/flutter_size_01/trace.arm64.json')
-                  ..createSync(recursive: true)
-                  ..writeAsStringSync('{}');
-              },
-            ),
-          ]),
+            fileSystem.file('build/flutter_size_01/trace.arm64.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('{}');
+          },
+        ),
+      ]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -812,20 +811,18 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            setUpFakeXcodeBuildHandler(
-              'Debug',
-              additionalCommandArguments: <String>[
-                'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements',
-              ],
-            ),
-          ]),
-      Platform:
-          () => FakePlatform(
-            operatingSystem: 'macos',
-            environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/', 'LUCI_CI': 'True'},
-          ),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Debug',
+          additionalCommandArguments: <String>[
+            'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements',
+          ],
+        ),
+      ]),
+      Platform: () => FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/', 'LUCI_CI': 'True'},
+      ),
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },
@@ -881,20 +878,18 @@ STDERR STUFF
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            setUpFakeXcodeBuildHandler(
-              'Release',
-              additionalCommandArguments: <String>[
-                'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
-              ],
-            ),
-          ]),
-      Platform:
-          () => FakePlatform(
-            operatingSystem: 'macos',
-            environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/', 'LUCI_CI': 'True'},
-          ),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Release',
+          additionalCommandArguments: <String>[
+            'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
+          ],
+        ),
+      ]),
+      Platform: () => FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/', 'LUCI_CI': 'True'},
+      ),
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },

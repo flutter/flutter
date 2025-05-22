@@ -69,13 +69,13 @@ String _getOutputAppLinkSettingsTaskFor(String buildVariant) {
 Directory getApkDirectory(FlutterProject project) {
   return project.isModule
       ? project.android.buildDirectory
-          .childDirectory('host')
-          .childDirectory('outputs')
-          .childDirectory('apk')
+            .childDirectory('host')
+            .childDirectory('outputs')
+            .childDirectory('apk')
       : project.android.buildDirectory
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('flutter-apk');
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('flutter-apk');
 }
 
 /// The directory where the app bundle artifact is generated.
@@ -83,13 +83,13 @@ Directory getApkDirectory(FlutterProject project) {
 Directory getBundleDirectory(FlutterProject project) {
   return project.isModule
       ? project.android.buildDirectory
-          .childDirectory('host')
-          .childDirectory('outputs')
-          .childDirectory('bundle')
+            .childDirectory('host')
+            .childDirectory('outputs')
+            .childDirectory('bundle')
       : project.android.buildDirectory
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('bundle');
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('bundle');
 }
 
 @visibleForTesting
@@ -204,8 +204,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       outputDirectory = outputDirectory.childDirectory('host');
     }
 
-    final bool containsX86Targets =
-        androidBuildInfo.where((AndroidBuildInfo info) => info.containsX86Target).isNotEmpty;
+    final bool containsX86Targets = androidBuildInfo
+        .where((AndroidBuildInfo info) => info.containsX86Target)
+        .isNotEmpty;
     if (containsX86Targets) {
       _logger.printWarning(androidX86DeprecationWarning);
     }
@@ -220,10 +221,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
     printHowToConsumeAar(
-      buildModes:
-          androidBuildInfo.map<String>((AndroidBuildInfo androidBuildInfo) {
-            return androidBuildInfo.buildInfo.modeName;
-          }).toSet(),
+      buildModes: androidBuildInfo.map<String>((AndroidBuildInfo androidBuildInfo) {
+        return androidBuildInfo.buildInfo.modeName;
+      }).toSet(),
       androidPackage: project.manifest.androidPackage,
       repoDirectory: getRepoDirectory(outputDirectory),
       buildNumber: buildNumber,
@@ -493,8 +493,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // Assembly work starts here.
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-    final String assembleTask =
-        isBuildingBundle ? getBundleTaskFor(buildInfo) : getAssembleTaskFor(buildInfo);
+    final String assembleTask = isBuildingBundle
+        ? getBundleTaskFor(buildInfo)
+        : getAssembleTaskFor(buildInfo);
 
     if (_logger.isVerbose) {
       options.add('--full-stacktrace');
@@ -537,8 +538,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final String baseApplicationName =
         project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2
-            ? 'android.app.Application'
-            : 'io.flutter.app.FlutterApplication';
+        ? 'android.app.Application'
+        : 'io.flutter.app.FlutterApplication';
     options.add('-Pbase-application-name=$baseApplicationName');
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null) {
@@ -622,10 +623,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
         throwToolExit(failedToStripDebugSymbolsErrorMessage);
       }
 
-      final String appSize =
-          (buildInfo.mode == BuildMode.debug)
-              ? '' // Don't display the size when building a debug variant.
-              : ' (${getSizeAsPlatformMB(bundleFile.lengthSync())})';
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsPlatformMB(bundleFile.lengthSync())})';
 
       if (buildInfo.codeSizeDirectory != null) {
         await _performCodeSizeAnalysis('aab', bundleFile, androidBuildInfo);
@@ -639,10 +639,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return;
     }
     // Gradle produced APKs.
-    final Iterable<String> apkFilesPaths =
-        project.isModule
-            ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
-            : listApkPaths(androidBuildInfo);
+    final Iterable<String> apkFilesPaths = project.isModule
+        ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
+        : listApkPaths(androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
 
     // Generate sha1 for every generated APKs.
@@ -661,10 +660,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
       apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-      final String appSize =
-          (buildInfo.mode == BuildMode.debug)
-              ? '' // Don't display the size when building a debug variant.
-              : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
+      final String appSize = (buildInfo.mode == BuildMode.debug)
+          ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
       _logger.printStatus(
         '${_logger.terminal.successMark} '
         'Built ${_fileSystem.path.relative(apkFile.path)}$appSize',

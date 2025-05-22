@@ -63,8 +63,9 @@ class DarwinDependencyManagement {
         'The platform ${platform.name} is incompatible with Darwin Dependency Managers. Only iOS and macOS are allowed.',
       );
     }
-    final XcodeBasedProject xcodeProject =
-        platform == SupportedPlatform.ios ? _project.ios : _project.macos;
+    final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+        ? _project.ios
+        : _project.macos;
     if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
@@ -80,11 +81,8 @@ class DarwinDependencyManagement {
     if (_project.isModule) {
       return;
     }
-    final (
-      :int totalCount,
-      :int swiftPackageCount,
-      :int podCount,
-    ) = await _evaluatePluginsAndPrintWarnings(platform: platform, xcodeProject: xcodeProject);
+    final (:int totalCount, :int swiftPackageCount, :int podCount) =
+        await _evaluatePluginsAndPrintWarnings(platform: platform, xcodeProject: xcodeProject);
 
     final bool useCocoapods;
     if (xcodeProject.usesSwiftPackageManager) {

@@ -310,7 +310,10 @@ class _MailPreviewActionBar extends StatelessWidget {
             ),
             onPressed: onDelete,
           ),
-          IconButton(icon: Icon(Icons.more_vert, color: color), onPressed: () {}),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: color),
+            onPressed: () {},
+          ),
           const SizedBox(width: 12),
         ],
         ProfileAvatar(avatar: avatar),

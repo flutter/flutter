@@ -123,11 +123,10 @@ void main() {
       tall: Typography.tall2018,
     ).debugFillProperties(builder);
 
-    final List<String> nonDefaultPropertyNames =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.name!)
-            .toList();
+    final List<String> nonDefaultPropertyNames = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.name!)
+        .toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });

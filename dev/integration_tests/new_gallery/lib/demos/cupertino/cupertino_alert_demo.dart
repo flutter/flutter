@@ -102,26 +102,25 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
-      builder:
-          (BuildContext context) => ApplyTextOptions(
-            child: CupertinoAlertDialog(
-              title: Text(localizations.dialogDiscardTitle),
-              actions: <Widget>[
-                CupertinoDialogAction(
-                  isDestructiveAction: true,
-                  onPressed: () {
-                    Navigator.of(context).pop(localizations.cupertinoAlertDiscard);
-                  },
-                  child: Text(localizations.cupertinoAlertDiscard),
-                ),
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertCancel),
-                  child: Text(localizations.cupertinoAlertCancel),
-                ),
-              ],
+      builder: (BuildContext context) => ApplyTextOptions(
+        child: CupertinoAlertDialog(
+          title: Text(localizations.dialogDiscardTitle),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(context).pop(localizations.cupertinoAlertDiscard);
+              },
+              child: Text(localizations.cupertinoAlertDiscard),
             ),
-          ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertCancel),
+              child: Text(localizations.cupertinoAlertCancel),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -129,23 +128,22 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
-      builder:
-          (BuildContext context) => ApplyTextOptions(
-            child: CupertinoAlertDialog(
-              title: Text(localizations.cupertinoAlertLocationTitle),
-              content: Text(localizations.cupertinoAlertLocationDescription),
-              actions: <Widget>[
-                CupertinoDialogAction(
-                  onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertDontAllow),
-                  child: Text(localizations.cupertinoAlertDontAllow),
-                ),
-                CupertinoDialogAction(
-                  onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertAllow),
-                  child: Text(localizations.cupertinoAlertAllow),
-                ),
-              ],
+      builder: (BuildContext context) => ApplyTextOptions(
+        child: CupertinoAlertDialog(
+          title: Text(localizations.cupertinoAlertLocationTitle),
+          content: Text(localizations.cupertinoAlertLocationDescription),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertDontAllow),
+              child: Text(localizations.cupertinoAlertDontAllow),
             ),
-          ),
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertAllow),
+              child: Text(localizations.cupertinoAlertAllow),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -153,13 +151,12 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoDialogRoute<String>(
       context: context,
-      builder:
-          (BuildContext context) => ApplyTextOptions(
-            child: CupertinoDessertDialog(
-              title: Text(localizations.cupertinoAlertFavoriteDessert),
-              content: Text(localizations.cupertinoAlertDessertDescription),
-            ),
-          ),
+      builder: (BuildContext context) => ApplyTextOptions(
+        child: CupertinoDessertDialog(
+          title: Text(localizations.cupertinoAlertFavoriteDessert),
+          content: Text(localizations.cupertinoAlertDessertDescription),
+        ),
+      ),
     );
   }
 
@@ -173,33 +170,31 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
   static Route<String> _modalRoute(BuildContext context, Object? arguments) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return CupertinoModalPopupRoute<String>(
-      builder:
-          (BuildContext context) => ApplyTextOptions(
-            child: CupertinoActionSheet(
-              title: Text(localizations.cupertinoAlertFavoriteDessert),
-              message: Text(localizations.cupertinoAlertDessertDescription),
-              actions: <Widget>[
-                CupertinoActionSheetAction(
-                  onPressed:
-                      () => Navigator.of(context).pop(localizations.cupertinoAlertCheesecake),
-                  child: Text(localizations.cupertinoAlertCheesecake),
-                ),
-                CupertinoActionSheetAction(
-                  onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertTiramisu),
-                  child: Text(localizations.cupertinoAlertTiramisu),
-                ),
-                CupertinoActionSheetAction(
-                  onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertApplePie),
-                  child: Text(localizations.cupertinoAlertApplePie),
-                ),
-              ],
-              cancelButton: CupertinoActionSheetAction(
-                isDefaultAction: true,
-                onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertCancel),
-                child: Text(localizations.cupertinoAlertCancel),
-              ),
+      builder: (BuildContext context) => ApplyTextOptions(
+        child: CupertinoActionSheet(
+          title: Text(localizations.cupertinoAlertFavoriteDessert),
+          message: Text(localizations.cupertinoAlertDessertDescription),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertCheesecake),
+              child: Text(localizations.cupertinoAlertCheesecake),
             ),
+            CupertinoActionSheetAction(
+              onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertTiramisu),
+              child: Text(localizations.cupertinoAlertTiramisu),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertApplePie),
+              child: Text(localizations.cupertinoAlertApplePie),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(context).pop(localizations.cupertinoAlertCancel),
+            child: Text(localizations.cupertinoAlertCancel),
           ),
+        ),
+      ),
     );
   }
 
@@ -214,15 +209,13 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> with Restoratio
         builder: (BuildContext context) {
           final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
           final Widget showAlertButton = CupertinoButton.filled(
-            onPressed:
-                () =>
-                    switch (widget.type) {
-                      AlertDemoType.alert => _alertDialogRoute,
-                      AlertDemoType.alertTitle => _alertWithTitleDialogRoute,
-                      AlertDemoType.alertButtons => _alertWithButtonsDialogRoute,
-                      AlertDemoType.alertButtonsOnly => _alertWithButtonsOnlyDialogRoute,
-                      AlertDemoType.actionSheet => _modalPopupRoute,
-                    }.present(),
+            onPressed: () => switch (widget.type) {
+              AlertDemoType.alert => _alertDialogRoute,
+              AlertDemoType.alertTitle => _alertWithTitleDialogRoute,
+              AlertDemoType.alertButtons => _alertWithButtonsDialogRoute,
+              AlertDemoType.alertButtonsOnly => _alertWithButtonsOnlyDialogRoute,
+              AlertDemoType.actionSheet => _modalPopupRoute,
+            }.present(),
             child: Text(localizations.cupertinoShowAlert),
           );
 

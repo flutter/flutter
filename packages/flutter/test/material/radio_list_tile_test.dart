@@ -15,7 +15,10 @@ import '../widgets/semantics_tester.dart';
 Widget wrap({Widget? child}) {
   return MediaQuery(
     data: const MediaQueryData(),
-    child: Directionality(textDirection: TextDirection.ltr, child: Material(child: child)),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
   );
 }
 
@@ -27,17 +30,19 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
     // irrelevant when searching with [find.byType].
-    final Type radioListTileType =
-        const RadioListTile<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioListTileType = const RadioListTile<int>(
+      value: 0,
+      groupValue: 0,
+      onChanged: null,
+    ).runtimeType;
 
     List<RadioListTile<int>> generatedRadioListTiles;
-    List<RadioListTile<int>> findTiles() =>
-        find
-            .byType(radioListTileType)
-            .evaluate()
-            .map<Widget>((Element element) => element.widget)
-            .cast<RadioListTile<int>>()
-            .toList();
+    List<RadioListTile<int>> findTiles() => find
+        .byType(radioListTileType)
+        .evaluate()
+        .map<Widget>((Element element) => element.widget)
+        .cast<RadioListTile<int>>()
+        .toList();
 
     Widget buildFrame() {
       return wrap(
@@ -46,17 +51,16 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -168,18 +172,17 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        log.add(value);
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    log.add(value);
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -233,18 +236,17 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        log.add(value);
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    log.add(value);
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -619,8 +621,11 @@ void main() {
   });
 
   testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
-    final Type radioType =
-        const Radio<bool>(groupValue: true, value: true, onChanged: null).runtimeType;
+    final Type radioType = const Radio<bool>(
+      groupValue: true,
+      value: true,
+      onChanged: null,
+    ).runtimeType;
 
     await tester.pumpWidget(
       wrap(
@@ -929,14 +934,13 @@ void main() {
             return RadioListTile<int>(
               value: 0,
               fillColor: fillColor,
-              onChanged:
-                  enabled
-                      ? (int? newValue) {
-                        setState(() {
-                          groupValue = newValue;
-                        });
-                      }
-                      : null,
+              onChanged: enabled
+                  ? (int? newValue) {
+                      setState(() {
+                        groupValue = newValue;
+                      });
+                    }
+                  : null,
               groupValue: groupValue,
             );
           },
@@ -1055,14 +1059,13 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return RadioListTile<int>(
                 value: 0,
-                onChanged:
-                    enabled
-                        ? (int? newValue) {
-                          setState(() {
-                            groupValue = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (int? newValue) {
+                        setState(() {
+                          groupValue = newValue;
+                        });
+                      }
+                    : null,
                 hoverColor: hoverColor,
                 groupValue: groupValue,
               );
@@ -1440,8 +1443,9 @@ void main() {
                 groupValue: true,
                 onChanged: (_) {},
                 fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-                overlayColor:
-                    useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+                overlayColor: useOverlay
+                    ? MaterialStateProperty.resolveWith(getOverlayColor)
+                    : null,
                 hoverColor: hoverColor,
               ),
             ),
@@ -1514,14 +1518,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return RadioListTile<int>(
                   value: 0,
-                  onChanged:
-                      enabled
-                          ? (int? newValue) {
-                            setState(() {
-                              groupValue = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (int? newValue) {
+                          setState(() {
+                            groupValue = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: hoverColor,
                   groupValue: groupValue,
                 );
@@ -1653,14 +1656,14 @@ void main() {
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            themeDataIsThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-                : null,
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 RadioListTile<int>(
@@ -1771,15 +1774,15 @@ void main() {
         key: UniqueKey(),
         theme: ThemeData(
           platform: TargetPlatform.iOS,
-          listTileTheme:
-              themeDataIsThreeLine != null
-                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
-                  : null,
+          listTileTheme: themeDataIsThreeLine != null
+              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+              : null,
         ),
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 RadioListTile<int>.adaptive(

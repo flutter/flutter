@@ -80,19 +80,18 @@ void main() {
             'libraryFilters': <Object>['package:foo/'],
             'librariesAlreadyCompiled': <Object>[],
           },
-          jsonResponse:
-              SourceReport(
-                ranges: <SourceReportRange>[
-                  SourceReportRange(
-                    scriptIndex: 0,
-                    startPos: 0,
-                    endPos: 0,
-                    compiled: true,
-                    coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
-                  ),
-                ],
-                scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
-              ).toJson(),
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
+              ),
+            ],
+            scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
+          ).toJson(),
         ),
       ],
     );
@@ -185,19 +184,18 @@ void main() {
             'libraryFilters': <Object>['package:foo/'],
             'librariesAlreadyCompiled': <Object>[],
           },
-          jsonResponse:
-              SourceReport(
-                ranges: <SourceReportRange>[
-                  SourceReportRange(
-                    scriptIndex: 0,
-                    startPos: 0,
-                    endPos: 0,
-                    compiled: true,
-                    coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
-                  ),
-                ],
-                scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
-              ).toJson(),
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
+              ),
+            ],
+            scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
+          ).toJson(),
         ),
       ],
     );
@@ -249,19 +247,18 @@ void main() {
             'reportLines': true,
             'librariesAlreadyCompiled': <Object>[],
           },
-          jsonResponse:
-              SourceReport(
-                ranges: <SourceReportRange>[
-                  SourceReportRange(
-                    scriptIndex: 0,
-                    startPos: 0,
-                    endPos: 0,
-                    compiled: true,
-                    coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
-                  ),
-                ],
-                scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
-              ).toJson(),
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
+              ),
+            ],
+            scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
+          ).toJson(),
         ),
       ],
     );
@@ -314,20 +311,19 @@ void main() {
             'libraryFilters': <Object>['package:foo/'],
             'librariesAlreadyCompiled': <Object>[],
           },
-          jsonResponse:
-              SourceReport(
-                ranges: <SourceReportRange>[
-                  SourceReportRange(
-                    scriptIndex: 0,
-                    startPos: 0,
-                    endPos: 0,
-                    compiled: true,
-                    coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
-                    branchCoverage: SourceReportCoverage(hits: <int>[4, 6], misses: <int>[5]),
-                  ),
-                ],
-                scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
-              ).toJson(),
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
+                branchCoverage: SourceReportCoverage(hits: <int>[4, 6], misses: <int>[5]),
+              ),
+            ],
+            scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
+          ).toJson(),
         ),
       ],
     );
@@ -379,10 +375,9 @@ void main() {
       );
       await collector.collectCoverage(
         TestTestDevice(),
-        serviceOverride:
-            createFakeVmServiceHostWithFooAndBar(
-              libraryFilters: <String>['package:foo/', 'package:bar/'],
-            ).vmService,
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/', 'package:bar/'],
+        ).vmService,
       );
 
       Future<void> getHitMapAndVerify() async {
@@ -431,11 +426,10 @@ void main() {
       fooFile.deleteSync();
       await collector.collectCoverage(
         TestTestDevice(),
-        serviceOverride:
-            createFakeVmServiceHostWithFooAndBar(
-              libraryFilters: <String>['package:foo/', 'package:bar/'],
-              librariesAlreadyCompiled: <String>['package:foo/foo.dart', 'package:bar/bar.dart'],
-            ).vmService,
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/', 'package:bar/'],
+          librariesAlreadyCompiled: <String>['package:foo/foo.dart', 'package:bar/bar.dart'],
+        ).vmService,
       );
       await getHitMapAndVerify();
     } finally {
@@ -462,10 +456,9 @@ void main() {
       );
       await collector.collectCoverage(
         TestTestDevice(),
-        serviceOverride:
-            createFakeVmServiceHostWithFooAndBar(
-              libraryFilters: <String>['package:foo/', 'package:bar/'],
-            ).vmService,
+        serviceOverride: createFakeVmServiceHostWithFooAndBar(
+          libraryFilters: <String>['package:foo/', 'package:bar/'],
+        ).vmService,
       );
 
       final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
@@ -506,10 +499,9 @@ void main() {
         );
         await collector.collectCoverage(
           TestTestDevice(),
-          serviceOverride:
-              createFakeVmServiceHostWithFooAndBar(
-                libraryFilters: <String>['package:foo/', 'package:bar/'],
-              ).vmService,
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(
+            libraryFilters: <String>['package:foo/', 'package:bar/'],
+          ).vmService,
         );
 
         String? report = await collector.finalizeCoverage();
@@ -524,10 +516,9 @@ void main() {
         );
         await collector.collectCoverage(
           TestTestDevice(),
-          serviceOverride:
-              createFakeVmServiceHostWithFooAndBar(
-                libraryFilters: <String>['package:foo/'],
-              ).vmService,
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(
+            libraryFilters: <String>['package:foo/'],
+          ).vmService,
         );
 
         report = await collector.finalizeCoverage();
@@ -567,24 +558,23 @@ void main() {
         );
         await collector.collectCoverage(
           TestTestDevice(),
-          serviceOverride:
-              createFakeVmServiceHostWithFooAndBar(
-                libraryFilters: <String>['package:foo/', 'package:bar/'],
-              ).vmService,
+          serviceOverride: createFakeVmServiceHostWithFooAndBar(
+            libraryFilters: <String>['package:foo/', 'package:bar/'],
+          ).vmService,
         );
 
         // Expect one message for each phase.
-        final List<String> logPhaseMessages =
-            testTimeRecorder
-                .getPrintAsListForTesting()
-                .where((String m) => m.startsWith('Runtime for phase '))
-                .toList();
+        final List<String> logPhaseMessages = testTimeRecorder
+            .getPrintAsListForTesting()
+            .where((String m) => m.startsWith('Runtime for phase '))
+            .toList();
         expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
         // Several phases actually does something, but here we just expect at
         // least one phase to take a non-zero amount of time.
-        final List<String> logPhaseMessagesNonZero =
-            logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+        final List<String> logPhaseMessagesNonZero = logPhaseMessages
+            .where((String m) => !m.contains(Duration.zero.toString()))
+            .toList();
         expect(logPhaseMessagesNonZero, isNotEmpty);
       } finally {
         tempDir?.deleteSync(recursive: true);
@@ -614,19 +604,18 @@ void main() {
             'libraryFilters': <String>['package:foo/'],
             'librariesAlreadyCompiled': <String>[],
           },
-          jsonResponse:
-              SourceReport(
-                ranges: <SourceReportRange>[
-                  SourceReportRange(
-                    scriptIndex: 0,
-                    startPos: 0,
-                    endPos: 0,
-                    compiled: true,
-                    coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
-                  ),
-                ],
-                scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
-              ).toJson(),
+          jsonResponse: SourceReport(
+            ranges: <SourceReportRange>[
+              SourceReportRange(
+                scriptIndex: 0,
+                startPos: 0,
+                endPos: 0,
+                compiled: true,
+                coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
+              ),
+            ],
+            scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
+          ).toJson(),
         ),
       ],
     );
@@ -691,19 +680,18 @@ void main() {
               'libraryFilters': <String>['package:foo/'],
               'librariesAlreadyCompiled': <String>['package:foo/foo.dart'],
             },
-            jsonResponse:
-                SourceReport(
-                  ranges: <SourceReportRange>[
-                    SourceReportRange(
-                      scriptIndex: 0,
-                      startPos: 0,
-                      endPos: 0,
-                      compiled: true,
-                      coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[]),
-                    ),
-                  ],
-                  scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
-                ).toJson(),
+            jsonResponse: SourceReport(
+              ranges: <SourceReportRange>[
+                SourceReportRange(
+                  scriptIndex: 0,
+                  startPos: 0,
+                  endPos: 0,
+                  compiled: true,
+                  coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[]),
+                ),
+              ],
+              scripts: <ScriptRef>[ScriptRef(uri: 'package:foo/foo.dart', id: '1')],
+            ).toJson(),
           ),
         ],
       );
@@ -784,29 +772,28 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
           'librariesAlreadyCompiled': librariesAlreadyCompiled,
           if (libraryFilters != null) 'libraryFilters': libraryFilters,
         },
-        jsonResponse:
-            SourceReport(
-              ranges: <SourceReportRange>[
-                SourceReportRange(
-                  scriptIndex: 0,
-                  startPos: 0,
-                  endPos: 0,
-                  compiled: true,
-                  coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
-                ),
-                SourceReportRange(
-                  scriptIndex: 1,
-                  startPos: 0,
-                  endPos: 0,
-                  compiled: true,
-                  coverage: SourceReportCoverage(hits: <int>[47, 21], misses: <int>[32, 86]),
-                ),
-              ],
-              scripts: <ScriptRef>[
-                ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
-                ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
-              ],
-            ).toJson(),
+        jsonResponse: SourceReport(
+          ranges: <SourceReportRange>[
+            SourceReportRange(
+              scriptIndex: 0,
+              startPos: 0,
+              endPos: 0,
+              compiled: true,
+              coverage: SourceReportCoverage(hits: <int>[1, 3], misses: <int>[2]),
+            ),
+            SourceReportRange(
+              scriptIndex: 1,
+              startPos: 0,
+              endPos: 0,
+              compiled: true,
+              coverage: SourceReportCoverage(hits: <int>[47, 21], misses: <int>[32, 86]),
+            ),
+          ],
+          scripts: <ScriptRef>[
+            ScriptRef(uri: 'package:foo/foo.dart', id: '1'),
+            ScriptRef(uri: 'package:bar/bar.dart', id: '2'),
+          ],
+        ).toJson(),
       ),
     ],
   );

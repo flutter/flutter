@@ -100,8 +100,9 @@ class _NextPageState extends State<NextPage> {
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color:
-                    brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
+                color: brightness == Brightness.light
+                    ? CupertinoColors.black
+                    : CupertinoColors.white,
               ),
             ),
             middle: const Text('Contacts Group'),
@@ -128,25 +129,24 @@ class _NextPageState extends State<NextPage> {
             },
           ),
           SliverFillRemaining(
-            child:
-                searchIsActive
-                    ? ColoredBox(
-                      color: CupertinoColors.extraLightBackgroundGray,
-                      child: Center(child: Text(text, textAlign: TextAlign.center)),
-                    )
-                    : const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          Text('Drag me up', textAlign: TextAlign.center),
-                          Text(
-                            'Tap on the search field to open the search view',
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+            child: searchIsActive
+                ? ColoredBox(
+                    color: CupertinoColors.extraLightBackgroundGray,
+                    child: Center(child: Text(text, textAlign: TextAlign.center)),
+                  )
+                : const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Text('Drag me up', textAlign: TextAlign.center),
+                        Text(
+                          'Tap on the search field to open the search view',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
+                  ),
           ),
         ],
       ),

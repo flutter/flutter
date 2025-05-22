@@ -158,15 +158,14 @@ void main() {
         await startWidgetPreview(rootProject: rootProject);
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -180,15 +179,14 @@ void main() {
         }, getCurrentDirectory: () => rootProject);
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -229,15 +227,14 @@ List<_i1.WidgetPreview> previews() => [
         expect(generatedFile.readAsStringSync(), expectedGeneratedFileContents);
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -264,15 +261,14 @@ List<_i1.WidgetPreview> previews() => [
         }, getCurrentDirectory: () => fs.directory(rootProject));
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -284,15 +280,14 @@ List<_i1.WidgetPreview> previews() => [
         await cleanWidgetPreview(rootProject: rootProject);
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -337,15 +332,14 @@ List<_i1.WidgetPreview> previews() => [
       },
       overrides: <Type, Generator>{
         ProcessManager: () => loggingProcessManager,
-        Pub:
-            () => Pub.test(
-              fileSystem: fs,
-              logger: logger,
-              processManager: loggingProcessManager,
-              botDetector: botDetector,
-              platform: platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });

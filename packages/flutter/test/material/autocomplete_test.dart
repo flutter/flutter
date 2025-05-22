@@ -210,14 +210,15 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController textEditingController,
-              FocusNode focusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              return Container(key: fieldKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return Container(key: fieldKey);
+                },
           ),
         ),
       ),
@@ -239,13 +240,14 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -545,10 +547,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -564,10 +565,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -584,10 +584,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.up));
 
       await tester.tap(find.byType(RawAutocomplete<String>));

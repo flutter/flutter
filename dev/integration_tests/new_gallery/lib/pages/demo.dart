@@ -140,8 +140,9 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
     }
 
     setStateAndUpdate(() {
-      _demoStateIndex.value =
-          _demoStateIndex.value == newStateIndex ? _DemoState.normal.index : newStateIndex;
+      _demoStateIndex.value = _demoStateIndex.value == newStateIndex
+          ? _DemoState.normal.index
+          : newStateIndex;
     });
   }
 
@@ -346,14 +347,13 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
         child: MouseRegion(
           cursor: isDemoNormal ? MouseCursor.defer : SystemMouseCursors.click,
           child: GestureDetector(
-            onTap:
-                isDemoNormal
-                    ? null
-                    : () {
-                      setStateAndUpdate(() {
-                        _demoStateIndex.value = _DemoState.normal.index;
-                      });
-                    },
+            onTap: isDemoNormal
+                ? null
+                : () {
+                    setStateAndUpdate(() {
+                      _demoStateIndex.value = _DemoState.normal.index;
+                    });
+                  },
             child: Semantics(excludeSemantics: !isDemoNormal, child: demoContent),
           ),
         ),
@@ -401,11 +401,10 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
               child: Container(
                 padding: const EdgeInsets.only(top: 56),
                 child: Container(
-                  color:
-                      ColorTween(
-                        begin: Colors.transparent,
-                        end: GalleryThemeData.darkThemeData.canvasColor,
-                      ).animate(_codeBackgroundColorController).value,
+                  color: ColorTween(
+                    begin: Colors.transparent,
+                    end: GalleryThemeData.darkThemeData.canvasColor,
+                  ).animate(_codeBackgroundColorController).value,
                 ),
               ),
             );
@@ -670,10 +669,9 @@ class CodeDisplayPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding:
-              isDesktop
-                  ? const EdgeInsets.only(bottom: 8)
-                  : const EdgeInsets.symmetric(vertical: 8),
+          padding: isDesktop
+              ? const EdgeInsets.only(bottom: 8)
+              : const EdgeInsets.symmetric(vertical: 8),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white.withOpacity(0.15),

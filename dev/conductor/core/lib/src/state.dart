@@ -13,7 +13,8 @@ import './proto/conductor_state.pbenum.dart' show ReleasePhase;
 
 const String kStateFileName = '.flutter_conductor_state.json';
 
-const String betaPostReleaseMsg = """
+const String betaPostReleaseMsg =
+    """
   'Ensure the following post release steps are complete:',
   '\t 1. Post announcement to discord and press the publish button',
   '\t\t Discord: ${globals.discordReleaseChannel}',
@@ -21,7 +22,8 @@ const String betaPostReleaseMsg = """
   '\t\t Chatroom: ${globals.flutterReleaseHotline}',
 """;
 
-const String stablePostReleaseMsg = """
+const String stablePostReleaseMsg =
+    """
   'Ensure the following post release steps are complete:',
   '\t 1. Update hotfix to stable wiki following documentation best practices',
   '\t\t Wiki link: ${globals.hotfixToStableWiki}',
@@ -140,11 +142,12 @@ String presentPhases(ReleasePhase currentPhase) {
 String phaseInstructions(pb.ConductorState state) {
   switch (state.currentPhase) {
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-      final List<pb.Cherrypick> outstandingCherrypicks =
-          state.framework.cherrypicks.where((pb.Cherrypick cp) {
-            return cp.state == pb.CherrypickState.PENDING ||
-                cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
-          }).toList();
+      final List<pb.Cherrypick> outstandingCherrypicks = state.framework.cherrypicks.where((
+        pb.Cherrypick cp,
+      ) {
+        return cp.state == pb.CherrypickState.PENDING ||
+            cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
+      }).toList();
       if (outstandingCherrypicks.isNotEmpty) {
         return <String>[
           'You must now manually apply the following framework cherrypicks to the checkout',

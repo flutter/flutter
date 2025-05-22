@@ -106,15 +106,14 @@ void main() {
       final FileSystem fs = LocalFileSystem.test(signals: Signals.test());
       final BufferLogger logger = BufferLogger.test();
       FlutterManifest.empty(logger: logger);
-      final Directory projectDir =
-          fs.systemTempDirectory.createTempSync('project')
-            ..childDirectory('lib/src').createSync(recursive: true)
-            ..childFile('pubspec.yaml').writeAsStringSync(kPubspec)
-            ..childFile('lib/foo.dart').writeAsStringSync(kFooDart)
-            ..childFile('lib/src/bar.dart').writeAsStringSync(kBarDart)
-            ..childFile('lib/src/brightness.dart').writeAsStringSync(kBrightnessDart)
-            ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
-            ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart);
+      final Directory projectDir = fs.systemTempDirectory.createTempSync('project')
+        ..childDirectory('lib/src').createSync(recursive: true)
+        ..childFile('pubspec.yaml').writeAsStringSync(kPubspec)
+        ..childFile('lib/foo.dart').writeAsStringSync(kFooDart)
+        ..childFile('lib/src/bar.dart').writeAsStringSync(kBarDart)
+        ..childFile('lib/src/brightness.dart').writeAsStringSync(kBrightnessDart)
+        ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
+        ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
         projectRoot: projectDir,

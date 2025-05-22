@@ -301,8 +301,9 @@ class KernelSnapshot extends Target {
     // reflected in the environment variable.
     if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final XcodeBasedProject xcodeProject =
-          targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
+      final XcodeBasedProject xcodeProject = targetPlatform == TargetPlatform.ios
+          ? flutterProject.ios
+          : flutterProject.macos;
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {
       flavor = environment.defines[kFlavor];

@@ -41,8 +41,9 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
       '--target=lib/main.dart',
     ];
     int hotRestartCount = 0;
-    final String expectedMessage =
-        webDevice == WebDevice.webServer ? 'Recompile complete' : 'Reloaded application';
+    final String expectedMessage = webDevice == WebDevice.webServer
+        ? 'Recompile complete'
+        : 'Reloaded application';
     final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);

@@ -117,8 +117,10 @@ void main() {
     () async {
       environment.defines[kIosArchs] = 'x86_64';
       environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
-      final String appFrameworkPath =
-          environment.buildDir.childDirectory('App.framework').childFile('App').path;
+      final String appFrameworkPath = environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .path;
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -180,8 +182,10 @@ void main() {
     () async {
       environment.defines[kIosArchs] = 'arm64';
       environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-      final String appFrameworkPath =
-          environment.buildDir.childDirectory('App.framework').childFile('App').path;
+      final String appFrameworkPath = environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .path;
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -389,8 +393,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 

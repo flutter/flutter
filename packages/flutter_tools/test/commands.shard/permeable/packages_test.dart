@@ -279,15 +279,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -308,15 +307,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -350,14 +348,13 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-            ),
+        Pub: () => Pub(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+        ),
         FeatureFlags: disableExplicitPackageDependencies,
       },
     );
@@ -425,15 +422,14 @@ workspace:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -467,14 +463,13 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-            ),
+        Pub: () => Pub(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+        ),
       },
     );
 
@@ -499,15 +494,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -537,15 +531,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -567,15 +560,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -600,15 +592,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -630,15 +621,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -658,15 +648,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -686,15 +675,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -720,15 +708,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -752,15 +739,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });
@@ -801,15 +787,14 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(false),
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -840,15 +825,14 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(true),
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -882,15 +866,14 @@ flutter:
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -923,15 +906,14 @@ flutter:
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -960,15 +942,14 @@ flutter:
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });

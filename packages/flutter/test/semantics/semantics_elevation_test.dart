@@ -171,7 +171,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: Material(elevation: 24.0, child: Text('Hello')))),
+      const MaterialApp(
+        home: Center(child: Material(elevation: 24.0, child: Text('Hello'))),
+      ),
     );
 
     final SemanticsNode node = tester.getSemantics(find.text('Hello'));

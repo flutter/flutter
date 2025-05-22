@@ -218,8 +218,9 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction:
-          verboseLogging ? null : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: verboseLogging
+          ? null
+          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
     );
   } finally {
     status.cancel();
@@ -235,10 +236,9 @@ Future<void> buildMacOS({
     final Directory outputDirectory = globals.fs.directory(applicationBundle);
     // This output directory is the .app folder itself.
     final int? directorySize = globals.os.getDirectorySize(outputDirectory);
-    final String appSize =
-        (buildInfo.mode == BuildMode.debug || directorySize == null)
-            ? '' // Don't display the size when building a debug variant.
-            : ' (${getSizeAsPlatformMB(directorySize)})';
+    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsPlatformMB(directorySize)})';
     globals.printStatus(
       '${globals.terminal.successMark} '
       'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',

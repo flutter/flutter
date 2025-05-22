@@ -197,7 +197,8 @@ class NextContext extends Context {
 
         await pushWorkingBranch(framework, state.framework);
       case pb.ReleasePhase.PUBLISH_VERSION:
-        final String command = '''
+        final String command =
+            '''
           tool-proxy-cli --tool_proxy=/abns/dart-eng-tool-proxy/prod-dart-eng-tool-proxy-tool-proxy.annealed-tool-proxy \\
           --block_on_mpa -I flutter_release \\
           :git_branch ${state.framework.candidateBranch} \\

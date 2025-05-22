@@ -198,10 +198,9 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
           final String mainFormat = formatParts.first;
           final List<String> addedFormats = formatParts.skip(1).toList();
 
-          final String addedFormatsString =
-              addedFormats.map((String addFormat) {
-                return dateFormatAddFormatTemplate.replaceAll('@(format)', addFormat);
-              }).join();
+          final String addedFormatsString = addedFormats.map((String addFormat) {
+            return dateFormatAddFormatTemplate.replaceAll('@(format)', addFormat);
+          }).join();
 
           return dateFormatTemplate
               .replaceAll('@(placeholder)', placeholder.name)
@@ -280,7 +279,8 @@ String generateBaseClassMethod(
   final String comment =
       message.description?.split('\n').map((String line) => '  /// $line').join('\n') ??
       '  /// No description provided for @${message.resourceId}.';
-  final String templateLocaleTranslationComment = '''
+  final String templateLocaleTranslationComment =
+      '''
   /// In $templateArbLocale, this message translates to:
   /// **'${generateString(message.value)}'**''';
 
@@ -344,37 +344,36 @@ String _generateLookupByScriptCode(
   AppResourceBundleCollection allBundles,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<String> switchClauses =
-      allBundles.languages.map((String language) {
-        final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-        final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((LocaleInfo locale) {
-          return locale.scriptCode != null && locale.countryCode == null;
-        });
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((LocaleInfo locale) {
+      return locale.scriptCode != null && locale.countryCode == null;
+    });
 
-        if (localesWithScriptCodes.isEmpty) {
-          return null;
-        }
+    if (localesWithScriptCodes.isEmpty) {
+      return null;
+    }
 
-        return _addSpaces(
-          nestedSwitchTemplate
-              .replaceAll('@(languageCode)', language)
-              .replaceAll('@(code)', 'scriptCode')
-              .replaceAll(
-                '@(switchClauses)',
-                _addSpaces(
-                  localesWithScriptCodes
-                      .map((LocaleInfo locale) {
-                        return generateSwitchClauseTemplate(
-                          locale,
-                        ).replaceAll('@(case)', locale.scriptCode!);
-                      })
-                      .join('\n'),
-                  spaces: 8,
-                ),
-              ),
-          spaces: 4,
-        );
-      }).whereType<String>();
+    return _addSpaces(
+      nestedSwitchTemplate
+          .replaceAll('@(languageCode)', language)
+          .replaceAll('@(code)', 'scriptCode')
+          .replaceAll(
+            '@(switchClauses)',
+            _addSpaces(
+              localesWithScriptCodes
+                  .map((LocaleInfo locale) {
+                    return generateSwitchClauseTemplate(
+                      locale,
+                    ).replaceAll('@(case)', locale.scriptCode!);
+                  })
+                  .join('\n'),
+              spaces: 8,
+            ),
+          ),
+      spaces: 4,
+    );
+  }).whereType<String>();
 
   if (switchClauses.isEmpty) {
     return '';
@@ -389,37 +388,36 @@ String _generateLookupByCountryCode(
   AppResourceBundleCollection allBundles,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<String> switchClauses =
-      allBundles.languages.map((String language) {
-        final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-        final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) {
-          return locale.countryCode != null && locale.scriptCode == null;
-        });
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) {
+      return locale.countryCode != null && locale.scriptCode == null;
+    });
 
-        if (localesWithCountryCodes.isEmpty) {
-          return null;
-        }
+    if (localesWithCountryCodes.isEmpty) {
+      return null;
+    }
 
-        return _addSpaces(
-          nestedSwitchTemplate
-              .replaceAll('@(languageCode)', language)
-              .replaceAll('@(code)', 'countryCode')
-              .replaceAll(
-                '@(switchClauses)',
-                _addSpaces(
-                  localesWithCountryCodes
-                      .map((LocaleInfo locale) {
-                        return generateSwitchClauseTemplate(
-                          locale,
-                        ).replaceAll('@(case)', locale.countryCode!);
-                      })
-                      .join('\n'),
-                  spaces: 4,
-                ),
-              ),
-          spaces: 4,
-        );
-      }).whereType<String>();
+    return _addSpaces(
+      nestedSwitchTemplate
+          .replaceAll('@(languageCode)', language)
+          .replaceAll('@(code)', 'countryCode')
+          .replaceAll(
+            '@(switchClauses)',
+            _addSpaces(
+              localesWithCountryCodes
+                  .map((LocaleInfo locale) {
+                    return generateSwitchClauseTemplate(
+                      locale,
+                    ).replaceAll('@(case)', locale.countryCode!);
+                  })
+                  .join('\n'),
+              spaces: 4,
+            ),
+          ),
+      spaces: 4,
+    );
+  }).whereType<String>();
 
   if (switchClauses.isEmpty) {
     return '';
@@ -434,25 +432,22 @@ String _generateLookupByLanguageCode(
   AppResourceBundleCollection allBundles,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<String> switchClauses =
-      allBundles.languages.map((String language) {
-        final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-        final Iterable<LocaleInfo> localesWithLanguageCode = locales.where((LocaleInfo locale) {
-          return locale.countryCode == null && locale.scriptCode == null;
-        });
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    final Iterable<LocaleInfo> localesWithLanguageCode = locales.where((LocaleInfo locale) {
+      return locale.countryCode == null && locale.scriptCode == null;
+    });
 
-        if (localesWithLanguageCode.isEmpty) {
-          return null;
-        }
+    if (localesWithLanguageCode.isEmpty) {
+      return null;
+    }
 
-        return localesWithLanguageCode
-            .map((LocaleInfo locale) {
-              return generateSwitchClauseTemplate(
-                locale,
-              ).replaceAll('@(case)', locale.languageCode);
-            })
-            .join('\n      ');
-      }).whereType<String>();
+    return localesWithLanguageCode
+        .map((LocaleInfo locale) {
+          return generateSwitchClauseTemplate(locale).replaceAll('@(case)', locale.languageCode);
+        })
+        .join('\n      ');
+  }).whereType<String>();
 
   if (switchClauses.isEmpty) {
     return '';
@@ -511,12 +506,11 @@ String _generateDelegateClass({
   final String loadBody = (useDeferredLoading ? loadBodyDeferredLoadingTemplate : loadBodyTemplate)
       .replaceAll('@(class)', className)
       .replaceAll('@(lookupName)', 'lookup$className');
-  final String lookupFunction = (useDeferredLoading
-          ? lookupFunctionDeferredLoadingTemplate
-          : lookupFunctionTemplate)
-      .replaceAll('@(class)', className)
-      .replaceAll('@(lookupName)', 'lookup$className')
-      .replaceAll('@(lookupBody)', lookupBody);
+  final String lookupFunction =
+      (useDeferredLoading ? lookupFunctionDeferredLoadingTemplate : lookupFunctionTemplate)
+          .replaceAll('@(class)', className)
+          .replaceAll('@(lookupName)', 'lookup$className')
+          .replaceAll('@(lookupBody)', lookupBody);
   return delegateClassTemplate
       .replaceAll('@(class)', className)
       .replaceAll('@(loadBody)', loadBody)
@@ -1014,20 +1008,19 @@ class LocalizationsGenerator {
       }
     }
     // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
-    _allMessages =
-        _templateBundle.resourceIds
-            .map(
-              (String id) => Message(
-                _templateBundle,
-                _allBundles,
-                id,
-                areResourceAttributesRequired,
-                useEscaping: useEscaping,
-                logger: logger,
-                useRelaxedSyntax: useRelaxedSyntax,
-              ),
-            )
-            .toList();
+    _allMessages = _templateBundle.resourceIds
+        .map(
+          (String id) => Message(
+            _templateBundle,
+            _allBundles,
+            id,
+            areResourceAttributesRequired,
+            useEscaping: useEscaping,
+            logger: logger,
+            useRelaxedSyntax: useRelaxedSyntax,
+          ),
+        )
+        .toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
       _inputFileList.addAll(
@@ -1289,13 +1282,12 @@ class LocalizationsGenerator {
       String generateVariables(Node node, {bool isRoot = false}) {
         switch (node.type) {
           case ST.message:
-            final List<String> expressions =
-                node.children.map<String>((Node node) {
-                  if (node.type == ST.string) {
-                    return generateString(node.value!);
-                  }
-                  return generateVariables(node);
-                }).toList();
+            final List<String> expressions = node.children.map<String>((Node node) {
+              if (node.type == ST.string) {
+                return generateString(node.value!);
+              }
+              return generateVariables(node);
+            }).toList();
             return generateReturnExpr(expressions);
 
           case ST.placeholderExpr:
@@ -1463,10 +1455,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     // A pubspec.yaml file is required when using a synthetic package. If it does not
     // exist, create a blank one.
     if (useSyntheticPackage) {
-      final Directory syntheticPackageDirectory =
-          projectDirectory != null
-              ? projectDirectory!.childDirectory(_defaultSyntheticPackagePath(_fs))
-              : _fs.directory(_defaultSyntheticPackagePath(_fs));
+      final Directory syntheticPackageDirectory = projectDirectory != null
+          ? projectDirectory!.childDirectory(_defaultSyntheticPackagePath(_fs))
+          : _fs.directory(_defaultSyntheticPackagePath(_fs));
       syntheticPackageDirectory.createSync(recursive: true);
       final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
       if (!flutterGenPubspec.existsSync()) {

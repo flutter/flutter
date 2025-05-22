@@ -151,10 +151,9 @@ String getNewPrLink({
   final (pb.Repository repository, String repoLabel) = switch (repoName) {
     'flutter' => (state.framework, 'Framework'),
     'engine' => (state.engine, 'Engine'),
-    _ =>
-      throw ConductorException(
-        'Expected repoName to be one of flutter or engine but got $repoName.',
-      ),
+    _ => throw ConductorException(
+      'Expected repoName to be one of flutter or engine but got $repoName.',
+    ),
   };
   final String candidateBranch = repository.candidateBranch;
   final String workingBranch = repository.workingBranch;

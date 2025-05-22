@@ -444,8 +444,8 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform:
-            (BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
+        constraintsTransform: (BoxConstraints constraints) =>
+            const BoxConstraints(maxHeight: -1, minHeight: 200),
         child: child,
       );
 
@@ -472,8 +472,8 @@ void main() {
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
               textDirection: TextDirection.ltr,
-              constraintsTransform:
-                  (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              constraintsTransform: (BoxConstraints constraints) =>
+                  constraints.copyWith(maxWidth: double.infinity),
               clipBehavior: clip!,
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
@@ -486,8 +486,8 @@ void main() {
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
               textDirection: TextDirection.ltr,
-              constraintsTransform:
-                  (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              constraintsTransform: (BoxConstraints constraints) =>
+                  constraints.copyWith(maxWidth: double.infinity),
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
                   width: double.maxFinite,
@@ -526,8 +526,8 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform:
-            (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        constraintsTransform: (BoxConstraints constraints) =>
+            constraints.copyWith(maxWidth: double.infinity),
         child: child,
       );
 
@@ -551,8 +551,8 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform:
-            (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        constraintsTransform: (BoxConstraints constraints) =>
+            constraints.copyWith(maxWidth: double.infinity),
         child: child,
       );
 

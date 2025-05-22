@@ -1424,8 +1424,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // [widget.initialRoute].
   String get _initialRouteName =>
       WidgetsBinding.instance.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
-          ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
-          : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+      ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+      : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
   AppLifecycleState? _appLifecycleState;
 
@@ -1547,8 +1547,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final String? name = settings.name;
     final WidgetBuilder? pageContentBuilder =
         name == Navigator.defaultRouteName && widget.home != null
-            ? (BuildContext context) => widget.home!
-            : widget.routes![name];
+        ? (BuildContext context) => widget.home!
+        : widget.routes![name];
 
     if (pageContentBuilder != null) {
       assert(
@@ -1698,10 +1698,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   bool _debugCheckLocalizations(Locale appLocale) {
     assert(() {
-      final Set<Type> unsupportedTypes =
-          _localizationsDelegates
-              .map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type)
-              .toSet();
+      final Set<Type> unsupportedTypes = _localizationsDelegates
+          .map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type)
+          .toSet();
       for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type)) {
           continue;
@@ -1719,35 +1718,34 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           exception:
               "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
           library: 'widgets',
-          informationCollector:
-              () => <DiagnosticsNode>[
-                for (final Type unsupportedType in unsupportedTypes)
-                  ErrorDescription(
-                    '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
-                  ),
-                ErrorSpacer(),
-                if (unsupportedTypes.length == 1 &&
-                    unsupportedTypes.single.toString() == 'CupertinoLocalizations')
-                // We previously explicitly avoided checking for this class so it's not uncommon for applications
-                // to have omitted importing the required delegate.
-                ...<DiagnosticsNode>[
-                  ErrorHint(
-                    'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
-                    'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
-                    'the appropriate Cupertino localizations.',
-                  ),
-                  ErrorSpacer(),
-                ],
-                ErrorHint(
-                  'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}',
-                ),
-                ErrorSpacer(),
-                ErrorDescription(
-                  'See https://flutter.dev/to/internationalization/ for more '
-                  "information about configuring an app's locale, supportedLocales, "
-                  'and localizationsDelegates parameters.',
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            for (final Type unsupportedType in unsupportedTypes)
+              ErrorDescription(
+                '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
+              ),
+            ErrorSpacer(),
+            if (unsupportedTypes.length == 1 &&
+                unsupportedTypes.single.toString() == 'CupertinoLocalizations')
+            // We previously explicitly avoided checking for this class so it's not uncommon for applications
+            // to have omitted importing the required delegate.
+            ...<DiagnosticsNode>[
+              ErrorHint(
+                'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
+                'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
+                'the appropriate Cupertino localizations.',
+              ),
+              ErrorSpacer(),
+            ],
+            ErrorHint(
+              'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}',
+            ),
+            ErrorSpacer(),
+            ErrorDescription(
+              'See https://flutter.dev/to/internationalization/ for more '
+              "information about configuring an app's locale, supportedLocales, "
+              'and localizationsDelegates parameters.',
+            ),
+          ],
         ),
       );
       return true;
@@ -1777,16 +1775,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           key: _navigator,
           initialRoute: _initialRouteName,
           onGenerateRoute: _onGenerateRoute,
-          onGenerateInitialRoutes:
-              widget.onGenerateInitialRoutes == null
-                  ? Navigator.defaultGenerateInitialRoutes
-                  : (NavigatorState navigator, String initialRouteName) {
-                    return widget.onGenerateInitialRoutes!(initialRouteName);
-                  },
+          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+              ? Navigator.defaultGenerateInitialRoutes
+              : (NavigatorState navigator, String initialRouteName) {
+                  return widget.onGenerateInitialRoutes!(initialRouteName);
+                },
           onUnknownRoute: _onUnknownRoute,
           observers: widget.navigatorObservers!,
-          routeTraversalEdgeBehavior:
-              kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
+          routeTraversalEdgeBehavior: kIsWeb
+              ? TraversalEdgeBehavior.leaveFlutterView
+              : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
         ),
       );
@@ -1870,10 +1868,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       title = Title(title: widget.title ?? '', color: widget.color.withOpacity(1.0), child: result);
     }
 
-    final Locale appLocale =
-        widget.locale != null
-            ? _resolveLocales(<Locale>[widget.locale!], widget.supportedLocales)
-            : _locale!;
+    final Locale appLocale = widget.locale != null
+        ? _resolveLocales(<Locale>[widget.locale!], widget.supportedLocales)
+        : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
 

@@ -1117,12 +1117,11 @@ void main() {
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged =
-        !enabled
-            ? null
-            : (RangeValues newValues) {
-              values = newValues;
-            };
+    final ValueChanged<RangeValues>? onChanged = !enabled
+        ? null
+        : (RangeValues newValues) {
+            values = newValues;
+          };
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
@@ -1418,12 +1417,11 @@ void main() {
         int? divisions,
         bool enabled = true,
       }) {
-        final ValueChanged<RangeValues>? onChanged =
-            !enabled
-                ? null
-                : (RangeValues newValues) {
-                  values = newValues;
-                };
+        final ValueChanged<RangeValues>? onChanged = !enabled
+            ? null
+            : (RangeValues newValues) {
+                values = newValues;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -2134,11 +2132,10 @@ void main() {
       values: const RangeValues(25.0, 75.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -2416,14 +2413,13 @@ void main() {
                       }),
                       values: values,
                       max: 100.0,
-                      onChanged:
-                          enabled
-                              ? (RangeValues newValues) {
-                                setState(() {
-                                  values = newValues;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (RangeValues newValues) {
+                              setState(() {
+                                values = newValues;
+                              });
+                            }
+                          : null,
                       onChangeStart: enabled ? (RangeValues newValues) {} : null,
                       onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                     ),
@@ -2481,14 +2477,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2547,14 +2542,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2619,14 +2613,13 @@ void main() {
 
                       return null;
                     }),
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                     onChangeStart: enabled ? (RangeValues newValues) {} : null,
                     onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                   ),
@@ -3153,12 +3146,11 @@ void main() {
     final Color valueIndicatorColor = colorScheme.inverseSurface;
     RangeValues values = const RangeValues(25.0, 75.0);
     Widget buildApp({int? divisions, bool enabled = true}) {
-      final ValueChanged<RangeValues>? onChanged =
-          !enabled
-              ? null
-              : (RangeValues newValues) {
-                values = newValues;
-              };
+      final ValueChanged<RangeValues>? onChanged = !enabled
+          ? null
+          : (RangeValues newValues) {
+              values = newValues;
+            };
       return MaterialApp(
         home: Material(
           child: Center(

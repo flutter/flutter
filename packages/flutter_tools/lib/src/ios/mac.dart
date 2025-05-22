@@ -56,7 +56,8 @@ const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds ru
 /// Starting with Xcode 15, the simulator is no longer downloaded with Xcode
 /// and must be downloaded and installed separately.
 @visibleForTesting
-String missingPlatformInstructions(String simulatorVersion) => '''
+String missingPlatformInstructions(String simulatorVersion) =>
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 $simulatorVersion is not installed. To download and install the platform, open
 Xcode, select Xcode > Settings > Components, and click the GET button for the
@@ -939,8 +940,9 @@ Future<bool> _handleIssues(
     globals.printTrace('XCResult parsing error: ${xcResult.parsingErrorMessage}');
   }
 
-  final XcodeBasedProject xcodeProject =
-      platform == SupportedPlatform.ios ? project.ios : project.macos;
+  final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+      ? project.ios
+      : project.macos;
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1016,14 +1018,13 @@ Future<bool> _isPluginSwiftPackageOnly({
   required FileSystem fileSystem,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
-  final Plugin? matched =
-      plugins
-          .where(
-            (Plugin plugin) =>
-                plugin.name.toLowerCase() == pluginName.toLowerCase() &&
-                plugin.platforms[platform.name] != null,
-          )
-          .firstOrNull;
+  final Plugin? matched = plugins
+      .where(
+        (Plugin plugin) =>
+            plugin.name.toLowerCase() == pluginName.toLowerCase() &&
+            plugin.platforms[platform.name] != null,
+      )
+      .firstOrNull;
   if (matched == null) {
     return false;
   }

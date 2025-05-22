@@ -753,11 +753,8 @@ exit code: 66
           'get',
           '--example',
         ],
-        onRun:
-            (_) => writePackageConfigFiles(
-              directory: fileSystem.currentDirectory,
-              mainLibName: 'my_app',
-            ),
+        onRun: (_) =>
+            writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app'),
       ),
     ]);
 
@@ -909,11 +906,8 @@ exit code: 66
           'FLUTTER_ROOT': '',
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
-        onRun:
-            (_) => writePackageConfigFiles(
-              directory: fileSystem.currentDirectory,
-              mainLibName: 'my_app',
-            ),
+        onRun: (_) =>
+            writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app'),
       ),
     ]);
 

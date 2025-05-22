@@ -31,13 +31,12 @@ void main() {
       fs = MemoryFileSystem.test();
       final Directory directory = fs.currentDirectory.childDirectory('app');
       flutterManifest = FakeFlutterManifest();
-      flutterProject =
-          FakeFlutterProject()
-            ..manifest = flutterManifest
-            ..directory = directory
-            ..flutterPluginsFile = directory.childFile('.flutter-plugins')
-            ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
-            ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
+      flutterProject = FakeFlutterProject()
+        ..manifest = flutterManifest
+        ..directory = directory
+        ..flutterPluginsFile = directory.childFile('.flutter-plugins')
+        ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
+        ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
       writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
     });
 

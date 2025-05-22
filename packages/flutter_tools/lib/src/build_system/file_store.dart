@@ -23,8 +23,8 @@ class FileStorage {
       throw Exception('File storage format invalid');
     }
     final int version = json['version'] as int;
-    final List<Map<String, dynamic>> rawCachedFiles =
-        (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>)
+        .cast<Map<String, dynamic>>();
     final List<FileHash> cachedFiles = <FileHash>[
       for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];

@@ -38,8 +38,9 @@ void testAll({
       'hot reload displays a formatted error message when removing a field from a const class',
       () async {
         await flutter.run(
-          device:
-              chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+          device: chrome
+              ? GoogleChromeDevice.kChromeDeviceId
+              : FlutterTesterDevices.kTesterDeviceId,
           additionalCommandArgs: additionalCommandArgs,
         );
         project.removeFieldFromConstClass();

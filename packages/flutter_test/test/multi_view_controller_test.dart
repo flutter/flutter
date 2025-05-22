@@ -244,6 +244,9 @@ Future<void> pumpViews({required WidgetTester tester}) {
 
   return tester.pumpWidget(
     wrapWithView: false,
-    Directionality(textDirection: TextDirection.ltr, child: ViewCollection(views: views)),
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: ViewCollection(views: views),
+    ),
   );
 }

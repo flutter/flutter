@@ -865,7 +865,9 @@ void main() {
     testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.link))),
+        child: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.link)),
+        ),
       );
 
       await tester.pumpWidget(
@@ -880,7 +882,9 @@ void main() {
     testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.link))),
+        child: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.link)),
+        ),
       );
 
       await tester.pumpWidget(
@@ -977,7 +981,9 @@ void main() {
         home: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow))),
+            child: Center(
+              child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow)),
+            ),
           ),
         ),
       ),
@@ -1125,7 +1131,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -1262,7 +1270,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton.filled(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton.filled(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -1781,7 +1791,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -2564,7 +2576,9 @@ void main() {
             visualDensity: themeVisualDensity,
           ),
           home: Material(
-            child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow))),
+            child: Center(
+              child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow)),
+            ),
           ),
         ),
       );
@@ -2940,7 +2954,9 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/130708.
       Widget buildWidget(bool showIconButton) {
         return showIconButton
-            ? MaterialApp(home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)))
+            ? MaterialApp(
+                home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              )
             : const SizedBox();
       }
 
@@ -3454,19 +3470,22 @@ Widget buildAllVariants({
 Widget wrap({required Widget child, required bool useMaterial3}) {
   return useMaterial3
       ? MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
-        home: FocusTraversalGroup(
-          policy: ReadingOrderTraversalPolicy(),
-          child: Directionality(textDirection: TextDirection.ltr, child: Center(child: child)),
-        ),
-      )
+          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          home: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(child: child),
+            ),
+          ),
+        )
       : FocusTraversalGroup(
-        policy: ReadingOrderTraversalPolicy(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(child: Center(child: child)),
-        ),
-      );
+          policy: ReadingOrderTraversalPolicy(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(child: Center(child: child)),
+          ),
+        );
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

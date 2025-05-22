@@ -232,10 +232,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    final Directory widgetPreviewScaffold =
-        customPreviewScaffoldOutput != null
-            ? fs.directory(customPreviewScaffoldOutput)
-            : rootProject.widgetPreviewScaffold;
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
+        ? fs.directory(customPreviewScaffoldOutput)
+        : rootProject.widgetPreviewScaffold;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.
@@ -405,10 +404,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await buildLinux(
         widgetPreviewScaffoldProject.linux,
         buildInfo,
-        targetPlatform:
-            os.hostPlatform == HostPlatform.linux_x64
-                ? TargetPlatform.linux_x64
-                : TargetPlatform.linux_arm64,
+        targetPlatform: os.hostPlatform == HostPlatform.linux_x64
+            ? TargetPlatform.linux_x64
+            : TargetPlatform.linux_arm64,
         logger: logger,
       );
     } else if (platform.isWindows) {
@@ -512,8 +510,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
             // connection.
             dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
-            extraFrontEndOptions:
-                isWeb ? <String>['--dartdevc-canary', '--dartdevc-module-format=ddc'] : null,
+            extraFrontEndOptions: isWeb
+                ? <String>['--dartdevc-canary', '--dartdevc-module-format=ddc']
+                : null,
             packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
             packageConfig: PackageConfig.parseBytes(
               widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
@@ -610,8 +609,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
     final List<Uri> shaders = rootManifest.shaders.map(transformAssetUri).toList();
 
-    final List<DeferredComponent>? deferredComponents =
-        rootManifest.deferredComponents?.map(transformDeferredComponent).toList();
+    final List<DeferredComponent>? deferredComponents = rootManifest.deferredComponents
+        ?.map(transformDeferredComponent)
+        .toList();
 
     return widgetPreviewManifest.copyWith(
       logger: logger,

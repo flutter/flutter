@@ -731,7 +731,8 @@ void main() {
     expect(generatedManifestFile, exists);
 
     String generatedManifest = generatedManifestFile.readAsStringSync();
-    final String generatedSwiftDependency = '''
+    final String generatedSwiftDependency =
+        '''
     dependencies: [
         .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
     ],
@@ -828,7 +829,8 @@ void main() {
 
     String xcodeProject = xcodeProjectFile.readAsStringSync();
     String generatedManifest = generatedManifestFile.readAsStringSync();
-    final String generatedSwiftDependency = '''
+    final String generatedSwiftDependency =
+        '''
     dependencies: [
         .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
     ],

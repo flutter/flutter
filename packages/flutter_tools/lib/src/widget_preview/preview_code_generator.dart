@@ -116,10 +116,10 @@ class PreviewCodeGenerator {
     // Sort the entries by URI so that the code generator assigns import prefixes in a
     // deterministic manner, mainly for testing purposes. This also results in previews being
     // displayed in the same order across platforms with differing path styles.
-    final List<_PreviewMappingEntry> sortedPreviews =
-        previews.entries.toList()..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
-          return a.key.uri.toString().compareTo(b.key.uri.toString());
-        });
+    final List<_PreviewMappingEntry> sortedPreviews = previews.entries.toList()
+      ..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
+        return a.key.uri.toString().compareTo(b.key.uri.toString());
+      });
     for (final _PreviewMappingEntry(
           key: (path: String _, :Uri uri),
           value: List<PreviewDetails> previewMethods,
@@ -164,10 +164,9 @@ class PreviewCodeGenerator {
         preview.wrapper!,
       ).call(<cb.Expression>[previewWidget]);
     }
-    previewWidget =
-        cb.Method((cb.MethodBuilder previewBuilder) {
-          previewBuilder.body = previewWidget.code;
-        }).closure;
+    previewWidget = cb.Method((cb.MethodBuilder previewBuilder) {
+      previewBuilder.body = previewWidget.code;
+    }).closure;
 
     return cb
         .refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri)
@@ -211,8 +210,9 @@ class PreviewCodeGenerator {
     if (expression == null) {
       return null;
     }
-    cb.Expression generatedExpression =
-        expression.accept(AnalyzerAstToCodeBuilderVisitor(allocator: allocator))!;
+    cb.Expression generatedExpression = expression.accept(
+      AnalyzerAstToCodeBuilderVisitor(allocator: allocator),
+    )!;
 
     if (isCallback) {
       generatedExpression = generatedExpression.call(<cb.Expression>[]);
@@ -361,11 +361,10 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
   cb.Expression visitInstanceCreationExpression(analyzer.InstanceCreationExpression node) {
     final cb.Expression type = node.constructorName.type.accept(this)!;
     final String? name = node.constructorName.name?.name;
-    final List<cb.Expression> positionalArguments =
-        node.argumentList.arguments
-            .where((analyzer.Expression e) => e is! analyzer.NamedExpression)
-            .map<cb.Expression>((analyzer.Expression e) => e.accept(this)!)
-            .toList();
+    final List<cb.Expression> positionalArguments = node.argumentList.arguments
+        .where((analyzer.Expression e) => e is! analyzer.NamedExpression)
+        .map<cb.Expression>((analyzer.Expression e) => e.accept(this)!)
+        .toList();
     final Map<String, cb.Expression> namedArguments = <String, cb.Expression>{
       for (final analyzer.NamedExpression e
           in node.argumentList.arguments.whereType<analyzer.NamedExpression>())
@@ -376,12 +375,12 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
     ];
     return node.isConst
         ? cb.InvokeExpression.constOf(
-          type,
-          positionalArguments,
-          namedArguments,
-          typeArguments,
-          name,
-        )
+            type,
+            positionalArguments,
+            namedArguments,
+            typeArguments,
+            name,
+          )
         : cb.InvokeExpression.newOf(type, positionalArguments, namedArguments, typeArguments, name);
   }
 

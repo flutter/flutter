@@ -232,15 +232,14 @@ class AndroidStudio {
       return null;
     }
 
-    final AndroidStudio? manuallyConfigured =
-        studios
-            .where(
-              (AndroidStudio studio) =>
-                  studio.configuredPath != null &&
-                  configuredStudioDir != null &&
-                  _pathsAreEqual(studio.configuredPath!, configuredStudioDir.path),
-            )
-            .firstOrNull;
+    final AndroidStudio? manuallyConfigured = studios
+        .where(
+          (AndroidStudio studio) =>
+              studio.configuredPath != null &&
+              configuredStudioDir != null &&
+              _pathsAreEqual(studio.configuredPath!, configuredStudioDir.path),
+        )
+        .firstOrNull;
 
     if (manuallyConfigured != null) {
       return manuallyConfigured;
@@ -281,8 +280,10 @@ class AndroidStudio {
         return;
       }
       try {
-        final Iterable<Directory> directories =
-            globals.fs.directory(path).listSync(followLinks: false).whereType<Directory>();
+        final Iterable<Directory> directories = globals.fs
+            .directory(path)
+            .listSync(followLinks: false)
+            .whereType<Directory>();
         for (final Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
@@ -342,8 +343,9 @@ class AndroidStudio {
 
           return AndroidStudio.fromMacOSBundle(
             e.path,
-            configuredPath:
-                _pathsAreEqual(configuredStudioDir.path, e.path) ? configuredStudioDir.path : null,
+            configuredPath: _pathsAreEqual(configuredStudioDir.path, e.path)
+                ? configuredStudioDir.path
+                : null,
           );
         })
         .whereType<AndroidStudio>()
@@ -385,8 +387,9 @@ class AndroidStudio {
       final List<Directory> entities = <Directory>[];
 
       for (final Directory baseDir in directoriesToSearch) {
-        final Iterable<Directory> directories =
-            baseDir.listSync(followLinks: false).whereType<Directory>();
+        final Iterable<Directory> directories = baseDir
+            .listSync(followLinks: false)
+            .whereType<Directory>();
         entities.addAll(
           directories.where(
             (Directory directory) => _dotHomeStudioVersionMatcher.hasMatch(directory.basename),
@@ -419,8 +422,9 @@ class AndroidStudio {
             String? installPath;
 
             try {
-              installPath =
-                  globals.fs.file(globals.fs.path.join(dir.path, '.home')).readAsStringSync();
+              installPath = globals.fs
+                  .file(globals.fs.path.join(dir.path, '.home'))
+                  .readAsStringSync();
             } on FileSystemException {
               // ignored
             }
@@ -444,10 +448,9 @@ class AndroidStudio {
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null) {
-      final AndroidStudio? matchingAlreadyFoundInstall =
-          studios
-              .where((AndroidStudio other) => _pathsAreEqual(configuredStudioDir, other.directory))
-              .firstOrNull;
+      final AndroidStudio? matchingAlreadyFoundInstall = studios
+          .where((AndroidStudio other) => _pathsAreEqual(configuredStudioDir, other.directory))
+          .firstOrNull;
       if (matchingAlreadyFoundInstall != null) {
         studios.remove(matchingAlreadyFoundInstall);
         studios.add(

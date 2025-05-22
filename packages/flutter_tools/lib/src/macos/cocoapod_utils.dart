@@ -67,8 +67,9 @@ Future<void> processPodsIfNeeded(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
     );
-    final SupportedPlatform platform =
-        xcodeProject is IosProject ? SupportedPlatform.ios : SupportedPlatform.macos;
+    final SupportedPlatform platform = xcodeProject is IosProject
+        ? SupportedPlatform.ios
+        : SupportedPlatform.macos;
 
     await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
   }

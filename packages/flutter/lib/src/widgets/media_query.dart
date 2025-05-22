@@ -862,12 +862,9 @@ class MediaQueryData {
         right: math.max(0.0, viewInsets.right - rightInset),
         bottom: math.max(0.0, viewInsets.bottom - bottomInset),
       ),
-      displayFeatures:
-          displayFeatures
-              .where(
-                (ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds),
-              )
-              .toList(),
+      displayFeatures: displayFeatures
+          .where((ui.DisplayFeature displayFeature) => subScreen.overlaps(displayFeature.bounds))
+          .toList(),
     );
   }
 
@@ -1787,11 +1784,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool supportsShowingSystemContextMenu(BuildContext context) =>
-      _of(
-        context,
-        _MediaQueryAspect.supportsShowingSystemContextMenu,
-      ).supportsShowingSystemContextMenu;
+  static bool supportsShowingSystemContextMenu(BuildContext context) => _of(
+    context,
+    _MediaQueryAspect.supportsShowingSystemContextMenu,
+  ).supportsShowingSystemContextMenu;
 
   /// Returns [MediaQueryData.supportsShowingSystemContextMenu] for the nearest
   /// [MediaQuery] ancestor or null, if no such ancestor exists.
@@ -1801,11 +1797,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// ancestor [MediaQuery] changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeSupportsShowingSystemContextMenu(BuildContext context) =>
-      _maybeOf(
-        context,
-        _MediaQueryAspect.supportsShowingSystemContextMenu,
-      )?.supportsShowingSystemContextMenu;
+  static bool? maybeSupportsShowingSystemContextMenu(BuildContext context) => _maybeOf(
+    context,
+    _MediaQueryAspect.supportsShowingSystemContextMenu,
+  )?.supportsShowingSystemContextMenu;
 
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;

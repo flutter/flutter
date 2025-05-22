@@ -132,8 +132,10 @@ class VsCode {
     Platform platform,
     ProcessManager processManager,
   ) {
-    final String? homeDirPath =
-        FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+    final String? homeDirPath = FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: platform,
+    ).homeDirPath;
 
     String vsCodeSpotlightResult = '';
     String vsCodeInsiderSpotlightResult = '';
@@ -297,8 +299,10 @@ class VsCode {
     final List<VsCode> results = <VsCode>[];
 
     for (final VsCodeInstallLocation searchLocation in allLocations) {
-      final String? homeDirPath =
-          FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+      final String? homeDirPath = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: platform,
+      ).homeDirPath;
       if (homeDirPath != null && fileSystem.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory = fileSystem.path.join(
           homeDirPath,

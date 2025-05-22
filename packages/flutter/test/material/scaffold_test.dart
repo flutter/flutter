@@ -139,7 +139,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(appBar: AppBar(title: const Text('Title')), body: Container(key: bodyKey)),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title')),
+          body: Container(key: bodyKey),
+        ),
       ),
     );
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
@@ -662,7 +665,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)), child: child),
+      MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)),
+        child: child,
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -747,8 +753,9 @@ void main() {
       ),
     );
 
-    final Finder buttonsBar =
-        find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
+    final Finder buttonsBar = find
+        .ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding))
+        .first;
     expect(tester.getBottomLeft(buttonsBar), const Offset(10.0, 560.0));
     expect(tester.getBottomRight(buttonsBar), const Offset(770.0, 560.0));
   });
@@ -782,8 +789,9 @@ void main() {
       ),
     );
 
-    final Finder buttonsBar =
-        find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
+    final Finder buttonsBar = find
+        .ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding))
+        .first;
     // The SafeArea of the persistentFooterButtons should not pad below them
     // since they are stacked on top of the bottomNavigationBar. The
     // bottomNavigationBar will handle the padding instead.
@@ -806,7 +814,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)), child: child),
+      MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)),
+        child: child,
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -871,7 +882,9 @@ void main() {
     ) async {
       const IconData expectedIcon = Icons.close;
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(appBar: AppBar(), body: const Text('Page 1'))),
+        MaterialApp(
+          home: Scaffold(appBar: AppBar(), body: const Text('Page 1')),
+        ),
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(routeBuilder());
@@ -899,13 +912,14 @@ void main() {
 
     PageRoute<void> pageRouteBuilder() {
       return PageRouteBuilder<void>(
-        pageBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-        ) {
-          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
-        },
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+            },
         fullscreenDialog: true,
       );
     }
@@ -976,7 +990,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: const MediaQueryData(),
-            child: Scaffold(body: Center(child: Container(key: testKey))),
+            child: Scaffold(
+              body: Center(child: Container(key: testKey)),
+            ),
           ),
         ),
       );
@@ -1093,19 +1109,18 @@ void main() {
               builder: (BuildContext context) {
                 return Scaffold(
                   extendBodyBehindAppBar: extendBodyBehindAppBar,
-                  appBar:
-                      !hasAppBar
-                          ? null
-                          : PreferredSize(
-                            key: appBarKey,
-                            preferredSize: const Size.fromHeight(appBarHeight),
-                            child: Container(
-                              constraints: BoxConstraints(
-                                minHeight: appBarHeight,
-                                maxHeight: fixedHeightAppBar ? appBarHeight : double.infinity,
-                              ),
+                  appBar: !hasAppBar
+                      ? null
+                      : PreferredSize(
+                          key: appBarKey,
+                          preferredSize: const Size.fromHeight(appBarHeight),
+                          child: Container(
+                            constraints: BoxConstraints(
+                              minHeight: appBarHeight,
+                              maxHeight: fixedHeightAppBar ? appBarHeight : double.infinity,
                             ),
                           ),
+                        ),
                   body: Builder(
                     builder: (BuildContext context) {
                       mediaQueryTop = MediaQuery.paddingOf(context).top;
@@ -1258,7 +1273,10 @@ void main() {
                   child: SafeArea(child: Placeholder(key: insideAppBar)),
                 ),
               ),
-              body: Container(key: body, child: SafeArea(child: Placeholder(key: insideBody))),
+              body: Container(
+                key: body,
+                child: SafeArea(child: Placeholder(key: insideBody)),
+              ),
               floatingActionButton: SizedBox(
                 key: floatingActionButton,
                 width: 77.0,
@@ -1363,7 +1381,10 @@ void main() {
                   child: SafeArea(child: Placeholder(key: insideAppBar)),
                 ),
               ),
-              body: Container(key: body, child: SafeArea(child: Placeholder(key: insideBody))),
+              body: Container(
+                key: body,
+                child: SafeArea(child: Placeholder(key: insideBody)),
+              ),
               floatingActionButton: SizedBox(
                 key: floatingActionButton,
                 width: 77.0,
@@ -1593,8 +1614,10 @@ void main() {
       ScaffoldGeometry geometry = listenerState.cache.value;
       final Rect transitioningFabRect = geometry.floatingActionButtonArea!;
 
-      final double transitioningRotation =
-          tester.widget<RotationTransition>(find.byType(RotationTransition)).turns.value;
+      final double transitioningRotation = tester
+          .widget<RotationTransition>(find.byType(RotationTransition))
+          .turns
+          .value;
 
       await tester.pump(const Duration(seconds: 3));
       geometry = listenerState.cache.value;
@@ -1602,8 +1625,10 @@ void main() {
       final Rect fabRect =
           floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
 
-      final double completedRotation =
-          tester.widget<RotationTransition>(find.byType(RotationTransition)).turns.value;
+      final double completedRotation = tester
+          .widget<RotationTransition>(find.byType(RotationTransition))
+          .turns
+          .value;
 
       expect(transitioningRotation, lessThan(1.0));
 
@@ -2180,8 +2205,8 @@ void main() {
 
     testWidgets(
       'didUpdate bottomSheet while a previous bottom sheet is still displayed',
-      experimentalLeakTesting:
-          LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // leaking by design because of exception
       (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         const Key buttonKey = Key('button');
@@ -2518,45 +2543,44 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder:
-              (BuildContext context) => Scaffold(
-                body: Scaffold(
-                  body: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return Scaffold(
-                              body: Column(
-                                children: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      const SnackBar snackBar = SnackBar(
-                                        content: Text(snackBarContent),
-                                        behavior: SnackBarBehavior.floating,
-                                      );
-                                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                                    },
-                                    child: const Text('Show SnackBar'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Pop route'),
-                                  ),
-                                ],
+          builder: (BuildContext context) => Scaffold(
+            body: Scaffold(
+              body: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          body: Column(
+                            children: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  const SnackBar snackBar = SnackBar(
+                                    content: Text(snackBarContent),
+                                    behavior: SnackBarBehavior.floating,
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                },
+                                child: const Text('Show SnackBar'),
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: const Text('Push route'),
-                  ),
-                ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Pop route'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Push route'),
               ),
+            ),
+          ),
         ),
       ),
     );
@@ -2697,24 +2721,23 @@ void main() {
           return MaterialApp(
             theme: themeIsLight ? ThemeData() : ThemeData.dark(),
             home: Scaffold(
-              bottomSheet:
-                  defaultBottomSheet == null
-                      ? null
-                      : defaultBottomSheet!
-                      ? Container(
-                        key: bottomSheetKey1,
-                        width: double.infinity,
-                        height: 100,
-                        color: Colors.blue,
-                        child: const Text('BottomSheet'),
-                      )
-                      : Container(
-                        key: bottomSheetKey2,
-                        width: double.infinity,
-                        height: 100,
-                        color: Colors.red,
-                        child: const Text('BottomSheet'),
-                      ),
+              bottomSheet: defaultBottomSheet == null
+                  ? null
+                  : defaultBottomSheet!
+                  ? Container(
+                      key: bottomSheetKey1,
+                      width: double.infinity,
+                      height: 100,
+                      color: Colors.blue,
+                      child: const Text('BottomSheet'),
+                    )
+                  : Container(
+                      key: bottomSheetKey2,
+                      width: double.infinity,
+                      height: 100,
+                      color: Colors.red,
+                      child: const Text('BottomSheet'),
+                    ),
               body: const Placeholder(),
             ),
           );
@@ -2772,7 +2795,12 @@ void main() {
     PersistentBottomSheetController? sheetController;
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ),
     );
 
     sheetController = scaffoldKey.currentState!.showBottomSheet((_) {
@@ -2816,34 +2844,31 @@ void main() {
 
     await tester.pumpWidget(
       StatefulBuilder(
-        builder:
-            (_, StateSetter setState) => MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: Builder(
-                    builder:
-                        (BuildContext context) => ElevatedButton(
-                          onPressed: () {
-                            if (controller == null) {
-                              controller = showBottomSheet(
-                                context: context,
-                                builder: (_) => Container(key: bottomSheetKey, height: 200),
-                              );
-                            } else {
-                              controller!.close();
-                              controller = null;
-                            }
-                          },
-                          child: const Text('BottomSheet'),
-                        ),
-                  ),
+        builder: (_, StateSetter setState) => MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Builder(
+                builder: (BuildContext context) => ElevatedButton(
+                  onPressed: () {
+                    if (controller == null) {
+                      controller = showBottomSheet(
+                        context: context,
+                        builder: (_) => Container(key: bottomSheetKey, height: 200),
+                      );
+                    } else {
+                      controller!.close();
+                      controller = null;
+                    }
+                  },
+                  child: const Text('BottomSheet'),
                 ),
-                floatingActionButton:
-                    show
-                        ? FloatingActionButton(onPressed: () => setState(() => show = false))
-                        : null,
               ),
             ),
+            floatingActionButton: show
+                ? FloatingActionButton(onPressed: () => setState(() => show = false))
+                : null,
+          ),
+        ),
       ),
     );
 
@@ -3303,10 +3328,9 @@ void main() {
                 },
                 child: const Text('Toggle FAB'),
               ),
-              floatingActionButton:
-                  !showFab
-                      ? null
-                      : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+              floatingActionButton: !showFab
+                  ? null
+                  : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
             );
           },
         ),
@@ -3378,10 +3402,9 @@ void main() {
                   ),
                 ],
               ),
-              floatingActionButton:
-                  !showFab
-                      ? null
-                      : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+              floatingActionButton: !showFab
+                  ? null
+                  : FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
             );
           },
         ),
@@ -3433,7 +3456,10 @@ void main() {
       ),
     );
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Scaffold(body: SizedBox.expand())),
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: SizedBox.expand()),
+      ),
     );
 
     final Material scaffoldMaterial = tester.widget<Material>(

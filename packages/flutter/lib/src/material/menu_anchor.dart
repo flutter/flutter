@@ -1156,19 +1156,18 @@ class CheckboxMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuItemButton(
       key: key,
-      onPressed:
-          onChanged == null
-              ? null
-              : () {
-                switch (value) {
-                  case false:
-                    onChanged!(true);
-                  case true:
-                    onChanged!(tristate ? null : false);
-                  case null:
-                    onChanged!(false);
-                }
-              },
+      onPressed: onChanged == null
+          ? null
+          : () {
+              switch (value) {
+                case false:
+                  onChanged!(true);
+                case true:
+                  onChanged!(tristate ? null : false);
+                case null:
+                  onChanged!(false);
+              }
+            },
       onHover: onHover,
       onFocusChange: onFocusChange,
       focusNode: focusNode,
@@ -1355,15 +1354,14 @@ class RadioMenuButton<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuItemButton(
       key: key,
-      onPressed:
-          onChanged == null
-              ? null
-              : () {
-                if (toggleable && groupValue == value) {
-                  return onChanged!(null);
-                }
-                onChanged!(value);
-              },
+      onPressed: onChanged == null
+          ? null
+          : () {
+              if (toggleable && groupValue == value) {
+                return onChanged!(null);
+              }
+              onChanged!(value);
+            },
       onHover: onHover,
       onFocusChange: onFocusChange,
       focusNode: focusNode,
@@ -2131,8 +2129,9 @@ class _LocalizedShortcutLabeler {
         if (shortcutTrigger == null && logicalKeyId & LogicalKeyboardKey.planeMask == 0x0) {
           // If the trigger is a Unicode-character-producing key, then use the
           // character.
-          shortcutTrigger =
-              String.fromCharCode(logicalKeyId & LogicalKeyboardKey.valueMask).toUpperCase();
+          shortcutTrigger = String.fromCharCode(
+            logicalKeyId & LogicalKeyboardKey.valueMask,
+          ).toUpperCase();
         }
         // Fall back to the key label if all else fails.
         shortcutTrigger ??= trigger.keyLabel;
@@ -2826,10 +2825,9 @@ class _MenuItemLabel extends StatelessWidget {
                 Expanded(
                   child: ClipRect(
                     child: Padding(
-                      padding:
-                          leadingIcon != null
-                              ? EdgeInsetsDirectional.only(start: horizontalPadding)
-                              : EdgeInsets.zero,
+                      padding: leadingIcon != null
+                          ? EdgeInsetsDirectional.only(start: horizontalPadding)
+                          : EdgeInsets.zero,
                       child: child,
                     ),
                   ),
@@ -2845,10 +2843,9 @@ class _MenuItemLabel extends StatelessWidget {
           if (leadingIcon != null) leadingIcon!,
           if (child != null)
             Padding(
-              padding:
-                  leadingIcon != null
-                      ? EdgeInsetsDirectional.only(start: horizontalPadding)
-                      : EdgeInsets.zero,
+              padding: leadingIcon != null
+                  ? EdgeInsetsDirectional.only(start: horizontalPadding)
+                  : EdgeInsets.zero,
               child: child,
             ),
         ],
@@ -3207,10 +3204,9 @@ class _MenuPanelState extends State<_MenuPanel> {
     // widest child.
     List<Widget> children = widget.children;
     if (widget.orientation == Axis.horizontal) {
-      children =
-          children.map<Widget>((Widget child) {
-            return IntrinsicWidth(child: child);
-          }).toList();
+      children = children.map<Widget>((Widget child) {
+        return IntrinsicWidth(child: child);
+      }).toList();
     }
 
     Widget menuPanel = _intrinsicCrossSize(
@@ -3338,15 +3334,14 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
-    final Rect anchorRect =
-        layerLink == null
-            ? Rect.fromLTRB(
-              menuPosition.anchorRect.left + dx,
-              menuPosition.anchorRect.top - dy,
-              menuPosition.anchorRect.right,
-              menuPosition.anchorRect.bottom,
-            )
-            : Rect.zero;
+    final Rect anchorRect = layerLink == null
+        ? Rect.fromLTRB(
+            menuPosition.anchorRect.left + dx,
+            menuPosition.anchorRect.top - dy,
+            menuPosition.anchorRect.right,
+            menuPosition.anchorRect.bottom,
+          )
+        : Rect.zero;
 
     final Widget menuPanel = TapRegion(
       groupId: menuPosition.tapRegionGroupId,

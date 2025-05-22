@@ -76,15 +76,14 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>['which', 'clang++'],
-              stdout: '''
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['which', 'clang++'],
+          stdout: '''
 /some/path/to/clang++
 ''', // Newline at the end of the string.
-            ),
-          ]),
+        ),
+      ]),
       FileSystem: () => fileSystem,
     },
     () async {

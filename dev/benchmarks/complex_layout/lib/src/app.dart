@@ -25,10 +25,9 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
     return MaterialApp(
       theme: lightTheme ? ThemeData() : ThemeData.dark(),
       title: 'Advanced Layout',
-      home:
-          scrollMode == ScrollMode.complex
-              ? ComplexLayout(badScroll: widget.badScroll)
-              : const TileScrollLayout(),
+      home: scrollMode == ScrollMode.complex
+          ? ComplexLayout(badScroll: widget.badScroll)
+          : const TileScrollLayout(),
     );
   }
 
@@ -127,7 +126,12 @@ class ComplexLayoutState extends State<ComplexLayout> {
           const TopBarMenu(),
         ],
       ),
-      body: Column(children: <Widget>[Expanded(child: body), const BottomBar()]),
+      body: Column(
+        children: <Widget>[
+          Expanded(child: body),
+          const BottomBar(),
+        ],
+      ),
       drawer: const GalleryDrawer(),
     );
   }
@@ -142,49 +146,48 @@ class TopBarMenu extends StatelessWidget {
       onSelected: (String value) {
         print('Selected: $value');
       },
-      itemBuilder:
-          (BuildContext context) => <PopupMenuItem<String>>[
-            const PopupMenuItem<String>(
-              value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.group, 'Groups', '14'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.image, 'Pictures', '12'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.group, 'Groups', '14'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.image, 'Pictures', '12'),
-            ),
-            const PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33'),
-            ),
-          ],
+      itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+        const PopupMenuItem<String>(
+          value: 'Friends',
+          child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.group, 'Groups', '14'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.image, 'Pictures', '12'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Friends',
+          child: MenuItemWithIcon(Icons.people, 'Friends', '5'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.event, 'Events', '12'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.group, 'Groups', '14'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.image, 'Pictures', '12'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'Events',
+          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33'),
+        ),
+      ],
     );
   }
 }
@@ -374,9 +377,15 @@ class UserHeader extends StatelessWidget {
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodyMedium,
                     children: <TextSpan>[
-                      TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(
+                        text: userName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const TextSpan(text: ' shared a new '),
-                      const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const TextSpan(
+                        text: 'photo',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -515,56 +524,55 @@ class ItemGalleryBox extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: TabBarView(
-                children:
-                    tabNames.map<Widget>((String tabName) {
-                      return Container(
-                        key: PageStorageKey<String>(tabName),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
-                            child: Column(
-                              children: <Widget>[
-                                Expanded(
-                                  child: ColoredBox(
-                                    color: Theme.of(context).primaryColor,
-                                    child: Center(
-                                      child: Text(
-                                        tabName,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.headlineSmall!.copyWith(color: Colors.white),
-                                      ),
-                                    ),
+                children: tabNames.map<Widget>((String tabName) {
+                  return Container(
+                    key: PageStorageKey<String>(tabName),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        child: Column(
+                          children: <Widget>[
+                            Expanded(
+                              child: ColoredBox(
+                                color: Theme.of(context).primaryColor,
+                                child: Center(
+                                  child: Text(
+                                    tabName,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineSmall!.copyWith(color: Colors.white),
                                   ),
                                 ),
-                                Row(
-                                  children: <Widget>[
-                                    IconButton(
-                                      icon: const Icon(Icons.share),
-                                      onPressed: () {
-                                        print('Pressed share');
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.event),
-                                      onPressed: () {
-                                        print('Pressed event');
-                                      },
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 8.0),
-                                        child: Text('This is item $tabName'),
-                                      ),
-                                    ),
-                                  ],
+                              ),
+                            ),
+                            Row(
+                              children: <Widget>[
+                                IconButton(
+                                  icon: const Icon(Icons.share),
+                                  onPressed: () {
+                                    print('Pressed share');
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.event),
+                                  onPressed: () {
+                                    print('Pressed event');
+                                  },
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text('This is item $tabName'),
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
+                          ],
                         ),
-                      );
-                    }).toList(),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
             const TabPageSelector(),

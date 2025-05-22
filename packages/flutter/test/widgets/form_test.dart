@@ -360,8 +360,8 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    final Set<FormFieldState<dynamic>> validationResult =
-        formKey.currentState!.validateGranularly();
+    final Set<FormFieldState<dynamic>> validationResult = formKey.currentState!
+        .validateGranularly();
 
     expect(validationResult.length, equals(2));
     expect(
@@ -491,7 +491,9 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Center(
               child: Material(
-                child: Form(child: TextFormField(key: inputKey, initialValue: 'hello')),
+                child: Form(
+                  child: TextFormField(key: inputKey, initialValue: 'hello'),
+                ),
               ),
             ),
           ),
@@ -532,7 +534,9 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Center(
               child: Material(
-                child: Form(child: TextFormField(key: inputKey, controller: controller)),
+                child: Form(
+                  child: TextFormField(key: inputKey, controller: controller),
+                ),
               ),
             ),
           ),
@@ -632,7 +636,9 @@ void main() {
                 textDirection: TextDirection.ltr,
                 child: Center(
                   child: Material(
-                    child: Form(child: TextFormField(key: inputKey, controller: currentController)),
+                    child: Form(
+                      child: TextFormField(key: inputKey, controller: currentController),
+                    ),
                   ),
                 ),
               ),
@@ -731,18 +737,17 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  child:
-                      remove
-                          ? Container()
-                          : TextFormField(
-                            autofocus: true,
-                            onSaved: (String? value) {
-                              fieldValue = value;
-                            },
-                            validator: (String? value) {
-                              return (value == null || value.isEmpty) ? null : 'yes';
-                            },
-                          ),
+                  child: remove
+                      ? Container()
+                      : TextFormField(
+                          autofocus: true,
+                          onSaved: (String? value) {
+                            fieldValue = value;
+                          },
+                          validator: (String? value) {
+                            return (value == null || value.isEmpty) ? null : 'yes';
+                          },
+                        ),
                 ),
               ),
             ),
@@ -948,7 +953,9 @@ void main() {
                 child: Form(
                   key: formState,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Material(child: TextFormField(initialValue: 'foo', validator: errorText)),
+                  child: Material(
+                    child: TextFormField(initialValue: 'foo', validator: errorText),
+                  ),
                 ),
               ),
             ),
@@ -995,8 +1002,8 @@ void main() {
                   onSaved: (String? value) {
                     fieldValue = value;
                   },
-                  validator:
-                      (String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
+                  validator: (String? value) =>
+                      (value != null && value.length > 5) ? 'Exceeded' : null,
                 ),
               ),
             ),
@@ -1030,7 +1037,9 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: Material(child: TextFormField(key: fieldKey))),
+          child: Center(
+            child: Material(child: TextFormField(key: fieldKey)),
+          ),
         ),
       ),
     );
@@ -1050,7 +1059,9 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: Material(child: TextFormField(key: fieldKey))),
+          child: Center(
+            child: Material(child: TextFormField(key: fieldKey)),
+          ),
         ),
       ),
     );
@@ -1075,7 +1086,9 @@ void main() {
         data: const MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: Material(child: TextFormField(key: fieldKey))),
+          child: Center(
+            child: Material(child: TextFormField(key: fieldKey)),
+          ),
         ),
       ),
     );

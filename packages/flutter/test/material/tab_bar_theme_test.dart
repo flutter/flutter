@@ -44,10 +44,9 @@ Widget buildTabBar({
   final TabController controller = TabController(length: tabs.length, vsync: const TestVSync());
   addTearDown(controller.dispose);
 
-  Widget tabBar =
-      secondaryTabBar
-          ? TabBar.secondary(tabs: tabs, isScrollable: isScrollable, controller: controller)
-          : TabBar(tabs: tabs, isScrollable: isScrollable, controller: controller);
+  Widget tabBar = secondaryTabBar
+      ? TabBar.secondary(tabs: tabs, isScrollable: isScrollable, controller: controller)
+      : TabBar(tabs: tabs, isScrollable: isScrollable, controller: controller);
 
   if (localTabBarTheme != null) {
     tabBar = TabBarTheme(data: localTabBarTheme, child: tabBar);
@@ -55,7 +54,9 @@ Widget buildTabBar({
 
   return MaterialApp(
     theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
-    home: Scaffold(body: RepaintBoundary(key: _painterKey, child: tabBar)),
+    home: Scaffold(
+      body: RepaintBoundary(key: _painterKey, child: tabBar),
+    ),
   );
 }
 
@@ -101,11 +102,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TabBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -129,11 +129,10 @@ void main() {
       textScaler: TextScaler.noScaling,
       indicatorAnimation: TabIndicatorAnimation.elastic,
     ).debugFillProperties(builder);
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode n) => n.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
     expect(description, <String>[
       'indicator: BoxDecoration(color: ${const Color(0xff00ff00)})',
       'indicatorColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
@@ -813,7 +812,11 @@ void main() {
           appBar: AppBar(
             bottom: TabBar(
               controller: controller,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -845,7 +848,11 @@ void main() {
               dividerColor: dividerColor,
               dividerHeight: dividerHeight,
               controller: controller,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -869,7 +876,10 @@ void main() {
           appBar: AppBar(
             bottom: TabBar(
               controller: controller1,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -897,7 +907,10 @@ void main() {
             bottom: TabBar(
               isScrollable: true,
               controller: controller2,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -930,7 +943,10 @@ void main() {
             bottom: TabBar(
               tabAlignment: TabAlignment.center,
               controller: controller1,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -959,7 +975,10 @@ void main() {
               isScrollable: true,
               tabAlignment: TabAlignment.start,
               controller: controller2,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -995,10 +1014,14 @@ void main() {
 
       final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      final TextStyle selectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-      final TextStyle unselectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+      final TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      final TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       // Selected tab should use labelStyle color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -1033,10 +1056,14 @@ void main() {
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      TextStyle selectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-      TextStyle unselectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       // Selected tab should use the labelStyle color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -1093,7 +1120,10 @@ void main() {
               child: TabBar(
                 labelStyle: labelStyle,
                 unselectedLabelStyle: unselectedLabelStyle,
-                tabs: <Widget>[Tab(text: _tab1Text), Tab(text: _tab2Text)],
+                tabs: <Widget>[
+                  Tab(text: _tab1Text),
+                  Tab(text: _tab2Text),
+                ],
               ),
             ),
           ),
@@ -1105,10 +1135,14 @@ void main() {
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      TextStyle selectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-      TextStyle unselectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       // Selected tab should use the [TabBar.labelStyle] color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -1353,7 +1387,10 @@ void main() {
             appBar: AppBar(
               bottom: TabBar(
                 controller: controller,
-                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 3')],
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 3'),
+                ],
               ),
             ),
           ),
@@ -1387,7 +1424,10 @@ void main() {
               bottom: TabBar(
                 tabAlignment: TabAlignment.center,
                 controller: controller,
-                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 3')],
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 3'),
+                ],
               ),
             ),
           ),
@@ -1498,10 +1538,14 @@ void main() {
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
     final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-    final TextStyle selectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-    final TextStyle unselectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+    final TextStyle selectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(_tab1Text))
+        .text
+        .style!;
+    final TextStyle unselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(_tab2Text))
+        .text
+        .style!;
 
     expect(selectedTabIcon.color, selectedColor);
     expect(unselectedTabIcon.color, unselectedColor);
@@ -1532,10 +1576,14 @@ void main() {
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      TextStyle selectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-      TextStyle unselectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       expect(selectedTabIcon.color, selectedStateColor);
       expect(unselectedTabIcon.color, unselectedStateColor);
@@ -1608,7 +1656,10 @@ void main() {
   ) async {
     const double indicatorWidth = 50.0;
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(key: ValueKey<int>(index), child: const SizedBox(width: indicatorWidth));
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
     });
 
     final TabController controller = createTabController(

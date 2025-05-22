@@ -23,11 +23,10 @@ sealed class CheckoutStatePostGradleRegeneration {
       changedPaths.add(match.group(1)!);
     }
 
-    final List<String> nonLockfileDiffs =
-        changedPaths.where((String path) {
-          final String extension = context.extension(path);
-          return extension != '.lockfile';
-        }).toList();
+    final List<String> nonLockfileDiffs = changedPaths.where((String path) {
+      final String extension = context.extension(path);
+      return extension != '.lockfile';
+    }).toList();
 
     if (nonLockfileDiffs.isNotEmpty) {
       return NonLockfileChanges(nonLockfileDiffs);

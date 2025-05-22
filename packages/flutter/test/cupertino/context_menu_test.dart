@@ -114,7 +114,9 @@ void main() {
       // Measure the child in the scene with no CupertinoContextMenu.
       final Widget child = getChild();
       await tester.pumpWidget(
-        CupertinoApp(home: CupertinoPageScaffold(child: Center(child: child))),
+        CupertinoApp(
+          home: CupertinoPageScaffold(child: Center(child: child)),
+        ),
       );
       final Rect childRect = tester.getRect(find.byWidget(child));
 
@@ -183,17 +185,14 @@ void main() {
                   child: Navigator(
                     onGenerateRoute: (RouteSettings settings) {
                       return CupertinoPageRoute<void>(
-                        builder:
-                            (BuildContext context) => Align(
-                              child: CupertinoContextMenu(
-                                actions: const <CupertinoContextMenuAction>[
-                                  CupertinoContextMenuAction(
-                                    child: Text('CupertinoContextMenuAction'),
-                                  ),
-                                ],
-                                child: child,
-                              ),
-                            ),
+                        builder: (BuildContext context) => Align(
+                          child: CupertinoContextMenu(
+                            actions: const <CupertinoContextMenuAction>[
+                              CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
+                            ],
+                            child: child,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -370,12 +369,11 @@ void main() {
         ),
       );
 
-      final Widget child =
-          find
-              .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
-              .evaluate()
-              .single
-              .widget;
+      final Widget child = find
+          .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
+          .evaluate()
+          .single
+          .widget;
       final Rect childRect = tester.getRect(find.byWidget(child));
       expect(
         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
@@ -843,26 +841,25 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return ListView(
-                  children:
-                      items
-                          .map(
-                            (int index) => CupertinoContextMenu(
-                              actions: <CupertinoContextMenuAction>[
-                                CupertinoContextMenuAction(
-                                  child: const Text('DELETE'),
-                                  onPressed: () {
-                                    setState(() {
-                                      items.remove(index);
-                                      Navigator.of(context).pop();
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                              child: Text('Item $index'),
+                  children: items
+                      .map(
+                        (int index) => CupertinoContextMenu(
+                          actions: <CupertinoContextMenuAction>[
+                            CupertinoContextMenuAction(
+                              child: const Text('DELETE'),
+                              onPressed: () {
+                                setState(() {
+                                  items.remove(index);
+                                  Navigator.of(context).pop();
+                                });
+                                Navigator.of(context).pop();
+                              },
                             ),
-                          )
-                          .toList(),
+                          ],
+                          child: Text('Item $index'),
+                        ),
+                      )
+                      .toList(),
                 );
               },
             ),

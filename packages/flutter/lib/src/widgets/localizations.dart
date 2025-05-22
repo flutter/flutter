@@ -531,8 +531,8 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
   /// method will throw an exception.
   static Locale localeOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(() {
       if (scope == null) {
         throw FlutterError(
@@ -557,16 +557,16 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then this function will return
   /// null.
   static Locale? maybeLocaleOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.locale;
   }
 
   // There doesn't appear to be a need to make this public. See the
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
   }
@@ -587,8 +587,8 @@ class Localizations extends StatefulWidget {
   /// }
   /// ```
   static T? of<T>(BuildContext context, Type type) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.resourcesFor<T?>(type);
   }
 
@@ -648,12 +648,10 @@ class _LocalizationsState extends State<Localizations> {
     }
 
     Map<Type, dynamic>? typeToResources;
-    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(
-      locale,
-      delegates,
-    ).then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
-      return typeToResources = value;
-    });
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
+        .then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
+          return typeToResources = value;
+        });
 
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.

@@ -710,10 +710,12 @@ class IconButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     if (theme.useMaterial3) {
-      final Size? minSize =
-          constraints == null ? null : Size(constraints!.minWidth, constraints!.minHeight);
-      final Size? maxSize =
-          constraints == null ? null : Size(constraints!.maxWidth, constraints!.maxHeight);
+      final Size? minSize = constraints == null
+          ? null
+          : Size(constraints!.minWidth, constraints!.minHeight);
+      final Size? maxSize = constraints == null
+          ? null
+          : Size(constraints!.maxWidth, constraints!.maxHeight);
 
       ButtonStyle adjustedStyle = styleFrom(
         visualDensity: visualDensity,

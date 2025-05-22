@@ -140,8 +140,9 @@ void main() {
                   usesSwiftPackageManager: true,
                   fileSystem: testFileSystem,
                 );
-                final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+                    ? project.ios
+                    : project.macos;
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
                 xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
                   'FlutterGeneratedPluginSwiftPackage',
@@ -211,8 +212,9 @@ void main() {
                   usesSwiftPackageManager: true,
                   fileSystem: testFileSystem,
                 );
-                final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+                    ? project.ios
+                    : project.macos;
                 xcodeProject.podfile.createSync(recursive: true);
                 xcodeProject.podfile.writeAsStringSync('Standard Podfile template');
 
@@ -280,8 +282,9 @@ void main() {
                   usesSwiftPackageManager: true,
                   fileSystem: testFileSystem,
                 );
-                final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+                    ? project.ios
+                    : project.macos;
                 xcodeProject.podfile.createSync(recursive: true);
                 xcodeProject.podfile.writeAsStringSync('Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
@@ -367,8 +370,9 @@ void main() {
                   usesSwiftPackageManager: true,
                   fileSystem: testFileSystem,
                 );
-                final XcodeBasedProject xcodeProject =
-                    platform == SupportedPlatform.ios ? project.ios : project.macos;
+                final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+                    ? project.ios
+                    : project.macos;
                 xcodeProject.podfile.createSync(recursive: true);
                 xcodeProject.podfile.writeAsStringSync('Non-Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
@@ -466,8 +470,9 @@ void main() {
                 usesSwiftPackageManager: true,
                 fileSystem: testFileSystem,
               );
-              final XcodeBasedProject xcodeProject =
-                  platform == SupportedPlatform.ios ? project.ios : project.macos;
+              final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+                  ? project.ios
+                  : project.macos;
               xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
               xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
                 'FlutterGeneratedPluginSwiftPackage',
@@ -533,8 +538,9 @@ void main() {
                 usesSwiftPackageManager: true,
                 fileSystem: testFileSystem,
               );
-              final XcodeBasedProject xcodeProject =
-                  platform == SupportedPlatform.ios ? project.ios : project.macos;
+              final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
+                  ? project.ios
+                  : project.macos;
               xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
               xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
                 'FlutterGeneratedPluginSwiftPackage',

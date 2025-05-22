@@ -80,13 +80,12 @@ void main() {
       testWithoutContext('returns false with and without a terminal attached', () async {
         final BotDetector botDetector = BotDetector(
           platform: fakePlatform,
-          httpClientFactory:
-              () => FakeHttpClient.list(<FakeRequest>[
-                FakeRequest(
-                  azureUrl,
-                  responseError: const SocketException('HTTP connection timed out'),
-                ),
-              ]),
+          httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(
+              azureUrl,
+              responseError: const SocketException('HTTP connection timed out'),
+            ),
+          ]),
           persistentToolState: persistentToolState,
         );
 
@@ -158,13 +157,9 @@ void main() {
   group('AzureDetector', () {
     testWithoutContext('isRunningOnAzure returns false when connection times out', () async {
       final AzureDetector azureDetector = AzureDetector(
-        httpClientFactory:
-            () => FakeHttpClient.list(<FakeRequest>[
-              FakeRequest(
-                azureUrl,
-                responseError: const SocketException('HTTP connection timed out'),
-              ),
-            ]),
+        httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(azureUrl, responseError: const SocketException('HTTP connection timed out')),
+        ]),
       );
 
       expect(await azureDetector.isRunningOnAzure, isFalse);
@@ -172,10 +167,9 @@ void main() {
 
     testWithoutContext('isRunningOnAzure returns false when OsError is thrown', () async {
       final AzureDetector azureDetector = AzureDetector(
-        httpClientFactory:
-            () => FakeHttpClient.list(<FakeRequest>[
-              FakeRequest(azureUrl, responseError: const OSError('Connection Refused', 111)),
-            ]),
+        httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(azureUrl, responseError: const OSError('Connection Refused', 111)),
+        ]),
       );
 
       expect(await azureDetector.isRunningOnAzure, isFalse);

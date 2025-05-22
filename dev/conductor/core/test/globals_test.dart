@@ -30,24 +30,21 @@ void main() {
     late pb.ConductorState state;
 
     setUp(() {
-      state =
-          (pb.ConductorState.create()
-            ..engine =
-                (pb.Repository.create()
-                  ..candidateBranch = candidateBranch
-                  ..cherrypicks.addAll(<pb.Cherrypick>[
-                    pb.Cherrypick.create()..trunkRevision = engineCherrypick1,
-                    pb.Cherrypick.create()..trunkRevision = engineCherrypick2,
-                  ])
-                  ..dartRevision = dartRevision
-                  ..workingBranch = workingBranch)
-            ..framework =
-                (pb.Repository.create()
-                  ..candidateBranch = candidateBranch
-                  ..cherrypicks.add(pb.Cherrypick.create()..trunkRevision = frameworkCherrypick)
-                  ..workingBranch = workingBranch)
-            ..releaseChannel = releaseChannel
-            ..releaseVersion = releaseVersion);
+      state = (pb.ConductorState.create()
+        ..engine = (pb.Repository.create()
+          ..candidateBranch = candidateBranch
+          ..cherrypicks.addAll(<pb.Cherrypick>[
+            pb.Cherrypick.create()..trunkRevision = engineCherrypick1,
+            pb.Cherrypick.create()..trunkRevision = engineCherrypick2,
+          ])
+          ..dartRevision = dartRevision
+          ..workingBranch = workingBranch)
+        ..framework = (pb.Repository.create()
+          ..candidateBranch = candidateBranch
+          ..cherrypicks.add(pb.Cherrypick.create()..trunkRevision = frameworkCherrypick)
+          ..workingBranch = workingBranch)
+        ..releaseChannel = releaseChannel
+        ..releaseVersion = releaseVersion);
     });
 
     test('throws on an invalid repoName', () {
@@ -65,7 +62,8 @@ void main() {
         Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
         '[flutter_releases] Flutter $releaseChannel $releaseVersion Engine Cherrypicks',
       );
-      final String expectedBody = '''
+      final String expectedBody =
+          '''
 # Flutter $releaseChannel $releaseVersion Engine
 
 ## Scheduled Cherrypicks
@@ -85,7 +83,8 @@ void main() {
         Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
         '[flutter_releases] Flutter $releaseChannel $releaseVersion Framework Cherrypicks',
       );
-      final String expectedBody = '''
+      final String expectedBody =
+          '''
 # Flutter $releaseChannel $releaseVersion Framework
 
 ## Scheduled Cherrypicks

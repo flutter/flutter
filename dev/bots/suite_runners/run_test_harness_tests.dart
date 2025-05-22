@@ -58,8 +58,8 @@ Future<void> testHarnessTestsRunner() async {
         return result.flattenedStdout!.contains('failingPendingTimerTest')
             ? null
             : 'Failed to find the stack trace for the pending Timer.\n\n'
-                'stdout:\n${result.flattenedStdout}\n\n'
-                'stderr:\n${result.flattenedStderr}';
+                  'stdout:\n${result.flattenedStdout}\n\n'
+                  'stderr:\n${result.flattenedStderr}';
       },
     ),
     () => runFlutterTest(

@@ -192,10 +192,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode =
-          mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
+      final String artifactsMode = mode == BuildMode.debug
+          ? 'darwin-x64'
+          : 'darwin-x64-${mode.cliName}';
 
-      final String podspecContents = '''
+      final String podspecContents =
+          '''
 Pod::Spec.new do |s|
   s.name                  = 'FlutterMacOS'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
@@ -260,8 +262,9 @@ end
         processManager: globals.processManager,
         platform: globals.platform,
         analytics: globals.analytics,
-        engineVersion:
-            globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+        engineVersion: globals.artifacts!.usesLocalArtifacts
+            ? null
+            : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
       Target target;
@@ -351,8 +354,9 @@ end
 
       final Directory buildConfiguration = buildOutput.childDirectory(xcodeBuildConfiguration);
 
-      final Iterable<Directory> products =
-          buildConfiguration.listSync(followLinks: false).whereType<Directory>();
+      final Iterable<Directory> products = buildConfiguration
+          .listSync(followLinks: false)
+          .whereType<Directory>();
       for (final Directory builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;

@@ -73,8 +73,9 @@ void main() {
         overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
         () async {
           writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
-          final Uri nonFlutterTesterAssetUri =
-              environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+          final Uri nonFlutterTesterAssetUri = environment.buildDir
+              .childFile(InstallCodeAssets.nativeAssetsFilename)
+              .uri;
           final File dylibAfterCompiling = fileSystem.file('bar.dll');
           // The mock doesn't create the file, so create it here.
           await dylibAfterCompiling.create();
@@ -90,16 +91,16 @@ void main() {
           final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
-            linkResult:
-                buildMode == BuildMode.debug
-                    ? null
-                    : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+            linkResult: buildMode == BuildMode.debug
+                ? null
+                : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
           );
           final Map<String, String> environmentDefines = <String, String>{
             kBuildMode: buildMode.cliName,
           };
-          final TargetPlatform targetPlatform =
-              flutterTester ? TargetPlatform.tester : TargetPlatform.windows_x64;
+          final TargetPlatform targetPlatform = flutterTester
+              ? TargetPlatform.tester
+              : TargetPlatform.windows_x64;
           final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
@@ -107,14 +108,14 @@ void main() {
             fileSystem: fileSystem,
             buildRunner: buildRunner,
           );
-          final String expectedDirectory =
-              flutterTester ? code_assets.OS.current.toString() : 'windows';
-          final Uri nativeAssetsFileUri =
-              flutterTester
-                  ? projectUri.resolve(
-                    'build/native_assets/$expectedDirectory/${InstallCodeAssets.nativeAssetsFilename}',
-                  )
-                  : nonFlutterTesterAssetUri;
+          final String expectedDirectory = flutterTester
+              ? code_assets.OS.current.toString()
+              : 'windows';
+          final Uri nativeAssetsFileUri = flutterTester
+              ? projectUri.resolve(
+                  'build/native_assets/$expectedDirectory/${InstallCodeAssets.nativeAssetsFilename}',
+                )
+              : nonFlutterTesterAssetUri;
           await installCodeAssets(
             dartBuildResult: dartBuildResult,
             environmentDefines: environmentDefines,
@@ -160,25 +161,24 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                RegExp(r'(.*)vswhere.exe'),
-                '-format',
-                'json',
-                '-products',
-                '*',
-                '-utf8',
-                '-latest',
-                '-version',
-                '16',
-                '-requires',
-                'Microsoft.VisualStudio.Workload.NativeDesktop',
-                'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-                'Microsoft.VisualStudio.Component.VC.CMake.Project',
-              ],
-              stdout: r'''
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            RegExp(r'(.*)vswhere.exe'),
+            '-format',
+            'json',
+            '-products',
+            '*',
+            '-utf8',
+            '-latest',
+            '-version',
+            '16',
+            '-requires',
+            'Microsoft.VisualStudio.Workload.NativeDesktop',
+            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+            'Microsoft.VisualStudio.Component.VC.CMake.Project',
+          ],
+          stdout: r'''
 [
   {
     "instanceId": "491ec752",
@@ -230,8 +230,8 @@ void main() {
   }
 ]
 ''', // Newline at the end of the string.
-            ),
-          ]),
+        ),
+      ]),
       FileSystem: () => fileSystem,
     },
     () async {

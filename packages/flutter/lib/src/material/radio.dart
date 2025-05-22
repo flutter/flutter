@@ -449,15 +449,16 @@ class _RadioPaintState extends State<_RadioPaint> {
   @override
   Widget build(BuildContext context) {
     final RadioThemeData radioTheme = RadioTheme.of(context);
-    final RadioThemeData defaults =
-        Theme.of(context).useMaterial3 ? _RadioDefaultsM3(context) : _RadioDefaultsM2(context);
+    final RadioThemeData defaults = Theme.of(context).useMaterial3
+        ? _RadioDefaultsM3(context)
+        : _RadioDefaultsM2(context);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
-    final Set<MaterialState> activeStates =
-        widget.toggleableState.states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates =
-        widget.toggleableState.states..remove(MaterialState.selected);
+    final Set<MaterialState> activeStates = widget.toggleableState.states
+      ..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = widget.toggleableState.states
+      ..remove(MaterialState.selected);
     final Color? activeColor =
         widget.fillColor?.resolve(activeStates) ??
         _widgetFillColor.resolve(activeStates) ??
@@ -470,16 +471,16 @@ class _RadioPaintState extends State<_RadioPaint> {
     final Color effectiveInactiveColor =
         inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
 
-    final Set<MaterialState> focusedStates =
-        widget.toggleableState.states..add(MaterialState.focused);
+    final Set<MaterialState> focusedStates = widget.toggleableState.states
+      ..add(MaterialState.focused);
     Color effectiveFocusOverlayColor =
         widget.overlayColor?.resolve(focusedStates) ??
         widget.focusColor ??
         radioTheme.overlayColor?.resolve(focusedStates) ??
         defaults.overlayColor!.resolve(focusedStates)!;
 
-    final Set<MaterialState> hoveredStates =
-        widget.toggleableState.states..add(MaterialState.hovered);
+    final Set<MaterialState> hoveredStates = widget.toggleableState.states
+      ..add(MaterialState.hovered);
     Color effectiveHoverOverlayColor =
         widget.overlayColor?.resolve(hoveredStates) ??
         widget.hoverColor ??
@@ -501,14 +502,12 @@ class _RadioPaintState extends State<_RadioPaint> {
         defaults.overlayColor!.resolve(inactivePressedStates)!;
 
     if (widget.toggleableState.downPosition != null) {
-      effectiveHoverOverlayColor =
-          widget.toggleableState.states.contains(MaterialState.selected)
-              ? effectiveActivePressedOverlayColor
-              : effectiveInactivePressedOverlayColor;
-      effectiveFocusOverlayColor =
-          widget.toggleableState.states.contains(MaterialState.selected)
-              ? effectiveActivePressedOverlayColor
-              : effectiveInactivePressedOverlayColor;
+      effectiveHoverOverlayColor = widget.toggleableState.states.contains(MaterialState.selected)
+          ? effectiveActivePressedOverlayColor
+          : effectiveInactivePressedOverlayColor;
+      effectiveFocusOverlayColor = widget.toggleableState.states.contains(MaterialState.selected)
+          ? effectiveActivePressedOverlayColor
+          : effectiveInactivePressedOverlayColor;
     }
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize =
@@ -531,22 +530,21 @@ class _RadioPaintState extends State<_RadioPaint> {
 
     return CustomPaint(
       size: size,
-      painter:
-          _painter
-            ..position = widget.toggleableState.position
-            ..reaction = widget.toggleableState.reaction
-            ..reactionFocusFade = widget.toggleableState.reactionFocusFade
-            ..reactionHoverFade = widget.toggleableState.reactionHoverFade
-            ..inactiveReactionColor = effectiveInactivePressedOverlayColor
-            ..reactionColor = effectiveActivePressedOverlayColor
-            ..hoverColor = effectiveHoverOverlayColor
-            ..focusColor = effectiveFocusOverlayColor
-            ..splashRadius = widget.splashRadius ?? radioTheme.splashRadius ?? kRadialReactionRadius
-            ..downPosition = widget.toggleableState.downPosition
-            ..isFocused = widget.toggleableState.states.contains(MaterialState.focused)
-            ..isHovered = widget.toggleableState.states.contains(MaterialState.hovered)
-            ..activeColor = effectiveActiveColor
-            ..inactiveColor = effectiveInactiveColor,
+      painter: _painter
+        ..position = widget.toggleableState.position
+        ..reaction = widget.toggleableState.reaction
+        ..reactionFocusFade = widget.toggleableState.reactionFocusFade
+        ..reactionHoverFade = widget.toggleableState.reactionHoverFade
+        ..inactiveReactionColor = effectiveInactivePressedOverlayColor
+        ..reactionColor = effectiveActivePressedOverlayColor
+        ..hoverColor = effectiveHoverOverlayColor
+        ..focusColor = effectiveFocusOverlayColor
+        ..splashRadius = widget.splashRadius ?? radioTheme.splashRadius ?? kRadialReactionRadius
+        ..downPosition = widget.toggleableState.downPosition
+        ..isFocused = widget.toggleableState.states.contains(MaterialState.focused)
+        ..isHovered = widget.toggleableState.states.contains(MaterialState.hovered)
+        ..activeColor = effectiveActiveColor
+        ..inactiveColor = effectiveInactiveColor,
     );
   }
 }
@@ -559,11 +557,10 @@ class _RadioPainter extends ToggleablePainter {
     final Offset center = (Offset.zero & size).center;
 
     // Outer circle
-    final Paint paint =
-        Paint()
-          ..color = Color.lerp(inactiveColor, activeColor, position.value)!
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
+    final Paint paint = Paint()
+      ..color = Color.lerp(inactiveColor, activeColor, position.value)!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);
 
     // Inner circle

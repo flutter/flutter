@@ -57,7 +57,10 @@ class SwiftPackageManager {
     final (
       List<SwiftPackagePackageDependency> packageDependencies,
       List<SwiftPackageTargetDependency> targetDependencies,
-    ) = _dependenciesForPlugins(plugins, platform);
+    ) = _dependenciesForPlugins(
+      plugins,
+      platform,
+    );
 
     // If there aren't any Swift Package plugins and the project hasn't been
     // migrated yet, don't generate a Swift package or migrate the app since
@@ -190,11 +193,10 @@ class SwiftPackageManager {
 
     final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
     final String oldSupportedPlatform = defaultPlatform.format();
-    final String newSupportedPlatform =
-        SwiftPackageSupportedPlatform(
-          platform: packagePlatform,
-          version: projectDeploymentTargetVersion,
-        ).format();
+    final String newSupportedPlatform = SwiftPackageSupportedPlatform(
+      platform: packagePlatform,
+      version: projectDeploymentTargetVersion,
+    ).format();
 
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),

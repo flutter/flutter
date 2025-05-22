@@ -176,12 +176,11 @@ void main() {
         outputPreferences: OutputPreferences.test(),
       );
       terminalUnderTest.usesTerminalUi = true;
-      mockStdInStream =
-          Stream<String>.fromFutures(<Future<String>>[
-            Future<String>.value('d'), // Not in accepted list.
-            Future<String>.value('\n'), // Not in accepted list
-            Future<String>.value('b'),
-          ]).asBroadcastStream();
+      mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+        Future<String>.value('d'), // Not in accepted list.
+        Future<String>.value('\n'), // Not in accepted list
+        Future<String>.value('b'),
+      ]).asBroadcastStream();
       final String choice = await terminalUnderTest.promptForCharInput(
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
@@ -202,10 +201,9 @@ void main() {
         outputPreferences: OutputPreferences.test(),
       );
       terminalUnderTest.usesTerminalUi = true;
-      mockStdInStream =
-          Stream<String>.fromFutures(<Future<String>>[
-            Future<String>.value('\n'), // Not in accepted list
-          ]).asBroadcastStream();
+      mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+        Future<String>.value('\n'), // Not in accepted list
+      ]).asBroadcastStream();
       final String choice = await terminalUnderTest.promptForCharInput(
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
@@ -505,13 +503,10 @@ void main() {
     final FakeStdio stdio = FakeStdio();
     final AnsiTerminal terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
     stdio.stdinHasTerminal = true;
-    stdio._stdin =
-        FakeStdin()
-          ..echoModeCallback =
-              (bool _) =>
-                  throw const StdinException(
-                    'Error setting terminal echo mode, OS Error: The handle is invalid.',
-                  );
+    stdio._stdin = FakeStdin()
+      ..echoModeCallback = (bool _) => throw const StdinException(
+        'Error setting terminal echo mode, OS Error: The handle is invalid.',
+      );
     terminal.singleCharMode = true;
   });
 

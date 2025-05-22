@@ -111,8 +111,9 @@ Finder flying(WidgetTester tester, Finder finder) {
 }
 
 void checkBackgroundBoxOffset(WidgetTester tester, int boxIndex, Offset offset) {
-  final Widget transitionBackgroundBox =
-      tester.widget<Stack>(flying(tester, find.byType(Stack))).children[boxIndex];
+  final Widget transitionBackgroundBox = tester
+      .widget<Stack>(flying(tester, find.byType(Stack)))
+      .children[boxIndex];
   final Offset testOffset = tester.getBottomRight(
     find.descendant(of: find.byWidget(transitionBackgroundBox), matching: find.byType(SizedBox)),
   );
@@ -361,9 +362,8 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(
           CupertinoSheetRoute<void>(
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(const CupertinoNavigationBar(middle: Text('Page 1')))!,
+            builder: (BuildContext context) =>
+                scaffoldForNavBar(const CupertinoNavigationBar(middle: Text('Page 1')))!,
           ),
         );
 
@@ -374,11 +374,8 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(
           CupertinoSheetRoute<void>(
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(
-                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+            builder: (BuildContext context) =>
+                scaffoldForNavBar(const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')))!,
           ),
         );
 
@@ -665,11 +662,8 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 2',
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(
-                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+            builder: (BuildContext context) =>
+                scaffoldForNavBar(const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')))!,
           ),
         );
 
@@ -693,11 +687,8 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 2',
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(
-                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+            builder: (BuildContext context) =>
+                scaffoldForNavBar(const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')))!,
           ),
         );
 
@@ -785,10 +776,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Middle widget is visible when nav bar is collapsed.
-    final RenderAnimatedOpacity userMiddleOpacity =
-        tester
-            .element(find.byWidget(userMiddle))
-            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    final RenderAnimatedOpacity userMiddleOpacity = tester
+        .element(find.byWidget(userMiddle))
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     expect(userMiddleOpacity.opacity.value, 1.0);
 
     tester
@@ -1212,16 +1202,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 1',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1242,16 +1230,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 2',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoNavigationBar(
-                          bottom: PreferredSize(
-                            preferredSize: Size.fromHeight(20),
-                            child: ColoredBox(color: Color(0xffff0000)),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoNavigationBar(
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(20),
+                    child: ColoredBox(color: Color(0xffff0000)),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1274,16 +1260,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 3',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1331,16 +1315,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 1',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1361,16 +1343,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 2',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1393,16 +1373,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 3',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1678,16 +1656,15 @@ void main() {
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    final double largeTitleOpacity =
-        tester
-            .firstRenderObject<RenderAnimatedOpacity>(
-              find.ancestor(
-                of: flying(tester, find.text('Page 2')),
-                matching: find.byType(FadeTransition),
-              ),
-            )
-            .opacity
-            .value;
+    final double largeTitleOpacity = tester
+        .firstRenderObject<RenderAnimatedOpacity>(
+          find.ancestor(
+            of: flying(tester, find.text('Page 2')),
+            matching: find.byType(FadeTransition),
+          ),
+        )
+        .opacity
+        .value;
 
     checkOpacity(tester, flying(tester, find.byType(Placeholder)), largeTitleOpacity);
 
@@ -1892,8 +1869,9 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    final TextScaler scaler =
-        tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaler;
+    final TextScaler scaler = tester
+        .firstWidget<RichText>(flying(tester, find.byType(RichText)))
+        .textScaler;
     final List<double> fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
     expect(fontSizes.map(scaler.scale), fontSizes);
   });

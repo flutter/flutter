@@ -26,7 +26,9 @@ class _PageState extends State<Page> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: FilledButton(onPressed: () {}, child: Text(widget.title)));
+    return Center(
+      child: FilledButton(onPressed: () {}, child: Text(widget.title)),
+    );
   }
 }
 
@@ -37,7 +39,9 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(title: const Text('Button Border Test')),
-          body: Center(child: ElevatedButton(child: const Text('Test'), onPressed: () {})),
+          body: Center(
+            child: ElevatedButton(child: const Text('Test'), onPressed: () {}),
+          ),
         ),
       ),
     );

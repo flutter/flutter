@@ -33,11 +33,10 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -55,10 +54,9 @@ void runTests() {
   testWidgets('loads an image from the network with unsuccessful HTTP code', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 404
-          ..mockEvent = MockEvent('error', web.Event('test error'));
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 404
+      ..mockEvent = MockEvent('error', web.Event('test error'));
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -80,11 +78,10 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with empty response', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('successful load'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('successful load'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
@@ -102,11 +99,10 @@ void runTests() {
   testWidgets('When strategy is default, emits an error if the image is cross-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest failingRequest =
-        TestHttpRequest()
-          ..status = 500
-          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestHttpRequest failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {
       return failingRequest.getMock() as web_shim.XMLHttpRequest;
@@ -146,11 +142,10 @@ void runTests() {
   testWidgets('When strategy is .fallback, emits a WebImageInfo if the image is cross-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest failingRequest =
-        TestHttpRequest()
-          ..status = 500
-          ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-          ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestHttpRequest failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -199,11 +194,10 @@ void runTests() {
   testWidgets(
     'When strategy is .fallback, emits an error if the image is cross-origin but fails to decode',
     (WidgetTester tester) async {
-      final TestHttpRequest failingRequest =
-          TestHttpRequest()
-            ..status = 500
-            ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
-            ..response = (Uint8List.fromList(<int>[])).buffer;
+      final TestHttpRequest failingRequest = TestHttpRequest()
+        ..status = 500
+        ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+        ..response = (Uint8List.fromList(<int>[])).buffer;
       final TestImgElement testImg = TestImgElement();
 
       httpRequestFactory = () {
@@ -249,11 +243,10 @@ void runTests() {
   testWidgets('When strategy is .prefer, emits an WebImageInfo if the image is same-origin', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -302,11 +295,10 @@ void runTests() {
   testWidgets('When strategy is .prefer, emits a normal image if headers is not null', (
     WidgetTester tester,
   ) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
     final TestImgElement testImg = TestImgElement();
 
     httpRequestFactory = () {
@@ -375,11 +367,10 @@ void runTests() {
   });
 
   testWidgets('Does not crash when disposed between frames', (WidgetTester tester) async {
-    final TestHttpRequest testHttpRequest =
-        TestHttpRequest()
-          ..status = 200
-          ..mockEvent = MockEvent('load', web.Event('test error'))
-          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+    final TestHttpRequest testHttpRequest = TestHttpRequest()
+      ..status = 200
+      ..mockEvent = MockEvent('load', web.Event('test error'))
+      ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
       return testHttpRequest.getMock() as web_shim.XMLHttpRequest;

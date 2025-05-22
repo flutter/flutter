@@ -299,8 +299,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
         final ExpressionCompiler? expressionCompiler =
             debuggingOptions.webEnableExpressionEvaluation
-                ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
-                : null;
+            ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
+            : null;
 
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',

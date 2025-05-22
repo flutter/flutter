@@ -125,15 +125,14 @@ class _ShrineAppState extends State<ShrineApp> with TickerProviderStateMixin, Re
         menuController: _controller,
         cartController: _expandingController,
         child: LayoutBuilder(
-          builder:
-              (BuildContext context, BoxConstraints constraints) => HomePage(
-                backdrop: isDisplayDesktop(context) ? desktopBackdrop() : mobileBackdrop(),
-                scrim: Scrim(controller: _expandingController),
-                expandingBottomSheet: ExpandingBottomSheet(
-                  hideController: _controller,
-                  expandingController: _expandingController,
-                ),
-              ),
+          builder: (BuildContext context, BoxConstraints constraints) => HomePage(
+            backdrop: isDisplayDesktop(context) ? desktopBackdrop() : mobileBackdrop(),
+            scrim: Scrim(controller: _expandingController),
+            expandingBottomSheet: ExpandingBottomSheet(
+              hideController: _controller,
+              expandingController: _expandingController,
+            ),
+          ),
         ),
       ),
     );

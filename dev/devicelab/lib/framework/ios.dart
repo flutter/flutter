@@ -69,8 +69,9 @@ Future<void> testWithNewIOSSimulator(
   // version, or it's indicated a better match for your SDK.
   final Map<String, Object?> decodeResult =
       json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
-  final String? iosKey =
-      decodeResult.keys.where((String key) => key.contains('iphoneos')).firstOrNull;
+  final String? iosKey = decodeResult.keys
+      .where((String key) => key.contains('iphoneos'))
+      .firstOrNull;
   final String? runtimeBuildForSelectedXcode = switch (decodeResult[iosKey]) {
     {'userOverriddenBuild': final String build} => build,
     {'preferredBuild': final String build} => build,
@@ -270,8 +271,9 @@ File? _createDisabledSandboxEntitlementFile(String platformDirectory, String con
   }
 
   final String originalEntitlementFileContents = entitlementFile.readAsStringSync();
-  final String tempEntitlementPath =
-      Directory.systemTemp.createTempSync('flutter_disable_sandbox_entitlement.').path;
+  final String tempEntitlementPath = Directory.systemTemp
+      .createTempSync('flutter_disable_sandbox_entitlement.')
+      .path;
   final File disabledSandboxEntitlementFile = File(
     path.join(
       tempEntitlementPath,

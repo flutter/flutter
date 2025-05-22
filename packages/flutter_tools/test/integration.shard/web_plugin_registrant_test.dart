@@ -82,15 +82,14 @@ void main() {
       expect(contents, contains('registrar.registerMessageHandler();'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -139,15 +138,14 @@ void main() {
       expect(contents, contains('registrar.registerMessageHandler();'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -176,15 +174,14 @@ void main() {
       expect(contents, contains('void registerPlugins() {}'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -213,15 +210,14 @@ void main() {
       expect(buildDir, isNot(exists));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 
@@ -263,15 +259,14 @@ void main() {
       await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
     },
     overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: globals.stdio,
-          ),
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: globals.stdio,
+      ),
     },
   );
 }

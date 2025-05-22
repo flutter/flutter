@@ -1091,10 +1091,9 @@ class TextField extends StatefulWidget {
       DiagnosticsProperty<List<String>>(
         'contentCommitMimeTypes',
         contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
-        defaultValue:
-            contentInsertionConfiguration == null
-                ? const <String>[]
-                : kDefaultContentInsertionMimeTypes,
+        defaultValue: contentInsertionConfiguration == null
+            ? const <String>[]
+            : kDefaultContentInsertionMimeTypes,
       ),
     );
     properties.add(
@@ -1311,10 +1310,9 @@ class _TextFieldState extends State<TextField>
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -1461,15 +1459,14 @@ class _TextFieldState extends State<TextField>
   @override
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
-    final AutofillConfiguration autofillConfiguration =
-        autofillHints != null
-            ? AutofillConfiguration(
-              uniqueIdentifier: autofillId,
-              autofillHints: autofillHints,
-              currentEditingValue: _effectiveController.value,
-              hintText: (widget.decoration ?? const InputDecoration()).hintText,
-            )
-            : AutofillConfiguration.disabled;
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+        ? AutofillConfiguration(
+            uniqueIdentifier: autofillId,
+            autofillHints: autofillHints,
+            currentEditingValue: _effectiveController.value,
+            hintText: (widget.decoration ?? const InputDecoration()).hintText,
+          )
+        : AutofillConfiguration.disabled;
 
     return _editableText!.textInputConfiguration.copyWith(
       autofillConfiguration: autofillConfiguration,
@@ -1557,10 +1554,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates ??= true;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
@@ -1573,10 +1569,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
@@ -1597,10 +1592,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= materialTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
 
@@ -1609,10 +1603,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
@@ -1630,10 +1623,9 @@ class _TextFieldState extends State<TextField>
         textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates ??= false;
-        cursorColor =
-            _hasError
-                ? _errorColor
-                : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
@@ -1773,50 +1765,47 @@ class _TextFieldState extends State<TextField>
                 enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
-                onTap:
-                    widget.readOnly
-                        ? null
-                        : () {
-                          if (!_effectiveController.selection.isValid) {
-                            _effectiveController.selection = TextSelection.collapsed(
-                              offset: _effectiveController.text.length,
-                            );
-                          }
-                          _requestKeyboard();
-                        },
+                onTap: widget.readOnly
+                    ? null
+                    : () {
+                        if (!_effectiveController.selection.isValid) {
+                          _effectiveController.selection = TextSelection.collapsed(
+                            offset: _effectiveController.text.length,
+                          );
+                        }
+                        _requestKeyboard();
+                      },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
-                onFocus:
-                    _isEnabled
-                        ? () {
-                          assert(
-                            _effectiveFocusNode.canRequestFocus,
-                            'Received SemanticsAction.focus from the engine. However, the FocusNode '
-                            'of this text field cannot gain focus. This likely indicates a bug. '
-                            'If this text field cannot be focused (e.g. because it is not '
-                            'enabled), then its corresponding semantics node must be configured '
-                            'such that the assistive technology cannot request focus on it.',
-                          );
+                onFocus: _isEnabled
+                    ? () {
+                        assert(
+                          _effectiveFocusNode.canRequestFocus,
+                          'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                          'of this text field cannot gain focus. This likely indicates a bug. '
+                          'If this text field cannot be focused (e.g. because it is not '
+                          'enabled), then its corresponding semantics node must be configured '
+                          'such that the assistive technology cannot request focus on it.',
+                        );
 
-                          if (_effectiveFocusNode.canRequestFocus &&
-                              !_effectiveFocusNode.hasFocus) {
-                            _effectiveFocusNode.requestFocus();
-                          } else if (!widget.readOnly) {
-                            // If the platform requested focus, that means that previously the
-                            // platform believed that the text field did not have focus (even
-                            // though Flutter's widget system believed otherwise). This likely
-                            // means that the on-screen keyboard is hidden, or more generally,
-                            // there is no current editing session in this field. To correct
-                            // that, keyboard must be requested.
-                            //
-                            // A concrete scenario where this can happen is when the user
-                            // dismisses the keyboard on the web. The editing session is
-                            // closed by the engine, but the text field widget stays focused
-                            // in the framework.
-                            _requestKeyboard();
-                          }
+                        if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                          _effectiveFocusNode.requestFocus();
+                        } else if (!widget.readOnly) {
+                          // If the platform requested focus, that means that previously the
+                          // platform believed that the text field did not have focus (even
+                          // though Flutter's widget system believed otherwise). This likely
+                          // means that the on-screen keyboard is hidden, or more generally,
+                          // there is no current editing session in this field. To correct
+                          // that, keyboard must be requested.
+                          //
+                          // A concrete scenario where this can happen is when the user
+                          // dismisses the keyboard on the web. The editing session is
+                          // closed by the engine, but the text field widget stays focused
+                          // in the framework.
+                          _requestKeyboard();
                         }
-                        : null,
+                      }
+                    : null,
                 child: child,
               );
             },

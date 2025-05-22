@@ -1906,14 +1906,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 );
@@ -1966,14 +1965,13 @@ void main() {
 
                     return Colors.transparent;
                   }),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 );
@@ -2017,14 +2015,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2098,14 +2095,13 @@ void main() {
 
                     return Colors.transparent;
                   }),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2166,14 +2162,13 @@ void main() {
                   key: sliderKey,
                   value: value,
                   focusNode: focusNode,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2252,14 +2247,13 @@ void main() {
 
                     return Colors.transparent;
                   }),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2322,14 +2316,13 @@ void main() {
                   value: value,
                   activeColor: activeColor,
                   overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusNode: focusNode,
                 );
               },
@@ -2788,7 +2781,9 @@ void main() {
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Slider(value: 0.5, onChanged: (double _) {}, focusNode: focusNode)),
+          home: Material(
+            child: Slider(value: 0.5, onChanged: (double _) {}, focusNode: focusNode),
+          ),
         ),
       );
 
@@ -2899,13 +2894,13 @@ void main() {
         valueIndicatorBox,
         isVisible
             ? (paints
-              ..path(color: theme.valueIndicatorColor)
-              ..paragraph())
-            : isNot(
-              paints
                 ..path(color: theme.valueIndicatorColor)
-                ..paragraph(),
-            ),
+                ..paragraph())
+            : isNot(
+                paints
+                  ..path(color: theme.valueIndicatorColor)
+                  ..paragraph(),
+              ),
       );
       await gesture.up();
     }
@@ -3341,11 +3336,10 @@ void main() {
       secondaryTrackValue: 75.0,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'value: 50.0',
@@ -3528,7 +3522,9 @@ void main() {
 
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: Material(child: Slider(value: 0, onChanged: (double newValue) {}, thumbColor: color)),
+      home: Material(
+        child: Slider(value: 0, onChanged: (double newValue) {}, thumbColor: color),
+      ),
     );
 
     await tester.pumpWidget(sliderAdaptive);
@@ -3832,14 +3828,13 @@ void main() {
                   return Slider(
                     value: value,
                     overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -3901,14 +3896,13 @@ void main() {
                   value: value,
                   focusNode: focusNode,
                   overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -4039,14 +4033,13 @@ void main() {
                     focusNode: focusNode,
                     divisions: 5,
                     label: value.toStringAsFixed(1),
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -4128,17 +4121,16 @@ void main() {
                         // Note: it is important that `onTap` is non-null so
                         // [GestureDetector] will register tap events.
                         onTap: () {},
-                        child:
-                            shouldShowSlider
-                                ? Slider(
-                                  value: value,
-                                  onChanged: (double newValue) {
-                                    setState(() {
-                                      value = newValue;
-                                    });
-                                  },
-                                )
-                                : const SizedBox.expand(),
+                        child: shouldShowSlider
+                            ? Slider(
+                                value: value,
+                                onChanged: (double newValue) {
+                                  setState(() {
+                                    value = newValue;
+                                  });
+                                },
+                              )
+                            : const SizedBox.expand(),
                       );
                     },
                   ),
@@ -4186,14 +4178,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return Slider(
                     value: value,
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -4250,14 +4241,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return Slider(
                     value: value,
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                     autofocus: true,
                     focusNode: focusNode,
                   );
@@ -4309,14 +4299,13 @@ void main() {
                     key: sliderKey,
                     value: value,
                     focusNode: focusNode,
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -5013,7 +5002,9 @@ void main() {
     const double startPadding = 100;
     const double endPadding = 20;
     await tester.pumpWidget(
-      buildSlider(padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding)),
+      buildSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -5073,12 +5064,11 @@ void main() {
       final Color valueIndicatorColor = colorScheme.inverseSurface;
       double value = 0.45;
       Widget buildApp({int? divisions, bool enabled = true}) {
-        final ValueChanged<double>? onChanged =
-            !enabled
-                ? null
-                : (double d) {
-                  value = d;
-                };
+        final ValueChanged<double>? onChanged = !enabled
+            ? null
+            : (double d) {
+                value = d;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,

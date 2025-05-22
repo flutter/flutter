@@ -68,8 +68,9 @@ void main() {
       const Rect.fromLTRB(0.0, 300.0, 300.0, 500.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -148,8 +149,9 @@ void main() {
       const Rect.fromLTRB(0.0, 100.0, 300.0, 300.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -231,10 +233,9 @@ void main() {
       const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester
-            .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
-            .toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -317,10 +318,9 @@ void main() {
       const Rect.fromLTRB(100.0, 0.0, 300.0, 600.0),
     );
 
-    final List<RenderSliverList> renderSlivers =
-        tester
-            .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
-            .toList();
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false))
+        .toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -359,25 +359,21 @@ void main() {
           _buildSliverList(
             itemMainAxisExtent: 300,
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 0
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 0 Tile $item',
-                          child: Text('Group 0 Tile $item'),
-                        )
-                        : Text('Group 0 Tile $item'),
+            label: (int item) => tile == item && group == 0
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                    child: Text('Group 0 Tile $item'),
+                  )
+                : Text('Group 0 Tile $item'),
           ),
           _buildSliverList(
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 1
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 1 Tile $item',
-                          child: Text('Group 1 Tile $item'),
-                        )
-                        : Text('Group 1 Tile $item'),
+            label: (int item) => tile == item && group == 1
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                    child: Text('Group 1 Tile $item'),
+                  )
+                : Text('Group 1 Tile $item'),
           ),
         ],
       ),
@@ -397,25 +393,21 @@ void main() {
           _buildSliverList(
             itemMainAxisExtent: 300,
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 0
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 0 Tile $item',
-                          child: Text('Group 0 Tile $item'),
-                        )
-                        : Text('Group 0 Tile $item'),
+            label: (int item) => tile == item && group == 0
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                    child: Text('Group 0 Tile $item'),
+                  )
+                : Text('Group 0 Tile $item'),
           ),
           _buildSliverList(
             items: items,
-            label:
-                (int item) =>
-                    tile == item && group == 1
-                        ? TextButton(
-                          onPressed: () => clickedTile = 'Group 1 Tile $item',
-                          child: Text('Group 1 Tile $item'),
-                        )
-                        : Text('Group 1 Tile $item'),
+            label: (int item) => tile == item && group == 1
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                    child: Text('Group 1 Tile $item'),
+                  )
+                : Text('Group 1 Tile $item'),
           ),
         ],
       ),
@@ -902,10 +894,14 @@ void main() {
               ),
             ),
             SliverToBoxAdapter(
-              child: Material(child: TextField(key: firstTextFieldKey, focusNode: textFieldFocus)),
+              child: Material(
+                child: TextField(key: firstTextFieldKey, focusNode: textFieldFocus),
+              ),
             ),
             SliverToBoxAdapter(child: Container(color: Colors.green, height: 500)),
-            SliverToBoxAdapter(child: Material(child: TextField(focusNode: textFieldFocus2))),
+            SliverToBoxAdapter(
+              child: Material(child: TextField(focusNode: textFieldFocus2)),
+            ),
           ],
         ),
       );
@@ -1052,15 +1048,15 @@ Widget _buildSliverList({
       (BuildContext context, int i) {
         return scrollDirection == Axis.vertical
             ? SizedBox(
-              key: ValueKey<int>(items[i]),
-              height: itemMainAxisExtent,
-              child: label(items[i]),
-            )
+                key: ValueKey<int>(items[i]),
+                height: itemMainAxisExtent,
+                child: label(items[i]),
+              )
             : SizedBox(
-              key: ValueKey<int>(items[i]),
-              width: itemMainAxisExtent,
-              child: label(items[i]),
-            );
+                key: ValueKey<int>(items[i]),
+                width: itemMainAxisExtent,
+                child: label(items[i]),
+              );
       },
       findChildIndexCallback: (Key key) {
         final ValueKey<int> valueKey = key as ValueKey<int>;
@@ -1093,7 +1089,10 @@ Widget _buildSliverMainAxisGroup({
             scrollDirection: scrollDirection,
             reverse: reverse,
             controller: controller,
-            slivers: <Widget>[SliverMainAxisGroup(slivers: slivers), ...otherSlivers],
+            slivers: <Widget>[
+              SliverMainAxisGroup(slivers: slivers),
+              ...otherSlivers,
+            ],
           ),
         ),
       ),

@@ -253,8 +253,9 @@ void main() {
         '- ${dependency.name} ${dependency.version}',
     ];
 
-    final Set<String> dependencies =
-        flutterPubspec.allDependencies.map<String>((PubspecDependency dep) => dep.name).toSet();
+    final Set<String> dependencies = flutterPubspec.allDependencies
+        .map<String>((PubspecDependency dep) => dep.name)
+        .toSet();
     depsLines.add('- flutter 1.0.0 [${dependencies.join(' ')}}]');
     depsLines.forEach(flutterTree.fill);
     flutterPubspec.apply(flutterTree, <String>{});

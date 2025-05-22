@@ -564,8 +564,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation = translation;
     }
 
-    final Matrix4 nextMatrix =
-        matrix.clone()..translate(alignedTranslation.dx, alignedTranslation.dy);
+    final Matrix4 nextMatrix = matrix.clone()
+      ..translate(alignedTranslation.dx, alignedTranslation.dy);
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -605,10 +605,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // calculating the translation to put the viewport inside that Quad is more
     // complicated than this when rotated.
     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix =
-        matrix.clone()..setTranslation(
-          Vector3(correctedTotalTranslation.dx, correctedTotalTranslation.dy, 0.0),
-        );
+    final Matrix4 correctedMatrix = matrix.clone()
+      ..setTranslation(Vector3(correctedTotalTranslation.dx, correctedTotalTranslation.dy, 0.0));
 
     // Double check that the corrected translation fits.
     final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
@@ -1234,11 +1232,10 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 // Find the axis aligned bounding box for the rect rotated about its center by
 // the given amount.
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-  final Matrix4 rotationMatrix =
-      Matrix4.identity()
-        ..translate(rect.size.width / 2, rect.size.height / 2)
-        ..rotateZ(rotation)
-        ..translate(-rect.size.width / 2, -rect.size.height / 2);
+  final Matrix4 rotationMatrix = Matrix4.identity()
+    ..translate(rect.size.width / 2, rect.size.height / 2)
+    ..rotateZ(rotation)
+    ..translate(-rect.size.width / 2, -rect.size.height / 2);
   final Quad boundariesRotated = Quad.points(
     rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),

@@ -90,18 +90,16 @@ void main() {
       // Depfile is created correctly.
       expect(outputDepfile, exists);
 
-      final List<String> inputPaths =
-          environment.depFileService
-              .parse(outputDepfile)
-              .inputs
-              .map((File file) => file.path)
-              .toList();
-      final List<String> outputPaths =
-          environment.depFileService
-              .parse(outputDepfile)
-              .outputs
-              .map((File file) => file.path)
-              .toList();
+      final List<String> inputPaths = environment.depFileService
+          .parse(outputDepfile)
+          .inputs
+          .map((File file) => file.path)
+          .toList();
+      final List<String> outputPaths = environment.depFileService
+          .parse(outputDepfile)
+          .outputs
+          .map((File file) => file.path)
+          .toList();
 
       // Depfile has expected sources.
       expect(

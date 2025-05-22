@@ -302,8 +302,9 @@ environement:
         contains('#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'),
       );
       expect(debugContents, contains('Existing debug config'));
-      final String releaseContents =
-          projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
+      final String releaseContents = projectUnderTest.ios
+          .xcodeConfigFor('Release')
+          .readAsStringSync();
       expect(
         releaseContents,
         contains(
@@ -337,14 +338,16 @@ environement:
         );
         await cocoaPodsUnderTest.setupPodfile(project.ios);
 
-        final String debugContents =
-            projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
+        final String debugContents = projectUnderTest.ios
+            .xcodeConfigFor('Debug')
+            .readAsStringSync();
         // Redundant contains check, but this documents what we're testing--that the optional
         // #include? doesn't get written in addition to the previous style #include.
         expect(debugContents, isNot(contains('#include?')));
         expect(debugContents, equals(legacyDebugInclude));
-        final String releaseContents =
-            projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
+        final String releaseContents = projectUnderTest.ios
+            .xcodeConfigFor('Release')
+            .readAsStringSync();
         expect(releaseContents, isNot(contains('#include?')));
         expect(releaseContents, equals(legacyReleaseInclude));
       },
@@ -374,14 +377,16 @@ environement:
         );
         await cocoaPodsUnderTest.setupPodfile(project.ios);
 
-        final String debugContents =
-            projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
+        final String debugContents = projectUnderTest.ios
+            .xcodeConfigFor('Debug')
+            .readAsStringSync();
         // Redundant contains check, but this documents what we're testing--that the optional
         // #include? doesn't get written in addition to the previous style #include.
         expect(debugContents, isNot(contains('Pods-Runner/Pods-Runner.debug')));
         expect(debugContents, equals(flavorDebugInclude));
-        final String releaseContents =
-            projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
+        final String releaseContents = projectUnderTest.ios
+            .xcodeConfigFor('Release')
+            .readAsStringSync();
         expect(releaseContents, isNot(contains('Pods-Runner/Pods-Runner.release')));
         expect(releaseContents, equals(flavorReleaseInclude));
       },
@@ -411,8 +416,9 @@ environement:
         );
         await injectPlugins(project, iosPlatform: true, releaseMode: false);
 
-        final String debugContents =
-            projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
+        final String debugContents = projectUnderTest.ios
+            .xcodeConfigFor('Debug')
+            .readAsStringSync();
         expect(
           debugContents,
           contains(
@@ -420,8 +426,9 @@ environement:
           ),
         );
         expect(debugContents, contains('Existing debug config'));
-        final String releaseContents =
-            projectUnderTest.ios.xcodeConfigFor('Release').readAsStringSync();
+        final String releaseContents = projectUnderTest.ios
+            .xcodeConfigFor('Release')
+            .readAsStringSync();
         expect(
           releaseContents,
           contains(

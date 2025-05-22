@@ -488,7 +488,8 @@ void main() {
         });
 
         testWithoutContext('loads valid JSON', () async {
-          final String value = '''
+          final String value =
+              '''
         {
           "lastKnownRemoteVersion": "${_testClock.ago(const Duration(days: 1))}",
           "lastTimeVersionWasChecked": "${_testClock.ago(const Duration(days: 2))}",
@@ -524,10 +525,9 @@ void main() {
     }
 
     testWithoutContext('returns error if repository url is null', () {
-      final VersionCheckError error =
-          runUpstreamValidator(
-            // repositoryUrl is null by default
-          )!;
+      final VersionCheckError error = runUpstreamValidator(
+        // repositoryUrl is null by default
+      )!;
       expect(error, isNotNull);
       expect(
         error.message,
@@ -545,8 +545,9 @@ void main() {
     );
 
     testWithoutContext('returns error at non-standard remote url with FLUTTER_GIT_URL unset', () {
-      final VersionCheckError error =
-          runUpstreamValidator(versionUpstreamUrl: flutterNonStandardUrlDotGit)!;
+      final VersionCheckError error = runUpstreamValidator(
+        versionUpstreamUrl: flutterNonStandardUrlDotGit,
+      )!;
       expect(error, isNotNull);
       expect(
         error.message,
@@ -572,11 +573,10 @@ void main() {
     );
 
     testWithoutContext('respects FLUTTER_GIT_URL even if upstream remote url is standard', () {
-      final VersionCheckError error =
-          runUpstreamValidator(
-            versionUpstreamUrl: flutterStandardUrlDotGit,
-            flutterGitUrl: flutterNonStandardUrlDotGit,
-          )!;
+      final VersionCheckError error = runUpstreamValidator(
+        versionUpstreamUrl: flutterStandardUrlDotGit,
+        flutterGitUrl: flutterNonStandardUrlDotGit,
+      )!;
       expect(error, isNotNull);
       expect(
         error.message,
@@ -711,10 +711,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
         FakeCommand(
           command: const <String>[
@@ -728,10 +727,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
       ]);
 
@@ -947,10 +945,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
         FakeCommand(
           command: const <String>[
@@ -964,10 +961,9 @@ void main() {
             '--pretty=format:%ad',
             '--date=iso',
           ],
-          stdout:
-              _testClock
-                  .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
-                  .toString(),
+          stdout: _testClock
+              .ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2)
+              .toString(),
         ),
       ]);
 

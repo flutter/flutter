@@ -58,14 +58,13 @@ class DotState extends State<Dot> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap:
-          widget.tappable
-              ? () {
-                setState(() {
-                  taps += 1;
-                });
-              }
-              : null,
+      onTap: widget.tappable
+          ? () {
+              setState(() {
+                taps += 1;
+              });
+            }
+          : null,
       child: Container(
         width: widget.size,
         height: widget.size,
@@ -108,7 +107,11 @@ class ExampleDragSource extends StatelessWidget {
     final Widget contents = DefaultTextStyle(
       style: Theme.of(context).textTheme.bodyMedium!,
       textAlign: TextAlign.center,
-      child: Dot(color: color, size: size, child: Center(child: child)),
+      child: Dot(
+        color: color,
+        size: size,
+        child: Center(child: child),
+      ),
     );
 
     Widget feedback = Opacity(opacity: 0.75, child: contents);
@@ -158,11 +161,10 @@ class DashOutlineCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / 2.0;
-    final Paint paint =
-        Paint()
-          ..color = const Color(0xFF000000)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = radius / 10.0;
+    final Paint paint = Paint()
+      ..color = const Color(0xFF000000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius / 10.0;
     final Path path = Path();
     final Rect box = Offset.zero & size;
     for (double theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta) {
