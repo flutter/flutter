@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -46,7 +48,7 @@ abstract class FeatureFlags {
   bool get isCliAnimationEnabled => true;
 
   /// Whether native assets compilation and bundling is enabled.
-  bool get isNativeAssetsEnabled => false;
+  bool get isNativeAssetsEnabled => true;
 
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
@@ -152,7 +154,8 @@ const Feature nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
-  master: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
@@ -275,7 +278,8 @@ class Feature {
 }
 
 /// A description of the conditions to enable a feature for a particular channel.
-class FeatureChannelSetting {
+@immutable
+final class FeatureChannelSetting {
   const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
@@ -288,4 +292,19 @@ class FeatureChannelSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeatureChannelSetting &&
+        available == other.available &&
+        enabledByDefault == other.enabledByDefault;
+  }
+
+  @override
+  int get hashCode => Object.hash(available, enabledByDefault);
+
+  @override
+  String toString() {
+    return 'FeatureChannelSetting <available: $available, enabledByDefault: $enabledByDefault>';
+  }
 }

@@ -4,12 +4,13 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 
-#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 FLUTTER_ASSERT_ARC
@@ -154,6 +155,10 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (BOOL)handleOpenURL:(NSURL*)url
                      options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
     relayToSystemIfUnhandled:(BOOL)throwBack {
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  if (flutterApplication == nil) {
+    return NO;
+  }
   if (![self isFlutterDeepLinkingEnabled]) {
     return NO;
   }
@@ -164,11 +169,13 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                  completionHandler:^(BOOL success) {
                                    if (!success && throwBack) {
                                      // throw it back to iOS
-                                     [UIApplication.sharedApplication openURL:url];
+                                     [flutterApplication openURL:url
+                                                         options:@{}
+                                               completionHandler:nil];
                                    }
                                  }];
   } else {
-    FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+    [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;
   }
   return YES;

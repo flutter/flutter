@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+library;
+
 import 'dart:async';
 
 import 'package:meta/meta.dart' show visibleForTesting;
@@ -42,7 +45,7 @@ const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 const int kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
-/// for [WebSocket]s (used by tests).
+/// for [io.WebSocket]s (used by tests).
 typedef WebSocketConnector =
     Future<io.WebSocket> Function(
       String url, {
@@ -154,8 +157,8 @@ Future<io.WebSocket> _defaultOpenChannel(
   return socket;
 }
 
-/// Override `VMServiceConnector` in [context] to return a different VMService
-/// from [VMService.connect] (used by tests).
+/// Override `VMServiceConnector` in [context] to return a different
+/// [vm_service.VmService] from [connectToVmService] (used by tests).
 typedef VMServiceConnector =
     Future<FlutterVmService> Function(
       Uri httpUri, {
@@ -478,7 +481,7 @@ class FlutterVmService {
   final Uri? wsAddress;
   final Uri? httpAddress;
 
-  /// Calls [service.getVM]. However, in the case that an [vm_service.RPCError]
+  /// Calls [vm_service.VmService.getVM]. However, in the case that an [vm_service.RPCError]
   /// is thrown due to the service being disconnected, the error is discarded
   /// and null is returned.
   Future<vm_service.VM?> getVmGuarded() async {
@@ -486,6 +489,7 @@ class FlutterVmService {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          err.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           err.message.contains('Service connection disposed')) {
         globals.printTrace('VmService.getVm call failed: $err');
         return null;
@@ -507,6 +511,7 @@ class FlutterVmService {
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
       if (e.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          e.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           e.message.contains('Service connection disposed')) {
         return null;
       }
@@ -560,21 +565,6 @@ class FlutterVmService {
       }
     }
 
-    // TODO(andrewkolos): this is to assist in troubleshooting
-    //  https://github.com/flutter/flutter/issues/152220 and should be reverted
-    //  once this issue is resolved.
-    final StreamSubscription<String> onReceiveSubscription = service.onReceive.listen((
-      String message,
-    ) {
-      globals.logger.printTrace('runInView VM service onReceive listener received "$message"');
-      final dynamic messageAsJson = jsonDecode(message);
-      // ignore: avoid_dynamic_calls -- Temporary code.
-      final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
-      if (messageKind == 'IsolateRunnable') {
-        globals.logger.printTrace('Received IsolateRunnable event from onReceive.');
-      }
-    });
-
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -587,7 +577,6 @@ class FlutterVmService {
       },
     );
     await onRunnable;
-    await onReceiveSubscription.cancel();
   }
 
   Future<String> flutterDebugDumpApp({required String isolateId}) async {
@@ -792,6 +781,7 @@ class FlutterVmService {
       // disappears while handling a request, return null.
       if ((err.code == vm_service.RPCErrorKind.kMethodNotFound.code) ||
           (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code) ||
+          (err.code == vm_service.RPCErrorKind.kConnectionDisposed.code) ||
           (err.message.contains('Service connection disposed'))) {
         return null;
       }
@@ -858,9 +848,6 @@ class FlutterVmService {
   ///
   /// Looks at the list of loaded extensions for first Flutter view, as well as
   /// the stream of added extensions to avoid races.
-  ///
-  /// If [webIsolate] is true, this uses the VM Service isolate list instead of
-  /// the `_flutter.listViews` method, which is not implemented by DWDS.
   ///
   /// Throws a [VmServiceDisappearedException] should the VM Service disappear
   /// while making calls to it.
@@ -992,8 +979,8 @@ class VmServiceExpressionCompilationException implements Exception {
   final String errorMessage;
 }
 
-/// Whether the event attached to an [Isolate.pauseEvent] should be considered
-/// a "pause" event.
+/// Whether the event attached to an [vm_service.Isolate.pauseEvent] should be
+/// considered a "pause" event.
 bool isPauseEvent(String kind) {
   return kind == vm_service.EventKind.kPauseStart ||
       kind == vm_service.EventKind.kPauseExit ||

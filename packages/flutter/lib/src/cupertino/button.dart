@@ -266,6 +266,8 @@ class CupertinoButton extends StatefulWidget {
   /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
   ///  * [WidgetState.disabled].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.focused].
   ///
   /// If null, then [MouseCursor.defer] is used when the button is disabled.
   /// When the button is enabled, [SystemMouseCursors.click] is used on Web
@@ -356,8 +358,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   bool _buttonHeldDown = false;
+  bool _tapInProgress = false;
 
   void _handleTapDown(TapDownDetails event) {
+    setState(() {
+      _tapInProgress = true;
+    });
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
@@ -365,6 +371,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapUp(TapUpDetails event) {
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -377,19 +386,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapCancel() {
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
     }
   }
 
-  void _handTapMove(TapMoveDetails event) {
+  void _handleTapMove(TapMoveDetails event) {
     final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
     final bool buttonShouldHeldDown = renderObject.paintBounds
         .inflate(CupertinoButton.tapMoveSlop())
         .contains(localPosition);
-    if (buttonShouldHeldDown != _buttonHeldDown) {
+    if (_tapInProgress && buttonShouldHeldDown != _buttonHeldDown) {
       _buttonHeldDown = buttonShouldHeldDown;
       _animate();
     }
@@ -489,7 +501,11 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
-    final Set<WidgetState> states = <WidgetState>{if (!enabled) WidgetState.disabled};
+    final Set<WidgetState> states = <WidgetState>{
+      if (!enabled) WidgetState.disabled,
+      if (_tapInProgress) WidgetState.pressed,
+      if (isFocused) WidgetState.focused,
+    };
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
@@ -512,7 +528,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 instance.onTapDown = enabled ? _handleTapDown : null;
                 instance.onTapUp = enabled ? _handleTapUp : null;
                 instance.onTapCancel = enabled ? _handleTapCancel : null;
-                instance.onTapMove = enabled ? _handTapMove : null;
+                instance.onTapMove = enabled ? _handleTapMove : null;
                 instance.gestureSettings = gestureSettings;
               },
             ),

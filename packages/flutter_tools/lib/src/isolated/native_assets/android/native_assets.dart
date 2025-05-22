@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../android/android_sdk.dart';
 import '../../../android/gradle_utils.dart';
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
+import '../native_assets.dart';
 
 int targetAndroidNdkApi(Map<String, String> environmentDefines) {
   return int.parse(environmentDefines[kMinSdkVersion] ?? minSdkVersion);
@@ -17,7 +18,7 @@ int targetAndroidNdkApi(Map<String, String> environmentDefines) {
 
 Future<void> copyNativeCodeAssetsAndroid(
   Uri buildUri,
-  Map<CodeAsset, KernelAsset> assetTargetLocations,
+  Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
@@ -28,8 +29,8 @@ Future<void> copyNativeCodeAssetsAndroid(
     final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
     await fileSystem.directory(archUri).create(recursive: true);
   }
-  for (final MapEntry<CodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
-    final Uri source = assetMapping.key.file!;
+  for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
+    final Uri source = assetMapping.key.codeAsset.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final AndroidArch androidArch = _getAndroidArch(assetMapping.value.target.architecture);
     final String jniArchDir = androidArch.archName;
@@ -62,16 +63,18 @@ AndroidArch _getAndroidArch(Architecture architecture) {
   };
 }
 
-Map<CodeAsset, KernelAsset> assetTargetLocationsAndroid(List<CodeAsset> nativeAssets) {
-  return <CodeAsset, KernelAsset>{
-    for (final CodeAsset asset in nativeAssets) asset: _targetLocationAndroid(asset),
+Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsAndroid(
+  List<FlutterCodeAsset> nativeAssets,
+) {
+  return <FlutterCodeAsset, KernelAsset>{
+    for (final FlutterCodeAsset asset in nativeAssets) asset: _targetLocationAndroid(asset),
   };
 }
 
 /// Converts the `path` of [asset] as output from a `build.dart` invocation to
 /// the path used inside the Flutter app bundle.
-KernelAsset _targetLocationAndroid(CodeAsset asset) {
-  final LinkMode linkMode = asset.linkMode;
+KernelAsset _targetLocationAndroid(FlutterCodeAsset asset) {
+  final LinkMode linkMode = asset.codeAsset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
     case DynamicLoadingSystem _:
@@ -81,16 +84,12 @@ KernelAsset _targetLocationAndroid(CodeAsset asset) {
     case LookupInProcess _:
       kernelAssetPath = KernelAssetInProcess();
     case DynamicLoadingBundled _:
-      final String fileName = asset.file!.pathSegments.last;
+      final String fileName = asset.codeAsset.file!.pathSegments.last;
       kernelAssetPath = KernelAssetAbsolutePath(Uri(path: fileName));
     default:
       throw Exception('Unsupported asset link mode $linkMode in asset $asset');
   }
-  return KernelAsset(
-    id: asset.id,
-    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
-    path: kernelAssetPath,
-  );
+  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
 }
 
 /// Looks the NDK clang compiler tools.

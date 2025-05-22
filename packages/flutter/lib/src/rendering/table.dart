@@ -4,7 +4,6 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
@@ -618,7 +617,7 @@ class RenderTable extends RenderBox {
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
-  /// And if a cell has mutiple semantics node or has a different semantic role, we create
+  /// And if a cell has multiple semantics node or has a different semantic role, we create
   /// a new semantics node to wrap it.
   @override
   void assembleSemanticsNode(

@@ -22,9 +22,6 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   ///
   /// The [env] property is used to locate the project files that are checked.
   ///
-  /// The [templatesDir] parameter is optional. If null, the tool's default
-  /// templates directory will be used.
-  ///
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
@@ -38,8 +35,8 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// so an environment should be available.
   final Environment env;
 
-  // The key used to identify the metadata element as the loading unit id to
-  // deferred component mapping.
+  /// The key used to identify the metadata element as the loading unit id to
+  /// deferred component mapping.
   static const String _mappingKey =
       'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
 
@@ -289,10 +286,10 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     return loadingUnits;
   }
 
-  /// Writes the provided generatedLoadingUnits as `deferred_components_loading_units.yaml`
+  /// Writes the provided [generatedLoadingUnits] as `deferred_components_loading_units.yaml`.
   ///
   /// This cache file is used to detect any changes in the loading units
-  /// produced by gen_snapshot. Running [checkAgainstLoadingUnitCache] with a
+  /// produced by gen_snapshot. Running [checkAgainstLoadingUnitsCache] with a
   /// mismatching or missing cache will result in a failed validation. This
   /// prevents unexpected changes in loading units causing misconfigured
   /// deferred components.

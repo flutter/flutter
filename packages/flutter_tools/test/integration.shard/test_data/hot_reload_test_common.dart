@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -31,12 +33,20 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot reload works without error', () async {
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await flutter.hotReload();
     });
 
     testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       // Capture how many *real* hot reloads occur.
       int numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
@@ -88,7 +98,11 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
           sawTick2.complete();
         }
       });
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await runFlutterWithDevice(
+        flutter,
+        chrome: chrome,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await sawTick1.future;
       project.uncommentHotReloadPrint();
       try {
@@ -101,81 +115,92 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot restart works without error', () async {
-      await flutter.run(
-        verbose: true,
+      await runFlutterWithDevice(
+        flutter,
         chrome: chrome,
+        verbose: true,
         additionalCommandArgs: additionalCommandArgs,
       );
       await flutter.hotRestart();
     });
 
-    testWithoutContext('breakpoints are hit after hot reload', () async {
-      Isolate isolate;
-      final Completer<void> sawTick1 = Completer<void>();
-      final Completer<void> sawDebuggerPausedMessage = Completer<void>();
-      final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-        if (line.contains('((((TICK 1))))')) {
-          expect(sawTick1.isCompleted, isFalse);
-          sawTick1.complete();
+    testWithoutContext(
+      'breakpoints are hit after hot reload',
+      () async {
+        Isolate isolate;
+        final Completer<void> sawTick1 = Completer<void>();
+        final Completer<void> sawDebuggerPausedMessage = Completer<void>();
+        final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+          if (line.contains('((((TICK 1))))')) {
+            expect(sawTick1.isCompleted, isFalse);
+            sawTick1.complete();
+          }
+          if (line.contains('The application is paused in the debugger on a breakpoint.')) {
+            expect(sawDebuggerPausedMessage.isCompleted, isFalse);
+            sawDebuggerPausedMessage.complete();
+          }
+        });
+        await runFlutterWithDevice(
+          flutter,
+          chrome: chrome,
+          withDebugger: true,
+          startPaused: true,
+          additionalCommandArgs: additionalCommandArgs,
+        );
+        await flutter
+            .resume(); // we start paused so we can set up our TICK 1 listener before the app starts
+        unawaited(
+          sawTick1.future.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              // This print is useful for people debugging this test. Normally we would avoid printing
+              // in a test but this is an exception because it's useful ambient information.
+              // ignore: avoid_print
+              print(
+                'The test app is taking longer than expected to print its synchronization line...',
+              );
+            },
+          ),
+        );
+        printOnFailure('waiting for synchronization line...');
+        await sawTick1.future; // after this, app is in steady state
+        await flutter.addBreakpoint(
+          project.scheduledBreakpointUri,
+          project.scheduledBreakpointLine,
+        );
+        await Future<void>.delayed(const Duration(seconds: 2));
+        await flutter.hotReload(); // reload triggers code which eventually hits the breakpoint
+        isolate = await flutter.waitForPause();
+        expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
+        await flutter.resume();
+        await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
+        bool reloaded = false;
+        final Future<void> reloadFuture = flutter.hotReload().then((void value) {
+          reloaded = true;
+        });
+        printOnFailure('waiting for pause...');
+        isolate = await flutter.waitForPause();
+        expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
+        if (!chrome) {
+          // TODO(srujzs): Implement paused event messages for the web.
+          // https://github.com/flutter/flutter/issues/162500
+          printOnFailure('waiting for debugger message...');
+          await sawDebuggerPausedMessage.future;
         }
-        if (line.contains('The application is paused in the debugger on a breakpoint.')) {
-          expect(sawDebuggerPausedMessage.isCompleted, isFalse);
-          sawDebuggerPausedMessage.complete();
-        }
-      });
-      await flutter.run(
-        withDebugger: true,
-        startPaused: true,
-        chrome: chrome,
-        additionalCommandArgs: additionalCommandArgs,
-      );
-      await flutter
-          .resume(); // we start paused so we can set up our TICK 1 listener before the app starts
-      unawaited(
-        sawTick1.future.timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            // This print is useful for people debugging this test. Normally we would avoid printing
-            // in a test but this is an exception because it's useful ambient information.
-            // ignore: avoid_print
-            print(
-              'The test app is taking longer than expected to print its synchronization line...',
-            );
-          },
-        ),
-      );
-      printOnFailure('waiting for synchronization line...');
-      await sawTick1.future; // after this, app is in steady state
-      await flutter.addBreakpoint(project.scheduledBreakpointUri, project.scheduledBreakpointLine);
-      await Future<void>.delayed(const Duration(seconds: 2));
-      await flutter.hotReload(); // reload triggers code which eventually hits the breakpoint
-      isolate = await flutter.waitForPause();
-      expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
-      await flutter.resume();
-      await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
-      bool reloaded = false;
-      final Future<void> reloadFuture = flutter.hotReload().then((void value) {
-        reloaded = true;
-      });
-      printOnFailure('waiting for pause...');
-      isolate = await flutter.waitForPause();
-      expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
-      if (!chrome) {
-        // TODO(srujzs): Implement paused event messages for the web.
-        // https://github.com/flutter/flutter/issues/162500
-        printOnFailure('waiting for debugger message...');
-        await sawDebuggerPausedMessage.future;
-      }
-      expect(reloaded, isFalse);
-      printOnFailure('waiting for resume...');
-      await flutter.resume();
-      printOnFailure('waiting for reload future...');
-      await reloadFuture;
-      expect(reloaded, isTrue);
-      reloaded = false;
-      printOnFailure('subscription cancel...');
-      await subscription.cancel();
-    });
+        expect(reloaded, isFalse);
+        printOnFailure('waiting for resume...');
+        await flutter.resume();
+        printOnFailure('waiting for reload future...');
+        await reloadFuture;
+        expect(reloaded, isTrue);
+        reloaded = false;
+        printOnFailure('subscription cancel...');
+        await subscription.cancel();
+      },
+      // Hot reload on web does not reregister breakpoints correctly yet.
+      // https://github.com/dart-lang/sdk/issues/60186
+      skip: chrome,
+    );
 
     testWithoutContext(
       "hot reload doesn't reassemble if paused",
@@ -201,9 +226,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
             sawDebuggerPausedMessage2.complete();
           }
         });
-        await flutter.run(
-          withDebugger: true,
+        await runFlutterWithDevice(
+          flutter,
           chrome: chrome,
+          withDebugger: true,
           additionalCommandArgs: additionalCommandArgs,
         );
         await Future<void>.delayed(const Duration(seconds: 1));
@@ -241,3 +267,19 @@ bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {
       (event['params']! as Map<String, Object?>)['progressId'] == 'hot.reload' &&
       (event['params']! as Map<String, Object?>)['finished'] == true;
 }
+
+// Helper to run flutter with or without device param based on chrome flag.
+Future<void> runFlutterWithDevice(
+  FlutterRunTestDriver flutter, {
+  required bool chrome,
+  bool verbose = false,
+  bool withDebugger = false,
+  bool startPaused = false,
+  List<String> additionalCommandArgs = const <String>[],
+}) => flutter.run(
+  verbose: verbose,
+  withDebugger: withDebugger,
+  startPaused: startPaused,
+  device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+  additionalCommandArgs: additionalCommandArgs,
+);
