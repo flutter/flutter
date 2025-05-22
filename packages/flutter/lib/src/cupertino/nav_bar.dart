@@ -1742,7 +1742,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
     super.applyPaintTransform(child, transform);
 
-    transform.scale(_scale, _scale);
+    transform.scaledByDouble(_scale, _scale, _scale, 1);
   }
 
   @override
@@ -1776,8 +1776,8 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
     final Matrix4 transform =
         Matrix4.identity()
-          ..scale(1.0 / _scale, 1.0 / _scale, 1.0)
-          ..translate(-childOffset.dx, -childOffset.dy);
+          ..scaleByDouble(1.0 / _scale, 1.0 / _scale, 1.0, 1)
+          ..translateByDouble(-childOffset.dx, -childOffset.dy, 0, 1);
 
     return result.addWithRawTransform(
       transform: transform,
@@ -2357,7 +2357,7 @@ class _BackChevron extends StatelessWidget {
     switch (textDirection) {
       case TextDirection.rtl:
         iconWidget = Transform(
-          transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+          transform: Matrix4.identity()..scaleByDouble(-1.0, 1.0, 1.0, 1),
           alignment: Alignment.center,
           transformHitTests: false,
           child: iconWidget,
