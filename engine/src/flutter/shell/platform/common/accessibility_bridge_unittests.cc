@@ -21,7 +21,7 @@ FlutterSemanticsNode2 CreateSemanticsNode(
     const std::vector<int32_t>* children = nullptr) {
   return {
       .id = id,
-      .flags = static_cast<FlutterSemanticsFlag>(0),
+      .flags__deprecated__ = static_cast<FlutterSemanticsFlag>(0),
       .actions = static_cast<FlutterSemanticsAction>(0),
       .text_selection_base = -1,
       .text_selection_extent = -1,
