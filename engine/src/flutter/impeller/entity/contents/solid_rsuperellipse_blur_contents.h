@@ -16,9 +16,10 @@
 
 namespace impeller {
 
-/// @brief  Draws a fast solid color blur of an rounded rectangle. Only supports
-/// RRects with fully symmetrical radii. Also produces correct results for
-/// rectangles (corner_radius=0) and circles (corner_radius=width/2=height/2).
+/// @brief  Draws a fast solid color blur of an rounded superellipse. Only
+/// supports RSuperellipses with fully symmetrical radii. Also produces correct
+/// results for rectangles (corner_radius=0) and circles
+/// (corner_radius=width/2=height/2).
 class SolidRSuperellipseBlurContents final : public SolidRRectLikeBlurContents {
  public:
   SolidRSuperellipseBlurContents();
