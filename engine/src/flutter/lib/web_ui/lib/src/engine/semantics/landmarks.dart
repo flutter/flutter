@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui.dart' as ui;
-
 import 'label_and_value.dart';
 import 'semantics.dart';
 
@@ -26,7 +24,7 @@ class SemanticComplementary extends SemanticRole {
   void update() {
     super.update();
 
-    Set<int> complementaryIds = _sameRoleIds(semanticsObject);
+    final Set<int> complementaryIds = _sameRoleIds(semanticsObject);
 
     if (complementaryIds.length > 1) {
       _updateUniqueLabels(complementaryIds, semanticsObject);
@@ -41,7 +39,7 @@ class SemanticComplementary extends SemanticRole {
 
 Set<int> _sameRoleIds(SemanticsObject semanticsObject) {
   final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
-  Set<int> sameRoleIds = {};
+  final Set<int> sameRoleIds = {};
   for (final int id in tree.keys) {
     if (tree[id]?.role == semanticsObject.role) {
       sameRoleIds.add(id);
@@ -80,7 +78,7 @@ class SemanticContentInfo extends SemanticRole {
   void update() {
     super.update();
 
-    Set<int> contentInfoIds = _sameRoleIds(semanticsObject);
+    final Set<int> contentInfoIds = _sameRoleIds(semanticsObject);
 
     if (contentInfoIds.length > 1) {
       _updateUniqueLabels(contentInfoIds, semanticsObject);
@@ -112,7 +110,7 @@ class SemanticMain extends SemanticRole {
   void update() {
     super.update();
 
-    Set<int> mainIds = _sameRoleIds(semanticsObject);
+    final Set<int> mainIds = _sameRoleIds(semanticsObject);
 
     if (mainIds.length > 1) {
       _updateUniqueLabels(mainIds, semanticsObject);
@@ -144,7 +142,7 @@ class SemanticNavigation extends SemanticRole {
   void update() {
     super.update();
 
-    Set<int> navigationIds = _sameRoleIds(semanticsObject);
+    final Set<int> navigationIds = _sameRoleIds(semanticsObject);
 
     if (navigationIds.length > 1) {
       _updateUniqueLabels(navigationIds, semanticsObject);
@@ -175,8 +173,7 @@ class SemanticRegion extends SemanticRole {
   @override
   void update() {
     super.update();
-    Set<int> regionIds = _sameRoleIds(semanticsObject);
-    final Map<int, SemanticsObject> tree = semanticsObject.owner.semanticsTree;
+    final Set<int> regionIds = _sameRoleIds(semanticsObject);
 
     if (regionIds.length > 1) {
       _updateUniqueLabels(regionIds, semanticsObject);
