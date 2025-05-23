@@ -99,9 +99,9 @@ time for the team.
 
 As of 2025/05/23, the presubmit pool for `flutter/flutter` has:
 
-- [125 Linux VMs](https://chromium-swarm.appspot.com/botlist?f=cores%3A8&f=device_type%3Anone&f=os%3AUbuntu&f=pool%3Aluci.flutter.prod)
-- [55 ARM64 Mac VMs](https://chromium-swarm.appspot.com/botlist?f=cpu%3Aarm64&f=device_type%3Anone&f=os%3AMac-14&f=pool%3Aluci.flutter.prod)
-- [55 Windows VMs](https://chromium-swarm.appspot.com/botlist?f=device_type%3Anone&f=os%3AWindows-10&f=pool%3Aluci.flutter.prod)
+- [301 Linux VMs](https://chromium-swarm.appspot.com/botlist?c=id&c=task&c=os&c=status&d=asc&f=os%3AUbuntu&f=pool%3Aluci.flutter.try)
+- [131 ARM64 Mac VMs](https://chromium-swarm.appspot.com/botlist?f=cpu%3Aarm64&f=os%3AMac-14&f=pool%3Aluci.flutter.try)
+- [134 Windows VMs](https://chromium-swarm.appspot.com/botlist?f=os%3AWindows-10&f=pool%3Aluci.flutter.try)
 
 Resources for on-device testing (device lab) are even more limited.
 
