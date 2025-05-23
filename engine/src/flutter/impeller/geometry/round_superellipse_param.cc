@@ -475,7 +475,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadius(
     Scalar radius) {
   return RoundSuperellipseParam{
       .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
-                                   {radius, radius}),
+                                   {radius, radius}, {-1, 1}),
       .all_corners_same = true,
   };
 }
