@@ -827,7 +827,7 @@ class MenuController {
   /// widget will not rebuild when the menu opens and closes, nor when the
   /// [MenuController] changes.
   static MenuController? maybeOf(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.controller;
+    return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.controller;
   }
 
   /// Returns the value of [MenuController.isOpen] of the ancestor
