@@ -3149,7 +3149,6 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
-../../../flutter/third_party/skia/modules/skcapture/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium
@@ -3208,6 +3207,7 @@
 ../../../flutter/third_party/skia/src/android/BUILD.bazel
 ../../../flutter/third_party/skia/src/base/BUILD.bazel
 ../../../flutter/third_party/skia/src/base/README.md
+../../../flutter/third_party/skia/src/capture/BUILD.bazel
 ../../../flutter/third_party/skia/src/codec/BUILD.bazel
 ../../../flutter/third_party/skia/src/core/BUILD.bazel
 ../../../flutter/third_party/skia/src/effects/BUILD.bazel

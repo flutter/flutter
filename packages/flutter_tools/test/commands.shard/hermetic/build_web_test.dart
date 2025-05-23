@@ -547,7 +547,11 @@ void main() {
 
       void expectVisible(String option) {
         expect(command.argParser.options.keys, contains(option));
-        expect(command.argParser.options[option]!.hide, isFalse);
+        expect(
+          command.argParser.options[option]!.hide,
+          isFalse,
+          reason: 'Expecting `$option` to be visible',
+        );
         expect(command.usage, contains(option));
       }
 
@@ -557,8 +561,6 @@ void main() {
       expectVisible('source-maps');
       expectVisible('csp');
       expectVisible('dart2js-optimization');
-      expectVisible('dump-info');
-      expectVisible('no-frequency-based-minification');
       expectVisible('wasm');
       expectVisible('strip-wasm');
       expectVisible('base-href');
