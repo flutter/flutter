@@ -17,7 +17,7 @@ dependencyResolutionManagement {
         // BEGIN ci only configuration for getting engine artifacts in pre-submit environments
         def flutterSdkPath = {
             def properties = new Properties()
-            file("local.properties").withInputStream { properties.load(it) }
+            file("../hello/.android/local.properties").withInputStream { properties.load(it) }
             def flutterSdkPath = properties.getProperty("flutter.sdk")
             assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
             return flutterSdkPath
