@@ -1069,6 +1069,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
+../../../flutter/third_party/boringssl/src/crypto/xwing/xwing_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/blowfish/blowfish_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cast/cast_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cfb/cfb_test.cc
@@ -3148,7 +3149,6 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
-../../../flutter/third_party/skia/modules/skcapture/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium
@@ -3207,6 +3207,7 @@
 ../../../flutter/third_party/skia/src/android/BUILD.bazel
 ../../../flutter/third_party/skia/src/base/BUILD.bazel
 ../../../flutter/third_party/skia/src/base/README.md
+../../../flutter/third_party/skia/src/capture/BUILD.bazel
 ../../../flutter/third_party/skia/src/codec/BUILD.bazel
 ../../../flutter/third_party/skia/src/core/BUILD.bazel
 ../../../flutter/third_party/skia/src/effects/BUILD.bazel
