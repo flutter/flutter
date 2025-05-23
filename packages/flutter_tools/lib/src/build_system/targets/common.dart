@@ -310,7 +310,6 @@ class KernelSnapshot extends Target {
     }
     if (!dartDefines.any((String element) => element.startsWith(kAppFlavor))) {
       // If the flavor is not already in the dart defines, add it.
-      print(dartDefines);
       dartDefines.add('$kAppFlavor=$flavor');
     }
   }
