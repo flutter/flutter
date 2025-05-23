@@ -1788,6 +1788,7 @@ class _RenderBaselineAlignedStack extends RenderBox
 
   @override
   void performLayout() {
+    assert(constraints.hasTightWidth);
     final RenderBox? placeholder = _placeholderChild;
     final RenderBox editableText = _editableTextChild;
 
@@ -1796,24 +1797,16 @@ class _RenderBaselineAlignedStack extends RenderBox
     final _BaselineAlignedStackParentData? placeholderParentData =
         placeholder?.parentData as _BaselineAlignedStackParentData?;
 
-    final Size editableTextSize = ChildLayoutHelper.layoutChild(editableText, constraints);
-    Size? placeholderSize;
-    if (placeholder != null) {
-      placeholderSize = ChildLayoutHelper.layoutChild(placeholder, constraints);
-    }
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      getBaseline: ChildLayoutHelper.getBaseline,
+    );
 
     final double editableTextBaselineValue =
         editableText.getDistanceToBaseline(editableTextBaseline)!;
     final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
       placeholderBaseline,
-    );
-
-    size = _computeSize(
-      constraints: constraints,
-      editableTextSize: editableTextSize,
-      placeholderSize: placeholderSize,
-      editableTextBaseline: editableTextBaselineValue,
-      placeholderBaseline: placeholderBaselineValue,
     );
 
     assert(placeholder != null || placeholderBaselineValue == null);
@@ -1845,51 +1838,43 @@ class _RenderBaselineAlignedStack extends RenderBox
 
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    final RenderBox? placeholder = _placeholderChild;
-    final RenderBox editableText = _editableTextChild;
-
-    final Size editableTextSize = ChildLayoutHelper.dryLayoutChild(editableText, constraints);
-    final double editableTextBaselineValue =
-        editableText.getDryBaseline(constraints, editableTextBaseline)!;
-
-    Size? placeholderSize;
-    double? placeholderBaselineValue;
-    if (placeholder != null) {
-      placeholderSize = ChildLayoutHelper.dryLayoutChild(placeholder, constraints);
-      placeholderBaselineValue = placeholder.getDryBaseline(constraints, placeholderBaseline);
-    }
-
     return _computeSize(
       constraints: constraints,
-      editableTextSize: editableTextSize,
-      placeholderSize: placeholderSize,
-      editableTextBaseline: editableTextBaselineValue,
-      placeholderBaseline: placeholderBaselineValue,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      getBaseline: ChildLayoutHelper.getDryBaseline,
     );
   }
 
   Size _computeSize({
     required BoxConstraints constraints,
-    required Size editableTextSize,
-    required Size? placeholderSize,
-    required double editableTextBaseline,
-    required double? placeholderBaseline,
+    required ChildLayouter layoutChild,
+    required ChildBaselineGetter getBaseline,
   }) {
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
+    final RenderBox editableText = _editableTextChild;
+    final Size editableTextSize = layoutChild(editableText, constraints);
+    final double editableTextBaselineValue =
+        getBaseline(editableText, constraints, editableTextBaseline)!;
+    final double editableTextDescent = editableTextSize.height - editableTextBaselineValue;
+
+    Size? placeholderSize;
+    double? placeholderBaselineValue;
     final RenderBox? placeholder = _placeholderChild;
     if (placeholder != null) {
-      width = math.max(width, placeholderSize!.width);
-      final double placeholderDescent = placeholderSize.height - placeholderBaseline!;
-      final double editableTextDescent = editableTextSize.height - editableTextBaseline;
+      placeholderSize = layoutChild(placeholder, constraints);
+      width = math.max(width, placeholderSize.width);
+      placeholderBaselineValue = getBaseline(placeholder, constraints, placeholderBaseline);
+      final double placeholderDescent = placeholderSize.height - placeholderBaselineValue!;
       // The size is the sum of the placeholder's max ascent and descent and the
       // editable text's max ascent and descent.
       final double maxExtentBaseline =
-          math.max(editableTextBaseline, placeholderBaseline) +
+          math.max(editableTextBaselineValue, placeholderBaselineValue) +
           math.max(editableTextDescent, placeholderDescent);
       height = math.max(height, maxExtentBaseline);
     }
+
     height = math.max(height, editableTextSize.height);
     width = math.max(width, editableTextSize.width);
     final Size size = Size(width, height);
