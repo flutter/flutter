@@ -1668,6 +1668,36 @@ void main() {
     expect(message, contains('Container'));
     expect(message, contains('means one was found but some were expected'));
   });
+
+  testWidgets('finds matching candidates only for some of the finders in the findersList', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Column(children: <Widget>[const Text('foo', textDirection: TextDirection.ltr), Container()]),
+    );
+
+    late TestFailure failure;
+    try {
+      expect(
+        find.bySubtype<Widget>(),
+        findsAscendinglyOrderedWidgets(<Finder>[find.text('foo'), find.byType(CircularProgressIndicator), find.byType(Container)]),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+    expect(failure, isNotNull);
+    final String message = failure.message!;
+    expect(
+      message,
+      contains(
+        'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+      ),
+    );
+    expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+    expect(message, contains('Text("foo"'));
+    expect(message, contains('Container'));
+    expect(message, contains('is not enough'));
+  });
 }
 
 enum _ComparatorBehavior { returnTrue, returnFalse, throwTestFailure }
