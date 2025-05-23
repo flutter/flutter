@@ -444,7 +444,7 @@ mixin BaseRangeSliderTrackShape {
     final double trackRight =
         trackLeft +
         parentBox.size.width -
-        (sliderTheme.padding == null ? math.max(thumbSize.width, overlayWidth) : (thumbSize.width));
+        (sliderTheme.padding == null ? math.max(thumbSize.width, overlayWidth) : thumbSize.width);
     final double trackBottom = trackTop + trackHeight;
     // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(
