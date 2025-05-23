@@ -13,7 +13,6 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/command_buffer.h"
 #include "flutter/impeller/renderer/context.h"
-#include "fml/synchronization/count_down_latch.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -395,17 +394,16 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     result_texture = std::move(resize_texture);
   }
   blit_pass->EncodeCommands();
-
-  fml::CountDownLatch latch(1);
   if (!context->GetCommandQueue()
-           ->Submit({command_buffer},
-                    [&latch](impeller::CommandBuffer::Status status) {
-                      if (status == impeller::CommandBuffer::Status::kError) {
-                        FML_LOG(ERROR)
-                            << "Error submitting image decoding command buffer";
-                      }
-                      latch.CountDown();
-                    })
+           ->Submit(
+               {command_buffer},
+               [](impeller::CommandBuffer::Status status) {
+                 if (status == impeller::CommandBuffer::Status::kError) {
+                   FML_LOG(ERROR)
+                       << "GPU Error submitting image decoding command buffer.";
+                 }
+               },
+               /*block_on_schedule=*/true)
            .ok()) {
     std::string decode_error("Failed to submit image decoding command buffer.");
     FML_DLOG(ERROR) << decode_error;
