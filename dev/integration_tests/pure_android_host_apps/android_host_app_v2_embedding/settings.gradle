@@ -23,8 +23,10 @@ dependencyResolutionManagement {
             return flutterSdkPath
         }
 
+        settings.ext.flutterSdkPath = flutterSdkPath()
+
         def engineRealm =
-                new File(flutterSdkPath, "bin/cache/engine.realm")
+                new File("${settings.ext.flutterSdkPath}/bin/cache/engine.realm")
                         .getText('UTF-8')
                         .trim()
 
