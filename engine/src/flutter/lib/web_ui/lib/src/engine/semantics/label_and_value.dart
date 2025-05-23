@@ -509,8 +509,7 @@ class LabelAndValue extends SemanticBehavior {
     if (hint != null && hint.trim().isNotEmpty) {
       _setAriaDescriptionOrDescribedBy(hint);
     } else {
-      owner.removeAttribute('aria-description');
-      owner.removeAttribute('aria-describedby');
+      _cleanUpDescriptionOrDescribedBy();
     }
   }
 
