@@ -33,7 +33,8 @@
         "--no-lto",
         "--rbe",
         "--no-goma",
-        "--xcode-symlinks"
+        "--xcode-symlinks",
+        "--gn-args=dart_dynamic_modules=true"
       ],
       "name": "ci/ios_debug_sim_ddm",
       "description": "Produces debug mode artifacts to target the x64 iOS simulator.",
@@ -50,7 +51,8 @@
           "--simulator",
           "--no-lto",
           "--no-rbe",
-          "--no-goma"
+          "--no-goma",
+          "--gn-args=dart_dynamic_modules=true"
         ]
       },
       "properties": {
