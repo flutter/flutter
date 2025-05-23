@@ -1326,7 +1326,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Notifications
 
-- (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+- (void)sceneDidBecomeActive:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterWillEnterForeground:notification];
 }
 
@@ -1334,7 +1334,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self flutterDidEnterBackground:notification];
 }
 
-- (void)applicationWillEnterForeground:(NSNotification*)notification {
+- (void)applicationDidBecomeActive:(NSNotification*)notification {
   [self flutterWillEnterForeground:notification];
 }
 
