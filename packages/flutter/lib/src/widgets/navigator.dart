@@ -2808,7 +2808,11 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  static void popUntil<T extends Object?>(BuildContext context, RoutePredicate predicate, [T? result]) {
+  static void popUntil<T extends Object?>(
+    BuildContext context,
+    RoutePredicate predicate, [
+    T? result,
+  ]) {
     Navigator.of(context).popUntil<T>(predicate, result);
   }
 
