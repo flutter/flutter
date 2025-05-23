@@ -5632,24 +5632,26 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@end-tool}
   @optionalTypeArgs
   void popUntil<T extends Object?>(RoutePredicate predicate, [T? result]) {
-    final List<_RouteEntry> present = _history.where(_RouteEntry.isPresentPredicate).toList();
+    _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
 
-    int toPop = 0;
-    for (final _RouteEntry entry in present.reversed) {
-      if (predicate(entry.route)) {
-        break;
+    while (candidate != null) {
+      if (predicate(candidate.route)) {
+        return;
       }
-      toPop++;
-    }
 
-    if (toPop == 0) {
-      return;
-    }
+      // Check what would be next if we pop this route
+      final _RouteEntry? next = _lastRouteEntryWhereOrNull(
+        (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
+      );
 
-    for (int i = 0; i < toPop - 1; i++) {
-      pop();
+      if (next != null && predicate(next.route)) {
+        pop<T>(result);
+      } else {
+        pop();
+      }
+
+      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
-    pop<T>(result);
   }
 
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
