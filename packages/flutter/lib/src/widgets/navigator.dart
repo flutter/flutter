@@ -2802,8 +2802,9 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  static void popUntil(BuildContext context, RoutePredicate predicate) {
-    Navigator.of(context).popUntil(predicate);
+  @optionalTypeArgs
+  static void popUntil<T extends Object?>(BuildContext context, RoutePredicate predicate, [T? result]) {
+    Navigator.of(context).popUntil<T>(predicate, result);
   }
 
   /// Immediately remove `route` from the navigator that most tightly encloses
@@ -5621,15 +5622,26 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  void popUntil(RoutePredicate predicate) {
-    _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-    while (candidate != null) {
-      if (predicate(candidate.route)) {
-        return;
+  @optionalTypeArgs
+  void popUntil<T extends Object?>(RoutePredicate predicate, [T? result]) {
+    final List<_RouteEntry> present = _history.where(_RouteEntry.isPresentPredicate).toList();
+
+    int toPop = 0;
+    for (final _RouteEntry entry in present.reversed) {
+      if (predicate(entry.route)) {
+        break;
       }
-      pop();
-      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      toPop++;
     }
+
+    if (toPop == 0) {
+      return;
+    }
+
+    for (int i = 0; i < toPop - 1; i++) {
+      pop();
+    }
+    pop<T>(result);
   }
 
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.

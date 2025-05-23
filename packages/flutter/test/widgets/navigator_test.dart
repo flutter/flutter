@@ -1312,6 +1312,74 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('popUntil with a return value', (WidgetTester tester) async {
+    bool? firstReturnValue;
+    bool? secondReturnValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          final String? routeName = settings.name;
+
+          switch (routeName) {
+            case '/':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: '/',
+                      onTap: () async {
+                        firstReturnValue = await Navigator.pushNamed(context, '/A');
+                      },
+                    ),
+                settings: settings,
+              );
+            case '/A':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: 'A',
+                      onTap: () async {
+                        firstReturnValue = await Navigator.pushNamed(context, '/B');
+                      },
+                    ),
+                settings: settings,
+              );
+            case '/B':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: 'B',
+                      onTap: () async {
+                        Navigator.popUntil(context, (Route<dynamic> route) => route.isFirst, true);
+                      },
+                    ),
+                settings: settings,
+              );
+            default:
+              return null;
+          }
+        },
+      ),
+    );
+    expect(find.text('/'), findsOneWidget);
+
+    await tester.tap(find.text('/'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+    expect(find.text('B'), findsOneWidget);
+
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsOneWidget);
+
+    // Only the first return value should be set.
+    expect(firstReturnValue, isTrue);
+    expect(secondReturnValue, isNull);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
