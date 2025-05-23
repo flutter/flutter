@@ -2538,35 +2538,25 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.isFocusable,
-                                SemanticsFlag.hasSelectedState,
-                                SemanticsFlag.isSelected,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'A\nTab 1 of 2',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.isFocusable,
-                                SemanticsFlag.hasSelectedState,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'B\nTab 2 of 2',
-                              textDirection: TextDirection.ltr,
-                            ),
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isSelected,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'A\nTab 1 of 2',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasSelectedState,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'B\nTab 2 of 2',
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
