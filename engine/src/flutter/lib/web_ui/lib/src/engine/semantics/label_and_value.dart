@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../browser_detection.dart';
 import '../dom.dart';
@@ -435,6 +434,10 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
 /// Renders the label for a [SemanticsObject] that can be scanned by screen
 /// readers, web crawlers, and other automated agents.
 ///
+/// The hint property from the semantics object is translated to `aria-description`
+/// (when supported by the browser) or `aria-describedby` (as a fallback) to provide
+/// additional accessibility information to screen readers.
+///
 /// See [computeDomSemanticsLabel] for the exact logic that constructs the label
 /// of a semantic node.
 class LabelAndValue extends SemanticBehavior {
@@ -449,8 +452,8 @@ class LabelAndValue extends SemanticBehavior {
   /// instead.
   LabelRepresentation preferredRepresentation;
 
-  String? _describedById;
   DomElement? _describedBySpan;
+  String? get _describedById => _describedBySpan?.id;
 
   @override
   void update() {
@@ -503,29 +506,31 @@ class LabelAndValue extends SemanticBehavior {
   }
 
   void _updateHintDescription(String? hint) {
-    owner.removeAttribute('aria-description');
-    owner.removeAttribute('aria-describedby');
     if (hint != null && hint.trim().isNotEmpty) {
       _setAriaDescriptionOrDescribedBy(hint);
+    } else {
+      owner.removeAttribute('aria-description');
+      owner.removeAttribute('aria-describedby');
     }
   }
 
   void _setAriaDescriptionOrDescribedBy(String hint) {
     if (supportsAriaDescription) {
       owner.setAttribute('aria-description', hint);
+      owner.removeAttribute('aria-describedby');
     } else {
       final String id = _ensureDescribedBy(hint);
       owner.setAttribute('aria-describedby', id);
+      owner.removeAttribute('aria-description');
     }
   }
 
   String _ensureDescribedBy(String hint) {
-    _describedById ??= 'flt-hint-${semanticsObject.id}';
     _describedBySpan ??= domDocument.createElement('span');
-    _describedBySpan!.id = _describedById!;
+    _describedBySpan!.id = 'flt-hint-${semanticsObject.id}';
     _describedBySpan!.setAttribute('hidden', '');
     _describedBySpan!.text = hint;
-    if (_describedBySpan!.isConnected != true) {
+    if (!(_describedBySpan?.isConnected ?? false)) {
       // Append the describedby span as a sibling to the semantics element,
       // not as a child. This is crucial because if the span were a child,
       // element.text would read both the label and hint text concatenated
@@ -568,24 +573,11 @@ class LabelAndValue extends SemanticBehavior {
     if (isChromium || isEdge) {
       return true;
     }
-    if (isSafari) {
-      final RegExp safariRegexp = RegExp(r'Version\/([0-9]+)\.([0-9]+)');
-      final RegExpMatch? match = safariRegexp.firstMatch(ui_web.browser.userAgent);
-      if (match != null) {
-        final int majorVersion = int.parse(match.group(1)!);
-        final int minorVersion = int.parse(match.group(2)!);
-        return majorVersion > 17 || (majorVersion == 17 && minorVersion >= 4);
-      }
-      return false;
+    if (isSafari174OrNewer) {
+      return true;
     }
-    if (isFirefox) {
-      final RegExp firefoxRegexp = RegExp(r'Firefox\/([0-9]+)');
-      final RegExpMatch? match = firefoxRegexp.firstMatch(ui_web.browser.userAgent);
-      if (match != null) {
-        final int version = int.parse(match.group(1)!);
-        return version >= 119;
-      }
-      return false;
+    if (isFirefox119OrNewer) {
+      return true;
     }
     return false;
   }
@@ -595,9 +587,6 @@ class LabelAndValue extends SemanticBehavior {
     owner.removeAttribute('aria-describedby');
     _describedBySpan?.remove();
     _describedBySpan = null;
-    _describedById = null;
-    final String hintId = 'hint-${semanticsObject.id}';
-    domDocument.getElementById(hintId)?.remove();
   }
 
   void _cleanUpDom() {
