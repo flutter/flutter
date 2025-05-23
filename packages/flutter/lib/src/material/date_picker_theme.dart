@@ -165,14 +165,64 @@ class DatePickerThemeData with Diagnosticable {
   /// grid of the date picker.
   ///
   /// This will be used instead of the color provided in [dayStyle].
+  ///
+  /// This supports different colors based on the [WidgetState]s of
+  /// the day button, such as `WidgetState.selected`, `WidgetState.hovered`,
+  /// `WidgetState.focused`, and `WidgetState.disabled`.
+  ///
+  /// ```dart
+  /// dayBackgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+  ///   if (states.contains(WidgetState.selected)) {
+  ///     return Theme.of(context).colorScheme.primary;
+  ///   }
+  ///   return null; // Use the default color.
+  /// })
+  /// ```
+  ///
+  /// See also:
+  ///   * [dayOverlayColor] which applies an overlay over the day labels depending on the [WidgetState].
   final WidgetStateProperty<Color?>? dayForegroundColor;
 
   /// Overrides the default color used to paint the background of the
   /// day labels in the grid of the date picker.
+  ///
+  /// This supports different colors based on the [WidgetState]s of
+  /// the day button, such as `WidgetState.selected`, `WidgetState.hovered`,
+  /// `WidgetState.focused`, and `WidgetState.disabled`.
+  ///
+  /// ```dart
+  /// dayBackgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+  ///   if (states.contains(WidgetState.selected)) {
+  ///     return Theme.of(context).colorScheme.primary;
+  ///   }
+  ///   return null; // Use the default color.
+  /// })
+  /// ```
+  /// See also:
+  ///   * [dayOverlayColor] which applies an overlay over the day labels depending on the [WidgetState].
   final WidgetStateProperty<Color?>? dayBackgroundColor;
 
   /// Overrides the default highlight color that's typically used to
   /// indicate that a day in the grid is focused, hovered, or pressed.
+  ///
+  /// This supports different colors based on the [WidgetState]s of
+  /// the day button. The overlay color is usually used with an opacity to
+  /// create hover, focus, and press effects.
+  ///
+  /// ```dart
+  /// dayOverlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+  ///   if (states.contains(WidgetState.pressed)) {
+  ///     return Colors.blue.withOpacity(0.12);
+  ///   }
+  ///   if (states.contains(WidgetState.hovered)) {
+  ///     return Colors.blue.withOpacity(0.08);
+  ///   }
+  ///   if (states.contains(WidgetState.focused)) {
+  ///     return Colors.blue.withOpacity(0.12);
+  ///   }
+  ///   return null; // Use the default color.
+  /// })
+  /// ```
   final WidgetStateProperty<Color?>? dayOverlayColor;
 
   /// Overrides the default shape used to paint the shape decoration of the
@@ -969,8 +1019,8 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.datePickerTheme] if it doesn't
-  ///    find a [DatePickerTheme] ancestor, instead of returning null.
+  ///  * [of], which will return the data from [ThemeData.datePickerTheme] if
+  ///    it doesn't find a [DatePickerTheme] ancestor, instead of returning null.
   ///  * [defaults], which will return the default properties used when no
   ///    other [DatePickerTheme] has been provided.
   static DatePickerThemeData? maybeOf(BuildContext context) {
@@ -984,8 +1034,8 @@ class DatePickerTheme extends InheritedTheme {
   ///
   /// See also:
   ///
-  ///  * [of], which will return [ThemeData.datePickerTheme] if it doesn't
-  ///    find a [DatePickerTheme] ancestor, instead of returning null.
+  ///  * [of], which will return the data from [ThemeData.datePickerTheme] if
+  ///    it doesn't find a [DatePickerTheme] ancestor, instead of returning null.
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [DatePickerTheme] ancestor.
   static DatePickerThemeData defaults(BuildContext context) {

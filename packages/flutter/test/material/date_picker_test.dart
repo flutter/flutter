@@ -1662,6 +1662,31 @@ void main() {
       });
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/140311.
+    testWidgets('Text field stays visible when orientation is portrait and height is reduced', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = const Size(720, 1280);
+      tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+
+      // Text field and header are visible by default.
+      await prepareDatePicker(tester, useMaterial3: true, (Future<DateTime?> range) async {
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.text('Select date'), findsOne);
+      });
+
+      // Simulate the portait mode on a device with a small display when the virtual
+      // keyboard is visible.
+      tester.view.viewInsets = const FakeViewPadding(bottom: 1000);
+      await tester.pumpAndSettle();
+
+      // Text field is visible and header is hidden.
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Select date'), findsNothing);
+    });
+
     // This is a regression test for https://github.com/flutter/flutter/issues/139120.
     testWidgets('Dialog contents are visible - textScaler 0.88, 1.0, 2.0', (
       WidgetTester tester,
@@ -1872,7 +1897,7 @@ void main() {
 
       final SemanticsNode node = tester.semantics.find(find.byType(DatePickerDialog));
       final SemanticsData semanticsData = node.getSemanticsData();
-      expect(semanticsData.hasFlag(SemanticsFlag.isFocusable), false);
+      expect(semanticsData.flagsCollection.isFocusable, false);
     });
   });
 

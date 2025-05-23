@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../android/android_sdk.dart';
 import '../../../android/gradle_utils.dart';
