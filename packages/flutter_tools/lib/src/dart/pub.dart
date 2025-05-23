@@ -698,9 +698,6 @@ class _DefaultPub implements Pub {
 
   /// Update the package configuration file in [project].
   ///
-  /// Creates a corresponding `package_config_subset` file that is used by the
-  /// build system to avoid rebuilds caused by an updated pub timestamp.
-  ///
   /// if `project.generateSyntheticPackage` is `true` then insert flutter_gen
   /// synthetic package into the package configuration. This is used by the l10n
   /// localization tooling to insert a new reference into the package_config
@@ -714,10 +711,6 @@ class _DefaultPub implements Pub {
       packageConfigFile,
       logger: _logger,
     );
-
-    packageConfigFile.parent
-        .childFile('package_config_subset')
-        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
 
     // If we aren't generating localizations, short-circuit.
     if (!project.manifest.generateLocalizations) {
@@ -759,19 +752,5 @@ class _DefaultPub implements Pub {
     });
 
     packageConfigFile.writeAsStringSync(json.encode(jsonContents));
-  }
-
-  // Subset the package config file to only the parts that are relevant for
-  // rerunning the dart compiler.
-  String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
-    final StringBuffer buffer = StringBuffer();
-    for (final Package package in packageConfig.packages) {
-      buffer.writeln(package.name);
-      buffer.writeln(package.languageVersion);
-      buffer.writeln(package.root);
-      buffer.writeln(package.packageUriRoot);
-    }
-    buffer.writeln(packageConfig.version);
-    return buffer.toString();
   }
 }

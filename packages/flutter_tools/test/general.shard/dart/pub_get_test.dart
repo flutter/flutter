@@ -989,60 +989,6 @@ exit code: 66
   });
 
   testUsingContext(
-    'package_config_subset file is generated from packages and not timestamp',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Pub pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-        platform: FakePlatform(
-          environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-        ),
-      );
-      fileSystem.file('version').createSync();
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
-      flutter:
-        generate: true
-      ''');
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-      {"configVersion": 2,"packages": [
-        {
-          "name": "flutter_tools",
-          "rootUri": "../",
-          "packageUri": "lib/",
-          "languageVersion": "2.7"
-        }
-      ],"generated":"some-time"}
-''');
-
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests,
-      );
-
-      expect(
-        fileSystem.file('.dart_tool/package_config_subset').readAsStringSync(),
-        'flutter_tools\n'
-        '2.7\n'
-        'file:///\n'
-        'file:///lib/\n'
-        '2\n',
-      );
-    },
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: false),
-    },
-  );
-
-  testUsingContext(
     'cannot use `generate: true` with a workspace without --explicit-package-dependencies',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
