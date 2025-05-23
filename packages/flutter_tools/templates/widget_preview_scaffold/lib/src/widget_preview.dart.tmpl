@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 
@@ -61,4 +62,13 @@ class WidgetPreview {
   ///
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
+
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty<String>('name', name, ifNull: 'not set'))
+      ..add(DiagnosticsProperty<Size>('size', size))
+      ..add(DiagnosticsProperty<double>('textScaleFactor', textScaleFactor))
+      ..add(DiagnosticsProperty<PreviewThemeData>('theme', theme))
+      ..add(DiagnosticsProperty<Brightness>('brightness', brightness));
+  }
 }

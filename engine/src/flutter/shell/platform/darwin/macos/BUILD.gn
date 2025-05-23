@@ -62,7 +62,10 @@ source_set("InternalFlutterSwift") {
     "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
   ]
   bridge_header = "InternalFlutterSwift-Bridging-Header.h"
-  sources = [ "framework/Source/FlutterRunLoop.swift" ]
+  sources = [
+    "framework/Source/FlutterRunLoop.swift",
+    "framework/Source/ResizeSynchronizer.swift",
+  ]
   deps = [ "//flutter/shell/platform/darwin/common:framework_common" ]
   public = _flutter_framework_headers + framework_common_headers
 }
@@ -109,8 +112,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterPlatformViewController.mm",
     "framework/Source/FlutterRenderer.h",
     "framework/Source/FlutterRenderer.mm",
-    "framework/Source/FlutterResizeSynchronizer.h",
-    "framework/Source/FlutterResizeSynchronizer.mm",
     "framework/Source/FlutterSurface.h",
     "framework/Source/FlutterSurface.mm",
     "framework/Source/FlutterSurfaceManager.h",
@@ -188,6 +189,21 @@ test_fixtures("flutter_desktop_darwin_fixtures") {
   fixtures = [ "//flutter/third_party/icu/common/icudtl.dat" ]
 }
 
+executable("flutter_desktop_darwin_swift_unittests") {
+  testonly = true
+  public_configs = [
+    "//flutter/shell/platform/darwin/common:config",
+    "//flutter/shell/platform/darwin/common:test_config",
+    "//flutter/shell/platform/darwin/common:swift_testing_config",
+  ]
+  sources = [ "framework/Source/ResizeSynchronizerTest.swift" ]
+  deps = [
+    ":flutter_framework_source",
+    "//flutter/shell/platform/darwin/common:swift_testing_main",
+    "//flutter/shell/platform/darwin/common:test_utils_swift",
+  ]
+}
+
 executable("flutter_desktop_darwin_unittests") {
   testonly = true
   cflags_objc = flutter_cflags_objc
@@ -210,7 +226,6 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterMutatorViewTest.mm",
     "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
     "framework/Source/FlutterPlatformViewControllerTest.mm",
-    "framework/Source/FlutterResizeSynchronizerTest.mm",
     "framework/Source/FlutterSurfaceManagerTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextInputSemanticsObjectTest.mm",
