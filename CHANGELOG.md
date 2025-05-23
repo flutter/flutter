@@ -29,6 +29,14 @@ Our goal is to make the list easy for them to scan.
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
+## Flutter 3.32 Changes
+
+### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) [Android] Fix regression in NDK version checking for projects with old AGP versions.
+
+### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
+Initial stable release.
+
 ## Flutter 3.29 Changes
 
 ### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
