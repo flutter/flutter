@@ -1,4 +1,4 @@
-Signature: 88dbe45a7d2fca3a982b10487982edd6
+Signature: 56de18406ea13e97299de90e8e3591e1
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9883,6 +9883,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/SkGaneshRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RecorderOptionsPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9913,6 +9914,7 @@ FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h
 FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h
+FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/SkGaneshRecorder.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RecorderOptionsPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
