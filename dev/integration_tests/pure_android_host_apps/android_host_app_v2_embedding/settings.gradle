@@ -14,8 +14,6 @@ dependencyResolutionManagement {
         maven {
             url = uri("../hello/build/host/outputs/repo")
         }
-        // BEGIN CI only configuration (for pre-submits which contain engine changes).
-        // END CI only configuration (for pre-submits which contain engine changes).
     }
 }
 
