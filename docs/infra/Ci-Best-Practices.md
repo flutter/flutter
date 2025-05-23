@@ -64,13 +64,10 @@ commit(s) that are causing a CI failure, and is the preferred way to revert
 recently merged commits as it bypasses most testing to get the revert landed as
 fast as possible.
 
-You'll need to add a comment on the PR:
+Before using this label, You'll need to add a comment on the PR:
 
 ```md
 reason for revert: This breaks the build, see XYZ link.
-```
-
-... in order to use this label.
 
 Please coordinate with the Google team that administrates the repository before
 using the `revert` label, as it may not be appropriate to use in all cases, and
