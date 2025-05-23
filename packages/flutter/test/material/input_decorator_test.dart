@@ -8105,6 +8105,141 @@ void main() {
     );
   });
 
+  testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/19305
+    expect(
+      const InputDecorationTheme(contentPadding: EdgeInsetsDirectional.only(start: 5.0)).toString(),
+      contains('contentPadding: EdgeInsetsDirectional(5.0, 0.0, 0.0, 0.0)'),
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/20374
+    expect(
+      const InputDecorationTheme(contentPadding: EdgeInsets.only(left: 5.0)).toString(),
+      contains('contentPadding: EdgeInsets(5.0, 0.0, 0.0, 0.0)'),
+    );
+
+    // Verify that the toString() method succeeds.
+    final String debugString =
+        const InputDecorationTheme(
+          labelStyle: TextStyle(height: 1.0),
+          helperStyle: TextStyle(height: 2.0),
+          helperMaxLines: 5,
+          hintStyle: TextStyle(height: 3.0),
+          errorStyle: TextStyle(height: 4.0),
+          errorMaxLines: 5,
+          isDense: true,
+          contentPadding: EdgeInsets.only(right: 6.0),
+          isCollapsed: true,
+          prefixStyle: TextStyle(height: 7.0),
+          suffixStyle: TextStyle(height: 8.0),
+          counterStyle: TextStyle(height: 9.0),
+          filled: true,
+          fillColor: Color(0x00000010),
+          focusColor: Color(0x00000020),
+          errorBorder: UnderlineInputBorder(),
+          focusedBorder: OutlineInputBorder(),
+          focusedErrorBorder: UnderlineInputBorder(),
+          disabledBorder: OutlineInputBorder(),
+          enabledBorder: UnderlineInputBorder(),
+          border: OutlineInputBorder(),
+        ).toString();
+
+    // Spot check
+    expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
+    expect(debugString, contains('isDense: true'));
+    expect(debugString, contains('fillColor: ${const Color(0x00000010)}'));
+    expect(debugString, contains('focusColor: ${const Color(0x00000020)}'));
+    expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
+    expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
+  });
+
+  testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const BoxConstraints constraints = BoxConstraints(
+      minWidth: 10,
+      maxWidth: 10,
+      minHeight: 30,
+      maxHeight: 30,
+    );
+    const InputDecorationTheme(
+      labelStyle: TextStyle(),
+      floatingLabelStyle: TextStyle(),
+      helperStyle: TextStyle(),
+      helperMaxLines: 6,
+      hintStyle: TextStyle(),
+      errorStyle: TextStyle(),
+      errorMaxLines: 5,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      floatingLabelAlignment: FloatingLabelAlignment.center,
+      isDense: true,
+      contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+      isCollapsed: true,
+      iconColor: Colors.red,
+      prefixIconColor: Colors.blue,
+      prefixIconConstraints: constraints,
+      prefixStyle: TextStyle(),
+      suffixIconColor: Colors.blue,
+      suffixIconConstraints: constraints,
+      suffixStyle: TextStyle(),
+      counterStyle: TextStyle(),
+      filled: true,
+      fillColor: Colors.red,
+      activeIndicatorBorder: BorderSide(),
+      outlineBorder: BorderSide(),
+      focusColor: Colors.blue,
+      hoverColor: Colors.green,
+      errorBorder: UnderlineInputBorder(),
+      focusedBorder: UnderlineInputBorder(),
+      focusedErrorBorder: UnderlineInputBorder(),
+      disabledBorder: UnderlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      border: UnderlineInputBorder(),
+      alignLabelWithHint: true,
+      constraints: constraints,
+    ).debugFillProperties(builder);
+    final List<String> description =
+        builder.properties
+            .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode n) => n.toString())
+            .toList();
+    expect(description, <String>[
+      'labelStyle: TextStyle(<all styles inherited>)',
+      'floatingLabelStyle: TextStyle(<all styles inherited>)',
+      'helperStyle: TextStyle(<all styles inherited>)',
+      'helperMaxLines: 6',
+      'hintStyle: TextStyle(<all styles inherited>)',
+      'errorStyle: TextStyle(<all styles inherited>)',
+      'errorMaxLines: 5',
+      'floatingLabelBehavior: FloatingLabelBehavior.never',
+      'floatingLabelAlignment: FloatingLabelAlignment.center',
+      'isDense: true',
+      'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
+      'isCollapsed: true',
+      'iconColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'prefixIconColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'prefixIconConstraints: BoxConstraints(w=10.0, h=30.0)',
+      'prefixStyle: TextStyle(<all styles inherited>)',
+      'suffixIconColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'suffixIconConstraints: BoxConstraints(w=10.0, h=30.0)',
+      'suffixStyle: TextStyle(<all styles inherited>)',
+      'counterStyle: TextStyle(<all styles inherited>)',
+      'filled: true',
+      'fillColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'activeIndicatorBorder: BorderSide',
+      'outlineBorder: BorderSide',
+      'focusColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'hoverColor: MaterialColor(primary value: ${const Color(0xff4caf50)})',
+      'errorBorder: UnderlineInputBorder()',
+      'focusedBorder: UnderlineInputBorder()',
+      'focusedErrorBorder: UnderlineInputBorder()',
+      'disabledBorder: UnderlineInputBorder()',
+      'enabledBorder: UnderlineInputBorder()',
+      'border: UnderlineInputBorder()',
+      'alignLabelWithHint: true',
+      'constraints: BoxConstraints(w=10.0, h=30.0)',
+    ]);
+  });
+
   testWidgets('InputDecorationThemeData.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
     expect(

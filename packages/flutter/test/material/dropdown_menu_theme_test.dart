@@ -216,10 +216,7 @@ void main() {
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.lightGreen,
-      ),
+      inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
     final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
@@ -318,10 +315,7 @@ void main() {
           RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
         ),
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.lightGreen,
-      ),
+      inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
     final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(

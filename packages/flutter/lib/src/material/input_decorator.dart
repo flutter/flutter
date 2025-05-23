@@ -4831,6 +4831,12 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   Widget wrap(BuildContext context, Widget child) {
     return InputDecorationTheme(data: data, child: child);
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    data.debugFillProperties(properties);
+  }
 }
 
 /// Defines the default appearance of [InputDecorator]s.
