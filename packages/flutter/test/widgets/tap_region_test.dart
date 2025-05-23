@@ -1197,30 +1197,27 @@ void main() {
               onTapOutside: (PointerEvent event) {},
               behavior: HitTestBehavior.opaque,
               child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  tester.element(find.byType(GestureDetector)),
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) => Scaffold(
-                      body: Center(
-                        child: ElevatedButton(
-                          key: buttonKey,
-                          onPressed: () {
-                            buttonTapped = true;
-                          },
-                          child: const Text('Test Button'),
-                        ),
-                      ),
+                onTap: () {
+                  Navigator.push(
+                    tester.element(find.byType(GestureDetector)),
+                    MaterialPageRoute<void>(
+                      builder:
+                          (BuildContext context) => Scaffold(
+                            body: Center(
+                              child: ElevatedButton(
+                                key: buttonKey,
+                                onPressed: () {
+                                  buttonTapped = true;
+                                },
+                                child: const Text('Test Button'),
+                              ),
+                            ),
+                          ),
                     ),
-                  ),
-                );
-              },
-              child: Container(
-                width: 250.0,
-                height: 250.0,
-                color: Colors.blue,
+                  );
+                },
+                child: Container(width: 250.0, height: 250.0, color: Colors.blue),
               ),
-            ),
             ),
           ),
         ),
@@ -1239,6 +1236,10 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
-    expect(buttonTapped, true, reason: 'Button tap was not consumed by a TapRegion on a non-current route');
+    expect(
+      buttonTapped,
+      true,
+      reason: 'Button tap was not consumed by a TapRegion on a non-current route',
+    );
   });
 }
