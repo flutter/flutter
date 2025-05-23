@@ -1680,7 +1680,11 @@ void main() {
     try {
       expect(
         find.bySubtype<Widget>(),
-        findsAscendinglyOrderedWidgets(<Finder>[find.text('foo'), find.byType(CircularProgressIndicator), find.byType(Container)]),
+        findsAscendinglyOrderedWidgets(<Finder>[
+          find.text('foo'),
+          find.byType(CircularProgressIndicator),
+          find.byType(Container),
+        ]),
       );
     } on TestFailure catch (e) {
       failure = e;
