@@ -414,7 +414,6 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// Defaults to true.
   ///
-  ///
   /// {@tool dartpad}
   /// This sample demonstrates how to use the [AutomaticKeepAlive] widget in
   /// combination with the [AutomaticKeepAliveClientMixin] to selectively preserve
