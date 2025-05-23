@@ -11,6 +11,7 @@
 #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
@@ -2224,9 +2225,10 @@ class CanvasCompareTester {
                    })
                    .with_diff_clip());
     DlPathBuilder path_builder;
+    path_builder.SetFillType(DlPathFillType::kOdd);
     path_builder.AddRect(r_clip);
     path_builder.AddCircle(DlPoint(kRenderCenterX, kRenderCenterY), 1.0f);
-    DlPath path_clip(path_builder, DlPathFillType::kOdd);
+    DlPath path_clip = path_builder.TakePath();
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
                    "Hard ClipPath inset by 15.4",
@@ -3202,7 +3204,7 @@ TEST_F(DisplayListRendering, DrawPath) {
   }
   path_builder.Close();
 
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -3910,7 +3912,7 @@ TEST_F(DisplayListRendering, DrawShadow) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -3934,7 +3936,7 @@ TEST_F(DisplayListRendering, DrawShadowTransparentOccluder) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -3958,7 +3960,7 @@ TEST_F(DisplayListRendering, DrawShadowDpr) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;

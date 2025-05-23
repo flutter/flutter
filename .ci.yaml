@@ -4702,7 +4702,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6566,7 +6566,7 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6943,9 +6943,7 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: true # https://github.com/flutter/flutter/issues/126286
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
@@ -6960,7 +6958,6 @@ targets:
     timeout: 60
     scheduler: release
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
@@ -6977,7 +6974,6 @@ targets:
     timeout: 60
     scheduler: release
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:
@@ -6994,7 +6990,6 @@ targets:
     scheduler: release
     bringup: true
     enabled_branches:
-      - flutter-\d+\.\d+-candidate\.\d+
       - beta
       - stable
     properties:

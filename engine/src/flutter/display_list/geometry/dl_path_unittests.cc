@@ -6,6 +6,7 @@
 
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_mock_path_receiver.h"
 #include "flutter/third_party/skia/include/core/SkPath.h"
 #include "flutter/third_party/skia/include/core/SkRRect.h"
@@ -16,11 +17,9 @@ namespace testing {
 TEST(DisplayListPath, DefaultConstruction) {
   DlPath path;
 
-  EXPECT_FALSE(path.IsConverted());
   EXPECT_EQ(path, DlPath());
   EXPECT_EQ(path.GetSkPath(), SkPath());
-  EXPECT_TRUE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_TRUE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect());
   EXPECT_TRUE(path.IsConvex());
@@ -51,10 +50,8 @@ TEST(DisplayListPath, ConstructFromEmptySkiaPath) {
 
   EXPECT_EQ(path, DlPath());
   EXPECT_EQ(path.GetSkPath(), SkPath());
-  EXPECT_FALSE(path.IsConverted());
 
-  EXPECT_TRUE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_TRUE(path.IsEmpty());
   EXPECT_FALSE(path.IsVolatile());
 
   EXPECT_EQ(path.GetBounds(), DlRect());
@@ -78,21 +75,18 @@ TEST(DisplayListPath, ConstructFromEmptySkiaPath) {
   EXPECT_EQ(path.GetBounds(), DlRect());
 }
 
-TEST(DisplayListPath, ConstructFromEmptyImpellerPath) {
-  impeller::Path imp_path;
-  DlPath path(imp_path);
-
-  EXPECT_TRUE(path.GetPath().IsEmpty());
-  EXPECT_FALSE(path.IsConverted());
-
-  EXPECT_EQ(path.GetSkPath(), SkPath());
-  EXPECT_TRUE(path.IsConverted());
-  EXPECT_FALSE(path.IsVolatile());
+TEST(DisplayListPath, ConstructFromEmptyDlPathBuilder) {
+  DlPathBuilder path_builder;
+  DlPath path = path_builder.TakePath();
 
   EXPECT_EQ(path, DlPath());
+  EXPECT_EQ(path.GetSkPath(), SkPath());
+
+  EXPECT_TRUE(path.IsEmpty());
+  EXPECT_FALSE(path.IsVolatile());
 
   EXPECT_EQ(path.GetBounds(), DlRect());
-  EXPECT_FALSE(path.IsConvex());
+  EXPECT_TRUE(path.IsConvex());
   EXPECT_EQ(path.GetFillType(), DlPathFillType::kNonZero);
 
   bool is_closed = false;
@@ -121,7 +115,6 @@ TEST(DisplayListPath, CopyConstruct) {
   EXPECT_EQ(path2, DlPath(SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20))));
   EXPECT_EQ(path2.GetSkPath(), SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20)));
 
-  EXPECT_FALSE(path2.IsConverted());
   EXPECT_FALSE(path2.IsVolatile());
 
   EXPECT_EQ(path2.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
@@ -153,9 +146,7 @@ TEST(DisplayListPath, ConstructFromVolatile) {
   EXPECT_EQ(path, DlPath());
   EXPECT_EQ(path.GetSkPath(), SkPath());
 
-  EXPECT_FALSE(path.IsConverted());
-  EXPECT_TRUE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_TRUE(path.IsEmpty());
   EXPECT_TRUE(path.IsVolatile());
 
   bool is_closed = false;
@@ -180,12 +171,6 @@ TEST(DisplayListPath, VolatileBecomesNonVolatile) {
   sk_path.setIsVolatile(true);
   DlPath path(sk_path);
 
-  EXPECT_TRUE(path.IsVolatile());
-
-  for (int i = 0; i < 1000; i++) {
-    // grabbing the Impeller version of the path does not make it non-volatile
-    path.GetPath();
-  }
   EXPECT_TRUE(path.IsVolatile());
 
   for (int i = 0; i < 1000; i++) {
@@ -244,59 +229,6 @@ TEST(DisplayListPath, MultipleVolatileCopiesBecomeNonVolatileTogether) {
   }
 }
 
-TEST(DisplayListPath, EmbeddingSharedReference) {
-  SkPath sk_path = SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20));
-  DlPath path(sk_path);
-
-  class ConversionSharingTester {
-   public:
-    explicit ConversionSharingTester(const DlPath& path) : path_(path) {}
-
-    bool ConvertAndTestEmpty() { return path_.GetPath().IsEmpty(); }
-
-    bool Test(const DlPath& reference_path, const std::string& label) {
-      EXPECT_EQ(path_, reference_path) << label;
-      EXPECT_EQ(path_, DlPath(SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20))))
-          << label;
-      EXPECT_EQ(path_.GetSkPath(),
-                SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20)))
-          << label;
-
-      bool is_closed = false;
-      EXPECT_FALSE(path_.IsRect(nullptr)) << label;
-      EXPECT_FALSE(path_.IsRect(nullptr, &is_closed)) << label;
-      EXPECT_FALSE(is_closed) << label;
-      EXPECT_TRUE(path_.IsOval(nullptr)) << label;
-      EXPECT_FALSE(path_.IsRoundRect(nullptr));
-
-      is_closed = false;
-      EXPECT_FALSE(path_.IsRect(nullptr)) << label;
-      EXPECT_FALSE(path_.IsRect(nullptr, &is_closed)) << label;
-      EXPECT_FALSE(is_closed) << label;
-      EXPECT_TRUE(path_.IsOval(nullptr)) << label;
-      EXPECT_FALSE(path_.IsRoundRect(nullptr)) << label;
-
-      EXPECT_EQ(path_.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20)) << label;
-      return path_.IsConverted();
-    };
-
-   private:
-    const DlPath path_;
-  };
-
-  EXPECT_FALSE(path.IsConverted());
-  ConversionSharingTester before_tester(path);
-  EXPECT_FALSE(before_tester.Test(path, "Before triggering conversion"));
-  EXPECT_FALSE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(before_tester.Test(path, "After conversion of source object"));
-  EXPECT_FALSE(before_tester.ConvertAndTestEmpty());
-  EXPECT_TRUE(before_tester.Test(path, "After conversion of captured object"));
-
-  EXPECT_TRUE(path.IsConverted());
-  ConversionSharingTester after_tester(path);
-  EXPECT_TRUE(after_tester.Test(path, "Constructed after conversion"));
-}
-
 TEST(DisplayListPath, ConstructFromRect) {
   SkPath sk_path = SkPath::Rect(SkRect::MakeLTRB(10, 10, 20, 20));
   DlPath path(sk_path);
@@ -304,9 +236,7 @@ TEST(DisplayListPath, ConstructFromRect) {
   EXPECT_EQ(path, DlPath(SkPath::Rect(SkRect::MakeLTRB(10, 10, 20, 20))));
   EXPECT_EQ(path.GetSkPath(), SkPath::Rect(SkRect::MakeLTRB(10, 10, 20, 20)));
 
-  EXPECT_FALSE(path.IsConverted());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_TRUE(path.IsConvex());
@@ -327,24 +257,19 @@ TEST(DisplayListPath, ConstructFromRect) {
 TEST(DisplayListPath, ConstructFromDlPathBuilderRect) {
   DlPathBuilder builder;
   builder.AddRect(DlRect::MakeLTRB(10, 10, 20, 20));
-  DlPath path(builder);
-  EXPECT_FALSE(path.IsConverted());
+  DlPath path = builder.TakePath();
 
-  // Paths constructed from PathBuilder don't match paths built from similar
-  // SkRect and SkPath and DlPath factory methods exactly, only paths built
-  // from similar PathBuilder calls match exactly for == comparison
   {
     DlPathBuilder builder2;
     builder2.AddRect(DlRect::MakeLTRB(10, 10, 20, 20));
-    EXPECT_EQ(path, DlPath(builder2));
+    EXPECT_EQ(path, builder2.TakePath());
   }
-  EXPECT_TRUE(path.IsConverted());
 
   EXPECT_FALSE(path.GetSkPath().isEmpty());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_FALSE(path.IsConvex());
+  EXPECT_TRUE(path.IsConvex());
   EXPECT_EQ(path.GetFillType(), DlPathFillType::kNonZero);
 
   bool is_closed = false;
@@ -366,9 +291,7 @@ TEST(DisplayListPath, ConstructFromOval) {
   EXPECT_EQ(path, DlPath(SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20))));
   EXPECT_EQ(path.GetSkPath(), SkPath::Oval(SkRect::MakeLTRB(10, 10, 20, 20)));
 
-  EXPECT_FALSE(path.IsConverted());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_TRUE(path.IsConvex());
@@ -387,33 +310,26 @@ TEST(DisplayListPath, ConstructFromOval) {
 TEST(DisplayListPath, ConstructFromDlPathBuilderOval) {
   DlPathBuilder builder;
   builder.AddOval(DlRect::MakeLTRB(10, 10, 20, 20));
-  DlPath path(builder);
-  EXPECT_FALSE(path.IsConverted());
+  DlPath path = builder.TakePath();
 
-  // Paths constructed from PathBuilder don't match paths built from similar
-  // SkRect and SkPath and DlPath factory methods exactly, only paths built
-  // from similar PathBuilder calls match exactly for == comparison
   {
     DlPathBuilder builder2;
     builder2.AddOval(DlRect::MakeLTRB(10, 10, 20, 20));
-    EXPECT_EQ(path, DlPath(builder2));
+    EXPECT_EQ(path, builder2.TakePath());
   }
-  EXPECT_TRUE(path.IsConverted());
 
   EXPECT_FALSE(path.GetSkPath().isEmpty());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_FALSE(path.IsConvex());
+  EXPECT_TRUE(path.IsConvex());
   EXPECT_EQ(path.GetFillType(), DlPathFillType::kNonZero);
 
-  // Skia path, used for these tests,  doesn't recognize ovals created
-  // by PathBuilder
   EXPECT_FALSE(path.IsRect(nullptr));
-  // EXPECT_TRUE(path.IsOval(nullptr));
-  // DlRect dl_bounds;
-  // EXPECT_TRUE(path.IsOval(&dl_bounds));
-  // EXPECT_EQ(dl_bounds, DlRect::MakeLTRB(10, 10, 20, 20));
+  EXPECT_TRUE(path.IsOval(nullptr));
+  DlRect dl_bounds;
+  EXPECT_TRUE(path.IsOval(&dl_bounds));
+  EXPECT_EQ(dl_bounds, DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
@@ -428,10 +344,8 @@ TEST(DisplayListPath, ConstructFromRRect) {
   EXPECT_EQ(path.GetSkPath(),
             SkPath::RRect(SkRect::MakeLTRB(10, 10, 20, 20), 1, 2));
 
-  EXPECT_FALSE(path.IsConverted());
   EXPECT_FALSE(path.GetSkPath().isEmpty());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_TRUE(path.IsConvex());
@@ -451,35 +365,28 @@ TEST(DisplayListPath, ConstructFromDlPathBuilderRoundRect) {
   DlPathBuilder builder;
   builder.AddRoundRect(
       DlRoundRect::MakeRectXY(DlRect::MakeLTRB(10, 10, 20, 20), 1, 2));
-  DlPath path(builder);
-  EXPECT_FALSE(path.IsConverted());
+  DlPath path = builder.TakePath();
 
-  // Paths constructed from PathBuilder don't match paths built from similar
-  // SkRRect and SkPath and DlPath factory methods exactly, only built from
-  // similar PathBuilder calls match exactly for == comparison
   {
     DlPathBuilder builder2;
     builder2.AddRoundRect(
         DlRoundRect::MakeRectXY(DlRect::MakeLTRB(10, 10, 20, 20), 1, 2));
-    EXPECT_EQ(path, DlPath(builder2));
+    EXPECT_EQ(path, builder2.TakePath());
   }
-  EXPECT_TRUE(path.IsConverted());
 
   EXPECT_FALSE(path.GetSkPath().isEmpty());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_FALSE(path.IsConvex());
+  EXPECT_TRUE(path.IsConvex());
   EXPECT_EQ(path.GetFillType(), DlPathFillType::kNonZero);
 
-  // Skia path, used for these tests,  doesn't recognize ovals created
-  // by PathBuilder
   EXPECT_FALSE(path.IsRect(nullptr));
   EXPECT_FALSE(path.IsOval(nullptr));
-  // DlRoundRect roundrect;
-  // EXPECT_TRUE(path.IsRoundRect(&roundrect));
-  // EXPECT_EQ(roundrect,
-  //           DlRoundRect::MakeRectXY(DlRect::MakeLTRB(10, 10, 20, 20), 1, 2));
+  DlRoundRect roundrect;
+  EXPECT_TRUE(path.IsRoundRect(&roundrect));
+  EXPECT_EQ(roundrect,
+            DlRoundRect::MakeRectXY(DlRect::MakeLTRB(10, 10, 20, 20), 1, 2));
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
 }
@@ -500,9 +407,7 @@ TEST(DisplayListPath, ConstructFromPath) {
   EXPECT_EQ(path, DlPath(sk_path2));
   EXPECT_EQ(path.GetSkPath(), sk_path2);
 
-  EXPECT_FALSE(path.IsConverted());
-  EXPECT_FALSE(path.GetPath().IsEmpty());
-  EXPECT_TRUE(path.IsConverted());
+  EXPECT_FALSE(path.IsEmpty());
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_TRUE(path.IsConvex());
@@ -515,8 +420,9 @@ TEST(DisplayListPath, ConstructFromPath) {
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
 }
 
-TEST(DisplayListPath, ConstructFromImpellerEqualsConstructFromSkia) {
+TEST(DisplayListPath, ConstructFromDlPathBuilderEqualsConstructFromSkia) {
   DlPathBuilder path_builder;
+  path_builder.SetFillType(DlPathFillType::kNonZero);
   path_builder.MoveTo({0, 0});
   path_builder.LineTo({100, 0});
   path_builder.LineTo({0, 100});
@@ -527,82 +433,9 @@ TEST(DisplayListPath, ConstructFromImpellerEqualsConstructFromSkia) {
   sk_path.moveTo(0, 0);
   sk_path.lineTo(100, 0);
   sk_path.lineTo(0, 100);
-  sk_path.lineTo(0, 0);  // Shouldn't be needed, but PathBuilder draws this
   sk_path.close();
 
-  EXPECT_EQ(DlPath(path_builder, DlPathFillType::kNonZero), DlPath(sk_path));
-}
-
-TEST(DisplayListPath, SkiaToImpellerFillTypeOddAndConvexityTrue) {
-  SkPath sk_path;
-  sk_path.moveTo(10, 10);
-  sk_path.lineTo(20, 10);
-  sk_path.lineTo(10, 20);
-  sk_path.setFillType(SkPathFillType::kEvenOdd);
-
-  ASSERT_TRUE(sk_path.isConvex());
-  ASSERT_EQ(sk_path.getFillType(), SkPathFillType::kEvenOdd);
-
-  DlPath path(sk_path);
-  EXPECT_TRUE(path.IsConvex());
-  EXPECT_EQ(path.GetFillType(), DlPathFillType::kOdd);
-  EXPECT_TRUE(path.GetPath().IsConvex());
-  EXPECT_EQ(path.GetPath().GetFillType(), DlPathFillType::kOdd);
-}
-
-TEST(DisplayListPath, SkiaToImpellerFillTypeWindingAndConvexityFalse) {
-  SkPath sk_path;
-  sk_path.moveTo(10, 10);
-  sk_path.lineTo(20, 10);
-  sk_path.lineTo(10, 20);
-  sk_path.lineTo(20, 20);
-  sk_path.setFillType(SkPathFillType::kWinding);
-
-  ASSERT_FALSE(sk_path.isConvex());
-  ASSERT_EQ(sk_path.getFillType(), SkPathFillType::kWinding);
-
-  DlPath path(sk_path);
-  EXPECT_FALSE(path.IsConvex());
-  EXPECT_EQ(path.GetFillType(), DlPathFillType::kNonZero);
-  EXPECT_FALSE(path.GetPath().IsConvex());
-  EXPECT_EQ(path.GetPath().GetFillType(), DlPathFillType::kNonZero);
-}
-
-TEST(DisplayListPath, ImpellerToSkiaFillTypeOddAndConvexityTrue) {
-  DlPathBuilder path_builder;
-  path_builder.MoveTo({10, 10});
-  path_builder.LineTo({20, 10});
-  path_builder.LineTo({10, 20});
-  path_builder.SetConvexity(impeller::Convexity::kConvex);
-  auto impeller_path = path_builder.TakePath(DlPathFillType::kOdd);
-
-  ASSERT_TRUE(impeller_path.IsConvex());
-  ASSERT_EQ(impeller_path.GetFillType(), DlPathFillType::kOdd);
-
-  DlPath path(impeller_path);
-  EXPECT_TRUE(path.IsConvex());
-  EXPECT_EQ(path.GetFillType(), DlPathFillType::kOdd);
-  EXPECT_TRUE(path.GetSkPath().isConvex());
-  EXPECT_EQ(path.GetSkPath().getFillType(), SkPathFillType::kEvenOdd);
-}
-
-TEST(DisplayListPath, ImpellerToSkiaFillTypeWindingAndConvexityFalse) {
-  DlPathBuilder path_builder;
-  path_builder.MoveTo({10, 10});
-  path_builder.LineTo({20, 10});
-  path_builder.LineTo({10, 20});
-  path_builder.LineTo({20, 20});
-  path_builder.SetConvexity(impeller::Convexity::kUnknown);
-  auto impeller_path = path_builder.TakePath(DlPathFillType::kNonZero);
-
-  ASSERT_FALSE(impeller_path.IsConvex());
-  ASSERT_EQ(impeller_path.GetFillType(), DlPathFillType::kNonZero);
-
-  DlPath path(impeller_path);
-  EXPECT_FALSE(path.IsConvex());
-  EXPECT_EQ(path.GetFillType(), DlPathFillType::kNonZero);
-  EXPECT_FALSE(path.GetSkPath().isConvex());
-  EXPECT_EQ(path.GetSkPath().getFillType(), SkPathFillType::kWinding);
+  EXPECT_EQ(path_builder.TakePath(), DlPath(sk_path));
 }
 
 TEST(DisplayListPath, IsLineFromSkPath) {
@@ -621,11 +454,12 @@ TEST(DisplayListPath, IsLineFromSkPath) {
   EXPECT_FALSE(DlPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100))).IsLine());
 }
 
-TEST(DisplayListPath, IsLineFromImpellerPath) {
+TEST(DisplayListPath, IsLineFromPathBuilder) {
   DlPathBuilder path_builder;
+  path_builder.SetFillType(DlPathFillType::kNonZero);
   path_builder.MoveTo({0, 0});
   path_builder.LineTo({100, 0});
-  DlPath path = DlPath(path_builder, DlPathFillType::kNonZero);
+  DlPath path = path_builder.TakePath();
 
   DlPoint start;
   DlPoint end;
@@ -635,11 +469,12 @@ TEST(DisplayListPath, IsLineFromImpellerPath) {
 
   {
     DlPathBuilder path_builder;
+    path_builder.SetFillType(DlPathFillType::kNonZero);
     path_builder.MoveTo({0, 0});
     path_builder.LineTo({100, 0});
     path_builder.LineTo({100, 100});
 
-    DlPath path = DlPath(path_builder, DlPathFillType::kNonZero);
+    DlPath path = path_builder.TakePath();
     EXPECT_FALSE(path.IsLine());
   }
 }
@@ -696,72 +531,122 @@ TEST(DisplayListPath, DispatchImpellerPathOneOfEachVerb) {
                             DlPoint(300, 350));
   path_builder.Close();
 
-  TestPathDispatchOneOfEachVerb(DlPath(path_builder));
+  TestPathDispatchOneOfEachVerb(path_builder.TakePath());
 }
 
-static void TestPathDispatchConicToQuads(const DlPath& path, DlScalar weight) {
+static void TestPathDispatchConicToQuads(
+    const DlPath& path,
+    DlScalar weight,
+    const std::array<DlPoint, 4>& quad_points) {
   ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
 
   {
     ::testing::InSequence sequence;
 
-    std::array<DlPoint, 5> i_points;
-    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
-                                         DlPoint(20, 20), weight);
-    i_conic.SubdivideToQuadraticPoints(i_points);
-
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10), false));
     EXPECT_CALL(mock_receiver,
                 ConicTo(DlPoint(20, 10), DlPoint(20, 20), weight))
         .WillOnce(Return(false));
-    EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
-    EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
+    EXPECT_CALL(mock_receiver,
+                QuadTo(PointEq(quad_points[0]), PointEq(quad_points[1])));
+    EXPECT_CALL(mock_receiver,
+                QuadTo(PointEq(quad_points[2]), PointEq(quad_points[3])));
     EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
 }
 
-static void TestSkiaPathDispatchConicToQuads(DlScalar weight) {
+static void TestSkiaPathDispatchConicToQuads(
+    DlScalar weight,
+    const std::array<DlPoint, 4>& quad_points) {
   SkPath sk_path;
   sk_path.moveTo(10, 10);
   sk_path.conicTo(20, 10, 20, 20, weight);
 
-  TestPathDispatchConicToQuads(DlPath(sk_path), weight);
+  TestPathDispatchConicToQuads(DlPath(sk_path), weight, quad_points);
 }
 
-static void TestImpellerPathDispatchConicToQuads(DlScalar weight) {
+static void TestImpellerPathDispatchConicToQuads(
+    DlScalar weight,
+    const std::array<DlPoint, 4>& quad_points) {
   DlPathBuilder path_builder;
   path_builder.MoveTo(DlPoint(10, 10));
   path_builder.ConicCurveTo(DlPoint(20, 10), DlPoint(20, 20), weight);
 
-  TestPathDispatchConicToQuads(DlPath(path_builder), weight);
+  TestPathDispatchConicToQuads(path_builder.TakePath(), weight, quad_points);
 }
 
 TEST(DisplayListPath, DispatchSkiaPathConicToQuadsNearlyZero) {
-  TestSkiaPathDispatchConicToQuads(kEhCloseEnough);
+  TestSkiaPathDispatchConicToQuads(kEhCloseEnough,
+                                   {
+                                       DlPoint(10.01f, 10.0f),
+                                       DlPoint(15.005f, 14.995f),
+                                       DlPoint(20.0f, 19.99f),
+                                       DlPoint(20.0f, 20.0f),
+                                   });
 }
 TEST(DisplayListPath, DispatchSkiaPathConicToQuadsHalf) {
-  TestSkiaPathDispatchConicToQuads(0.5f);
+  TestSkiaPathDispatchConicToQuads(0.5f, {
+                                             DlPoint(13.3333f, 10.0f),
+                                             DlPoint(16.6667f, 13.3333f),
+                                             DlPoint(20.0f, 16.6667f),
+                                             DlPoint(20.0f, 20.0f),
+                                         });
 }
 TEST(DisplayListPath, DispatchSkiaPathConicToQuadsCircular) {
-  TestSkiaPathDispatchConicToQuads(impeller::kSqrt2Over2);
+  TestSkiaPathDispatchConicToQuads(impeller::kSqrt2Over2,
+                                   {
+                                       DlPoint(14.1421f, 10.0f),
+                                       DlPoint(17.0711f, 12.9289f),
+                                       DlPoint(20.0f, 15.8579f),
+                                       DlPoint(20.0f, 20.0f),
+                                   });
 }
 TEST(DisplayListPath, DispatchSkiaPathConicToQuadsNearlyOne) {
-  TestSkiaPathDispatchConicToQuads(1.0f - kEhCloseEnough);
+  TestSkiaPathDispatchConicToQuads(1.0f - kEhCloseEnough,
+                                   {
+                                       DlPoint(14.9975f, 10.0f),
+                                       DlPoint(17.4987f, 12.5013f),
+                                       DlPoint(20.0f, 15.0025f),
+                                       DlPoint(20.0f, 20.0f),
+                                   });
 }
 
 TEST(DisplayListPath, DispatchImpellerPathConicToQuadsNearlyZero) {
-  TestImpellerPathDispatchConicToQuads(kEhCloseEnough);
+  TestImpellerPathDispatchConicToQuads(kEhCloseEnough,
+                                       {
+                                           DlPoint(10.01f, 10.0f),
+                                           DlPoint(15.005f, 14.995f),
+                                           DlPoint(20.0f, 19.99f),
+                                           DlPoint(20.0f, 20.0f),
+                                       });
 }
 TEST(DisplayListPath, DispatchImpellerPathConicToQuadsHalf) {
-  TestImpellerPathDispatchConicToQuads(0.5f);
+  TestImpellerPathDispatchConicToQuads(0.5f, {
+                                                 DlPoint(13.3333f, 10.0f),
+                                                 DlPoint(16.6667f, 13.3333f),
+                                                 DlPoint(20.0f, 16.6667f),
+                                                 DlPoint(20.0f, 20.0f),
+                                             });
 }
 TEST(DisplayListPath, DispatchImpellerPathConicToQuadsCircular) {
-  TestImpellerPathDispatchConicToQuads(impeller::kSqrt2Over2);
+  TestImpellerPathDispatchConicToQuads(impeller::kSqrt2Over2,
+                                       {
+                                           DlPoint(14.1421f, 10.0f),
+                                           DlPoint(17.0711f, 12.9289f),
+                                           DlPoint(20.0f, 15.8579f),
+                                           DlPoint(20.0f, 20.0f),
+                                       });
 }
 TEST(DisplayListPath, DispatchImpellerPathConicToQuadsNearlyOne) {
-  TestImpellerPathDispatchConicToQuads(1.0f - kEhCloseEnough);
+  TestImpellerPathDispatchConicToQuads(1.0f - kEhCloseEnough,
+                                       {
+                                           DlPoint(14.9975f, 10.0f),
+                                           DlPoint(17.4987f, 12.5013f),
+                                           DlPoint(20.0f, 15.0025f),
+                                           DlPoint(20.0f, 20.0f),
+                                       });
 }
 
 static void TestPathDispatchUnclosedTriangle(const DlPath& path) {
@@ -794,7 +679,7 @@ TEST(DisplayListPath, DispatchUnclosedImpellerTriangle) {
   path_builder.LineTo({20, 10});
   path_builder.LineTo({10, 20});
 
-  TestPathDispatchUnclosedTriangle(DlPath(path_builder));
+  TestPathDispatchUnclosedTriangle(path_builder.TakePath());
 }
 
 static void TestPathDispatchClosedTriangle(const DlPath& path) {
@@ -824,15 +709,14 @@ TEST(DisplayListPath, DispatchClosedSkiaTriangle) {
   TestPathDispatchClosedTriangle(DlPath(sk_path));
 }
 
-TEST(DisplayListPath, DispatchClosedImpellerTriangle) {
+TEST(DisplayListPath, DispatchClosedPathBuilderTriangle) {
   DlPathBuilder path_builder;
   path_builder.MoveTo({10, 10});
   path_builder.LineTo({20, 10});
   path_builder.LineTo({10, 20});
   path_builder.Close();
-  path_builder.SetConvexity(impeller::Convexity::kConvex);
 
-  TestPathDispatchClosedTriangle(DlPath(path_builder));
+  TestPathDispatchClosedTriangle(path_builder.TakePath());
 }
 
 static void TestPathDispatchMixedCloseTriangles(const DlPath& path) {
@@ -887,7 +771,7 @@ TEST(DisplayListPath, DispatchMixedCloseImpellerPath) {
   path_builder.LineTo({220, 10});
   path_builder.LineTo({210, 20});
 
-  TestPathDispatchMixedCloseTriangles(DlPath(path_builder));
+  TestPathDispatchMixedCloseTriangles(path_builder.TakePath());
 }
 
 static void TestPathDispatchImplicitMoveAfterClose(const DlPath& path) {
@@ -922,7 +806,7 @@ TEST(DisplayListPath, DispatchImplicitMoveAfterCloseSkiaPath) {
   TestPathDispatchImplicitMoveAfterClose(DlPath(sk_path));
 }
 
-TEST(DisplayListPath, DispatchImplicitMoveAfterCloseImpellerPath) {
+TEST(DisplayListPath, DispatchImplicitMoveAfterClosePathBuilder) {
   DlPathBuilder path_builder;
   path_builder.MoveTo({10, 10});
   path_builder.LineTo({20, 10});
@@ -930,9 +814,8 @@ TEST(DisplayListPath, DispatchImplicitMoveAfterCloseImpellerPath) {
   path_builder.Close();
   path_builder.LineTo({-20, 10});
   path_builder.LineTo({10, -20});
-  path_builder.SetConvexity(impeller::Convexity::kUnknown);
 
-  TestPathDispatchImplicitMoveAfterClose(DlPath(path_builder));
+  TestPathDispatchImplicitMoveAfterClose(path_builder.TakePath());
 }
 
 #ifndef NDEBUG
