@@ -381,32 +381,29 @@ class _BottomSheetState extends State<BottomSheet> {
       }
     }
 
-    Widget bottomSheet = Semantics(
-      container: true,
-      child: Material(
-        key: _childKey,
-        color: color,
-        elevation: elevation,
-        surfaceTintColor: surfaceTintColor,
-        shadowColor: shadowColor,
-        shape: shape,
-        clipBehavior: clipBehavior,
-        child: NotificationListener<DraggableScrollableNotification>(
-          onNotification: extentChanged,
-          child:
-              !showDragHandle
-                  ? widget.builder(context)
-                  : Stack(
-                    alignment: Alignment.topCenter,
-                    children: <Widget>[
-                      dragHandle!,
-                      Padding(
-                        padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                        child: widget.builder(context),
-                      ),
-                    ],
-                  ),
-        ),
+    Widget bottomSheet = Material(
+      key: _childKey,
+      color: color,
+      elevation: elevation,
+      surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
+      shape: shape,
+      clipBehavior: clipBehavior,
+      child: NotificationListener<DraggableScrollableNotification>(
+        onNotification: extentChanged,
+        child:
+            !showDragHandle
+                ? widget.builder(context)
+                : Stack(
+                  alignment: Alignment.topCenter,
+                  children: <Widget>[
+                    dragHandle!,
+                    Padding(
+                      padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                      child: widget.builder(context),
+                    ),
+                  ],
+                ),
       ),
     );
 
