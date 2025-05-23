@@ -14,12 +14,9 @@ import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import java.io.FileNotFoundException
-import java.nio.charset.StandardCharsets
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
