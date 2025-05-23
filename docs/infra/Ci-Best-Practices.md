@@ -123,7 +123,7 @@ test targets.
 
 _This advice only applies to the `flutter/flutter` repository._
 
-Due to how the test infrastructure works, renaming or resharing tests can be
+Due to how the test infrastructure works, renaming or resharding tests can be
 very time-consuming, and should be avoided if possible, or carefully coordinated
 when required:
 
