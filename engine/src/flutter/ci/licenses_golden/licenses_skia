@@ -1,4 +1,4 @@
-Signature: c60421040f270e03ea28f73b8ba0aaf4
+Signature: 88dbe45a7d2fca3a982b10487982edd6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -411,12 +411,8 @@ FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_gpu.minified.sks
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_gpu.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag.unoptimized.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag_es2.minified.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag_es2.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert.unoptimized.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert_es2.minified.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert_es2.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_public.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_public.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_rt_shader.minified.sksl
@@ -430,9 +426,7 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_compute.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_frag.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_frag.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_frag_es2.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_vert.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_vert_es2.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
@@ -9876,10 +9870,10 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/Vul
 ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9906,10 +9900,10 @@ FILE: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/Vulka
 FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp
-FILE: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.cpp
-FILE: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp
