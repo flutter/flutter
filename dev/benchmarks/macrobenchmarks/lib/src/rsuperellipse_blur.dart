@@ -84,7 +84,7 @@ class PointsPainter extends CustomPainter {
       canvas.drawRSuperellipse(
         RSuperellipse.fromRectAndRadius(
           Rect.fromCircle(center: Offset(xval, yval), radius: 50),
-          Radius.circular(40),
+          const Radius.circular(40),
         ),
         paint..color = kColors[i % kColors.length],
       );
