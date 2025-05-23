@@ -118,6 +118,10 @@ settings:
     '*.ipp': cpp
     csetjmp: cpp
     cfenv: cpp
+    execution: cpp
+    print: cpp
+    source_location: cpp
+    syncstream: cpp
   C_Cpp.default.includePath:
     - ${default}
     - ${workspaceFolder}/..
@@ -252,6 +256,17 @@ tasks:
         - build
         - -c
         - ios_debug_unopt
+    - <<: *et-task
+      label: ios_debug_sim_unopt_arm64
+      args:
+        - build
+        - -c
+        - host_debug_unopt_arm64
+        - "&&"
+        - *et-cmd
+        - build
+        - -c
+        - ios_debug_sim_unopt_arm64
     - <<: *et-task
       label: android_debug_unopt_arm64
       args:
