@@ -371,7 +371,7 @@ class KeepAliveHandle extends ChangeNotifier {
   }
 }
 
-/// A mixin with convenience methods for clients of [AutomaticKeepAlive]. Used
+/// A mixin with convenience methods for clients of [AutomaticKeepAlive]. It is used
 /// with [State] subclasses to manage keep-alive behavior in lazily built lists.
 ///
 /// This mixin simplifies interaction with [AutomaticKeepAlive] by automatically
