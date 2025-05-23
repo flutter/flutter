@@ -387,7 +387,7 @@ class EngineAutofillForm {
   /// On the other hand, overall for text editing there is already a lifecycle
   /// for subscriptions: All the subscriptions of the DOM elements are to the
   /// `subscriptions` property of [DefaultTextEditingStrategy].
-  /// [TextEditingStrategy] manages all subscription lifecycle. All
+  /// [TextEditingStrategy] manages all subscription lifecyle. All
   /// listeners with no exceptions are added during
   /// [TextEditingStrategy.addEventHandlers] method call and all
   /// listeners are removed during [TextEditingStrategy.disable] method call.
@@ -581,7 +581,7 @@ class TextEditingDeltaState {
   ///
   /// For a deletion, the length and the direction of the deletion (backward or forward)
   /// are calculated by comparing the new and last editing states.
-  /// If the deletion is backward, the length is subtracted from the [deltaEnd]
+  /// If the deletion is backward, the length is susbtracted from the [deltaEnd]
   /// that we set when beforeinput was fired to determine the [deltaStart].
   /// If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
   /// and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
@@ -1186,8 +1186,6 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
 class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
   SafariDesktopTextEditingStrategy(super.owner);
 
-  Timer? _focusInputElementTimer;
-
   /// Appending an element on the DOM for Safari Desktop Browser.
   ///
   /// This method is only called when geometry information is updated by
@@ -1206,17 +1204,10 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
       // Set the last editing state if it exists, this is critical for a
       // users ongoing work to continue uninterrupted when there is an update to
       // the transform.
-      lastEditingState?.applyToDomElement(activeDomElement);
       // If domElement is not focused cursor location will not be correct.
-      _scheduleFocus();
-    }
-  }
-
-  void _scheduleFocus() {
-    _focusInputElementTimer?.cancel();
-    _focusInputElementTimer = Timer(Duration.zero, () {
       moveFocusToActiveDomElement();
-    });
+      lastEditingState?.applyToDomElement(activeDomElement);
+    }
   }
 
   @override
@@ -1225,13 +1216,6 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
       placeElement();
     }
     moveFocusToActiveDomElement();
-  }
-
-  @override
-  void disable() {
-    super.disable();
-    _focusInputElementTimer?.cancel();
-    _focusInputElementTimer = null;
   }
 }
 
@@ -1920,11 +1904,9 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 /// Firefox behaviour for text editing.
 ///
 /// Selections are different in Firefox. [addEventHandlers] strategy is
-/// implemented differently in Firefox.
+/// impelemented diefferently in Firefox.
 class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   FirefoxTextEditingStrategy(super.owner);
-
-  Timer? _focusInputElementTimer;
 
   @override
   void initializeTextEditing(
@@ -1998,26 +1980,12 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void placeElement() {
+    moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
     // Set the last editing state if it exists, this is critical for a
     // users ongoing work to continue uninterrupted when there is an update to
     // the transform.
     lastEditingState?.applyToDomElement(activeDomElement);
-    _scheduleFocus();
-  }
-
-  void _scheduleFocus() {
-    _focusInputElementTimer?.cancel();
-    _focusInputElementTimer = Timer(Duration.zero, () {
-      moveFocusToActiveDomElement();
-    });
-  }
-
-  @override
-  void disable() {
-    super.disable();
-    _focusInputElementTimer?.cancel();
-    _focusInputElementTimer = null;
   }
 }
 
@@ -2246,7 +2214,7 @@ class TextEditingChannel {
 
       case 'TextInput.updateConfig':
         // Set configuration eagerly because it contains data about the text
-        // field used to flush the command queue. However, delay applying the
+        // field used to flush the command queue. However, delaye applying the
         // configuration because the strategy may not be available yet.
         implementation.configuration = InputConfiguration.fromFrameworkMessage(
           call.arguments as Map<String, dynamic>,
