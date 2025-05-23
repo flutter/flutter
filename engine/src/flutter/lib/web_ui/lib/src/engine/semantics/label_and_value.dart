@@ -525,9 +525,29 @@ class LabelAndValue extends SemanticBehavior {
     _describedBySpan!.id = _describedById!;
     _describedBySpan!.setAttribute('hidden', '');
     _describedBySpan!.text = hint;
-    // Attach as a child of the semantics element, not document.body
     if (_describedBySpan!.isConnected != true) {
-      owner.element.append(_describedBySpan!);
+      // Append the describedby span as a sibling to the semantics element,
+      // not as a child. This is crucial because if the span were a child,
+      // element.text would read both the label and hint text concatenated
+      // together (e.g., "LabelHint" instead of just "Label").
+      //
+      // DOM structure we want:
+      //   <parent>
+      //     <flt-semantics>Label</flt-semantics>
+      //     <span hidden aria-hidden="true">Hint</span>
+      //   </parent>
+      //
+      // This ensures element.text on the semantics element returns only "Label"
+      // while aria-describedby still works correctly since it references by ID.
+      final DomElement? parent = owner.element.parentElement;
+      if (parent != null) {
+        parent.append(_describedBySpan!);
+      } else {
+        // Fallback: append to document.body if no parent is available.
+        // This can happen during DOM construction or if the element is detached.
+        // aria-describedby will still work since it references the span by ID.
+        domDocument.body!.append(_describedBySpan!);
+      }
     }
     return _describedById!;
   }

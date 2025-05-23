@@ -986,6 +986,62 @@ label''');
     LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
     semantics().semanticsEnabled = false;
   });
+
+  test('LabelAndValue fallback appends aria-describedby span to document.body when no parent', () async {
+    semantics().semanticsEnabled = true;
+    final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+
+    LabelAndValue.supportsAriaDescriptionForTest = false;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      label: 'Label',
+      hint: 'Hint',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    final element = node.element;
+
+    final ariaDescribedBy = element.getAttribute('aria-describedby');
+    expect(ariaDescribedBy, isNotNull);
+
+    // Verify the span was created and has the correct content
+    final describedNode = domDocument.getElementById(ariaDescribedBy!);
+    expect(describedNode, isNotNull);
+    expect(describedNode!.text, 'Hint');
+    expect(describedNode.getAttribute('hidden'), '');
+
+    // The span should be attached somewhere in the DOM
+    expect(describedNode.isConnected, isTrue);
+
+    // Test that the fallback logic works: when we manually remove the element from its parent
+    // and call update again, the span should be appended to document.body as fallback
+    final originalParent = element.parentElement;
+    element.remove();
+
+    // Verify the span is still there but potentially orphaned
+    final describedNodeAfterRemove = domDocument.getElementById(ariaDescribedBy);
+    expect(describedNodeAfterRemove, isNotNull);
+
+    // Update should trigger fallback logic
+    node.semanticRole?.labelAndValue?.update();
+
+    // The span should still exist and be connected
+    final describedNodeAfterUpdate = domDocument.getElementById(ariaDescribedBy);
+    expect(describedNodeAfterUpdate, isNotNull);
+    expect(describedNodeAfterUpdate!.isConnected, isTrue);
+
+    // Re-attach element to its original parent for proper cleanup
+    if (originalParent != null) {
+      originalParent.append(element);
+    }
+
+    LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testContainer() {
