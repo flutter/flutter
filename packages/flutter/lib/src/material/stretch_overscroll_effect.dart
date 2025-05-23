@@ -18,7 +18,14 @@ class StretchOverscrollEffect extends StatefulWidget {
     this.overscrollX = 0.0,
     this.overscrollY = 0.0,
     required this.child,
-  });
+  }) : assert(
+         overscrollX >= -1.0 && overscrollX <= 1.0,
+         'overscrollX must be between -1.0 and 1.0',
+       ),
+       assert(
+         overscrollY >= -1.0 && overscrollY <= 1.0,
+         'overscrollY must be between -1.0 and 1.0',
+       );
 
   /// The horizontal overscroll amount applied for stretching effect,
   /// and value should be between -1 and 1 inclusive.
@@ -38,10 +45,24 @@ class StretchOverscrollEffect extends StatefulWidget {
 class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
 
+  /// The maximum scale multiplier applied during a stretch effect.
+  static const double maxStretchIntensity = 1.0;
+
+  /// The strength of the interpolation used for smoothing the effect.
+  static const double interpolationStrength = 0.7;
+
   @override
   void dispose() {
     _fragmentShader?.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_StretchOverscrollEffectShader._initCalled) {
+      _StretchOverscrollEffectShader.initializeShader();
+    }
   }
 
   @override
@@ -55,26 +76,15 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
     if (_StretchOverscrollEffectShader._initialized) {
       _fragmentShader?.dispose();
       _fragmentShader = _StretchOverscrollEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, 1.0);
+      _fragmentShader!.setFloat(2, maxStretchIntensity);
       _fragmentShader!.setFloat(3, widget.overscrollX);
       _fragmentShader!.setFloat(4, widget.overscrollY);
-      _fragmentShader!.setFloat(5, 0.7);
+      _fragmentShader!.setFloat(5, interpolationStrength);
 
       imageFilter = ui.ImageFilter.shader(_fragmentShader!);
     } else {
-      if (!_StretchOverscrollEffectShader._initCalled) {
-        _StretchOverscrollEffectShader.initializeShader();
-        _StretchOverscrollEffectShader.addListener(() {
-          if (mounted) {
-            setState(() {
-              // Rebuilds the widget once the fragment shader is fully initialized.
-            });
-          }
-        });
-      } else {
-        _fragmentShader?.dispose();
-        _fragmentShader = null;
-      }
+      _fragmentShader?.dispose();
+      _fragmentShader = null;
 
       imageFilter = ui.ImageFilter.matrix(Matrix4.identity().storage);
     }
@@ -120,7 +130,6 @@ class _StretchOverscrollEffectShader {
   static bool _initCalled = false;
   static bool _initialized = false;
   static ui.FragmentProgram? _program;
-  static final List<VoidCallback> _listeners = <VoidCallback>[];
 
   static void initializeShader() {
     if (!_initCalled) {
@@ -129,21 +138,8 @@ class _StretchOverscrollEffectShader {
       ) {
         _program = program;
         _initialized = true;
-        _notifyListeners();
-        _listeners.clear();
       });
       _initCalled = true;
-    }
-  }
-
-  static void addListener(VoidCallback listener) {
-    assert(!_listeners.contains(listener));
-    _listeners.add(listener);
-  }
-
-  static void _notifyListeners() {
-    for (final VoidCallback listener in _listeners) {
-      listener.call();
     }
   }
 }
