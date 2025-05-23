@@ -29,6 +29,17 @@ FLUTTER_DARWIN_EXPORT
 
 @property(nonatomic, strong, nullable) UIWindow* window;
 
+/**
+ * The `FlutterPluginRegistrant` that will be use when FlutterViewControllers
+ * are instantiated from nibs.
+ *
+ * The `FlutterAppDelegate` itself can be passed in without creating a retain
+ * cycle.
+ *
+ * This was introduced to help users migrate code from the FlutterAppDelegate
+ * when UISceneDelegate was adopted. Using
+ * FlutterViewController.pluginRegistrant should be preferred.
+ */
 @property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 
 @end

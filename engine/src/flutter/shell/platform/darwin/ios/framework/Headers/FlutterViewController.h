@@ -254,6 +254,10 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
+/**
+ * The plugin registrant that will be executed when the FlutterViewController is
+ * created with a NIB.
+ */
 @property(nonatomic, strong) IBOutlet NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 
 @end
