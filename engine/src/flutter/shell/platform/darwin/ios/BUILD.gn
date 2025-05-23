@@ -216,10 +216,7 @@ if (enable_ios_unittests) {
       "framework/Source/UITextInputEditingStateTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
-    deps = [
-      ":InternalFlutterSwift",
-      ":flutter_framework_source",
-    ]
+    deps = [ ":flutter_framework_source" ]
   }
 
   shared_library("ios_test_flutter") {
