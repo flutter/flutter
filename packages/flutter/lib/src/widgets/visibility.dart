@@ -12,6 +12,7 @@ library;
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'sliver.dart';
 import 'ticker_provider.dart';
@@ -66,6 +67,7 @@ class Visibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
+    this.maintainFocusability = false,
   }) : assert(
          maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
@@ -95,6 +97,7 @@ class Visibility extends StatelessWidget {
       maintainSize = true,
       maintainSemantics = true,
       maintainInteractivity = true,
+      maintainFocusability = true,
       replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
@@ -215,6 +218,11 @@ class Visibility extends StatelessWidget {
   /// true, then touch events will nonetheless be passed through.
   final bool maintainInteractivity;
 
+  /// Whether to allow the widget to receive focus when hidden. Only in effect if [visible] is false.
+  ///
+  /// Defaults to false.
+  final bool maintainFocusability;
+
   /// Tells the visibility state of an element in the tree based off its
   /// ancestor [Visibility] elements.
   ///
@@ -245,7 +253,7 @@ class Visibility extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = child;
+    Widget result = ExcludeFocus(excluding: !visible && !maintainFocusability, child: child);
     if (maintainSize) {
       result = _Visibility(
         visible: visible,
