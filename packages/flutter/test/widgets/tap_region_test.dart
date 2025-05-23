@@ -1199,6 +1199,7 @@ void main() {
               child: GestureDetector(
               onTap: () {
                 Navigator.push(
+                  context,
                   MaterialPageRoute<void>(
                     builder: (BuildContext context) => Scaffold(
                       body: Center(
