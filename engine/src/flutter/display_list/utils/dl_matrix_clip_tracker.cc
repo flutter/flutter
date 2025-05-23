@@ -46,6 +46,7 @@ bool DisplayListMatrixClipState::mapAndClipRect(const DlRect& src,
     *mapped = dl_intersected;
     return true;
   }
+  *mapped = DlRect();
   return false;
 }
 
