@@ -564,6 +564,88 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets('CircularProgressIndicator with custom animation controller', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller1 = AnimationController(
+      vsync: tester,
+      duration: CircularProgressIndicator.defaultAnimationDuration,
+    );
+    final AnimationController inheritedController = AnimationController(
+      vsync: tester,
+      duration: CircularProgressIndicator.defaultAnimationDuration * 2,
+    );
+
+    Widget buildWidget({
+      AnimationController? controller,
+      AnimationController? inheritedController,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(
+          progressIndicatorTheme: ProgressIndicatorThemeData(controller: inheritedController),
+        ),
+        home: Scaffold(body: Center(child: CircularProgressIndicator(controller: controller))),
+      );
+    }
+DIT ZOU NIET MOGEN SLAGEN
+    _testCustomAnimationController(
+      tester: tester,
+      buildWidget: (AnimationController? controller) => buildWidget(controller: controller),
+      controller: controller1,
+    );
+DIT ZOU NIET MOGEN SLAGEN
+    _testCustomAnimationController(
+      tester: tester,
+      buildWidget:
+          (AnimationController? controller) => buildWidget(inheritedController: controller),
+      controller: inheritedController,
+    );
+
+    controller1.dispose();
+    inheritedController.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator with custom animation controller', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller1 = AnimationController(
+      vsync: tester,
+      duration: LinearProgressIndicator.defaultAnimationDuration,
+    );
+    final AnimationController inheritedController = AnimationController(
+      vsync: tester,
+      duration: LinearProgressIndicator.defaultAnimationDuration * 2,
+    );
+
+    Widget buildWidget({
+      AnimationController? controller,
+      AnimationController? inheritedController,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(
+          progressIndicatorTheme: ProgressIndicatorThemeData(controller: inheritedController),
+        ),
+        home: Scaffold(body: Center(child: LinearProgressIndicator(controller: controller))),
+      );
+    }
+DIT ZOU NIET MOGEN SLAGEN
+    _testCustomAnimationController(
+      tester: tester,
+      buildWidget: (AnimationController? controller) => buildWidget(controller: controller),
+      controller: controller1,
+    );
+DIT ZOU NIET MOGEN SLAGEN
+    _testCustomAnimationController(
+      tester: tester,
+      buildWidget:
+          (AnimationController? controller) => buildWidget(inheritedController: controller),
+      controller: inheritedController,
+    );
+
+    controller1.dispose();
+    inheritedController.dispose();
+  });
+
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
@@ -1822,4 +1904,64 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
       ),
     );
   }
+}
+
+Future<void> _testCustomAnimationController({
+  required WidgetTester tester,
+  required Widget Function(AnimationController? controller) buildWidget,
+  required AnimationController controller,
+}) async {
+  await tester.pumpWidget(buildWidget(controller));
+  expect(controller.value, 0.000);
+  controller.forward();
+  await tester.pump();
+  expect(controller.status, AnimationStatus.forward);
+  await tester.pump(const Duration(milliseconds: 500));
+  expect(controller.value, 0.500);
+  await tester.pumpWidget(buildWidget(null));
+  await tester.pumpWidget(buildWidget(controller));
+  expect(controller.value, 0.500);
+  await tester.pump();
+  await tester.pump();
+  expect(controller.value, 0.500);
+  await tester.pump(const Duration(milliseconds: 500));
+  expect(controller.value, 1.000);
+  controller.stop();
+  expect(controller.status, AnimationStatus.forward);
+  expect(controller.value, 1.000);
+  await tester.pump();
+  await tester.pump();
+  expect(controller.value, 1.000);
+  await tester.pump(const Duration(seconds: 2));
+  expect(controller.value, 1.000);
+  controller.repeat(reverse: true);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 123));
+  await tester.pump();
+  expect(controller.value, 1.000 - 0.123);
+  await tester.pump();
+  expect(controller.value, 1.000 - 0.123);
+  controller.reset();
+  await tester.pump();
+  expect(controller.value, 0.000);
+  await tester.pump();
+  expect(controller.value, 0.000);
+  await tester.pump();
+  controller.forward();
+  expect(controller.status, AnimationStatus.forward);
+  await tester.pump();
+  expect(controller.value, 0.000);
+  await tester.pump(const Duration(milliseconds: 500));
+  expect(controller.value, 0.500);
+  await tester.pump();
+  controller.forward(from: 0.600);
+  await tester.pump();
+  expect(controller.value, 0.600);
+  await tester.pump(const Duration(milliseconds: 400));
+  expect(controller.value, 1.000);
+  controller.stop();
+  controller.reverse();
+  await tester.pump();
+  expect(controller.value, 1.000);
+  expect(controller.status, AnimationStatus.reverse);
 }
