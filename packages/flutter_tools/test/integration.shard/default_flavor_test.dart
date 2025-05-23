@@ -39,7 +39,7 @@ void main() {
 final class _DefaultFlavorProject extends Project {
   @override
   final String main = r'''
-    // Irrelevant to this test. 
+    // Irrelevant to this test.
     void main() {}
   ''';
 
