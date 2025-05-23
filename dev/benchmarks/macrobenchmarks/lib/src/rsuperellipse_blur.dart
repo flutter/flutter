@@ -14,7 +14,8 @@ class RSuperellipseBlur extends StatefulWidget {
   State<RSuperellipseBlur> createState() => _RSuperellipseBlurPageState();
 }
 
-class _RSuperellipseBlurPageState extends State<RSuperellipseBlur> with SingleTickerProviderStateMixin {
+class _RSuperellipseBlurPageState extends State<RSuperellipseBlur>
+    with SingleTickerProviderStateMixin {
   late final AnimationController controller;
   double tick = 0.0;
 
