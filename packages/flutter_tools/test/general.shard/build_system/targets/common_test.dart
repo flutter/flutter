@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:test/fake.dart';
 
@@ -551,6 +552,63 @@ void main() {
     overrides: <Type, Generator>{
       XcodeProjectInterpreter:
           () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
+    },
+  );
+
+  testUsingContext(
+    'KernelSnapshot does not add kAppFlavor twice to Dart defines',
+    () async {
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+      final String build = iosEnvironment.buildDir.path;
+      final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: TargetPlatform.darwin,
+        mode: BuildMode.debug,
+      );
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+            artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+            '--sdk-root',
+            '$flutterPatchedSdkPath/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-D$kAppFlavor=vanilla',
+            ...buildModeOptions(BuildMode.debug, <String>[]),
+            '--packages',
+            '/.dart_tool/package_config.json',
+            '--output-dill',
+            '$build/app.dill',
+            '--depfile',
+            '$build/kernel_snapshot_program.d',
+            '--incremental',
+            '--initialize-from-dill',
+            '$build/app.dill',
+            '--verbosity=error',
+            'file:///lib/main.dart',
+          ],
+          stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        ),
+      ]);
+
+      await const KernelSnapshot().build(
+        iosEnvironment
+          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kBuildMode] = BuildMode.debug.cliName
+          ..defines[kDartDefines] = base64Encode(utf8.encode('FLUTTER_APP_FLAVOR=vanilla'))
+          ..defines[kFlavor] = 'strawberry'
+          ..defines[kTrackWidgetCreation] = 'false',
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     },
   );
 

@@ -1444,7 +1444,9 @@ abstract class FlutterCommand extends Command<void> {
         'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
       );
     }
-    dartDefines.add('$kAppFlavor=$flavor');
+    if (flavor != null) {
+      dartDefines.add('$kAppFlavor=$flavor');
+    }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
 
     return BuildInfo(

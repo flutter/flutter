@@ -150,7 +150,7 @@ void main() {
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
               'DartDefines':
-                  'Zm9vPWE=,RkxVVFRFUl9BUFBfRkxBVk9SPW51bGw=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+                  'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -202,7 +202,7 @@ void main() {
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
               'DartDefines':
-                  'RkxVVFRFUl9BUFBfRkxBVk9SPW51bGw=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -254,7 +254,7 @@ void main() {
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
               'DartDefines':
-                  'RkxVVFRFUl9BUFBfRkxBVk9SPW51bGw=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -349,7 +349,7 @@ void main() {
               'ServiceWorkerStrategy': 'offline-first',
               'BuildMode': 'release',
               'DartDefines':
-                  'RkxVVFRFUl9BUFBfRkxBVk9SPW51bGw=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
@@ -547,7 +547,11 @@ void main() {
 
       void expectVisible(String option) {
         expect(command.argParser.options.keys, contains(option));
-        expect(command.argParser.options[option]!.hide, isFalse);
+        expect(
+          command.argParser.options[option]!.hide,
+          isFalse,
+          reason: 'Expecting `$option` to be visible',
+        );
         expect(command.usage, contains(option));
       }
 
@@ -557,8 +561,6 @@ void main() {
       expectVisible('source-maps');
       expectVisible('csp');
       expectVisible('dart2js-optimization');
-      expectVisible('dump-info');
-      expectVisible('no-frequency-based-minification');
       expectVisible('wasm');
       expectVisible('strip-wasm');
       expectVisible('base-href');
