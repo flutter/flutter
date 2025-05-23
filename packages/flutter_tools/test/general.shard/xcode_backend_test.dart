@@ -258,7 +258,14 @@ void main() {
             fileSystem: fileSystem,
           );
           expect(() => context.run(), throwsException);
-          expect(context.stderr, contains('error: Your Flutter build settings are outdated.'));
+          expect(
+            context.stderr,
+            contains(
+              'error: Your Flutter build settings are outdated. '
+              'Please run `flutter build ${platform.name} --config-only --release` '
+              'in your Flutter project to update your settings.',
+            ),
+          );
         },
       );
 
@@ -286,7 +293,11 @@ void main() {
         expect(() => context.run(), throwsException);
         expect(
           context.stderr,
-          contains('error: Your project is currently configured for debug mode.'),
+          contains(
+            'error: Your project is currently configured for debug mode. '
+            'Please run `flutter build ${platform.name} --config-only --release` '
+            'in your Flutter project to update your settings.',
+          ),
         );
       });
 
@@ -312,7 +323,14 @@ void main() {
           fakeProcessManager: FakeProcessManager.any(),
         );
         context.run();
-        expect(context.stderr, contains('warning: Your Flutter build settings are outdated.'));
+        expect(
+          context.stderr,
+          contains(
+            'warning: Your Flutter build settings are outdated. '
+            'Please run `flutter build ${platform.name} --config-only --release` '
+            'in your Flutter project to update your settings.',
+          ),
+        );
       });
 
       test('prints useful warning message when build mode mismatches', () {
@@ -340,7 +358,11 @@ void main() {
         context.run();
         expect(
           context.stderr,
-          contains('warning: Your project is currently configured for debug mode.'),
+          contains(
+            'warning: Your project is currently configured for debug mode. '
+            'Please run `flutter build ${platform.name} --config-only --release` '
+            'in your Flutter project to update your settings.',
+          ),
         );
       });
     });
