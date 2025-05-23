@@ -123,7 +123,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[InstallCodeAssets()];
 }
 
 /// Generate a snapshot of the dart code used in the program.

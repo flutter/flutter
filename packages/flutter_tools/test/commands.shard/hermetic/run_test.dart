@@ -176,7 +176,7 @@ void main() {
         fs = MemoryFileSystem.test();
 
         fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-        writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'my_app');
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
 
         final Directory libDir = fs.currentDirectory.childDirectory('lib');
         libDir.createSync();
@@ -1156,7 +1156,7 @@ void main() {
   });
 
   testUsingContext(
-    'Flutter run catches catches errors due to vm service disconnection and throws a tool exit',
+    'Flutter run catches catches errors due to vm service disconnection by text and throws a tool exit',
     () async {
       final FakeResidentRunner residentRunner = FakeResidentRunner();
       residentRunner.rpcError = RPCError(
@@ -1176,6 +1176,41 @@ void main() {
         'flutter._listViews',
         RPCErrorKind.kServerError.code,
         'Service connection disposed.',
+      );
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Flutter run catches catches errors due to vm service disconnection by code and throws a tool exit',
+    () async {
+      final FakeResidentRunner residentRunner = FakeResidentRunner();
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kServiceDisappeared.code,
+        '',
+      );
+      final TestRunCommandWithFakeResidentRunner command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kConnectionDisposed.code,
+        'dummy text not matched.',
       );
 
       await expectToolExitLater(

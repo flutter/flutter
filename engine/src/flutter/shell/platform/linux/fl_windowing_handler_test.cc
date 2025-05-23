@@ -7,7 +7,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
-#include "flutter/shell/platform/linux/testing/mock_window.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 #include "flutter/testing/testing.h"
 
 #include "gmock/gmock.h"
@@ -72,15 +72,15 @@ static FlValue* make_destroy_window_args(int64_t view_id) {
 
 TEST(FlWindowingHandlerTest, CreateRegular) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_window_set_default_size(::testing::_, 800, 600));
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_set_default_size(::testing::_, 800, 600));
 
   g_autoptr(FlValue) args = make_create_regular_args(800, 600);
 
@@ -101,15 +101,15 @@ TEST(FlWindowingHandlerTest, CreateRegular) {
 
 TEST(FlWindowingHandlerTest, CreateRegularMinSize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window,
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk,
               gtk_window_set_geometry_hints(
                   ::testing::_, nullptr,
                   ::testing::Pointee(::testing::AllOf(
@@ -137,15 +137,15 @@ TEST(FlWindowingHandlerTest, CreateRegularMinSize) {
 
 TEST(FlWindowingHandlerTest, CreateRegularMaxSize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window,
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk,
               gtk_window_set_geometry_hints(
                   ::testing::_, nullptr,
                   ::testing::Pointee(::testing::AllOf(
@@ -173,15 +173,15 @@ TEST(FlWindowingHandlerTest, CreateRegularMaxSize) {
 
 TEST(FlWindowingHandlerTest, CreateRegularWithTitle) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window,
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk,
               gtk_window_set_title(::testing::_, ::testing::StrEq("TITLE")));
 
   g_autoptr(FlValue) args = make_create_regular_args(800, 600);
@@ -204,15 +204,15 @@ TEST(FlWindowingHandlerTest, CreateRegularWithTitle) {
 
 TEST(FlWindowingHandlerTest, CreateRegularMaximized) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_window_maximize(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_maximize(::testing::_));
 
   g_autoptr(FlValue) args = make_create_regular_args(800, 600);
   fl_value_set_string_take(args, "state",
@@ -235,15 +235,15 @@ TEST(FlWindowingHandlerTest, CreateRegularMaximized) {
 
 TEST(FlWindowingHandlerTest, CreateRegularMinimized) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_window_iconify(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_iconify(::testing::_));
 
   g_autoptr(FlValue) args = make_create_regular_args(800, 600);
   fl_value_set_string_take(args, "state",
@@ -266,15 +266,15 @@ TEST(FlWindowingHandlerTest, CreateRegularMinimized) {
 
 TEST(FlWindowingHandlerTest, ModifyRegularSize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_window_resize(::testing::_, 1024, 768));
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_resize(::testing::_, 1024, 768));
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
 
@@ -309,15 +309,15 @@ TEST(FlWindowingHandlerTest, ModifyRegularSize) {
 
 TEST(FlWindowingHandlerTest, ModifyRegularTitle) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window,
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk,
               gtk_window_set_title(::testing::_, ::testing::StrEq("TITLE")));
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
@@ -353,14 +353,14 @@ TEST(FlWindowingHandlerTest, ModifyRegularTitle) {
 
 TEST(FlWindowingHandlerTest, ModifyRegularMaximize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_new);
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
 
@@ -375,7 +375,7 @@ TEST(FlWindowingHandlerTest, ModifyRegularMaximize) {
       &view_id);
   EXPECT_GT(view_id, 0);
 
-  EXPECT_CALL(mock_window, gtk_window_maximize(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_maximize(::testing::_));
 
   g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
   fl_value_set_string_take(modify_args, "state",
@@ -398,15 +398,15 @@ TEST(FlWindowingHandlerTest, ModifyRegularMaximize) {
 
 TEST(FlWindowingHandlerTest, ModifyRegularUnmaximize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_window_maximize(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_maximize(::testing::_));
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
   fl_value_set_string_take(create_args, "state",
@@ -423,9 +423,9 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnmaximize) {
       &view_id);
   EXPECT_GT(view_id, 0);
 
-  EXPECT_CALL(mock_window, gtk_window_is_maximized(::testing::_))
+  EXPECT_CALL(mock_gtk, gtk_window_is_maximized(::testing::_))
       .WillOnce(::testing::Return(TRUE));
-  EXPECT_CALL(mock_window, gtk_window_unmaximize(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_unmaximize(::testing::_));
 
   g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
   fl_value_set_string_take(modify_args, "state",
@@ -448,14 +448,14 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnmaximize) {
 
 TEST(FlWindowingHandlerTest, ModifyRegularMinimize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_new);
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
 
@@ -470,7 +470,7 @@ TEST(FlWindowingHandlerTest, ModifyRegularMinimize) {
       &view_id);
   EXPECT_GT(view_id, 0);
 
-  EXPECT_CALL(mock_window, gtk_window_iconify(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_iconify(::testing::_));
 
   g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
   fl_value_set_string_take(modify_args, "state",
@@ -493,15 +493,15 @@ TEST(FlWindowingHandlerTest, ModifyRegularMinimize) {
 
 TEST(FlWindowingHandlerTest, ModifyRegularUnminimize) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_window_iconify(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_window_iconify(::testing::_));
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
   fl_value_set_string_take(create_args, "state",
@@ -518,9 +518,9 @@ TEST(FlWindowingHandlerTest, ModifyRegularUnminimize) {
       &view_id);
   EXPECT_GT(view_id, 0);
 
-  EXPECT_CALL(mock_window, gdk_window_get_state(::testing::_))
+  EXPECT_CALL(mock_gtk, gdk_window_get_state(::testing::_))
       .WillOnce(::testing::Return(GDK_WINDOW_STATE_ICONIFIED));
-  EXPECT_CALL(mock_window, gtk_window_deiconify(::testing::_));
+  EXPECT_CALL(mock_gtk, gtk_window_deiconify(::testing::_));
 
   g_autoptr(FlValue) modify_args = make_modify_regular_args(view_id);
   fl_value_set_string_take(modify_args, "state",
@@ -572,15 +572,15 @@ TEST(FlWindowingHandlerTest, ModifyUnknownWindow) {
 
 TEST(FlWindowingHandlerTest, DestroyWindow) {
   flutter::testing::fl_ensure_gtk_init();
-  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
 
-  EXPECT_CALL(mock_window, gtk_window_new);
-  EXPECT_CALL(mock_window, gtk_widget_destroy);
+  EXPECT_CALL(mock_gtk, gtk_window_new);
+  EXPECT_CALL(mock_gtk, gtk_widget_destroy);
 
   g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
 

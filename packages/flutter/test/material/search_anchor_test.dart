@@ -51,7 +51,7 @@ void main() {
   }
 
   testWidgets('SearchBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
@@ -1013,9 +1013,8 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const Center(
+      const MaterialApp(
+        home: Center(
           child: Material(child: SearchBar(constraints: BoxConstraints.tightFor(height: 35.0))),
         ),
       ),
@@ -1030,7 +1029,7 @@ void main() {
   });
 
   testWidgets('The search view defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -2796,10 +2795,7 @@ void main() {
       disabledBorder: UnderlineInputBorder(),
       constraints: BoxConstraints(maxWidth: 300),
     );
-    final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      inputDecorationTheme: inputDecorationTheme,
-    );
+    final ThemeData theme = ThemeData(inputDecorationTheme: inputDecorationTheme);
 
     void checkDecorationInSearchBar(WidgetTester tester) {
       final Finder textField = findTextField();
@@ -3227,7 +3223,7 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Disabled SearchBar semantics node still contains value', (
+  testWidgets('Disabled SearchBar semantics node still contains value and inputType', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -3240,7 +3236,23 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[],
+        value: 'text',
+        inputType: SemanticsInputType.search,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: SearchBar()))));
+
+    expect(semantics, includesNodeWith(inputType: SemanticsInputType.search));
     semantics.dispose();
   });
 
@@ -3691,6 +3703,44 @@ void main() {
 
       expect(find.byType(Placeholder), findsOneWidget);
     });
+
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   testWidgets('SearchAnchor does not dispose external SearchController', (
@@ -3915,6 +3965,143 @@ void main() {
 
     // No exception.
   });
+
+  testWidgets('SearchAnchor viewOnOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              viewOnClose: () {
+                searchViewState = 'Closed';
+              },
+              viewOnOpen: () {
+                searchViewState = 'Opened';
+              },
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
+
+  testWidgets('SearchAnchor.bar onOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor.bar(
+              onClose: () {
+                searchViewState = 'Closed';
+              },
+              onOpen: () {
+                searchViewState = 'Opened';
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
+
+  testWidgets(
+    'The last element of the suggestion list should be visible when scrolling to the end of list',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(30, (int index) {
+                return ListTile(
+                  titleAlignment: ListTileTitleAlignment.center,
+                  title: Text('Item $index'),
+                );
+              });
+            },
+          ),
+        ),
+      );
+
+      // Open search view.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      const double fakeKeyboardHeight = 500.0;
+      final double physicalBottomPadding = fakeKeyboardHeight * tester.view.devicePixelRatio;
+
+      // Simulate the keyboard opening resizing the view.
+      tester.view.viewInsets = FakeViewPadding(bottom: physicalBottomPadding);
+      addTearDown(tester.view.reset);
+
+      // Scroll down to the end of the list.
+      expect(find.byType(ListView), findsOne);
+      await tester.fling(find.byType(ListView), const Offset(0, -5000), 5000);
+      await tester.pumpAndSettle();
+
+      // The last item should not be hidden by the keyboard.
+      final double lastItemBottom = tester.getRect(find.text('Item 29')).bottom;
+      final double fakeKeyboardTop =
+          tester.getSize(find.byType(MaterialApp)).height - fakeKeyboardHeight;
+      expect(lastItemBottom, lessThanOrEqualTo(fakeKeyboardTop));
+    },
+  );
 }
 
 Future<void> checkSearchBarDefaults(

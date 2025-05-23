@@ -13,49 +13,16 @@
 		F241F50D2D08EE8900C053B5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F241F50C2D08EE8900C053B5 /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		F241F5132D08EE8900C053B5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F241F4FA2D08EE8800C053B5 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F241F5012D08EE8800C053B5;
-			remoteInfo = hello_world_swiftui;
-		};
-		F241F51D2D08EE8900C053B5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F241F4FA2D08EE8800C053B5 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F241F5012D08EE8800C053B5;
-			remoteInfo = hello_world_swiftui;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		F241F5022D08EE8800C053B5 /* hello_world_swiftui.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hello_world_swiftui.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F241F5052D08EE8800C053B5 /* hello_world_swiftuiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hello_world_swiftuiApp.swift; sourceTree = "<group>"; };
 		F241F5072D08EE8800C053B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F241F5092D08EE8900C053B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F241F50C2D08EE8900C053B5 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		F241F5122D08EE8900C053B5 /* hello_world_swiftuiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hello_world_swiftuiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F241F51C2D08EE8900C053B5 /* hello_world_swiftuiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hello_world_swiftuiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		F241F4FF2D08EE8800C053B5 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F241F50F2D08EE8900C053B5 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F241F5192D08EE8900C053B5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -77,8 +44,6 @@
 			isa = PBXGroup;
 			children = (
 				F241F5022D08EE8800C053B5 /* hello_world_swiftui.app */,
-				F241F5122D08EE8900C053B5 /* hello_world_swiftuiTests.xctest */,
-				F241F51C2D08EE8900C053B5 /* hello_world_swiftuiUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,42 +87,6 @@
 			productReference = F241F5022D08EE8800C053B5 /* hello_world_swiftui.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F241F5112D08EE8900C053B5 /* hello_world_swiftuiTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F241F5292D08EE8900C053B5 /* Build configuration list for PBXNativeTarget "hello_world_swiftuiTests" */;
-			buildPhases = (
-				F241F50E2D08EE8900C053B5 /* Sources */,
-				F241F50F2D08EE8900C053B5 /* Frameworks */,
-				F241F5102D08EE8900C053B5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				F241F5142D08EE8900C053B5 /* PBXTargetDependency */,
-			);
-			name = hello_world_swiftuiTests;
-			productName = hello_world_swiftuiTests;
-			productReference = F241F5122D08EE8900C053B5 /* hello_world_swiftuiTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		F241F51B2D08EE8900C053B5 /* hello_world_swiftuiUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F241F52C2D08EE8900C053B5 /* Build configuration list for PBXNativeTarget "hello_world_swiftuiUITests" */;
-			buildPhases = (
-				F241F5182D08EE8900C053B5 /* Sources */,
-				F241F5192D08EE8900C053B5 /* Frameworks */,
-				F241F51A2D08EE8900C053B5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				F241F51E2D08EE8900C053B5 /* PBXTargetDependency */,
-			);
-			name = hello_world_swiftuiUITests;
-			productName = hello_world_swiftuiUITests;
-			productReference = F241F51C2D08EE8900C053B5 /* hello_world_swiftuiUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -170,14 +99,6 @@
 				TargetAttributes = {
 					F241F5012D08EE8800C053B5 = {
 						CreatedOnToolsVersion = 15.4;
-					};
-					F241F5112D08EE8900C053B5 = {
-						CreatedOnToolsVersion = 15.4;
-						TestTargetID = F241F5012D08EE8800C053B5;
-					};
-					F241F51B2D08EE8900C053B5 = {
-						CreatedOnToolsVersion = 15.4;
-						TestTargetID = F241F5012D08EE8800C053B5;
 					};
 				};
 			};
@@ -195,8 +116,6 @@
 			projectRoot = "";
 			targets = (
 				F241F5012D08EE8800C053B5 /* hello_world_swiftui */,
-				F241F5112D08EE8900C053B5 /* hello_world_swiftuiTests */,
-				F241F51B2D08EE8900C053B5 /* hello_world_swiftuiUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -208,20 +127,6 @@
 			files = (
 				F241F50D2D08EE8900C053B5 /* Preview Assets.xcassets in Resources */,
 				F241F50A2D08EE8900C053B5 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F241F5102D08EE8900C053B5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F241F51A2D08EE8900C053B5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,34 +142,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F241F50E2D08EE8900C053B5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F241F5182D08EE8900C053B5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		F241F5142D08EE8900C053B5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F241F5012D08EE8800C053B5 /* hello_world_swiftui */;
-			targetProxy = F241F5132D08EE8900C053B5 /* PBXContainerItemProxy */;
-		};
-		F241F51E2D08EE8900C053B5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F241F5012D08EE8800C053B5 /* hello_world_swiftui */;
-			targetProxy = F241F51D2D08EE8900C053B5 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F241F5242D08EE8900C053B5 /* Debug */ = {
@@ -302,6 +180,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = S8QB4VV633;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -365,6 +244,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = S8QB4VV633;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -391,6 +271,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"hello_world_swiftui/Preview Content\"";
@@ -410,6 +291,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.flutter.plugins.hello-world-swiftui";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -421,6 +303,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"hello_world_swiftui/Preview Content\"";
@@ -440,81 +323,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.flutter.plugins.hello-world-swiftui";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		F241F52A2D08EE8900C053B5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S8QB4VV633;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.flutter.plugins.hello-world-swiftuiTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hello_world_swiftui.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hello_world_swiftui";
-			};
-			name = Debug;
-		};
-		F241F52B2D08EE8900C053B5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S8QB4VV633;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.flutter.plugins.hello-world-swiftuiTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hello_world_swiftui.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hello_world_swiftui";
-			};
-			name = Release;
-		};
-		F241F52D2D08EE8900C053B5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S8QB4VV633;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.flutter.plugins.hello-world-swiftuiUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = hello_world_swiftui;
-			};
-			name = Debug;
-		};
-		F241F52E2D08EE8900C053B5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S8QB4VV633;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.flutter.plugins.hello-world-swiftuiUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = hello_world_swiftui;
 			};
 			name = Release;
 		};
@@ -535,24 +347,6 @@
 			buildConfigurations = (
 				F241F5272D08EE8900C053B5 /* Debug */,
 				F241F5282D08EE8900C053B5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F241F5292D08EE8900C053B5 /* Build configuration list for PBXNativeTarget "hello_world_swiftuiTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F241F52A2D08EE8900C053B5 /* Debug */,
-				F241F52B2D08EE8900C053B5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F241F52C2D08EE8900C053B5 /* Build configuration list for PBXNativeTarget "hello_world_swiftuiUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F241F52D2D08EE8900C053B5 /* Debug */,
-				F241F52E2D08EE8900C053B5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

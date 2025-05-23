@@ -1470,7 +1470,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Theme(
-            data: ThemeData.light(),
+            data: ThemeData(),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Material(child: Slider(value: 100.0, max: 200.0, onChanged: (double v) {})),
@@ -2006,7 +2006,7 @@ void main() {
 
   testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -3395,8 +3395,8 @@ void main() {
     Widget buildFrame(ThemeMode themeMode) {
       return MaterialApp(
         themeMode: themeMode,
-        theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
-        darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        theme: ThemeData(brightness: Brightness.light),
+        darkTheme: ThemeData(brightness: Brightness.dark),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -3956,7 +3956,7 @@ void main() {
   testWidgets(
     'Value indicator disappears after adjusting the slider on desktop',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       const double currentValue = 0.5;
       await tester.pumpWidget(
         MaterialApp(
@@ -4486,16 +4486,28 @@ void main() {
     });
 
     testWidgets('SliderInteraction.slideOnly', (WidgetTester tester) async {
+      const double overlayRadius = 23;
+      const Color overlayColor = Colors.red;
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
-      const Offset startOfTheSliderTrack = Offset(24, 300);
-      const Offset centerOfTheSlideTrack = Offset(400, 300);
-      const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+      const Offset startOfTheSliderTrack = Offset(overlayRadius, 300);
+      const Offset centerOfTheSliderTrack = Offset(400, 300);
+      const Offset endOfTheSliderTrack = Offset(800 - overlayRadius, 300);
+      final Tween<double> xPosThumb = Tween<double>(
+        begin: startOfTheSliderTrack.dx,
+        end: endOfTheSliderTrack.dx,
+      );
       final List<String> logs = <String>[];
 
       Widget buildApp() {
         return MaterialApp(
+          theme: ThemeData(
+            sliderTheme: const SliderThemeData(
+              overlayColor: overlayColor,
+              overlayShape: RoundSliderOverlayShape(overlayRadius: overlayRadius),
+            ),
+          ),
           home: Material(
             child: Center(
               child: StatefulBuilder(
@@ -4526,28 +4538,76 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
+      final Element sliderContext = tester.element(find.byType(Slider));
+      final MaterialInkController material = Material.of(sliderContext);
+
       expect(logs, isEmpty);
 
-      // test tap
-      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
+      // Test tap.
+      final TestGesture gesture = await tester.startGesture(centerOfTheSliderTrack);
+      // Start animation.
       await tester.pump();
-      // has no effect as tap is disabled, remains 1.0
+      // Go to mid-animation frame.
+      await tester.pump(kRadialReactionDuration * 0.5);
+      expect(material, paints..circle(color: overlayColor, x: xPosThumb.transform(value)));
+      // We have a non-linear asymmetric curve, so just verify the radius is not full.
+      expect(
+        material,
+        isNot(
+          paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+        ),
+      );
+
+      // Finish animation.
+      await tester.pumpAndSettle();
+      // Overlay drawn.
+      expect(
+        material,
+        paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+      );
+      // Has no other effect as tap is disabled, remains 1.0.
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart']);
 
-      // test slide
+      // Test slide.
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pump();
-      // changes from 1.0 -> 0.5
+      // Changes from 1.0 -> 0.5.
       expect(value, 0.5);
+      // Overlay still there.
+      expect(
+        material,
+        paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+      );
       await gesture.moveTo(endOfTheSliderTrack);
       await tester.pump();
-      // changes from 0.0 -> 1.0
+      // Changes from 0.0 -> 1.0.
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged']);
+      // Overlay still there.
+      expect(
+        material,
+        paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+      );
 
       await gesture.up();
+
+      // Start release animation.
       await tester.pump();
+      // Go to mid-animation frame.
+      await tester.pump(kRadialReactionDuration * 0.5);
+      expect(material, paints..circle(color: overlayColor, x: xPosThumb.transform(value)));
+      // Verify the radius is not full.
+      expect(
+        material,
+        isNot(
+          paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      // No overlay drawn.
+      expect(material, isNot(paints..circle(color: overlayColor, radius: overlayRadius)));
 
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
@@ -5267,5 +5327,47 @@ void main() {
     await tester.pumpWidget(buildSlider(0.5));
     await tester.pumpAndSettle();
     expect(log.last, const Offset(400.0, 300.0));
+  });
+
+  // Regression test for hhttps://github.com/flutter/flutter/issues/161805
+  testWidgets('Discrete Slider does not apply thumb padding in a non-rounded track shape', (
+    WidgetTester tester,
+  ) async {
+    // The default track left and right padding.
+    const double sliderPadding = 24.0;
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        // Thumb padding is applied based on the track height.
+        trackHeight: 100,
+        trackShape: RectangularSliderTrackShape(),
+      ),
+    );
+
+    Widget buildSlider({required double value}) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: SizedBox(
+            width: 300,
+            child: Slider(value: value, max: 100, divisions: 100, onChanged: (double value) {}),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(value: 0));
+
+    MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    expect(material, paints..circle(x: sliderPadding, y: 300.0, color: theme.colorScheme.primary));
+
+    await tester.pumpWidget(buildSlider(value: 100));
+    await tester.pumpAndSettle();
+
+    material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
+    );
   });
 }

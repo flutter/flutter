@@ -295,16 +295,23 @@ struct MouseState {
   FlutterDartProject* _project;
 
   std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
-
-  // FlutterViewController does not actually uses the synchronizer, but only
-  // passes it to FlutterView.
-  FlutterThreadSynchronizer* _threadSynchronizer;
 }
 
 // Synthesize properties declared readonly.
 @synthesize viewIdentifier = _viewIdentifier;
 
 @dynamic accessibilityBridge;
+
+// Returns the text input plugin associated with this view controller.
+// This method only returns non nil instance if the text input plugin has active
+// client with viewId matching this controller's view identifier.
+- (FlutterTextInputPlugin*)activeTextInputPlugin {
+  if (_engine.textInputPlugin.currentViewController == self) {
+    return _engine.textInputPlugin;
+  } else {
+    return nil;
+  }
+}
 
 /**
  * Performs initialization that's common between the different init paths.
@@ -326,7 +333,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"the FlutterEngine is mocked. Please subclass these classes instead.",
             controller.engine, controller.viewIdentifier);
   controller->_mouseTrackingMode = kFlutterMouseTrackingModeInKeyWindow;
-  controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller notifySemanticsEnabledChanged];
 }
 
@@ -416,6 +422,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   if ([self attached]) {
     [_engine removeViewController:self];
   }
+  [self.flutterView shutDown];
 }
 
 #pragma mark - Public methods
@@ -462,19 +469,14 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)setUpWithEngine:(FlutterEngine*)engine
-         viewIdentifier:(FlutterViewIdentifier)viewIdentifier
-     threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer {
+         viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
   _viewIdentifier = viewIdentifier;
-  _threadSynchronizer = threadSynchronizer;
-  [_threadSynchronizer registerView:_viewIdentifier];
 }
 
 - (void)detachFromEngine {
   NSAssert(_engine != nil, @"Not attached to any engine.");
-  [_threadSynchronizer deregisterView:_viewIdentifier];
-  _threadSynchronizer = nil;
   _engine = nil;
 }
 
@@ -544,7 +546,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                      NSResponder* firstResponder = [[event window] firstResponder];
                                      if (weakSelf.viewLoaded && weakSelf.flutterView &&
                                          (firstResponder == weakSelf.flutterView ||
-                                          firstResponder == weakSelf.textInputPlugin) &&
+                                          firstResponder == weakSelf.activeTextInputPlugin) &&
                                          ([event modifierFlags] & NSEventModifierFlagCommand) &&
                                          ([event type] == NSEventTypeKeyUp)) {
                                        [weakSelf keyUp:event];
@@ -772,12 +774,12 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)onAccessibilityStatusChanged:(BOOL)enabled {
-  if (!enabled && self.viewLoaded && [_textInputPlugin isFirstResponder]) {
+  if (!enabled && self.viewLoaded && [self.activeTextInputPlugin isFirstResponder]) {
     // Normally TextInputPlugin, when editing, is child of FlutterViewWrapper.
-    // When accessiblity is enabled the TextInputPlugin gets added as an indirect
+    // When accessibility is enabled the TextInputPlugin gets added as an indirect
     // child to FlutterTextField. When disabling the plugin needs to be reparented
     // back.
-    [self.view addSubview:_textInputPlugin];
+    [self.view addSubview:self.activeTextInputPlugin];
   }
 }
 
@@ -791,7 +793,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
-                             threadSynchronizer:_threadSynchronizer
                                  viewIdentifier:_viewIdentifier];
 }
 
@@ -818,7 +819,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   // Only allow FlutterView to become first responder if TextInputPlugin is
   // not active. Otherwise a mouse event inside FlutterView would cause the
   // TextInputPlugin to lose first responder status.
-  return !_textInputPlugin.isFirstResponder;
+  return !self.activeTextInputPlugin.isFirstResponder;
 }
 
 #pragma mark - FlutterPluginRegistry
@@ -834,7 +835,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 #pragma mark - FlutterKeyboardViewDelegate
 
 - (BOOL)onTextInputKeyEvent:(nonnull NSEvent*)event {
-  return [_textInputPlugin handleKeyEvent:event];
+  return [self.activeTextInputPlugin handleKeyEvent:event];
 }
 
 #pragma mark - NSResponder

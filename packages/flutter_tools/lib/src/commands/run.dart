@@ -239,9 +239,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @override
   bool get refreshWirelessDevices => true;
 
-  @override
-  bool get reportNullSafety => true;
-
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
@@ -868,6 +865,7 @@ class RunCommand extends RunCommandBase {
       }
     } on RPCError catch (error) {
       if (error.code == RPCErrorKind.kServiceDisappeared.code ||
+          error.code == RPCErrorKind.kConnectionDisposed.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

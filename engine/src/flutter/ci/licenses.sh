@@ -114,8 +114,26 @@ function verify_licenses() (
 
   collect_licenses
 
+  # The dart license includes a git sha in it. This is the line that contains
+  # it. We ignore that for the purposes of diffing. If the license file changes
+  # this will need to be updated.
+  dart_ignore_line=4865
   for f in out/license_script_output/licenses_*; do
-    if ! cmp -s "flutter/ci/licenses_golden/$(basename "$f")" "$f"; then
+    golden_file="flutter/ci/licenses_golden/$(basename "$f")"
+    if [[ $(basename "$f") == "licenses_dart" ]]; then
+      cmp -s <(sed "${dart_ignore_line}d" "$golden_file") <(sed "${dart_ignore_line}d" "$f")
+      cmp_result=$?
+      if ! sed -n "${dart_ignore_line}p" "$golden_file" | grep -q 'dart\.googlesource\.com'; then
+        echo "============================= ERROR ============================="
+        echo "Ignored dart license line did not include the googlesource url as expected."
+        echo "================================================================="
+        exitStatus=1
+      fi
+    else
+      cmp -s "$golden_file" "$f"
+      cmp_result=$?
+    fi
+    if [[ $cmp_result -ne 0 ]]; then
       echo "============================= ERROR ============================="
       echo "License script got different results than expected for $f."
       echo "Please rerun the licenses script locally to verify that it is"
@@ -123,7 +141,7 @@ function verify_licenses() (
       echo "changed, and then update this file:"
       echo "  flutter/sky/packages/sky_engine/LICENSE"
       echo "For more information, see the script in:"
-      echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
+      echo "  https://github.com/flutter/flutter/tree/main/engine/src/flutter/tools/licenses"
       echo ""
       diff -U 6 "flutter/ci/licenses_golden/$(basename "$f")" "$f"
       echo "================================================================="
@@ -143,7 +161,7 @@ function verify_licenses() (
     echo "license tool signature golden file:"
     echo "  ci/licenses_golden/tool_signature"
     echo "For more information, see the script in:"
-    echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
+    echo "  https://github.com/flutter/flutter/tree/main/engine/src/flutter/tools/licenses"
     echo ""
     diff -U 6 "flutter/ci/licenses_golden/tool_signature" "out/license_script_output/tool_signature"
     echo "================================================================="
@@ -173,7 +191,7 @@ function verify_licenses() (
 
   local actualLicenseCount
   actualLicenseCount="$(tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9')"
-  local expectedLicenseCount=840
+  local expectedLicenseCount=846
 
   if [[ $actualLicenseCount -ne $expectedLicenseCount ]]; then
     echo "=============================== ERROR ==============================="

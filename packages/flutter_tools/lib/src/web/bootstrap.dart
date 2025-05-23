@@ -269,11 +269,6 @@ $_simpleLoaderScript
               if (script.id == null) continue;
               var src = _currentDirectory + script.src.toString();
               var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
-              // Only compare the search parameters which contain the cache
-              // busting portion of the uri. The path might be different if the
-              // script is loaded from a different application on the page.
-              if (window.\$dartLoader.moduleIdToUrl.has(script.id) &&
-                  new URL(oldSrc).search == new URL(src).search) continue;
 
               // We might actually load from a different uri, delete the old one
               // just to be sure.
@@ -313,14 +308,13 @@ $_simpleLoaderScript
 /// The JavaScript bootstrap script to support in-browser hot restart.
 ///
 /// The [requireUrl] loads our cached RequireJS script file. The [mapperUrl]
-/// loads the special Dart stack trace mapper. The [entrypoint] is the
-/// actual main.dart file.
+/// loads the special Dart stack trace mapper.
 ///
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
 ///
-/// If `generateLoadingIndicator` is true, embeds a loading indicator onto the
+/// If [generateLoadingIndicator] is `true`, embeds a loading indicator onto the
 /// web page that's visible while the Flutter app is loading.
 String generateBootstrapScript({
   required String requireUrl,
@@ -668,15 +662,19 @@ String generateTestBootstrapFileContents(String mainUri, String requireUrl, Stri
 ''';
 }
 
-String generateDefaultFlutterBootstrapScript() {
-  return '''
-{{flutter_js}}
-{{flutter_build_config}}
-
-_flutter.loader.load({
+String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
+  final String serviceWorkerSettings =
+      includeServiceWorkerSettings
+          ? '''
+{
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}}
   }
-});
+}'''
+          : '';
+  return '''
+{{flutter_js}}
+{{flutter_build_config}}
+_flutter.loader.load($serviceWorkerSettings);
 ''';
 }

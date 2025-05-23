@@ -432,22 +432,45 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
+    final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
+    final String sdkName = await device!.device!.sdkNameAndVersion;
+
+    // Will be null if there is no report.
+    final UpdateFSReport? report;
     if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
       await runSourceGenerators();
       // Don't reset the resident compiler for web, since the extra recompile is
       // wasteful.
-      final UpdateFSReport report = await _updateDevFS(
-        fullRestart: fullRestart,
-        resetCompiler: false,
-      );
+      report = await _updateDevFS(fullRestart: fullRestart, resetCompiler: false);
       if (report.success) {
         device!.generator!.accept();
       } else {
         status.stop();
         await device!.generator!.reject();
+        if (report.hotReloadRejected) {
+          // We cannot capture the reason why the reload was rejected as it may
+          // contain user information.
+          HotEvent(
+            'reload-reject',
+            targetPlatform: targetPlatform,
+            sdkName: sdkName,
+            emulator: false,
+            fullRestart: fullRestart,
+          ).send();
+          _analytics.send(
+            Event.hotRunnerInfo(
+              label: 'reload-reject',
+              targetPlatform: targetPlatform,
+              sdkName: sdkName,
+              emulator: false,
+              fullRestart: fullRestart,
+            ),
+          );
+        }
         return OperationResult(1, 'Failed to recompile application.');
       }
     } else {
+      report = null;
       try {
         final WebBuilder webBuilder = WebBuilder(
           logger: _logger,
@@ -469,6 +492,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       }
     }
 
+    // Both will be null when not assigned.
+    Duration? reloadDuration;
+    Duration? reassembleDuration;
     try {
       if (!deviceIsDebuggable) {
         _logger.printStatus('Recompile complete. Page requires refresh.');
@@ -482,7 +508,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         } else {
           // Isolates don't work on web. For lack of a better value, pass an
           // empty string for the isolate id.
+          final DateTime reloadStart = _systemClock.now();
           final vmservice.ReloadReport report = await _vmService.service.reloadSources('');
+          reloadDuration = _systemClock.now().difference(reloadStart);
           final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
           if (!success) {
@@ -497,6 +525,21 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
               _logger.printError(reason.toString());
             }
             return OperationResult(1, reloadFailedMessage);
+          }
+          String? failedReassemble;
+          final DateTime reassembleStart = _systemClock.now();
+          await _vmService
+              .flutterReassemble(isolateId: null)
+              .then(
+                (Object? o) => o,
+                onError: (Object error, StackTrace stackTrace) {
+                  failedReassemble = 'Reassembling failed: $error\n$stackTrace';
+                  _logger.printError(failedReassemble!);
+                },
+              );
+          reassembleDuration = _systemClock.now().difference(reassembleStart);
+          if (failedReassemble != null) {
+            return OperationResult(1, failedReassemble!);
           }
         }
       } else {
@@ -522,11 +565,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      // TODO(srujzs): There are a number of fields that the VM tracks in the
-      // analytics that we do not for both hot restart and reload. We should
-      // unify that.
-      final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
-      final String sdkName = await device!.device!.sdkNameAndVersion;
       if (fullRestart) {
         _analytics.send(
           Event.timing(
@@ -543,6 +581,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fullRestart: true,
           reason: reason,
           overallTimeInMs: elapsed.inMilliseconds,
+          syncedBytes: report?.syncedBytes,
+          invalidatedSourcesCount: report?.invalidatedSourcesCount,
+          transferTimeInMs: report?.transferDuration.inMilliseconds,
+          compileTimeInMs: report?.compileDuration.inMilliseconds,
+          findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+          scannedSourcesCount: report?.scannedSourcesCount,
         ).send();
         _analytics.send(
           Event.hotRunnerInfo(
@@ -553,6 +597,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fullRestart: true,
             reason: reason,
             overallTimeInMs: elapsed.inMilliseconds,
+            syncedBytes: report?.syncedBytes,
+            invalidatedSourcesCount: report?.invalidatedSourcesCount,
+            transferTimeInMs: report?.transferDuration.inMilliseconds,
+            compileTimeInMs: report?.compileDuration.inMilliseconds,
+            findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+            scannedSourcesCount: report?.scannedSourcesCount,
           ),
         );
       } else {
@@ -571,6 +621,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fullRestart: false,
           reason: reason,
           overallTimeInMs: elapsed.inMilliseconds,
+          syncedBytes: report?.syncedBytes,
+          invalidatedSourcesCount: report?.invalidatedSourcesCount,
+          transferTimeInMs: report?.transferDuration.inMilliseconds,
+          compileTimeInMs: report?.compileDuration.inMilliseconds,
+          findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+          scannedSourcesCount: report?.scannedSourcesCount,
+          reassembleTimeInMs: reassembleDuration?.inMilliseconds,
+          reloadVMTimeInMs: reloadDuration?.inMilliseconds,
         ).send();
         _analytics.send(
           Event.hotRunnerInfo(
@@ -581,6 +639,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fullRestart: false,
             reason: reason,
             overallTimeInMs: elapsed.inMilliseconds,
+            syncedBytes: report?.syncedBytes,
+            invalidatedSourcesCount: report?.invalidatedSourcesCount,
+            transferTimeInMs: report?.transferDuration.inMilliseconds,
+            compileTimeInMs: report?.compileDuration.inMilliseconds,
+            findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+            scannedSourcesCount: report?.scannedSourcesCount,
+            reassembleTimeInMs: reassembleDuration?.inMilliseconds,
+            reloadVMTimeInMs: reloadDuration?.inMilliseconds,
           ),
         );
       }

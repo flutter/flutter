@@ -8,6 +8,7 @@
 
 #include <cstring>
 
+#if !SLIMPELLER
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLAssembleInterface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h"
 
@@ -26,6 +27,7 @@
 #if defined(FML_OS_IOS)
 #include "third_party/skia/include/gpu/ganesh/gl/ios/GrGLMakeIOSInterface.h"
 #endif
+#endif  // !SLIMPELLER
 
 namespace flutter {
 
@@ -53,6 +55,7 @@ GPUSurfaceGLDelegate::GLProcResolver GPUSurfaceGLDelegate::GetGLProcResolver()
   return nullptr;
 }
 
+#if !SLIMPELLER
 static bool IsProcResolverOpenGLES(
     const GPUSurfaceGLDelegate::GLProcResolver& proc_resolver) {
   // Version string prefix that identifies an OpenGL ES implementation.
@@ -130,14 +133,23 @@ static sk_sp<const GrGLInterface> CreateGLInterface(
   FML_LOG(ERROR) << "Could not create a valid GL interface.";
   return nullptr;
 }
+#endif  // !SLIMPELLER
 
 sk_sp<const GrGLInterface> GPUSurfaceGLDelegate::GetGLInterface() const {
+#if !SLIMPELLER
   return CreateGLInterface(GetGLProcResolver());
+#else
+  return nullptr;
+#endif  //! SLIMPELLER
 }
 
 sk_sp<const GrGLInterface>
 GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface() {
+#if !SLIMPELLER
   return CreateGLInterface(nullptr);
+#else
+  return nullptr;
+#endif  // !SLIMPELLER
 }
 
 bool GPUSurfaceGLDelegate::AllowsDrawingWhenGpuDisabled() const {

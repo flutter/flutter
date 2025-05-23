@@ -56,6 +56,14 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
+    this.validationResult = SemanticsValidationResult.none,
+    this.inputType = SemanticsInputType.none,
+    this.controlsNodes,
+    this.linkUrl,
+    this.maxValueLength,
+    this.currentValueLength,
+    this.identifier = '',
+    this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -80,6 +88,14 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
+    this.validationResult = SemanticsValidationResult.none,
+    this.inputType = SemanticsInputType.none,
+    this.controlsNodes,
+    this.linkUrl,
+    this.maxValueLength,
+    this.currentValueLength,
+    this.identifier = '',
+    this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -120,6 +136,14 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
+    this.validationResult = SemanticsValidationResult.none,
+    this.inputType = SemanticsInputType.none,
+    this.controlsNodes,
+    this.linkUrl,
+    this.maxValueLength,
+    this.currentValueLength,
+    this.identifier = '',
+    this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
@@ -230,7 +254,59 @@ class TestSemantics {
   /// The total number of semantic nodes within a scrollable.
   final int? scrollChildren;
 
+  /// The expected text selection.
   final TextSelection? textSelection;
+
+  /// The validation result for this node, if any.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsValidationResult], which is the enum listing possible values
+  ///    for this field.
+  final SemanticsValidationResult validationResult;
+
+  /// The expected heading level
+  final int? headingLevel;
+
+  /// The expected role for the node.
+  ///
+  /// Defaults to SemanticsRole.none if not set.
+  final SemanticsRole role;
+
+  /// The expected input type for the node.
+  ///
+  /// Defaults to SemanticsInputType.none if not set.
+  final SemanticsInputType inputType;
+
+  /// The expected nodes that this node controls.
+  ///
+  /// Defaults to an empty set if not set.
+  final Set<String>? controlsNodes;
+
+  /// The expected url for the node.
+  ///
+  /// Defaults to null if not set.
+  final Uri? linkUrl;
+
+  /// The expected max value length for the node.
+  ///
+  /// Defaults to null if not set.
+  final int? maxValueLength;
+
+  /// The expected current value length for the node.
+  ///
+  /// Defaults to null if not set.
+  final int? currentValueLength;
+
+  /// The expected identifier for the node.
+  ///
+  /// Defaults to an empty string if not set.
+  final String identifier;
+
+  /// The expected hint overrides for the node.
+  ///
+  /// Defaults to null if not set.
+  final SemanticsHintOverrides? hintOverrides;
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
     final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
@@ -245,13 +321,6 @@ class TestSemantics {
 
   /// The tags of this node.
   final Set<SemanticsTag> tags;
-
-  final int? headingLevel;
-
-  /// The expected role for the node.
-  ///
-  /// Defaults to SemanticsRole.none if not set.
-  final SemanticsRole role;
 
   bool _matches(
     SemanticsNode? node,
@@ -392,6 +461,49 @@ class TestSemantics {
       return fail('expected node id $id to have role $role but found role ${node.role}');
     }
 
+    if (validationResult != node.validationResult) {
+      return fail(
+        'expected node id $id to have validationResult $validationResult but found validationResult ${node.validationResult}',
+      );
+    }
+    if (inputType != node.inputType) {
+      return fail(
+        'expected node id $id to have input type $inputType but found input type ${node.inputType}',
+      );
+    }
+
+    if (controlsNodes != controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
+      return fail(
+        'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
+      );
+    }
+
+    if (linkUrl?.toString() != node.linkUrl?.toString()) {
+      return fail(
+        'expected node id $id to have link url $linkUrl but found link url ${node.linkUrl}',
+      );
+    }
+    if (maxValueLength != node.maxValueLength) {
+      return fail(
+        'expected node id $id to have max value length $maxValueLength but found max value length ${node.maxValueLength}',
+      );
+    }
+    if (currentValueLength != node.currentValueLength) {
+      return fail(
+        'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
+      );
+    }
+    if (identifier != node.identifier) {
+      return fail(
+        'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
+      );
+    }
+    if (hintOverrides != node.hintOverrides) {
+      return fail(
+        'expected node id $id to have hint overrides $hintOverrides but found hint overrides ${node.hintOverrides}',
+      );
+    }
+
     if (children.isEmpty) {
       return true;
     }
@@ -476,6 +588,27 @@ class TestSemantics {
     }
     if (thickness != null) {
       buf.writeln('$indent  thickness: $thickness,');
+    }
+    if (inputType != SemanticsInputType.none) {
+      buf.writeln('$indent  inputType: $inputType,');
+    }
+    if (controlsNodes != null) {
+      buf.writeln('$indent  controlsNodes: $controlsNodes,');
+    }
+    if (linkUrl != null) {
+      buf.writeln('$indent  linkUrl: $linkUrl,');
+    }
+    if (maxValueLength != null) {
+      buf.writeln('$indent  maxValueLength: $maxValueLength,');
+    }
+    if (currentValueLength != null) {
+      buf.writeln('$indent  currentValueLength: $currentValueLength,');
+    }
+    if (identifier.isNotEmpty) {
+      buf.writeln('$indent  identifier: $identifier,');
+    }
+    if (hintOverrides != null) {
+      buf.writeln('$indent  hintOverrides: $hintOverrides,');
     }
     buf.writeln('$indent  children: <TestSemantics>[');
     for (final TestSemantics child in children) {
@@ -572,6 +705,7 @@ class SemanticsTester {
     int? currentValueLength,
     int? maxValueLength,
     SemanticsNode? ancestor,
+    SemanticsInputType? inputType,
   }) {
     bool checkNode(SemanticsNode node) {
       if (label != null && node.label != label) {
@@ -653,6 +787,9 @@ class SemanticsTester {
         return false;
       }
       if (maxValueLength != null && node.maxValueLength != maxValueLength) {
+        return false;
+      }
+      if (inputType != null && node.inputType != inputType) {
         return false;
       }
       return true;
@@ -806,6 +943,27 @@ class SemanticsTester {
     if (node.role != SemanticsRole.none) {
       buf.writeln('  role: ${node.role},');
     }
+    if (node.inputType != SemanticsInputType.none) {
+      buf.writeln('  inputType: ${node.inputType},');
+    }
+    if (node.controlsNodes != null) {
+      buf.writeln('  controlsNodes: ${node.controlsNodes},');
+    }
+    if (node.linkUrl != null) {
+      buf.writeln('  linkUrl: ${node.linkUrl},');
+    }
+    if (node.maxValueLength != null) {
+      buf.writeln('  maxValueLength: ${node.maxValueLength},');
+    }
+    if (node.currentValueLength != null) {
+      buf.writeln('  currentValueLength: ${node.currentValueLength},');
+    }
+    if (node.identifier.isNotEmpty) {
+      buf.writeln('  identifier: ${node.identifier},');
+    }
+    if (node.hintOverrides != null) {
+      buf.writeln('  hintOverrides: ${node.hintOverrides},');
+    }
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
       for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
@@ -935,6 +1093,7 @@ class _IncludesNodeWith extends Matcher {
     this.scrollExtentMin,
     this.maxValueLength,
     this.currentValueLength,
+    this.inputType,
   }) : assert(
          label != null ||
              value != null ||
@@ -947,7 +1106,8 @@ class _IncludesNodeWith extends Matcher {
              scrollExtentMax != null ||
              scrollExtentMin != null ||
              maxValueLength != null ||
-             currentValueLength != null,
+             currentValueLength != null ||
+             inputType != null,
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
@@ -966,6 +1126,7 @@ class _IncludesNodeWith extends Matcher {
   final double? scrollExtentMin;
   final int? currentValueLength;
   final int? maxValueLength;
+  final SemanticsInputType? inputType;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -988,6 +1149,7 @@ class _IncludesNodeWith extends Matcher {
           scrollExtentMin: scrollExtentMin,
           currentValueLength: currentValueLength,
           maxValueLength: maxValueLength,
+          inputType: inputType,
         )
         .isNotEmpty;
   }
@@ -1023,6 +1185,7 @@ class _IncludesNodeWith extends Matcher {
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
       if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
       if (maxValueLength != null) 'maxValueLength "$maxValueLength"',
+      if (inputType != null) 'inputType $inputType',
     ];
     return strings.join(', ');
   }
@@ -1050,6 +1213,7 @@ Matcher includesNodeWith({
   double? scrollExtentMin,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsInputType? inputType,
 }) {
   return _IncludesNodeWith(
     label: label,
@@ -1069,5 +1233,6 @@ Matcher includesNodeWith({
     scrollExtentMin: scrollExtentMin,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    inputType: inputType,
   );
 }

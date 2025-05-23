@@ -2,11 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -15,6 +21,10 @@ void main() {
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
     );
     return iconRichText.text.style!;
+  }
+
+  Color textColor(WidgetTester tester, String text) {
+    return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
   }
 
   testWidgets('OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
@@ -37,7 +47,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -84,7 +94,7 @@ void main() {
     // No change vs enabled and not pressed.
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -130,7 +140,7 @@ void main() {
 
     material = tester.widget<Material>(iconButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -163,7 +173,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -343,7 +353,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -647,8 +657,8 @@ void main() {
   testWidgets('OutlinedButton uses stateful color for text color in different states', (
     WidgetTester tester,
   ) async {
+    const String buttonText = 'OutlinedButton';
     final FocusNode focusNode = FocusNode();
-
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
     const Color focusedColor = Color(0x00000003);
@@ -677,24 +687,20 @@ void main() {
               ),
               onPressed: () {},
               focusNode: focusNode,
-              child: const Text('OutlinedButton'),
+              child: const Text(buttonText),
             ),
           ),
         ),
       ),
     );
 
-    Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('OutlinedButton')).text.style!.color!;
-    }
-
     // Default, not disabled.
-    expect(textColor(), equals(defaultColor));
+    expect(textColor(tester, buttonText), equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(textColor(), focusedColor);
+    expect(textColor(tester, buttonText), focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(OutlinedButton));
@@ -702,7 +708,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(textColor(), hoverColor);
+    expect(textColor(tester, buttonText), hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
@@ -710,7 +716,7 @@ void main() {
     await tester.pump(
       const Duration(milliseconds: 800),
     ); // Wait for splash and highlight to be well under way.
-    expect(textColor(), pressedColor);
+    expect(textColor(tester, buttonText), pressedColor);
 
     focusNode.dispose();
   });
@@ -1121,7 +1127,8 @@ void main() {
             alignment: Alignment.topLeft,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                shape: const RoundedRectangleBorder(), // default border radius is 0
+                shape: const RoundedRectangleBorder(),
+                // default border radius is 0
                 backgroundColor: fillColor,
                 minimumSize: const Size(64, 36),
               ).copyWith(
@@ -1683,7 +1690,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: OutlinedButton(key: key, onPressed: () {}, child: const Text('OutlinedButton')),
@@ -1702,7 +1709,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: OutlinedButton.icon(
@@ -1798,7 +1805,7 @@ void main() {
   testWidgets(
     'OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2848,6 +2855,7 @@ void main() {
 
     // Test disabled button.
     await tester.pumpWidget(buildButton(enabled: false));
+    await tester.pumpAndSettle();
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
 
     final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
@@ -2876,5 +2884,109 @@ void main() {
       ),
     );
     expect(iconStyle(tester, Icons.add).color, foregroundColor);
+  });
+
+  testWidgets('OutlinedButton text and icon respect animation duration', (
+    WidgetTester tester,
+  ) async {
+    const String buttonText = 'Button';
+    const IconData buttonIcon = Icons.add;
+    const Color hoveredColor = Color(0xFFFF0000);
+    const Color idleColor = Color(0xFF000000);
+
+    Widget buildButton({Duration? animationDuration}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: OutlinedButton.icon(
+              style: ButtonStyle(
+                animationDuration: animationDuration,
+                iconColor: const WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
+                  WidgetState.hovered: hoveredColor,
+                  WidgetState.any: idleColor,
+                }),
+                foregroundColor: const WidgetStateProperty<Color>.fromMap(
+                  <WidgetStatesConstraint, Color>{
+                    WidgetState.hovered: hoveredColor,
+                    WidgetState.any: idleColor,
+                  },
+                ),
+              ),
+              onPressed: () {},
+              icon: const Icon(buttonIcon),
+              label: const Text(buttonText),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default animation duration.
+    await tester.pumpWidget(buildButton());
+
+    expect(textColor(tester, buttonText), idleColor);
+    expect(iconStyle(tester, buttonIcon).color, idleColor);
+
+    final Offset buttonCenter = tester.getCenter(find.text(buttonText));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(buttonCenter);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(textColor(tester, buttonText), hoveredColor.withValues(red: 0.5));
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor.withValues(red: 0.5));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(textColor(tester, buttonText), hoveredColor);
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+
+    await gesture.removePointer();
+
+    // Test custom animation duration.
+    await tester.pumpWidget(buildButton(animationDuration: const Duration(seconds: 2)));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(buttonCenter);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(textColor(tester, buttonText), hoveredColor.withValues(red: 0.5));
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor.withValues(red: 0.5));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(textColor(tester, buttonText), hoveredColor);
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  testWidgets("OutlinedButton's outline should be behind its child", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/167431
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(backgroundColor: Colors.transparent),
+                onPressed: () {},
+                child: const Badge(
+                  backgroundColor: Colors.green,
+                  label: Text('Ad', style: TextStyle(fontSize: 18, color: Colors.red)),
+                  child: Icon(Icons.lightbulb_rounded),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(OutlinedButton),
+      matchesGoldenFile('outlined_button.badge.outline.png'),
+    );
   });
 }

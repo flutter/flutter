@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -162,6 +163,7 @@ class TextFormField extends FormField<String> {
     Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool? enableInteractiveSelection,
+    bool? selectAllOnFocus,
     TextSelectionControls? selectionControls,
     InputCounterWidgetBuilder? buildCounter,
     ScrollPhysics? scrollPhysics,
@@ -282,6 +284,7 @@ class TextFormField extends FormField<String> {
                keyboardAppearance: keyboardAppearance,
                enableInteractiveSelection:
                    enableInteractiveSelection ?? (!obscureText || !readOnly),
+               selectAllOnFocus: selectAllOnFocus,
                selectionControls: selectionControls,
                buildCounter: buildCounter,
                autofillHints: autofillHints,
@@ -326,6 +329,9 @@ class TextFormField extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 

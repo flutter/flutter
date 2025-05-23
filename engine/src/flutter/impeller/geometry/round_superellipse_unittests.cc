@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 
 #include "flutter/impeller/geometry/round_superellipse.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
 
@@ -549,7 +550,8 @@ TEST(RoundSuperellipseTest, ContractAndRequireRadiiAdjustment) {
 
 TEST(RoundSuperellipseTest, NoCornerRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  // RRect of bounds with no corners contains corners just barely
+  // Rounded superellipses of bounds with no corners contains corners just
+  // barely.
   auto no_corners = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({0.0f, 0.0f}));
 
@@ -571,7 +573,8 @@ TEST(RoundSuperellipseTest, NoCornerRoundSuperellipseContains) {
 
 TEST(RoundSuperellipseTest, TinyCornerContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  // RRect of bounds with even the tiniest corners does not contain corners
+  // Rounded superellipses of bounds with even the tiniest corners does not
+  // contain corners.
   auto tiny_corners = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({0.01f, 0.01f}));
 
@@ -592,13 +595,13 @@ TEST(RoundSuperellipseTest, UniformSquareContains) {
   CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, 1), Point(-0.02, 0.02)); \
   CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, -0.02));
 
-  CHECK_POINT_AND_MIRRORS(Point(0, 49.995));       // Top
-  CHECK_POINT_AND_MIRRORS(Point(44.245, 49.995));  // Top stretch end
-  CHECK_POINT_AND_MIRRORS(Point(45.72, 49.92));    // Top joint
-  CHECK_POINT_AND_MIRRORS(Point(48.53, 48.53));    // Circular arc mid
-  CHECK_POINT_AND_MIRRORS(Point(49.92, 45.72));    // Right joint
-  CHECK_POINT_AND_MIRRORS(Point(49.995, 44.245));  // Right stretch end
-  CHECK_POINT_AND_MIRRORS(Point(49.995, 0));       // Right
+  CHECK_POINT_AND_MIRRORS(Point(0, 49.995));      // Top
+  CHECK_POINT_AND_MIRRORS(Point(44.245, 49.95));  // Top curve start
+  CHECK_POINT_AND_MIRRORS(Point(45.72, 49.87));   // Top joint
+  CHECK_POINT_AND_MIRRORS(Point(48.53, 48.53));   // Circular arc mid
+  CHECK_POINT_AND_MIRRORS(Point(49.87, 45.72));   // Right joint
+  CHECK_POINT_AND_MIRRORS(Point(49.95, 44.245));  // Right curve start
+  CHECK_POINT_AND_MIRRORS(Point(49.995, 0));      // Right
 #undef CHECK_POINT_AND_MIRRORS
 }
 
@@ -614,11 +617,11 @@ TEST(RoundSuperellipseTest, UniformEllipticalContains) {
   CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, -0.02));
 
   CHECK_POINT_AND_MIRRORS(Point(0, 49.995));       // Top
-  CHECK_POINT_AND_MIRRORS(Point(44.245, 49.995));  // Top stretch end
-  CHECK_POINT_AND_MIRRORS(Point(45.72, 49.84));    // Top joint
+  CHECK_POINT_AND_MIRRORS(Point(44.245, 49.911));  // Top curve start
+  CHECK_POINT_AND_MIRRORS(Point(45.72, 49.75));    // Top joint
   CHECK_POINT_AND_MIRRORS(Point(48.51, 47.07));    // Circular arc mid
-  CHECK_POINT_AND_MIRRORS(Point(49.92, 41.44));    // Right joint
-  CHECK_POINT_AND_MIRRORS(Point(49.995, 38.49));   // Right stretch end
+  CHECK_POINT_AND_MIRRORS(Point(49.87, 41.44));    // Right joint
+  CHECK_POINT_AND_MIRRORS(Point(49.95, 38.49));    // Right curve start
   CHECK_POINT_AND_MIRRORS(Point(49.995, 0));       // Right
 #undef CHECK_POINT_AND_MIRRORS
 }
@@ -645,9 +648,9 @@ TEST(RoundSuperellipseTest, UniformRectangularContains) {
   CHECK_POINT_AND_MIRRORS(Point(34.99, 98.06));
   CHECK_POINT_AND_MIRRORS(Point(39.99, 94.73));
   CHECK_POINT_AND_MIRRORS(Point(44.13, 89.99));
-  CHECK_POINT_AND_MIRRORS(Point(48.60, 79.99));
-  CHECK_POINT_AND_MIRRORS(Point(49.93, 69.99));
-  CHECK_POINT_AND_MIRRORS(Point(49.99, 59.99));
+  CHECK_POINT_AND_MIRRORS(Point(48.46, 79.99));
+  CHECK_POINT_AND_MIRRORS(Point(49.70, 69.99));
+  CHECK_POINT_AND_MIRRORS(Point(49.97, 59.99));
   CHECK_POINT_AND_MIRRORS(Point(49.99, 49.99));  // Right mid edge
 
 #undef CHECK_POINT_AND_MIRRORS
@@ -688,6 +691,23 @@ TEST(RoundSuperellipseTest, SlimDiagnalContains) {
   CHECK_DIAGNAL_POINTS(Point(21.05, -20.92));
   CHECK_DIAGNAL_POINTS(Point(40.0, 5.68));
 #undef CHECK_POINT_AND_MIRRORS
+}
+
+TEST(RoundSuperellipseTest, PointsOutsideOfSharpCorner) {
+  Rect bounds = Rect::MakeLTRB(196.0f, 0.0f, 294.0f, 28.0f);
+  // Regression test for a case where RoundSuperellipseParam::Contains
+  // previously failed. Although the bounding rect filter of
+  // `RoundSuperellipse::Contains` would reject this point, this test ensures
+  // the internal logic of RoundSuperellipseParam::Contains is now correct.
+  auto rr = RoundSuperellipseParam::MakeBoundsRadii(
+      bounds, {
+                  .top_left = Size(0.0, 0.0),
+                  .top_right = Size(3.0, 3.0),
+                  .bottom_left = Size(0.0, 0.0),
+                  .bottom_right = Size(3.0, 3.0),
+              });
+
+  EXPECT_FALSE(rr.Contains(Point{147.0, 14.0}));
 }
 
 }  // namespace testing

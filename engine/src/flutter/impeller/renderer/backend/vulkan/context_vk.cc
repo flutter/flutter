@@ -103,7 +103,7 @@ static std::optional<QueueIndexVK> PickQueue(const vk::PhysicalDevice& device,
 }
 
 std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
-  auto context = std::shared_ptr<ContextVK>(new ContextVK());
+  auto context = std::shared_ptr<ContextVK>(new ContextVK(settings.flags));
   context->Setup(std::move(settings));
   if (!context->IsValid()) {
     return nullptr;
@@ -127,7 +127,8 @@ uint64_t CalculateHash(void* ptr) {
 }
 }  // namespace
 
-ContextVK::ContextVK() : hash_(CalculateHash(this)) {}
+ContextVK::ContextVK(const Flags& flags)
+    : Context(flags), hash_(CalculateHash(this)) {}
 
 ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
@@ -150,16 +151,6 @@ void ContextVK::Setup(Settings settings) {
 
   raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
       ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
-  raster_message_loop_->PostTaskToAllWorkers([]() {
-    // Currently we only use the worker task pool for small parts of a frame
-    // workload, if this changes this setting may need to be adjusted.
-    fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
-#ifdef FML_OS_ANDROID
-    if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
-      VALIDATION_LOG << "Failed to set Workers task runner priority";
-    }
-#endif  // FML_OS_ANDROID
-  });
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
@@ -214,7 +205,18 @@ void ContextVK::Setup(Settings settings) {
   }
 
   vk::ApplicationInfo application_info;
-  application_info.setApplicationVersion(VK_API_VERSION_1_0);
+
+  // Use the same encoding macro as vulkan versions, but otherwise application
+  // version is intended to be the version of the Impeller engine. This version
+  // information, along with the application name below is provided to allow
+  // IHVs to make optimizations and/or disable functionality based on knowledge
+  // of the engine version (for example, to work around bugs). We don't tie this
+  // to the overall Flutter version as that version is not yet defined when the
+  // engine is compiled. Instead we can manually bump it occassionally.
+  //
+  // variant, major, minor, patch
+  application_info.setApplicationVersion(
+      VK_MAKE_API_VERSION(0, 2, 0, 0) /*version 2.0.0*/);
   application_info.setApiVersion(VK_API_VERSION_1_1);
   application_info.setEngineVersion(VK_API_VERSION_1_0);
   application_info.setPEngineName("Impeller");
@@ -546,9 +548,8 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
     DescriptorPoolMap::iterator current_pool =
         cached_descriptor_pool_.find(std::this_thread::get_id());
     if (current_pool == cached_descriptor_pool_.end()) {
-      descriptor_pool =
-          (cached_descriptor_pool_[std::this_thread::get_id()] =
-               std::make_shared<DescriptorPoolVK>(weak_from_this()));
+      descriptor_pool = (cached_descriptor_pool_[std::this_thread::get_id()] =
+                             descriptor_pool_recycler_->GetDescriptorPool());
     } else {
       descriptor_pool = current_pool->second;
     }

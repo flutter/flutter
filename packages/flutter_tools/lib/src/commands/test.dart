@@ -273,10 +273,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'timeout',
         help:
-            'The default test timeout, specified either '
-            'in seconds (e.g. "60s"), '
-            'as a multiplier of the default timeout (e.g. "2x"), '
-            'or as the string "none" to disable the timeout entirely.',
+            'The default timeout for individual tests, specified either in '
+            'seconds (e.g. "60s"), as a multiplier of the default test timeout '
+            '(e.g. "2x"), or as the string "none" to disable test timeouts '
+            'entirely. This value does not apply to the default test suite '
+            'loading timeout.',
+      )
+      ..addFlag(
+        'ignore-timeouts',
+        help:
+            'Ignore all timeouts. Useful when testing a big application '
+            'that requires a longer time to compile (e.g. running integration '
+            'tests for a Flutter app).',
+        negatable: false,
       )
       ..addFlag(
         FlutterOptions.kWebWasmFlag,
@@ -647,6 +656,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        ignoreTimeouts: boolArg('ignore-timeouts'),
         failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
@@ -675,6 +685,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
         timeout: stringArg('timeout'),
+        ignoreTimeouts: boolArg('ignore-timeouts'),
         failFast: boolArg('fail-fast'),
         runSkipped: boolArg('run-skipped'),
         shardIndex: shardIndex,
@@ -716,8 +727,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final String projectName = flutterProject.manifest.appName;
-    final Set<String> packagesToInclude = <String>{if (packagesRegExps.isEmpty) projectName};
+    final Set<String> packagesToInclude = <String>{};
+    if (packagesRegExps.isEmpty) {
+      void addProject(FlutterProject project) {
+        packagesToInclude.add(project.manifest.appName);
+        project.workspaceProjects.forEach(addProject);
+      }
+
+      addProject(flutterProject);
+    }
     try {
       for (final String regExpStr in packagesRegExps) {
         final RegExp regExp = RegExp(regExpStr);
@@ -732,7 +750,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   /// Parses a test file/directory target passed as an argument and returns it
-  /// as an absolute file:/// [URI] with optional querystring for name/line/col.
+  /// as an absolute `file:///` [Uri] with optional querystring for name/line/col.
   Uri _parseTestArgument(String arg) {
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
@@ -753,7 +771,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required String packageConfigPath,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build(packageConfigPath: packageConfigPath, flavor: flavor);
+    final int build = await assetBundle.build(
+      packageConfigPath: packageConfigPath,
+      flavor: flavor,
+      includeAssetsFromDevDependencies: true,
+    );
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }

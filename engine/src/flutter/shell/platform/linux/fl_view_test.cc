@@ -5,9 +5,10 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
-#include "flutter/shell/platform/linux/testing/mock_window.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "gtest/gtest.h"
 
@@ -59,6 +60,57 @@ TEST(FlViewTest, FirstFrameSignal) {
 
   // Check view has detected frame.
   EXPECT_TRUE(first_frame_emitted);
+}
+
+// Check semantics update applied
+TEST(FlViewTest, SemanticsUpdate) {
+  flutter::testing::fl_ensure_gtk_init();
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlView* view = fl_view_new(project);
+
+  FlEngine* engine = fl_view_get_engine(view);
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+
+  FlutterSemanticsNode2 root_node = {
+      .id = 0,
+      .label = "root",
+  };
+  FlutterSemanticsNode2* nodes[1] = {&root_node};
+  FlutterSemanticsUpdate2 update = {
+      .node_count = 1, .nodes = nodes, .view_id = 0};
+  g_signal_emit_by_name(engine, "update-semantics", &update);
+
+  FlViewAccessible* accessible = fl_view_get_accessible(view);
+  EXPECT_EQ(atk_object_get_n_accessible_children(ATK_OBJECT(accessible)), 1);
+  AtkObject* root_object =
+      atk_object_ref_accessible_child(ATK_OBJECT(accessible), 0);
+  EXPECT_STREQ(atk_object_get_name(root_object), "root");
+}
+
+// Check semantics update ignored for other view
+TEST(FlViewTest, SemanticsUpdateOtherView) {
+  flutter::testing::fl_ensure_gtk_init();
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlView* view = fl_view_new(project);
+
+  FlEngine* engine = fl_view_get_engine(view);
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+
+  FlutterSemanticsNode2 root_node = {
+      .id = 0,
+      .label = "root",
+  };
+  FlutterSemanticsNode2* nodes[1] = {&root_node};
+  FlutterSemanticsUpdate2 update = {
+      .node_count = 1, .nodes = nodes, .view_id = 99};
+  g_signal_emit_by_name(engine, "update-semantics", &update);
+
+  FlViewAccessible* accessible = fl_view_get_accessible(view);
+  EXPECT_EQ(atk_object_get_n_accessible_children(ATK_OBJECT(accessible)), 0);
 }
 
 // Check secondary view is registered with engine.

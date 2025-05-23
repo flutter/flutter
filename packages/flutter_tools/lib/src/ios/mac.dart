@@ -25,6 +25,7 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
@@ -164,10 +165,17 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
-      features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
+    LLDBInitMigration(
+      app.project,
+      buildInfo,
+      globals.logger,
+      deviceID: deviceID,
+      fileSystem: globals.fs,
+      environmentType: environmentType,
+    ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -272,6 +280,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
   }
 
@@ -279,6 +290,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    featureFlags: featureFlags,
   );
   if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
@@ -701,7 +713,7 @@ Future<void> diagnoseXcodeBuildFailure(
   }
 }
 
-/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+/// `xcodebuild <buildaction>` parameter (see `man xcodebuild` for details).
 ///
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
@@ -965,7 +977,8 @@ Future<bool> _handleIssues(
         'to learn more about understanding Podlock dependency tree. \n\n'
         'You can also disable Swift Package Manager for the project by adding the '
         'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n',
+        '  config:'
+        '    enable-swift-package-manager: false\n',
       );
     }
   } else if (missingModules.isNotEmpty) {

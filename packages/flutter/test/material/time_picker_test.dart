@@ -8,8 +8,10 @@ library;
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -72,7 +74,7 @@ void main() {
 
   testWidgets('Material2 - Dialog size - input mode', (WidgetTester tester) async {
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
-    const Size timePickerInputSize = Size(312, 216);
+    const Size timePickerInputSize = Size(312, 252);
     const Size dayPeriodPortraitSize = Size(52, 80);
     const EdgeInsets padding = EdgeInsets.fromLTRB(8, 18, 8, 8);
     final double height = timePickerInputSize.height + padding.vertical;
@@ -81,7 +83,9 @@ void main() {
     await mediaQueryBoilerplate(tester, entryMode: entryMode, materialType: MaterialType.material2);
 
     width = timePickerInputSize.width + padding.horizontal;
-    expect(tester.getSize(find.byWidget(getMaterialFromDialog(tester))), Size(width, height));
+    Size size = tester.getSize(find.byWidget(getMaterialFromDialog(tester)));
+    expect(size.width, width);
+    expect(size.height, lessThan(height));
 
     await tester.tap(find.text(okString)); // dismiss the dialog
     await tester.pumpAndSettle();
@@ -93,7 +97,9 @@ void main() {
       materialType: MaterialType.material2,
     );
     width = timePickerInputSize.width - dayPeriodPortraitSize.width - 12 + padding.horizontal + 16;
-    expect(tester.getSize(find.byWidget(getMaterialFromDialog(tester))), Size(width, height));
+    size = tester.getSize(find.byWidget(getMaterialFromDialog(tester)));
+    expect(size.width, width);
+    expect(size.height, lessThan(height));
   });
 
   testWidgets('Material2 - respects MediaQueryData.alwaysUse24HourFormat == true', (
@@ -160,10 +166,10 @@ void main() {
   });
 
   testWidgets('Material3 - Dialog size - input mode', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
     const double textScaleFactor = 1.0;
-    const Size timePickerMinInputSize = Size(312, 216);
+    const Size timePickerMinInputSize = Size(312, 252);
     const Size dayPeriodPortraitSize = Size(52, 80);
     const EdgeInsets padding = EdgeInsets.all(24.0);
     final double height = timePickerMinInputSize.height * textScaleFactor + padding.vertical;
@@ -172,7 +178,9 @@ void main() {
     await mediaQueryBoilerplate(tester, entryMode: entryMode, materialType: MaterialType.material3);
 
     width = timePickerMinInputSize.width - (theme.useMaterial3 ? 32 : 0) + padding.horizontal;
-    expect(tester.getSize(find.byWidget(getMaterialFromDialog(tester))), Size(width, height));
+    Size size = tester.getSize(find.byWidget(getMaterialFromDialog(tester)));
+    expect(size.width, width);
+    expect(size.height, lessThan(height));
 
     await tester.tap(find.text(okString)); // dismiss the dialog
     await tester.pumpAndSettle();
@@ -185,7 +193,9 @@ void main() {
     );
 
     width = timePickerMinInputSize.width - dayPeriodPortraitSize.width - 12 + padding.horizontal;
-    expect(tester.getSize(find.byWidget(getMaterialFromDialog(tester))), Size(width, height));
+    size = tester.getSize(find.byWidget(getMaterialFromDialog(tester)));
+    expect(size.width, width);
+    expect(size.height, lessThan(height));
   });
 
   testWidgets('Material3 - respects MediaQueryData.alwaysUse24HourFormat == true', (
@@ -222,10 +232,68 @@ void main() {
     expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/164860
+  testWidgets('Material3 - formats 24-hour numbers correctly in Farsi', (
+    WidgetTester tester,
+  ) async {
+    await mediaQueryBoilerplate(
+      tester,
+      locale: const Locale('fa', 'IR'),
+      materialType: MaterialType.material3,
+    );
+
+    final List<String> labels00To23 = <String>[
+      '۰',
+      '۱',
+      '۲',
+      '۳',
+      '۴',
+      '۵',
+      '۶',
+      '۷',
+      '۸',
+      '۹',
+      '۱۰',
+      '۱۱',
+      '۱۲',
+      '۱۳',
+      '۱۴',
+      '۱۵',
+      '۱۶',
+      '۱۷',
+      '۱۸',
+      '۱۹',
+      '۲۰',
+      '۲۱',
+      '۲۲',
+      '۲۳',
+    ];
+    final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
+
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+      labels00To23,
+    );
+    // ignore: avoid_dynamic_calls
+    expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+  });
+
   testWidgets('Material3 - Dial background uses correct default color', (
     WidgetTester tester,
   ) async {
-    ThemeData theme = ThemeData(useMaterial3: true);
+    ThemeData theme = ThemeData();
     Widget buildTimePicker(ThemeData themeData) {
       return MaterialApp(
         theme: themeData,
@@ -593,6 +661,24 @@ void main() {
         expect(find.text('Enter time'), findsOneWidget);
         expect(find.text('Cancel'), findsOneWidget);
       });
+
+      testWidgets(
+        'Material3 - large actions label should not overflow in input mode',
+        (WidgetTester tester) async {
+          await startPicker(
+            tester,
+            (TimeOfDay? time) {},
+            entryMode: TimePickerEntryMode.input,
+            materialType: MaterialType.material3,
+            cancelText: 'Very very very long cancel text',
+            confirmText: 'Very very very long confirm text',
+          );
+
+          // Verify that no overflow errors occur.
+          expect(tester.takeException(), isNull);
+        },
+        variant: TargetPlatformVariant.mobile(),
+      );
 
       testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (
         WidgetTester tester,
@@ -1067,7 +1153,6 @@ void main() {
         const String cancelString = 'Cancel';
         Widget buildFrame(TextDirection textDirection) {
           return MaterialApp(
-            theme: ThemeData(useMaterial3: true),
             home: Material(
               child: Center(
                 child: Builder(
@@ -1992,6 +2077,45 @@ void main() {
         expect(hourField.focusNode!.hasFocus, isFalse);
         expect(minuteField.focusNode!.hasFocus, isFalse);
       });
+
+      testWidgets(
+        'TAB key selects text in hour and minute fields on the web',
+        (WidgetTester tester) async {
+          await mediaQueryBoilerplate(
+            tester,
+            entryMode: TimePickerEntryMode.input,
+            materialType: materialType,
+          );
+
+          // Focus on the hour field.
+          final Finder hourField = find.byType(TextField).first;
+          await tester.tap(hourField);
+          await tester.pumpAndSettle();
+
+          // Verify that the hour field is focused and its text is selected.
+          final TextField hourTextField = tester.widget(hourField);
+          expect(hourTextField.focusNode!.hasFocus, isTrue);
+          expect(hourTextField.controller!.selection.baseOffset, 0);
+          expect(
+            hourTextField.controller!.selection.extentOffset,
+            hourTextField.controller!.text.length,
+          );
+
+          // Press TAB to move to the minute field.
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pumpAndSettle();
+
+          // Verify that the minute field is focused and its text is selected.
+          final Finder minuteField = find.byType(TextField).last;
+          final TextField minuteTextField = tester.widget(minuteField);
+          expect(minuteTextField.controller!.selection.baseOffset, 0);
+          expect(
+            minuteTextField.controller!.selection.extentOffset,
+            minuteTextField.controller!.text.length,
+          );
+        },
+        skip: !kIsWeb, // [intended] Web-specific behavior
+      );
     });
 
     group('Time picker - Restoration (${materialType.name})', () {
@@ -2126,6 +2250,77 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text(':'));
     expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
     expect(paragraph.text.style!.fontSize, 56.0);
+  });
+
+  testWidgets('provides semantics information for hour/minute mode announcement', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(TimePickerDialog)),
+    );
+    final Finder semanticsFinder = find.bySemanticsLabel(
+      localizations.timePickerHourModeAnnouncement,
+    );
+
+    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
+    expect(
+      semanticsNode.label,
+      localizations.timePickerHourModeAnnouncement,
+      reason: 'Label should announce hour mode initially',
+    );
+    expect(
+      semanticsNode.hasFlag(SemanticsFlag.isLiveRegion),
+      isTrue,
+      reason: 'Node should be a live region to announce changes',
+    );
+
+    // --- Switch to minute mode ---
+    final Finder minuteControlInkWell = find.descendant(
+      of: _minuteControl,
+      matching: find.byType(InkWell),
+    );
+    expect(minuteControlInkWell, findsOneWidget, reason: 'Minute control should exist');
+    await tester.tap(minuteControlInkWell);
+    await tester.pumpAndSettle();
+
+    // Get the updated node properties
+    expect(
+      semanticsNode.label,
+      localizations.timePickerMinuteModeAnnouncement,
+      reason: 'Label should announce minute mode after switching',
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for the header (selected time)', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TimeOfDay initialTime = TimeOfDay(hour: 7, minute: 15);
+
+    await mediaQueryBoilerplate(
+      tester,
+      initialTime: initialTime,
+      materialType: MaterialType.material3,
+    );
+
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(TimePickerDialog)),
+    );
+    final String expectedLabel12Hour = localizations.formatTimeOfDay(initialTime);
+    final String expectedHelpText = localizations.timePickerDialHelpText;
+
+    expect(
+      semantics,
+      includesNodeWith(label: '$expectedLabel12Hour\n$expectedHelpText'),
+      reason: 'Header should have semantics label: $expectedLabel12Hour (12-hour)',
+    );
+
+    semantics.dispose();
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/153549.
@@ -2326,11 +2521,15 @@ class _TimePickerLauncher extends StatefulWidget {
     required this.onChanged,
     this.entryMode = TimePickerEntryMode.dial,
     this.restorationId,
+    this.cancelText,
+    this.confirmText,
   });
 
   final ValueChanged<TimeOfDay?> onChanged;
   final TimePickerEntryMode entryMode;
   final String? restorationId;
+  final String? cancelText;
+  final String? confirmText;
 
   @override
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
@@ -2347,7 +2546,11 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
         onPresent: (NavigatorState navigator, Object? arguments) {
           return navigator.restorablePush(
             _timePickerRoute,
-            arguments: <String, String>{'entry_mode': widget.entryMode.name},
+            arguments: <String, String>{
+              'entry_mode': widget.entryMode.name,
+              if (widget.cancelText != null) 'cancel_text': widget.cancelText!,
+              if (widget.confirmText != null) 'confirm_text': widget.confirmText!,
+            },
           );
         },
       );
@@ -2364,6 +2567,8 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
     final TimePickerEntryMode entryMode = TimePickerEntryMode.values.firstWhere(
       (TimePickerEntryMode element) => element.name == args['entry_mode'],
     );
+    final String? cancelText = args['cancel_text'] as String?;
+    final String? confirmText = args['confirm_text'] as String?;
     return DialogRoute<TimeOfDay>(
       context: context,
       builder: (BuildContext context) {
@@ -2371,6 +2576,8 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
           restorationId: 'time_picker_dialog',
           initialTime: const TimeOfDay(hour: 7, minute: 0),
           initialEntryMode: entryMode,
+          cancelText: cancelText,
+          confirmText: confirmText,
         );
       },
     );
@@ -2427,6 +2634,8 @@ Future<Offset?> startPicker(
   String? restorationId,
   ThemeData? theme,
   MaterialType? materialType,
+  String? cancelText,
+  String? confirmText,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -2437,6 +2646,8 @@ Future<Offset?> startPicker(
         onChanged: onChanged,
         entryMode: entryMode,
         restorationId: restorationId,
+        cancelText: cancelText,
+        confirmText: confirmText,
       ),
     ),
   );

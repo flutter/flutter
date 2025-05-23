@@ -260,33 +260,50 @@ def setup_rbe(args):
   return rbe_gn_args
 
 
-# Find the locations of the macOS and iOS SDKs under flutter/prebuilts.
+# Returns a mapping of gn variables to paths of the macOS and iOS SDKs found
+# under //flutter/prebuilts directory.
+#
+# `gclient sync` populates symlinks under:
+# * //flutter/prebuilts/Platforms: for Apple Platforms.
+# * //flutter/prebuilts/SDKs: for Apple SDKs and the host toolchain.
 def setup_apple_sdks():
   sdks_gn_args = {}
 
-  # These are needed on a macOS host regardless of target.
-  # This value should agree with the 'mac_sdk_min' value in the DEPS file.
-  sdks_gn_args['mac_sdk_min'] = '10.14'
-
   # The MACOSX_DEPLOYMENT_TARGET variable used when compiling.
   # Must be of the form x.x.x for Info.plist files.
-  sdks_gn_args['mac_deployment_target'] = '10.14.0'
+  sdks_gn_args['mac_deployment_target'] = '10.15.0'
 
   running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
   if running_on_luci:
     return sdks_gn_args
 
-  prefixes = [
+  # Populate args for SDKs in //flutter/prebuilts/SDKs.
+  sdk_prefixes = [
       ('MacOSX', 'mac_sdk_path'),
       ('iPhoneOS', 'ios_device_sdk_path'),
       ('iPhoneSimulator', 'ios_simulator_sdk_path'),
+      ('XcodeDefault.xctoolchain', 'mac_host_toolchain_path'),
   ]
   sdks_path = os.path.join(SRC_ROOT, 'flutter', 'prebuilts', 'SDKs')
   sdk_entries = os.listdir(sdks_path)
-  for (prefix, arg) in prefixes:
+  for (prefix, arg) in sdk_prefixes:
     for entry in sdk_entries:
       if entry.startswith(prefix):
         sdks_gn_args[arg] = os.path.join(sdks_path, entry)
+
+  # Populate args for SDKs in //flutter/prebuilts/Platforms.
+  platform_prefixes = [
+      ('MacOSX', 'mac_platform_path'),
+      ('iPhoneOS', 'ios_device_platform_path'),
+      ('iPhoneSimulator', 'ios_simulator_platform_path'),
+  ]
+  platforms_path = os.path.join(SRC_ROOT, 'flutter', 'prebuilts', 'Platforms')
+  platform_entries = os.listdir(platforms_path)
+  for (prefix, arg) in platform_prefixes:
+    for entry in platform_entries:
+      if entry.startswith(prefix):
+        sdks_gn_args[arg] = os.path.join(platforms_path, entry)
+
   return sdks_gn_args
 
 
@@ -394,9 +411,6 @@ def to_gn_args(args):
   if args.simulator:
     if args.target_os != 'ios':
       raise Exception('--simulator is only supported for iOS')
-
-  if args.slimpeller and args.target_os != 'ios':
-    raise Exception('--slimpeller is only supported for iOS.')
 
   runtime_mode = args.runtime_mode
 
@@ -628,6 +642,12 @@ def to_gn_args(args):
 
   if args.arm_float_abi:
     gn_args['arm_float_abi'] = args.arm_float_abi
+
+  if args.dart_dynamic_modules:
+    gn_args['dart_dynamic_modules'] = True
+
+  if args.no_enable_unittests:
+    gn_args['dart_dynamic_modules'] = False
 
   # If we have a prebuilt for the Dart SDK for the target architecture, then
   # use it instead of building a new one.
@@ -1139,6 +1159,16 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Use mallinfo2 to collect malloc stats.'
+  )
+
+  parser.add_argument(
+      '--dart-dynamic-modules',
+      default=False,
+      action='store_true',
+      help='Whether to include the Dart dynamic module interpreter in the build.'
+  )
+  parser.add_argument(
+      '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
   )
 
   # Impeller flags.

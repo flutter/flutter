@@ -46,7 +46,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 12
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 13
 
   # ARC code targeting iOS 8 does not build on Xcode 14.3.
   force_to_arc_supported_min = target.deployment_target[/\d+/].to_i < 9
@@ -128,11 +128,11 @@ def flutter_additional_macos_build_settings(target)
                                   (deployment_target_major.to_i < 10) ||
                                   (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 11)
 
-  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.14).
+  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.15).
   # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
   inherit_deployment_target = !target.deployment_target.blank? &&
     (deployment_target_major.to_i < 10) ||
-    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 14)
+    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 15)
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -233,7 +233,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
         s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.ios.deployment_target = '12.0'
+        s.ios.deployment_target = '13.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -271,7 +271,7 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
         s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.osx.deployment_target = '10.14'
+        s.osx.deployment_target = '10.15'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'FlutterMacOS'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'

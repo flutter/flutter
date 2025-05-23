@@ -150,12 +150,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             `CustomAccessibilityActionUpdates`,
     ///             `PlatformView::UpdateSemantics`
     ///
+    /// @param[in]  view_id  The ID of the view that this update is for
     /// @param[in]  updates  A map with the stable semantics node identifier as
     ///                      key and the node properties as the value.
     /// @param[in]  actions  A map with the stable semantics node identifier as
     ///                      key and the custom node action as the value.
     ///
     virtual void OnEngineUpdateSemantics(
+        int64_t view_id,
         SemanticsNodeUpdates updates,
         CustomAccessibilityActionUpdates actions) = 0;
 
@@ -404,8 +406,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
          const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-         impeller::RuntimeStageBackend runtime_stage_type =
-             impeller::RuntimeStageBackend::kSkSL);
+         const std::shared_future<impeller::RuntimeStageBackend>&
+             runtime_stage_backend);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a Engine that shares as many resources as
@@ -439,7 +441,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @return     The pointer to this instance of the engine. The engine may
   ///             only be accessed safely on the UI task runner.
   ///
-  fml::WeakPtr<Engine> GetWeakPtr() const;
+  fml::TaskRunnerAffineWeakPtr<Engine> GetWeakPtr() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Moves the root isolate to the `DartIsolate::Phase::Running`
@@ -819,12 +821,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             originates on the platform view and has been forwarded to the
   ///             engine here on the UI task runner by the shell.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The accessibility related action performed on the
   ///                     node of the specified ID.
   /// @param[in]  args    Optional data that applies to the specified action.
   ///
-  void DispatchSemanticsAction(int node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -873,7 +877,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::shared_ptr<AssetManager> GetAssetManager() override;
 
   // Return the weak_ptr of ImageDecoder.
-  fml::WeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
+  fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
 
   //----------------------------------------------------------------------------
   /// @brief      Get the `ImageGeneratorRegistry` associated with the current
@@ -881,7 +885,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   /// @return     The engine's `ImageGeneratorRegistry`.
   ///
-  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry();
+  fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+  GetImageGeneratorRegistry();
 
   // |PointerDataDispatcher::Delegate|
   void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
@@ -1008,7 +1013,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
               float device_pixel_ratio) override;
 
   // |RuntimeDelegate|
-  void UpdateSemantics(SemanticsNodeUpdates update,
+  void UpdateSemantics(int64_t view_id,
+                       SemanticsNodeUpdates update,
                        CustomAccessibilityActionUpdates actions) override;
 
   // |RuntimeDelegate|
@@ -1079,7 +1085,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::unique_ptr<ImageDecoder> image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
-  fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.
+  fml::TaskRunnerAffineWeakPtrFactory<Engine>
+      weak_factory_;  // Must be the last member.
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 

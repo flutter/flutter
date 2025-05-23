@@ -8,7 +8,7 @@
 @TestOn('!chrome')
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -20,7 +20,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
@@ -1617,6 +1616,7 @@ void main() {
               id: 1,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
@@ -2166,6 +2166,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               actions: <SemanticsAction>[SemanticsAction.longPress],
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isReadOnly,
@@ -2195,6 +2196,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               textSelection: const TextSelection.collapsed(offset: 9),
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2228,6 +2230,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 4),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2263,6 +2266,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 0),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorForwardByCharacter,
@@ -2342,6 +2346,7 @@ void main() {
               id: 1,
               value: 'Guten Tag',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 // Absent the following because enableInteractiveSelection: false
@@ -2387,6 +2392,7 @@ void main() {
               id: 1,
               value: 'Hello',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
@@ -2418,6 +2424,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2451,6 +2458,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2527,6 +2535,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           actions: <SemanticsAction>[SemanticsAction.longPress],
+                          inputType: ui.SemanticsInputType.text,
                           children: <TestSemantics>[
                             TestSemantics(
                               children: <TestSemantics>[
@@ -2600,6 +2609,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2653,6 +2663,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2699,6 +2710,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
@@ -2725,6 +2737,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
@@ -5267,7 +5280,7 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.1.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+  });
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5304,7 +5317,7 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+  });
 
   testWidgets('keeps alive when has focus', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5566,5 +5579,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+  });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 }

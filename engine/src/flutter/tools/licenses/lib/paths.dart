@@ -101,6 +101,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'flutter/third_party/gradle',
   r'flutter/third_party/harfbuzz/docs',
+  r'flutter/third_party/harfbuzz/perf',
+  r'flutter/third_party/harfbuzz/src/hb-bit-vector.hh',
+  r'flutter/third_party/harfbuzz/src/hb-directwrite.hh',
+  r'flutter/third_party/harfbuzz/src/hb-directwrite-shape.cc',
+  r'flutter/third_party/harfbuzz/src/hb-fontations.h',
   r'flutter/third_party/harfbuzz/util', // utils are command line tools that do not end up in the binary
   r'flutter/third_party/icu/filters',
   r'flutter/third_party/icu/fuzzers',
@@ -137,6 +142,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/libwebp/gradle', // not included in our build
   r'flutter/third_party/libwebp/swig', // not included in our build
   r'flutter/third_party/libwebp/webp_js',
+  r'flutter/third_party/llvm_libc/AOR_v20.02',
+  r'flutter/third_party/llvm_libc/benchmarks',
+  r'flutter/third_party/llvm_libc/examples',
+  r'flutter/third_party/llvm_libc/fuzzing',
+  r'flutter/third_party/llvm_libc/test',
   r'flutter/third_party/ninja', // build system
   r'flutter/third_party/ocmock', // only used for tests
   r'flutter/third_party/perfetto/debian', // contains nothing that ends up in the binary executable

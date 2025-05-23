@@ -49,6 +49,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
+      bool injectDebuggingSupportCode,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -131,7 +132,7 @@ class WebAssetServer implements AssetReader {
     this._canaryFeatures, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
-  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref() {
+  }) : basePath = WebTemplate.baseHref(_htmlTemplate('index.html', _kDefaultIndex)) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -145,10 +146,6 @@ class WebAssetServer implements AssetReader {
 
   final Map<String, String> _modules;
   final Map<String, String> _digests;
-
-  // The generation number that maps to the number of hot restarts. This is used
-  // to suffix a query to source paths in order to cache-bust.
-  int _hotRestartGeneration = 0;
 
   int get selectedPort => _httpServer.port;
 
@@ -179,14 +176,13 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
-    if (writeRestartScripts && _hotRestartGeneration > 0) {
+    if (writeRestartScripts) {
       final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
       for (final String src in modules) {
-        srcIdsList.add(<String, String>{'src': '$src?gen=$_hotRestartGeneration', 'id': src});
+        srcIdsList.add(<String, String>{'src': src, 'id': src});
       }
       writeFile('restart_scripts.json', json.encode(srcIdsList));
     }
-    _hotRestartGeneration++;
   }
 
   static const String _reloadScriptsFileName = 'reload_scripts.json';
@@ -378,6 +374,15 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen(log);
 
+    // Retrieve connected web devices.
+    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
+    final Set<String> connectedWebDeviceIds =
+        devices
+            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
+            .map((Device d) => d.id)
+            .toSet() ??
+        <String>{};
+
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -428,6 +433,12 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
+      // Inject the debugging support code if connected web devices are present,
+      // and user specified a device id that matches a connected web device.
+      // If the user did not specify a device id, we use chrome as the default.
+      injectDebuggingSupportCode:
+          connectedWebDeviceIds.isNotEmpty &&
+          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -669,15 +680,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   String get _flutterBootstrapJsContent {
     final WebTemplate bootstrapTemplate = _getWebTemplate(
       'flutter_bootstrap.js',
-      generateDefaultFlutterBootstrapScript(),
+      generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
-    bootstrapTemplate.applySubstitutions(
+    return bootstrapTemplate.withSubstitutions(
       baseHref: '/',
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
     );
-    return bootstrapTemplate.content;
   }
 
   shelf.Response _serveFlutterBootstrapJs() {
@@ -689,16 +699,15 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   shelf.Response _serveIndexHtml() {
     final WebTemplate indexHtml = _getWebTemplate('index.html', _kDefaultIndex);
-    indexHtml.applySubstitutions(
-      // Currently, we don't support --base-href for the "run" command.
-      baseHref: '/',
-      serviceWorkerVersion: null,
-      buildConfig: _buildConfigString,
-      flutterJsFile: _flutterJsFile,
-      flutterBootstrapJs: _flutterBootstrapJsContent,
-    );
     return shelf.Response.ok(
-      indexHtml.content,
+      indexHtml.withSubstitutions(
+        // Currently, we don't support --base-href for the "run" command.
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        buildConfig: _buildConfigString,
+        flutterJsFile: _flutterJsFile,
+        flutterBootstrapJs: _flutterBootstrapJsContent,
+      ),
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
     );
   }
@@ -1139,7 +1148,14 @@ class WebDevFS implements DevFS {
       recompileRestart: fullRestart,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport();
+      return UpdateFSReport(
+        // TODO(srujzs): We're currently reliant on compile error string parsing
+        // as hot reload rejections are sent to stderr just like other
+        // compilation errors. Ideally, we should have some shared parsing
+        // functionality, but that would require a shared package.
+        // See https://github.com/dart-lang/sdk/issues/60275.
+        hotReloadRejected: compilerOutput?.errorMessage?.contains('Hot reload rejected') ?? false,
+      );
     }
 
     // Only update the last compiled time if we successfully compiled.
@@ -1167,7 +1183,10 @@ class WebDevFS implements DevFS {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
     if (fullRestart) {
-      webAssetServer.performRestart(modules, writeRestartScripts: ddcModuleSystem);
+      webAssetServer.performRestart(
+        modules,
+        writeRestartScripts: ddcModuleSystem && !bundleFirstUpload,
+      );
     } else {
       webAssetServer.performReload(modules);
     }
@@ -1365,7 +1384,11 @@ String? _stripBasePath(String path, String basePath) {
 }
 
 WebTemplate _getWebTemplate(String filename, String fallbackContent) {
-  final File template = globals.fs.currentDirectory.childDirectory('web').childFile(filename);
-  final String htmlContent = template.existsSync() ? template.readAsStringSync() : fallbackContent;
+  final String htmlContent = _htmlTemplate(filename, fallbackContent);
   return WebTemplate(htmlContent);
+}
+
+String _htmlTemplate(String filename, String fallbackContent) {
+  final File template = globals.fs.currentDirectory.childDirectory('web').childFile(filename);
+  return template.existsSync() ? template.readAsStringSync() : fallbackContent;
 }

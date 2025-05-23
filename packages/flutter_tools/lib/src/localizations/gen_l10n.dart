@@ -112,7 +112,7 @@ String _defaultSyntheticPackagePath(FileSystem fileSystem) =>
 /// The default path used when the `_useSyntheticPackage` setting is set to true
 /// in [LocalizationsGenerator].
 ///
-/// See [LocalizationsGenerator.initialize] for where and how it is used by the
+/// See [LocalizationsGenerator.new] for where and how it is used by the
 /// localizations tool.
 String _syntheticL10nPackagePath(FileSystem fileSystem) =>
     fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
@@ -134,8 +134,8 @@ List<String> generateMethodParameters(
     final Placeholder? localePlaceholder = localePlaceholders?[e.key];
     if (localePlaceholder != null && placeholder.type != localePlaceholder.type) {
       throw L10nException(
-        'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
-        'the "${localePlaceholder.type}" type in locale "$locale", but it is "${placeholder.type}" '
+        'For the message "${message.resourceId}" the placeholder "${placeholder.name}" has its "type" resource attribute set to '
+        'the type "${localePlaceholder.type}" in locale "$locale", but it is "${placeholder.type}" '
         'in the template placeholder. For compatibility with template placeholder, change '
         'the "type" attribute to "${placeholder.type}".',
       );
@@ -163,8 +163,8 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
         final String? placeholderFormat = placeholder.format;
         if (placeholderFormat == null) {
           throw L10nException(
-            'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
-            'the "${placeholder.type}" type. To properly resolve for the right '
+            'For the message "${message.resourceId}" the placeholder "${placeholder.name}" has its "type" resource attribute set to '
+            'the type "${placeholder.type}" in locale "$locale". To properly resolve for the right '
             '${placeholder.type} format, the "format" attribute needs to be set '
             'to determine which DateFormat to use. \n'
             "Check the intl library's DateFormat class constructors for allowed "
@@ -176,8 +176,8 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
             (isCustomDateFormat == null || !isCustomDateFormat)) {
           if (placeholder.dateFormatParts.length > 1) {
             throw L10nException(
-              'Date format "$placeholderFormat" for placeholder '
-              '${placeholder.name} contains at least one invalid date format. '
+              'For the message "${message.resourceId}" the date format "$placeholderFormat" for placeholder '
+              '${placeholder.name} contains at least one invalid date format in locale "$locale". '
               'Ensure all date formats joined by a "+" character have '
               'a corresponding DateFormat constructor.\n Check the intl '
               "library's DateFormat class constructors for allowed date formats.",
@@ -185,9 +185,9 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
           }
 
           throw L10nException(
-            'Date format "$placeholderFormat" for placeholder '
+            'For the message "${message.resourceId}" the date format "$placeholderFormat" for placeholder '
             '${placeholder.name} does not have a corresponding DateFormat '
-            "constructor\n. Check the intl library's DateFormat class "
+            'constructor in locale "$locale". Check the intl library\'s DateFormat class '
             'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
             'to "true".',
           );
@@ -228,8 +228,8 @@ String generateNumberFormattingLogic(Message message, LocaleInfo locale) {
         final String? placeholderFormat = placeholder.format;
         if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
           throw L10nException(
-            'Number format $placeholderFormat for the ${placeholder.name} '
-            'placeholder does not have a corresponding NumberFormat constructor.\n'
+            'For the message "${message.resourceId}" the number format $placeholderFormat for the ${placeholder.name} '
+            'placeholder does not have a corresponding NumberFormat constructor in locale "$locale".\n'
             "Check the intl library's NumberFormat class constructors for allowed "
             'number formats.',
           );
@@ -526,7 +526,7 @@ String _generateDelegateClass({
 
 class LocalizationsGenerator {
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
-  /// [outputFile] and [className].
+  /// [baseOutputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
   /// by [LocalizationsGenerator].
@@ -545,7 +545,7 @@ class LocalizationsGenerator {
     String? headerFile,
     bool useDeferredLoading = false,
     String? inputsAndOutputsListPath,
-    bool useSyntheticPackage = true,
+    bool useSyntheticPackage = false,
     String? projectPathString,
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,
@@ -658,12 +658,12 @@ class LocalizationsGenerator {
   /// The directory to generate the project's localizations files in.
   ///
   /// It is assumed that all output files (e.g. The localizations
-  /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
+  /// [baseOutputFile], `messages_<locale>.dart` and `messages_all.dart`)
   /// will reside here.
   final Directory outputDirectory;
 
   /// The input arb file which defines all of the messages that will be
-  /// exported by the generated class that's written to [outputFile].
+  /// exported by the generated class that's written to [baseOutputFile].
   final File templateArbFile;
 
   /// The file to write the generated abstract localizations and
@@ -672,7 +672,7 @@ class LocalizationsGenerator {
   /// filename as a prefix and the locale as the suffix.
   final File baseOutputFile;
 
-  /// The class name to be used for the localizations class in [outputFile].
+  /// The class name to be used for the localizations class in [baseOutputFile].
   ///
   /// For example, if 'AppLocalizations' is passed in, a class named
   /// AppLocalizations will be used for localized message lookups.
@@ -726,7 +726,7 @@ class LocalizationsGenerator {
   /// deferred, allowing for lazy loading of each locale in Flutter web.
   ///
   /// This can reduce a web app’s initial startup time by decreasing the size of
-  /// the JavaScript bundle. When [_useDeferredLoading] is set to true, the
+  /// the JavaScript bundle. When [useDeferredLoading] is set to `true`, the
   /// messages for a particular locale are only downloaded and loaded by the
   /// Flutter app as they are needed. For projects with a lot of different
   /// locales and many localization strings, it can be an performance
@@ -1269,7 +1269,7 @@ class LocalizationsGenerator {
             .replaceAll('@(name)', message.resourceId)
             .replaceAll(
               '@(message)',
-              "'${generateString(node.children.map((Node child) => child.value!).join())}'",
+              "'${generateString(node.children.map((Node child) => child.value).join())}'",
             );
       }
 
@@ -1406,9 +1406,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             // Check that formatType is a valid intl.DateFormat.
             if (!validDateFormats.contains(formatType.value)) {
               throw L10nParserException(
-                'Date format "${formatType.value!}" for placeholder '
+                'For message "${message.resourceId}" the date format "${formatType.value!}" for placeholder '
                 '$identifierName does not have a corresponding DateFormat '
-                "constructor\n. Check the intl library's DateFormat class "
+                'constructor in locale "$locale"\n. Check the intl library\'s DateFormat class '
                 'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
                 'to "true".',
                 _inputFileNames[locale]!,

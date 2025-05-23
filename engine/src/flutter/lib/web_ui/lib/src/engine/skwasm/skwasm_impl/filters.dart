@@ -369,5 +369,7 @@ class SkwasmMaskFilter extends SkwasmObjectWrapper<RawMaskFilter> {
   );
 
   static final SkwasmFinalizationRegistry<RawMaskFilter> _registry =
-      SkwasmFinalizationRegistry<RawMaskFilter>(maskFilterDispose);
+      SkwasmFinalizationRegistry<RawMaskFilter>(
+        (MaskFilterHandle handle) => maskFilterDispose(handle),
+      );
 }

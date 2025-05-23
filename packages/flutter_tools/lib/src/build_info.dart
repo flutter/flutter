@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build_system/build_system.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -917,7 +920,7 @@ const String kAndroidArchs = 'AndroidArchs';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
-/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
 ///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
@@ -967,11 +970,20 @@ const String kBuildName = 'BuildName';
 const String kFlavor = 'Flavor';
 
 /// Environment variable of the flavor to be set in dartDefines to be accessed
-/// by the [appFlavor] service.
+/// by the `appFlavor` service.
 const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
 
 /// The Xcode configuration used to build the project.
 const String kXcodeConfiguration = 'Configuration';
+
+/// The Xcode build setting SRCROOT. Identifies the directory containing the
+/// Xcode target's source files.
+const String kSrcRoot = 'SrcRoot';
+
+/// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
+/// target device. Only available if a specific device is being targeted during
+/// the build.
+const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
@@ -986,6 +998,9 @@ const String kXcodeAction = 'Action';
 /// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
 /// to the BUILT_PRODUCTS_DIR prior to the build.
 const String kXcodePreAction = 'PreBuildAction';
+
+// Whether the last Flutter tool invocation enabled dev dependencies.
+const String kDevDependenciesEnabled = 'DevDependenciesEnabled';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

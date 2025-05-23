@@ -38,6 +38,13 @@ const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
+// From the M3 spec, horizontal padding is 12 pixels for the prefix icon and
+// 16 pixels for the input content.
+// InputDecorator default padding is set to 12 pixels because 16 pixels will move
+// the prefix icon too far.
+// An extra padding should be added for the input content to comply with the 16 pixels padding.
+const double _kInputExtraPadding = 4.0;
+
 typedef _SubtextSize = ({double ascent, double bottomHeight, double subtextHeight});
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
 
@@ -211,7 +218,9 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     );
     _border = _InputBorderTween(begin: widget.border, end: widget.border);
     _hoverAnimation = CurvedAnimation(parent: _hoverColorController, curve: Curves.linear);
-    _hoverColorTween = ColorTween(begin: Colors.transparent, end: widget.hoverColor);
+
+    // Animate between transparent [widget.hoverColor] and [widget.hoverColor].
+    _hoverColorTween = ColorTween(begin: widget.hoverColor.withAlpha(0), end: widget.hoverColor);
   }
 
   @override
@@ -233,7 +242,8 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         ..forward();
     }
     if (widget.hoverColor != oldWidget.hoverColor) {
-      _hoverColorTween = ColorTween(begin: Colors.transparent, end: widget.hoverColor);
+      // Animate between transparent [widget.hoverColor] and [widget.hoverColor].
+      _hoverColorTween = ColorTween(begin: widget.hoverColor.withAlpha(0), end: widget.hoverColor);
     }
     if (widget.isHovering != oldWidget.isHovering) {
       if (widget.isHovering) {
@@ -565,6 +575,7 @@ class _Decoration {
     required this.isDense,
     required this.isEmpty,
     required this.visualDensity,
+    required this.inputGap,
     required this.maintainHintSize,
     this.icon,
     this.input,
@@ -590,6 +601,7 @@ class _Decoration {
   final bool? isDense;
   final bool isEmpty;
   final VisualDensity visualDensity;
+  final double inputGap;
   final bool maintainHintSize;
   final Widget? icon;
   final Widget? input;
@@ -623,6 +635,7 @@ class _Decoration {
         other.isDense == isDense &&
         other.isEmpty == isEmpty &&
         other.visualDensity == visualDensity &&
+        other.inputGap == inputGap &&
         other.maintainHintSize == maintainHintSize &&
         other.icon == icon &&
         other.input == input &&
@@ -649,6 +662,7 @@ class _Decoration {
     isDense,
     isEmpty,
     visualDensity,
+    inputGap,
     maintainHintSize,
     icon,
     input,
@@ -657,8 +671,7 @@ class _Decoration {
     prefix,
     suffix,
     prefixIcon,
-    suffixIcon,
-    Object.hash(helperError, counter, container),
+    Object.hash(suffixIcon, helperError, counter, container),
   );
 }
 
@@ -967,10 +980,14 @@ class _RenderDecoration extends RenderBox
       start:
           iconWidth +
           prefixSize.width +
-          (prefixIcon == null ? contentPadding.start : prefixIconSize.width + prefixToInputGap),
+          (prefixIcon == null
+              ? contentPadding.start + decoration.inputGap
+              : prefixIconSize.width + prefixToInputGap),
       end:
           suffixSize.width +
-          (suffixIcon == null ? contentPadding.end : suffixIconSize.width + inputToSuffixGap),
+          (suffixIcon == null
+              ? contentPadding.end + decoration.inputGap
+              : suffixIconSize.width + inputToSuffixGap),
     );
 
     final double inputWidth = math.max(
@@ -987,7 +1004,11 @@ class _RenderDecoration extends RenderBox
       final double labelWidth = math.max(
         0.0,
         constraints.maxWidth -
-            (iconWidth + contentPadding.horizontal + prefixIconSize.width + suffixIconSpace),
+            (decoration.inputGap * 2 +
+                iconWidth +
+                contentPadding.horizontal +
+                prefixIconSize.width +
+                suffixIconSpace),
       );
 
       // Increase the available width for the label when it is scaled down.
@@ -1168,13 +1189,13 @@ class _RenderDecoration extends RenderBox
             ? math.max(_minWidth(input, height), _minWidth(hint, height))
             : _minWidth(input, height);
     return _minWidth(icon, height) +
-        (prefixIcon != null ? prefixToInputGap : contentPadding.start) +
+        (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _minWidth(prefixIcon, height) +
         _minWidth(prefix, height) +
         contentWidth +
         _minWidth(suffix, height) +
         _minWidth(suffixIcon, height) +
-        (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
+        (suffixIcon != null ? inputToSuffixGap : contentPadding.end + decoration.inputGap);
   }
 
   @override
@@ -1184,13 +1205,13 @@ class _RenderDecoration extends RenderBox
             ? math.max(_maxWidth(input, height), _maxWidth(hint, height))
             : _maxWidth(input, height);
     return _maxWidth(icon, height) +
-        (prefixIcon != null ? prefixToInputGap : contentPadding.start) +
+        (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _maxWidth(prefixIcon, height) +
         _maxWidth(prefix, height) +
         contentWidth +
         _maxWidth(suffix, height) +
         _maxWidth(suffixIcon, height) +
-        (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
+        (suffixIcon != null ? inputToSuffixGap : contentPadding.end + decoration.inputGap);
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {
@@ -1375,10 +1396,13 @@ class _RenderDecoration extends RenderBox
       case TextDirection.ltr:
         start = contentPadding.start + _boxSize(icon).width;
         end = overallWidth - contentPadding.end;
-        _boxParentData(helperError).offset = Offset(start, subtextBaseline - helperErrorBaseline);
+        _boxParentData(helperError).offset = Offset(
+          start + decoration.inputGap,
+          subtextBaseline - helperErrorBaseline,
+        );
         if (counter != null) {
           _boxParentData(counter).offset = Offset(
-            end - counter.size.width,
+            end - counter.size.width - decoration.inputGap,
             subtextBaseline - counterBaseline,
           );
         }
@@ -1386,11 +1410,14 @@ class _RenderDecoration extends RenderBox
         start = overallWidth - contentPadding.start - _boxSize(icon).width;
         end = contentPadding.end;
         _boxParentData(helperError).offset = Offset(
-          start - helperError.size.width,
+          start - helperError.size.width - decoration.inputGap,
           subtextBaseline - helperErrorBaseline,
         );
         if (counter != null) {
-          _boxParentData(counter).offset = Offset(end, subtextBaseline - counterBaseline);
+          _boxParentData(counter).offset = Offset(
+            end + decoration.inputGap,
+            subtextBaseline - counterBaseline,
+          );
         }
     }
 
@@ -1410,6 +1437,8 @@ class _RenderDecoration extends RenderBox
             start += contentPadding.start;
             start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
             start -= prefixToInputGap;
+          } else {
+            start -= decoration.inputGap;
           }
           if (label != null) {
             if (decoration.alignLabelWithHint) {
@@ -1431,6 +1460,8 @@ class _RenderDecoration extends RenderBox
             end -= contentPadding.end;
             end += centerLayout(suffixIcon!, end);
             end += inputToSuffixGap;
+          } else {
+            end += decoration.inputGap;
           }
           if (suffix != null) {
             end += baselineLayout(suffix!, end);
@@ -1443,6 +1474,8 @@ class _RenderDecoration extends RenderBox
             start -= contentPadding.start;
             start += centerLayout(prefixIcon!, start);
             start += prefixToInputGap;
+          } else {
+            start += decoration.inputGap;
           }
           if (label != null) {
             if (decoration.alignLabelWithHint) {
@@ -1464,6 +1497,8 @@ class _RenderDecoration extends RenderBox
             end += contentPadding.end;
             end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
             end -= inputToSuffixGap;
+          } else {
+            end -= decoration.inputGap;
           }
           if (suffix != null) {
             end -= baselineLayout(suffix!, end - suffix!.size.width);
@@ -2257,10 +2292,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final VisualDensity visualDensity = decoration.visualDensity ?? themeData.visualDensity;
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
     final InputDecorationTheme defaults =
-        Theme.of(context).useMaterial3
-            ? _InputDecoratorDefaultsM3(context)
-            : _InputDecoratorDefaultsM2(context);
+        useMaterial3 ? _InputDecoratorDefaultsM3(context) : _InputDecoratorDefaultsM2(context);
     final InputDecorationTheme inputDecorationTheme = themeData.inputDecorationTheme;
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
@@ -2422,7 +2457,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 child: ConstrainedBox(
                   constraints:
                       decoration.prefixIconConstraints ??
-                      themeData.visualDensity.effectiveConstraints(
+                      visualDensity.effectiveConstraints(
                         const BoxConstraints(
                           minWidth: kMinInteractiveDimension,
                           minHeight: kMinInteractiveDimension,
@@ -2460,7 +2495,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 child: ConstrainedBox(
                   constraints:
                       decoration.suffixIconConstraints ??
-                      themeData.visualDensity.effectiveConstraints(
+                      visualDensity.effectiveConstraints(
                         const BoxConstraints(
                           minWidth: kMinInteractiveDimension,
                           minHeight: kMinInteractiveDimension,
@@ -2550,7 +2585,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (decoration.filled ?? false) {
         contentPadding =
             decorationContentPadding ??
-            (Theme.of(context).useMaterial3
+            (useMaterial3
                 ? decorationIsDense
                     ? const EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0)
                     : const EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 8.0)
@@ -2563,7 +2598,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         // the most noticeable layout change introduced by #13734.
         contentPadding =
             decorationContentPadding ??
-            (Theme.of(context).useMaterial3
+            (useMaterial3
                 ? decorationIsDense
                     ? const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0)
                     : const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 8.0)
@@ -2575,7 +2610,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       floatingLabelHeight = 0.0;
       contentPadding =
           decorationContentPadding ??
-          (Theme.of(context).useMaterial3
+          (useMaterial3
               ? decorationIsDense
                   ? const EdgeInsetsDirectional.fromSTEB(12.0, 16.0, 12.0, 8.0)
                   : const EdgeInsetsDirectional.fromSTEB(12.0, 20.0, 12.0, 12.0)
@@ -2584,10 +2619,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               : const EdgeInsetsDirectional.fromSTEB(12.0, 24.0, 12.0, 16.0));
     }
 
+    double inputGap = 0.0;
+    if (useMaterial3) {
+      if (border is OutlineInputBorder) {
+        inputGap = border.gapPadding;
+      } else {
+        inputGap = border.isOutline || (decoration.filled ?? false) ? _kInputExtraPadding : 0.0;
+      }
+    }
+
     final _Decorator decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed,
+        inputGap: inputGap,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration.floatingLabelAlignment!,
         floatingLabelProgress: _floatingLabelAnimation.value,
@@ -2596,7 +2641,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         alignLabelWithHint: decoration.alignLabelWithHint ?? false,
         isDense: decoration.isDense,
         isEmpty: isEmpty,
-        visualDensity: themeData.visualDensity,
+        visualDensity: visualDensity,
         maintainHintSize: maintainHintSize,
         icon: icon,
         input: input,
@@ -2773,6 +2818,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
+    this.visualDensity,
   }) : assert(
          !(label != null && labelText != null),
          'Declaring both label and labelText is not supported.',
@@ -2880,7 +2926,8 @@ class InputDecoration {
        floatingLabelBehavior = floatingLabelBehavior,
        // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
        floatingLabelAlignment = floatingLabelAlignment,
-       alignLabelWithHint = false;
+       alignLabelWithHint = false,
+       visualDensity = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3794,6 +3841,32 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
+  /// Defines how compact the decoration's layout will be.
+  ///
+  /// The vertical aspect of the default or user-specified [contentPadding] is adjusted
+  /// automatically based on [visualDensity].
+  ///
+  /// When the visual density is [VisualDensity.compact], the vertical aspect of
+  /// [contentPadding] is reduced by 8 pixels.
+  ///
+  /// When the visual density is [VisualDensity.comfortable], the vertical aspect of
+  /// [contentPadding] is reduced by 4 pixels.
+  ///
+  /// When the visual density is [VisualDensity.standard] vertical aspect of
+  /// [contentPadding] is not changed.
+  ///
+  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
+  /// [InputDecorationTheme.visualDensity] will be used. If that is null then
+  /// [ThemeData.visualDensity] will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
+  ///    within a [Theme].
+  ///  * [InputDecorationTheme.visualDensity], which can override this setting for a
+  ///    given decorator.
+  final VisualDensity? visualDensity;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
@@ -3853,6 +3926,7 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
+    VisualDensity? visualDensity,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3911,6 +3985,7 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
+      visualDensity: visualDensity ?? this.visualDensity,
     );
   }
 
@@ -3927,6 +4002,7 @@ class InputDecoration {
       helperMaxLines: helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
       hintFadeDuration: hintFadeDuration ?? theme.hintFadeDuration,
+      hintMaxLines: hintMaxLines ?? theme.hintMaxLines,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
@@ -3954,6 +4030,7 @@ class InputDecoration {
       border: border ?? theme.border,
       alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
       constraints: constraints ?? theme.constraints,
+      visualDensity: visualDensity ?? theme.visualDensity,
     );
   }
 
@@ -4021,7 +4098,8 @@ class InputDecoration {
         other.enabled == enabled &&
         other.semanticCounterText == semanticCounterText &&
         other.alignLabelWithHint == alignLabelWithHint &&
-        other.constraints == constraints;
+        other.constraints == constraints &&
+        other.visualDensity == visualDensity;
   }
 
   @override
@@ -4083,6 +4161,7 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
+      visualDensity,
     ];
     return Object.hashAll(values);
   }
@@ -4142,6 +4221,7 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
+      if (visualDensity != null) 'visualDensity: $visualDensity',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
@@ -4167,6 +4247,7 @@ class InputDecorationTheme with Diagnosticable {
     this.helperMaxLines,
     this.hintStyle,
     this.hintFadeDuration,
+    this.hintMaxLines,
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
@@ -4196,6 +4277,7 @@ class InputDecorationTheme with Diagnosticable {
     this.border,
     this.alignLabelWithHint = false,
     this.constraints,
+    this.visualDensity,
   });
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
@@ -4242,6 +4324,15 @@ class InputDecorationTheme with Diagnosticable {
   /// The duration of the [InputDecoration.hintText] fade in and fade out animations.
   final Duration? hintFadeDuration;
 
+  /// The maximum number of lines the [InputDecoration.hintText] can occupy.
+  ///
+  /// Defaults to null, which means that the [InputDecoration.hintText] will
+  /// be limited to a single line with [TextOverflow.ellipsis].
+  ///
+  /// This value is passed along to the [Text.maxLines] attribute
+  /// of the [Text] widget used to display the hint text.
+  final int? hintMaxLines;
+
   /// {@macro flutter.material.inputDecoration.errorStyle}
   final TextStyle? errorStyle;
 
@@ -4283,9 +4374,9 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
   /// [InputDecoration.counterText].
   ///
-  /// By default the [contentPadding] reflects [isDense] and the type of the
-  /// [border]. If [isCollapsed] is true then [contentPadding] is
-  /// [EdgeInsets.zero].
+  /// By default the [contentPadding] reflects [visualDensity], [isDense] and
+  /// the type of the [border]. If [isCollapsed] is true then [contentPadding]
+  /// is [EdgeInsets.zero].
   final EdgeInsetsGeometry? contentPadding;
 
   /// Whether the decoration is the same size as the input field.
@@ -4601,6 +4692,30 @@ class InputDecorationTheme with Diagnosticable {
   ///    given decorator.
   final BoxConstraints? constraints;
 
+  /// Defines how compact the decoration's layout will be.
+  ///
+  /// The vertical aspect of the default or user-specified [contentPadding] is adjusted
+  /// automatically based on [visualDensity].
+  ///
+  /// When the visual density is [VisualDensity.compact], the vertical aspect of
+  /// [contentPadding] is reduced by 8 pixels.
+  ///
+  /// When the visual density is [VisualDensity.comfortable], the vertical aspect of
+  /// [contentPadding] is reduced by 4 pixels.
+  ///
+  /// When the visual density is [VisualDensity.standard] vertical aspect of
+  /// [contentPadding] is not changed.
+  ///
+  /// If null, defaults to [ThemeData.visualDensity].
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
+  ///    within a [Theme].
+  ///  * [InputDecoration.visualDensity], which can override this setting for a
+  ///    given decorator.
+  final VisualDensity? visualDensity;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
@@ -4610,6 +4725,7 @@ class InputDecorationTheme with Diagnosticable {
     int? helperMaxLines,
     TextStyle? hintStyle,
     Duration? hintFadeDuration,
+    int? hintMaxLines,
     TextStyle? errorStyle,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
@@ -4639,6 +4755,7 @@ class InputDecorationTheme with Diagnosticable {
     InputBorder? border,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
+    VisualDensity? visualDensity,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4647,6 +4764,7 @@ class InputDecorationTheme with Diagnosticable {
       helperMaxLines: helperMaxLines ?? this.helperMaxLines,
       hintStyle: hintStyle ?? this.hintStyle,
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
+      hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
@@ -4676,6 +4794,7 @@ class InputDecorationTheme with Diagnosticable {
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
+      visualDensity: visualDensity ?? this.visualDensity,
     );
   }
 
@@ -4699,6 +4818,7 @@ class InputDecorationTheme with Diagnosticable {
       helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
       hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
       hintFadeDuration: hintFadeDuration ?? inputDecorationTheme.hintFadeDuration,
+      hintMaxLines: hintMaxLines ?? inputDecorationTheme.hintMaxLines,
       errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
       errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
       contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
@@ -4722,6 +4842,7 @@ class InputDecorationTheme with Diagnosticable {
       enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
       border: border ?? inputDecorationTheme.border,
       constraints: constraints ?? inputDecorationTheme.constraints,
+      visualDensity: visualDensity ?? inputDecorationTheme.visualDensity,
     );
   }
 
@@ -4732,6 +4853,7 @@ class InputDecorationTheme with Diagnosticable {
     helperStyle,
     helperMaxLines,
     hintStyle,
+    hintMaxLines,
     errorStyle,
     errorMaxLines,
     floatingLabelBehavior,
@@ -4745,8 +4867,8 @@ class InputDecorationTheme with Diagnosticable {
     prefixIconConstraints,
     suffixStyle,
     suffixIconColor,
-    suffixIconConstraints,
     Object.hash(
+      suffixIconConstraints,
       counterStyle,
       filled,
       fillColor,
@@ -4763,6 +4885,7 @@ class InputDecorationTheme with Diagnosticable {
       alignLabelWithHint,
       constraints,
       hintFadeDuration,
+      visualDensity,
     ),
   );
 
@@ -4808,9 +4931,11 @@ class InputDecorationTheme with Diagnosticable {
         other.disabledBorder == disabledBorder &&
         other.enabledBorder == enabledBorder &&
         other.border == border &&
+        other.hintMaxLines == hintMaxLines &&
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints &&
-        other.disabledBorder == disabledBorder;
+        other.disabledBorder == disabledBorder &&
+        other.visualDensity == visualDensity;
   }
 
   @override
@@ -4850,6 +4975,9 @@ class InputDecorationTheme with Diagnosticable {
         hintFadeDuration,
         defaultValue: defaultTheme.hintFadeDuration,
       ),
+    );
+    properties.add(
+      IntProperty('hintMaxLines', hintMaxLines, defaultValue: defaultTheme.hintMaxLines),
     );
     properties.add(
       DiagnosticsProperty<TextStyle>(
@@ -5010,6 +5138,13 @@ class InputDecorationTheme with Diagnosticable {
         defaultValue: defaultTheme.constraints,
       ),
     );
+    properties.add(
+      DiagnosticsProperty<VisualDensity>(
+        'visualDensity',
+        visualDensity,
+        defaultValue: defaultTheme.visualDensity,
+      ),
+    );
   }
 }
 
@@ -5070,7 +5205,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    return switch ((Theme.of(context).brightness, states.contains(MaterialState.disabled))) {
+    return switch ((Theme.brightnessOf(context), states.contains(MaterialState.disabled))) {
       (Brightness.dark, true) => const Color(0x0DFFFFFF), //  5% white
       (Brightness.dark, false) => const Color(0x1AFFFFFF), // 10% white
       (Brightness.light, true) => const Color(0x05000000), //  2% black
@@ -5086,7 +5221,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
-    return switch (Theme.of(context).brightness) {
+    return switch (Theme.brightnessOf(context)) {
       Brightness.dark => Colors.white70,
       Brightness.light => Colors.black45,
     };
@@ -5100,7 +5235,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
-    return switch (Theme.of(context).brightness) {
+    return switch (Theme.brightnessOf(context)) {
       Brightness.dark => Colors.white70,
       Brightness.light => Colors.black45,
     };
@@ -5117,7 +5252,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
-    return switch (Theme.of(context).brightness) {
+    return switch (Theme.brightnessOf(context)) {
       Brightness.dark => Colors.white70,
       Brightness.light => Colors.black45,
     };

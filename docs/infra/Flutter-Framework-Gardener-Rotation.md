@@ -50,7 +50,7 @@ Unmute the [tree-gardener channel] and [hackers-infra channel] on [Discord]. Con
 Escalate to the [test owner][TESTOWNERS]. File GitHub issues if none are already open.
 1. The title should include the name of the failing test.
 1. Assign the issue to the test owner with a `P1` priority.
-1. Add the `team` label.
+1. Add the [`c: contributor-productivity`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22c%3A%20contributor-productivity%22) label.
 1. Include links to the failing tests. Download any relevant logs and attach them to the issue, even if the link to the failing tests has the same information. This prevents the issues from becoming stale when logs are expunged.
 1. @ mention the test owner in the [tree-gardener channel] on [Discord] with a link to the GitHub issue. If they are unavailable, escalate to another team member. Continue escalating until someone acknowledges the issue is being investigated.
 
@@ -137,7 +137,7 @@ See the [golden test build breakage] guide.
 1. Open a [new infra issue].
 1. Add a descriptive title. A message like "Add a LUCI builder for linux web engine" or "Debug gallery startup" is much more helpful than "quick request" or "test doesn't work?".
 1. Clearly describe the issue or request in the description field. For example, if a ticket is requesting running several commands on the bots, the ticket should explain why, what commands are needed, on which bots and how to verify the results.
-1. Add the `team: infra` label and a priority label:
+1. Add the `team-infra` label and a priority label:
    * `P0` (immediate): Such as a build break or regression.
       * Fix as soon as possible, before any other work.
       * Should be very rare, and only used when critical work is blocked without a workaround.
@@ -147,8 +147,6 @@ See the [golden test build breakage] guide.
       * Degraded service (Build bots work but are slow to start).
       * Time-sensitive requests.
       * Should be relatively rare.
-   * Anything below `P1` is not suitable for the infra ticket queue and will be treated as a normal infra bug.
-1. Add the project "Infra Ticket Queue".
 1. Click the create button. No need to set an assignee; infra oncall will handle all new tickets.
 
 ## Communication channels (public)
@@ -176,7 +174,7 @@ The bulk of communication happens on [Discord].
 [flutter-hackers]: https://github.com/orgs/flutter/teams/flutter-hackers
 [golden test build breakage]: /docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md#build-breakage
 [new issue]: https://github.com/flutter/flutter/issues/new/choose
-[new infra issue]: https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml
+[new infra issue]: https://github.com/flutter/flutter/issues/new?template=06_infrastructure.yml
 
 [Framework build dashboard]: https://flutter-dashboard.appspot.com/#/build
 [framework benchmarks]: https://flutter-flutter-perf.skia.org/e/

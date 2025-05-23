@@ -737,39 +737,6 @@ void main() {
     expect(tapOutsideCount, 3);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/134341.
-  testWidgets('onTapOutside is not called upon tap outside when field is not focused', (
-    WidgetTester tester,
-  ) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                TextFormField(
-                  onTapOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.byType(TextFormField));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 0);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/127597.
   testWidgets(
     'The second TextFormField is clicked, triggers the onTapOutside callback of the previous TextFormField',
@@ -1683,5 +1650,45 @@ void main() {
     await tester.pump();
 
     expect(find.text('**validation error**'), findsOneWidget);
+  });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 }

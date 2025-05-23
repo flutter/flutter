@@ -58,6 +58,8 @@ class SemanticsTester {
     bool? isMultiline,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? hasRequiredState,
+    bool? isRequired,
 
     // Actions
     int actions = 0,
@@ -118,6 +120,9 @@ class SemanticsTester {
     int? headingLevel,
     String? linkUrl,
     ui.SemanticsRole? role,
+    List<String>? controlsNodes,
+    ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
+    ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   }) {
     // Flags
     if (hasCheckedState ?? false) {
@@ -203,6 +208,12 @@ class SemanticsTester {
     }
     if (isKeyboardKey ?? false) {
       flags |= ui.SemanticsFlag.isKeyboardKey.index;
+    }
+    if (hasRequiredState ?? false) {
+      flags |= ui.SemanticsFlag.hasRequiredState.index;
+    }
+    if (isRequired ?? false) {
+      flags |= ui.SemanticsFlag.isRequired.index;
     }
 
     // Actions
@@ -333,6 +344,9 @@ class SemanticsTester {
       headingLevel: headingLevel ?? 0,
       linkUrl: linkUrl,
       role: role ?? ui.SemanticsRole.none,
+      controlsNodes: controlsNodes,
+      validationResult: validationResult,
+      inputType: inputType,
     );
     _nodeUpdates.add(update);
     return update;

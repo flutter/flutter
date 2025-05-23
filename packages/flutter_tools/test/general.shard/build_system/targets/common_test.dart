@@ -794,7 +794,7 @@ void main() {
         FakeCommand(
           command: <String>[
             // This path is not known by the cache due to the iOS gen_snapshot split.
-            'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
+            'Artifact.genSnapshotArm64.TargetPlatform.ios.profile',
             '--deterministic',
             '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
             '--trace-precompiler-to=code_size_1/trace.arm64.json',
@@ -809,7 +809,7 @@ void main() {
             'cc',
             '-arch',
             'arm64',
-            '-miphoneos-version-min=12.0',
+            '-miphoneos-version-min=13.0',
             '-isysroot',
             'path/to/iPhoneOS.sdk',
             '-c',
@@ -824,7 +824,7 @@ void main() {
             'clang',
             '-arch',
             'arm64',
-            '-miphoneos-version-min=12.0',
+            '-miphoneos-version-min=13.0',
             '-isysroot',
             'path/to/iPhoneOS.sdk',
             '-dynamiclib',

@@ -5,6 +5,7 @@
 #include "impeller/fixtures/spec_constant.frag.h"
 #include "impeller/fixtures/spec_constant.vert.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_library_gles.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -65,6 +66,34 @@ TEST_P(PipelineLibraryGLESTest, ChangingSpecConstantsCausesNewProgramObject) {
   ASSERT_FALSE(new_pipeline_gles.GetProgramHandle().IsDead());
   ASSERT_FALSE(pipeline_gles.GetProgramHandle().GetName().value() ==
                new_pipeline_gles.GetProgramHandle().GetName().value());
+}
+
+TEST_P(PipelineLibraryGLESTest, ClearingPipelineWillAlsoClearProgramHandle) {
+  using VS = SpecConstantVertexShader;
+  using FS = SpecConstantFragmentShader;
+  std::shared_ptr<Context> context = GetContext();
+  std::optional<PipelineDescriptor> desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline =
+      context->GetPipelineLibrary()->GetPipeline(desc).Get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+  const auto& pipeline_gles = PipelineGLES::Cast(*pipeline);
+  HandleGLES handle = pipeline_gles.GetProgramHandle();
+
+  // Clear the pipeline descriptor.
+  auto entrypoint =
+      pipeline->GetDescriptor().GetEntrypointForStage(ShaderStage::kFragment);
+  context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(entrypoint);
+
+  // Re-create the pipeline
+  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_2 =
+      context->GetPipelineLibrary()->GetPipeline(desc).Get();
+  ASSERT_TRUE(pipeline && pipeline->IsValid());
+  const auto& pipeline_gles_2 = PipelineGLES::Cast(*pipeline_2);
+  HandleGLES handle_2 = pipeline_gles_2.GetProgramHandle();
+
+  EXPECT_FALSE(HandleGLES::Equal{}(handle, handle_2));
 }
 // NOLINTEND(bugprone-unchecked-optional-access)
 

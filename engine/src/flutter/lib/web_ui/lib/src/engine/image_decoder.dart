@@ -102,28 +102,26 @@ abstract class BrowserImageDecoder implements ui.Codec {
     try {
       final ImageDecoder webDecoder = ImageDecoder(
         ImageDecoderOptions(
-          type: contentType.toJS,
+          type: contentType,
           data: dataSource,
 
           // Flutter always uses premultiplied alpha when decoding.
-          premultiplyAlpha: 'premultiply'.toJS,
+          premultiplyAlpha: 'premultiply',
           // "default" gives the browser the liberty to convert to display-appropriate
           // color space, typically SRGB, which is what we want.
-          colorSpaceConversion: 'default'.toJS,
+          colorSpaceConversion: 'default',
 
           // Flutter doesn't give the developer a way to customize this, so if this
           // is an animated image we should prefer the animated track.
-          preferAnimation: true.toJS,
+          preferAnimation: true,
         ),
       );
 
-      await promiseToFuture<void>(webDecoder.tracks.ready);
+      await webDecoder.tracks.ready.toDart;
 
       // Flutter doesn't have an API for progressive loading of images, so we
       // wait until the image is fully decoded.
-      // package:js bindings don't work with getters that return a Promise, which
-      // is why js_util is used instead.
-      await promiseToFuture<void>(getJsProperty(webDecoder, 'completed'));
+      await webDecoder.completed.toDart;
       frameCount = webDecoder.tracks.selectedTrack!.frameCount.toInt();
 
       // We coerce the DOM's `repetitionCount` into an int by explicitly
@@ -151,7 +149,11 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       return webDecoder;
     } catch (error) {
-      if (domInstanceOfString(error, 'DOMException')) {
+      // TODO(srujzs): Replace this with `error.isJSAny` when we have that API
+      // in `dart:js_interop`.
+      // https://github.com/dart-lang/sdk/issues/56905
+      // ignore: invalid_runtime_check_with_js_interop_types
+      if (error is JSAny && error.isA<DomException>()) {
         if ((error as DomException).name == DomException.notSupported) {
           throw ImageCodecException(
             "Image file format ($contentType) is not supported by this browser's ImageDecoder API.\n"
@@ -171,9 +173,8 @@ abstract class BrowserImageDecoder implements ui.Codec {
   Future<ui.FrameInfo> getNextFrame() async {
     _debugCheckNotDisposed();
     final ImageDecoder webDecoder = await _getOrCreateWebDecoder();
-    final DecodeResult result = await promiseToFuture<DecodeResult>(
-      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex.toJS)),
-    );
+    final DecodeResult result =
+        await webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)).toDart;
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
 

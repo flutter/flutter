@@ -34,6 +34,8 @@
 #include "gmock/gmock.h"  // For EXPECT_THAT and matchers
 #include "gtest/gtest.h"
 
+using flutter::DlColor;
+using flutter::DlMatrix;
 using flutter::DlRect;
 using flutter::DlSize;
 using fuchsia::scenic::scheduling::FramePresentedInfo;
@@ -65,7 +67,7 @@ constexpr static int64_t kImplicitViewId = 0;
 class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
  public:
   explicit FakeSurfaceProducerSurface(
-      fidl::InterfaceRequest<fuchsia::sysmem::BufferCollectionToken>
+      fidl::InterfaceRequest<fuchsia::sysmem2::BufferCollectionToken>
           sysmem_token_request,
       fuchsia::ui::composition::BufferCollectionImportToken buffer_import_token,
       const SkISize& size)
@@ -122,7 +124,7 @@ class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
       const std::function<void(void)>& on_writes_committed) override {}
 
  private:
-  fidl::InterfaceRequest<fuchsia::sysmem::BufferCollectionToken>
+  fidl::InterfaceRequest<fuchsia::sysmem2::BufferCollectionToken>
       sysmem_token_request_;
   fuchsia::ui::composition::BufferCollectionImportToken buffer_import_token_;
   zx::event acquire_fence_;
@@ -153,13 +155,14 @@ class FakeSurfaceProducer : public SurfaceProducer {
       const SkISize& size) override {
     auto [buffer_export_token, buffer_import_token] =
         BufferCollectionTokenPair::New();
-    fuchsia::sysmem::BufferCollectionTokenHandle sysmem_token;
+    fuchsia::sysmem2::BufferCollectionTokenHandle sysmem_token;
     auto sysmem_token_request = sysmem_token.NewRequest();
 
     fuchsia::ui::composition::RegisterBufferCollectionArgs
         buffer_collection_args;
     buffer_collection_args.set_export_token(std::move(buffer_export_token));
-    buffer_collection_args.set_buffer_collection_token(std::move(sysmem_token));
+    buffer_collection_args.set_buffer_collection_token2(
+        std::move(sysmem_token));
     buffer_collection_args.set_usage(
         fuchsia::ui::composition::RegisterBufferCollectionUsage::DEFAULT);
     flatland_allocator_->RegisterBufferCollection(
@@ -607,20 +610,18 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneView) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 200;
-  const float kOpacityFloat = 200 / 255.0f;
+  const uint8_t kOpacity = 200u;
+  const float kOpacityFloat = DlColor::toOpacity(kOpacity);
   const fuchsia::math::VecF kScale{3.0f, 4.0f};
 
-  auto matrix = SkMatrix::I();
-  matrix.setScaleX(kScale.x);
-  matrix.setScaleY(kScale.y);
+  DlMatrix matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
 
   auto mutators_stack = flutter::MutatorsStack();
   mutators_stack.PushOpacity(kOpacity);
   mutators_stack.PushTransform(matrix);
 
-  flutter::EmbeddedViewParams child_view_params(matrix, child_view_size_signed,
-                                                mutators_stack);
+  flutter::EmbeddedViewParams child_view_params(
+      flutter::ToSkMatrix(matrix), child_view_size_signed, mutators_stack);
   external_view_embedder.CreateView(
       child_view_id, []() {},
       [](fuchsia::ui::composition::ContentId,
@@ -830,33 +831,31 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneClippedView) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 200;
-  const float kOpacityFloat = 200 / 255.0f;
+  const uint8_t kOpacity = 200u;
+  const float kOpacityFloat = DlColor::toOpacity(kOpacity);
   const fuchsia::math::VecF kScale{3.0f, 4.0f};
   const int kTranslateX = 10;
   const int kTranslateY = 20;
 
-  auto matrix = SkMatrix::I();
-  matrix.setScaleX(kScale.x);
-  matrix.setScaleY(kScale.y);
-  matrix.setTranslateX(kTranslateX);
-  matrix.setTranslateY(kTranslateY);
+  DlMatrix matrix = DlMatrix::MakeTranslation({kTranslateX, kTranslateY}) *
+                    DlMatrix::MakeScale({kScale.x, kScale.y, 1});
 
-  SkRect kClipRect =
-      SkRect::MakeXYWH(30, 40, child_view_size_signed.width() - 50,
+  DlRect kClipRect =
+      DlRect::MakeXYWH(30, 40, child_view_size_signed.width() - 50,
                        child_view_size_signed.height() - 60);
   fuchsia::math::Rect kClipInMathRect = {
-      static_cast<int32_t>(kClipRect.x()), static_cast<int32_t>(kClipRect.y()),
-      static_cast<int32_t>(kClipRect.width()),
-      static_cast<int32_t>(kClipRect.height())};
+      static_cast<int32_t>(kClipRect.GetX()),
+      static_cast<int32_t>(kClipRect.GetY()),
+      static_cast<int32_t>(kClipRect.GetWidth()),
+      static_cast<int32_t>(kClipRect.GetHeight())};
 
   auto mutators_stack = flutter::MutatorsStack();
   mutators_stack.PushOpacity(kOpacity);
   mutators_stack.PushTransform(matrix);
   mutators_stack.PushClipRect(kClipRect);
 
-  flutter::EmbeddedViewParams child_view_params(matrix, child_view_size_signed,
-                                                mutators_stack);
+  flutter::EmbeddedViewParams child_view_params(
+      flutter::ToSkMatrix(matrix), child_view_size_signed, mutators_stack);
   external_view_embedder.CreateView(
       child_view_id, []() {},
       [](fuchsia::ui::composition::ContentId,
@@ -939,14 +938,13 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneClippedView) {
 
   // Draw another frame with view, but get rid of the clips this time. This
   // should remove all ClipTransformLayer instances.
-  auto new_matrix = SkMatrix::I();
-  new_matrix.setScaleX(kScale.x);
-  new_matrix.setScaleY(kScale.y);
+  DlMatrix new_matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
   auto new_mutators_stack = flutter::MutatorsStack();
   new_mutators_stack.PushOpacity(kOpacity);
   new_mutators_stack.PushTransform(new_matrix);
   flutter::EmbeddedViewParams new_child_view_params(
-      new_matrix, child_view_size_signed, new_mutators_stack);
+      flutter::ToSkMatrix(new_matrix), child_view_size_signed,
+      new_mutators_stack);
   DrawFrameWithView(
       external_view_embedder, frame_size_signed, kDPR, child_view_id,
       new_child_view_params,
@@ -1071,20 +1069,18 @@ TEST_F(ExternalViewEmbedderTest, SceneWithOneView_NoOverlay) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 125;
-  const float kOpacityFloat = 125 / 255.0f;
+  const uint8_t kOpacity = 125u;
+  const float kOpacityFloat = DlColor::toOpacity(kOpacity);
   const fuchsia::math::VecF kScale{2.f, 3.0f};
 
-  auto matrix = SkMatrix::I();
-  matrix.setScaleX(kScale.x);
-  matrix.setScaleY(kScale.y);
+  DlMatrix matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
 
   auto mutators_stack = flutter::MutatorsStack();
   mutators_stack.PushOpacity(kOpacity);
   mutators_stack.PushTransform(matrix);
 
-  flutter::EmbeddedViewParams child_view_params(matrix, child_view_size_signed,
-                                                mutators_stack);
+  flutter::EmbeddedViewParams child_view_params(
+      flutter::ToSkMatrix(matrix), child_view_size_signed, mutators_stack);
   external_view_embedder.CreateView(
       child_view_id, []() {},
       [](fuchsia::ui::composition::ContentId,
@@ -1587,20 +1583,18 @@ TEST_F(ExternalViewEmbedderTest, ViewportCoveredWithInputInterceptor) {
   auto [child_view_token, child_viewport_token] = ViewTokenPair::New();
   const uint32_t child_view_id = child_viewport_token.value.get();
 
-  const int kOpacity = 200;
-  const float kOpacityFloat = 200 / 255.0f;
+  const uint8_t kOpacity = 200u;
+  const float kOpacityFloat = DlColor::toOpacity(kOpacity);
   const fuchsia::math::VecF kScale{3.0f, 4.0f};
 
-  auto matrix = SkMatrix::I();
-  matrix.setScaleX(kScale.x);
-  matrix.setScaleY(kScale.y);
+  DlMatrix matrix = DlMatrix::MakeScale({kScale.x, kScale.y, 1});
 
   auto mutators_stack = flutter::MutatorsStack();
   mutators_stack.PushOpacity(kOpacity);
   mutators_stack.PushTransform(matrix);
 
-  flutter::EmbeddedViewParams child_view_params(matrix, child_view_size_signed,
-                                                mutators_stack);
+  flutter::EmbeddedViewParams child_view_params(
+      flutter::ToSkMatrix(matrix), child_view_size_signed, mutators_stack);
   external_view_embedder.CreateView(
       child_view_id, []() {},
       [](fuchsia::ui::composition::ContentId,
@@ -1624,24 +1618,23 @@ TEST_F(ExternalViewEmbedderTest, ViewportCoveredWithInputInterceptor) {
   const fuchsia::math::SizeU frame_size{
       static_cast<uint32_t>(frame_size_signed.width()),
       static_cast<uint32_t>(frame_size_signed.height())};
-  DrawFrameWithView(
-      external_view_embedder, frame_size_signed, kDPR, child_view_id,
-      child_view_params,
-      [](flutter::DlCanvas* canvas) {
-        const DlSize canvas_size(canvas->GetBaseLayerDimensions());
-        flutter::DlPaint rect_paint;
-        rect_paint.setColor(flutter::DlColor::kGreen());
-        canvas->Translate(canvas_size.width / 4.f, canvas_size.height / 2.f);
-        canvas->DrawRect(DlRect::MakeSize(canvas_size / 32.f), rect_paint);
-      },
-      [](flutter::DlCanvas* canvas) {
-        const DlSize canvas_size(canvas->GetBaseLayerDimensions());
-        flutter::DlPaint rect_paint;
-        rect_paint.setColor(flutter::DlColor::kRed());
-        canvas->Translate(canvas_size.width * 3.f / 4.f,
-                          canvas_size.height / 2.f);
-        canvas->DrawRect(DlRect::MakeSize(canvas_size / 32.f), rect_paint);
-      });
+  auto background_draw_callback = [](flutter::DlCanvas* canvas) {
+    const DlSize canvas_size(canvas->GetBaseLayerDimensions());
+    flutter::DlPaint rect_paint;
+    rect_paint.setColor(flutter::DlColor::kGreen());
+    canvas->Translate(canvas_size.width / 4.f, canvas_size.height / 2.f);
+    canvas->DrawRect(DlRect::MakeSize(canvas_size / 32.f), rect_paint);
+  };
+  auto overlay_draw_callback = [](flutter::DlCanvas* canvas) {
+    const DlSize canvas_size(canvas->GetBaseLayerDimensions());
+    flutter::DlPaint rect_paint;
+    rect_paint.setColor(flutter::DlColor::kRed());
+    canvas->Translate(canvas_size.width * 3.f / 4.f, canvas_size.height / 2.f);
+    canvas->DrawRect(DlRect::MakeSize(canvas_size / 32.f), rect_paint);
+  };
+  DrawFrameWithView(external_view_embedder, frame_size_signed, kDPR,
+                    child_view_id, child_view_params, background_draw_callback,
+                    overlay_draw_callback);
   EXPECT_THAT(fake_flatland().graph(),
               IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
                              view_ref_clone, {IsInputShield()}));
