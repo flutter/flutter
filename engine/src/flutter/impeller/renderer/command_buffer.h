@@ -107,7 +107,8 @@ class CommandBuffer {
 
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() = 0;
 
-  [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
+  [[nodiscard]] virtual bool OnSubmitCommands(bool block_on_schedule,
+                                              CompletionCallback callback) = 0;
 
   virtual void OnWaitUntilCompleted() = 0;
 
@@ -127,9 +128,10 @@ class CommandBuffer {
   ///
   /// @param[in]  callback  The completion callback.
   ///
-  [[nodiscard]] bool SubmitCommands(const CompletionCallback& callback);
+  [[nodiscard]] bool SubmitCommands(bool block_on_schedule,
+                                    const CompletionCallback& callback);
 
-  [[nodiscard]] bool SubmitCommands();
+  [[nodiscard]] bool SubmitCommands(bool block_on_schedule);
 
   CommandBuffer(const CommandBuffer&) = delete;
 
