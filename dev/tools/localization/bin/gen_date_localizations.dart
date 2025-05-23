@@ -46,9 +46,7 @@ Future<void> main(List<String> rawArgs) async {
 
   final bool writeToFile = parseArgs(rawArgs).writeToFile;
 
-  final File packageConfigFile = File(
-    path.join('packages', 'flutter_localizations', '.dart_tool', 'package_config.json'),
-  );
+  final File packageConfigFile = File(path.join('.dart_tool', 'package_config.json'));
   final bool packageConfigExists = packageConfigFile.existsSync();
 
   if (!packageConfigExists) {

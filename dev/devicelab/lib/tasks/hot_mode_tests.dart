@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
@@ -16,7 +17,7 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(
-  path.join(Directory.systemTemp.path, 'edited_flutter_gallery'),
+  path.join(Directory.systemTemp.path, 'gallery_workspace', 'edited_flutter_gallery'),
 );
 final Directory flutterGalleryDir = dir(
   path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'),
@@ -64,6 +65,14 @@ TaskFunction createHotModeTest({
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
+      final String pubspec =
+          File(path.join(flutterDirectory.path, 'pubspec.yaml')).readAsStringSync();
+
+      final YamlEditor yamlEditor = YamlEditor(pubspec);
+      yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
+      File(
+        path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),
+      ).writeAsStringSync(yamlEditor.toString());
 
       try {
         await inDirectory<void>(_editedFlutterGalleryDir, () async {
