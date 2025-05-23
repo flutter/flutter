@@ -17,9 +17,11 @@ Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
   return (left * ratio_right + right * ratio_left) / (ratio_left + ratio_right);
 }
 
-// Return the same Point, but each NaN coordinate is replaced by 1.
-inline Point ReplanceNaNWithOne(Point in) {
-  return Point{std::isnan(in.x) ? 1 : in.x, std::isnan(in.y) ? 1 : in.y};
+// Return the same Point, but each NaN coordinate is replaced by that of
+// `default_size`.
+inline Point ReplanceNaNWithDefault(Point in, Size default_size) {
+  return Point{std::isnan(in.x) ? default_size.width : in.x,
+               std::isnan(in.y) ? default_size.height : in.y};
 }
 
 // Swap the x and y coordinate of a point.
@@ -194,11 +196,15 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 // radii.
 //
 // The `corner` is the coordinate of the corner point in the same coordinate
-// space as `center`, which specifies both the half size of the bounding box and
-// which quadrant the curve should be.
+// space as `center`, which specifies the half size of the bounding box.
+//
+// The `sign` is a vector of {±1, ±1} that specifies which quadrant the curve
+// should be, which should have the same sign as `corner - center` except that
+// the latter may have a 0.
 RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Point corner,
-                                                 Size in_radii) {
+                                                 Size in_radii,
+                                                 Size sign) {
   Point corner_vector = corner - center;
   Size radii = in_radii.Abs();
 
@@ -209,7 +215,8 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   Scalar norm_radius = radii.MinDimension();
   Size forward_scale = norm_radius == 0 ? Size{1, 1} : radii / norm_radius;
   Point norm_half_size = corner_vector.Abs() / forward_scale;
-  Point signed_scale = ReplanceNaNWithOne(corner_vector / norm_half_size);
+  Point signed_scale =
+      ReplanceNaNWithDefault(corner_vector / norm_half_size, sign);
 
   // Each quadrant curve is composed of two octant curves, each of which belongs
   // to a square-like rounded rectangle. For the two octants to connect at the
@@ -481,7 +488,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     // treatment on border containment and therefore is not `all_corners_same`.
     return RoundSuperellipseParam{
         .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
-                                     radii.top_right),
+                                     radii.top_right, {-1, 1}),
         .all_corners_same = true,
     };
   }
@@ -496,15 +503,18 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
                             radii.top_left.height, radii.bottom_left.height);
 
   return RoundSuperellipseParam{
-      .top_right = ComputeQuadrant(Point{top_split, right_split},
-                                   bounds.GetRightTop(), radii.top_right),
+      .top_right =
+          ComputeQuadrant(Point{top_split, right_split}, bounds.GetRightTop(),
+                          radii.top_right, {1, -1}),
       .bottom_right =
           ComputeQuadrant(Point{bottom_split, right_split},
-                          bounds.GetRightBottom(), radii.bottom_right),
-      .bottom_left = ComputeQuadrant(Point{bottom_split, left_split},
-                                     bounds.GetLeftBottom(), radii.bottom_left),
-      .top_left = ComputeQuadrant(Point{top_split, left_split},
-                                  bounds.GetLeftTop(), radii.top_left),
+                          bounds.GetRightBottom(), radii.bottom_right, {1, 1}),
+      .bottom_left =
+          ComputeQuadrant(Point{bottom_split, left_split},
+                          bounds.GetLeftBottom(), radii.bottom_left, {-1, 1}),
+      .top_left =
+          ComputeQuadrant(Point{top_split, left_split}, bounds.GetLeftTop(),
+                          radii.top_left, {-1, -1}),
       .all_corners_same = false,
   };
 }
