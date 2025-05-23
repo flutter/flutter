@@ -685,6 +685,8 @@ Matcher matchesSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -770,6 +772,8 @@ Matcher matchesSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -883,6 +887,8 @@ Matcher containsSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -968,6 +974,8 @@ Matcher containsSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -2399,6 +2407,8 @@ class _MatchesSemanticsData extends Matcher {
     required this.currentValueLength,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2555,6 +2565,8 @@ class _MatchesSemanticsData extends Matcher {
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult validationResult;
+  final String? maxValue;
+  final String? minValue;
 
   /// There are three possible states for these two maps:
   ///
@@ -2673,6 +2685,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (validationResult != SemanticsValidationResult.none) {
       description.add(' with validation result: $validationResult');
+    }
+    if (minValue != null) {
+      description.add(' with minValue: $minValue');
+    }
+    if (maxValue != null) {
+      description.add(' with maxValue: $maxValue');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2815,6 +2833,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (inputType != null && inputType != data.inputType) {
       return failWithDescription(matchState, 'inputType was: ${data.inputType}');
+    }
+    if (minValue != null && minValue != data.minValue) {
+      return failWithDescription(matchState, 'minValue was: ${data.minValue}');
+    }
+    if (maxValue != null && maxValue != data.maxValue) {
+      return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
