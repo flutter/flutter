@@ -68,6 +68,7 @@ Before using this label, You'll need to add a comment on the PR:
 
 ```md
 reason for revert: This breaks the build, see XYZ link.
+```
 
 Please coordinate with the Google team that administrates the repository before
 using the `revert` label, as it may not be appropriate to use in all cases, and
