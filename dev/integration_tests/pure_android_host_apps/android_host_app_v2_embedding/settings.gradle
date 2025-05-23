@@ -15,14 +15,13 @@ dependencyResolutionManagement {
             url = uri("../hello/build/host/outputs/repo")
         }
         // BEGIN ci only configuration for getting engine artifacts in pre-submit environments
-        def flutterSdkPath =
-                run {
-                    def properties = java.util.Properties()
-                    file("../hello/local.properties").inputStream().use { properties.load(it) }
-                    def flutterSdkPath = properties.getProperty("flutter.sdk")
-                    require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
-                    flutterSdkPath
-                }
+        def flutterSdkPath = {
+            def properties = new Properties()
+            file("local.properties").withInputStream { properties.load(it) }
+            def flutterSdkPath = properties.getProperty("flutter.sdk")
+            assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+            return flutterSdkPath
+        }
 
         def engineRealm =
                 new File(flutterSdkPath, "bin/cache/engine.realm")
