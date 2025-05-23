@@ -100,6 +100,10 @@ struct RoundSuperellipseParam {
       const Rect& bounds,
       const RoundingRadii& radii);
 
+  [[nodiscard]] static RoundSuperellipseParam MakeBoundsRadius(
+      const Rect& bounds,
+      Scalar radius);
+
   // Returns whether this rounded superellipse contains the point.
   //
   // This method does not perform any prescreening such as comparing the point
