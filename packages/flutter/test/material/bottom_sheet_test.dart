@@ -1029,9 +1029,16 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
-                            TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  label: 'BottomSheet',
+                                  textDirection: TextDirection.ltr,
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
