@@ -14,6 +14,30 @@ dependencyResolutionManagement {
         maven {
             url = uri("../hello/build/host/outputs/repo")
         }
+        // BEGIN ci only configuration for getting engine artifacts in pre-submit environments
+        def flutterSdkPath =
+                run {
+                    def properties = java.util.Properties()
+                    file("../hello/local.properties").inputStream().use { properties.load(it) }
+                    def flutterSdkPath = properties.getProperty("flutter.sdk")
+                    require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
+                    flutterSdkPath
+                }
+
+        def engineRealm =
+                new File(flutterSdkPath, "bin/cache/engine.realm")
+                        .getText('UTF-8')
+                        .trim()
+
+        if (engineRealm) { // In Groovy, a non-empty string is true
+            engineRealm += "/"
+        }
+
+        maven {
+            url = uri("${flutterStorageUrl}/${engineRealm}download.flutter.io")
+        }
+
+        // END ci only configuration for getting engine artifacts in pre-submit environments
     }
 }
 
