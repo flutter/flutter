@@ -415,6 +415,7 @@ void main() {
         ..clipPath(
           pathMatcher: isPathThat(
             includes: <Offset>[const Offset(18.0, 49.0), const Offset(25.0, 42.0)],
+            excludes: <Offset>[const Offset(18.0, 0.0), const Offset(25.0, 7.0)],
           ),
         ),
     );
