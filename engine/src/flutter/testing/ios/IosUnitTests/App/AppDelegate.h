@@ -7,7 +7,7 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol FlutterPluginRegistrant;
+@class FlutterEngine;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
@@ -15,6 +15,11 @@
 
 //  A mirror of the FlutterAppDelegate API for integration testing.
 @property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
+
+/** The FlutterEngine that will be served by `takeLaunchEngine`. */
+@property(nonatomic, strong, nullable) FlutterEngine* mockLaunchEngine;
+
+- (nullable FlutterEngine*)takeLaunchEngine;
 
 @end
 
