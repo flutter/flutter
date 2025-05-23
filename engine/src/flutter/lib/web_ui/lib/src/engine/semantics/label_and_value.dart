@@ -570,16 +570,7 @@ class LabelAndValue extends SemanticBehavior {
   }
 
   static bool _checkAriaDescriptionSupport() {
-    if (isChromium || isEdge) {
-      return true;
-    }
-    if (isSafari174OrNewer) {
-      return true;
-    }
-    if (isFirefox119OrNewer) {
-      return true;
-    }
-    return false;
+    return isChromium || isEdge || isSafari174OrNewer || isFirefox119OrNewer;
   }
 
   void _cleanUpDescriptionOrDescribedBy() {
