@@ -27,7 +27,9 @@ FLUTTER_DARWIN_EXPORT
 @interface FlutterAppDelegate
     : UIResponder <UIApplicationDelegate, FlutterPluginRegistry, FlutterAppLifeCycleProvider>
 
-@property(strong, nonatomic) UIWindow* window;
+@property(nonatomic, strong, nullable) UIWindow* window;
+
+@property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 
 @end
 

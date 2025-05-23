@@ -254,6 +254,8 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
+@property(nonatomic, strong) IBOutlet NSObject<FlutterPluginRegistrant>* pluginRegistrant;
+
 @end
 
 NS_ASSUME_NONNULL_END
