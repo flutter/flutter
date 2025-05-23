@@ -175,6 +175,14 @@ static std::unordered_map<
     std::vector<std::weak_ptr<CommandPoolVK>>> g_all_pools_map
     IPLR_GUARDED_BY(g_all_pools_map_mutex);
 
+// Visible for testing.
+// Returns the number of pools in g_all_pools_map for the given context.
+int CommandPoolRecyclerVK::GetGlobalPoolCount(const ContextVK* context) {
+  Lock all_pools_lock(g_all_pools_map_mutex);
+  auto it = g_all_pools_map.find(context);
+  return it != g_all_pools_map.end() ? it->second.size() : 0;
+}
+
 // TODO(matanlurey): Return a status_or<> instead of nullptr when we have one.
 std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
   auto const strong_context = context_.lock();
@@ -182,7 +190,7 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
     return nullptr;
   }
 
-  // If there is a resource in used for this thread and context, return it.
+  // If there is a resource in use for this thread and context, return it.
   if (!tls_command_pool_map.get()) {
     tls_command_pool_map.reset(new CommandPoolMap());
   }
@@ -193,8 +201,13 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
     return it->second;
   }
 
-  // Otherwise, create a new resource and return it.
-  auto data = Create();
+  // If we can reuse a command pool and its buffers, do so.
+  auto data = Reuse();
+  bool reused_pool = data.has_value();
+  if (!reused_pool) {
+    // Otherwise, create a new one.
+    data = Create();
+  }
   if (!data || !data->pool) {
     return nullptr;
   }
@@ -203,7 +216,9 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
       std::move(data->pool), std::move(data->buffers), context_);
   pool_map.emplace(hash, resource);
 
-  {
+  if (!reused_pool) {
+    // If a new pool was created, then add it to this context's list of pools
+    // in the global map.
     Lock all_pools_lock(g_all_pools_map_mutex);
     g_all_pools_map[strong_context.get()].push_back(resource);
   }
@@ -214,12 +229,6 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
 // TODO(matanlurey): Return a status_or<> instead of nullopt when we have one.
 std::optional<CommandPoolRecyclerVK::RecycledData>
 CommandPoolRecyclerVK::Create() {
-  // If we can reuse a command pool and its buffers, do so.
-  if (auto data = Reuse()) {
-    return data;
-  }
-
-  // Otherwise, create a new one.
   auto context = context_.lock();
   if (!context) {
     return std::nullopt;

@@ -71,6 +71,28 @@ class DeathRattle final {
   std::function<void()> callback_;
 };
 
+// Wait for reclaim of recycled command pools.
+void WaitForReclaim(const std::shared_ptr<ContextVK>& context) {
+  // Add a resource to the resource manager and wait for its destructor to
+  // signal an event.
+  //
+  // This must be done twice because the resource manager does not guarantee
+  // the order in which resources are handled within the set of reclaimable
+  // resources.  When the first DeathRattle is signaled there may be pools
+  // within the pending set that have not yet been reclaimed.  After the second
+  // DeathRattle is signaled all resources in the original set will have been
+  // reclaimed.
+  for (int i = 0; i < 2; i++) {
+    auto waiter = fml::AutoResetWaitableEvent();
+    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
+    {
+      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
+                                              std::move(rattle));
+    }
+    waiter.Wait();
+  }
+}
+
 }  // namespace
 
 TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
@@ -85,16 +107,7 @@ TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
     recycler->Dispose();
   }
 
-  // Add something to the resource manager and have it notify us when it's
-  // destroyed. That should give us a non-flaky signal that the pool has been
-  // reclaimed as well.
-  auto waiter = fml::AutoResetWaitableEvent();
-  auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-  {
-    UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                            std::move(rattle));
-  }
-  waiter.Wait();
+  WaitForReclaim(context);
 
   // On another thread explicitly, request a new pool.
   std::thread thread([&]() {
@@ -127,16 +140,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
     recycler->Dispose();
   }
 
-  // Wait for the pool to be reclaimed.
-  for (auto i = 0u; i < 2u; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
-    }
-    waiter.Wait();
-  }
+  WaitForReclaim(context);
 
   {
     // Create a second pool and command buffer, which should reused the existing
@@ -180,16 +184,7 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     recycler->Dispose();
   }
 
-  // Wait for the pool to be reclaimed.
-  for (auto i = 0u; i < 2u; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
-    }
-    waiter.Wait();
-  }
+  WaitForReclaim(context);
 
   // Command pool is reset but does not release resources.
   auto called = GetMockVulkanFunctions(context->GetDevice());
@@ -206,16 +201,7 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     recycler->Dispose();
   }
 
-  // Wait for the pool to be reclaimed.
-  for (auto i = 0u; i < 2u; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
-    }
-    waiter.Wait();
-  }
+  WaitForReclaim(context);
 
   // Verify that the cmd pool was trimmed.
 
@@ -224,6 +210,43 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
   EXPECT_EQ(std::count(called->begin(), called->end(),
                        "vkResetCommandPoolReleaseResources"),
             1u);
+
+  context->Shutdown();
+}
+
+TEST(CommandPoolRecyclerVKTest, RecyclerGlobalPoolMapSize) {
+  auto context = MockVulkanContextBuilder().Build();
+  auto const recycler = context->GetCommandPoolRecycler();
+
+  // The global pool list for this context should initially be empty.
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(context.get()), 0);
+
+  // Create a group of command pools that will be added to the global map.
+  const int kPoolCount = 3;
+  std::vector<std::shared_ptr<CommandPoolVK>> pools;
+  for (int i = 0; i < kPoolCount; i++) {
+    pools.push_back(recycler->Get());
+    recycler->Dispose();
+  }
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(context.get()),
+            kPoolCount);
+
+  // Release the pools and wait for them to be reclaimed by the recycler.
+  pools.clear();
+  WaitForReclaim(context);
+
+  // The reclaimed pools should still be present in the global map.
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(context.get()),
+            kPoolCount);
+
+  // Obtain the pools again.  The previously created pools should be reused,
+  // and no more pools should be added to the global map.
+  for (int i = 0; i < kPoolCount; i++) {
+    pools.push_back(recycler->Get());
+    recycler->Dispose();
+  }
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(context.get()),
+            kPoolCount);
 
   context->Shutdown();
 }
