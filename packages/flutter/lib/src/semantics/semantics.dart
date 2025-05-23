@@ -4300,6 +4300,9 @@ class SemanticsOwner extends ChangeNotifier {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
+      if (node._canPerformAction(action)) {
+        return node._actions[action];
+      }
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
         if (child._canPerformAction(action)) {
