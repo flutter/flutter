@@ -7,15 +7,9 @@
 
 #import <UIKit/UIKit.h>
 
-@class FlutterEngine;
-
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property(strong, nonatomic) UIWindow* window;
-/** The FlutterEngine that will be served by `takeLaunchEngine`. */
-@property(strong, nonatomic) FlutterEngine* mockLaunchEngine;
-
-- (FlutterEngine*)takeLaunchEngine;
 
 @end
 
