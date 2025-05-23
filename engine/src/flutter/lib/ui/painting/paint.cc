@@ -83,7 +83,6 @@ DlPaint* CreatePaint(DlPaint& paint,
                      const DisplayListAttributeFlags& flags,
                      DlTileMode tile_mode,
                      Dart_Handle paint_objects,
-                     bool has_paint_objects,
                      std::vector<uint8_t>& paint_data) {
   if (paint_data.empty()) {
     return nullptr;
@@ -95,7 +94,7 @@ DlPaint* CreatePaint(DlPaint& paint,
       reinterpret_cast<const uint32_t*>(paint_data.data());
   const float* float_data = reinterpret_cast<const float*>(paint_data.data());
 
-  if (has_paint_objects) {
+  if (!Dart_IsNull(paint_objects)) {
     Dart_Handle values[kObjectCount];
 
     FML_DCHECK(Dart_IsList(paint_objects));

@@ -14,7 +14,6 @@ DlPaint* CreatePaint(DlPaint& paint,
                      const DisplayListAttributeFlags& flags,
                      DlTileMode tile_mode,
                      Dart_Handle paint_objects,
-                     bool has_paint_objects,
                      std::vector<uint8_t>& byte_data);
 
 }  // namespace flutter

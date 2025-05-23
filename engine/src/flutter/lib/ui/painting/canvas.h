@@ -35,15 +35,13 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   ~Canvas() override;
 
   void save();
-  void saveLayerWithoutBounds(Dart_Handle paint_objects,
-                              bool has_paint_objects);
+  void saveLayerWithoutBounds(Dart_Handle paint_objects);
 
   void saveLayer(double left,
                  double top,
                  double right,
                  double bottom,
-                 Dart_Handle paint_objects,
-                 bool has_paint_objects);
+                 Dart_Handle paint_objects);
 
   void restore();
   int getSaveCount();
@@ -74,43 +72,31 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                 double y1,
                 double x2,
                 double y2,
-                Dart_Handle paint_objects,
-                bool has_paint_objects);
+                Dart_Handle paint_objects);
 
-  void drawPaint(Dart_Handle paint_objects, bool has_paint_objects);
+  void drawPaint(Dart_Handle paint_objects);
 
   void drawRect(double left,
                 double top,
                 double right,
                 double bottom,
-                Dart_Handle paint_objects,
-                bool has_paint_objects);
+                Dart_Handle paint_objects);
 
-  void drawRRect(const RRect& rrect,
-                 Dart_Handle paint_objects,
-                 bool has_paint_objects);
+  void drawRRect(const RRect& rrect, Dart_Handle paint_objects);
 
   void drawDRRect(const RRect& outer,
                   const RRect& inner,
-                  Dart_Handle paint_objects,
-                  bool has_paint_objects);
+                  Dart_Handle paint_objects);
 
-  void drawRSuperellipse(const RSuperellipse* rse,
-                         Dart_Handle paint_objects,
-                         bool has_paint_objects);
+  void drawRSuperellipse(const RSuperellipse* rse, Dart_Handle paint_objects);
 
   void drawOval(double left,
                 double top,
                 double right,
                 double bottom,
-                Dart_Handle paint_objects,
-                bool has_paint_objects);
+                Dart_Handle paint_objects);
 
-  void drawCircle(double x,
-                  double y,
-                  double radius,
-                  Dart_Handle paint_objects,
-                  bool has_paint_objects);
+  void drawCircle(double x, double y, double radius, Dart_Handle paint_objects);
 
   void drawArc(double left,
                double top,
@@ -119,18 +105,14 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                double startAngle,
                double sweepAngle,
                bool useCenter,
-               Dart_Handle paint_objects,
-               bool has_paint_objects);
+               Dart_Handle paint_objects);
 
-  void drawPath(const CanvasPath* path,
-                Dart_Handle paint_objects,
-                bool has_paint_objects);
+  void drawPath(const CanvasPath* path, Dart_Handle paint_objects);
 
   Dart_Handle drawImage(const CanvasImage* image,
                         double x,
                         double y,
                         Dart_Handle paint_objects,
-                        bool has_paint_objects,
                         int filter_quality_index);
 
   Dart_Handle drawImageRect(const CanvasImage* image,
@@ -143,7 +125,6 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                             double dst_right,
                             double dst_bottom,
                             Dart_Handle paint_objects,
-                            bool has_paint_objects,
                             int filter_quality_index);
 
   Dart_Handle drawImageNine(const CanvasImage* image,
@@ -156,7 +137,6 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                             double dst_right,
                             double dst_bottom,
                             Dart_Handle paint_objects,
-                            bool has_paint_objects,
                             int bitmap_sampling_index);
 
   void drawPicture(Picture* picture);
@@ -167,17 +147,14 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   // either need to process the paint argument first.
 
   void drawPoints(Dart_Handle paint_objects,
-                  bool has_paint_objects,
                   DlPointMode point_mode,
                   const tonic::Float32List& points);
 
   void drawVertices(const Vertices* vertices,
                     DlBlendMode blend_mode,
-                    Dart_Handle paint_objects,
-                    bool has_paint_objects);
+                    Dart_Handle paint_objects);
 
   Dart_Handle drawAtlas(Dart_Handle paint_objects,
-                        bool has_paint_objects,
                         int filter_quality_index,
                         CanvasImage* atlas,
                         Dart_Handle transforms_handle,

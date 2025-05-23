@@ -380,9 +380,7 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
                                  double decorationThickness,
                                  const std::string& locale,
                                  Dart_Handle background_objects,
-                                 bool has_background_objects,
                                  Dart_Handle foreground_objects,
-                                 bool has_foreground_objects,
                                  Dart_Handle shadows_data,
                                  Dart_Handle font_features_data,
                                  Dart_Handle font_variations_data) {
@@ -461,16 +459,14 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
   if (mask & kTSBackgroundMask) {
     DlPaint dl_paint;
     CreatePaint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
-                DlTileMode::kDecal, background_objects, has_background_objects,
-                background_data_);
+                DlTileMode::kDecal, background_objects, background_data_);
     style.background = dl_paint;
   }
 
   if (mask & kTSForegroundMask) {
     DlPaint dl_paint;
     CreatePaint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
-                DlTileMode::kDecal, foreground_objects, has_foreground_objects,
-                foreground_data_);
+                DlTileMode::kDecal, foreground_objects, foreground_data_);
     style.foreground = dl_paint;
   }
 

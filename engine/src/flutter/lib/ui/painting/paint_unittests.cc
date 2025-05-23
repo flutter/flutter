@@ -28,8 +28,7 @@ TEST_F(ShellTest, ConvertPaintToDlPaint) {
     memcpy(paint_bytes.data(), raw_data, byte_data.length_in_bytes());
 
     CreatePaint(dl_paint, DisplayListOpFlags::kDrawRectFlags,
-                DlTileMode::kClamp, paint_objects, Dart_IsNull(paint_objects),
-                paint_bytes);
+                DlTileMode::kClamp, paint_objects, paint_bytes);
 
     message_latch->Signal();
   };
