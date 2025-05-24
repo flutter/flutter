@@ -471,35 +471,6 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter test should respect --serve-observatory', () async {
-    Process? process;
-    StreamSubscription<String>? sub;
-    try {
-      process = await _runFlutterTestConcurrent(
-        'trivial',
-        automatedTestsDirectory,
-        flutterTestDirectory,
-        extraArguments: const <String>['--start-paused', '--serve-observatory'],
-      );
-      final Completer<Uri> completer = Completer<Uri>();
-      final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
-      sub = process.stdout.transform(utf8.decoder).listen((String e) {
-        if (!completer.isCompleted && vmServiceUriRegExp.hasMatch(e)) {
-          completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
-        }
-      });
-      final Uri vmServiceUri = await completer.future;
-      final HttpClient client = HttpClient();
-      final HttpClientRequest request = await client.getUrl(vmServiceUri);
-      final HttpClientResponse response = await request.close();
-      final String content = await response.transform(utf8.decoder).join();
-      expect(content, contains('Dart VM Observatory'));
-    } finally {
-      await sub?.cancel();
-      process?.kill();
-    }
-  });
-
   testWithoutContext('flutter test should serve DevTools', () async {
     Process? process;
     StreamSubscription<String>? sub;

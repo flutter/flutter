@@ -214,7 +214,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDeviceConnectionOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -360,7 +359,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
-        serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,

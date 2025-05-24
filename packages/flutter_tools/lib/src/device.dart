@@ -968,7 +968,6 @@ class DebuggingOptions {
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
-    this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1031,7 +1030,6 @@ class DebuggingOptions {
        fastStart = false,
        webEnableExpressionEvaluation = false,
        nativeNullAssertions = false,
-       serveObservatory = false,
        enableDevTools = false,
        ipv6 = false,
        google3WorkspaceRoot = null,
@@ -1085,7 +1083,6 @@ class DebuggingOptions {
     required this.enableImpeller,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
-    required this.serveObservatory,
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1131,7 +1128,6 @@ class DebuggingOptions {
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
   final bool enableVulkanValidation;
-  final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1281,7 +1277,6 @@ class DebuggingOptions {
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableVulkanValidation': enableVulkanValidation,
-    'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1351,7 +1346,6 @@ class DebuggingOptions {
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
-        serveObservatory: (json['serveObservatory'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
@@ -1364,9 +1358,7 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({Uri? vmServiceUri, Uri? observatoryUri})
-    : started = true,
-      vmServiceUri = vmServiceUri ?? observatoryUri;
+  LaunchResult.succeeded({this.vmServiceUri}) : started = true;
 
   LaunchResult.failed() : started = false, vmServiceUri = null;
 

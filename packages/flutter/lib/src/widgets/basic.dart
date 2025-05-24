@@ -6990,7 +6990,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 ///  * [debugRepaintRainbowEnabled], a debugging flag to help visually monitor
 ///    render tree repaints in a running app.
 ///  * [debugProfilePaintsEnabled], a debugging flag to show render tree
-///    repaints in the observatory's timeline view.
+///    repaints in Flutter DevTools' timeline view.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const RepaintBoundary({super.key, super.child});
