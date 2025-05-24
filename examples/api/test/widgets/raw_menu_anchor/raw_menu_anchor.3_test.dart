@@ -54,7 +54,7 @@ void main() {
   testWidgets('Hover traversal opens one submenu at a time', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RawMenuAnchorSubmenuAnimationApp());
 
-    // Open root menu
+    // Open root menu.
     await tester.tap(find.byType(FilledButton));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
@@ -82,7 +82,7 @@ void main() {
   testWidgets('Submenu opens at expected rate', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RawMenuAnchorSubmenuAnimationApp());
 
-    // Open root menu
+    // Open root menu.
     await tester.tap(find.byType(FilledButton));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 201));
@@ -126,7 +126,7 @@ void main() {
   testWidgets('Outside tap closes all menus', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RawMenuAnchorSubmenuAnimationApp());
 
-    // Open root menu and submenu
+    // Open root menu and submenu.
     await tester.tap(find.byType(FilledButton));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 201));

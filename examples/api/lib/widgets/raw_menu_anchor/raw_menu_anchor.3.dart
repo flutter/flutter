@@ -216,7 +216,6 @@ class RawMenuAnchorSubmenuAnimationApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
