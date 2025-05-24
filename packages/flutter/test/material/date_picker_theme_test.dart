@@ -910,7 +910,7 @@ void main() {
   testWidgets('DatePicker uses ThemeData.inputDecorationTheme properties '
       'which are null in DatePickerThemeData.inputDecorationTheme', (WidgetTester tester) async {
     Widget buildWidget({
-      InputDecorationTheme? inputDecorationTheme,
+      InputDecorationThemeData? inputDecorationTheme,
       DatePickerThemeData? datePickerTheme,
     }) {
       return MaterialApp(
@@ -938,7 +938,7 @@ void main() {
     // Test DatePicker with DatePickerThemeData.inputDecorationTheme.
     await tester.pumpWidget(
       buildWidget(
-        inputDecorationTheme: const InputDecorationTheme(filled: true),
+        inputDecorationTheme: const InputDecorationThemeData(filled: true),
         datePickerTheme: datePickerTheme,
       ),
     );
@@ -949,7 +949,7 @@ void main() {
     // Test DatePicker with ThemeData.inputDecorationTheme.
     await tester.pumpWidget(
       buildWidget(
-        inputDecorationTheme: const InputDecorationTheme(
+        inputDecorationTheme: const InputDecorationThemeData(
           filled: true,
           fillColor: Color(0xFF00FF00),
           border: OutlineInputBorder(),
