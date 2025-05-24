@@ -508,10 +508,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         } else {
           final DateTime reloadStart = _systemClock.now();
           final vmservice.VM vm = await _vmService.service.getVM();
-          final vmservice.Isolate isolate = await _vmService.service.getIsolate(
-            vm.isolates!.first.id!,
+          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
+            vm.isolates?.firstOrNull?.id ?? '',
           );
-          final vmservice.ReloadReport report = await _vmService.service.reloadSources(isolate.id!);
           reloadDuration = _systemClock.now().difference(reloadStart);
           final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
