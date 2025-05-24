@@ -1884,6 +1884,92 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
+
+    testWidgets('CarouselView currentIndex updates correctly', (WidgetTester tester) async {
+      const int numberOfChildren = 10;
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+      int currentIndex = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[1, 2, 3],
+              controller: controller,
+              onItemChanged: (int index) {
+                currentIndex = index;
+              },
+              itemSnapping: true,
+              children: List<Widget>.generate(numberOfChildren, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(0));
+      expect(currentIndex, equals(0));
+
+      await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(3));
+      expect(currentIndex, equals(3));
+
+      await tester.drag(find.byType(CarouselView), const Offset(400, 0));
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(0));
+      expect(currentIndex, equals(0));
+    });
+
+    testWidgets('CarouselView navigates to a specific item and updates currentIndex', (
+      WidgetTester tester,
+    ) async {
+      const int numberOfChildren = 10;
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 3, 1],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(numberOfChildren, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(0));
+
+      controller.animateToItem(
+        3,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(3));
+
+      controller.animateToItem(
+        5,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(5));
+    });
   });
 }
 
