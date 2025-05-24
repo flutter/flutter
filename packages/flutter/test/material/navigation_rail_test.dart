@@ -2568,6 +2568,24 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Semantics - scrollable', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await _pumpLocalizedTestRail(tester, scrollable: true);
+
+    expect(
+      semantics,
+      hasSemantics(
+        _expectedSemantics(scrollable: true),
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.all', (
     WidgetTester tester,
   ) async {
@@ -3957,6 +3975,59 @@ void main() {
     // If the widget manages to layout without throwing an overflow exception,
     // the test passes.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('NavigationRail can scroll in low height', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/89167.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              // Set Screen height with 300
+              data: MediaQuery.of(context).copyWith(size: const Size(800, 300)),
+              child: Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    // Set NavigationRail height with 100
+                    SizedBox(
+                      height: 100,
+                      child: NavigationRail(
+                        selectedIndex: 0,
+                        scrollable: true,
+                        destinations: const <NavigationRailDestination>[
+                          NavigationRailDestination(
+                            icon: Icon(Icons.favorite_border),
+                            selectedIcon: Icon(Icons.favorite),
+                            label: Text('Abc'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.bookmark_border),
+                            selectedIcon: Icon(Icons.bookmark),
+                            label: Text('Def'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.star_border),
+                            selectedIcon: Icon(Icons.star),
+                            label: Text('Ghi'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Expanded(child: Text('body')),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
   });
 
   group('Material 2', () {
@@ -5949,7 +6020,47 @@ void main() {
   }); // End Material 2 group
 }
 
-TestSemantics _expectedSemantics() {
+TestSemantics _expectedSemantics({bool scrollable = false}) {
+  List<TestSemantics> destinations = <TestSemantics>[
+    TestSemantics(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasSelectedState,
+        SemanticsFlag.isSelected,
+        SemanticsFlag.isFocusable,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Abc\nTab 1 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+    TestSemantics(
+      flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Def\nTab 2 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+    TestSemantics(
+      flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Ghi\nTab 3 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+    TestSemantics(
+      flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Jkl\nTab 4 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+  ];
+
+  if (scrollable) {
+    destinations = <TestSemantics>[
+      TestSemantics(
+        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+        children: destinations,
+      ),
+    ];
+  }
+
   return TestSemantics.root(
     children: <TestSemantics>[
       TestSemantics(
@@ -5960,43 +6071,7 @@ TestSemantics _expectedSemantics() {
               TestSemantics(
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.hasSelectedState,
-                      SemanticsFlag.isSelected,
-                      SemanticsFlag.isFocusable,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Abc\nTab 1 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isFocusable,
-                      SemanticsFlag.hasSelectedState,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Def\nTab 2 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isFocusable,
-                      SemanticsFlag.hasSelectedState,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Ghi\nTab 3 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isFocusable,
-                      SemanticsFlag.hasSelectedState,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Jkl\nTab 4 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
+                  ...destinations,
                   TestSemantics(label: 'body', textDirection: TextDirection.ltr),
                 ],
               ),
@@ -6062,6 +6137,7 @@ Future<void> _pumpLocalizedTestRail(
   WidgetTester tester, {
   NavigationRailLabelType? labelType,
   bool extended = false,
+  bool scrollable = false,
 }) async {
   await tester.pumpWidget(
     Localizations(
@@ -6079,6 +6155,7 @@ Future<void> _pumpLocalizedTestRail(
                 extended: extended,
                 destinations: _destinations(),
                 labelType: labelType,
+                scrollable: scrollable,
               ),
               const Expanded(child: Text('body')),
             ],

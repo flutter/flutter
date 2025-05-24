@@ -109,6 +109,9 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
+    this.leadingAtTop = true,
+    this.trailingAtBottom = false,
+    this.scrollable = false,
   }) : assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
        assert(elevation == null || elevation > 0),
        assert(minWidth == null || minWidth > 0),
@@ -315,6 +318,26 @@ class NavigationRail extends StatefulWidget {
   /// that is null, defaults to [StadiumBorder].
   final ShapeBorder? indicatorShape;
 
+  /// If `true`, the [leading] widget is pinned to the top of the
+  /// [NavigationRail]. Otherwise it precedes directly the main group of
+  /// [destinations].
+  final bool leadingAtTop;
+
+  /// If `true`, the [trailing] widget is pinned to the bottom of the
+  /// [NavigationRail]. Otherwise it follows directly the main group of
+  /// [destinations].
+  final bool trailingAtBottom;
+
+  /// Specifies, if the main group of items should be scrollable, when vertical
+  /// space is insufficient to show all of [destinations], [leading] and
+  /// [trailing].
+  ///
+  /// If [leadingAtTop] or [trailingAtBottom] are false, [leading] or [trailing]
+  /// widgets, respectively, are part of the main group, additionally to
+  /// [destinations]. Otherwise these are statical at the top or bottom,
+  /// respectively.
+  final bool scrollable;
+
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
   /// This can be used to synchronize animations in the [leading] or [trailing]
@@ -444,6 +467,52 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
     final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
 
+    Widget mainGroup = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (!widget.leadingAtTop && widget.leading != null) ...<Widget>[
+          widget.leading!,
+          _verticalSpacer,
+        ],
+        for (int i = 0; i < widget.destinations.length; i += 1)
+          _RailDestination(
+            minWidth: minWidth,
+            minExtendedWidth: minExtendedWidth,
+            extendedTransitionAnimation: _extendedAnimation,
+            selected: widget.selectedIndex == i,
+            icon:
+                widget.selectedIndex == i
+                    ? widget.destinations[i].selectedIcon
+                    : widget.destinations[i].icon,
+            label: widget.destinations[i].label,
+            destinationAnimation: _destinationAnimations[i],
+            labelType: labelType,
+            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+            labelTextStyle:
+                widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+            padding: widget.destinations[i].padding,
+            useIndicator: useIndicator,
+            indicatorColor: useIndicator ? indicatorColor : null,
+            indicatorShape: useIndicator ? indicatorShape : null,
+            onTap: () {
+              if (widget.onDestinationSelected != null) {
+                widget.onDestinationSelected!(i);
+              }
+            },
+            indexLabel: localizations.tabLabel(
+              tabIndex: i + 1,
+              tabCount: widget.destinations.length,
+            ),
+            disabled: widget.destinations[i].disabled,
+          ),
+        if (!widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
+      ],
+    );
+
+    if (widget.scrollable) {
+      mainGroup = SingleChildScrollView(child: mainGroup);
+    }
+
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: Semantics(
@@ -457,54 +526,12 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
             child: Column(
               children: <Widget>[
                 _verticalSpacer,
-                if (widget.leading != null) ...<Widget>[widget.leading!, _verticalSpacer],
-                Expanded(
-                  child: Align(
-                    alignment: Alignment(0, groupAlignment),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        for (int i = 0; i < widget.destinations.length; i += 1)
-                          _RailDestination(
-                            minWidth: minWidth,
-                            minExtendedWidth: minExtendedWidth,
-                            extendedTransitionAnimation: _extendedAnimation,
-                            selected: widget.selectedIndex == i,
-                            icon:
-                                widget.selectedIndex == i
-                                    ? widget.destinations[i].selectedIcon
-                                    : widget.destinations[i].icon,
-                            label: widget.destinations[i].label,
-                            destinationAnimation: _destinationAnimations[i],
-                            labelType: labelType,
-                            iconTheme:
-                                widget.selectedIndex == i
-                                    ? selectedIconTheme
-                                    : effectiveUnselectedIconTheme,
-                            labelTextStyle:
-                                widget.selectedIndex == i
-                                    ? selectedLabelTextStyle
-                                    : unselectedLabelTextStyle,
-                            padding: widget.destinations[i].padding,
-                            useIndicator: useIndicator,
-                            indicatorColor: useIndicator ? indicatorColor : null,
-                            indicatorShape: useIndicator ? indicatorShape : null,
-                            onTap: () {
-                              if (widget.onDestinationSelected != null) {
-                                widget.onDestinationSelected!(i);
-                              }
-                            },
-                            indexLabel: localizations.tabLabel(
-                              tabIndex: i + 1,
-                              tabCount: widget.destinations.length,
-                            ),
-                            disabled: widget.destinations[i].disabled,
-                          ),
-                        if (widget.trailing != null) widget.trailing!,
-                      ],
-                    ),
-                  ),
-                ),
+                if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
+                  widget.leading!,
+                  _verticalSpacer,
+                ],
+                Flexible(child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup)),
+                if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
               ],
             ),
           ),
@@ -1168,18 +1195,22 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // dart format off
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)
-    : super(
-        elevation: 0.0,
-        groupAlignment: -1,
-        labelType: NavigationRailLabelType.none,
-        useIndicator: true,
-        minWidth: 80.0,
-        minExtendedWidth: 256,
-      );
+      : super(
+    elevation: 0.0,
+    groupAlignment: -1,
+    labelType: NavigationRailLabelType.none,
+    useIndicator: true,
+    minWidth: 80.0,
+    minExtendedWidth: 256,
+  );
 
   final BuildContext context;
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final TextTheme _textTheme = Theme.of(context).textTheme;
+  late final ColorScheme _colors = Theme
+      .of(context)
+      .colorScheme;
+  late final TextTheme _textTheme = Theme
+      .of(context)
+      .textTheme;
 
   @override Color? get backgroundColor => _colors.surface;
 
