@@ -4,7 +4,7 @@
 
 // This sample demonstrates nested navigation in a bottom navigation bar.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 // There are three possible tabs.
 enum _Tab { home, one, two }

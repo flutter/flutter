@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/widgets/async/stream_builder.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

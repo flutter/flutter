@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 // Common constants between SlowMotionSetting and SettingsListItem.
 final BorderRadius settingItemBorderRadius = BorderRadius.circular(10);

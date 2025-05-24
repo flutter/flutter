@@ -4,7 +4,7 @@
 
 import 'package:collection/collection.dart' show lowerBound;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/semantics.dart';
 
 import '../../gallery/demo.dart';

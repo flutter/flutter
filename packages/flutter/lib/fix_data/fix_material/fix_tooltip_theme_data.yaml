@@ -21,7 +21,7 @@ transforms:
   - title: "Migrate to 'constraints'"
     date: 2025-02-14
     element:
-      uris: ["package:flutter/material.dart"]
+      uris: ["package:material/material.dart"]
       constructor: ""
       inClass: "TooltipThemeData"
     oneOf:
@@ -73,7 +73,7 @@ transforms:
   - title: "Migrate to 'constraints'"
     date: 2025-02-14
     element:
-      uris: ["package:flutter/material.dart"]
+      uris: ["package:material/material.dart"]
       getter: "height"
       inClass: "TooltipThemeData"
     changes:
@@ -84,7 +84,7 @@ transforms:
   - title: "Migrate to 'constraints'"
     date: 2025-02-14
     element:
-      uris: ["package:flutter/material.dart"]
+      uris: ["package:material/material.dart"]
       method: "copyWith"
       inClass: "TooltipThemeData"
     oneOf:

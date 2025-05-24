@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:cupertino/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// This sample demonstrates creating a custom page transition that is able to
 /// override the outgoing transition of the route behind it in the navigation

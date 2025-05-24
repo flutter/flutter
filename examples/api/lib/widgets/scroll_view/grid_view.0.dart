@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/rendering.dart';
 
 void main() => runApp(const GridViewExampleApp());

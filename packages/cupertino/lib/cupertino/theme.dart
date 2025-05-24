@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'app.dart';
 /// @docImport 'button.dart';
@@ -31,7 +31,10 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   CupertinoColors.systemBackground,
   CupertinoColors.systemBlue,
   false,
-  _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
+  _CupertinoTextThemeDefaults(
+    CupertinoColors.label,
+    CupertinoColors.inactiveGray,
+  ),
 );
 
 /// Applies a visual styling theme to descendant Cupertino widgets.
@@ -67,9 +70,10 @@ class CupertinoTheme extends StatelessWidget {
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
-    return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    return (inheritedTheme?.theme.data ?? const CupertinoThemeData())
+        .resolveFrom(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -88,9 +92,10 @@ class CupertinoTheme extends StatelessWidget {
   /// * [CupertinoThemeData.brightness], the property takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    return inheritedTheme?.theme.data.brightness ??
+        MediaQuery.platformBrightnessOf(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -109,9 +114,10 @@ class CupertinoTheme extends StatelessWidget {
   /// * [brightnessOf], which throws if no valid [CupertinoTheme] or
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
-    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    return inheritedTheme?.theme.data.brightness ??
+        MediaQuery.maybePlatformBrightnessOf(context);
   }
 
   /// The widget below this widget in the tree.
@@ -123,7 +129,10 @@ class CupertinoTheme extends StatelessWidget {
   Widget build(BuildContext context) {
     return InheritedCupertinoTheme(
       theme: this,
-      child: IconTheme(data: CupertinoIconThemeData(color: data.primaryColor), child: child),
+      child: IconTheme(
+        data: CupertinoIconThemeData(color: data.primaryColor),
+        child: child,
+      ),
     );
   }
 
@@ -138,7 +147,11 @@ class CupertinoTheme extends StatelessWidget {
 class InheritedCupertinoTheme extends InheritedTheme {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
   /// descendants.
-  const InheritedCupertinoTheme({super.key, required this.theme, required super.child});
+  const InheritedCupertinoTheme({
+    super.key,
+    required this.theme,
+    required super.child,
+  });
 
   /// The [CupertinoTheme] that is provided to widgets lower in the tree.
   final CupertinoTheme theme;
@@ -149,7 +162,8 @@ class InheritedCupertinoTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(InheritedCupertinoTheme oldWidget) => theme.data != oldWidget.theme.data;
+  bool updateShouldNotify(InheritedCupertinoTheme oldWidget) =>
+      theme.data != oldWidget.theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].
@@ -169,7 +183,8 @@ class InheritedCupertinoTheme extends InheritedTheme {
 ///  * [ThemeData], a Material equivalent that also configures Cupertino
 ///    styling via a [CupertinoThemeData] subclass [MaterialBasedCupertinoThemeData].
 @immutable
-class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable {
+class CupertinoThemeData extends NoDefaultCupertinoThemeData
+    with Diagnosticable {
   /// Creates a [CupertinoTheme] styling specification.
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
@@ -256,17 +271,20 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }
 
   @override
-  Color get barBackgroundColor => super.barBackgroundColor ?? _defaults.barBackgroundColor;
+  Color get barBackgroundColor =>
+      super.barBackgroundColor ?? _defaults.barBackgroundColor;
 
   @override
   Color get scaffoldBackgroundColor =>
       super.scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
 
   @override
-  Color get selectionHandleColor => super.selectionHandleColor ?? _defaults.selectionHandleColor;
+  Color get selectionHandleColor =>
+      super.selectionHandleColor ?? _defaults.selectionHandleColor;
 
   @override
-  bool get applyThemeToAll => super.applyThemeToAll ?? _defaults.applyThemeToAll;
+  bool get applyThemeToAll =>
+      super.applyThemeToAll ?? _defaults.applyThemeToAll;
 
   @override
   NoDefaultCupertinoThemeData noDefault() {
@@ -284,7 +302,8 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 
   @override
   CupertinoThemeData resolveFrom(BuildContext context) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
+    Color? convertColor(Color? color) =>
+        CupertinoDynamicColor.maybeResolve(color, context);
 
     return CupertinoThemeData._rawWithDefaults(
       brightness,
@@ -327,7 +346,9 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(
+      EnumProperty<Brightness>('brightness', brightness, defaultValue: null),
+    );
     properties.add(
       createCupertinoColorProperty(
         'primaryColor',
@@ -533,7 +554,8 @@ class NoDefaultCupertinoThemeData {
   /// [CupertinoThemeData].
   @protected
   NoDefaultCupertinoThemeData resolveFrom(BuildContext context) {
-    Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
+    Color? convertColor(Color? color) =>
+        CupertinoDynamicColor.maybeResolve(color, context);
 
     return NoDefaultCupertinoThemeData(
       brightness: brightness,
@@ -566,10 +588,12 @@ class NoDefaultCupertinoThemeData {
     return NoDefaultCupertinoThemeData(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
-      primaryContrastingColor: primaryContrastingColor ?? this.primaryContrastingColor,
+      primaryContrastingColor:
+          primaryContrastingColor ?? this.primaryContrastingColor,
       textTheme: textTheme ?? this.textTheme,
       barBackgroundColor: barBackgroundColor ?? this.barBackgroundColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
+      scaffoldBackgroundColor:
+          scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       selectionHandleColor: selectionHandleColor ?? this.selectionHandleColor,
       applyThemeToAll: applyThemeToAll ?? this.applyThemeToAll,
     );
@@ -627,8 +651,12 @@ class _CupertinoThemeDefaults {
   final bool applyThemeToAll;
   final _CupertinoTextThemeDefaults textThemeDefaults;
 
-  _CupertinoThemeDefaults resolveFrom(BuildContext context, bool resolveTextTheme) {
-    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context);
+  _CupertinoThemeDefaults resolveFrom(
+    BuildContext context,
+    bool resolveTextTheme,
+  ) {
+    Color convertColor(Color color) =>
+        CupertinoDynamicColor.resolve(color, context);
 
     return _CupertinoThemeDefaults(
       brightness,
@@ -638,7 +666,9 @@ class _CupertinoThemeDefaults {
       convertColor(scaffoldBackgroundColor),
       convertColor(selectionHandleColor),
       applyThemeToAll,
-      resolveTextTheme ? textThemeDefaults.resolveFrom(context) : textThemeDefaults,
+      resolveTextTheme
+          ? textThemeDefaults.resolveFrom(context)
+          : textThemeDefaults,
     );
   }
 }
@@ -683,16 +713,20 @@ class _DefaultCupertinoTextThemeData extends CupertinoTextThemeData {
   TextStyle get textStyle => super.textStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get tabLabelTextStyle => super.tabLabelTextStyle.copyWith(color: inactiveGray);
+  TextStyle get tabLabelTextStyle =>
+      super.tabLabelTextStyle.copyWith(color: inactiveGray);
 
   @override
-  TextStyle get navTitleTextStyle => super.navTitleTextStyle.copyWith(color: labelColor);
+  TextStyle get navTitleTextStyle =>
+      super.navTitleTextStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get navLargeTitleTextStyle => super.navLargeTitleTextStyle.copyWith(color: labelColor);
+  TextStyle get navLargeTitleTextStyle =>
+      super.navLargeTitleTextStyle.copyWith(color: labelColor);
 
   @override
-  TextStyle get pickerTextStyle => super.pickerTextStyle.copyWith(color: labelColor);
+  TextStyle get pickerTextStyle =>
+      super.pickerTextStyle.copyWith(color: labelColor);
 
   @override
   TextStyle get dateTimePickerTextStyle =>

@@ -29,7 +29,7 @@
 // is referenced more than once, link back to the instance the example file is
 // named for.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// Flutter code sample for [Placeholder].
 

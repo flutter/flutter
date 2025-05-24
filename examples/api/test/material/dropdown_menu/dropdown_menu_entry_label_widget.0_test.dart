@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu_entry_label_widget.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';

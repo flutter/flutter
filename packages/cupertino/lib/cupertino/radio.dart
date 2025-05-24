@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'checkbox.dart';
 /// @docImport 'slider.dart';
@@ -36,18 +36,21 @@ const Color _kDisabledBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(64, 0, 0, 0),
   darkColor: Color.fromARGB(64, 0, 0, 0),
 );
-const CupertinoDynamicColor _kDefaultBorderColor = CupertinoDynamicColor.withBrightness(
-  color: Color.fromARGB(255, 209, 209, 214),
-  darkColor: Color.fromARGB(64, 0, 0, 0),
-);
-const CupertinoDynamicColor _kDefaultInnerColor = CupertinoDynamicColor.withBrightness(
-  color: CupertinoColors.white,
-  darkColor: Color.fromARGB(255, 222, 232, 248),
-);
-const CupertinoDynamicColor _kDefaultOuterColor = CupertinoDynamicColor.withBrightness(
-  color: CupertinoColors.activeBlue,
-  darkColor: Color.fromARGB(255, 50, 100, 215),
-);
+const CupertinoDynamicColor _kDefaultBorderColor =
+    CupertinoDynamicColor.withBrightness(
+      color: Color.fromARGB(255, 209, 209, 214),
+      darkColor: Color.fromARGB(64, 0, 0, 0),
+    );
+const CupertinoDynamicColor _kDefaultInnerColor =
+    CupertinoDynamicColor.withBrightness(
+      color: CupertinoColors.white,
+      darkColor: Color.fromARGB(255, 222, 232, 248),
+    );
+const CupertinoDynamicColor _kDefaultOuterColor =
+    CupertinoDynamicColor.withBrightness(
+      color: CupertinoColors.activeBlue,
+      darkColor: Color.fromARGB(255, 50, 100, 215),
+    );
 const double _kPressedOverlayOpacity = 0.15;
 const double _kCheckmarkStrokeWidth = 2.0;
 const double _kFocusOutlineStrokeWidth = 3.0;
@@ -199,7 +202,8 @@ class CupertinoRadio<T> extends StatefulWidget {
 }
 
 class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+  FocusNode get _effectiveFocusNode =>
+      widget.focusNode ?? (_internalFocusNode ??= FocusNode());
   FocusNode? _internalFocusNode;
 
   @override
@@ -212,7 +216,10 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
   Widget build(BuildContext context) {
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-          return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+          return WidgetStateProperty.resolveAs<MouseCursor?>(
+                widget.mouseCursor,
+                states,
+              ) ??
               (!states.contains(WidgetState.disabled) && kIsWeb
                   ? SystemMouseCursors.click
                   : SystemMouseCursors.basic);
@@ -282,7 +289,8 @@ class _RadioPaintState extends State<_RadioPaint> {
         return CupertinoDynamicColor.resolve(_kDisabledOuterColor, context);
       }
       if (states.contains(WidgetState.selected)) {
-        return widget.activeColor ?? CupertinoDynamicColor.resolve(_kDefaultOuterColor, context);
+        return widget.activeColor ??
+            CupertinoDynamicColor.resolve(_kDefaultOuterColor, context);
       }
       return widget.inactiveColor ?? CupertinoColors.white;
     });
@@ -290,11 +298,14 @@ class _RadioPaintState extends State<_RadioPaint> {
 
   WidgetStateProperty<Color> get _defaultInnerColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
-        return widget.fillColor ?? CupertinoDynamicColor.resolve(_kDisabledInnerColor, context);
+      if (states.contains(WidgetState.disabled) &&
+          states.contains(WidgetState.selected)) {
+        return widget.fillColor ??
+            CupertinoDynamicColor.resolve(_kDisabledInnerColor, context);
       }
       if (states.contains(WidgetState.selected)) {
-        return widget.fillColor ?? CupertinoDynamicColor.resolve(_kDefaultInnerColor, context);
+        return widget.fillColor ??
+            CupertinoDynamicColor.resolve(_kDefaultInnerColor, context);
       }
       return CupertinoColors.white;
     });
@@ -302,7 +313,8 @@ class _RadioPaintState extends State<_RadioPaint> {
 
   WidgetStateProperty<Color> get _defaultBorderColor {
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if ((states.contains(WidgetState.selected) || states.contains(WidgetState.focused)) &&
+      if ((states.contains(WidgetState.selected) ||
+              states.contains(WidgetState.focused)) &&
           !states.contains(WidgetState.disabled)) {
         return CupertinoColors.transparent;
       }
@@ -316,9 +328,10 @@ class _RadioPaintState extends State<_RadioPaint> {
   @override
   Widget build(BuildContext context) {
     // Colors need to be resolved in selected and non selected states separately.
-    final Set<WidgetState> activeStates = widget.toggleableState.states..add(WidgetState.selected);
-    final Set<WidgetState> inactiveStates =
-        widget.toggleableState.states..remove(WidgetState.selected);
+    final Set<WidgetState> activeStates = widget.toggleableState.states
+      ..add(WidgetState.selected);
+    final Set<WidgetState> inactiveStates = widget.toggleableState.states
+      ..remove(WidgetState.selected);
 
     // Since the states getter always makes a new set, make a copy to use
     // throughout the lifecycle of this build method.
@@ -326,36 +339,41 @@ class _RadioPaintState extends State<_RadioPaint> {
 
     final Color effectiveActiveColor = _defaultOuterColor.resolve(activeStates);
 
-    final Color effectiveInactiveColor = _defaultOuterColor.resolve(inactiveStates);
+    final Color effectiveInactiveColor = _defaultOuterColor.resolve(
+      inactiveStates,
+    );
 
     final Color effectiveFocusOverlayColor =
         widget.focusColor ??
-        HSLColor.fromColor(effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity))
+        HSLColor.fromColor(
+              effectiveActiveColor.withOpacity(kCupertinoFocusColorOpacity),
+            )
             .withLightness(kCupertinoFocusColorBrightness)
             .withSaturation(kCupertinoFocusColorSaturation)
             .toColor();
 
     final Color effectiveFillColor = _defaultInnerColor.resolve(currentStates);
 
-    final Color effectiveBorderColor = _defaultBorderColor.resolve(currentStates);
+    final Color effectiveBorderColor = _defaultBorderColor.resolve(
+      currentStates,
+    );
 
     return CustomPaint(
       size: _size,
-      painter:
-          _painter
-            ..position = widget.toggleableState.position
-            ..reaction = widget.toggleableState.reaction
-            ..focusColor = effectiveFocusOverlayColor
-            ..downPosition = widget.toggleableState.downPosition
-            ..isFocused = widget.focused
-            ..activeColor = effectiveActiveColor
-            ..inactiveColor = effectiveInactiveColor
-            ..fillColor = effectiveFillColor
-            ..value = widget.toggleableState.value
-            ..checkmarkStyle = widget.useCheckmarkStyle
-            ..isActive = widget.isActive
-            ..borderColor = effectiveBorderColor
-            ..brightness = CupertinoTheme.of(context).brightness,
+      painter: _painter
+        ..position = widget.toggleableState.position
+        ..reaction = widget.toggleableState.reaction
+        ..focusColor = effectiveFocusOverlayColor
+        ..downPosition = widget.toggleableState.downPosition
+        ..isFocused = widget.focused
+        ..activeColor = effectiveActiveColor
+        ..inactiveColor = effectiveInactiveColor
+        ..fillColor = effectiveFillColor
+        ..value = widget.toggleableState.value
+        ..checkmarkStyle = widget.useCheckmarkStyle
+        ..isActive = widget.isActive
+        ..borderColor = effectiveBorderColor
+        ..brightness = CupertinoTheme.of(context).brightness,
     );
   }
 }
@@ -412,12 +430,10 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   void _drawPressedOverlay(Canvas canvas, Offset center, double radius) {
-    final Paint pressedPaint =
-        Paint()
-          ..color =
-              brightness == Brightness.light
-                  ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
-                  : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+    final Paint pressedPaint = Paint()
+      ..color = brightness == Brightness.light
+          ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
+          : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
     canvas.drawCircle(center, radius, pressedPaint);
   }
 
@@ -434,16 +450,16 @@ class _RadioPainter extends ToggleablePainter {
       colors: <Color>[topColor, bottomColor],
     );
     final Rect circleRect = Rect.fromCircle(center: center, radius: radius);
-    final Paint gradientPaint = Paint()..shader = fillGradient.createShader(circleRect);
+    final Paint gradientPaint = Paint()
+      ..shader = fillGradient.createShader(circleRect);
     canvas.drawPath(Path()..addOval(circleRect), gradientPaint);
   }
 
   void _drawOuterBorder(Canvas canvas, Offset center) {
-    final Paint borderPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..color = borderColor
-          ..strokeWidth = _kBorderOutlineStrokeWidth;
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = borderColor
+      ..strokeWidth = _kBorderOutlineStrokeWidth;
     canvas.drawCircle(center, _kOuterRadius, borderPaint);
   }
 
@@ -454,14 +470,16 @@ class _RadioPainter extends ToggleablePainter {
     if (checkmarkStyle) {
       if (value ?? false) {
         final Path path = Path();
-        final Paint checkPaint =
-            Paint()
-              ..color = activeColor
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = _kCheckmarkStrokeWidth
-              ..strokeCap = StrokeCap.round;
+        final Paint checkPaint = Paint()
+          ..color = activeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _kCheckmarkStrokeWidth
+          ..strokeCap = StrokeCap.round;
         final double width = _size.width;
-        final Offset origin = Offset(center.dx - (width / 2), center.dy - (width / 2));
+        final Offset origin = Offset(
+          center.dx - (width / 2),
+          center.dy - (width / 2),
+        );
         final Offset start = Offset(width * 0.25, width * 0.52);
         final Offset mid = Offset(width * 0.46, width * 0.75);
         final Offset end = Offset(width * 0.85, width * 0.29);
@@ -482,10 +500,14 @@ class _RadioPainter extends ToggleablePainter {
             center,
             _kOuterRadius,
             outerPaint.color.withOpacity(
-              isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0],
+              isActive
+                  ? _kDarkGradientOpacities[0]
+                  : _kDisabledDarkGradientOpacities[0],
             ),
             outerPaint.color.withOpacity(
-              isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1],
+              isActive
+                  ? _kDarkGradientOpacities[1]
+                  : _kDisabledDarkGradientOpacities[1],
             ),
           );
         } else {
@@ -510,10 +532,14 @@ class _RadioPainter extends ToggleablePainter {
             center,
             _kOuterRadius,
             paint.color.withOpacity(
-              isActive ? _kDarkGradientOpacities[0] : _kDisabledDarkGradientOpacities[0],
+              isActive
+                  ? _kDarkGradientOpacities[0]
+                  : _kDisabledDarkGradientOpacities[0],
             ),
             paint.color.withOpacity(
-              isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1],
+              isActive
+                  ? _kDarkGradientOpacities[1]
+                  : _kDisabledDarkGradientOpacities[1],
             ),
           );
         } else {
@@ -527,12 +553,15 @@ class _RadioPainter extends ToggleablePainter {
       }
     }
     if (isFocused) {
-      final Paint focusPaint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = focusColor
-            ..strokeWidth = _kFocusOutlineStrokeWidth;
-      canvas.drawCircle(center, _kOuterRadius + _kFocusOutlineStrokeWidth / 2, focusPaint);
+      final Paint focusPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = _kFocusOutlineStrokeWidth;
+      canvas.drawCircle(
+        center,
+        _kOuterRadius + _kFocusOutlineStrokeWidth / 2,
+        focusPaint,
+      );
     }
   }
 }

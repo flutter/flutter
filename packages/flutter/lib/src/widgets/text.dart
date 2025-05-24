@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/gestures.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'editable_text.dart';
 /// @docImport 'gesture_detector.dart';

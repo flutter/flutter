@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'simple_platform_view.dart';
 
 // ignore_for_file: public_member_api_docs

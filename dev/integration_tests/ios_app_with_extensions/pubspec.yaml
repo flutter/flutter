@@ -18,6 +18,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   # This integration test includes a watchOS pod. Add a Flutter plugin
   # to prompt the tool to run pod install.
   device_info: 2.0.3

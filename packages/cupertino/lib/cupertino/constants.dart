@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'checkbox.dart';
 /// @docImport 'radio.dart';
@@ -46,7 +46,8 @@ const double kCupertinoFocusColorOpacity = 0.80,
 /// See also:
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS>
-const double kCupertinoButtonTintedOpacityLight = 0.12, kCupertinoButtonTintedOpacityDark = 0.26;
+const double kCupertinoButtonTintedOpacityLight = 0.12,
+    kCupertinoButtonTintedOpacityDark = 0.26;
 
 /// The default value for [IconThemeData.size] of [CupertinoButton.child].
 ///
@@ -59,12 +60,15 @@ const double kCupertinoButtonDefaultIconSize = 20.0;
 /// The padding values for the different [CupertinoButtonSize]s.
 ///
 /// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
-const Map<CupertinoButtonSize, EdgeInsetsGeometry> kCupertinoButtonPadding =
-    <CupertinoButtonSize, EdgeInsetsGeometry>{
-      CupertinoButtonSize.small: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-      CupertinoButtonSize.medium: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      CupertinoButtonSize.large: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-    };
+const Map<CupertinoButtonSize, EdgeInsetsGeometry>
+kCupertinoButtonPadding = <CupertinoButtonSize, EdgeInsetsGeometry>{
+  CupertinoButtonSize.small: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+  CupertinoButtonSize.medium: EdgeInsets.symmetric(
+    vertical: 10,
+    horizontal: 15,
+  ),
+  CupertinoButtonSize.large: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+};
 
 /// The border radius values for the different [CupertinoButtonSize]s.
 ///
@@ -79,11 +83,12 @@ final Map<CupertinoButtonSize, BorderRadius> kCupertinoButtonSizeBorderRadius =
 /// The minimum size of a [CupertinoButton] based on the [CupertinoButtonSize].
 ///
 /// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
-const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButtonSize, double>{
-  CupertinoButtonSize.small: 28,
-  CupertinoButtonSize.medium: 32,
-  CupertinoButtonSize.large: 44,
-};
+const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize =
+    <CupertinoButtonSize, double>{
+      CupertinoButtonSize.small: 28,
+      CupertinoButtonSize.medium: 32,
+      CupertinoButtonSize.large: 44,
+    };
 
 /// The distance a button needs to be moved after being pressed for its opacity to change.
 ///

@@ -1,6 +1,6 @@
 # Tests for the Cupertino package
 
-Avoid importing the Material 'package:flutter/material.dart' in these tests as
+Avoid importing the Material 'package:material/material.dart' in these tests as
 we're trying to test the Cupertino package in standalone scenarios.
 
 The 'material' subdirectory contains tests for cross-interactions of Material

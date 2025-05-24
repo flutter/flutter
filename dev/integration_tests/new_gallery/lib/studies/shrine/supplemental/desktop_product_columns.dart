@@ -4,7 +4,7 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import '../model/product.dart';
 import 'product_card.dart';

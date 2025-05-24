@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:android_driver_extensions/extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';

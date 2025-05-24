@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 // If true, the app autofocuses a text field, making the software keyboard visible.
 // The test changes this line while the app is running.

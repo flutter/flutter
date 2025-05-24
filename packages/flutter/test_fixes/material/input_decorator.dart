@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/46115.
-  const InputDecoration inputDecoration = InputDecoration(
-    hasFloatingPlaceholder: true,
-  );
+  const InputDecoration inputDecoration = InputDecoration(hasFloatingPlaceholder: true);
   InputDecoration(hasFloatingPlaceholder: false);
   InputDecoration();
   InputDecoration(error: '');
@@ -40,7 +38,5 @@ void main() {
   const InputDecoration decoration = InputDecoration(maintainHintHeight: false);
   decoration.maintainHintHeight;
 
-  const InputDecoration decoration = InputDecoration.collapsed(
-    maintainHintHeight: false,
-  );
+  const InputDecoration decoration = InputDecoration.collapsed(maintainHintHeight: false);
 }

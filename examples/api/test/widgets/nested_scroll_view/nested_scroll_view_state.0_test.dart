@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/widgets/nested_scroll_view/nested_scroll_view_state.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';

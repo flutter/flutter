@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'list_section.dart';
 library;
@@ -102,7 +102,10 @@ class CupertinoExpansionTile extends StatefulWidget {
 class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   final GlobalKey _headerKey = GlobalKey();
   final OverlayPortalController _fadeController = OverlayPortalController();
-  static final Animatable<double> _quarterTween = Tween<double>(begin: 0.0, end: 0.25);
+  static final Animatable<double> _quarterTween = Tween<double>(
+    begin: 0.0,
+    end: 0.25,
+  );
 
   late ExpansibleController _tileController;
   late Animation<double> _iconTurns;
@@ -133,8 +136,12 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   }
 
   Widget? _buildIcon(BuildContext context, Animation<double> animation) {
-    _iconTurns = animation.drive(_quarterTween.chain(CurveTween(curve: _kAnimationCurve)));
-    final double? size = CupertinoTheme.of(context).textTheme.textStyle.fontSize;
+    _iconTurns = animation.drive(
+      _quarterTween.chain(CurveTween(curve: _kAnimationCurve)),
+    );
+    final double? size = CupertinoTheme.of(
+      context,
+    ).textTheme.textStyle.fontSize;
     return RotationTransition(
       turns: _iconTurns,
       child: SizedBox(
@@ -181,7 +188,8 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         header,
-        if (animation.isAnimating && widget.transitionMode == ExpansionTileTransitionMode.fade)
+        if (animation.isAnimating &&
+            widget.transitionMode == ExpansionTileTransitionMode.fade)
           Opacity(opacity: 0.0, child: body)
         else
           body,
@@ -198,9 +206,14 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
           overlayChildBuilder: (BuildContext context) {
             final BuildContext headerContext = _headerKey.currentContext!;
             final RenderBox overlay =
-                Overlay.of(headerContext).context.findRenderObject()! as RenderBox;
-            final RenderBox headerBox = headerContext.findRenderObject()! as RenderBox;
-            final Offset headerOffset = headerBox.localToGlobal(Offset.zero, ancestor: overlay);
+                Overlay.of(headerContext).context.findRenderObject()!
+                    as RenderBox;
+            final RenderBox headerBox =
+                headerContext.findRenderObject()! as RenderBox;
+            final Offset headerOffset = headerBox.localToGlobal(
+              Offset.zero,
+              ancestor: overlay,
+            );
             return Positioned(
               top: headerOffset.dy + _kHeaderHeight,
               left: headerOffset.dx,
@@ -208,7 +221,10 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
                 constraints: constraints,
                 child: Visibility(
                   visible: animation.isAnimating,
-                  child: FadeTransition(opacity: animation, child: widget.child),
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: widget.child,
+                  ),
                 ),
               ),
             );
@@ -226,7 +242,8 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
       duration: _kAnimationDuration,
       curve: _kAnimationCurve,
       headerBuilder: _buildHeader,
-      bodyBuilder: (BuildContext context, Animation<double> animation) => widget.child,
+      bodyBuilder: (BuildContext context, Animation<double> animation) =>
+          widget.child,
       expansibleBuilder: _buildExpansible,
     );
   }

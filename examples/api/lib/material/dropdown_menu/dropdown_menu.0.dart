@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 // Flutter code sample for [DropdownMenu]s. The first dropdown menu
 // has the default outlined border and demos using the

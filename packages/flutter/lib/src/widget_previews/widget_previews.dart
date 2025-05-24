@@ -7,7 +7,7 @@
 library;
 
 import 'package:cupertino/cupertino.dart' show CupertinoThemeData;
-import 'package:flutter/material.dart' show Brightness, ThemeData;
+import 'package:material/material.dart' show Brightness, ThemeData;
 import 'package:flutter/widgets.dart';
 
 /// Signature for callbacks that build theming data used when creating a [Preview].

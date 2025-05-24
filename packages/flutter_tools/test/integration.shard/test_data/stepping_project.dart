@@ -19,7 +19,7 @@ class SteppingProject extends Project {
   final String main = r'''
   import 'dart:async';
 
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   void main() => runApp(MyApp());
 
@@ -75,7 +75,7 @@ class WebSteppingProject extends Project {
   final String main = r'''
   import 'dart:async';
 
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   void main() => runApp(MyApp());
 

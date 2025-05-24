@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:android_driver_extensions/extension.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 

@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:manual_tests/card_collection.dart' as card_collection;
 

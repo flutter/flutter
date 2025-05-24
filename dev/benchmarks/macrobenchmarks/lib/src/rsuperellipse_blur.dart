@@ -5,7 +5,7 @@
 import 'dart:math' show cos, sin;
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class RSuperellipseBlur extends StatefulWidget {
   const RSuperellipseBlur({super.key});

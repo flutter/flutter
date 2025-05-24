@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'picture_cache.dart';
 
 class ShaderMaskCachePage extends StatefulWidget {

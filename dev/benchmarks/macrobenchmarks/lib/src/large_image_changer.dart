@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// Displays a new (from image cache's perspective) large image every 500ms.
 class LargeImageChangerPage extends StatefulWidget {

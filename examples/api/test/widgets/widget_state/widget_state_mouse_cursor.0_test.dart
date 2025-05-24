@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/widget_state/widget_state_mouse_cursor.0.dart'
     as example;

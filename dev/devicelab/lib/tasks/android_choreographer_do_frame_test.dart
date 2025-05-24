@@ -44,7 +44,7 @@ TaskFunction androidChoreographerDoFrameTest({Map<String, String>? environment})
 
       section('Patch lib/main.dart');
       await mainDart.writeAsString('''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 
 Future<void> main() async {

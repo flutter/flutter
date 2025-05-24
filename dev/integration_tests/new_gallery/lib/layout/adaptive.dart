@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// The maximum width taken up by each item on the home screen.
 const double maxHomeItemWidth = 1400.0;

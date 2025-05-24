@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'package:macrobenchmarks/src/animated_image.dart';

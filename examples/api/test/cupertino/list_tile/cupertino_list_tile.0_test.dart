@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:cupertino/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/cupertino/list_tile/cupertino_list_tile.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

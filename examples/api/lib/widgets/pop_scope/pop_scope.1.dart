@@ -5,7 +5,7 @@
 // This sample demonstrates how to use a PopScope to wrap a widget that
 // may pop the page with a result.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() => runApp(const NavigatorPopHandlerApp());
 

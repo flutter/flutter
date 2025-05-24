@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// Flutter code sample for a [ChangeNotifier] with a [ListenableBuilder].
 

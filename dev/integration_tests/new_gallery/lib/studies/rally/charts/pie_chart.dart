@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import '../../../data/gallery_options.dart';
 import '../../../layout/letter_spacing.dart';

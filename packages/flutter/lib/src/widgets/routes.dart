@@ -4,7 +4,7 @@
 
 /// @docImport 'dart:ui';
 /// @docImport 'package:cupertino/cupertino.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'app.dart';
 /// @docImport 'form.dart';

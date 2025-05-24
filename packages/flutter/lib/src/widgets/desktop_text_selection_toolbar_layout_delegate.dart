@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:cupertino/cupertino.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'text_selection_toolbar_layout_delegate.dart';
 library;

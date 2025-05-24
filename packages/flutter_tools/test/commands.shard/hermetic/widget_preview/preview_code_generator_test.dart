@@ -27,6 +27,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_test:
     sdk: flutter
 ''';
@@ -40,7 +42,7 @@ Widget preview() => Text('Foo');
 ''';
 
 const String kBarDart = '''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -68,7 +70,7 @@ WidgetBuilder barPreview3() => (BuildContext context) {
 ''';
 
 const String kBrightnessDart = '''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 const Brightness brightnessConstant = Brightness.dark;
 ''';

@@ -6,7 +6,7 @@
 library;
 
 import 'package:cupertino/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

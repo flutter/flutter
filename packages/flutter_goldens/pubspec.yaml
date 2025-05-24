@@ -10,6 +10,8 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   crypto: 3.0.6

@@ -484,7 +484,7 @@ The `name` key is required. The `name` key specifies the name of the top-level d
 
 ```yaml
 kind: import
-uris: [ 'package:flutter/material.dart' ]
+uris: [ 'package:material/material.dart' ]
 name: 'Widget'
 ```
 

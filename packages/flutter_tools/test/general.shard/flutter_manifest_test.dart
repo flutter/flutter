@@ -51,6 +51,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 ''';
       final FlutterManifest flutterManifest =
           FlutterManifest.createFromString(manifest, logger: logger)!;
@@ -71,6 +73,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
 ''';
@@ -85,6 +89,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   generate: true
@@ -101,6 +107,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   generate: "invalid"
 ''';
@@ -116,6 +124,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   generate: false
 ''';
@@ -130,6 +140,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -164,6 +176,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -205,6 +219,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   fonts:
@@ -245,6 +261,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -309,6 +327,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   fonts:
@@ -353,6 +373,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -402,6 +424,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   fonts:
@@ -446,6 +470,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   fonts:
@@ -466,6 +492,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';
@@ -572,6 +600,8 @@ version: 1.0.0+2
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
 
@@ -593,6 +623,8 @@ version: 0.0.1
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
 
@@ -610,6 +642,8 @@ name: test
 version: 1.0.0-beta+exp.sha.5114f85
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';
@@ -636,6 +670,8 @@ version: 1.0.0+2
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
 
@@ -657,6 +693,8 @@ version:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
 
@@ -673,6 +711,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';
@@ -691,6 +731,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   fonts:
@@ -714,6 +756,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   fonts: []
 ''';
@@ -733,6 +777,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   fonts:
@@ -757,6 +803,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   fonts:
     family: foo
@@ -779,6 +827,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -805,6 +855,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   - uses-material-design: true
 ''';
@@ -830,6 +882,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -846,6 +900,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';
@@ -995,6 +1051,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   licenses: []
 ''';
@@ -1014,6 +1072,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   licenses:
     - foo.txt
@@ -1030,6 +1090,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   licenses: foo.txt
@@ -1052,6 +1114,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   licenses:
@@ -1077,6 +1141,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1105,6 +1171,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1147,6 +1215,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   deferred-components:
 ''';
@@ -1163,6 +1233,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1188,6 +1260,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   deferred-components: blah
 ''';
@@ -1209,6 +1283,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1235,6 +1311,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1263,6 +1341,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   deferred-components:
     - name: blah
@@ -1287,6 +1367,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1314,6 +1396,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1345,6 +1429,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   deferred-components:
     - name: blah
@@ -1365,6 +1451,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   deferred-components:
@@ -1409,6 +1497,8 @@ name: test
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   disable-swift-package-manager: true
@@ -1462,6 +1552,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
 ''';
@@ -1509,6 +1601,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true

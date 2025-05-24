@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:cupertino/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import '../../gallery_localizations.dart';
 
 // BEGIN cupertinoSearchTextFieldDemo

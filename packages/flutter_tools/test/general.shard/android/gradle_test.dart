@@ -352,6 +352,8 @@ version: 1.0.0+1
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
 
@@ -376,6 +378,8 @@ version: 1.0.0
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
       const BuildInfo buildInfo = BuildInfo(
@@ -393,6 +397,8 @@ name: test
 version: 1.0.0+1
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';
@@ -418,6 +424,8 @@ version: 1.0.0+1
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
       const BuildInfo buildInfo = BuildInfo(
@@ -441,6 +449,8 @@ name: test
 version: 1.0.0+1
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';
@@ -467,6 +477,8 @@ version: 1.0.0
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
       const BuildInfo buildInfo = BuildInfo(
@@ -491,6 +503,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
 ''';
       const BuildInfo buildInfo = BuildInfo(
@@ -514,6 +528,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
 ''';

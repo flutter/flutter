@@ -10,7 +10,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';

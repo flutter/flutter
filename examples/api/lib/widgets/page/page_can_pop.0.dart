@@ -5,7 +5,7 @@
 // This sample demonstrates showing a confirmation dialog before navigating
 // away from a page.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() => runApp(const PageApiExampleApp());
 

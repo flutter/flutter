@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_gpu/gpu.dart' as gpu;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride;
 
 void main() {

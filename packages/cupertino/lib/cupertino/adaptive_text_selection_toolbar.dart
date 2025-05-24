@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 library;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -195,13 +195,17 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
-          return CupertinoTextSelectionToolbarButton.buttonItem(buttonItem: buttonItem);
+          return CupertinoTextSelectionToolbarButton.buttonItem(
+            buttonItem: buttonItem,
+          );
         });
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
-          return CupertinoDesktopTextSelectionToolbarButton.buttonItem(buttonItem: buttonItem);
+          return CupertinoDesktopTextSelectionToolbarButton.buttonItem(
+            buttonItem: buttonItem,
+          );
         });
     }
   }

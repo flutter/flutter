@@ -1,0 +1,23 @@
+name: material
+description: "A new Flutter package project."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  cupertino:
+    sdk: flutter
+  file: ^7.0.1
+  flutter:
+    sdk: flutter
+  platform: ^3.1.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_lints: ^5.0.0

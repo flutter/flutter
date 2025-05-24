@@ -24,7 +24,7 @@ class HotRestartWithPausedChildIsolateProject extends Project {
   import 'dart:developer';
   import 'dart:isolate';
 
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   void main() {
     WidgetsFlutterBinding.ensureInitialized().platformDispatcher.onError = (Object error, StackTrace? stack) {

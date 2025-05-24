@@ -8,7 +8,7 @@
 
 import 'dart:collection';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:intl/intl.dart' as intl;
 
 import '../material_localizations.dart';

@@ -23,6 +23,8 @@ name: path_provider_example
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 ''';
 
 const String _kSamplePubspecFile = '''
@@ -31,6 +33,8 @@ description: Demonstrates how to use the path_provider plugin.
 
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
   path_provider_linux: 1.0.0
 ''';

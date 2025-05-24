@@ -206,6 +206,8 @@ name: foo
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   a_plugin: 1.0.0
 ''');
       writePackageConfigFiles(

@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/material/ink/ink.image_clip.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

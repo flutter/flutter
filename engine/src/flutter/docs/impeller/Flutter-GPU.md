@@ -24,6 +24,8 @@ And so Flutter GPU can be used by adding an SDK dependency to a package pubspec:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_gpu:
     sdk: flutter
 ```

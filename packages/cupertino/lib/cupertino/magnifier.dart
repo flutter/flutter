@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 library;
 
 import 'dart:math' as math;
@@ -111,7 +111,10 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       parent: _ioAnimationController,
       curve: widget.animationCurve,
     );
-    _ioAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_ioCurvedAnimation);
+    _ioAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_ioCurvedAnimation);
   }
 
   @override
@@ -119,15 +122,21 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     widget.controller.animationController = null;
     _ioAnimationController.dispose();
     _ioCurvedAnimation.dispose();
-    widget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
+    widget.magnifierInfo.removeListener(
+      _determineMagnifierPositionAndFocalPoint,
+    );
     super.dispose();
   }
 
   @override
   void didUpdateWidget(CupertinoTextMagnifier oldWidget) {
     if (oldWidget.magnifierInfo != widget.magnifierInfo) {
-      oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
-      widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
+      oldWidget.magnifierInfo.removeListener(
+        _determineMagnifierPositionAndFocalPoint,
+      );
+      widget.magnifierInfo.addListener(
+        _determineMagnifierPositionAndFocalPoint,
+      );
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -142,11 +151,13 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     final MagnifierInfo textEditingContext = widget.magnifierInfo.value;
 
     // The exact Y of the center of the current line.
-    final double verticalCenterOfCurrentLine = textEditingContext.caretRect.center.dy;
+    final double verticalCenterOfCurrentLine =
+        textEditingContext.caretRect.center.dy;
 
     // If the magnifier is currently showing, but we have dragged out of threshold,
     // we should hide it.
-    if (verticalCenterOfCurrentLine - textEditingContext.globalGesturePosition.dy <
+    if (verticalCenterOfCurrentLine -
+            textEditingContext.globalGesturePosition.dy <
         -widget.hideBelowThreshold) {
       // Only signal a hide if we are currently showing.
       if (widget.controller.shown) {
@@ -165,15 +176,18 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     final double verticalPositionOfLens = math.max(
       verticalCenterOfCurrentLine,
       verticalCenterOfCurrentLine -
-          (verticalCenterOfCurrentLine - textEditingContext.globalGesturePosition.dy) /
+          (verticalCenterOfCurrentLine -
+                  textEditingContext.globalGesturePosition.dy) /
               widget.dragResistance,
     );
 
     // The raw position, tracking the gesture directly.
     final Offset rawMagnifierPosition = Offset(
-      textEditingContext.globalGesturePosition.dx - CupertinoMagnifier.kDefaultSize.width / 2,
+      textEditingContext.globalGesturePosition.dx -
+          CupertinoMagnifier.kDefaultSize.width / 2,
       verticalPositionOfLens -
-          (CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint),
+          (CupertinoMagnifier.kDefaultSize.height -
+              CupertinoMagnifier.kMagnifierAboveFocalPoint),
     );
 
     final Rect screenRect = Offset.zero & MediaQuery.sizeOf(context);
@@ -200,7 +214,8 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     setState(() {
       _currentAdjustedMagnifierPosition = adjustedMagnifierPosition;
       // The lens should always point to the center of the line.
-      _verticalFocalPointAdjustment = verticalCenterOfCurrentLine - verticalPositionOfLens;
+      _verticalFocalPointAdjustment =
+          verticalCenterOfCurrentLine - verticalPositionOfLens;
     });
   }
 
@@ -260,10 +275,16 @@ class CupertinoMagnifier extends StatelessWidget {
       ),
     ],
     this.clipBehavior = Clip.none,
-    this.borderSide = const BorderSide(color: Color.fromARGB(255, 0, 124, 255), width: 2.0),
+    this.borderSide = const BorderSide(
+      color: Color.fromARGB(255, 0, 124, 255),
+      width: 2.0,
+    ),
     this.inOutAnimation,
     this.magnificationScale = 1.0,
-  }) : assert(magnificationScale > 0, 'The magnification scale should be greater than zero.');
+  }) : assert(
+         magnificationScale > 0,
+         'The magnification scale should be greater than zero.',
+       );
 
   /// A list of shadows cast by the [Magnifier].
   ///
@@ -346,23 +367,28 @@ class CupertinoMagnifier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Offset focalPointOffset = Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
+    Offset focalPointOffset = Offset(
+      0,
+      (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint,
+    );
     focalPointOffset.scale(1, inOutAnimation?.value ?? 1);
     focalPointOffset += additionalFocalPointOffset;
 
     return Transform.translate(
-      offset:
-          Offset.lerp(
-            const Offset(0, -kMagnifierAboveFocalPoint),
-            Offset.zero,
-            inOutAnimation?.value ?? 1,
-          )!,
+      offset: Offset.lerp(
+        const Offset(0, -kMagnifierAboveFocalPoint),
+        Offset.zero,
+        inOutAnimation?.value ?? 1,
+      )!,
       child: RawMagnifier(
         size: size,
         focalPointOffset: focalPointOffset,
         decoration: MagnifierDecoration(
           opacity: inOutAnimation?.value ?? 1,
-          shape: RoundedRectangleBorder(borderRadius: borderRadius, side: borderSide),
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius,
+            side: borderSide,
+          ),
           shadows: shadows,
         ),
         clipBehavior: clipBehavior,

@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class LargeImagesPage extends StatelessWidget {
   const LargeImagesPage({super.key});

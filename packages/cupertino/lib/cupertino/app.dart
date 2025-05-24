@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 /// @docImport 'package:flutter/services.dart';
 ///
 /// @docImport 'page_scaffold.dart';
@@ -160,13 +160,15 @@ class CupertinoApp extends StatefulWidget {
     this.navigatorKey,
     this.home,
     this.theme,
-    Map<String, Widget Function(BuildContext)> this.routes = const <String, WidgetBuilder>{},
+    Map<String, Widget Function(BuildContext)> this.routes =
+        const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.onNavigationNotification,
-    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers =
+        const <NavigatorObserver>[],
     this.builder,
     this.title,
     this.onGenerateTitle,
@@ -279,7 +281,8 @@ class CupertinoApp extends StatefulWidget {
   final RouteFactory? onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
-  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
+  final NotificationListenerCallback<NavigationNotification>?
+  onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
@@ -444,7 +447,8 @@ class CupertinoApp extends StatefulWidget {
   /// The [HeroController] used for Cupertino page transitions.
   ///
   /// Used by [CupertinoTabView] and [CupertinoApp].
-  static HeroController createCupertinoHeroController() => HeroController(); // Linear tweening.
+  static HeroController createCupertinoHeroController() =>
+      HeroController(); // Linear tweening.
 }
 
 /// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
@@ -465,7 +469,11 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -482,7 +490,11 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     // No overscroll indicator.
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
@@ -494,7 +506,9 @@ class CupertinoScrollBehavior extends ScrollBehavior {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     if (getPlatform(context) == TargetPlatform.macOS) {
-      return const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      return const BouncingScrollPhysics(
+        decelerationRate: ScrollDecelerationRate.fast,
+      );
     }
     return const BouncingScrollPhysics();
   }
@@ -506,7 +520,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
 
 class _CupertinoAppState extends State<CupertinoApp> {
   late HeroController _heroController;
-  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
+  bool get _usesRouter =>
+      widget.routerDelegate != null || widget.routerConfig != null;
 
   @override
   void initState() {
@@ -527,7 +542,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
   // _CupertinoLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null)
+        ...widget.localizationsDelegates!,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
@@ -555,7 +571,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
     return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+      icon: isLeftAligned
+          ? CupertinoIcons.arrow_right
+          : CupertinoIcons.arrow_left,
     );
   }
 
@@ -605,7 +623,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
-        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder:
+            _moveExitWidgetSelectionButtonBuilder,
         tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
@@ -641,7 +660,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
-      moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder:
+          _moveExitWidgetSelectionButtonBuilder,
       tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
@@ -651,15 +671,18 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData())
-        .resolveFrom(context);
+    final CupertinoThemeData effectiveThemeData =
+        (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
 
     // Prefer theme brightness if set, otherwise check system brightness.
     final Brightness brightness =
-        effectiveThemeData.brightness ?? MediaQuery.platformBrightnessOf(context);
+        effectiveThemeData.brightness ??
+        MediaQuery.platformBrightnessOf(context);
 
     SystemChrome.setSystemUIOverlayStyle(
-      brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
     );
 
     return ScrollConfiguration(
@@ -717,28 +740,29 @@ class _CupertinoInspectorButton extends InspectorButton {
       padding: const EdgeInsets.all(
         (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
       ),
-      child:
-          variant == InspectorButtonVariant.toggle && !toggledOn!
-              ? CupertinoButton.tinted(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                child: buttonIcon,
-              )
-              : CupertinoButton(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                color: backgroundColor(context),
-                child: buttonIcon,
-              ),
+      child: variant == InspectorButtonVariant.toggle && !toggledOn!
+          ? CupertinoButton.tinted(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              child: buttonIcon,
+            )
+          : CupertinoButton(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              color: backgroundColor(context),
+              child: buttonIcon,
+            ),
     );
   }
 
   @override
   Color foregroundColor(BuildContext context) {
     final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-    final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
+    final Color secondaryColor = CupertinoTheme.of(
+      context,
+    ).primaryContrastingColor;
     switch (variant) {
       case InspectorButtonVariant.filled:
         return secondaryColor;

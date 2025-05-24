@@ -23,7 +23,7 @@ import 'package:a11y_assessments/use_cases/switch_list_tile.dart';
 import 'package:a11y_assessments/use_cases/text_button.dart';
 import 'package:a11y_assessments/use_cases/text_field.dart';
 import 'package:a11y_assessments/use_cases/text_field_password.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';

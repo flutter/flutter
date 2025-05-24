@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 Future<ui.Image> loadImage(String asset) async {
   final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromAsset(asset);

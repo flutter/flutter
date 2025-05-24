@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 library;
 
 import 'package:flutter/services.dart';
@@ -92,7 +92,8 @@ class CupertinoScrollbar extends RawScrollbar {
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: const Duration(milliseconds: 100),
-         notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+         notificationPredicate:
+             notificationPredicate ?? defaultScrollNotificationPredicate,
        );
 
   /// Default value for [thickness] if it's not specified in [CupertinoScrollbar].
@@ -125,7 +126,8 @@ class CupertinoScrollbar extends RawScrollbar {
   final Radius radiusWhileDragging;
 
   @override
-  RawScrollbarState<CupertinoScrollbar> createState() => _CupertinoScrollbarState();
+  RawScrollbarState<CupertinoScrollbar> createState() =>
+      _CupertinoScrollbarState();
 }
 
 class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
@@ -133,7 +135,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
 
   double get _thickness {
     return widget.thickness! +
-        _thicknessAnimationController.value * (widget.thicknessWhileDragging - widget.thickness!);
+        _thicknessAnimationController.value *
+            (widget.thicknessWhileDragging - widget.thickness!);
   }
 
   Radius get _radius {
@@ -195,7 +198,9 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       return;
     }
     super.handleThumbPress();
-    _thicknessAnimationController.forward().then<void>((_) => HapticFeedback.mediumImpact());
+    _thicknessAnimationController.forward().then<void>(
+      (_) => HapticFeedback.mediumImpact(),
+    );
   }
 
   @override
@@ -218,7 +223,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void handleTrackTapDown(TapDownDetails details) {
     // On iOS, tapping the track does not page towards the position of the tap.
-    if (ScrollConfiguration.of(context).getPlatform(context) != TargetPlatform.iOS) {
+    if (ScrollConfiguration.of(context).getPlatform(context) !=
+        TargetPlatform.iOS) {
       super.handleTrackTapDown(details);
     }
   }

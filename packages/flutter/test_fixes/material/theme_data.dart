@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/66482
@@ -12,21 +12,11 @@ void main() {
   ThemeData(useTextSelectionTheme: false);
   ThemeData(textSelectionColor: Colors.red, useTextSelectionTheme: false);
   ThemeData(cursorColor: Colors.blue, useTextSelectionTheme: false);
-  ThemeData(
-    textSelectionHandleColor: Colors.yellow,
-    useTextSelectionTheme: false,
-  );
+  ThemeData(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
   ThemeData(textSelectionColor: Colors.red, cursorColor: Colors.blue);
   ThemeData(textSelectionHandleColor: Colors.yellow, cursorColor: Colors.blue);
-  ThemeData(
-    textSelectionColor: Colors.red,
-    textSelectionHandleColor: Colors.yellow,
-  );
-  ThemeData(
-    textSelectionColor: Colors.red,
-    cursorColor: Colors.blue,
-    useTextSelectionTheme: false,
-  );
+  ThemeData(textSelectionColor: Colors.red, textSelectionHandleColor: Colors.yellow);
+  ThemeData(textSelectionColor: Colors.red, cursorColor: Colors.blue, useTextSelectionTheme: false);
   ThemeData(
     textSelectionHandleColor: Colors.yellow,
     cursorColor: Colors.blue,
@@ -56,19 +46,10 @@ void main() {
   ThemeData.raw(useTextSelectionTheme: false);
   ThemeData.raw(textSelectionColor: Colors.red, useTextSelectionTheme: false);
   ThemeData.raw(cursorColor: Colors.blue, useTextSelectionTheme: false);
-  ThemeData.raw(
-    textSelectionHandleColor: Colors.yellow,
-    useTextSelectionTheme: false,
-  );
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow, useTextSelectionTheme: false);
   ThemeData.raw(textSelectionColor: Colors.red, cursorColor: Colors.blue);
-  ThemeData.raw(
-    textSelectionHandleColor: Colors.yellow,
-    cursorColor: Colors.blue,
-  );
-  ThemeData.raw(
-    textSelectionColor: Colors.red,
-    textSelectionHandleColor: Colors.yellow,
-  );
+  ThemeData.raw(textSelectionHandleColor: Colors.yellow, cursorColor: Colors.blue);
+  ThemeData.raw(textSelectionColor: Colors.red, textSelectionHandleColor: Colors.yellow);
   ThemeData.raw(
     textSelectionColor: Colors.red,
     cursorColor: Colors.blue,
@@ -100,10 +81,7 @@ void main() {
   ThemeData themeData = ThemeData();
   themeData = ThemeData(accentColor: Colors.red);
   themeData = ThemeData(accentColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData(
-    accentColor: Colors.red,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
   themeData = ThemeData(
     accentColor: Colors.red,
     colorScheme: ColorScheme.light(),
@@ -111,14 +89,8 @@ void main() {
   );
   themeData = ThemeData(error: '');
   themeData = ThemeData.raw(accentColor: Colors.red);
-  themeData = ThemeData.raw(
-    accentColor: Colors.red,
-    primarySwatch: Colors.blue,
-  );
-  themeData = ThemeData.raw(
-    accentColor: Colors.red,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
   themeData = ThemeData.raw(
     accentColor: Colors.red,
     colorScheme: ColorScheme.light(),
@@ -127,14 +99,8 @@ void main() {
   themeData = ThemeData.raw(error: '');
   themeData = themeData.copyWith(accentColor: Colors.red);
   themeData = themeData.copyWith(error: '');
-  themeData = themeData.copyWith(
-    accentColor: Colors.red,
-    primarySwatch: Colors.blue,
-  );
-  themeData = themeData.copyWith(
-    accentColor: Colors.red,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light());
   themeData = themeData.copyWith(
     accentColor: Colors.red,
     colorScheme: ColorScheme.light(),
@@ -205,10 +171,7 @@ void main() {
   ThemeData themeData = ThemeData();
   themeData = ThemeData(errorColor: Colors.red);
   themeData = ThemeData(errorColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData(
-    errorColor: Colors.red,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = ThemeData(errorColor: Colors.red, colorScheme: ColorScheme.light());
   themeData = ThemeData(
     errorColor: Colors.red,
     colorScheme: ColorScheme.light(),
@@ -217,10 +180,7 @@ void main() {
   themeData = ThemeData(otherParam: '');
   themeData = ThemeData.raw(errorColor: Colors.red);
   themeData = ThemeData.raw(errorColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData.raw(
-    errorColor: Colors.red,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = ThemeData.raw(errorColor: Colors.red, colorScheme: ColorScheme.light());
   themeData = ThemeData.raw(
     errorColor: Colors.red,
     colorScheme: ColorScheme.light(),
@@ -229,14 +189,8 @@ void main() {
   themeData = ThemeData.raw(otherParam: '');
   themeData = themeData.copyWith(errorColor: Colors.red);
   themeData = themeData.copyWith(otherParam: '');
-  themeData = themeData.copyWith(
-    errorColor: Colors.red,
-    primarySwatch: Colors.blue,
-  );
-  themeData = themeData.copyWith(
-    errorColor: Colors.red,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = themeData.copyWith(errorColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(errorColor: Colors.red, colorScheme: ColorScheme.light());
   themeData = themeData.copyWith(
     errorColor: Colors.red,
     colorScheme: ColorScheme.light(),
@@ -247,14 +201,8 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
   themeData = ThemeData(backgroundColor: Colors.grey);
-  themeData = ThemeData(
-    backgroundColor: Colors.grey,
-    primarySwatch: Colors.blue,
-  );
-  themeData = ThemeData(
-    backgroundColor: Colors.grey,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = ThemeData(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = ThemeData(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
   themeData = ThemeData(
     backgroundColor: Colors.grey,
     colorScheme: ColorScheme.light(),
@@ -262,14 +210,8 @@ void main() {
   );
   themeData = ThemeData(otherParam: '');
   themeData = ThemeData.raw(backgroundColor: Colors.grey);
-  themeData = ThemeData.raw(
-    backgroundColor: Colors.grey,
-    primarySwatch: Colors.blue,
-  );
-  themeData = ThemeData.raw(
-    backgroundColor: Colors.grey,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = ThemeData.raw(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
   themeData = ThemeData.raw(
     backgroundColor: Colors.grey,
     colorScheme: ColorScheme.light(),
@@ -278,14 +220,8 @@ void main() {
   themeData = ThemeData.raw(otherParam: '');
   themeData = themeData.copyWith(backgroundColor: Colors.grey);
   themeData = themeData.copyWith(otherParam: '');
-  themeData = themeData.copyWith(
-    backgroundColor: Colors.grey,
-    primarySwatch: Colors.blue,
-  );
-  themeData = themeData.copyWith(
-    backgroundColor: Colors.grey,
-    colorScheme: ColorScheme.light(),
-  );
+  themeData = themeData.copyWith(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
   themeData = themeData.copyWith(
     backgroundColor: Colors.grey,
     colorScheme: ColorScheme.light(),
@@ -296,14 +232,8 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
   themeData = ThemeData(backgroundColor: Colors.grey, errorColor: Colors.red);
-  themeData = ThemeData.raw(
-    backgroundColor: Colors.grey,
-    errorColor: Colors.red,
-  );
-  themeData = themeData.copyWith(
-    backgroundColor: Colors.grey,
-    errorColor: Colors.red,
-  );
+  themeData = ThemeData.raw(backgroundColor: Colors.grey, errorColor: Colors.red);
+  themeData = themeData.copyWith(backgroundColor: Colors.grey, errorColor: Colors.red);
 
   // Changes made in https://github.com/flutter/flutter/pull/111080
   ThemeData themeData = ThemeData();

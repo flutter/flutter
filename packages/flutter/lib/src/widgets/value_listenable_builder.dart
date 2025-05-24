@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/animation.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'async.dart';
 /// @docImport 'notification_listener.dart';

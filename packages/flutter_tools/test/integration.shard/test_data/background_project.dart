@@ -24,7 +24,7 @@ class BackgroundProject extends Project {
   import 'dart:isolate';
 
   import 'package:flutter/widgets.dart';
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   void main() {
     Isolate.spawn<void>(background, null, debugName: 'background');
@@ -77,7 +77,7 @@ class RepeatingBackgroundProject extends Project {
   import 'dart:isolate';
 
   import 'package:flutter/widgets.dart';
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   void main() {
     Isolate.spawn<void>(background, null, debugName: 'background');

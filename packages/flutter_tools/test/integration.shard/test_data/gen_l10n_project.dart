@@ -46,6 +46,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_localizations:
     sdk: flutter
   intl: any # Pick up the pinned version from flutter_localizations
@@ -524,7 +526,7 @@ flutter:
 ''';
 
   String _getMain() => r'''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import 'l10n/app_localizations.dart';
 
@@ -809,7 +811,7 @@ void main() {
 ''';
 
   String _getMainWithNamedParameters() => r'''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import 'l10n/app_localizations.dart';
 

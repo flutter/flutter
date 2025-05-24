@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../data/gallery_options.dart';

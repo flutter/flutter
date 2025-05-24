@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// An image that shows a [placeholder] widget while the target [image] is
 /// loading, then fades in the new image when it loads.

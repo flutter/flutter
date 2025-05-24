@@ -19,6 +19,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 dev_dependencies:
   capitalizer_transformer:
     path: ./capitalizer_transformer
@@ -31,7 +33,7 @@ flutter:
 
   @override
   final String main = '''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() {
   runApp(const MyApp());

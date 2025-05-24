@@ -5,7 +5,7 @@
 import 'dart:collection' show IterableMixin;
 import 'dart:math';
 import 'dart:ui' show Vertices;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // BEGIN transformationsDemo#2

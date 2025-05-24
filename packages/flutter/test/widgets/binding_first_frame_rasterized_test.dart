@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

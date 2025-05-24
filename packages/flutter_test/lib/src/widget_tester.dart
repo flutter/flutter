@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:fake_async/fake_async.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 /// @docImport 'package:matcher/matcher.dart';
 /// @docImport 'package:test_api/hooks.dart';
 library;
@@ -11,7 +11,7 @@ library;
 import 'package:cupertino/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' show Tooltip;
+import 'package:material/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';

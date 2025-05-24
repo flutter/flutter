@@ -5,7 +5,7 @@
 import 'dart:collection' show IterableMixin;
 import 'dart:math';
 import 'dart:ui' show Vertices;
-import 'package:flutter/material.dart' hide Gradient;
+import 'package:material/material.dart' hide Gradient;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // The entire state of the hex board and abstraction to get information about

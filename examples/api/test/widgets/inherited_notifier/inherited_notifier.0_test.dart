@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/widgets/inherited_notifier/inherited_notifier.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';

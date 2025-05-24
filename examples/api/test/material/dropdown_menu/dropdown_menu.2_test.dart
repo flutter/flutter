@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';

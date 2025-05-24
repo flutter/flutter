@@ -93,6 +93,8 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 
 environment:
   sdk: ^3.7.0-0

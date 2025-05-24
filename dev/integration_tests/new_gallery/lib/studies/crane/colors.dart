@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 const Color cranePurple700 = Color(0xFF720D5D);
 const Color cranePurple800 = Color(0xFF5D1049);

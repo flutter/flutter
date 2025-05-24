@@ -4,7 +4,7 @@
 
 // See //dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_test/flutter_test.dart';
