@@ -8,12 +8,18 @@
 #include <unordered_map>
 #include "display_list/dl_canvas.h"
 #include "flow/embedded_views.h"
+#include "include/core/SkRect.h"
 
 namespace flutter {
 
+struct SlicedViews {
+  std::unordered_map<int64_t, SkRect> computed_overlays;
+  std::vector<DlIRect> occlusions;
+};
+
 /// @brief Compute the required overlay layers and clip the view slices
 ///        according to the size and position of the platform views.
-std::unordered_map<int64_t, SkRect> SliceViews(
+SlicedViews SliceViews(
     DlCanvas* background_canvas,
     const std::vector<int64_t>& composition_order,
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
