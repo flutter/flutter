@@ -308,6 +308,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     assert(debugMaybeDispatchDisposed(this));
   }
 
+  @override
+  bool shouldBypassArena() => false;
+
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
   String get debugDescription;

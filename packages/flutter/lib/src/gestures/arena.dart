@@ -8,6 +8,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
 
@@ -34,6 +35,10 @@ abstract class GestureArenaMember {
 
   /// Called when this member loses the arena for the given pointer id.
   void rejectGesture(int pointer);
+
+  /// Returns whether the gesture should bypass the competition and
+  /// be accepted immediately in the gesture arena.
+  bool shouldBypassArena();
 }
 
 /// An interface to pass information to an arena.
@@ -124,6 +129,11 @@ class GestureArenaManager {
       return _GestureArena();
     });
     state.add(member);
+
+    if (member.shouldBypassArena()) {
+      Future.microtask(() => _resolveInFavorOf(pointer, state, member));
+    }
+
     assert(_debugLogDiagnostic(pointer, 'Adding: $member'));
     return GestureArenaEntry._(this, pointer, member);
   }

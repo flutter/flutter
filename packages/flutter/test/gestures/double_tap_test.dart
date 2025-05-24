@@ -19,6 +19,9 @@ class TestGestureArenaMember extends GestureArenaMember {
     rejected = true;
   }
 
+  @override
+  bool shouldBypassArena() => false;
+
   bool accepted = false;
   bool rejected = false;
 }

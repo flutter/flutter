@@ -14,6 +14,9 @@ class TestGestureArenaMember extends GestureArenaMember {
 
   @override
   void rejectGesture(int key) {}
+
+  @override
+  bool shouldBypassArena() => false;
 }
 
 void main() {

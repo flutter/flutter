@@ -346,6 +346,9 @@ class _DummyTapRecognizer extends GestureArenaMember {
 
   @override
   void rejectGesture(int pointer) {}
+
+  @override
+  bool shouldBypassArena() => false;
 }
 
 /// A widget that defines a region that can detect taps inside or outside of

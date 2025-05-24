@@ -23,6 +23,9 @@ class TestGestureArenaMember extends GestureArenaMember {
     expect(key, equals(primaryKey));
     rejectRan = true;
   }
+
+  @override
+  bool shouldBypassArena() => false;
 }
 
 class GestureTester {

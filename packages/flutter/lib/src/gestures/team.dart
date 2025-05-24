@@ -60,6 +60,9 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     }
   }
 
+  @override
+  bool shouldBypassArena() => false;
+
   void _close() {
     assert(!_resolved);
     _resolved = true;

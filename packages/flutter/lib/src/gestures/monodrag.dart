@@ -59,6 +59,8 @@ typedef GestureDragCancelCallback = void Function();
 /// Used by [DragGestureRecognizer.velocityTrackerBuilder].
 typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
 
+typedef GestureBypassArenaBuilder = bool Function();
+
 /// Recognizes movement.
 ///
 /// In contrast to [MultiDragGestureRecognizer], [DragGestureRecognizer]
@@ -88,6 +90,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.multitouchDragStrategy = MultitouchDragStrategy.latestPointer,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
+    this.bypassArenaBuilder,
     super.supportedDevices,
     super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
@@ -288,6 +291,8 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
+  GestureBypassArenaBuilder? bypassArenaBuilder;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -445,6 +450,11 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialButtons = kPrimaryButton;
     }
     _addPointer(event);
+  }
+
+  @override
+  bool shouldBypassArena() {
+    return bypassArenaBuilder?.call() ?? super.shouldBypassArena();
   }
 
   bool _shouldTrackMoveEvent(int pointer) {
@@ -934,6 +944,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    super.bypassArenaBuilder,
   });
 
   @override
@@ -998,6 +1009,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    super.bypassArenaBuilder,
   });
 
   @override

@@ -770,6 +770,10 @@ class ScrollableState extends State<Scrollable>
   bool? _lastCanDrag;
   Axis? _lastAxisDirection;
 
+  bool _shouldBypassArena() {
+    return _position?.isScrollingNotifier.value ?? false;
+  }
+
   @override
   @protected
   void setCanDrag(bool value) {
@@ -803,7 +807,8 @@ class ScrollableState extends State<Scrollable>
                       ..dragStartBehavior = widget.dragStartBehavior
                       ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
                       ..gestureSettings = _mediaQueryGestureSettings
-                      ..supportedDevices = _configuration.dragDevices;
+                      ..supportedDevices = _configuration.dragDevices
+                      ..bypassArenaBuilder = _shouldBypassArena;
                   },
                 ),
           };
@@ -827,7 +832,8 @@ class ScrollableState extends State<Scrollable>
                       ..dragStartBehavior = widget.dragStartBehavior
                       ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
                       ..gestureSettings = _mediaQueryGestureSettings
-                      ..supportedDevices = _configuration.dragDevices;
+                      ..supportedDevices = _configuration.dragDevices
+                      ..bypassArenaBuilder = _shouldBypassArena;
                   },
                 ),
           };
