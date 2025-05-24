@@ -10286,6 +10286,69 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
+  testWidgets('Placeholder is baseline aligned with text', (WidgetTester tester) async {
+    const String placeholderTextContent = 'hint text';
+    const String actualTextContent = 'text';
+    double currentPlaceholderFontSize = 0;
+    double currentTextFontSize = 0;
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return CupertinoTextField(
+                minLines: 4,
+                maxLines: 6,
+                placeholder: placeholderTextContent,
+                placeholderStyle: TextStyle(fontSize: currentPlaceholderFontSize),
+                style: TextStyle(fontSize: currentTextFontSize),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    Future<void> performBaselineAlignmentCheck(double placeholderSize, double textSize) async {
+      setState(() {
+        currentPlaceholderFontSize = placeholderSize;
+        currentTextFontSize = textSize;
+      });
+      await tester.pump();
+      await tester.enterText(find.byType(CupertinoTextField), actualTextContent);
+      await tester.pump();
+
+      expect(find.text(placeholderTextContent), findsOneWidget);
+      expect(find.text(actualTextContent), findsOneWidget);
+
+      // The placeholder and text are baseline aligned, so some portion of them
+      // extends both above and below the baseline.
+      const double ahemBaselineRatio =
+          0.8; // https://web-platform-tests.org/writing-tests/ahem.html
+      final double placeholderHeightAboveBaseline = placeholderSize * ahemBaselineRatio;
+      final double textHeightAboveBaseline = textSize * ahemBaselineRatio;
+      final double placeholderTopDy = tester.getTopLeft(find.text(placeholderTextContent)).dy;
+      final double textTopDy = tester.getTopLeft(find.text(actualTextContent)).dy;
+
+      expect(
+        textTopDy,
+        closeTo(placeholderTopDy + placeholderHeightAboveBaseline - textHeightAboveBaseline, 1.0),
+      );
+    }
+
+    // Placeholder and text are baseline aligned when the placeholder is larger.
+    await performBaselineAlignmentCheck(40.0, 20.0);
+
+    await tester.enterText(find.byType(CupertinoTextField), '');
+    await tester.pump();
+
+    // Placeholder and text are baseline aligned when the text is larger.
+    await performBaselineAlignmentCheck(20.0, 40.0);
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
