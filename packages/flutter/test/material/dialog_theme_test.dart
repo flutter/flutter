@@ -860,4 +860,34 @@ void main() {
     expect(renderBox.constraints.maxWidth, themeConstraints.maxWidth);
     expect(renderBox.constraints.maxHeight, themeConstraints.maxHeight);
   });
+
+  testWidgets('Dialog.constraints is null, it will fall back to the nearest DialogThemeData.constraints.', (
+    WidgetTester tester,
+  ) async {
+    const BoxConstraints themeConstraints = BoxConstraints(maxWidth: 500, maxHeight: 500);
+    const DialogThemeData dialogTheme = DialogThemeData(
+      alignment: Alignment.center,
+      constraints: BoxConstraints(maxWidth: 400, maxHeight: 400),
+    );
+
+    final Dialog dialog = Dialog(child: SizedBox.expand(child: Container(color: Colors.amber)));
+
+    await tester.pumpWidget(
+      _appWithDialog(
+        tester,
+        dialog,
+        theme: ThemeData(dialogTheme: dialogTheme),
+        dialogTheme: const DialogThemeData(constraints: themeConstraints),
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Verify that the dialog respects the constraints from the theme
+    final Finder dialogFinder = find.byType(Container);
+    final RenderBox renderBox = tester.renderObject(dialogFinder);
+
+    expect(renderBox.constraints.maxWidth, themeConstraints.maxWidth);
+    expect(renderBox.constraints.maxHeight, themeConstraints.maxHeight);
+  });
 }

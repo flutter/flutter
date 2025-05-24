@@ -45,6 +45,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
     Color? barrierColor,
     EdgeInsets? insetPadding,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
     DialogThemeData? data,
     Widget? child,
   }) : assert(
@@ -61,7 +62,8 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
                      actionsPadding ??
                      barrierColor ??
                      insetPadding ??
-                     clipBehavior) ==
+                     clipBehavior ??
+                     constraints) ==
                  null,
        ),
        _data = data,
@@ -78,6 +80,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
        _barrierColor = barrierColor,
        _insetPadding = insetPadding,
        _clipBehavior = clipBehavior,
+       _constraints = constraints,
        super(child: child ?? const SizedBox());
 
   final DialogThemeData? _data;
@@ -94,6 +97,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
   final Color? _barrierColor;
   final EdgeInsets? _insetPadding;
   final Clip? _clipBehavior;
+  final BoxConstraints? _constraints;
 
   /// Overrides the default value for [Dialog.backgroundColor].
   ///
@@ -189,6 +193,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
           barrierColor: _barrierColor,
           insetPadding: _insetPadding,
           clipBehavior: _clipBehavior,
+          constraints: _constraints,
         );
   }
 
@@ -225,6 +230,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
     Color? barrierColor,
     EdgeInsets? insetPadding,
     Clip? clipBehavior,
+    BoxConstraints? constraints,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -240,6 +246,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
       barrierColor: barrierColor ?? this.barrierColor,
       insetPadding: insetPadding ?? this.insetPadding,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      constraints: constraints ?? _constraints,
     );
   }
 
@@ -267,6 +274,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
       barrierColor: Color.lerp(a?.barrierColor, b?.barrierColor, t),
       insetPadding: EdgeInsets.lerp(a?.insetPadding, b?.insetPadding, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
+      constraints: t < 0.5 ? a?.data.constraints : b?.data.constraints,
     );
   }
 
@@ -296,6 +304,9 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
       DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null),
     );
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>('constraints', data.constraints, defaultValue: null),
+    );
   }
 }
 
