@@ -5,7 +5,7 @@
 // This example demonstrates showing the default buttons, but customizing their
 // appearance.
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

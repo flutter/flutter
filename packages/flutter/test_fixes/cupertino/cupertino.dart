@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 
 void main() {
   // Generic reference variables.
@@ -12,9 +12,7 @@ void main() {
   Object object;
 
   // Change made in https://github.com/flutter/flutter/pull/41859
-  CupertinoTextThemeData themeData = CupertinoTextThemeData(
-    brightness: Brightness.dark,
-  );
+  CupertinoTextThemeData themeData = CupertinoTextThemeData(brightness: Brightness.dark);
   themeData.copyWith(brightness: Brightness.light);
   themeData = CupertinoTextThemeData(error: '');
   themeData.copyWith(error: '');
@@ -157,12 +155,9 @@ void main() {
   textField.maxLengthEnforced;
 
   // Changes made in https://github.com/flutter/flutter/pull/59127
-  const BottomNavigationBarItem bottomNavigationBarItem =
-      BottomNavigationBarItem(title: myTitle);
-  const BottomNavigationBarItem bottomNavigationBarItem =
-      BottomNavigationBarItem();
-  const BottomNavigationBarItem bottomNavigationBarItem =
-      BottomNavigationBarItem(error: '');
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(title: myTitle);
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem();
+  const BottomNavigationBarItem bottomNavigationBarItem = BottomNavigationBarItem(error: '');
   bottomNavigationBarItem.title;
 
   // Changes made in https://github.com/flutter/flutter/pull/79160
@@ -198,13 +193,13 @@ void main() {
   singleChildRenderObjectElement.insertChildRenderObject(renderObject, object);
   singleChildRenderObjectElement.moveChildRenderObject(renderObject, object);
   singleChildRenderObjectElement.removeChildRenderObject(renderObject);
-  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement =
-      SliverMultiBoxAdaptorElement();
+  final SliverMultiBoxAdaptorElement sliverMultiBoxAdaptorElement = SliverMultiBoxAdaptorElement();
   sliverMultiBoxAdaptorElement.insertChildRenderObject(renderObject, object);
   sliverMultiBoxAdaptorElement.moveChildRenderObject(renderObject, object);
   sliverMultiBoxAdaptorElement.removeChildRenderObject(renderObject);
-  final RenderObjectToWidgetElement renderObjectToWidgetElement =
-      RenderObjectToWidgetElement(widget);
+  final RenderObjectToWidgetElement renderObjectToWidgetElement = RenderObjectToWidgetElement(
+    widget,
+  );
   renderObjectToWidgetElement.insertChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.moveChildRenderObject(renderObject, object);
   renderObjectToWidgetElement.removeChildRenderObject(renderObject);
@@ -226,8 +221,7 @@ void main() {
   listWheelViewport.clipToSize;
 
   // Changes made in https://github.com/flutter/flutter/pull/87839
-  OverscrollIndicatorNotification notification =
-      OverscrollIndicatorNotification(leading: true);
+  OverscrollIndicatorNotification notification = OverscrollIndicatorNotification(leading: true);
   notification = OverscrollIndicatorNotification(error: '');
   notification.disallowGlow();
 
@@ -243,8 +237,7 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/78588
   final ScrollBehavior scrollBehavior = ScrollBehavior();
   scrollBehavior.buildViewportChrome(context, child, axisDirection);
-  final CupertinoScrollBehavior cupertinoScrollBehavior =
-      CupertinoScrollBehavior();
+  final CupertinoScrollBehavior cupertinoScrollBehavior = CupertinoScrollBehavior();
   cupertinoScrollBehavior.buildViewportChrome(context, child, axisDirection);
 
   // Changes made in https://github.com/flutter/flutter/pull/114459

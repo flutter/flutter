@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 /// A [Magnifier] positioned by rules dictated by the native Android magnifier.

@@ -7,6 +7,8 @@ environment:
   sdk: ^3.8.0-265.0.dev
 
 dependencies:
+  cupertino:
+    sdk: flutter
   flutter:
     sdk: flutter
   flutter_test:

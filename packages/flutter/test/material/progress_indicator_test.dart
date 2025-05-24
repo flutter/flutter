@@ -13,7 +13,7 @@
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 library;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

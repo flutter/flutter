@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:cupertino/cupertino.dart';
 ///
 /// @docImport 'drawer.dart';
 /// @docImport 'list_tile_theme.dart';
@@ -11,7 +11,7 @@ library;
 import 'dart:developer' show Flow, Timeline;
 import 'dart:io' show Platform;
 
-import 'package:flutter/cupertino.dart' show CupertinoDialogAction;
+import 'package:cupertino/cupertino.dart' show CupertinoDialogAction;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' hide Flow;

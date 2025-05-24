@@ -7,7 +7,7 @@
 /// @docImport 'selectable_text.dart';
 library;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
 import 'adaptive_text_selection_toolbar.dart';

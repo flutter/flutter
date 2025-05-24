@@ -16,7 +16,7 @@ String generateCupertinoHeader(String regenerateInstructions) {
 
 import 'dart:collection';
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:intl/intl.dart' as intl;
 
 import '../cupertino_localizations.dart';

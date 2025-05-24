@@ -6,7 +6,7 @@
 /// @docImport 'text_field.dart';
 library;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'input_decorator.dart';

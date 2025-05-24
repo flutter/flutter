@@ -8,7 +8,8 @@ dependencies:
   #
   # For detailed instructions, refer to:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
-
+  cupertino:
+    sdk: flutter
   flutter:
     sdk: flutter
   intl: 0.20.2

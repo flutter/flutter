@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:/flutter/cupertino.dart';
+/// @docImport 'package:/cupertino/cupertino.dart';
 /// @docImport 'package:/flutter/material.dart';
 library;
 
-import 'package:flutter/cupertino.dart' show CupertinoThemeData;
+import 'package:cupertino/cupertino.dart' show CupertinoThemeData;
 import 'package:flutter/material.dart' show Brightness, ThemeData;
 import 'package:flutter/widgets.dart';
 

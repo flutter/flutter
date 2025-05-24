@@ -7,7 +7,7 @@
 /// @docImport 'text_theme.dart';
 library;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'material_localizations.dart';

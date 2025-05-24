@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'dart:ui';
-/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:cupertino/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 ///
 /// @docImport 'app.dart';

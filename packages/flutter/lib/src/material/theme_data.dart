@@ -7,7 +7,7 @@ library;
 
 import 'dart:ui' show Color, SystemColor, SystemColorPalette, lerpDouble;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'action_buttons.dart';
