@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -13,6 +15,8 @@ import 'semantics_tester.dart';
 import 'states.dart';
 
 void main() {
+  final bool isImpeller = ui.ImageFilter.isShaderFilterSupported;
+
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
@@ -1269,19 +1273,35 @@ void main() {
     controller.animateToPage(2, duration: const Duration(milliseconds: 300), curve: Curves.ease);
     await tester.pumpAndSettle();
 
-    final Finder transformFinder = find.descendant(
-      of: find.byType(PageView),
-      matching: find.byType(Transform),
-    );
-    expect(transformFinder, findsOneWidget);
+    if (isImpeller) {
+      final Finder effectFinder = find.descendant(
+        of: find.byType(PageView),
+        matching: find.byType(StretchOverscrollEffect),
+      );
+      expect(effectFinder, findsOneWidget);
 
-    // Get the Transform widget that stretches the PageView.
-    final Transform transform = tester.firstWidget<Transform>(
-      find.descendant(of: find.byType(PageView), matching: find.byType(Transform)),
-    );
+      // Get the Transform widget that stretches the PageView.
+      final StretchOverscrollEffect effect = tester.firstWidget<StretchOverscrollEffect>(
+        find.descendant(of: find.byType(PageView), matching: find.byType(StretchOverscrollEffect)),
+      );
 
-    // Check the stretch factor in the first element of the transform matrix.
-    expect(transform.transform.storage.first, 1.0);
+      expect(effect.overscrollX, 0.0);
+      expect(effect.overscrollY, 0.0);
+    } else {
+      final Finder transformFinder = find.descendant(
+        of: find.byType(PageView),
+        matching: find.byType(Transform),
+      );
+      expect(transformFinder, findsOneWidget);
+
+      // Get the Transform widget that stretches the PageView.
+      final Transform transform = tester.firstWidget<Transform>(
+        find.descendant(of: find.byType(PageView), matching: find.byType(Transform)),
+      );
+
+      // Check the stretch factor in the first element of the transform matrix.
+      expect(transform.transform.storage.first, 1.0);
+    }
   });
 
   testWidgets('PageController onAttach, onDetach', (WidgetTester tester) async {
