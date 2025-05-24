@@ -20,6 +20,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -29,6 +30,8 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
+import kotlin.io.path.exists
+import kotlin.io.path.name
 
 class FlutterPlugin : Plugin<Project> {
     private var project: Project? = null
@@ -96,6 +99,32 @@ class FlutterPlugin : Plugin<Project> {
         rootProject.allprojects {
             repositories.maven {
                 url = uri(repository!!)
+            }
+            if (plugins.hasPlugin("com.android.application") && hasProperty("android.injected.invoked.from.ide")) {
+                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
+            }
+        }
+
+        if (project.hasProperty("android.injected.invoked.from.ide")) {
+            val settingsFile = Paths.get(project.rootDir.absolutePath, "settings.gradle")
+            val settingsKtsFile = Paths.get(project.rootDir.absolutePath, "settings.gradle.kts")
+            val hasSettings = settingsFile.exists()
+            val hasSettingsKts = settingsKtsFile.exists()
+            val hasPubspec = Paths.get(project.rootDir.absolutePath, "pubspec.yaml").exists()
+            val hasParentSettings = Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle").exists()
+            val hasParentSettingsKts = Paths.get(project.rootDir.parentFile.absolutePath, "settings.gradle.kts").exists()
+            val hasParentPubspec = Paths.get(project.rootDir.parentFile.absolutePath, "pubspec.yaml").exists()
+
+            if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
+                val file = if (hasSettings) settingsFile else settingsKtsFile
+                // TODO(rekire): Ensure that this url is live before merging
+                project.logger.warn(
+                    "w: You should migrate your ${file.name}. See https://docs.flutter.dev/release/breaking-changes/gradle-settings-migration"
+                )
             }
         }
 
@@ -175,10 +204,7 @@ class FlutterPlugin : Plugin<Project> {
         // supported range.
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"] as? Boolean
-                        ?: false
-                )
+                (project.properties["skipDependencyChecks"] as? Boolean ?: false)
         if (!shouldSkipDependencyChecks) {
             try {
                 DependencyVersionChecker.checkDependencyVersions(project)
@@ -282,8 +308,12 @@ class FlutterPlugin : Plugin<Project> {
     private fun resolveFlutterSdkProperty(defaultValue: String?): String? {
         val propertyName = "flutter.sdk"
         if (localProperties == null) {
+            val projectProperties = File(project!!.projectDir.parentFile, "local.properties")
+            val rootProperties = File(project!!.rootDir, "local.properties")
             localProperties =
-                readPropertiesIfExist(File(project!!.projectDir.parentFile, "local.properties"))
+                readPropertiesIfExist(
+                    if (projectProperties.exists()) projectProperties else rootProperties
+                )
         }
         return project?.findProperty(propertyName) as? String ?: localProperties!!.getProperty(
             propertyName,
@@ -292,19 +322,23 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        rootProject.tasks.register("generateLockfiles") {
-            doLast {
-                rootProject.subprojects.forEach { subproject ->
-                    val gradlew: String =
-                        getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                    val execOps = rootProject.serviceOf<ExecOperations>()
-                    execOps.exec {
-                        workingDir(rootProject.projectDir)
-                        executable(gradlew)
-                        args(":${subproject.name}:dependencies", "--write-locks")
+        try {
+            rootProject.tasks.register("generateLockfiles") {
+                doLast {
+                    rootProject.subprojects.forEach { subproject ->
+                        val gradlew: String =
+                            getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
+                        val execOps = rootProject.serviceOf<ExecOperations>()
+                        execOps.exec {
+                            workingDir(rootProject.projectDir)
+                            executable(gradlew)
+                            args(":${subproject.name}:dependencies", "--write-locks")
+                        }
                     }
                 }
             }
+        } catch (e: TaskInstantiationException) {
+            // ignored
         }
     }
 
@@ -484,10 +518,8 @@ class FlutterPlugin : Plugin<Project> {
                     )
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
-                    val mergeAssets =
-                        projectToAddTasksTo
-                            .tasks
-                            .findByPath(":$hostAppProjectName:merge${FlutterPluginUtils.capitalize(appProjectVariant.name)}Assets")
+                    val task = ":$hostAppProjectName:merge${FlutterPluginUtils.capitalize(appProjectVariant.name)}Assets"
+                    val mergeAssets = projectToAddTasksTo.tasks.findByPath(task)
                     check(mergeAssets != null)
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }
