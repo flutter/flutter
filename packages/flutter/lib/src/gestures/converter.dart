@@ -247,9 +247,13 @@ abstract final class PointerEventConverter {
                     synthesized: datum.synthesized,
                   );
                 case ui.PointerChange.panZoomUpdate:
-                  final Offset pan = Offset(datum.panX, datum.panY) / devicePixelRatio;
-                  final Offset panDelta =
-                      Offset(datum.panDeltaX, datum.panDeltaY) / devicePixelRatio;
+                  final bool isPanning = (datum.scale - 1).abs() <= datum.rotation.abs();
+                  final Offset pan = isPanning
+                      ? Offset(datum.panX, datum.panY) / devicePixelRatio
+                      : Offset.zero;
+                  final Offset panDelta = isPanning
+                      ? Offset(datum.panDeltaX, datum.panDeltaY) / devicePixelRatio
+                      : Offset.zero;
                   return PointerPanZoomUpdateEvent(
                     viewId: datum.viewId,
                     timeStamp: timeStamp,
