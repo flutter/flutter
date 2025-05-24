@@ -667,10 +667,7 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    AotAssemblyProfile(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
 }
 
 /// Build a release iOS application bundle.
@@ -681,10 +678,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'release_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    AotAssemblyRelease(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[AotAssemblyRelease(), InstallCodeAssets()];
 
   @override
   Future<void> build(Environment environment) async {
