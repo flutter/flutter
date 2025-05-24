@@ -387,6 +387,40 @@ void main() {
     );
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
+  testWidgets('Arrow points upwards if toolbar is below the anchor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 59.0)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 51.0),
+                child: CupertinoTextSelectionToolbar(
+                  anchorAbove: const Offset(15.0, 117.0),
+                  anchorBelow: const Offset(15.0, 140.0),
+                  children: const <Widget>[SizedBox(height: 56.0)],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      findPrivate('_CupertinoTextSelectionToolbarShape'),
+      paints
+        ..rrect()
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[const Offset(18.0, 49.0), const Offset(25.0, 42.0)],
+            excludes: <Offset>[const Offset(18.0, 0.0), const Offset(25.0, 7.0)],
+          ),
+        ),
+    );
+  });
+
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'Select me custom menu');
     addTearDown(controller.dispose);
