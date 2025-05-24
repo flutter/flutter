@@ -59,6 +59,24 @@ typedef GestureDragCancelCallback = void Function();
 /// Used by [DragGestureRecognizer.velocityTrackerBuilder].
 typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
 
+/// {@template flutter.gestures.DragGestureRecognizer.GestureArenaClaimPredicate}
+/// Signature for a function that determines whether a [DragGestureRecognizer]
+/// should attempt to claim the gesture arena earlier than its standard conditions.
+///
+/// If this function returns true (typically evaluated when a new pointer
+/// is added), the recognizer may proceed to [DragGestureRecognizer._checkDrag]
+/// (and subsequently invoke onStart) upon subsequent pointer events (like `PointerMoveEvent`),
+/// even if the [DragGestureRecognizer._globalDistanceMoved] has not yet surpassed the configured
+/// slop value. This allows drag initiation based on custom logic rather
+/// than solely on movement distance.
+///
+/// Returning false or if the predicate is null (the default behavior)
+/// means the recognizer adheres to its standard conditions for winning the arena.
+///
+/// Used by [DragGestureRecognizer.arenaClaimPredicate].
+/// {@endtemplate}
+typedef GestureArenaClaimPredicate = bool Function();
+
 /// Recognizes movement.
 ///
 /// In contrast to [MultiDragGestureRecognizer], [DragGestureRecognizer]
@@ -88,6 +106,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     this.multitouchDragStrategy = MultitouchDragStrategy.latestPointer,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
+    this.arenaClaimPredicate,
     super.supportedDevices,
     super.allowedButtonsFilter = _defaultButtonAcceptBehavior,
   });
@@ -288,6 +307,14 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///    match the native behavior on that platform.
   GestureVelocityTrackerBuilder velocityTrackerBuilder;
 
+  /// If set, this predicate allows the gesture recognizer to attempt claiming
+  /// the gesture arena earlier than usual, based on custom logic. This can
+  /// enable [onStart] to be invoked even when the movement has not exceeded
+  /// the normal drag slop threshold.
+  ///
+  /// If null, the recognizer uses the default behavior based on movement distance.
+  GestureArenaClaimPredicate? arenaClaimPredicate;
+
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
@@ -390,6 +417,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Duration? _frameTimeStamp;
   Offset _lastUpdatedDeltaForPan = Offset.zero;
 
+  /// Whether a drag recognizer should attempt to claim the arena early.
+  bool _needsArenaClaim = false;
+
   @override
   bool isPointerAllowed(PointerEvent event) {
     if (_initialButtons == null) {
@@ -411,6 +441,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _addPointer(PointerEvent event) {
     _velocityTrackers[event.pointer] = velocityTrackerBuilder(event);
+    _needsArenaClaim = _shouldClaimArena();
     switch (_state) {
       case _DragState.ready:
         _state = _DragState.possible;
@@ -445,6 +476,10 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialButtons = kPrimaryButton;
     }
     _addPointer(event);
+  }
+
+  bool _shouldClaimArena() {
+    return arenaClaimPredicate?.call() ?? false;
   }
 
   bool _shouldTrackMoveEvent(int pointer) {
@@ -653,6 +688,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
+    if (event is PointerMoveEvent && _needsArenaClaim) {
+      _checkDrag(event.pointer);
+    }
     if (!event.synthesized &&
         (event is PointerDownEvent ||
             event is PointerMoveEvent ||
@@ -910,6 +948,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void dispose() {
     _velocityTrackers.clear();
+    _needsArenaClaim = false;
     super.dispose();
   }
 
@@ -938,6 +977,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    super.arenaClaimPredicate,
   });
 
   @override
@@ -1002,6 +1042,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    super.arenaClaimPredicate,
   });
 
   @override

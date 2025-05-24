@@ -36,6 +36,9 @@ abstract class ScrollActivityDelegate {
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
 
+  /// Whether ballistic scrolling is currently in progress.
+  bool get isBallisticScrolling;
+
   /// Update the scroll position to the given pixel value.
   ///
   /// Returns the overscroll, if any. See [ScrollPosition.setPixels] for more

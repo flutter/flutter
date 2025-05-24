@@ -545,6 +545,9 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
   AxisDirection get axisDirection => AxisDirection.down;
 
   @override
+  bool get isBallisticScrolling => false;
+
+  @override
   void goBallistic(double velocity) {}
 
   @override

@@ -82,6 +82,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   AxisDirection get axisDirection => context.axisDirection;
 
   @override
+  bool get isBallisticScrolling {
+    return activity is BallisticScrollActivity;
+  }
+
+  @override
   double setPixels(double newPixels) {
     assert(activity!.isScrolling);
     return super.setPixels(newPixels);

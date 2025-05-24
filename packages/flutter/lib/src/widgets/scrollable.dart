@@ -770,6 +770,15 @@ class ScrollableState extends State<Scrollable>
   bool? _lastCanDrag;
   Axis? _lastAxisDirection;
 
+  bool _shouldClaimArena() {
+    if (_position is ScrollActivityDelegate) {
+      final ScrollActivityDelegate? delegate = _position as ScrollActivityDelegate?;
+      return delegate?.isBallisticScrolling ?? false;
+    }
+
+    return false;
+  }
+
   @override
   @protected
   void setCanDrag(bool value) {
@@ -803,7 +812,8 @@ class ScrollableState extends State<Scrollable>
                       ..dragStartBehavior = widget.dragStartBehavior
                       ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
                       ..gestureSettings = _mediaQueryGestureSettings
-                      ..supportedDevices = _configuration.dragDevices;
+                      ..supportedDevices = _configuration.dragDevices
+                      ..arenaClaimPredicate = _shouldClaimArena;
                   },
                 ),
           };
@@ -827,7 +837,8 @@ class ScrollableState extends State<Scrollable>
                       ..dragStartBehavior = widget.dragStartBehavior
                       ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
                       ..gestureSettings = _mediaQueryGestureSettings
-                      ..supportedDevices = _configuration.dragDevices;
+                      ..supportedDevices = _configuration.dragDevices
+                      ..arenaClaimPredicate = _shouldClaimArena;
                   },
                 ),
           };
