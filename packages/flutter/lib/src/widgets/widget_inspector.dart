@@ -1820,7 +1820,7 @@ mixin WidgetInspectorService {
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
   /// the Dart garbage collector from collecting objects between when
   /// the value is returned over the VM service protocol and when the
-  /// separate observatory protocol command has to be used to retrieve its full
+  /// separate VM service protocol command has to be used to retrieve its full
   /// contents.
   //
   // TODO(jacobr): Replace this with a better solution once
@@ -2804,8 +2804,7 @@ class _WidgetForTypeTests extends Widget {
 /// Select a location on your device or emulator and view what widgets and
 /// render object that best matches the location. An outline of the selected
 /// widget and terse summary information is shown on device with detailed
-/// information is shown in the observatory or in IntelliJ when using the
-/// Flutter Plugin.
+/// information is shown in Flutter DevTools.
 ///
 /// The inspector has a select mode and a view mode.
 ///
