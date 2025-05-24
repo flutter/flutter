@@ -5574,7 +5574,10 @@ class EditableTextState extends State<EditableText>
       ),
     ),
     ScrollToDocumentBoundaryIntent: _makeOverridable(
-      CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary),
+      _WebComposingDisabllingPageBoundaryAction<ScrollToDocumentBoundaryIntent>(
+        this,
+        onInvoke: _scrollToDocumentBoundary,
+      ),
     ),
     ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
 
@@ -6574,6 +6577,21 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
     }
 
     return state._value.selection.isValid;
+  }
+}
+
+class _WebComposingDisabllingPageBoundaryAction<T extends Intent> extends CallbackAction<T> {
+  _WebComposingDisabllingPageBoundaryAction(this.state, {required super.onInvoke});
+
+  final EditableTextState state;
+
+  @override
+  bool get isActionEnabled {
+    if (kIsWeb && state.widget.selectionEnabled && state._value.composing.isValid) {
+      return false;
+    }
+
+    return super.isActionEnabled;
   }
 }
 

@@ -2972,6 +2972,54 @@ void main() {
           reason: arrowDown.toString(),
         );
       });
+
+      testWidgets('home in compposing', (WidgetTester tester) async {
+        const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, home);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: home.toString(),
+        );
+      });
+
+      testWidgets('end in compposing', (WidgetTester tester) async {
+        const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
+
+        controller.value = const TextEditingValue(
+          text: testText,
+          selection: TextSelection(baseOffset: 0, extentOffset: 3),
+          composing: TextRange(start: 0, end: 3),
+        );
+
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
+
+        await sendKeyCombination(tester, end);
+        await tester.pump();
+
+        // selection should not change.
+        expect(controller.text, testText);
+        expect(
+          controller.selection,
+          const TextSelection(baseOffset: 0, extentOffset: 3),
+          reason: end.toString(),
+        );
+      });
     },
 
     skip: !kIsWeb, // [intended] specific tests target web.
