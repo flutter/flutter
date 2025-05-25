@@ -944,7 +944,7 @@ STDERR STUFF
       FileSystem: () => fileSystem,
       ProcessManager:
           () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]),
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
@@ -975,7 +975,7 @@ STDERR STUFF
             setUpFakeXcodeBuildHandler('Debug', hostPlatformArch: 'arm64'),
           ]),
       FileSystem: () => fileSystem,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
@@ -1002,7 +1002,7 @@ STDERR STUFF
       FileSystem: () => fileSystem,
       ProcessManager:
           () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
