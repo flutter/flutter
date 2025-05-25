@@ -811,8 +811,8 @@ void main() {
     await tester.tap(find.byType(Icon));
     await tester.pumpAndSettle();
 
-    final Finder clipRRectFinder = find.byType(ClipRRect);
-    expect(clipRRectFinder, findsNothing);
+    expect(find.byType(ClipRSuperellipse), findsNothing);
+    expect(find.byType(ClipRRect), findsNothing);
   });
 
   testWidgets('Sheet transition does not interfere after popping', (WidgetTester tester) async {
