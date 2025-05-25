@@ -3749,7 +3749,10 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
       return null;
     }
 
-    final String buttonLabel = 'Move to the ${_leftAligned ? 'right' : 'left'}';
+    final TextDirection textDirection = Directionality.of(context);
+
+    final String buttonLabel = 'Move to the ${_leftAligned ? (textDirection == TextDirection.ltr ? 'right' : 'left') : (textDirection == TextDirection.rtl ? 'right' : 'left')}';
+
     return _WidgetInspectorButton(
       button: buttonBuilder(
         context,
@@ -3834,9 +3837,10 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
       ],
     );
 
-    return Positioned(
-      left: _leftAligned ? _kExitWidgetSelectionButtonMargin : null,
-      right: _leftAligned ? null : _kExitWidgetSelectionButtonMargin,
+    return Positioned.directional(
+      textDirection: Directionality.of(context),
+      start: _leftAligned ? _kExitWidgetSelectionButtonMargin : null,
+      end: _leftAligned ? null : _kExitWidgetSelectionButtonMargin,
       bottom: _kExitWidgetSelectionButtonMargin,
       child: buttonGroup,
     );
