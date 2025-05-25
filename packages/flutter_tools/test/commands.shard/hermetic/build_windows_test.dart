@@ -20,6 +20,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String flutterRoot = r'C:\flutter';
@@ -569,7 +570,16 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           r'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           r'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          r'  "DART_DEFINES=Zm9vPWE=,YmFyPWI=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI="',
+          '  "DART_DEFINES=${encodeDartDefinesMap(<String, String>{
+            'foo': 'a', //
+            'bar': 'b',
+            'FLUTTER_VERSION': '0.0.0',
+            'FLUTTER_CHANNEL': 'master',
+            'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+            'FLUTTER_FRAMEWORK_REVISION': '11111',
+            'FLUTTER_ENGINE_REVISION': 'abcde',
+            'FLUTTER_DART_VERSION': '12',
+          })}"',
           r'  "DART_OBFUSCATION=true"',
           r'  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           r'  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
