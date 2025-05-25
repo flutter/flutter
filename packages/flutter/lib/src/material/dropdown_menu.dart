@@ -986,7 +986,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
           final double? effectiveMaximumWidth =
               effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
-          final effectiveWidth = effectiveMaximumWidth == null
+          final double effectiveWidth = effectiveMaximumWidth == null
             ? widget.width!
             : math.min(widget.width!, effectiveMaximumWidth);
           return Size(effectiveWidth, 0.0);
@@ -997,7 +997,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
           final double? effectiveMaximumWidth =
               effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
-          final effectiveWidth = effectiveMaximumWidth == null
+          final double effectiveWidth = effectiveMaximumWidth == null
             ? anchorWidth
             : math.min(anchorWidth, effectiveMaximumWidth);
           return Size(effectiveWidth, 0.0);
