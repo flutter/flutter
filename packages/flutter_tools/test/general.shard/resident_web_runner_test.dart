@@ -48,6 +48,13 @@ import '../src/package_config.dart';
 import '../src/test_build_system.dart';
 import '../src/throwing_pub.dart';
 
+const List<VmServiceExpectation> kSetPauseIsolatesOnStartExpectations = <VmServiceExpectation>[
+  FakeVmServiceRequest(
+    method: 'setFlag',
+    args: <String, Object>{'name': 'pause_isolates_on_start', 'value': 'true'},
+  ),
+];
+
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stderr'}),
@@ -72,6 +79,12 @@ const List<VmServiceExpectation> kAttachIsolateExpectations = <VmServiceExpectat
 ];
 
 const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
+  ...kAttachLogExpectations,
+  ...kAttachIsolateExpectations,
+];
+
+const List<VmServiceExpectation> kStartPausedAndAttachExpectations = <VmServiceExpectation>[
+  ...kSetPauseIsolatesOnStartExpectations,
   ...kAttachLogExpectations,
   ...kAttachIsolateExpectations,
 ];
@@ -689,7 +702,7 @@ name: my_app
         systemClock: globals.systemClock,
         devtoolsHandler: createNoOpHandler,
       );
-      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      fakeVmServiceHost = FakeVmServiceHost(requests: kStartPausedAndAttachExpectations.toList());
       setupMocks();
       final Completer<DebugConnectionInfo> connectionInfoCompleter =
           Completer<DebugConnectionInfo>();
@@ -729,6 +742,10 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
+          const FakeVmServiceRequest(
+            method: kGetVMServiceName,
+            jsonResponse: <String, Object>{'type': 'VM', 'success': true},
+          ),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{'isolateId': ''},
