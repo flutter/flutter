@@ -2301,25 +2301,18 @@ class _MenuBarAnchor extends MenuAnchor {
 }
 
 class _MenuBarAnchorState extends _MenuAnchorState {
-  late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
-    DismissIntent: DismissMenuAction(controller: _menuController),
-  };
-
   @override
   Axis get _orientation => Axis.horizontal;
 
   @override
   Widget build(BuildContext context) {
-    final Actions child = Actions(
-      actions: actions,
-      child: Shortcuts(
-        shortcuts: _kMenuTraversalShortcuts,
-        child: _MenuPanel(
-          menuStyle: widget.style,
-          clipBehavior: widget.clipBehavior,
-          orientation: _orientation,
-          children: widget.menuChildren,
-        ),
+    final Widget child = Shortcuts(
+      shortcuts: _kMenuTraversalShortcuts,
+      child: _MenuPanel(
+        menuStyle: widget.style,
+        clipBehavior: widget.clipBehavior,
+        orientation: _orientation,
+        children: widget.menuChildren,
       ),
     );
     return _MenuAnchorScope(
@@ -3360,19 +3353,14 @@ class _Submenu extends StatelessWidget {
         child: FocusScope(
           node: anchor._menuScopeNode,
           skipTraversal: true,
-          child: Actions(
-            actions: <Type, Action<Intent>>{
-              DismissIntent: DismissMenuAction(controller: anchor._menuController),
-            },
-            child: Shortcuts(
-              shortcuts: _kMenuTraversalShortcuts,
-              child: _MenuPanel(
-                menuStyle: menuStyle,
-                clipBehavior: clipBehavior,
-                orientation: anchor._orientation,
-                crossAxisUnconstrained: crossAxisUnconstrained,
-                children: menuChildren,
-              ),
+          child: Shortcuts(
+            shortcuts: _kMenuTraversalShortcuts,
+            child: _MenuPanel(
+              menuStyle: menuStyle,
+              clipBehavior: clipBehavior,
+              orientation: anchor._orientation,
+              crossAxisUnconstrained: crossAxisUnconstrained,
+              children: menuChildren,
             ),
           ),
         ),
