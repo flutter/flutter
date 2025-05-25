@@ -37,15 +37,10 @@ Future<void> updateGeneratedXcodeProperties({
   String? buildDirOverride,
   String? configurationBuildDir,
 }) async {
-  // Dev dependencies are removed from release builds if the explicit package
-  // dependencies flag is on.
-  final bool devDependenciesEnabled =
-      !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
-
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
     buildInfo: buildInfo,
-    devDependenciesEnabled: devDependenciesEnabled,
+    devDependenciesEnabled: !buildInfo.mode.isRelease,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
