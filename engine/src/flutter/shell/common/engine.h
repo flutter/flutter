@@ -833,6 +833,16 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                                fml::MallocMapping args);
 
   //----------------------------------------------------------------------------
+  /// @brief      Gets semantics node from framework
+  ///
+  /// @param[in]  view_id The identifier of the view.
+  /// @param[in]  node_id The identifier of the accessibility node.
+  /// @param[in]  action  The accessibility related action performed on the
+  ///                     node of the specified ID.
+  /// @param[in]  args    Optional data that applies to the specified action.
+  SemanticsUpdate* GetSemanticsNode(int64_t view_id, int node_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the embedder has expressed an opinion
   ///             about whether the accessibility tree should be generated or
   ///             not. This call originates in the platform view and is

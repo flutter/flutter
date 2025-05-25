@@ -1188,6 +1188,23 @@ void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
 }
 
 // |PlatformView::Delegate|
+SemanticsUpdate* Shell::OnPlatformViewGetSemanticsNode(int64_t view_id,
+                                                       int32_t node_id) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  SemanticsUpdate* update;
+  fml::TaskRunner::RunNowAndFlushMessages(
+      task_runners_.GetUITaskRunner(),
+      fml::MakeCopyable(
+          [engine = engine_->GetWeakPtr(), view_id, node_id]() mutable {
+            if (engine) {
+              update = engine->GetSemanticsNode(view_id, node_id);
+            }
+          }));
+  return update;
+}
+
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewSetSemanticsEnabled(bool enabled) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
