@@ -492,6 +492,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.areCustomDevicesEnabled = false,
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
+    this.isDartDataAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isExplicitPackageDependenciesEnabled = false,
   });
@@ -525,6 +526,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isNativeAssetsEnabled;
+
+  @override
+  final bool isDartDataAssetsEnabled;
 
   @override
   final bool isSwiftPackageManagerEnabled;
