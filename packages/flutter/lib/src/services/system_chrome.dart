@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/cupertino.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:cupertino/cupertino.dart';
+/// @docImport 'package:material/material.dart';
 library;
 
 import 'dart:async';
@@ -21,7 +21,7 @@ export 'binding.dart' show SystemUiChangeCallback;
 // Examples can assume:
 // import 'dart:ui' as ui;
 // import 'package:flutter/services.dart';
-// import 'package:flutter/material.dart';
+// import 'package:material/material.dart';
 // import 'package:flutter/widgets.dart';
 // late BuildContext context;
 

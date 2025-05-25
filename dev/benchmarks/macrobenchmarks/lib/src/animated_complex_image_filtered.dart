@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 // Various tests to verify that animated image filtered layers do not
 // dirty children even without explicit repaint boundaries. These intentionally use

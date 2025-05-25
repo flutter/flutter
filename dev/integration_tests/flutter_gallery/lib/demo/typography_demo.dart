@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class TextStyleItem extends StatelessWidget {
   const TextStyleItem({super.key, required this.name, required this.style, required this.text});

@@ -1178,6 +1178,8 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   path_provider_linux: 1.0.0
 ''');
 

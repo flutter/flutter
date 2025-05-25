@@ -4,7 +4,7 @@
 
 // An example showing usage of [StarBorder].
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 const int _kParameterPrecision = 2;
 

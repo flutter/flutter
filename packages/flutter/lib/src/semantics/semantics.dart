@@ -4,7 +4,7 @@
 
 /// @docImport 'dart:ui';
 ///
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 /// @docImport 'package:flutter/rendering.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;

@@ -162,6 +162,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   generate: true

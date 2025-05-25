@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'picture_cache.dart';
 
 class ClipperCachePage extends StatefulWidget {

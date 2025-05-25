@@ -6,6 +6,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   integration_test:
     sdk: flutter
   flutter_test:

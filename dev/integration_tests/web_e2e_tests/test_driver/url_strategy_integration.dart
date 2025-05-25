@@ -7,7 +7,7 @@ import 'dart:js_interop';
 import 'dart:ui' as ui;
 import 'dart:ui_web';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:integration_test/integration_test.dart';

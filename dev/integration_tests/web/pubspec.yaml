@@ -13,6 +13,8 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 
   web: 1.1.1
 

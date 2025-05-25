@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_localizations:
     sdk: flutter
   adaptive_breakpoints: 0.1.7

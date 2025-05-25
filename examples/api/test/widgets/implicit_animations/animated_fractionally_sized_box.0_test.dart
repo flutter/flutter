@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/widgets/implicit_animations/animated_fractionally_sized_box.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';

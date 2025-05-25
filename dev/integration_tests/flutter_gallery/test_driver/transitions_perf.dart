@@ -4,7 +4,7 @@
 
 import 'dart:convert' show JsonEncoder;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_gallery/demo_lists.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;

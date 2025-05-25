@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/foundation.dart';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'animated_size.dart';
 /// @docImport 'transitions.dart';

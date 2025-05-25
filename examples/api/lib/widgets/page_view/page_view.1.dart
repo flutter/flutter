@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// Flutter code sample for a [PageView] using the `findChildIndexCallback` argument.
 void main() => runApp(const PageViewExampleApp());

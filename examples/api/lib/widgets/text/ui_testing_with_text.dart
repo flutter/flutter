@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() => runApp(const MyApp());
 

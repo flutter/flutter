@@ -4,8 +4,8 @@
 
 import 'dart:collection';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino/cupertino.dart';
+import 'package:material/material.dart';
 
 import '../codeviewer/code_displayer.dart';
 import '../deferred_widget.dart';

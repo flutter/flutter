@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import '../../gallery/demo.dart';
 

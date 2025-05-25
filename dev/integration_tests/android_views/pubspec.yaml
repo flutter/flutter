@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_driver:
     sdk: flutter
   path_provider: 2.1.5

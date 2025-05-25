@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/86198
@@ -19,6 +19,5 @@ void main() {
   SliverAppBar sliverAppBar = SliverAppBar();
   sliverAppBar = SliverAppBar(backwardsCompatibility: true);
   sliverAppBar = SliverAppBar(backwardsCompatibility: false);
-  sliverAppBar
-      .backwardsCompatibility; // Removing field reference not supported.
+  sliverAppBar.backwardsCompatibility; // Removing field reference not supported.
 }

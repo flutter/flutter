@@ -59,7 +59,7 @@ of the core Flutter framework and are imported using
 `'package:flutter/<library>.dart'`, like so:
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 ```
 

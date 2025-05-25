@@ -90,7 +90,7 @@ void main() {
     errorFile =
         fileSystem.file(fileSystem.path.join(projectWithErrors, 'other', 'error.dart'))
           ..createSync(recursive: true)
-          ..writeAsStringSync(r"""import 'package:flutter/material.dart""");
+          ..writeAsStringSync(r"""import 'package:material/material.dart""");
   });
 
   tearDown(() {
@@ -384,7 +384,7 @@ void assertContains(String text, List<String> patterns) {
 }
 
 const String mainDartSrc = r'''
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() => runApp(MyApp());
 
@@ -456,5 +456,7 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 ''';

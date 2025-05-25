@@ -4,7 +4,7 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import '../../../data/gallery_options.dart';
 import '../../../layout/text_scale.dart';

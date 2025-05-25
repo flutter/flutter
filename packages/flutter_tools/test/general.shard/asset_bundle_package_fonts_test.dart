@@ -49,6 +49,8 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 ${deps.entries.map((MapEntry<String, String> entry) => '  ${entry.key}: {path: ${entry.value}}').join('\n')}
 $fontsSection
 ''');

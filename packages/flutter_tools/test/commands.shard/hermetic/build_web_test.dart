@@ -637,6 +637,8 @@ name: foo
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   fizz:
     path:
       bar/

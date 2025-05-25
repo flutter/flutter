@@ -17,6 +17,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   assets: []
 ''';
@@ -36,6 +38,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -60,6 +64,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   assets:
@@ -79,6 +85,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true
@@ -106,6 +114,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   uses-material-design: true
   assets:
@@ -130,6 +140,8 @@ flutter:
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   uses-material-design: true

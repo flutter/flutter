@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.3.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

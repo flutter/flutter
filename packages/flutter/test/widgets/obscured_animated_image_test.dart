@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 

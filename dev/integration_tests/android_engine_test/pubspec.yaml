@@ -9,6 +9,8 @@ dependencies:
     path: ../../tools/android_driver_extensions
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_driver:
     sdk: flutter
 

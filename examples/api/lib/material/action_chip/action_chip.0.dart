@@ -4,7 +4,7 @@
 
 // Flutter code sample [ActionChip].
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() => runApp(const ChipApp());
 

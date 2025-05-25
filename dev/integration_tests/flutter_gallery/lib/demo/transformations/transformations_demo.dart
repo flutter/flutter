@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Vertices;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'transformations_demo_board.dart';
 import 'transformations_demo_edit_board_point.dart';
 import 'transformations_demo_gesture_transformable.dart';

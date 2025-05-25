@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'deferred_widget.dart';
 import 'main.dart';
 import 'pages/demo.dart';

@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
 const double _kFrontClosedHeight = 92.0; // front layer height when closed

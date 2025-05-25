@@ -4,7 +4,7 @@
 
 // Raw data for the animation demo.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 const Color _mariner = Color(0xFF3B5F8F);
 const Color _mediumPurple = Color(0xFF8266D4);

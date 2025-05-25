@@ -20,7 +20,7 @@ class BasicProject extends Project {
   final String main = r'''
   import 'dart:async';
 
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   Future<void> main() async {
     while (true) {
@@ -70,7 +70,7 @@ class BasicProjectThatThrows extends Project {
 
   @override
   final String main = r'''
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   void a() {
     throw Exception('a');
@@ -130,7 +130,7 @@ class BasicProjectWithTimelineTraces extends Project {
   import 'dart:async';
   import 'dart:developer';
 
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   Future<void> main() async {
     while (true) {
@@ -200,7 +200,7 @@ class BasicProjectWithUnaryMain extends Project {
   @override
   final String main = r'''
   import 'dart:async';
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
   Future<void> main(List<String> args) async {
     while (true) {
       runApp(MyApp());

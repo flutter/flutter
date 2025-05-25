@@ -5,7 +5,7 @@
 // Thanks for checking out Flutter!
 // Like what you see? Tweet us @FlutterDev
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import 'gallery/app.dart';
 

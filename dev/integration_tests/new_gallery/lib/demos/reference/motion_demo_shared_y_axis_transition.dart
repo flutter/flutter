@@ -4,7 +4,7 @@
 
 import 'dart:math';
 import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import '../../gallery_localizations.dart';
 
 // BEGIN sharedYAxisTransitionDemo

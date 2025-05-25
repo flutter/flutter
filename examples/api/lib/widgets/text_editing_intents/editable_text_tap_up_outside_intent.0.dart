@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// Flutter code sample for [EditableTextTapUpOutsideIntent].
 

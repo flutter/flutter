@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/material/text_button/text_button.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

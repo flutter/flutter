@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_api_samples/widgets/navigator_pop_handler/navigator_pop_handler.0.dart'

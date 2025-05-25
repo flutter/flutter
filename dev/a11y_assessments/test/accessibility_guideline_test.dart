@@ -4,7 +4,7 @@
 
 import 'package:a11y_assessments/main.dart';
 import 'package:a11y_assessments/use_cases/use_cases.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

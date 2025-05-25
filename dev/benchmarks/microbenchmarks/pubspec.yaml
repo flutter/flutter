@@ -8,6 +8,8 @@ dependencies:
   meta: 1.16.0
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   stocks:

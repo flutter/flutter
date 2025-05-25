@@ -4,7 +4,7 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class CardModel {
   CardModel(this.value, this.height) : textController = TextEditingController(text: 'Item $value');

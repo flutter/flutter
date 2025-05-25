@@ -10,7 +10,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide TextInputAction;
+import 'package:material/material.dart' hide TextInputAction;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' hide TextInputAction;

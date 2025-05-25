@@ -6,7 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'cupertino_localizations.dart';
@@ -16,7 +16,7 @@ import 'widgets_localizations.dart';
 
 // Examples can assume:
 // import 'package:flutter_localizations/flutter_localizations.dart';
-// import 'package:flutter/material.dart';
+// import 'package:material/material.dart';
 
 /// Implementation of localized strings for the material widgets using the
 /// `intl` package for date and time formatting.

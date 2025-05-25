@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'dart:ui';
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'scroll_position.dart';
 /// @docImport 'scrollable.dart';

@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show JsonEncoder;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:gallery/data/demos.dart';
 import 'package:gallery/main.dart' show GalleryApp;

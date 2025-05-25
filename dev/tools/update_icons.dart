@@ -462,7 +462,7 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
     newIconUsages.writeln(Icon(entry).usage);
   }
   final String demoFileContents = '''
-    import 'package:flutter/material.dart';
+    import 'package:material/material.dart';
 
     void main() => runApp(const IconDemo());
 

@@ -7,7 +7,7 @@ import 'dart:ui' as ui show Codec;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// An animated GIF image with 3 1x1 pixel frames (a red, green, and blue
 /// frames). The GIF animates forever, and each frame has a 100ms delay.

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import 'src/basic_messaging.dart';
 import 'src/method_calls.dart';

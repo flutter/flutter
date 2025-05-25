@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class ExampleDragTarget extends StatefulWidget {
   const ExampleDragTarget({super.key});

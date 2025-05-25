@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/material/search_anchor/search_anchor.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

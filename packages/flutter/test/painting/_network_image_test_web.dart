@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide NetworkImage;
+import 'package:material/material.dart' hide NetworkImage;
 import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter/src/painting/_web_image_info_web.dart';
 import 'package:flutter/src/web.dart' as web_shim;

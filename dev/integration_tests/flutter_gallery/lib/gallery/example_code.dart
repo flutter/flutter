@@ -4,7 +4,7 @@
 
 // This code is not runnable, it contains code snippets displayed in the Gallery.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class ButtonsDemo {
   void setState(VoidCallback callback) {}

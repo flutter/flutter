@@ -68,6 +68,8 @@ name: test
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   assets:
 ${assets.map((String entry) => '    - $entry').join('\n')}
@@ -292,6 +294,8 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
 name: test
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   assets:

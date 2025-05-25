@@ -71,6 +71,8 @@ name: $name
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 ${dependencies.entries.map((MapEntry<String, String> d) => '  ${d.key}: {path: ${d.value}}').join('\n')}
 $assetsSection
 ''');

@@ -10,9 +10,9 @@
 
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kPrimaryButton;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;

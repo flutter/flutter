@@ -4,7 +4,7 @@
 
 import 'dart:math' show Random;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 
 import '../../gallery/demo.dart';
 

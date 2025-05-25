@@ -4,7 +4,7 @@
 
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../layout/adaptive.dart';

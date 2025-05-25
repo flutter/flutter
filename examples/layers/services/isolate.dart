@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 
 typedef OnProgressListener = void Function(double completed, double total);

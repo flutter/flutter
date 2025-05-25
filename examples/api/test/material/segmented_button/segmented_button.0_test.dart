@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_api_samples/material/segmented_button/segmented_button.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 

@@ -20,7 +20,7 @@ class CompileErrorProject extends Project {
   final String main = r'''
   import 'dart:async';
 
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
 
   Future<void> main() async {
     this code does not compile

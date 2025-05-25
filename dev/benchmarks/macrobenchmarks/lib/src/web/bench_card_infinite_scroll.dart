@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 import 'recorder.dart';
 import 'test_data.dart';

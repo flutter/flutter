@@ -22,7 +22,7 @@ class HotReloadProject extends Project {
 
   static String getCode(bool stateful) {
     return '''
-  import 'package:flutter/material.dart';
+  import 'package:material/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
   import 'package:flutter/widgets.dart';

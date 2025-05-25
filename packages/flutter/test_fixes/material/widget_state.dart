@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 void main() {
   // Changes made in https://github.com/flutter/flutter/pull/142151
@@ -30,34 +30,28 @@ void main() {
     return Color(0xFF000003);
   }
 
-  final MaterialStateProperty<Color> backgroundColor =
-      MaterialStateColor.resolveWith(getColor);
+  final MaterialStateProperty<Color> backgroundColor = MaterialStateColor.resolveWith(getColor);
 
-  TextStyle floatingLabelStyle = MaterialStateTextStyle.resolveWith((
-    Set<MaterialState> states,
-  ) {
+  TextStyle floatingLabelStyle = MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final Color color =
-        states.contains(MaterialState.error)
-            ? Theme.of(context).colorScheme.error
-            : Colors.orange;
+        states.contains(MaterialState.error) ? Theme.of(context).colorScheme.error : Colors.orange;
     return TextStyle(color: color, letterSpacing: 1.3);
   });
 
-  final MaterialStateProperty<Icon?> thumbIcon =
-      MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          return const Icon(Icons.check);
-        }
-        return const Icon(Icons.close);
-      });
+  final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>((
+    Set<MaterialState> states,
+  ) {
+    if (states.contains(MaterialState.selected)) {
+      return const Icon(Icons.check);
+    }
+    return const Icon(Icons.close);
+  });
 
-  final Color backgroundColor = MaterialStatePropertyAll<Color>(
-    Colors.blue.withOpacity(0.12),
-  );
+  final Color backgroundColor = MaterialStatePropertyAll<Color>(Colors.blue.withOpacity(0.12));
 
-  final MaterialStatesController statesController = MaterialStatesController(
-    <MaterialState>{if (widget.selected) MaterialState.selected},
-  );
+  final MaterialStatesController statesController = MaterialStatesController(<MaterialState>{
+    if (widget.selected) MaterialState.selected,
+  });
 }
 
 class _MouseCursor extends MaterialStateMouseCursor {
@@ -70,8 +64,7 @@ class _MouseCursor extends MaterialStateMouseCursor {
       resolveCallback(states) ?? MouseCursor.uncontrolled;
 }
 
-class SelectedBorder extends RoundedRectangleBorder
-    implements MaterialStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
   const SelectedBorder();
 
   @override
@@ -84,11 +77,7 @@ class SelectedBorder extends RoundedRectangleBorder
 }
 
 class _MyWidget extends StatefulWidget {
-  const _MyWidget({
-    required this.controller,
-    required this.evaluator,
-    required this.materialState,
-  });
+  const _MyWidget({required this.controller, required this.evaluator, required this.materialState});
 
   final bool Function(_MyWidgetState state) evaluator;
 

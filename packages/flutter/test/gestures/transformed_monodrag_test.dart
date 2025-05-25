@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

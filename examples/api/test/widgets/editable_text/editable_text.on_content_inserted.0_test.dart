@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/widgets/editable_text/editable_text.on_content_inserted.0.dart'
     as example;

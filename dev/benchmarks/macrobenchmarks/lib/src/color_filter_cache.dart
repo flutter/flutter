@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 class ColorFilterCachePage extends StatefulWidget {
   const ColorFilterCachePage({super.key});

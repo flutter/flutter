@@ -18,6 +18,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   assets:
     - test_assets/asset1.txt
@@ -33,7 +35,7 @@ flutter:
   final String main = r'''
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'deferred_library.dart' deferred as DeferredLibrary;
 
 Future<void>? libFuture;

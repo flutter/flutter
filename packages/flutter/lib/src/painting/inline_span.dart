@@ -4,7 +4,7 @@
 
 /// @docImport 'dart:ui';
 ///
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'placeholder_span.dart';
 library;

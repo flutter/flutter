@@ -6,7 +6,7 @@ import 'dart:async' show Completer;
 import 'dart:convert' show base64Decode;
 import 'dart:typed_data' show ByteData, Uint8List;
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 
 /// A 100x100 png in Display P3 colorspace.
 const String _displayP3Logo =

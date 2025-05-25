@@ -4,7 +4,7 @@
 
 import 'dart:async' show Completer;
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

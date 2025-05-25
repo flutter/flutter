@@ -98,6 +98,8 @@ name: my_app
 dependencies:
   flutter:
     sdk: flutter
+  material:
+    sdk: flutter
 flutter:
   assets:
     - assets/foo/
@@ -709,6 +711,8 @@ flutter:
 name: my_app
 dependencies:
   flutter:
+    sdk: flutter
+  material:
     sdk: flutter
 flutter:
   assets:

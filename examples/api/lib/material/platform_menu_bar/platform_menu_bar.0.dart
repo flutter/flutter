@@ -4,7 +4,7 @@
 
 // THIS SAMPLE ONLY WORKS ON MACOS.
 
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/services.dart';
 
 /// Flutter code sample for [PlatformMenuBar].

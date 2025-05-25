@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:complex_layout/src/app.dart';
-import 'package:flutter/material.dart';
+import 'package:material/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 

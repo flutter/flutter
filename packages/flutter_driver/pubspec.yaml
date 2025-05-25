@@ -7,11 +7,15 @@ environment:
 
 dependencies:
   file: 7.0.1
+  cupertino:
+    sdk: flutter
   flutter:
     sdk: flutter
   flutter_test:
     sdk: flutter
   fuchsia_remote_debug_protocol:
+    sdk: flutter
+  material:
     sdk: flutter
   path: 1.9.1
   meta: 1.16.0

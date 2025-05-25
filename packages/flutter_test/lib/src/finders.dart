@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:material/material.dart';
 ///
 /// @docImport 'widget_tester.dart';
 library;
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show Tooltip;
+import 'package:material/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

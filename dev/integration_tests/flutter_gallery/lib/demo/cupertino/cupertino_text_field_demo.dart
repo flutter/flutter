@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino/cupertino.dart';
 
 class CupertinoTextFieldDemo extends StatefulWidget {
   const CupertinoTextFieldDemo({super.key});
