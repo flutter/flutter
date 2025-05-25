@@ -971,6 +971,18 @@ enum _ModalRouteAspect {
 
   /// Specifies the aspect corresponding to [ModalRoute.settings].
   settings,
+
+  /// Specifies the aspect corresponding to [ModalRoute.isActive].
+  isActive,
+
+  /// Specifies the aspect corresponding to [ModalRoute.isFirst].
+  isFirst,
+
+  /// Specifies the aspect corresponding to [ModalRoute.opaque].
+  opaque,
+
+  /// Specifies the aspect corresponding to [ModalRoute.popDisposition].
+  popDisposition,
 }
 
 class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
@@ -979,12 +991,14 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
     required this.canPop,
     required this.impliesAppBarDismissal,
     required this.route,
+    required this.opaque,
     required super.child,
   });
 
   final bool isCurrent;
   final bool canPop;
   final bool impliesAppBarDismissal;
+  final bool opaque;
   final Route<dynamic> route;
 
   @override
@@ -992,7 +1006,8 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
     return isCurrent != old.isCurrent ||
         canPop != old.canPop ||
         impliesAppBarDismissal != old.impliesAppBarDismissal ||
-        route != old.route;
+        route != old.route ||
+        opaque != old.opaque;
   }
 
   @override
@@ -1021,6 +1036,10 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
         _ModalRouteAspect.isCurrent => isCurrent != oldWidget.isCurrent,
         _ModalRouteAspect.canPop => canPop != oldWidget.canPop,
         _ModalRouteAspect.settings => route.settings != oldWidget.route.settings,
+        _ModalRouteAspect.isActive => route.isActive != oldWidget.route.isActive,
+        _ModalRouteAspect.isFirst => route.isFirst != oldWidget.route.isFirst,
+        _ModalRouteAspect.opaque => opaque != oldWidget.opaque,
+        _ModalRouteAspect.popDisposition => route.popDisposition != oldWidget.route.popDisposition,
       },
     );
   }
@@ -1143,6 +1162,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         route: widget.route,
         isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
         canPop: widget.route.canPop, // _routeSetState is called if this updates
+        opaque: widget.route.opaque, // _routeSetState is called if this updates
         impliesAppBarDismissal: widget.route.impliesAppBarDismissal,
         child: Offstage(
           offstage: widget.route.offstage, // _routeSetState is called if this updates
@@ -1299,10 +1319,53 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.settings] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.settings] changes.
   static RouteSettings? settingsOf(BuildContext context) =>
       _of(context, _ModalRouteAspect.settings)?.settings;
+
+  /// Returns [ModalRoute.isActive] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.isActive] changes.
+  static bool? isActiveOf(BuildContext context) =>
+      _of(context, _ModalRouteAspect.isActive)?.isActive;
+
+  /// Returns [ModalRoute.isFirst] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.isFirst] changes.
+  static bool? isFirstOf(BuildContext context) => _of(context, _ModalRouteAspect.isFirst)?.isFirst;
+
+  /// Returns [ModalRoute.opaque] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.opaque] changes.
+  static bool? opaqueOf(BuildContext context) => _of(context, _ModalRouteAspect.opaque)?.opaque;
+
+  /// Returns [ModalRoute.popDisposition] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.popDisposition] changes.
+  static RoutePopDisposition? popDispositionOf(BuildContext context) =>
+      _of(context, _ModalRouteAspect.popDisposition)?.popDisposition;
 
   /// Schedule a call to [buildTransitions].
   ///
