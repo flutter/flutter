@@ -13,6 +13,7 @@ export 'semantics/heading.dart';
 export 'semantics/image.dart';
 export 'semantics/incrementable.dart';
 export 'semantics/label_and_value.dart';
+export 'semantics/landmarks.dart';
 export 'semantics/link.dart';
 export 'semantics/list.dart';
 export 'semantics/live_region.dart';
