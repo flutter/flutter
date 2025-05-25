@@ -1813,6 +1813,8 @@ void main() {
       0.0,
       reason: 'PageView should not have changed pages during child ballistic scroll',
     );
+
+    controller.dispose();
   });
 }
 
