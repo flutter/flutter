@@ -140,6 +140,9 @@ class CommandPoolRecyclerVK final
   /// @brief      Clears all recycled command pools to let them be reclaimed.
   void Dispose();
 
+  // Visible for testing.
+  static int GetGlobalPoolCount(const ContextVK* context);
+
  private:
   std::weak_ptr<ContextVK> context_;
 
