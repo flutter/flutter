@@ -192,8 +192,12 @@ class NavigationRail extends StatefulWidget {
 
   /// The vertical alignment for the group of [destinations] within the rail.
   ///
-  /// The [NavigationRailDestination]s are grouped together with the [trailing]
-  /// widget, between the [leading] widget and the bottom of the rail.
+  /// The [NavigationRailDestination]s are by default grouped together with the
+  /// [trailing] widget, due to [trailingAtBottom] being `false`. The [leading]
+  /// widget, can also be in the aligned group by setting [leadingAtTop] to
+  /// `false`. If these widgets are not included in the group, they are placed
+  /// at the top and bottom, respectively, of the rail and only the space
+  /// between them is considered for the alignment.
   ///
   /// The value must be between -1.0 and 1.0.
   ///
