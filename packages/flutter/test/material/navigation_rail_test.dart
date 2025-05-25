@@ -4030,6 +4030,115 @@ void main() {
     expect(scrollable.position.pixels, equals(500.0));
   });
 
+  testWidgets(
+    'NavigationRail leading widget is at top and trailing widget is at last destination (defaults)',
+    (WidgetTester tester) async {
+      const Key leadingKey = Key('leading');
+      const Key trailingKey = Key('trailing');
+      tester.view.physicalSize = const Size(800, 600);
+      tester.view.devicePixelRatio = 1.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 140.0,
+                      child: NavigationRail(
+                        selectedIndex: 0,
+                        extended: true,
+                        groupAlignment: 0.0,
+                        leading: const SizedBox(key: leadingKey, height: 50),
+                        trailing: const SizedBox(key: trailingKey, height: 50),
+                        destinations: const <NavigationRailDestination>[
+                          NavigationRailDestination(icon: Icon(Icons.favorite), label: Text('Abc')),
+                          NavigationRailDestination(icon: Icon(Icons.bookmark), label: Text('Def')),
+                          NavigationRailDestination(icon: Icon(Icons.star), label: Text('Ghi')),
+                        ],
+                      ),
+                    ),
+                    const Expanded(child: Text('body')),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final Rect leadingRect = tester.getRect(find.byKey(leadingKey));
+      final Rect trailingRect = tester.getRect(find.byKey(trailingKey));
+      final Rect firstDestRect = tester.getRect(
+        find.ancestor(of: find.byIcon(Icons.favorite), matching: find.byType(Semantics)).first,
+      );
+      final Rect lastDestRect = tester.getRect(
+        find.ancestor(of: find.byIcon(Icons.star), matching: find.byType(Semantics)).first,
+      );
+
+      expect(leadingRect.top, 8);
+      expect(firstDestRect.top - leadingRect.bottom, greaterThan(100));
+      expect(trailingRect.top - lastDestRect.bottom, 0);
+      expect(trailingRect.bottom, lessThan(500));
+    },
+  );
+
+  testWidgets('NavigationRail leadingAtTop set to false and trailingAtBottom to true', (
+    WidgetTester tester,
+  ) async {
+    const Key leadingKey = Key('leading');
+    const Key trailingKey = Key('trailing');
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: 140.0,
+                    child: NavigationRail(
+                      selectedIndex: 0,
+                      extended: true,
+                      groupAlignment: 0.0,
+                      leadingAtTop: false,
+                      trailingAtBottom: true,
+                      leading: const SizedBox(key: leadingKey, height: 50),
+                      trailing: const SizedBox(key: trailingKey, height: 50),
+                      destinations: const <NavigationRailDestination>[
+                        NavigationRailDestination(icon: Icon(Icons.favorite), label: Text('Abc')),
+                        NavigationRailDestination(icon: Icon(Icons.bookmark), label: Text('Def')),
+                        NavigationRailDestination(icon: Icon(Icons.star), label: Text('Ghi')),
+                      ],
+                    ),
+                  ),
+                  const Expanded(child: Text('body')),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Rect leadingRect = tester.getRect(find.byKey(leadingKey));
+    final Rect trailingRect = tester.getRect(find.byKey(trailingKey));
+    final Rect firstDestRect = tester.getRect(
+      find.ancestor(of: find.byIcon(Icons.favorite), matching: find.byType(Semantics)).first,
+    );
+    final Rect lastDestRect = tester.getRect(
+      find.ancestor(of: find.byIcon(Icons.star), matching: find.byType(Semantics)).first,
+    );
+
+    expect(leadingRect.top, greaterThan(100));
+    expect(firstDestRect.top - leadingRect.bottom, 8);
+    expect(trailingRect.top - lastDestRect.bottom, greaterThan(100));
+    expect(trailingRect.bottom, 600);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
