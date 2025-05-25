@@ -1781,6 +1781,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(getScrollOffset(tester), 200);
   });
+
+  testWidgets('Scroll gesture should not re-compete with parent while ballistic scrolling', (
+    WidgetTester tester,
+  ) async {
+    final PageController controller = PageController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PageView(
+          controller: controller,
+          children: const <Widget>[
+            SingleChildScrollView(child: SizedBox(height: 1e4)),
+            SingleChildScrollView(child: SizedBox(height: 1e4)),
+          ],
+        ),
+      ),
+    );
+
+    // Start ballistic scroll on the fist child SingleChildScrollView.
+    await tester.fling(find.byType(SingleChildScrollView), const Offset(0, -500), 3000);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Attempt to fling the parent PageView during child's ballistic scroll.
+    final Size viewport = tester.getSize(find.byType(PageView));
+    await tester.fling(find.byType(PageView), Offset(-viewport.width / 2, 0), 3000);
+    await tester.pumpAndSettle();
+
+    expect(
+      controller.page,
+      0.0,
+      reason: 'PageView should not have changed pages during child ballistic scroll',
+    );
+  });
 }
 
 // ignore: must_be_immutable
