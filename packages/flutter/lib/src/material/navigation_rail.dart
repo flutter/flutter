@@ -1195,22 +1195,18 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // dart format off
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)
-      : super(
-    elevation: 0.0,
-    groupAlignment: -1,
-    labelType: NavigationRailLabelType.none,
-    useIndicator: true,
-    minWidth: 80.0,
-    minExtendedWidth: 256,
-  );
+    : super(
+        elevation: 0.0,
+        groupAlignment: -1,
+        labelType: NavigationRailLabelType.none,
+        useIndicator: true,
+        minWidth: 80.0,
+        minExtendedWidth: 256,
+      );
 
   final BuildContext context;
-  late final ColorScheme _colors = Theme
-      .of(context)
-      .colorScheme;
-  late final TextTheme _textTheme = Theme
-      .of(context)
-      .textTheme;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override Color? get backgroundColor => _colors.surface;
 
