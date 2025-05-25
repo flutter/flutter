@@ -22,7 +22,7 @@ platform.TargetPlatform get defaultTargetPlatform {
 platform.TargetPlatform? get _testPlatform {
   platform.TargetPlatform? testPlatform;
   assert(() {
-    if (ui_web.debugEmulateFlutterTesterEnvironment) {
+    if (ui_web.TestEnvironment.instance == const ui_web.TestEnvironment.flutterTester()) {
       // Return the overridden operatingSystem in tests, if any...
       if (ui_web.browser.debugOperatingSystemOverride != null) {
         testPlatform = _operatingSystemToTargetPlatform(ui_web.browser.operatingSystem);
