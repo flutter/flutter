@@ -272,16 +272,18 @@ The relevant error-causing widget was:
         );
       });
 
-      testWithoutContext('correctly outputs colored exceptions when supported', () async {
-        final BasicProjectThatThrows project = BasicProjectThatThrows();
-        final String output = await getExceptionOutput(project, noDebug: false, ansiColors: true);
+      testWithoutContext(
+        'correctly outputs colored exceptions when supported',
+        () async {
+          final BasicProjectThatThrows project = BasicProjectThatThrows();
+          final String output = await getExceptionOutput(project, noDebug: false, ansiColors: true);
 
-        // Frames in the stack trace that are the users own code will be unformatted, but
-        // frames from the framework are faint (starting with `\x1B[2m`).
+          // Frames in the stack trace that are the users own code will be unformatted, but
+          // frames from the framework are faint (starting with `\x1B[2m`).
 
-        expect(
-          output,
-          contains('''
+          expect(
+            output,
+            contains('''
 ════════ Exception caught by widgets library ═══════════════════════════════════
 The following _Exception was thrown building App(dirty):
 Exception: c
@@ -298,8 +300,10 @@ When the exception was thrown, this was the stack:
           ^ source: package:flutter/src/widgets/framework.dart
 \x1B[2m#3      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:1:1)\x1B[0m
           ^ source: package:flutter/src/widgets/framework.dart'''),
-        );
-      });
+          );
+        },
+        skip: true, // DAP URI parsing bug, https://github.com/dart-lang/sdk/issues/60797
+      );
 
       testWithoutContext('correctly outputs exceptions in noDebug mode', () async {
         final BasicProjectThatThrows project = BasicProjectThatThrows();
