@@ -1,4 +1,4 @@
-Signature: 86bcb5a9e91c7c04d78a3cf935091cb7
+Signature: 682090c7a560e0e842a3f46fcd668fef
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14799,6 +14799,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/fuchsia.interconnect.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/address_lookup.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14825,6 +14826,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/processargs.h + ../
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/fuchsia.interconnect.bind
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/address_lookup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl
