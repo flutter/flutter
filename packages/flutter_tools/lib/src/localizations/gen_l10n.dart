@@ -1000,6 +1000,14 @@ class LocalizationsGenerator {
     return true;
   }
 
+  void _addToFileList(List<String> fileList, String path) {
+    fileList.add(_fs.path.normalize(path));
+  }
+
+  void _addAllToFileList(List<String> fileList, Iterable<String> paths) {
+    fileList.addAll(paths.map(_fs.path.normalize));
+  }
+
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
@@ -1030,7 +1038,8 @@ class LocalizationsGenerator {
             .toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
-      _inputFileList.addAll(
+      _addAllToFileList(
+        _inputFileList,
         _allBundles.bundles.map((AppResourceBundle bundle) {
           return bundle.file.absolute.path;
         }),
@@ -1492,7 +1501,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
       file.writeAsStringSync(useCRLF ? contents.replaceAll('\n', '\r\n') : contents);
-      _outputFileList.add(file.absolute.path);
+      _addToFileList(_outputFileList, file.absolute.path);
     });
 
     baseOutputFile.writeAsStringSync(
@@ -1527,7 +1536,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       );
     }
     final File? inputsAndOutputsListFileLocal = inputsAndOutputsListFile;
-    _outputFileList.add(baseOutputFile.absolute.path);
+    _addToFileList(_outputFileList, baseOutputFile.absolute.path);
     if (inputsAndOutputsListFileLocal != null) {
       // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
       if (!inputsAndOutputsListFileLocal.existsSync()) {
@@ -1548,7 +1557,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
   void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
       untranslatedMessagesFile.writeAsStringSync('{}');
-      _outputFileList.add(untranslatedMessagesFile.absolute.path);
+      _addToFileList(_outputFileList, untranslatedMessagesFile.absolute.path);
       return;
     }
 
@@ -1576,6 +1585,6 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     resultingFile += '}\n';
     untranslatedMessagesFile.writeAsStringSync(resultingFile);
-    _outputFileList.add(untranslatedMessagesFile.absolute.path);
+    _addToFileList(_outputFileList, untranslatedMessagesFile.absolute.path);
   }
 }

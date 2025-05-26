@@ -479,6 +479,7 @@ class LocalizationOptions {
 LocalizationOptions parseLocalizationsOptionsFromYAML({
   required File file,
   required Logger logger,
+  required FileSystem fileSystem,
   required String defaultArbDir,
   required bool defaultSyntheticPackage,
 }) {
@@ -497,14 +498,24 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     throw Exception();
   }
   return LocalizationOptions(
-    arbDir: _tryReadUri(yamlNode, 'arb-dir', logger)?.path ?? defaultArbDir,
-    outputDir: _tryReadUri(yamlNode, 'output-dir', logger)?.path,
-    templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger)?.path,
-    outputLocalizationFile: _tryReadUri(yamlNode, 'output-localization-file', logger)?.path,
-    untranslatedMessagesFile: _tryReadUri(yamlNode, 'untranslated-messages-file', logger)?.path,
+    arbDir: _tryReadFilePath(yamlNode, 'arb-dir', logger, fileSystem) ?? defaultArbDir,
+    outputDir: _tryReadFilePath(yamlNode, 'output-dir', logger, fileSystem),
+    templateArbFile: _tryReadFilePath(yamlNode, 'template-arb-file', logger, fileSystem),
+    outputLocalizationFile: _tryReadFilePath(
+      yamlNode,
+      'output-localization-file',
+      logger,
+      fileSystem,
+    ),
+    untranslatedMessagesFile: _tryReadFilePath(
+      yamlNode,
+      'untranslated-messages-file',
+      logger,
+      fileSystem,
+    ),
     outputClass: _tryReadString(yamlNode, 'output-class', logger),
     header: _tryReadString(yamlNode, 'header', logger),
-    headerFile: _tryReadUri(yamlNode, 'header-file', logger)?.path,
+    headerFile: _tryReadFilePath(yamlNode, 'header-file', logger, fileSystem),
     useDeferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
     syntheticPackage:
@@ -596,8 +607,8 @@ List<String>? _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
   throw Exception();
 }
 
-// Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.
-Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
+// Try to read a valid file `Uri` or null from `yamlMap` to file path, otherwise throw.
+String? _tryReadFilePath(YamlMap yamlMap, String key, Logger logger, FileSystem fileSystem) {
   final String? value = _tryReadString(yamlMap, key, logger);
   if (value == null) {
     return null;
@@ -606,5 +617,5 @@ Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
   if (uri == null) {
     logger.printError('"$value" must be a relative file URI');
   }
-  return uri;
+  return uri != null ? fileSystem.path.normalize(uri.path) : null;
 }

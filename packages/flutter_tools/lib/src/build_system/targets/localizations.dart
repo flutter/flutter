@@ -58,6 +58,7 @@ class GenerateLocalizationsTarget extends Target {
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: environment.logger,
+      fileSystem: environment.fileSystem,
       defaultArbDir: defaultArbDir,
       defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
     );
