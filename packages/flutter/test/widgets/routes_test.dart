@@ -796,7 +796,10 @@ void main() {
 
         expect(find.text('Page One'), findsOneWidget);
         final Finder cupertinoSheetDelegatedTransitionFinder = find.ancestor(
-          of: find.ancestor(of: find.byType(ClipRRect), matching: find.byType(AnimatedBuilder)),
+          of: find.ancestor(
+            of: find.byType(ClipRSuperellipse),
+            matching: find.byType(AnimatedBuilder),
+          ),
           matching: find.byType(ScaleTransition),
         );
         expect(cupertinoSheetDelegatedTransitionFinder, findsOneWidget);
