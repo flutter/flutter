@@ -17,7 +17,6 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
   const String kClangBinary = 'clang';
   const String kArBinary = 'llvm-ar';
   const String kLdBinary = 'ld.lld';
-
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
     kClangPlusPlusBinary,
@@ -26,7 +25,8 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
     throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
   }
   File clangPpFile = globals.fs.file((whichResult.stdout as String).trim());
-  clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
+  final String resolvedClangPpFile = await clangPpFile.resolveSymbolicLinks();
+  clangPpFile = globals.fs.file(resolvedClangPpFile);
 
   final Directory clangDir = clangPpFile.parent;
   final Map<String, Uri> binaryPaths = <String, Uri>{};
