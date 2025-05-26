@@ -29,6 +29,10 @@ INTERNAL NOTE
 
 ## Flutter 3.32 Changes
 
+### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
+
+- [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fix flaky crash when targeting web applications via IDEs using the DAP.
+
 ### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
 Initial stable release.
 
