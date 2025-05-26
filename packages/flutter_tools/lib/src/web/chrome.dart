@@ -189,9 +189,27 @@ class ChromiumLauncher {
       }
     }
 
-    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync(
-      'flutter_tools_chrome_device.',
-    );
+    Directory userDataDir;
+    if (webBrowserFlags.isNotEmpty) {
+      final String userDataDirFlag = webBrowserFlags.firstWhere(
+        (String flag) => flag.startsWith('--user-data-dir='),
+        orElse: () => '',
+      );
+
+      if (userDataDirFlag != '') {
+        final String userDataDirPath = userDataDirFlag.split('=')[1];
+        userDataDir = _fileSystem.directory(userDataDirPath);
+        webBrowserFlags.remove(userDataDirFlag);
+      } else {
+        userDataDir = _fileSystem.systemTempDirectory.createTempSync(
+          'flutter_tools_chrome_device.',
+        );
+      }
+    } else {
+      userDataDir = _fileSystem.systemTempDirectory.createTempSync(
+        'flutter_tools_chrome_device.',
+      );
+    }
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
