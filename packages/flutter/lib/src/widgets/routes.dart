@@ -15,7 +15,6 @@
 library;
 
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -592,34 +591,18 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   void _handleDragEnd({required bool animateForward}) {
     if (isCurrent) {
       if (animateForward) {
-        // The closer the panel is to dismissing, the shorter the animation is.
-        // We want to cap the animation time, but we want to use a linear curve
-        // to determine it.
-        // These values were eyeballed to match the native predictive back
-        // animation on a Pixel 2 running Android API 34.
-        final int droppedPageForwardAnimationTime = min(
-          ui.lerpDouble(800, 0, _controller!.value)!.floor(),
-          300,
-        );
-        _controller?.animateTo(
-          1.0,
-          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-          curve: Curves.fastLinearToSlowEaseIn,
-        );
+        // Typically, handleUpdateBackGestureProgress will have already
+        // completed the animation. If not, animate to completion.
+        if (!_controller!.isCompleted) {
+          _controller!.forward();
+        }
       } else {
         // This route is destined to pop at this point. Reuse navigator's pop.
         navigator?.pop();
 
         // The popping may have finished inline if already at the target destination.
         if (_controller?.isAnimating ?? false) {
-          // Otherwise, use a custom popping animation duration and curve.
-          final int droppedPageBackAnimationTime =
-              ui.lerpDouble(0, 800, _controller!.value)!.floor();
-          _controller!.animateBack(
-            0.0,
-            duration: Duration(milliseconds: droppedPageBackAnimationTime),
-            curve: Curves.fastLinearToSlowEaseIn,
-          );
+          _controller!.reverse(from: _controller!.upperBound);
         }
       }
     }
@@ -1858,16 +1841,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (!animation!.isCompleted) {
       return false;
     }
-    // If we're being popped into, we also cannot be swiped until the pop above
-    // it completes. This translates to our secondary animation being
-    // dismissed.
-    if (!secondaryAnimation!.isDismissed) {
-      return false;
-    }
-    // If we're in a gesture already, we cannot start another.
-    if (popGestureInProgress) {
-      return false;
-    }
 
     // Looks like a back gesture would be welcome!
     return true;
@@ -2134,7 +2107,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is ModalRoute<T> &&
         canTransitionTo(nextRoute) &&
-        nextRoute.delegatedTransition != this.delegatedTransition) {
+        nextRoute.delegatedTransition != delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2147,7 +2120,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is ModalRoute<T> &&
         canTransitionTo(nextRoute) &&
-        nextRoute.delegatedTransition != this.delegatedTransition) {
+        nextRoute.delegatedTransition != delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2196,6 +2169,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// or there is at least one [LocalHistoryEntry] with [impliesAppBarDismissal]
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
+
+  /// {@macro flutter.widgets.RawDialogRoute.fullscreenDialog}
+  // TODO(dkwingsmt): Rename `ModalRoute.fullscreenDialog` something semantically suitable for a modal.
+  // https://github.com/flutter/flutter/issues/168949
+  bool get fullscreenDialog => false;
 
   // Internals
 
@@ -2524,6 +2502,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     this.anchorPoint,
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
+    this.fullscreenDialog = false,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
@@ -2553,6 +2532,17 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
+
+  /// {@template flutter.widgets.RawDialogRoute.fullscreenDialog}
+  /// Whether this route is a full-screen dialog.
+  ///
+  /// In Material and Cupertino, being fullscreen has the effects of making
+  /// the app bars have a close button instead of a back button. On
+  /// iOS, dialogs transitions animate differently and are also not closeable
+  /// with the back swipe gesture.
+  /// {@endtemplate}
+  @override
+  final bool fullscreenDialog;
 
   @override
   Widget buildPage(
@@ -2673,6 +2663,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   Duration transitionDuration = const Duration(milliseconds: 200),
   RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
+  bool fullscreenDialog = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   bool? requestFocus,
@@ -2689,6 +2680,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
+      fullscreenDialog: fullscreenDialog,
     ),
   );
 }

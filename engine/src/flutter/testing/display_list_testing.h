@@ -238,10 +238,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
     explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
         : dispatcher_(dispatcher) {}
 
-    void RecommendSizes(size_t verb_count, size_t point_count);
-    void RecommendBounds(const DlRect& bounds);
-    void SetPathInfo(DlPathFillType fill_type, bool is_convex);
-    void MoveTo(const DlPoint& p2);
+    void MoveTo(const DlPoint& p2, bool will_be_closed);
     void LineTo(const DlPoint& p2);
     void QuadTo(const DlPoint& cp, const DlPoint& p2);
     bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight);

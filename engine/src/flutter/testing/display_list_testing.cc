@@ -171,7 +171,7 @@ static std::ostream& operator<<(std::ostream& os, const SkRect& rect) {
 
 extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
   return os << "DlPath("
-            << "bounds: " << path.GetSkBounds()
+            << "bounds: " << path.GetBounds()
             // should iterate over verbs and coordinates...
             << ")";
 }
@@ -646,30 +646,15 @@ DisplayListStreamDispatcher::DlPathStreamer::~DlPathStreamer() {
     dispatcher_.startl() << "}" << std::endl;
   }
 }
-void DisplayListStreamDispatcher::DlPathStreamer::RecommendSizes(
-    size_t verb_count, size_t point_count) {
-  FML_DCHECK(!done_with_info_);
-  dispatcher_.startl() << "sizes:  "
-      << verb_count << " verbs, " << point_count << " points" << std::endl;
-};
-void DisplayListStreamDispatcher::DlPathStreamer::RecommendBounds(
-    const DlRect& bounds) {
-  FML_DCHECK(!done_with_info_);
-  dispatcher_.startl() << "bounds: " << bounds << std::endl;
-};
-void DisplayListStreamDispatcher::DlPathStreamer::SetPathInfo(
-    DlPathFillType fill_type, bool is_convex) {
-  FML_DCHECK(!done_with_info_);
-  dispatcher_.startl() << "info:   "
-      << fill_type << ", convex: " << is_convex << std::endl;
-}
-void DisplayListStreamDispatcher::DlPathStreamer::MoveTo(const DlPoint& p2) {
+void DisplayListStreamDispatcher::DlPathStreamer::MoveTo(const DlPoint& p2,
+                                                         bool will_be_closed) {
   if (!done_with_info_) {
     done_with_info_ = true;
     dispatcher_.startl() << "{" << std::endl;
     dispatcher_.indent(2);
   }
-  dispatcher_.startl() << "MoveTo(" << p2 << ")," << std::endl;
+  dispatcher_.startl() << "MoveTo(" << p2 << ", " << will_be_closed << "),"
+                       << std::endl;
 }
 void DisplayListStreamDispatcher::DlPathStreamer::LineTo(const DlPoint& p2) {
   FML_DCHECK(done_with_info_);
@@ -700,7 +685,11 @@ void DisplayListStreamDispatcher::DlPathStreamer::Close() {
   dispatcher_.startl() << "Close()," << std::endl;
 }
 void DisplayListStreamDispatcher::out(const DlVerbosePath& path) {
-  os_ << "DlPath(" << std::endl;
+  os_ << "DlPath(" << path.path.GetFillType() << ", ";
+  if (path.path.IsConvex()) {
+    os_ << "(convex), ";
+  }
+  os_ << path.path.GetBounds() << "," << std::endl;
   indent(2);
   {
     DlPathStreamer streamer(*this);
@@ -982,7 +971,7 @@ void DisplayListStreamDispatcher::drawDisplayList(
     const sk_sp<DisplayList> display_list, DlScalar opacity) {
   startl() << "drawDisplayList("
            << "ID: " << display_list->unique_id() << ", "
-           << "bounds: " << display_list->bounds() << ", "
+           << "bounds: " << display_list->GetBounds() << ", "
            << "opacity: " << opacity
            << ");" << std::endl;
 }

@@ -28,6 +28,7 @@ template("impeller_shaders_metal") {
                                   ])
   impellerc_mtl = "impellerc_$target_name"
   impellerc(impellerc_mtl) {
+    mnemonic = "IMPELLERC_METAL"
     shaders = invoker.shaders
     metal_version = metal_version
     sl_file_extension = "metal"

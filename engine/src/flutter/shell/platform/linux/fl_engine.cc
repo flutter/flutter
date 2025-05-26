@@ -637,6 +637,11 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
 
+  if (fl_dart_project_get_ui_thread_policy(self->project) ==
+      FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD) {
+    custom_task_runners.ui_task_runner = &platform_task_runner;
+  }
+
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
@@ -771,7 +776,7 @@ FlutterViewId fl_engine_add_view(FlEngine* self,
   // will be updated in a following FlutterWindowMetricsEvent
   FlutterEngineDisplayId display_id = 0;
 
-  FlutterWindowMetricsEvent metrics;
+  FlutterWindowMetricsEvent metrics = {};
   metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
   metrics.width = width;
   metrics.height = height;

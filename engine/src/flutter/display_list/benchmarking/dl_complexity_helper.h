@@ -219,29 +219,7 @@ class ComplexityCalculatorHelper
                                        unsigned int line_verb_cost,
                                        unsigned int quad_verb_cost,
                                        unsigned int conic_verb_cost,
-                                       unsigned int cubic_verb_cost) {
-    const impeller::Path& path = dl_path.GetPath();
-    unsigned int complexity = 0;
-    for (auto it = path.begin(), end = path.end(); it != end; ++it) {
-      switch (it.type()) {
-        case impeller::Path::ComponentType::kLinear:
-          complexity += line_verb_cost;
-          break;
-        case impeller::Path::ComponentType::kQuadratic:
-          complexity += quad_verb_cost;
-          break;
-        case impeller::Path::ComponentType::kConic:
-          complexity += conic_verb_cost;
-          break;
-        case impeller::Path::ComponentType::kCubic:
-          complexity += cubic_verb_cost;
-          break;
-        case impeller::Path::ComponentType::kContour:
-          break;
-      }
-    }
-    return complexity;
-  }
+                                       unsigned int cubic_verb_cost);
 
   virtual void ImageRect(const DlISize& size,
                          bool texture_backed,

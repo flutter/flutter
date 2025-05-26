@@ -74,11 +74,11 @@ mixin CompositionAwareMixin {
   }
 
   EditingState determineCompositionState(EditingState editingState) {
-    if (editingState.extentOffset == null || composingText == null || editingState.text == null) {
+    if (composingText == null) {
       return editingState;
     }
 
-    final int composingBase = editingState.extentOffset! - composingText!.length;
+    final int composingBase = editingState.extentOffset - composingText!.length;
 
     if (composingBase < 0) {
       return editingState;

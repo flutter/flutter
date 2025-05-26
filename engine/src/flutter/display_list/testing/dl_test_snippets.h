@@ -13,6 +13,8 @@
 #include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
@@ -178,9 +180,9 @@ static const DlRoundRect kTestInnerRRect =
     DlRoundRect::MakeRectXY(kTestBounds.Expand(-5, -5), 2, 2);
 static const SkRRect kTestSkInnerRRect =
     SkRRect::MakeRectXY(kTestSkBounds.makeInset(5, 5), 2, 2);
-static const DlPath kTestPathRect = DlPath(SkPath::Rect(kTestSkBounds));
-static const DlPath kTestPathOval = DlPath(SkPath::Oval(kTestSkBounds));
-static const DlPath kTestPathRRect = DlPath(SkPath::RRect(kTestSkRRect));
+static const DlPath kTestPathRect = DlPath::MakeRect(kTestBounds);
+static const DlPath kTestPathOval = DlPath::MakeOval(kTestBounds);
+static const DlPath kTestPathRRect = DlPath::MakeRoundRect(kTestRRect);
 static const DlPath kTestPath1 =
     DlPath(SkPath::Polygon({{0, 0}, {10, 10}, {10, 0}, {0, 10}}, true));
 static const DlPath kTestPath2 =

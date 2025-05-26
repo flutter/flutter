@@ -1,17 +1,58 @@
-# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 assert(host_os == "mac")
 
-import("//build/config/ios/ios_sdk.gni")
-import("//build/config/mac/mac_sdk.gni")
+import("//build/config/darwin/darwin_sdk.gni")
 import("//build/config/sysroot.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
 import("//build/toolchain/rbe.gni")
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/toolchain.gni")
+
+declare_args() {
+  # This controls whether whole module optimization is enabled when building
+  # Swift modules. If enabled, the compiler will compile the module as one
+  # unit, generating just one single object file. Otherwise, it will generate
+  # one object file per .swift file. If unspecified, will default to "true"
+  # for official builds, and "false" for all other builds.
+  swift_whole_module_optimization = -1
+
+  # If true, the intermediate build products of swift module compilation will
+  # be kept after the invocation of the swiftc compiler. Otherwise they will
+  # deleted between each invocation.
+  swift_keep_intermediate_files = false
+
+  # If unspecified, will use the toolchain downloaded via deps.
+  swift_toolchain_path = ""
+}
+
+if (swift_whole_module_optimization == -1) {
+  swift_whole_module_optimization = is_official_build
+}
+
+# When implementing tools using Python scripts, a TOOL_VERSION=N env
+# variable is placed in front of the command. The N should be incremented
+# whenever the script is changed, so that the build system rebuilds all
+# edges that utilize the script. Ideally this should be changed to use
+# proper input-dirty checking, but that could be expensive. Instead, use a
+# script to get the tool scripts' modification time to use as the version.
+# This won't cause a re-generation of GN files when the tool script changes
+# but it will cause edges to be marked as dirty if the ninja files are
+# regenerated. See https://crbug.com/619083 for details. A proper fix
+# would be to have inputs to tools (https://crbug.com/621119).
+get_tool_mtime = rebase_path("//build/toolchain/darwin/get_tool_mtime.py")
+tool_versions = exec_script(
+        get_tool_mtime, # "get_tool_mtime.py",
+        rebase_path(
+            [
+              "//build/toolchain/darwin/swift_const_gather_protocols.json",
+              "//build/toolchain/darwin/swiftc.py",
+            ],
+            root_build_dir),
+        "trim scope")
 
 if (host_cpu == "arm64") {
   rebased_clang_dir =
@@ -113,6 +154,15 @@ template("mac_toolchain") {
           [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
     }
 
+    tool("cxx_module") {
+      depfile = "{{output}}.d"
+      precompiled_header_type = "gcc"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} {{module_deps_no_self}} -fmodule-name={{label_name}} -c -x c++ -Xclang -emit-module {{source}} -o {{output}}"
+      depsformat = "gcc"
+      description = "CXX_MODULE {{output}}"
+      outputs = [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.pcm" ]
+    }
+
     tool("asm") {
       pool = "//build/toolchain:toolchain_pool($current_toolchain)"
       depfile = "{{output}}.d"
@@ -141,6 +191,133 @@ template("mac_toolchain") {
       description = "OBJCXX {{output}}"
       outputs =
           [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o" ]
+    }
+
+    tool("swift") {
+      _tool = rebase_path("//build/toolchain/darwin/swiftc.py", root_build_dir)
+
+      depfile = "{{target_out_dir}}/{{module_name}}.d"
+      depsformat = "gcc"
+
+      _header_path = "{{target_gen_dir}}/{{target_output_name}}/{{target_output_name}}.h"
+      _output_dir = "{{target_out_dir}}/{{label_name}}"
+
+      outputs = [
+        _header_path,
+        "$_output_dir/{{module_name}}-OutputFileMap.json",
+        "$_output_dir/{{module_name}}.SwiftFileList",
+        "$_output_dir/{{module_name}}.abi.json",
+        "$_output_dir/{{module_name}}.d",
+        "$_output_dir/{{module_name}}.dia",
+        "$_output_dir/{{module_name}}.swiftdoc",
+        "$_output_dir/{{module_name}}.swiftmodule",
+        "$_output_dir/{{module_name}}.swiftsourceinfo",
+      ]
+
+      partial_outputs = [ "$_output_dir/{{source_name_part}}.o" ]
+
+      # The list of outputs and partial_outputs change whether the whole
+      # module optimization is enabled or not.
+      if (swift_whole_module_optimization) {
+        outputs += [
+          "$_output_dir/{{module_name}}.swiftconstvalues",
+          "$_output_dir/{{module_name}}.swiftdeps",
+        ]
+      } else {
+        outputs += [ "$_output_dir/{{module_name}}.priors" ]
+        partial_outputs += [
+          "$_output_dir/{{source_name_part}}.d",
+          "$_output_dir/{{source_name_part}}.dia",
+          "$_output_dir/{{source_name_part}}.swiftdeps",
+          "$_output_dir/{{source_name_part}}.swiftconstvalues",
+        ]
+      }
+
+      # If configured to keep the intermediate build files, pass the flag
+      # to the script and inform gn of the stamp file only (as the other
+      # files have names that cannot be predicted without invoking swiftc).
+      if (swift_keep_intermediate_files) {
+        _derived_data_dir = "$_output_dir/DerivedData"
+        outputs += [ "$_derived_data_dir/{{module_name}}.stamp" ]
+      }
+
+      # Additional flags passed to the wrapper script but that are only
+      # set conditionally.
+      _extra_flags = ""
+
+      # Environment variables passed to the wrapper script. Considered
+      # part of the command-line by ninja (and thus cause the build to
+      # be considered dirty if they change) without having to be parsed
+      # by the script.
+      _env_vars = "TOOL_VERSION=${tool_versions.swiftc} " +
+                  "JSON_VERSION=${tool_versions.swift_const_gather_protocols}"
+
+      # Include the version of the compiler on the command-line. This causes
+      # `ninja` to consider all the compilation output to be dirty when the
+      # version changes.
+      if (defined(swiftc_version)) {
+        _env_vars += " SWIFTC_VERSION=$swiftc_version"
+      }
+
+      # Include the version of Xcode on the command-line (if specified via
+      # toolchain_args). This causes `ninja` to consider all the compilation
+      # outputs to be dirty when the version change.
+      #
+      # This is required because sometimes module dependency changes between
+      # different version of Xcode (e.g. when moving from Xcode 14 beta 6 to
+      # Xcode 14 RC). If the swiftmodule are not rebuilt when the version
+      # changes, they may encode dependency on now non-existing frameworks
+      # causing linker failures ultimately.
+      #if (defined(toolchain_args.xcode_build)) {
+      #  _env_vars += " XCODE_VERSION=${toolchain_args.xcode_build}"
+      #}
+
+      if (swift_toolchain_path != "") {
+        _extra_flags += " --swift-toolchain-path " +
+                        rebase_path(swift_toolchain_path, root_build_dir)
+      }
+
+      if (swift_whole_module_optimization) {
+        _extra_flags += " --whole-module-optimization"
+      }
+
+      if (swift_keep_intermediate_files) {
+        _extra_flags += " --derived-data-dir $_derived_data_dir"
+      }
+
+      # The Swift compiler assumes that the generated header will be used by
+      # Objective-C code compiled with module support enabled (-fmodules).
+      #
+      # As Chromium code is compiled without support for modules (i.e. the
+      # code is compiled without `-fmodules`), the dependent modules are not
+      # imported from the generated header, which causes compilation failure
+      # if the client code does not first import the required modules (see
+      # https://crbug.com/1316061 for details).
+      #
+      # Secondly, the Swift compiler uses absolute path when importing other
+      # modules' generated headers or Objective-C bridging headers. This
+      # causes issues with the distributed compiler (i.e. reclient or siso)
+      # as they want all paths to be relative to the source directory.
+      #
+      # Instruct swiftc.py to rewrite the generated header use relative
+      # import and to use the old #import syntax for system frameworks.
+      _extra_flags += " --fix-generated-header"
+
+      _src_dir = rebase_path("//", root_build_dir)
+      _gen_dir = rebase_path(root_gen_dir, root_build_dir)
+      _const_gather_protocols_file = rebase_path(
+              "//build/toolchain/darwin/swift_const_gather_protocols.json",
+              root_build_dir)
+
+      command =
+          "$_env_vars $python_path $_tool --module-name {{module_name}} " +
+          "--header-path $_header_path --target-out-dir $_output_dir " +
+          "--const-gather-protocols-file $_const_gather_protocols_file " +
+          "--depfile-path $depfile --src-dir $_src_dir --gen-dir $_gen_dir " +
+          "--bridge-header {{bridge_header}} {{include_dirs}} " +
+          "{{module_dirs}} {{swiftflags}} {{inputs}}$_extra_flags"
+
+      description = "SWIFT $_output_dir/{{module_name}}.swiftmodule"
     }
 
     tool("alink") {
@@ -241,55 +418,57 @@ template("mac_toolchain") {
   }
 }
 
-# Toolchain used for iOS device targets.
-mac_toolchain("ios_clang_arm") {
-  toolchain_cpu = "arm"
-  toolchain_os = "mac"
-  prefix = rebased_clang_dir
-  ar = "${prefix}/llvm-ar"
-  asm = "${prefix}/clang"
-  cc = "${cxx_prefix}${prefix}/clang"
-  cxx = "${cxx_prefix}${prefix}/clang++"
-  objc = "${objc_prefix}${prefix}/clang++"
-  ld = "${link_prefix}${prefix}/clang++"
-  is_clang = true
+if (is_ios) {
+  # Toolchain used for iOS device targets.
+  mac_toolchain("ios_clang_arm") {
+    toolchain_cpu = "arm"
+    toolchain_os = "mac"
+    prefix = rebased_clang_dir
+    ar = "${prefix}/llvm-ar"
+    asm = "${prefix}/clang"
+    cc = "${cxx_prefix}${prefix}/clang"
+    cxx = "${cxx_prefix}${prefix}/clang++"
+    objc = "${objc_prefix}${prefix}/clang++"
+    ld = "${link_prefix}${prefix}/clang++"
+    is_clang = true
 
-  sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
-  sysroot_flags = "-isysroot $sysroot_rel -miphoneos-version-min=$ios_deployment_target"
-}
+    sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
+    sysroot_flags = "-isysroot $sysroot_rel -miphoneos-version-min=$ios_deployment_target"
+  }
 
-# Toolchain used for iOS simulator targets (arm64).
-mac_toolchain("ios_clang_arm_sim") {
-  toolchain_cpu = "arm"
-  toolchain_os = "mac"
-  prefix = rebased_clang_dir
-  ar = "${prefix}/llvm-ar"
-  asm = "${prefix}/clang"
-  cc = "${cxx_prefix}${prefix}/clang"
-  cxx = "${cxx_prefix}${prefix}/clang++"
-  objc = "${objc_prefix}${prefix}/clang++"
-  ld = "${link_prefix}${prefix}/clang++"
-  is_clang = true
+  # Toolchain used for iOS simulator targets (arm64).
+  mac_toolchain("ios_clang_arm_sim") {
+    toolchain_cpu = "arm"
+    toolchain_os = "mac"
+    prefix = rebased_clang_dir
+    ar = "${prefix}/llvm-ar"
+    asm = "${prefix}/clang"
+    cc = "${cxx_prefix}${prefix}/clang"
+    cxx = "${cxx_prefix}${prefix}/clang++"
+    objc = "${objc_prefix}${prefix}/clang++"
+    ld = "${link_prefix}${prefix}/clang++"
+    is_clang = true
 
-  sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
-  sysroot_flags = "-isysroot $sysroot_rel -mios-simulator-version-min=$ios_deployment_target"
-}
+    sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
+    sysroot_flags = "-isysroot $sysroot_rel -mios-simulator-version-min=$ios_deployment_target"
+  }
 
-# Toolchain used for iOS simulator targets (x64).
-mac_toolchain("ios_clang_x64_sim") {
-  toolchain_cpu = "x64"
-  toolchain_os = "mac"
-  prefix = rebased_clang_dir
-  ar = "${prefix}/llvm-ar"
-  asm = "${prefix}/clang"
-  cc = "${cxx_prefix}${prefix}/clang"
-  cxx = "${cxx_prefix}${prefix}/clang++"
-  objc = "${objc_prefix}${prefix}/clang++"
-  ld = "${link_prefix}${prefix}/clang++"
-  is_clang = true
+  # Toolchain used for iOS simulator targets (x64).
+  mac_toolchain("ios_clang_x64_sim") {
+    toolchain_cpu = "x64"
+    toolchain_os = "mac"
+    prefix = rebased_clang_dir
+    ar = "${prefix}/llvm-ar"
+    asm = "${prefix}/clang"
+    cc = "${cxx_prefix}${prefix}/clang"
+    cxx = "${cxx_prefix}${prefix}/clang++"
+    objc = "${objc_prefix}${prefix}/clang++"
+    ld = "${link_prefix}${prefix}/clang++"
+    is_clang = true
 
-  sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
-  sysroot_flags = "-isysroot $sysroot_rel -mios-simulator-version-min=$ios_deployment_target"
+    sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
+    sysroot_flags = "-isysroot $sysroot_rel -mios-simulator-version-min=$ios_deployment_target"
+  }
 }
 
 # Toolchain used for Mac X64 host targets.
