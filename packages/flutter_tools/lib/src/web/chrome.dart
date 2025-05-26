@@ -145,6 +145,35 @@ class ChromiumLauncher {
   /// The executable this launcher will use.
   String findExecutable() => _browserFinder(_platform, _fileSystem);
 
+  /// Creates a user data directory for Chrome based on provided flags or creates a temporary one.
+  ///
+  /// This method handles the creation of Chrome's user data directory in two ways:
+  /// 1. If webBrowserFlags contains a --user-data-dir flag, it uses that directory
+  /// 2. Otherwise, it creates a temporary directory in the system's temp location
+  ///
+  /// The user data directory is where Chrome stores user preferences, cookies,
+  /// and other session data. Using a temporary directory ensures a clean state
+  /// for each launch, while allowing custom directories through flags for
+  /// persistent configurations.
+  Directory _createUserDataDirectory(List<String> webBrowserFlags) {
+    if (webBrowserFlags.isNotEmpty) {
+      final String userDataDirFlag = webBrowserFlags.firstWhere(
+        (String flag) => flag.startsWith('--user-data-dir='),
+        orElse: () => '',
+      );
+
+      if (userDataDirFlag != '') {
+        final String userDataDirPath = userDataDirFlag.split('=')[1];
+        final Directory userDataDir = _fileSystem.directory(userDataDirPath);
+        webBrowserFlags.remove(userDataDirFlag);
+        return userDataDir;
+      }
+    }
+    return _fileSystem.systemTempDirectory.createTempSync(
+      'flutter_tools_chrome_device.',
+    );
+  }
+
   /// Launch a Chromium browser to a particular `host` page.
   ///
   /// [headless] defaults to false, and controls whether we open a headless or
@@ -189,27 +218,7 @@ class ChromiumLauncher {
       }
     }
 
-    Directory userDataDir;
-    if (webBrowserFlags.isNotEmpty) {
-      final String userDataDirFlag = webBrowserFlags.firstWhere(
-        (String flag) => flag.startsWith('--user-data-dir='),
-        orElse: () => '',
-      );
-
-      if (userDataDirFlag != '') {
-        final String userDataDirPath = userDataDirFlag.split('=')[1];
-        userDataDir = _fileSystem.directory(userDataDirPath);
-        webBrowserFlags.remove(userDataDirFlag);
-      } else {
-        userDataDir = _fileSystem.systemTempDirectory.createTempSync(
-          'flutter_tools_chrome_device.',
-        );
-      }
-    } else {
-      userDataDir = _fileSystem.systemTempDirectory.createTempSync(
-        'flutter_tools_chrome_device.',
-      );
-    }
+    final Directory userDataDir = _createUserDataDirectory(webBrowserFlags);
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
