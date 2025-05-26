@@ -265,7 +265,7 @@
       "realm": "production"
     },
     {
-      "source": "out/debug_ddm/artifacts.zip",
+      "source": "out/release_ddm/artifacts.zip",
       "destination": "ios-release-ddm/artifacts.zip",
       "realm": "production"
     }
