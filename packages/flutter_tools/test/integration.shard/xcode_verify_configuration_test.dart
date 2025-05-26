@@ -53,7 +53,7 @@ void main() {
   group(
     'Xcode build iOS app',
     () {
-      test('succeeds after flutter build ios --config-only', () async {
+      test('succeeds when Flutter CLI last used configuration matches Xcode configuration', () async {
         final List<String> flutterCommand = <String>[
           flutterBin,
           ...getLocalEngineArguments(),
@@ -201,7 +201,7 @@ void main() {
   group(
     'Xcode build iOS module',
     () {
-      test('succeeds after flutter build ios --config-only', () async {
+      test('succeeds when Flutter CLI last used configuration matches Xcode configuration', () async {
         final Directory moduleDirectory = projectDir.childDirectory('hello');
         await processManager.run(<String>[
           flutterBin,
@@ -429,7 +429,7 @@ void main() {
   group(
     'Xcode build macOS app',
     () {
-      test('succeeds after flutter build macos --config-only', () async {
+      test('succeeds when Flutter CLI last used configuration matches Xcode configuration', () async {
         final List<String> flutterCommand = <String>[
           flutterBin,
           ...getLocalEngineArguments(),
