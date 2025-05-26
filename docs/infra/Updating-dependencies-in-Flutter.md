@@ -18,4 +18,7 @@ Sometimes you need to update a single dependency as a [cherrypick to a release c
 
 In that case, you can run:
 
-`flutter update-packages --cherry-pick-package=[pub package name] --cherry-pick-version='[pub package version]'`
+`flutter update-packages --cherry-pick=[pub package name]:[pub package version],[pub package2 name]:[pub package2 version]`
+
+for example, to update the `test` dependencies, run
+`flutter update-packages --cherry-pick=test_api:0.7.6,test_core:0.6.10,test:1.26.1`
