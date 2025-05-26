@@ -302,7 +302,7 @@ When the exception was thrown, this was the stack:
           ^ source: package:flutter/src/widgets/framework.dart'''),
           );
         },
-        skip: 'DAP URI parsing bug, https://github.com/dart-lang/sdk/issues/60797',
+        skip: true, // DAP URI parsing bug, https://github.com/dart-lang/sdk/issues/60797
       );
 
       testWithoutContext('correctly outputs exceptions in noDebug mode', () async {
