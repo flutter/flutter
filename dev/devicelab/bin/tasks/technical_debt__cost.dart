@@ -119,7 +119,7 @@ Future<int> findGlobalsForTool() async {
   return total;
 }
 
-Future<int> countDependencies() async => _getCount({
+Future<int> countDependencies() async => _getCount(<String>{
   ...(await dependenciesAt(packageNames: const <String>['_flutter_packages'])),
   ...(await dependenciesAt(
     packageNames: const <String>['flutter_tools'],
