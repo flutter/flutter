@@ -191,7 +191,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
-  ///         child: ClipRRect(
+  ///         child: ClipRSuperellipse(
   ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
   ///           child: SizedBox(
   ///             height: 150,
@@ -300,7 +300,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///         animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
-  ///         child: ClipRRect(
+  ///         child: ClipRSuperellipse(
   ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
   ///           child: SizedBox(
   ///             height: 150,
@@ -453,7 +453,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   ) {
     return FittedBox(
       fit: BoxFit.cover,
-      child: ClipRRect(
+      child: ClipRSuperellipse(
         borderRadius: BorderRadius.circular(_previewBorderRadiusRatio * animation.value),
         child: child,
       ),
@@ -1362,7 +1362,7 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
     final Widget menu = SizedBox(
       width: _kMenuWidth,
       child: IntrinsicHeight(
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
           child: ColoredBox(
             color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),

@@ -510,6 +510,24 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
 
+    final ShapeDecoration shapeDecoration = ShapeDecoration(
+      shape: RoundedSuperellipseBorder(
+        side:
+            enabled && isFocused
+                ? BorderSide(
+                  color: effectiveFocusOutlineColor,
+                  width: 3.5,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                )
+                : BorderSide.none,
+        borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
+      ),
+      color:
+          backgroundColor != null && !enabled
+              ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+              : backgroundColor,
+    );
+
     return MouseRegion(
       cursor: effectiveMouseCursor,
       child: FocusableActionDetector(
@@ -558,24 +576,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border:
-                        enabled && isFocused
-                            ? Border.fromBorderSide(
-                              BorderSide(
-                                color: effectiveFocusOutlineColor,
-                                width: 3.5,
-                                strokeAlign: BorderSide.strokeAlignOutside,
-                              ),
-                            )
-                            : null,
-                    borderRadius:
-                        widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
-                    color:
-                        backgroundColor != null && !enabled
-                            ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                            : backgroundColor,
-                  ),
+                  decoration: shapeDecoration,
                   child: Padding(
                     padding: widget.padding ?? kCupertinoButtonPadding[widget.sizeStyle]!,
                     child: Align(

@@ -482,7 +482,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
 }
 
 class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> {
-  RRect? surroundingRect;
+  RSuperellipse? surroundingRect;
 }
 
 typedef _NextChild = RenderBox? Function(RenderBox child);
@@ -630,21 +630,21 @@ class _RenderSegmentedControl<T> extends RenderBox
       final Offset childOffset = Offset(start, 0.0);
       childParentData.offset = childOffset;
       final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
-      final RRect rChildRect;
+      final RSuperellipse rChildRect;
       if (child == leftChild) {
-        rChildRect = RRect.fromRectAndCorners(
+        rChildRect = RSuperellipse.fromRectAndCorners(
           childRect,
           topLeft: const Radius.circular(3.0),
           bottomLeft: const Radius.circular(3.0),
         );
       } else if (child == rightChild) {
-        rChildRect = RRect.fromRectAndCorners(
+        rChildRect = RSuperellipse.fromRectAndCorners(
           childRect,
           topRight: const Radius.circular(3.0),
           bottomRight: const Radius.circular(3.0),
         );
       } else {
-        rChildRect = RRect.fromRectAndCorners(childRect);
+        rChildRect = RSuperellipse.fromRectAndCorners(childRect);
       }
       childParentData.surroundingRect = rChildRect;
       start += child.size.width;
@@ -735,13 +735,13 @@ class _RenderSegmentedControl<T> extends RenderBox
     final _SegmentedControlContainerBoxParentData childParentData =
         child.parentData! as _SegmentedControlContainerBoxParentData;
 
-    context.canvas.drawRRect(
+    context.canvas.drawRSuperellipse(
       childParentData.surroundingRect!.shift(offset),
       Paint()
         ..color = backgroundColors[childIndex]
         ..style = PaintingStyle.fill,
     );
-    context.canvas.drawRRect(
+    context.canvas.drawRSuperellipse(
       childParentData.surroundingRect!.shift(offset),
       Paint()
         ..color = borderColor
@@ -758,7 +758,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData =
           child.parentData! as _SegmentedControlContainerBoxParentData;
-      if (childParentData.surroundingRect!.contains(position)) {
+      if (childParentData.surroundingRect!.outerRect.contains(position)) {
         return result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,

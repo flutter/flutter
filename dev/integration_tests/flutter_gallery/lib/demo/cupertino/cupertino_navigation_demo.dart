@@ -469,7 +469,7 @@ class Tab2Header extends StatelessWidget {
       child: SafeArea(
         top: false,
         bottom: false,
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(16.0)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
