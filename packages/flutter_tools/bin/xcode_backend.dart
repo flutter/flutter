@@ -558,7 +558,7 @@ class Context {
     if (buildModeCLILastUsed == null) {
       final String message =
           'Your Flutter build settings are outdated. Please run '
-          '"flutter build ${platform.name} --$currentBuildMode" in your Flutter '
+          '"flutter build ${platform.name} --config-only --$currentBuildMode" in your Flutter '
           'project and try again.\n';
       if (fatal) {
         echoXcodeError(message);

@@ -262,8 +262,8 @@ void main() {
             context.stderr,
             contains(
               'error: Your Flutter build settings are outdated. '
-              'Please run `flutter build ${platform.name} --config-only --release` '
-              'in your Flutter project to update your settings.',
+              'Please run "flutter build ${platform.name} --config-only --release" '
+              'in your Flutter project and try again.',
             ),
           );
         },
@@ -327,8 +327,8 @@ void main() {
           context.stderr,
           contains(
             'warning: Your Flutter build settings are outdated. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
+            'Please run "flutter build ${platform.name} --config-only --release" '
+            'in your Flutter project and try again.',
           ),
         );
       });
