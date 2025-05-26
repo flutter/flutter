@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -1528,6 +1530,52 @@ void main() {
         DeviceManager: () => testDeviceManager,
       },
     );
+
+    group('prints warning when too slow', () {
+      late SlowWarningCallbackBufferLogger logger;
+
+      setUp(() {
+        logger = SlowWarningCallbackBufferLogger.test();
+      });
+
+      testUsingContext(
+        'to find on iOS Simulator',
+        () async {
+          final FakeIOSSimulator device = FakeIOSSimulator();
+          testDeviceManager.devices = <Device>[device];
+          FakeAsync().run((FakeAsync fakeAsync) {
+            createTestCommandRunner(
+              AttachCommand(
+                stdio: stdio,
+                logger: logger,
+                terminal: terminal,
+                signals: signals,
+                platform: platform,
+                processInfo: processInfo,
+                fileSystem: testFileSystem,
+              ),
+            ).run(<String>['attach']);
+
+            logger.expectedWarning =
+                'The Dart VM Service was not discovered after 30 seconds. '
+                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+                'If you do not receive a prompt, either run "flutter attach" before starting the '
+                'app or use the Dart VM service URL from the Xcode console with '
+                '"flutter attach --debug-url=<URL>".\n';
+            fakeAsync.elapse(const Duration(seconds: 30));
+          });
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+    });
   });
 }
 
@@ -1966,6 +2014,62 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   }
 }
 
+class FakeIOSSimulator extends Fake implements IOSSimulator {
+  @override
+  final String name = 'name';
+
+  @override
+  String get displayName => name;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
+
+  @override
+  bool get ephemeral => true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  final PlatformType platformType = PlatformType.ios;
+
+  @override
+  bool get isWirelesslyConnected => false;
+
+  @override
+  DevicePortForwarder portForwarder = RecordingPortForwarder();
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
+        MdnsVMServiceDiscoveryForAttach(
+          device: this,
+          appId: appId,
+          deviceVmservicePort: filterDevicePort,
+          hostVmservicePort: expectedHostPort,
+          usesIpv6: ipv6,
+          useDeviceIPAsHost: isWirelesslyConnected,
+        );
+    return mdnsVMServiceDiscoveryForAttach;
+  }
+}
+
 class FakeMDnsClient extends Fake implements MDnsClient {
   FakeMDnsClient(
     this.ptrRecords,
@@ -1987,6 +2091,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
     InternetAddress? mDnsAddress,
+    Function? onError,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);
@@ -2052,4 +2157,22 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   Stream<String> get keystrokes => StreamController<String>().stream;
+}
+
+class SlowWarningCallbackBufferLogger extends BufferLogger {
+  SlowWarningCallbackBufferLogger.test() : super.test();
+
+  String? expectedWarning;
+
+  @override
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
+  }) {
+    expect(slowWarningCallback, isNotNull);
+    expect(slowWarningCallback!(), expectedWarning);
+    return SilentStatus(stopwatch: Stopwatch(), onFinish: onFinish)..start();
+  }
 }

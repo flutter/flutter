@@ -17,12 +17,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
@@ -42,10 +42,11 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
 import '../src/package_config.dart';
+import '../src/test_build_system.dart';
+import '../src/throwing_pub.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
@@ -96,12 +97,6 @@ void main() {
   late ProcessManager processManager;
   late FakeAnalytics fakeAnalytics;
 
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return test_fakes.TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.any();
@@ -122,7 +117,7 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -258,8 +253,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -295,8 +289,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -323,8 +316,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -345,8 +337,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -378,8 +369,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -408,8 +398,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -451,8 +440,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -492,8 +480,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -536,8 +523,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -683,8 +669,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -717,8 +702,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -824,8 +808,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -909,8 +892,88 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/167887.
+  testUsingContext(
+    'WASM builds report analysis without crashing',
+    () async {
+      final BufferLogger logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            // Hot reload only supported with these flags for now.
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
+          ),
+          webUseWasm: true,
+        ),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(
+            method: kReloadSourcesServiceName,
+            args: <String, Object>{'isolateId': ''},
+            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+          ),
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.reassemble',
+            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
+          ),
+        ],
+      );
+      setupMocks();
+      final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
+      final FakeProcess process = FakeProcess();
+      final Chromium chrome = Chromium(
+        1,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+      chromiumLauncher.setInstance(chrome);
+
+      flutterDevice.device = GoogleChromeDevice(
+        fileSystem: fileSystem,
+        chromiumLauncher: chromiumLauncher,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.any(),
+      );
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final Completer<DebugConnectionInfo> connectionInfoCompleter =
+          Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+
+      expect(debugConnectionInfo, isNotNull);
+
+      final OperationResult result = await residentWebRunner.restart();
+      expect(logger.statusText, contains('Reloaded application in'));
+      expect(result.code, 0);
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1022,8 +1085,7 @@ name: my_app
         Analytics: () => fakeAnalytics,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   }
@@ -1058,8 +1120,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1096,8 +1157,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1137,8 +1197,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1164,8 +1223,7 @@ name: my_app
       Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1195,8 +1253,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1227,8 +1284,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1304,8 +1360,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1331,8 +1386,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1363,8 +1417,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1434,8 +1487,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1482,8 +1534,7 @@ name: my_app
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1524,7 +1575,7 @@ name: my_app
 flutter:
   generate: true
 ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1541,8 +1592,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1552,7 +1602,7 @@ flutter:
     'Does not generate dart_plugin_registrant.dart',
     () async {
       // Create necessary files for [DartPluginRegistrantTarget]
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: globals.fs.currentDirectory,
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
@@ -1598,8 +1648,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1652,8 +1701,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1671,8 +1719,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1691,8 +1738,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1710,8 +1756,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1730,8 +1775,7 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -1995,6 +2039,11 @@ class FakeChromeTab extends Fake implements ChromeTab {
 class FakeWipConnection extends Fake implements WipConnection {
   @override
   final WipDebugger debugger = FakeWipDebugger();
+
+  @override
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+  }
 }
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.

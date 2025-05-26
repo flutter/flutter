@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../src/common.dart';
 

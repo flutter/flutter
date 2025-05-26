@@ -574,7 +574,7 @@ void main() {
     expect(rrect.brRadiusY, 0);
   });
 
-  test('RSuperellipse.contains NoCornerRoundSuperellipseContains', () {
+  test('RSuperellipse.contains is correct with no corners', () {
     // RSuperellipse of bounds with no corners contains corners just barely.
     const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0, 0);
 
@@ -594,7 +594,7 @@ void main() {
     expect(rse.contains(const Offset(50, 50.01)), isFalse);
   });
 
-  test('RSuperellipse.contains TinyCornerContains', () {
+  test('RSuperellipse.contains is correct with tiny corners', () {
     // RSuperellipse of bounds with even the tiniest corners does not contain corners.
     const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0.01, 0.01);
 
@@ -604,7 +604,7 @@ void main() {
     expect(rse.contains(const Offset(50, 50)), isFalse);
   });
 
-  test('RSuperellipse.contains UniformSquareContains', () {
+  test('RSuperellipse.contains is correct with uniform corners', () {
     const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 5.0, 5.0);
 
     void checkPointAndMirrors(Offset p) {
@@ -623,7 +623,7 @@ void main() {
     checkPointAndMirrors(const Offset(49.995, 0)); // Right
   });
 
-  test('RSuperellipse.contains UniformEllipticalContains', () {
+  test('RSuperellipse.contains is correct with uniform elliptical corners', () {
     const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 5.0, 10.0);
 
     void checkPointAndMirrors(Offset p) {
@@ -642,7 +642,7 @@ void main() {
     checkPointAndMirrors(const Offset(49.995, 0)); // Right
   });
 
-  test('RSuperellipse.contains UniformRectangularContains', () {
+  test('RSuperellipse.contains is correct with uniform corners and unequal height and width', () {
     // The bounds is not centered at the origin and has unequal height and width.
     const RSuperellipse rse = RSuperellipse.fromLTRBXY(0, 0, 50, 100, 23.0, 30.0);
 
@@ -666,7 +666,7 @@ void main() {
     checkPointAndMirrors(const Offset(49.99, 49.99)); // Right mid-edge
   });
 
-  test('RSuperellipse.contains SlimDiagnalContains', () {
+  test('RSuperellipse.contains is correct for a slim diagnal shape', () {
     // This shape has large radii on one diagnal and tiny radii on the other,
     // resulting in a almond-like shape placed diagnally (NW to SE).
     final RSuperellipse rse = RSuperellipse.fromLTRBAndCorners(
@@ -703,6 +703,20 @@ void main() {
     checkDiagnalPoints(const Offset(20.0, -21.96));
     checkDiagnalPoints(const Offset(21.05, -20.92));
     checkDiagnalPoints(const Offset(40.0, 5.68));
+  });
+
+  test('RSuperellipse.contains is correct for points outside of a sharp corner', () {
+    expect(
+      RSuperellipse.fromLTRBAndCorners(
+        196.0,
+        0.0,
+        294.0,
+        28.0,
+        topRight: const Radius.circular(3.0),
+        bottomRight: const Radius.circular(3.0),
+      ).contains(const Offset(147.0, 14.0)),
+      isFalse,
+    );
   });
 }
 

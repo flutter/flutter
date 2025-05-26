@@ -41,7 +41,7 @@ class VisualStudio {
   /// True if Visual Studio installation was found.
   ///
   /// Versions older than 2017 Update 2 won't be detected, so error messages to
-  /// users should take into account that [false] may mean that the user may
+  /// users should take into account that `false` may mean that the user may
   /// have an old version rather than no installation at all.
   bool get isInstalled => _bestVisualStudioDetails != null;
 

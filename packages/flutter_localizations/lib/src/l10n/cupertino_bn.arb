@@ -28,6 +28,6 @@
   "lookUpButtonLabel": "লুক-আপ",
   "searchWebButtonLabel": "ওয়েবে সার্চ করুন",
   "shareButtonLabel": "শেয়ার করুন...",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "বাতিল করুন",
+  "backButtonLabel": "ফিরে যান"
 }

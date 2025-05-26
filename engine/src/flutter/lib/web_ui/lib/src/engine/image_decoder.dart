@@ -82,11 +82,11 @@ abstract class BrowserImageDecoder implements ui.Codec {
         ),
       );
 
-      await promiseToFuture<void>(webDecoder.tracks.ready);
+      await webDecoder.tracks.ready.toDart;
 
       // Flutter doesn't have an API for progressive loading of images, so we
       // wait until the image is fully decoded.
-      await promiseToFuture<void>(getJsProperty(webDecoder, 'completed'));
+      await webDecoder.completed.toDart;
       frameCount = webDecoder.tracks.selectedTrack!.frameCount.toInt();
 
       // We coerce the DOM's `repetitionCount` into an int by explicitly
@@ -133,9 +133,8 @@ abstract class BrowserImageDecoder implements ui.Codec {
       );
     }
 
-    final DecodeResult result = await promiseToFuture<DecodeResult>(
-      webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)),
-    );
+    final DecodeResult result =
+        await webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)).toDart;
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
 

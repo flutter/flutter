@@ -11,7 +11,7 @@
 //
 // The code that performs the transformations lives in:
 //
-//  - https://github.com/flutter/engine/blob/main/web_sdk/sdk_rewriter.dart
+//  - https://github.com/flutter/flutter/blob/main/engine/src/flutter/web_sdk/sdk_rewriter.dart
 // ignore: unnecessary_library_directive
 library engine;
 
@@ -159,4 +159,5 @@ export 'engine/view_embedder/flutter_view_manager.dart';
 export 'engine/view_embedder/global_html_attributes.dart';
 export 'engine/view_embedder/hot_restart_cache_handler.dart';
 export 'engine/view_embedder/style_manager.dart';
+export 'engine/web_paragraph/paragraph.dart';
 export 'engine/window.dart';

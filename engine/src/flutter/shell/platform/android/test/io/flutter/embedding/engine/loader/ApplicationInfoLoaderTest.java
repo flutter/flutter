@@ -27,11 +27,9 @@ import java.io.StringReader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.stubbing.Answer;
-import org.robolectric.annotation.Config;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class ApplicationInfoLoaderTest {
 

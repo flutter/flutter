@@ -161,7 +161,7 @@ void main() async {
       }
       expect(
         e.toString(),
-        contains('Flutter GPU requires the Impeller rendering backend to be enabled.'),
+        contains('Exception: Flutter GPU must be enabled via the Flutter GPU manifest setting'),
       );
     }
   });
