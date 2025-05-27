@@ -24,14 +24,14 @@ import 'shortcuts.dart';
 /// same value type.
 ///
 /// Using this widget also provides keyboard navigation and semantics for the
-/// radio buttons that matches [APG](https://www.w3.org/WAI/ARIA/apg/patterns/radio/)
+/// radio buttons that matches [APG](https://www.w3.org/WAI/ARIA/apg/patterns/radio/).
 ///
 /// The keyboard behaviors are:
 /// * Tab and Shift+Tab: moves focus into and out of radio group. When focus
 ///   moves into a radio group and a radio button is select, focus is set on
 ///   selected button. Otherwise, it focus the first radio button in reading
-///   order
-/// * Space: toggle the selection on the focused radio button
+///   order.
+/// * Space: toggle the selection on the focused radio button.
 /// * Right and down arrow key: move selection to next radio button in the group
 ///   in reading order.
 /// * Left and up arrow key: move selection to previous radio button in the
@@ -48,15 +48,14 @@ import 'shortcuts.dart';
 /// ** See code in examples/api/lib/widgets/radio_group/radio_group.0.dart **
 /// {@end-tool}
 class RadioGroup<T> extends StatefulWidget {
-  /// creates a radio group
+  /// Creates a radio group.
   ///
   /// The `groupValue` set the selection on a subtree radio with the same
   /// [RawRadio.value].
   ///
   /// The `onChanged` is called when the selection has changed in the subtree
   /// radios.
-  const RadioGroup({super.key, this.groupValue, required this.onChanged, required this.child})
-    : super();
+  const RadioGroup({super.key, this.groupValue, required this.onChanged, required this.child});
 
   /// The selected value under this radio group.
   ///
@@ -66,7 +65,7 @@ class RadioGroup<T> extends StatefulWidget {
 
   /// Called when selection has changed.
   ///
-  /// The value can be null if when unselect the [RawRadio] with
+  /// The value can be null when unselect the [RawRadio] with
   /// [RawRadio.toggleable] set to true.
   final ValueChanged<T?> onChanged;
 
@@ -219,7 +218,7 @@ abstract class RadioGroupRegistry<T> {
 
   /// Registers a radio client.
   ///
-  /// the subclass provides additional features, such as keyboard navigation
+  /// The subclass provides additional features, such as keyboard navigation
   /// for the registered clients.
   void registerClient(RadioClient<T> radio);
 

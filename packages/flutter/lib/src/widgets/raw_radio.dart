@@ -33,7 +33,7 @@ typedef RadioBuilder = Widget Function(BuildContext context, ToggleableStateMixi
 ///
 /// {@macro flutter.widget.RawRadio.groupValue}
 ///
-/// If [enabled] is false, the radio will not be interactable.
+/// If [enabled] is false, the radio will not be interactive.
 ///
 /// See also:
 ///
@@ -79,7 +79,17 @@ class RawRadio<T> extends StatefulWidget {
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
   ///
-  /// To indicate returning to an indeterminate state.
+  /// To indicate returning to an indeterminate state, [RadioGroup.onChange]
+  /// of the [RadioGroup] above will be called with null.
+  ///
+  /// If true, [RadioGroup.onChanged] is called with [value] when selected while
+  /// [RadioGroup.groupValue] != [value], and with null when selected again while
+  /// [RadioGroup.groupValue] == [value].
+  ///
+  /// If false, [RadioGroup.onChanged] will be called with [value] when it is
+  /// selected while [RadioGroup.groupValue] != [value], and only by selecting
+  /// another radio button in the group (i.e. changing the value of
+  /// [RadioGroup.groupValue]) can this radio button be unselected.
   ///
   /// The default is false.
   /// {@endtemplate}
