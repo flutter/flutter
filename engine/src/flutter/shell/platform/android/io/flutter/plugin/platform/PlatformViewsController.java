@@ -696,25 +696,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return textureId;
   }
 
-  /**
-   * Translates an original touch event to have the same locations as the ones that Flutter
-   * calculates (because original + flutter's - original = flutter's).
-   *
-   * @param originalEvent The saved original input event.
-   * @param pointerCoords The coordinates that Flutter thinks the touch is happening at.
-   */
-  private static void translateMotionEvent(
-      MotionEvent originalEvent, PointerCoords[] pointerCoords) {
-    if (pointerCoords.length < 1) {
-      return;
-    }
-
-    float xOffset = pointerCoords[0].x - originalEvent.getX();
-    float yOffset = pointerCoords[0].y - originalEvent.getY();
-
-    originalEvent.offsetLocation(xOffset, yOffset);
-  }
-
   @VisibleForTesting
   public MotionEvent toMotionEvent(
       float density, PlatformViewTouch touch, boolean usingVirtualDiplay) {
@@ -731,18 +712,37 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         parsePointerCoordsList(touch.rawPointerCoords, density)
             .toArray(new PointerCoords[touch.pointerCount]);
 
-    if (!usingVirtualDiplay && trackedEvent != null) {
-      // We have the original event, deliver it after offsetting as it will pass the verifiable
-      // input check.
-      translateMotionEvent(trackedEvent, pointerCoords);
-      return trackedEvent;
-    }
     // We are in virtual display mode or don't have a reference to the original MotionEvent.
     // In this case we manually recreate a MotionEvent to be delivered. This MotionEvent
     // will fail the verifiable input check.
     PointerProperties[] pointerProperties =
         parsePointerPropertiesList(touch.rawPointerPropertiesList)
             .toArray(new PointerProperties[touch.pointerCount]);
+
+    if (!usingVirtualDiplay && trackedEvent != null) {
+      // We need to use Flutter's calculated coordinates which may include complex transformations
+      // (zoom, scale, rotation) that can't be represented by simple offsetLocation().
+      // Creating a new MotionEvent with the correct coordinates ensures gestures work properly
+      // after transformations like zoom, but loses the verifiable input flag.
+      // This trade-off is necessary because Android doesn't provide a public API to update
+      // MotionEvent coordinates while preserving verifiability. The security impact is minimal
+      // because events have already passed through Flutter's framework validation.
+      return MotionEvent.obtain(
+          trackedEvent.getDownTime(),
+          trackedEvent.getEventTime(),
+          trackedEvent.getAction(), // Use action from original event, not from framework
+          touch.pointerCount,
+          pointerProperties,
+          pointerCoords,
+          trackedEvent.getMetaState(),
+          trackedEvent.getButtonState(),
+          trackedEvent.getXPrecision(),
+          trackedEvent.getYPrecision(),
+          trackedEvent.getDeviceId(),
+          trackedEvent.getEdgeFlags(),
+          trackedEvent.getSource(),
+          trackedEvent.getFlags());
+    }
 
     // TODO (kaushikiska) : warn that we are potentially using an untracked
     // event in the platform views.

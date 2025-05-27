@@ -491,6 +491,172 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  public void toMotionEvent_handlesTransformedCoordinates() {
+    // This test verifies the fix for issue #169486 - gestures blocked after zoom.
+    // When Flutter applies transforms (zoom, scale, rotation) to a platform view,
+    // the touch coordinates need to be transformed accordingly.
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Original event at position (100, 100)
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_DOWN,
+            100, // x
+            100, // y
+            0 // metaState
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // Flutter calculated transformed coordinates (e.g., after zoom scale 0.5)
+    // The touch at screen position (100, 100) maps to (50, 50) in the scaled view
+    List<List<Integer>> pointerProperties =
+        Arrays.asList(Arrays.asList(original.getPointerId(0), original.getToolType(0)));
+    List<List<Double>> transformedCoords =
+        Arrays.asList(
+            Arrays.asList(
+                (double) original.getOrientation(),
+                (double) original.getPressure(),
+                (double) original.getSize(),
+                (double) original.getToolMajor(),
+                (double) original.getToolMinor(),
+                (double) original.getTouchMajor(),
+                (double) original.getTouchMinor(),
+                50.0, // transformed x
+                50.0 // transformed y
+                ));
+
+    PlatformViewTouch transformedTouch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(), // Use same action as original
+            1, // pointerCount
+            pointerProperties,
+            transformedCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            transformedTouch,
+            false // usingVirtualDisplays
+            );
+
+    // Verify that the resolved event uses Flutter's transformed coordinates
+    assertEquals(50.0f, resolvedEvent.getX(), 0.001f);
+    assertEquals(50.0f, resolvedEvent.getY(), 0.001f);
+
+    // Verify other properties are preserved from the original event
+    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
+    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
+    assertEquals(original.getAction(), resolvedEvent.getAction());
+    assertEquals(original.getMetaState(), resolvedEvent.getMetaState());
+  }
+
+  @Test
+  public void toMotionEvent_multiTouchWithTransformedCoordinates() {
+    // Test multi-touch gestures (e.g., pinch-to-zoom) with transformed coordinates.
+    // This ensures the fix handles multi-pointer events correctly.
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Create a multi-touch event with 2 pointers
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_POINTER_DOWN,
+            2, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // Flutter transformed coordinates for both pointers
+    List<List<Integer>> pointerProperties =
+        Arrays.asList(
+            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
+            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> transformedCoords =
+        Arrays.asList(
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 50.0, 50.0), // pointer 0 transformed
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0) // pointer 1 transformed
+            );
+
+    PlatformViewTouch transformedTouch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(), // Use same action as original
+            2, // pointerCount
+            pointerProperties,
+            transformedCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            transformedTouch,
+            false // usingVirtualDisplays
+            );
+
+    // Verify both pointers use transformed coordinates
+    assertEquals(2, resolvedEvent.getPointerCount());
+    assertEquals(50.0f, resolvedEvent.getX(0), 0.001f);
+    assertEquals(50.0f, resolvedEvent.getY(0), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getX(1), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getY(1), 0.001f);
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void getPlatformViewById_hybridComposition() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
