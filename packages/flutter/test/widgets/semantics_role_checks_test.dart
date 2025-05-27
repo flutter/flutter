@@ -762,7 +762,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(
                 label: 'complementary 1',
                 role: SemanticsRole.complementary,
@@ -787,7 +787,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(
                 role: SemanticsRole.contentInfo,
                 child: const SizedBox.square(dimension: 1),
@@ -858,7 +858,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(
                 label: 'contentInfo 1',
                 role: SemanticsRole.contentInfo,
@@ -883,7 +883,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(role: SemanticsRole.main, child: const SizedBox.square(dimension: 1)),
               Semantics(
                 container: true,
@@ -947,7 +947,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(
                 label: 'main 1',
                 role: SemanticsRole.main,
@@ -972,7 +972,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(role: SemanticsRole.navigation, child: const SizedBox.square(dimension: 1)),
               Semantics(
                 container: true,
@@ -1015,7 +1015,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Column(
-            children: [
+            children: <Widget>[
               Semantics(
                 label: 'navigation 1',
                 role: SemanticsRole.navigation,
