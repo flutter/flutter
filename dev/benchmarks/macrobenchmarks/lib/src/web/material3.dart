@@ -1998,7 +1998,7 @@ class _MenusState extends State<Menus> {
                 label: const Text('Color'),
                 enableFilter: true,
                 dropdownMenuEntries: colorEntries,
-                inputDecorationTheme: const InputDecorationThemeData(filled: true),
+                inputDecorationTheme: const InputDecorationTheme(filled: true),
                 onSelected: (ColorLabel? color) {
                   setState(() {
                     selectedColor = color;

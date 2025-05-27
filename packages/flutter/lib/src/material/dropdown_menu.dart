@@ -316,7 +316,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defines the default appearance of [InputDecoration] to show around the text field.
   ///
   /// By default, shows a outlined text field.
-  final InputDecorationThemeData? inputDecorationTheme;
+  final InputDecorationTheme? inputDecorationTheme;
 
   /// The [MenuStyle] that defines the visual attributes of the menu.
   ///
@@ -1004,7 +1004,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         maximumSize: MaterialStatePropertyAll<Size>(Size(double.infinity, widget.menuHeight!)),
       );
     }
-    final InputDecorationThemeData effectiveInputDecorationTheme =
+    final InputDecorationTheme effectiveInputDecorationTheme =
         widget.inputDecorationTheme ?? theme.inputDecorationTheme ?? defaults.inputDecorationTheme!;
 
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
@@ -1087,7 +1087,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
                     : null,
             suffixIcon: widget.showTrailingIcon ? trailingButton : null,
-          ).applyDefaults(effectiveInputDecorationTheme),
+          ).applyDefaults(effectiveInputDecorationTheme.data),
           restorationId: widget.restorationId,
         );
 
@@ -1469,7 +1469,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   }
 
   @override
-  InputDecorationThemeData get inputDecorationTheme {
-    return const InputDecorationThemeData(border: OutlineInputBorder());
+  InputDecorationTheme get inputDecorationTheme {
+    return const InputDecorationTheme(border: OutlineInputBorder());
   }
 }
