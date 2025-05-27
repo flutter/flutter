@@ -65,17 +65,14 @@ class FileSystemUtils {
   /// path unchanged.
   String escapePath(String path) {
     if (_platform.isWindows) {
-      final String unified = path.replaceAll(r'\', r'\\');
-      if (unified.length > 2 && unified[1] == ':') {
+      path = path.replaceAll(r'\', r'\\');
+      if (path.startsWith(RegExp('[a-z]:')) {
         // ensure that the drive letter is upper case see
         // https://youtrack.jetbrains.com/issue/IDEA-329756/Importing-symlinked-Gradle-included-build-fails#focus=Comments-27-11721320.0-0
-        return unified[0].toUpperCase() + unified.substring(1);
-      } else {
-        return unified;
+        path = path[0].toUpperCase() + path.substring(1);
       }
-    } else {
-      return path;
     }
+    return path;
   }
 
   /// Returns true if the file system [entity] has not been modified since the
