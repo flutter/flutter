@@ -10,6 +10,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -22,6 +23,7 @@ FLUTTER_ASSERT_ARC
 - (void)searchWeb:(NSString*)searchTerm;
 - (void)showLookUpViewController:(NSString*)term;
 - (void)showShareViewController:(NSString*)content;
+- (void)showTranslateViewController:(NSString*)term;
 @end
 
 @interface UIViewController ()
@@ -147,6 +149,37 @@ FLUTTER_ASSERT_ARC
         presentViewController:[OCMArg isKindOfClass:[UIActivityViewController class]]
                      animated:YES
                    completion:nil]);
+    [presentExpectation fulfill];
+  };
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+- (void)testTranslateInvoked {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+
+  XCTestExpectation* presentExpectation =
+      [self expectationWithDescription:@"Translate view hosting controller presented"];
+
+  FlutterViewController* engineViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                      nibName:nil
+                                                                                       bundle:nil];
+  FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+  OCMStub([mockEngineViewController
+      presentViewController:[OCMArg isKindOfClass:[FlutterTranslateController class]]
+                   animated:YES
+                 completion:nil]);
+
+  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+  FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                    arguments:@"Test"];
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockEngineViewController
+               addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateController class]]
+              ]);
     [presentExpectation fulfill];
   };
   [mockPlugin handleMethodCall:methodCall result:result];
