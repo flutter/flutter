@@ -56,15 +56,7 @@ class _OverlayExampleState extends State<OverlayExample> {
           ),
           OverlayEntry(
             builder: (BuildContext context) {
-              return SelectionArea(
-                child: Column(
-                  children: [
-                    // Must be at least two selectable texts
-                    Text('subA'),
-                    Text('subB'),
-                  ],
-                ),
-              );
+              return Text('subA');
             },
             opaque: true,
             canSizeOverlay: true,
