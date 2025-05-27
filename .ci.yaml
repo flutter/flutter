@@ -5389,7 +5389,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      os: Mac-14|Mac-15.5
+      os: Mac-15.3
       device_os: iOS-18.4
       $flutter/osx_sdk : >-
         {
