@@ -1813,6 +1813,7 @@ extension type BidiNamespace(JSObject _) implements JSObject {
       _getBidiRegions(text.toJS, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
 
   @JS('reorderVisual')
+  // TODO(jlavrova): Use a JSInt32Array return type instead.
   external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
   List<BidiIndex> reorderVisual(Uint8List visuals) =>
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();

@@ -2709,6 +2709,8 @@ extension JSArrayExtension on JSArray<JSAny?> {
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {
+  // TODO(jlavrova): This has been renamed to `start` in the spec.
+  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
   @JS('begin')
   external int get _begin;
   int get begin => _begin;
