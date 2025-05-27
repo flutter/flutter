@@ -1788,12 +1788,7 @@ extension type SkPicture(JSObject _) implements JSObject {
   external int approximateBytesUsed();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class BidiRegion {}
-
-extension BidiRegionExtension on BidiRegion {
+extension type BidiRegion(JSObject _) implements JSObject {
   @JS('start')
   external JSNumber get _start;
   int get start => _start.toDartInt;
@@ -1805,23 +1800,13 @@ extension BidiRegionExtension on BidiRegion {
   int get level => _level.toDartInt;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class BidiIndex {}
-
-extension BidiIndexExtension on BidiIndex {
+extension type BidiIndex(JSObject _) implements JSObject {
   @JS('index')
   external JSNumber get _index;
   int get index => _index.toDartInt;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class BidiNamespace {}
-
-extension BidiNamespaceExtention on BidiNamespace {
+extension type BidiNamespace(JSObject _) implements JSObject {
   @JS('getBidiRegions')
   external JSArray<JSAny?> _getBidiRegions(JSString text, SkTextDirection dir);
   List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
@@ -1833,23 +1818,13 @@ extension BidiNamespaceExtention on BidiNamespace {
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class CodeUnitInfo {}
-
-extension CodeUnitInfoExtension on CodeUnitInfo {
+extension type CodeUnitInfo(JSObject _) implements JSObject {
   @JS('flags')
   external JSNumber get _flags;
   int get flags => _flags.toDartInt;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class CodeUnitsNamespace {}
-
-extension CodeUnitsNamespaceExtention on CodeUnitsNamespace {
+extension type CodeUnitsNamespace(JSObject _) implements JSObject {
   @JS('compute')
   external JSArray<JSAny?> _compute(JSString text);
   List<CodeUnitInfo> compute(String text) => _compute(text.toJS).toDart.cast<CodeUnitInfo>();
