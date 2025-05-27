@@ -118,7 +118,7 @@ class ReorderableListView extends StatefulWidget {
          'All children of this widget must have a key.',
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
-       itemCount = children.length,
+       childCount = children.length,
        separatorBuilder = null;
 
   /// Creates a reorderable list from widget items that are created on demand.
@@ -147,12 +147,12 @@ class ReorderableListView extends StatefulWidget {
   /// {@end-tool}
   /// See also:
   ///
-  ///   * [ReorderableListView], which allows you to build a reorderable
+  ///   * [ReorderableListView], which allows one to build a reorderable
   ///     list with all the items passed into the constructor.
   const ReorderableListView.builder({
     super.key,
     required this.itemBuilder,
-    required this.itemCount,
+    required this.childCount,
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
@@ -179,7 +179,7 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
-  }) : assert(itemCount >= 0),
+  }) : assert(childCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -202,7 +202,7 @@ class ReorderableListView extends StatefulWidget {
   /// or equal to zero and less than `itemCount - 1`. It builds the separator
   /// widgets which appear between the items.
   ///
-  /// The `itemCount` argument is the number of actual data items in your list.
+  /// The `itemCount` argument is the number of actual data items in the list.
   /// The total number of children in the list view will be greater due to the separators.
   ///
   /// All other parameters function similarly to [ReorderableListView.builder].
@@ -253,14 +253,13 @@ class ReorderableListView extends StatefulWidget {
          }
          final int itemIndex = index ~/ 2;
          if (index.isEven) {
-           // It's an item
            return itemBuilder(context, itemIndex);
          } else {
-           // It's a separator
            return separatorBuilder(context, itemIndex);
          }
        }),
-       itemCount = _computeActualChildCount(itemCount),
+       itemCount = itemCount,
+       childCount = _computeActualChildCount(itemCount),
        itemExtent = null,
        itemExtentBuilder = null,
        prototypeItem = null;
@@ -268,11 +267,17 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
 
+  /// The number of data items in the list.
+  ///
+  /// This is the number of data items in the list, not the number of children.
+  /// For example, if there is a list with 10 items and 9 separators, this will be 10.
+  final int itemCount;
+
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   /// When using the [ReorderableListView.separated] constructor, this is the total
   /// number of children in the list, including items and separators.
   /// The actual number of data items is less.
-  final int itemCount;
+  final int childCount;
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
@@ -403,13 +408,12 @@ class ReorderableListView extends StatefulWidget {
   /// The builder for separator widgets when using the [ReorderableListView.separated] constructor.
   ///
   /// This callback is used to build the separator widgets that appear between items.
-  /// It is called with indices from 0 to `itemCount - 2` (where `itemCount` is
-  /// the number of actual data items).
+  /// It is called with indices from 0 to [itemCount] - 2.
   ///
-  /// Will be null if not using the `separated` constructor.
+  /// Null if this is not a `ReorderableListView.separated`.
   final IndexedWidgetBuilder? separatorBuilder;
 
-  /// Helper method to compute the actual child count for the separated constructor.
+  /// Helper method to compute the actual child count for [ReorderableListView.separated].
   static int _computeActualChildCount(int itemCount) {
     return math.max(0, itemCount * 2 - 1);
   }
@@ -452,6 +456,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     }
 
     // This is an actual item (or we are not using .separated)
+    // For .separated constructor, items are at even indices (0, 2, 4, ...)
+    // For non-separated constructors, all indices are items
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
     if (widget.buildDefaultDragHandles) {
@@ -594,7 +600,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             itemExtent: widget.itemExtent,
             itemExtentBuilder: widget.itemExtentBuilder,
             prototypeItem: widget.prototypeItem,
-            itemCount: widget.itemCount,
+            itemCount: widget.childCount,
             onReorder: (int oldCombinedIndex, int newCombinedIndex) {
               if (widget.separatorBuilder != null) {
                 // oldCombinedIndex will be an even index (item) because separators are not draggable.

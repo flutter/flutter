@@ -40,7 +40,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
 
     return ReorderableListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 40),
-      itemCount: _items.length,
+      childCount: _items.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
           key: Key('$index'),

@@ -480,7 +480,7 @@ void main() {
             home: Scaffold(
               body: ReorderableListView.builder(
                 scrollController: controller,
-                itemCount: 100,
+                childCount: 100,
                 itemBuilder: (BuildContext context, int index) {
                   return Text('data', key: ValueKey<int>(index));
                 },
@@ -1587,7 +1587,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return const SizedBox();
           },
-          itemCount: -1,
+          childCount: -1,
           onReorder: (int from, int to) {},
         ),
         throwsAssertionError,
@@ -1623,7 +1623,7 @@ void main() {
               itemsCreated.add(index);
               return Text(index.toString(), key: ValueKey<int>(index));
             },
-            itemCount: 1000,
+            childCount: 1000,
             onReorder: (int from, int to) {},
           ),
         ),
@@ -1980,7 +1980,7 @@ void main() {
               );
             },
             buildDefaultDragHandles: false,
-            itemCount: items.length,
+            childCount: items.length,
             onReorder: handleReorder,
           ),
         ),
@@ -2050,7 +2050,7 @@ void main() {
             );
           },
           buildDefaultDragHandles: false,
-          itemCount: items.length,
+          childCount: items.length,
           onReorder: handleReorder,
           onReorderStart: (int index) {
             startIndex = index;
@@ -2105,7 +2105,7 @@ void main() {
       itemBuilder: (BuildContext context, int index) {
         return SizedBox(child: Text('Item $index'));
       },
-      itemCount: 3,
+      childCount: 3,
       onReorder: (int oldIndex, int newIndex) {},
     );
     await tester.pumpWidget(MaterialApp(home: reorderableListView));
@@ -2176,7 +2176,7 @@ void main() {
             ),
           );
         },
-        itemCount: numbers.length,
+        childCount: numbers.length,
         itemExtent: 30,
         prototypeItem: const SizedBox(),
         onReorder: (int fromIndex, int toIndex) {},
@@ -2207,7 +2207,7 @@ void main() {
                     ),
                   );
                 },
-                itemCount: numbers.length,
+                childCount: numbers.length,
                 itemExtent: 30,
                 onReorder: (int fromIndex, int toIndex) {},
               );
@@ -2248,7 +2248,7 @@ void main() {
                     ),
                   );
                 },
-                itemCount: numbers.length,
+                childCount: numbers.length,
                 prototypeItem: const SizedBox(height: 30, child: Text('3')),
                 onReorder: (int oldIndex, int newIndex) {},
               );
@@ -2306,7 +2306,7 @@ void main() {
                 ),
               );
             },
-            itemCount: items.length,
+            childCount: items.length,
             onReorder: (int fromIndex, int toIndex) {},
             scrollController: scrollController,
             autoScrollerVelocityScalar: autoScrollerVelocityScalar,
@@ -2371,7 +2371,7 @@ void main() {
                     child: Text('$index'),
                   );
                 },
-                itemCount: 5,
+                childCount: 5,
                 onReorder: (int fromIndex, int toIndex) {},
               ),
             ),
@@ -2408,7 +2408,7 @@ void main() {
                 child: Text('$index'),
               );
             },
-            itemCount: 5,
+            childCount: 5,
             onReorder: (int fromIndex, int toIndex) {},
           ),
         ),
@@ -2458,7 +2458,7 @@ void main() {
                   child: Text('$index'),
                 );
               },
-              itemCount: 5,
+              childCount: 5,
               onReorder: (int fromIndex, int toIndex) {},
             ),
           ),
