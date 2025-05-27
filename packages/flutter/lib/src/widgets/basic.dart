@@ -2345,6 +2345,7 @@ class Align extends SingleChildRenderObjectWidget {
         assert(heightFactor == null || heightFactor >= 0.0);
 
 
+
   /// How to align the child.
   /// The x and y values of the [Alignment] control the horizontal and vertical
   /// alignment, respectively. An x value of -1.0 means that the left edge of
