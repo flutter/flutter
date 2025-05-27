@@ -188,7 +188,7 @@ void main() {
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
 
     await gesture.up();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+  });
 
   testWidgets('mouse can select multiple widgets on double-click drag - horizontal', (
     WidgetTester tester,
@@ -238,7 +238,7 @@ void main() {
     expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     await gesture.up();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+  });
 
   testWidgets('mouse can select multiple widgets on triple-click drag', (
     WidgetTester tester,
@@ -310,7 +310,7 @@ void main() {
     expect(paragraph4.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     await gesture.up();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+  });
 
   testWidgets('mouse can select multiple widgets on triple-click drag - horizontal', (
     WidgetTester tester,
@@ -372,7 +372,7 @@ void main() {
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
     await gesture.up();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+  });
 
   testWidgets('select to scroll forward', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
