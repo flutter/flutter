@@ -72,7 +72,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
-  FlutterSemanticsFlags flags = FlutterSemanticsFlags{.is_text_field=true, .is_read_only=true};
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{.is_text_field = true, .is_read_only = true};
   root.id = 0;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -235,7 +235,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{.is_text_field=true};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{.is_text_field = true};
   root.id = 0;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
