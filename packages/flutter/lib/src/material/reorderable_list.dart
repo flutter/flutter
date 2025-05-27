@@ -268,6 +268,7 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
 
+  /// {@macro flutter.widgets.reorderable_list.itemCount}
   /// The number of data items in the list.
   ///
   /// This is the number of data items in the list, not the number of children.
