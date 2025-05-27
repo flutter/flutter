@@ -806,16 +806,16 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
           final double stretch = _stretchController.value;
-          double x = 0.0;
-          double y = 0.0;
+          double overscrollX = 0.0;
+          double overscrollY = 0.0;
           final double mainAxisSize;
 
           switch (widget.axis) {
             case Axis.horizontal:
-              x += stretch;
+              overscrollX += stretch;
               mainAxisSize = MediaQuery.widthOf(context);
             case Axis.vertical:
-              y += stretch;
+              overscrollY += stretch;
               mainAxisSize = MediaQuery.heightOf(context);
           }
 
@@ -825,13 +825,13 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
 
           if (ui.ImageFilter.isShaderFilterSupported) {
             if (_stretchController.stretchDirection == _StretchDirection.trailing) {
-              x = -x;
-              y = -y;
+              overscrollX = -overscrollX;
+              overscrollY = -overscrollY;
             }
 
             transform = StretchOverscrollEffect(
-              overscrollX: x,
-              overscrollY: y,
+              stretchStrengthX: overscrollX,
+              stretchStrengthY: overscrollY,
               child: widget.child!,
             );
           } else {
@@ -839,9 +839,12 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               _stretchController.stretchDirection,
             );
 
+            final double x = 1.0 + overscrollX;
+            final double y = 1.0 + overscrollY;
+
             transform = Transform(
               alignment: alignment,
-              transform: Matrix4.diagonal3Values(1.0 + x, 1.0 + y, 1.0),
+              transform: Matrix4.diagonal3Values(x, y, 1.0),
               filterQuality: stretch == 0 ? null : FilterQuality.medium,
               child: widget.child,
             );

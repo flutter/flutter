@@ -7,26 +7,64 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// Implements the Android native overscroll effect identically in Flutter.
+/// A widget that replicates the native Android stretch overscroll effect.
 ///
-/// This widget only supported with Impeller rendering engine.
+/// This widget is intended for use in scrollable widgets and creates
+/// a stretch visual feedback when the user overscrolls at the edges.
+///
+/// Only supported when using the Impeller rendering engine.
 class StretchOverscrollEffect extends StatefulWidget {
   /// Creates a StretchOverscrollEffect widget that applies a stretch
   /// effect when the user overscrolls horizontally or vertically.
   const StretchOverscrollEffect({
     super.key,
-    this.overscrollX = 0.0,
-    this.overscrollY = 0.0,
+    this.stretchStrengthX = 0.0,
+    this.stretchStrengthY = 0.0,
     required this.child,
-  });
+  }) : assert(
+         stretchStrengthX >= -1.0 && stretchStrengthX <= 1.0,
+         'overscrollX must be between -1.0 and 1.0',
+       ),
+       assert(
+         stretchStrengthY >= -1.0 && stretchStrengthY <= 1.0,
+         'overscrollY must be between -1.0 and 1.0',
+       );
 
-  /// The horizontal overscroll amount applied for stretching effect,
-  /// and value should be between -1 and 1 inclusive.
-  final double overscrollX;
+  /// The horizontal overscroll strength applied for the stretching effect.
+  ///
+  /// The value should be between -1.0 and 1.0 inclusive.
+  /// Positive values apply a pull from left to right,
+  /// while negative values pull from right to left.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to set the horizontal stretch strength to pull right.
+  ///
+  /// ```dart
+  /// const StretchOverscrollEffect(
+  ///   stretchStrengthX: 0.5,
+  ///   child: Text('Hello, World!'),
+  /// );
+  /// ```
+  /// {@end-tool}
+  final double stretchStrengthX;
 
-  /// The vertical overscroll amount applied for stretching effect,
-  /// and value should be between -1 and 1 inclusive.
-  final double overscrollY;
+  /// The vertical overscroll strength applied for the stretching effect.
+  ///
+  /// The value should be between -1.0 and 1.0 inclusive.
+  /// Positive values apply a pull from top to bottom,
+  /// while negative values pull from bottom to top.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to set the vertical stretch strength to pull bottom.
+  ///
+  /// ```dart
+  /// const StretchOverscrollEffect(
+  ///   stretchStrengthY: 0.5,
+  ///   child: Text('Hello, World!'),
+  /// );
+  /// ```
+  /// {@end-tool}
+  final double stretchStrengthY;
 
   /// The child widget that receives the stretching overscroll effect.
   final Widget child;
@@ -38,6 +76,12 @@ class StretchOverscrollEffect extends StatefulWidget {
 class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
 
+  /// The maximum scale multiplier applied during a stretch effect.
+  static const double maxStretchIntensity = 1.0;
+
+  /// The strength of the interpolation used for smoothing the effect.
+  static const double interpolationStrength = 0.7;
+
   @override
   void dispose() {
     _fragmentShader?.dispose();
@@ -45,29 +89,33 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (!_StretchOverscrollEffectShader._initCalled) {
+      _StretchOverscrollEffectShader.initializeShader();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bool isShaderNeeded =
-        widget.overscrollX.abs() > precisionErrorTolerance ||
-        widget.overscrollY.abs() > precisionErrorTolerance;
+        widget.stretchStrengthX.abs() > precisionErrorTolerance ||
+        widget.stretchStrengthY.abs() > precisionErrorTolerance;
 
     final ui.ImageFilter imageFilter;
 
     if (_StretchOverscrollEffectShader._initialized) {
       _fragmentShader?.dispose();
       _fragmentShader = _StretchOverscrollEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, 1.0);
-      _fragmentShader!.setFloat(3, widget.overscrollX);
-      _fragmentShader!.setFloat(4, widget.overscrollY);
-      _fragmentShader!.setFloat(5, 0.7);
+      _fragmentShader!.setFloat(2, maxStretchIntensity);
+      _fragmentShader!.setFloat(3, widget.stretchStrengthX);
+      _fragmentShader!.setFloat(4, widget.stretchStrengthY);
+      _fragmentShader!.setFloat(5, interpolationStrength);
 
       imageFilter = ui.ImageFilter.shader(_fragmentShader!);
     } else {
-      if (!_StretchOverscrollEffectShader._initCalled) {
-        _StretchOverscrollEffectShader.initializeShader();
-      } else {
-        _fragmentShader?.dispose();
-        _fragmentShader = null;
-      }
+      _fragmentShader?.dispose();
+      _fragmentShader = null;
 
       imageFilter = ui.ImageFilter.matrix(Matrix4.identity().storage);
     }

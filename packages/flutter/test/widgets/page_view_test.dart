@@ -1285,8 +1285,8 @@ void main() {
         find.descendant(of: find.byType(PageView), matching: find.byType(StretchOverscrollEffect)),
       );
 
-      expect(effect.overscrollX, 0.0);
-      expect(effect.overscrollY, 0.0);
+      expect(effect.stretchStrengthX, 0.0);
+      expect(effect.stretchStrengthY, 0.0);
     } else {
       final Finder transformFinder = find.descendant(
         of: find.byType(PageView),
