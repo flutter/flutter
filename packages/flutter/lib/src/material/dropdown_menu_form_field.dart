@@ -49,7 +49,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
     TextInputType? keyboardType,
     TextStyle? textStyle,
     TextAlign textAlign = TextAlign.start,
-    InputDecorationThemeData? inputDecorationTheme,
+    InputDecorationTheme? inputDecorationTheme,
     MenuStyle? menuStyle,
     this.controller,
     T? initialSelection,

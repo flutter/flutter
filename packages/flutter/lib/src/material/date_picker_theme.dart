@@ -413,7 +413,7 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Overrides the [InputDatePickerFormField]'s input decoration theme.
   /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
-  final InputDecorationThemeData? inputDecorationTheme;
+  final InputDecorationTheme? inputDecorationTheme;
 
   /// Overrides the default style of the cancel button of a [DatePickerDialog].
   final ButtonStyle? cancelButtonStyle;
@@ -473,7 +473,7 @@ class DatePickerThemeData with Diagnosticable {
     Color? rangeSelectionBackgroundColor,
     WidgetStateProperty<Color?>? rangeSelectionOverlayColor,
     Color? dividerColor,
-    InputDecorationThemeData? inputDecorationTheme,
+    InputDecorationTheme? inputDecorationTheme,
     ButtonStyle? cancelButtonStyle,
     ButtonStyle? confirmButtonStyle,
     Locale? locale,
@@ -932,8 +932,8 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
     properties.add(
       DiagnosticsProperty<InputDecorationThemeData>(
-        'inputDecorationTheme',
-        inputDecorationTheme,
+        'inputDecorationTheme.data',
+        inputDecorationTheme?.data,
         defaultValue: null,
       ),
     );
