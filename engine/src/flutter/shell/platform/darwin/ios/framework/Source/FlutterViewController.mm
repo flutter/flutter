@@ -247,12 +247,6 @@ typedef struct MouseState {
   if (!self.engine) {
     [self sharedSetupWithProject:nil initialRoute:nil];
   }
-  if ([FlutterSharedApplication.application.delegate
-          respondsToSelector:@selector(pluginRegistrant)]) {
-    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
-        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
-    [pluginRegistrant registerWithRegistry:self];
-  }
   if (self.pluginRegistrant) {
     [self.pluginRegistrant registerWithRegistry:self];
   }
@@ -290,6 +284,13 @@ typedef struct MouseState {
   // Eliminate method calls in initializers and dealloc.
   [self loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
+
+  if ([FlutterSharedApplication.application.delegate
+          respondsToSelector:@selector(pluginRegistrant)]) {
+    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
+        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
+    [pluginRegistrant registerWithRegistry:self];
+  }
 }
 
 - (BOOL)isViewOpaque {
