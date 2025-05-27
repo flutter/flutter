@@ -71,13 +71,6 @@ class TextWrapper {
       double widthCluster = cluster.advance.width;
       hardLineBreak = isHardLineBreak(cluster);
 
-      WebParagraphDebug.log(
-        'Wrapping1: '
-        '$_widthText ${ClusterRange(start: _startLine, end: _whitespaces.start)} '
-        '$_widthWhitespaces ${ClusterRange(start: _whitespaces.start, end: _whitespaces.end)} '
-        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + 1)}',
-      );
-
       if (hardLineBreak) {
         WebParagraphDebug.log('isHardLineBreak: $index');
         // Break the line and then continue with the current cluster as usual
@@ -182,13 +175,6 @@ class TextWrapper {
         // Start a new line but keep the clusters sequence
         startNewLine(_whitespaces.end, _widthLetters);
       }
-
-      WebParagraphDebug.log(
-        'Wrapping2: '
-        '$_widthText ${ClusterRange(start: _startLine, end: _whitespaces.start)} '
-        '$_widthWhitespaces ${ClusterRange(start: _whitespaces.start, end: _whitespaces.end)} '
-        '$_widthLetters + $widthCluster ${ClusterRange(start: _whitespaces.end, end: index + 1)}',
-      );
       // This is just a regular cluster, keep track of it
       _widthLetters += widthCluster;
     }

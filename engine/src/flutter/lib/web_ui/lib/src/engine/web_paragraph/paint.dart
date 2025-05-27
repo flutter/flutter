@@ -129,33 +129,70 @@ class TextPaint {
       }
     }
 
-    WebParagraphDebug.logging = true;
     WebParagraphDebug.log(
-      'paintLineDecorationOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.formattingShift}->${line.bounds.width}x${line.bounds.height}',
+      'paintLineDecorationOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) ${line.visualRuns.length} ${line.styledTextRanges.length}',
     );
-    for (final LineRun run in line.visualRuns) {
-      final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
-      final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
-      final int step = run.bidiLevel.isEven ? 1 : -1;
-      for (int i = start; i != end; i += step) {
-        final clusterText = layout.textClusters[i];
-        WebParagraphDebug.log(
-          '$i: ${line.formattingShift} + ${run.shiftInsideLine} + ${clusterText.shift}',
-        );
-        paintClusterDecoration(
-          canvas,
-          clusterText,
-          ui.Offset(
-            line.formattingShift + run.shiftInsideLine + clusterText.shift,
-            line.bounds.top,
-          ),
-          ui.Offset(x, y),
-          run.bidiLevel.isEven,
-          line.fontBoundingBoxAscent,
-        );
-      }
+    for (final s in line.styledTextRanges) {
+      WebParagraphDebug.log('${s.textRange}');
     }
-    WebParagraphDebug.logging = false;
+    // We need to iterate throught the blocks of clusters that belong to the same visual run and the same text style
+    // We need it to garantee the same direction and the same text metrics
+    // TODO(jlavrova): we actually cannot assume that the text metrics will be the same since Chrome does not garantee it. Should we make sure by comparing ascents/descents (since we only care about them)
+    // TODO(jlavrova): do we decorate whitespaces?
+    int visualRunIndex = 0;
+    int styledTextIndex = 0;
+    int textStart = -1;
+    while (visualRunIndex < line.visualRuns.length &&
+        styledTextIndex < line.styledTextRanges.length) {
+      final LineRun visualRun = line.visualRuns[visualRunIndex];
+      final LineStyledTextRange styledTextRange = line.styledTextRanges[styledTextIndex];
+      if (textStart == -1) {
+        textStart = styledTextRange.textRange.start;
+      }
+      int textEnd;
+      if (visualRun.textRange.end < styledTextRange.textRange.end) {
+        textEnd = visualRun.textRange.end;
+        visualRunIndex++;
+      } else if (visualRun.textRange.end > styledTextRange.textRange.end) {
+        textEnd = styledTextRange.textRange.end;
+        styledTextIndex++;
+      } else {
+        textEnd = styledTextRange.textRange.end;
+        visualRunIndex++;
+        styledTextIndex++;
+      }
+      if (textStart == textEnd) {
+        continue;
+      }
+      final ClusterRange clusterRange = layout.convertTextToClusterRange(textStart, textEnd);
+      final ClusterRange lineClusterRange = paragraph.getLayout().intersectClusterRange(
+        clusterRange,
+        line.textRange,
+      );
+
+      // Decorate [start: end)
+      final double styleShift = layout.textClusters[textStart].shift;
+      final DomTextMetrics textMetrics = layout.textClusters[clusterRange.start].textMetrics!;
+      WebParagraphDebug.log(
+        'paintClustersDecoration text:[$textStart:$textEnd) clusters:$clusterRange lineClusters:$lineClusterRange run:${visualRun.textRange} style:${styledTextRange.textRange} shift: $styleShift posX: ${layout.textClusters[lineClusterRange.start].advance.left}',
+      );
+      paintClustersDecoration(
+        canvas,
+        lineClusterRange.start,
+        lineClusterRange.end,
+        styledTextRange.textRange.start,
+        styledTextRange.offset,
+        styledTextRange.textStyle,
+        textMetrics,
+        layout.textClusters[lineClusterRange.start].advance.left,
+        ui.Offset(line.formattingShift + visualRun.shiftInsideLine + styleShift, line.bounds.top),
+        ui.Offset(x, y),
+        visualRun.bidiLevel.isEven,
+        line.fontBoundingBoxAscent,
+      );
+      // Move forward
+      textStart = textEnd;
+    }
   }
 
   void paintClusterBackground(
@@ -563,62 +600,84 @@ class TextPaint {
           paintContext.moveTo(x, y);
           paintContext.lineTo(x + width, y);
           paintContext.stroke();
-          WebParagraphDebug.log('solid: $x:${x + width}, $y');
+          WebParagraphDebug.log(
+            'solid: $x:${x + width}, $y ${textStyle.decorationColor!.toCssString()}',
+          );
           return;
       }
     }
   }
 
-  void paintClusterDecoration(
+  void paintClustersDecoration(
     CanvasKitCanvas canvas,
-    ExtendedTextCluster webTextCluster,
+    int start,
+    int end,
+    int beginning,
+    int offset,
+    WebTextStyle textStyle,
+    DomTextMetrics textMetrics,
+    double posX,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
     bool ltr,
     double lineAscent,
   ) {
-    final WebTextStyle textStyle = webTextCluster.textStyle!;
     if (textStyle.decoration == null || textStyle.decoration! == ui.TextDecoration.none) {
       // No decoration
       return;
     }
-    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
-      webTextCluster.cluster!.begin,
-      webTextCluster.cluster!.end,
+    WebParagraphDebug.log('[$start:$end) $beginning $offset');
+    final String text = paragraph.text!.substring(start, end);
+    final List<DomRectReadOnly> rects = textMetrics.getSelectionRects(
+      start + offset - beginning,
+      end + offset - beginning,
+    );
+    assert(rects.length == 1); // We worked hard to make it sequential
+    final rect = textMetrics.getActualBoundingBox(
+      start + offset - beginning,
+      end + offset - beginning,
+    );
+    double sum = 0;
+    final textRange = TextRange(start: start, end: end);
+    final clusterRange = paragraph.getLayout().convertTextToClusterRange(
+      textRange.start,
+      textRange.end,
+    );
+    for (int i = clusterRange.start; i < clusterRange.end; ++i) {
+      final cluster = paragraph.getLayout().textClusters[i];
+      final text = paragraph.text!.substring(cluster.textRange.start, cluster.textRange.end);
+      WebParagraphDebug.log(
+        'sum$i: "$text" $sum + ${cluster.advance.width} = ${sum + cluster.advance.width}',
+      );
+      sum += cluster.advance.width;
+    }
+    for (int i = start + 1; i <= end; ++i) {
+      final text = paragraph.text!.substring(start, i);
+      final test = paragraph.getLayout().getAdvance(
+        textMetrics,
+        TextRange(start: start + offset - beginning, end: i + offset - beginning),
+      );
+      WebParagraphDebug.log('test$i: "$text" [$start:$i) ${test.left}:${test.right}');
+    }
+    WebParagraphDebug.log(
+      'Compare $sum "$text" ${textMetrics.getTextClusters().length} $textRange  $offset - $beginning = ${offset - beginning} ? ${rects.first.width} ${rect.width} [$start:$end)',
     );
 
-    // Define the text cluster bounds
-    WebParagraphDebug.log(
-      'pos = ${webTextCluster.bounds.left - webTextCluster.advance.left} = ${webTextCluster.bounds.left} - ${webTextCluster.advance.left} ',
-    );
-    final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
-    final ui.Rect zeroRect = ui.Rect.fromLTWH(
-      pos,
-      0,
-      webTextCluster.bounds.width,
-      rects.first.height,
-    );
+    // Define the text clusters rect (using advances, not selected rects)
+    final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, rects.first.width, rects.first.height);
     final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
 
-    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
-    final double shift = left - left.floorToDouble();
     // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
-        .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy)
-        .translate(-shift, 0);
-
-    final String text = paragraph.text!.substring(
-      webTextCluster.textRange.start,
-      webTextCluster.textRange.end,
-    );
+        .translate(clusterOffset.dx + posX, clusterOffset.dy)
+        .translate(lineOffset.dx, lineOffset.dy);
 
     WebParagraphDebug.log(
-      'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} ${sourceRect.top}:${sourceRect.bottom} + ${webTextCluster.textMetrics!.fontBoundingBoxAscent} => target: ${targetRect.left}:${targetRect.right} ${targetRect.top}:${targetRect.bottom}',
+      'clusters "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right}',
     );
 
     paintContext.fillStyle = textStyle.foreground?.color.toCssString();
@@ -627,9 +686,8 @@ class TextPaint {
       textStyle,
       sourceRect,
       lineAscent,
-      webTextCluster.textMetrics!.fontBoundingBoxAscent,
-      webTextCluster.textMetrics!.fontBoundingBoxAscent +
-          webTextCluster.textMetrics!.fontBoundingBoxDescent,
+      textMetrics.fontBoundingBoxAscent,
+      textMetrics.fontBoundingBoxAscent + textMetrics.fontBoundingBoxDescent,
     );
 
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();

@@ -109,40 +109,49 @@ class TextLayout {
         : fontWeight.value.toStringAsFixed(2);
   }
 
+  ui.Rect getAdvance(DomTextMetrics textMetrics, TextRange textRange) {
+    final List<DomRectReadOnly> rects = textMetrics.getSelectionRects(
+      textRange.start,
+      textRange.end,
+    );
+    assert(rects.length == 1, 'Cluster text must be presented by a single rectangle');
+    return ui.Rect.fromLTWH(
+      rects.first.left,
+      rects.first.top,
+      rects.first.width,
+      rects.first.height,
+    );
+  }
+
+  ui.Rect getBounds(DomTextMetrics textMetrics, TextRange textRange) {
+    final DomRectReadOnly box = textMetrics.getActualBoundingBox(textRange.start, textRange.end);
+    return ui.Rect.fromLTWH(box.left, box.top, box.width, box.height);
+  }
+
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     double blockStart = 0.0;
     layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
-      final String text = paragraph.text!.substring(
-        styledBlock.textRange.start,
-        styledBlock.textRange.end,
-      );
+      final String text = getText(styledBlock.textRange);
+
       layoutContext.font =
           '${styleToString(styledBlock.textStyle.fontStyle!)} ${weightToString(styledBlock.textStyle.fontWeight!)} ${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
-          
+
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
-        final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
-          cluster.begin,
-          cluster.end,
+        final ui.Rect advance = getAdvance(
+          blockTextMetrics,
+          TextRange(start: cluster.begin, end: cluster.end),
         );
-        assert(rects.length == 1, 'Cluster text must be presented by a single rectangle');
-        final DomRectReadOnly box = blockTextMetrics.getActualBoundingBox(
-          cluster.begin,
-          cluster.end,
-        );
-        final ui.Rect bounds = ui.Rect.fromLTWH(box.left, box.top, box.width, box.height);
-        final ui.Rect advance = ui.Rect.fromLTWH(
-          rects.first.left,
-          rects.first.top,
-          rects.first.width,
-          rects.first.height,
+        final ui.Rect bounds = getBounds(
+          blockTextMetrics,
+          TextRange(start: cluster.begin, end: cluster.end),
         );
         textClusters.add(
           ExtendedTextCluster(
             cluster,
-            /*textRange:*/ ClusterRange(
+            TextRange(
               start: cluster.begin + styledBlock.textRange.start,
               end: cluster.end + styledBlock.textRange.start,
             ),
@@ -154,7 +163,14 @@ class TextLayout {
           ),
         );
       }
-      blockStart += blockTextMetrics.width!;
+      final ui.Rect blockAdvance = getAdvance(
+        blockTextMetrics,
+        TextRange(start: 0, end: text.length),
+      );
+      WebParagraphDebug.log(
+        'blockStart: ${blockStart + blockAdvance.width} += $blockStart + ${blockAdvance.width})',
+      );
+      blockStart += blockAdvance.width;
     }
 
     textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
@@ -177,16 +193,26 @@ class TextLayout {
     return ClusterRange(start: clusterStart, end: clusterEnd + 1);
   }
 
+  TextRange convertSequentialClusterRangeToText(ClusterRange clusterRange) {
+    final ExtendedTextCluster start = textClusters[clusterRange.start];
+    final ExtendedTextCluster end = textClusters[clusterRange.end - 1];
+    return TextRange(
+      start: math.min(start.textRange.start, end.textRange.end),
+      end: math.max(start.textRange.start, end.textRange.end),
+    );
+  }
+
   String getTextFromMonodirectionalClusterRange(ClusterRange clusterRange) {
     if (clusterRange.isEmpty) {
       return '';
     }
     final ExtendedTextCluster start = textClusters[clusterRange.start];
     final ExtendedTextCluster end = textClusters[clusterRange.end - 1];
-    return paragraph.text!.substring(
-      math.min(start.textRange.start, end.textRange.end),
-      math.max(start.textRange.start, end.textRange.end),
+    final TextRange textRange = TextRange(
+      start: math.min(start.textRange.start, end.textRange.end),
+      end: math.max(start.textRange.start, end.textRange.end),
     );
+    return getText(textRange);
   }
 
   void extractBidiRuns() {
@@ -214,9 +240,9 @@ class TextLayout {
     WebParagraphDebug.log('Text Clusters ($header): ${textClusters.length}');
     int i = 0;
     for (final ExtendedTextCluster cluster in textClusters) {
-      final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
+      final String clusterText = getText(cluster.textRange);
       WebParagraphDebug.log(
-        'cluster[$i]: [${cluster.start}:${cluster.end}) "$clusterText" ${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height}',
+        'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right}=${cluster.bounds.width}',
       );
       i += 1;
     }
@@ -232,9 +258,9 @@ class TextLayout {
       );
       for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
-        final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
+        final String clusterText = getText(cluster.textRange);
         WebParagraphDebug.log(
-          '$i: [${cluster.start}:${cluster.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
+          '$i: [${cluster.textRange.start}:${cluster.textRange.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
         );
       }
       runIndex += 1;
@@ -252,38 +278,69 @@ class TextLayout {
     return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
   }
 
+  TextRange intersectTextRange(TextRange a, TextRange b) {
+    return TextRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
+  }
+
   ClusterRange mergeSequentialClusterRanges(ClusterRange a, ClusterRange b) {
     assert(a.end == b.start || b.end == a.start);
     return ClusterRange(start: math.min(a.start, b.start), end: math.max(a.end, b.end));
   }
 
-  String text(ClusterRange r) {
-    return paragraph.text!.substring(r.start, r.end);
+  String getText(TextRange textRange) {
+    final String text = paragraph.text!.substring(textRange.start, textRange.end);
+    return text;
+  }
+
+  String getTextFromClusterRange(ClusterRange clusterRange) {
+    final TextRange textRange = convertSequentialClusterRangeToText(clusterRange);
+    return getText(textRange);
+  }
+
+  double getSequentialRangeWidth(DomTextMetrics lineTextMetrics, ClusterRange clusters) {
+    final TextRange text = convertSequentialClusterRangeToText(clusters);
+    final rects = lineTextMetrics.getSelectionRects(text.start, text.end);
+    assert(rects.length == 1);
+    return rects.first.width;
   }
 
   double addLine(
-    ClusterRange textRange,
-    double textWidth,
+    ClusterRange textClusterRange,
+    double textWidth0,
     ClusterRange whitespaces,
-    double whitespacesWidth,
+    double whitespacesWidth0,
     bool hardLineBreak,
     double top,
   ) {
     // Arrange line vertically, calculate metrics and bounds
+    final String text = getTextFromClusterRange(textClusterRange);
+    final DomTextMetrics lineTextMetrics = layoutContext.measureText(text);
+    final TextRange text1 = convertSequentialClusterRangeToText(textClusterRange);
+    WebParagraphDebug.log('LINE "$text" "$text1" $textClusterRange $text1');
+    final rect = lineTextMetrics.getActualBoundingBox(0, text1.width);
+    final textWidth = rect.width;
+
     final TextLine line = TextLine(
       this,
-      textRange,
+      lineTextMetrics,
+      textClusterRange,
       textWidth,
       whitespaces,
-      whitespacesWidth,
+      whitespacesWidth0,
       hardLineBreak,
     );
-    WebParagraphDebug.log('line $textRange + $whitespaces $textWidth $whitespacesWidth');
+    WebParagraphDebug.log(
+      'LINE $textClusterRange + $whitespaces $textWidth?$textWidth0 $whitespacesWidth0 ${line.lineTextMetrics.width}',
+    );
+
     // Get visual runs
     final List<int> logicalLevels = <int>[];
     int firstRunIndex = 0;
     for (final bidiRun in bidiRuns) {
-      final ClusterRange intesection1 = intersectClusterRange(bidiRun.clusterRange, textRange);
+      final ClusterRange intesection1 = intersectClusterRange(
+        bidiRun.clusterRange,
+        textClusterRange,
+      );
       final ClusterRange intesection2 = intersectClusterRange(bidiRun.clusterRange, whitespaces);
       if (intesection1.width <= 0 && intesection2.width <= 0) {
         if (logicalLevels.isNotEmpty) {
@@ -296,7 +353,7 @@ class TextLayout {
         // This run is on the line (at least, partially)
         WebParagraphDebug.log(
           'Add bidiRun '
-          '${bidiRun.clusterRange} & $textRange = $intesection1} '
+          '${bidiRun.clusterRange} & $textClusterRange = $intesection1} '
           '${bidiRun.clusterRange} & $whitespaces = $intesection2} ',
         );
         logicalLevels.add(bidiRun.bidiLevel);
@@ -313,49 +370,71 @@ class TextLayout {
       final BidiRun bidiRun = bidiRuns[visual.index + firstRunIndex];
       final ClusterRange lineRunClusterRange = intersectClusterRange(
         bidiRun.clusterRange,
-        textRange,
+        textClusterRange,
       );
       final ClusterRange whitespacesClusterRange = intersectClusterRange(
         bidiRun.clusterRange,
         whitespaces,
       );
       final String lineRunText = getTextFromMonodirectionalClusterRange(lineRunClusterRange);
+      final TextRange lineRunTextRange = convertSequentialClusterRangeToText(lineRunClusterRange);
       WebParagraphDebug.log(
         'Intersect "$lineRunText" '
-        '${bidiRun.clusterRange} & $textRange = $lineRunClusterRange '
+        '${bidiRun.clusterRange} & $textClusterRange = $lineRunClusterRange '
         '${bidiRun.clusterRange} & $whitespaces = $whitespacesClusterRange',
       );
-      final DomTextMetrics lineRunTextMetrics = layoutContext.measureText(lineRunText);
-      final List<DomRectReadOnly> rects = lineRunTextMetrics.getSelectionRects(
+      final List<DomRectReadOnly> rects = lineTextMetrics.getSelectionRects(
         0,
         lineRunClusterRange.width,
       );
-      for (int i = 0; i < rects.length; i++) {
-        WebParagraphDebug.log(
-          '$i: ${rects[i].left}:${rects[i].right} ${rects[i].width} ${lineRunTextMetrics.width}',
-        );
-      }
+      assert(rects.length == 1);
+      final bounds = lineTextMetrics.getActualBoundingBox(0, lineRunClusterRange.width);
+      WebParagraphDebug.log(
+        'run$lineRunClusterRange: ${rects.first.left}:${rects.first.right} ${rects.first.width} ${bounds.width}',
+      );
       final ExtendedTextCluster firstVisualClusterInRun =
           bidiRun.bidiLevel.isEven
               ? textClusters[lineRunClusterRange.start]
               : textClusters[lineRunClusterRange.end - 1];
-
+      WebParagraphDebug.log(
+        'firstVisualClusterInRun: ${lineRunClusterRange.start} ${firstVisualClusterInRun.advance.left}',
+      );
       line.visualRuns.add(
         LineRun(
           lineRunClusterRange,
           bidiRun.bidiLevel,
-          lineRunTextMetrics.width!,
+          lineRunTextRange,
+          bounds.width, //rects.first.width,
           shiftInsideLine - firstVisualClusterInRun.shift - firstVisualClusterInRun.advance.left,
         ),
       );
       WebParagraphDebug.log(
-        'Run[${visual.index} + $firstRunIndex]: "$lineRunText" ${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} {bidiRun.clusterRange}=>$lineRunClusterRange '
-        'width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.shift}-${firstVisualClusterInRun.advance.left}',
+        'Run[${visual.index} + $firstRunIndex]: "$lineRunText" ${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} ${bidiRun.clusterRange}=>$lineRunClusterRange '
+        'width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.absolutePositionX()}',
       );
-      shiftInsideLine += lineRunTextMetrics.width!;
+      shiftInsideLine += bounds.width; //rects.first.width;
     }
 
-    WebParagraphDebug.log('Line width: $shiftInsideLine vs $textWidth +$whitespacesWidth');
+    // Fill out styled text ranges
+    final lineTextRange = convertSequentialClusterRangeToText(textClusterRange);
+    for (final styledTextRange in paragraph.styledTextRanges) {
+      final TextRange intesection = intersectTextRange(styledTextRange.textRange, lineTextRange);
+      // We ignore whitespaces because for now we only use these textStyles for decoration
+      // (and we do not decorate hanging whitespaces)
+      if (intesection.width <= 0) {
+        continue;
+      }
+
+      // This run is on the line (at least, partially)
+      line.styledTextRanges.add(
+        LineStyledTextRange(
+          intesection.start,
+          intesection.end,
+          styledTextRange.textStyle,
+          intesection.start - styledTextRange.textRange.start,
+        ),
+      );
+    }
 
     // At this point we are agnostic of any fonts participating in text shaping
     // so we have to assume each cluster has a (different) font
@@ -438,10 +517,14 @@ class ExtendedTextCluster {
     : shift = 0.0,
       bounds = ui.Rect.zero,
       advance = ui.Rect.zero,
-      textRange = ClusterRange(start: 0, end: 0);
+      textRange = TextRange(start: 0, end: 0);
+
+  double absolutePositionX() {
+    return /*style block shift*/ shift + /*cluster advance inside the style block*/ advance.left;
+  }
 
   WebTextCluster? cluster;
-  ClusterRange textRange;
+  TextRange textRange;
   int start = 0;
   int end = 0;
   ui.Rect bounds;
@@ -461,14 +544,21 @@ class BidiRun {
 }
 
 class LineRun extends BidiRun {
-  LineRun(super.clusterRange, super.bidiLevel, this.width, this.shiftInsideLine);
+  LineRun(super.clusterRange, super.bidiLevel, this.textRange, this.width, this.shiftInsideLine);
+  final TextRange textRange;
   final double width;
   final double shiftInsideLine;
+}
+
+class LineStyledTextRange extends StyledTextRange {
+  LineStyledTextRange(super.start, super.end, super.textStyle, this.offset);
+  final int offset;
 }
 
 class TextLine {
   TextLine(
     this.textLayout,
+    this.lineTextMetrics,
     this.textRange,
     this.textWidth,
     this.whitespacesRange,
@@ -477,6 +567,7 @@ class TextLine {
   );
 
   final TextLayout textLayout;
+  final DomTextMetrics lineTextMetrics;
   final ClusterRange textRange;
   final ClusterRange whitespacesRange;
   final double textWidth;
@@ -488,5 +579,6 @@ class TextLine {
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
   List<LineRun> visualRuns = <LineRun>[];
+  List<LineStyledTextRange> styledTextRanges = <LineStyledTextRange>[];
   double formattingShift = 0.0;
 }

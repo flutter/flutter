@@ -535,7 +535,7 @@ Future<void> testMain() async {
     builder.pop();
 
     builder.pushStyle(through);
-    builder.addText('Through dotted blue decoration. ');
+    builder.addText('Through dashed blue decoration. ');
     builder.pop();
 
     builder.pushStyle(overlined);
