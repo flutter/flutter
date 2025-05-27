@@ -2347,7 +2347,6 @@ class Align extends SingleChildRenderObjectWidget {
 
   /// How to align the child.
   ///
-  ///
   /// The x and y values of the [Alignment] control the horizontal and vertical
   /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
