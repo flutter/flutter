@@ -360,18 +360,18 @@ sealed class _DebugSemanticsRoleChecks {
     return null;
   }
 
-  static bool _isLandmarkRole(SemanticsNode node) =>
-      node.role == SemanticsRole.complementary ||
-      node.role == SemanticsRole.contentInfo ||
-      node.role == SemanticsRole.main ||
-      node.role == SemanticsRole.navigation ||
-      node.role == SemanticsRole.region;
+  static bool _isLandmarkRole(SemanticsData nodeData) =>
+      nodeData.role == SemanticsRole.complementary ||
+      nodeData.role == SemanticsRole.contentInfo ||
+      nodeData.role == SemanticsRole.main ||
+      nodeData.role == SemanticsRole.navigation ||
+      nodeData.role == SemanticsRole.region;
 
   static bool _isSameRoleExisted(SemanticsNode semanticsNode) {
     final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
     int sameRoleCount = 0;
     for (final int id in treeNodes.keys) {
-      if (treeNodes[id]?.role == semanticsNode.role) {
+      if (treeNodes[id]?.getSemanticsData().role == semanticsNode.role) {
         sameRoleCount++;
         if (sameRoleCount > 1) {
           return true;
@@ -384,14 +384,16 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsComplementary(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      if (_isLandmarkRole(currentNode)) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
         return FlutterError(
           'The complementary landmark role should not contained within any other landmark roles.',
         );
       }
       currentNode = currentNode.parent;
     }
-    if (_isSameRoleExisted(node) && node.label.isEmpty) {
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
       return FlutterError(
         'The complementary landmark role should have a unique label as it is used more than once.',
       );
@@ -402,14 +404,17 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsContentInfo(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      if (_isLandmarkRole(currentNode)) {
+      final SemanticsData nodeData = currentNode.getSemanticsData();
+      if (_isLandmarkRole(nodeData)) {
         return FlutterError(
           'The contentInfo landmark role should not contained within any other landmark roles.',
         );
       }
       currentNode = currentNode.parent;
     }
-    if (_isSameRoleExisted(node) && node.label.isEmpty) {
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
       return FlutterError(
         'The contentInfo landmark role should have a unique label as it is used more than once.',
       );
@@ -427,7 +432,9 @@ sealed class _DebugSemanticsRoleChecks {
       }
       currentNode = currentNode.parent;
     }
-    if (_isSameRoleExisted(node) && node.label.isEmpty) {
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
       return FlutterError(
         'The main landmark role should have a unique label as it is used more than once.',
       );
@@ -436,7 +443,8 @@ sealed class _DebugSemanticsRoleChecks {
   }
 
   static FlutterError? _semanticsNavigation(SemanticsNode node) {
-    if (_isSameRoleExisted(node) && node.label.isEmpty) {
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
       return FlutterError(
         'The navigation landmark role should have a unique label as it is used more than once.',
       );
