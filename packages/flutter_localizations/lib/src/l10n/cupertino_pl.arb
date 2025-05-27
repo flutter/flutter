@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "Szukaj w internecie",
   "shareButtonLabel": "Udostępnij…",
   "clearButtonLabel": "Wyczyść",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Anuluj",
+  "backButtonLabel": "Wstecz"
 }

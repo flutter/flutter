@@ -617,7 +617,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     return suite;
   }
 
-  /// Returns the [BrowserManager] for [runtime], which should be a browser.
+  /// Returns the [BrowserManager] for [browser], which should be a browser.
   ///
   /// If no browser manager is running yet, starts one.
   Future<BrowserManager> _launchBrowser(Runtime browser) {
@@ -708,7 +708,7 @@ class OneOffHandler {
 }
 
 class BrowserManager {
-  /// Creates a new BrowserManager that communicates with [browser] over
+  /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
   BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket) {
     // The duration should be short enough that the debugging console is open as
@@ -795,14 +795,12 @@ class BrowserManager {
   /// [future]. If [debug] is true, starts the browser in debug mode, with its
   /// debugger interfaces on and detected.
   ///
-  /// The browser will start in headless mode if [headless] is true.
+  /// The browser will start in headless mode if [headless] is `true`.
   ///
   /// Add arbitrary browser flags via [webBrowserFlags].
   ///
-  /// The [settings] indicate how to invoke this browser's executable.
-  ///
-  /// Returns the browser manager, or throws an [ApplicationException] if a
-  /// connection fails to be established.
+  /// Returns the browser manager, or throws an exception if
+  /// a connection fails to be established.
   static Future<BrowserManager> start(
     ChromiumLauncher chromiumLauncher,
     Runtime runtime,
@@ -869,9 +867,6 @@ class BrowserManager {
   /// [url] should be an HTML page with a reference to the JS-compiled test
   /// suite. [path] is the path of the original test suite file, which is used
   /// for reporting. [suiteConfig] is the configuration for the test suite.
-  ///
-  /// If [mapper] is passed, it's used to map stack traces for errors coming
-  /// from this test suite.
   Future<RunnerSuite> load(
     String path,
     Uri url,
@@ -1004,6 +999,7 @@ class _BrowserEnvironment implements Environment {
   @override
   final bool supportsDebugging = true;
 
+  // TODO(bkonyi): update package:test_core to no longer reference Observatory.
   @override
   final Uri? observatoryUrl;
 

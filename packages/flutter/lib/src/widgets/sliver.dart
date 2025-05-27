@@ -1464,6 +1464,30 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// In practice, the simplest way to deal with these notifications is to mix
 /// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
 /// for that mixin class for details.
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use the [KeepAlive] widget
+/// to preserve the state of individual list items in a [ListView] when they are
+/// scrolled out of view.
+///
+/// By default, [ListView.builder] only keeps the widgets currently visible in
+/// the viewport alive. When an item scrolls out of view, it may be disposed to
+/// free up resources. This can cause the state of [StatefulWidget]s to be lost
+/// if not explicitly preserved.
+///
+/// In this example, each item in the list is a [StatefulWidget] that maintains
+/// a counter. Tapping the "+" button increments the counter. To selectively
+/// preserve the state, each item is wrapped in a [KeepAlive] widget, with the
+/// keepAlive parameter set based on the item’s index:
+///
+/// - For even-indexed items, `keepAlive: true`, so their state is preserved
+///   even when scrolled off-screen.
+/// - For odd-indexed items, `keepAlive: false`, so their state is discarded
+///   when they are no longer visible.
+///
+/// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
+/// {@end-tool}
+///
 class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   const KeepAlive({super.key, required this.keepAlive, required super.child});
@@ -1770,4 +1794,49 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
         })
         .forEach(visitor);
   }
+}
+
+/// A sliver that ensures its sliver child is included in the semantics tree.
+///
+/// This sliver ensures that its child sliver is still visited by the [RenderViewport]
+/// when constructing the semantics tree, and is not clipped out of the semantics tree by
+/// the [RenderViewport] when it is outside the current viewport and outside the cache extent.
+///
+/// The child sliver may still be excluded from the semantics tree if its [RenderSliver] does
+/// not provide a valid [RenderSliver.semanticBounds]. This sliver does not guarantee its
+/// child sliver is laid out.
+///
+/// Be mindful when positioning [SliverEnsureSemantics] in a [CustomScrollView] after slivers that build
+/// their children lazily, like [SliverList]. Lazy slivers might underestimate the total scrollable size (scroll
+/// extent) before the [SliverEnsureSemantics] widget. This inaccuracy can cause problems for assistive
+/// technologies (e.g., screen readers), which rely on a correct scroll extent to navigate properly; they
+/// might fail to scroll accurately to the content wrapped by [SliverEnsureSemantics].
+///
+/// To avoid this potential issue and ensure the scroll extent is calculated accurately up to this sliver,
+/// it's recommended to use slivers that can determine their extent precisely beforehand. Instead of
+/// [SliverList], consider using [SliverFixedExtentList], [SliverVariedExtentList], or
+/// [SliverPrototypeExtentList]. If using [SliverGrid], ensure it employs a delegate such as
+/// [SliverGridDelegateWithFixedCrossAxisCount] or [SliverGridDelegateWithMaxCrossAxisExtent].
+/// Using these alternatives guarantees that the scrollable area's size is known accurately, allowing
+/// assistive technologies to function correctly with [SliverEnsureSemantics].
+///
+/// {@tool dartpad}
+/// This example shows how to use [SliverEnsureSemantics] to keep certain headers and lists
+/// available to assistive technologies while they are outside the current viewport and cache extent.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_ensure_semantics.0.dart **
+/// {@end-tool}
+// TODO(Renzo-Olivares): Investigate potential solutions for revealing off screen items, https://github.com/flutter/flutter/issues/166703.
+class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that ensures its sliver child is included in the semantics tree.
+  const SliverEnsureSemantics({super.key, required Widget sliver}) : super(child: sliver);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverEnsureSemantics();
+}
+
+/// Ensures its sliver child is included in the semantics tree.
+class _RenderSliverEnsureSemantics extends RenderProxySliver {
+  @override
+  bool get ensureSemantics => true;
 }

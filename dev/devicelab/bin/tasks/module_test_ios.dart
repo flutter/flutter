@@ -18,18 +18,6 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    // TODO(matanlurey): Remove after default.
-    // https://github.com/flutter/flutter/issues/160257
-    section('Opt-in to --explicit-package-dependencies');
-    await flutter('config', options: <String>['--explicit-package-dependencies']);
-
-    // Update pod repo.
-    await eval(
-      'pod',
-      <String>['repo', 'update'],
-      environment: <String, String>{'LANG': 'en_US.UTF-8'},
-    );
-
     // This variable cannot be `late`, as we reference it in the `finally` block
     // which may execute before this field has been initialized.
     String? simulatorDeviceId;
@@ -67,8 +55,6 @@ Future<void> main() async {
       marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
       section('Create package with native assets');
-
-      await flutter('config', options: <String>['--enable-native-assets']);
 
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);

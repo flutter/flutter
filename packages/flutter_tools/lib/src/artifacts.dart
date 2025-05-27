@@ -334,8 +334,6 @@ abstract class Artifacts {
   /// all artifacts.
   ///
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
-  ///
-  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
   @visibleForTesting
   factory Artifacts.test({FileSystem? fileSystem}) {
     return _TestArtifacts(fileSystem ?? MemoryFileSystem.test());
@@ -1538,6 +1536,11 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
   }
 
   String _getDartSdkPath() {
+    // If the parent is a local engine, then use the locally built Dart SDK.
+    if (_parent.usesLocalArtifacts) {
+      return _parent.getArtifactPath(Artifact.engineDartSdkPath);
+    }
+
     // If we couldn't find a built dart sdk, let's look for a prebuilt one.
     final String prebuiltPath = _fileSystem.path.join(
       _getFlutterPrebuiltsPath(),

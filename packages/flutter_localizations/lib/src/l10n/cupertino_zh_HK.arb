@@ -1,4 +1,6 @@
 {
+  "cancelButtonLabel": "取消",
+  "backButtonLabel": "返回",
   "clearButtonLabel": "清除",
   "searchWebButtonLabel": "搜尋",
   "shareButtonLabel": "分享…",

@@ -123,6 +123,9 @@ class Capabilities {
   /// Vulkan and GLES.
   virtual bool SupportsExtendedRangeFormats() const = 0;
 
+  /// @brief The minimum alignment of uniform value offsets in bytes.
+  virtual size_t GetMinimumUniformAlignment() const = 0;
+
  protected:
   Capabilities();
 
@@ -169,6 +172,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetMaximumRenderPassAttachmentSize(ISize size);
 
+  CapabilitiesBuilder& SetMinimumUniformAlignment(size_t value);
+
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -189,6 +194,7 @@ class CapabilitiesBuilder {
   std::optional<PixelFormat> default_glyph_atlas_format_ = std::nullopt;
   std::optional<ISize> default_maximum_render_pass_attachment_size_ =
       std::nullopt;
+  size_t minimum_uniform_alignment_ = 256;
 
   CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;
 

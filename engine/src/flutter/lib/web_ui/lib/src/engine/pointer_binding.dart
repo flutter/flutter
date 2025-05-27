@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -17,7 +18,6 @@ import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
 import 'pointer_converter.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 import 'window.dart';
 
@@ -91,7 +91,7 @@ class SafariPointerEventWorkaround {
   void workAroundMissingPointerEvents() {
     // We only need to attach the listener once.
     if (_listener == null) {
-      _listener = createDomEventListener((_) {});
+      _listener = createDomEventListener((DomEvent _) {});
       domDocument.addEventListener('touchstart', _listener);
     }
   }
@@ -322,9 +322,9 @@ class ClickDebouncer {
     assert(event.type == 'pointerdown', 'Click debouncing must begin with a pointerdown');
 
     final DomEventTarget? target = event.target;
-    if (target is DomElement && target.hasAttribute('flt-tappable')) {
+    if (target.isA<DomElement>() && (target! as DomElement).hasAttribute('flt-tappable')) {
       _state = (
-        target: target,
+        target: target as DomElement,
         // The 200ms duration was chosen empirically by testing tapping, mouse
         // clicking, trackpad tapping and clicking, as well as the following
         // screen readers: TalkBack on Android, VoiceOver on macOS, Narrator/
@@ -439,7 +439,7 @@ class ClickDebouncer {
 class PointerSupportDetector {
   const PointerSupportDetector();
 
-  bool get hasPointerEvents => hasJsProperty(domWindow, 'PointerEvent');
+  bool get hasPointerEvents => domWindow.has('PointerEvent');
 
   @override
   String toString() => 'pointers:$hasPointerEvents';
@@ -471,7 +471,7 @@ class Listener {
       target.addEventListener(event, jsHandler);
     } else {
       final Map<String, Object> eventOptions = <String, Object>{'passive': passive};
-      target.addEventListenerWithOptions(event, jsHandler, eventOptions);
+      target.addEventListener(event, jsHandler, eventOptions.toJSAnyDeep);
     }
 
     final Listener listener = Listener._(event: event, target: target, handler: jsHandler);
@@ -528,9 +528,9 @@ abstract class _BaseAdapter {
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
   void addEventListener(DomEventTarget target, String eventName, DartDomEventListener handler) {
-    JSVoid loggedHandler(DomEvent event) {
+    void loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
-        if (domInstanceOfString(event, 'PointerEvent')) {
+        if (event.isA<DomPointerEvent>()) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
@@ -730,7 +730,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       return;
     }
 
-    assert(domInstanceOfString(event, 'WheelEvent'));
+    assert(event.isA<DomWheelEvent>());
     if (_debugLogPointerEvents) {
       print(event.type);
     }
@@ -1102,7 +1102,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   List<DomPointerEvent> _expandEvents(DomPointerEvent event) {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
-    if (hasJsProperty(event, 'getCoalescedEvents')) {
+    if (event.has('getCoalescedEvents')) {
       final List<DomPointerEvent> coalescedEvents =
           event.getCoalescedEvents().cast<DomPointerEvent>();
       // Some events don't perform coalescing, so they return an empty list. In

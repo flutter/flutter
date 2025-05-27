@@ -88,6 +88,7 @@ template("compiled_action") {
                              "testonly",
                              "pool",
                              "outputs",
+                             "mnemonic",
                            ])
 
     script = "//build/gn_run_binary.py"
@@ -140,6 +141,8 @@ template("compiled_action_foreach") {
   assert(defined(invoker.args), "args must be defined for $target_name")
 
   action_foreach(target_name) {
+    forward_variables_from(invoker, [ "mnemonic" ])
+
     # Otherwise this is a standalone action, define visibility if requested.
     if (defined(invoker.visibility)) {
       visibility = invoker.visibility

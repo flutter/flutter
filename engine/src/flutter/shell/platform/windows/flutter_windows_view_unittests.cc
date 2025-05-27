@@ -926,17 +926,18 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
       }));
 
   // Simulate raster thread.
-  std::thread([&metrics_sent_latch, &view]() {
+  std::thread frame_thread([&metrics_sent_latch, &view]() {
     metrics_sent_latch.Wait();
     // Frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnFrameGenerated(500, 500));
     view->OnFramePresented();
-  }).detach();
+  });
 
   // Start the window resize. This sends the new window metrics
   // and then blocks polling run loop until another thread completes the window
   // resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  frame_thread.join();
 }
 
 // Verify that an empty frame completes a view resize.
@@ -987,17 +988,18 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
   view_modifier.SetSurface(std::move(surface));
 
   // Simulate raster thread.
-  std::thread([&metrics_sent_latch, &view]() {
+  std::thread frame_thread([&metrics_sent_latch, &view]() {
     metrics_sent_latch.Wait();
 
     // Empty frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnEmptyFrameGenerated());
     view->OnFramePresented();
-  }).detach();
+  });
 
   // Start the window resize. This sends the new window metrics
   // and then blocks until another thread completes the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  frame_thread.join();
 }
 
 // A window resize can be interleaved between a frame generation and

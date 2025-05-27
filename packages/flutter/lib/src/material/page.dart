@@ -100,7 +100,14 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   PageTransitionsBuilder? _getPageTransitionBuilder(BuildContext context) {
     final TargetPlatform platform = Theme.of(context).platform;
     final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
-    return pageTransitionsTheme.builders[platform];
+    return pageTransitionsTheme.builders[platform] ??
+        switch (platform) {
+          TargetPlatform.iOS || TargetPlatform.macOS => const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.android ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.windows ||
+          TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+        };
   }
 
   // The transitionDuration is used to create the AnimationController which is only
@@ -173,7 +180,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    // Suppress previous route from transitioning if this is a fullscreenDialog route.
     return previousRoute is PageRoute && !fullscreenDialog;
   }
 

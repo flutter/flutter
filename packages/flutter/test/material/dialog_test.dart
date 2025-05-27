@@ -2890,6 +2890,62 @@ void main() {
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
   });
+
+  testWidgets('Dialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const Dialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          child: SizedBox(width: 1000, height: 100),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
+    // no back button in app bar for RawDialogRoute with full screen dialog set to true
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                child: const Text('X'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    RawDialogRoute<void>(
+                      pageBuilder: (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) {
+                        return Scaffold(
+                          appBar: AppBar(title: const Text('title')),
+                          body: const Text('body'),
+                        );
+                      },
+                      fullscreenDialog: true,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton), findsNothing);
+    expect(find.byType(CloseButton), findsOneWidget);
+  });
 }
 
 @pragma('vm:entry-point')

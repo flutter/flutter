@@ -401,11 +401,25 @@ GLuint _glCreateShader(GLenum shaderType) {
   return 0;
 }
 
-void _glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {}
+void _glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {
+  if (mock) {
+    mock->glDeleteFramebuffers(n, framebuffers);
+  }
+}
+
+void _glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers) {
+  if (mock) {
+    mock->glDeleteRenderbuffers(n, renderbuffers);
+  }
+}
 
 void _glDeleteShader(GLuint shader) {}
 
-void _glDeleteTextures(GLsizei n, const GLuint* textures) {}
+void _glDeleteTextures(GLsizei n, const GLuint* textures) {
+  if (mock) {
+    mock->glDeleteTextures(n, textures);
+  }
+}
 
 static void _glFramebufferRenderbuffer(GLenum target,
                                        GLenum attachment,
@@ -424,17 +438,26 @@ static void _glGenTextures(GLsizei n, GLuint* textures) {
   for (GLsizei i = 0; i < n; i++) {
     textures[i] = 0;
   }
+  if (mock) {
+    mock->glGenTextures(n, textures);
+  }
 }
 
 static void _glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
   for (GLsizei i = 0; i < n; i++) {
     framebuffers[i] = 0;
   }
+  if (mock) {
+    mock->glGenFramebuffers(n, framebuffers);
+  }
 }
 
 static void _glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
   for (GLsizei i = 0; i < n; i++) {
     renderbuffers[i] = 0;
+  }
+  if (mock) {
+    mock->glGenRenderbuffers(n, renderbuffers);
   }
 }
 
@@ -659,6 +682,7 @@ static void library_init() {
   epoxy_glCreateProgram = _glCreateProgram;
   epoxy_glCreateShader = _glCreateShader;
   epoxy_glDeleteFramebuffers = _glDeleteFramebuffers;
+  epoxy_glDeleteRenderbuffers = _glDeleteRenderbuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;

@@ -33,7 +33,8 @@ constexpr char kFloatType = 1;
 BufferView RuntimeEffectContents::EmplaceVulkanUniform(
     const std::shared_ptr<const std::vector<uint8_t>>& input_data,
     HostBuffer& host_buffer,
-    const RuntimeUniformDescription& uniform) {
+    const RuntimeUniformDescription& uniform,
+    size_t minimum_uniform_alignment) {
   // TODO(jonahwilliams): rewrite this to emplace directly into
   // HostBuffer.
   std::vector<float> uniform_buffer;
@@ -49,7 +50,7 @@ BufferView RuntimeEffectContents::EmplaceVulkanUniform(
     }
   }
   size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
-                              DefaultUniformAlignment());
+                              minimum_uniform_alignment);
 
   return host_buffer.Emplace(
       reinterpret_cast<const void*>(uniform_buffer.data()),
@@ -168,8 +169,9 @@ RuntimeEffectContents::CreatePipeline(const ContentContext& renderer,
   const std::shared_ptr<Context>& context = renderer.GetContext();
   const std::shared_ptr<ShaderLibrary>& library = context->GetShaderLibrary();
   const std::shared_ptr<const Capabilities>& caps = context->GetCapabilities();
-  const auto color_attachment_format = caps->GetDefaultColorFormat();
-  const auto stencil_attachment_format = caps->GetDefaultDepthStencilFormat();
+  const PixelFormat color_attachment_format = caps->GetDefaultColorFormat();
+  const PixelFormat stencil_attachment_format =
+      caps->GetDefaultDepthStencilFormat();
 
   using VS = RuntimeEffectVertexShader;
 
@@ -233,25 +235,38 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   ///
   BindFragmentCallback bind_callback = [this, &renderer,
                                         &context](RenderPass& pass) {
-    size_t minimum_sampler_index = 100000000;
     size_t buffer_index = 0;
     size_t buffer_offset = 0;
+    size_t sampler_location = 0;
+    size_t buffer_location = 0;
 
+    // Uniforms are ordered in the IPLR according to their
+    // declaration and the uniform location reflects the correct offset to
+    // be mapped to - except that it may include all proceeding
+    // uniforms of a different type. For example, a texture sampler that comes
+    // after 4 float uniforms may have a location of 4. Since we know that
+    // the declarations are already ordered, we can track the uniform location
+    // ourselves.
+    auto& host_buffer = renderer.GetTransientsBuffer();
     for (const auto& uniform : runtime_stage_->GetUniforms()) {
       std::unique_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
       switch (uniform.type) {
         case kSampledImage: {
-          // Sampler uniforms are ordered in the IPLR according to their
-          // declaration and the uniform location reflects the correct offset to
-          // be mapped to - except that it may include all proceeding float
-          // uniforms. For example, a float sampler that comes after 4 float
-          // uniforms may have a location of 4. To convert to the actual offset
-          // we need to find the largest location assigned to a float uniform
-          // and then subtract this from all uniform locations. This is more or
-          // less the same operation we previously performed in the shader
-          // compiler.
-          minimum_sampler_index =
-              std::min(minimum_sampler_index, uniform.location);
+          FML_DCHECK(sampler_location < texture_inputs_.size());
+          auto& input = texture_inputs_[sampler_location];
+
+          raw_ptr<const Sampler> sampler =
+              context->GetSamplerLibrary()->GetSampler(
+                  input.sampler_descriptor);
+
+          SampledImageSlot image_slot;
+          image_slot.name = uniform.name.c_str();
+          image_slot.binding = uniform.binding;
+          image_slot.texture_index = sampler_location;
+          pass.BindDynamicResource(ShaderStage::kFragment,
+                                   DescriptorType::kSampledImage, image_slot,
+                                   std::move(metadata), input.texture, sampler);
+          sampler_location++;
           break;
         }
         case kFloat: {
@@ -260,20 +275,21 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               << "Uniform " << uniform.name
               << " had unexpected type kFloat for Vulkan backend.";
 
-          size_t alignment =
-              std::max(uniform.bit_width / 8, DefaultUniformAlignment());
-          BufferView buffer_view = renderer.GetTransientsBuffer().Emplace(
-              uniform_data_->data() + buffer_offset, uniform.GetSize(),
-              alignment);
+          size_t alignment = std::max(uniform.bit_width / 8,
+                                      host_buffer.GetMinimumUniformAlignment());
+          BufferView buffer_view =
+              host_buffer.Emplace(uniform_data_->data() + buffer_offset,
+                                  uniform.GetSize(), alignment);
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
-          uniform_slot.ext_res_0 = uniform.location;
+          uniform_slot.ext_res_0 = buffer_location;
           pass.BindDynamicResource(ShaderStage::kFragment,
                                    DescriptorType::kUniformBuffer, uniform_slot,
                                    std::move(metadata), std::move(buffer_view));
           buffer_index++;
           buffer_offset += uniform.GetSize();
+          buffer_location++;
           break;
         }
         case kStruct: {
@@ -286,40 +302,12 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           pass.BindResource(
               ShaderStage::kFragment, DescriptorType::kUniformBuffer,
               uniform_slot, nullptr,
-              EmplaceVulkanUniform(uniform_data_,
-                                   renderer.GetTransientsBuffer(), uniform));
+              EmplaceVulkanUniform(uniform_data_, host_buffer, uniform,
+                                   host_buffer.GetMinimumUniformAlignment()));
         }
       }
     }
 
-    size_t sampler_index = 0;
-    for (const auto& uniform : runtime_stage_->GetUniforms()) {
-      std::unique_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
-
-      switch (uniform.type) {
-        case kSampledImage: {
-          FML_DCHECK(sampler_index < texture_inputs_.size());
-          auto& input = texture_inputs_[sampler_index];
-
-          raw_ptr<const Sampler> sampler =
-              context->GetSamplerLibrary()->GetSampler(
-                  input.sampler_descriptor);
-
-          SampledImageSlot image_slot;
-          image_slot.name = uniform.name.c_str();
-          image_slot.binding = uniform.binding;
-          image_slot.texture_index = uniform.location - minimum_sampler_index;
-          pass.BindDynamicResource(ShaderStage::kFragment,
-                                   DescriptorType::kSampledImage, image_slot,
-                                   std::move(metadata), input.texture, sampler);
-
-          sampler_index++;
-          break;
-        }
-        default:
-          continue;
-      }
-    }
     return true;
   };
 

@@ -35,8 +35,7 @@ void main() {
         expect(
           output.toString(),
           '\n'
-          '[{"event":"test.startedProcess","params":{"vmServiceUri":"http://localhost:1234",'
-          '"observatoryUri":"http://localhost:1234"}}]'
+          '[{"event":"test.startedProcess","params":{"vmServiceUri":"http://localhost:1234"}}]'
           '\n',
         );
       });
@@ -47,8 +46,7 @@ void main() {
         expect(
           output.toString(),
           '\n'
-          '[{"event":"test.startedProcess","params":{"vmServiceUri":null,'
-          '"observatoryUri":null}}]'
+          '[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]'
           '\n',
         );
       });

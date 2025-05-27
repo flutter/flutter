@@ -199,6 +199,7 @@ Future<void> a11y_main() async {
           textDirection: TextDirection.ltr,
           additionalActions: Int32List(0),
           controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateNode(
           id: 84,
@@ -235,6 +236,7 @@ Future<void> a11y_main() async {
           childrenInHitTestOrder: Int32List(0),
           childrenInTraversalOrder: Int32List(0),
           controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateNode(
           id: 96,
@@ -271,6 +273,7 @@ Future<void> a11y_main() async {
           textDirection: TextDirection.ltr,
           additionalActions: Int32List(0),
           controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateNode(
           id: 128,
@@ -307,6 +310,7 @@ Future<void> a11y_main() async {
           childrenInHitTestOrder: Int32List(0),
           childrenInTraversalOrder: Int32List(0),
           controlsNodes: null,
+          inputType: SemanticsInputType.none,
         )
         ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -395,6 +399,7 @@ Future<void> a11y_string_attributes() async {
         textDirection: TextDirection.ltr,
         additionalActions: Int32List(0),
         controlsNodes: null,
+        inputType: SemanticsInputType.none,
       );
 
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
@@ -1513,6 +1518,12 @@ void window_metrics_event_all_view_ids() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void remove_view_callback_too_early() {
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 Future<void> channel_listener_response() async {
   channelBuffers.setListener('test/listen', (
     ByteData? data,
@@ -1686,6 +1697,7 @@ Future<void> a11y_main_multi_view() async {
       textDirection: TextDirection.ltr,
       additionalActions: Int32List(0),
       controlsNodes: null,
+      inputType: SemanticsInputType.none,
     );
   }
 

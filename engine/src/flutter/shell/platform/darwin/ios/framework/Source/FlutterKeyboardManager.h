@@ -10,9 +10,9 @@
 #import <Foundation/NSObject.h>
 #import <UIKit/UIKit.h>
 
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
 
 typedef void (^KeyEventCompleteCallback)(bool, FlutterUIPressProxy* _Nonnull)
     API_AVAILABLE(ios(13.4));

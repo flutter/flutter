@@ -380,19 +380,19 @@ void main() {
     // Content section should be at the bottom left of action sheet
     // (minus padding).
     expect(
-      tester.getBottomLeft(find.byType(ClipRRect)),
+      tester.getBottomLeft(find.byType(ClipRSuperellipse)),
       tester.getBottomLeft(find.byType(CupertinoActionSheet)) - const Offset(-8.0, 8.0),
     );
 
     // Check that the dialog size is the same as the content section size
     // (minus padding).
     expect(
-      tester.getSize(find.byType(ClipRRect)).height,
+      tester.getSize(find.byType(ClipRSuperellipse)).height,
       tester.getSize(find.byType(CupertinoActionSheet)).height - 16.0,
     );
 
     expect(
-      tester.getSize(find.byType(ClipRRect)).width,
+      tester.getSize(find.byType(ClipRSuperellipse)).width,
       tester.getSize(find.byType(CupertinoActionSheet)).width - 16.0,
     );
   });
@@ -530,7 +530,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
           builder: (BuildContext context) {
-            screenHeight = MediaQuery.sizeOf(context).height;
+            screenHeight = MediaQuery.heightOf(context);
             return MediaQuery.withClampedTextScaling(
               minScaleFactor: 3.0,
               maxScaleFactor: 3.0,
@@ -706,7 +706,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
           builder: (BuildContext context) {
-            screenHeight = MediaQuery.sizeOf(context).height;
+            screenHeight = MediaQuery.heightOf(context);
             return CupertinoActionSheet(
               message: Text('content ' * 1000),
               actions: <Widget>[

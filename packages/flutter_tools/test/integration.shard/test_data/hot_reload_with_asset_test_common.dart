@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
 import '../test_driver.dart';
@@ -48,7 +50,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         }
       });
       flutter.stdout.listen(printOnFailure);
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await onFirstLoad.future;
 
       project.uncommentHotReloadPrint();
@@ -75,7 +80,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         }
       });
       flutter.stdout.listen(printOnFailure);
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       await onFirstLoad.future;
 
       project.uncommentHotReloadPrint();

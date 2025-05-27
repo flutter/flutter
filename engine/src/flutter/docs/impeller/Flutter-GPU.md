@@ -40,4 +40,4 @@ Under the hood, the API communicates with Flutter Engine via Dart FFI, calling s
 
 ## Reporting bugs
 
-If you run into issues while using Flutter GPU, please file a bug using the standard [bug report template](https://github.com/flutter/flutter/issues/new?template=2_bug.yml). Additionally, mention "Flutter GPU" in the title, label the bug with the `flutter-gpu` label.
+If you run into issues while using Flutter GPU, please file a bug using the standard [bug report template](https://github.com/flutter/flutter/issues/new?template=02_bug.yml). Additionally, mention "Flutter GPU" in the title, label the bug with the `flutter-gpu` label.

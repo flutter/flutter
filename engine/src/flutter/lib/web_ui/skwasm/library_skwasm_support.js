@@ -8,9 +8,72 @@
 mergeInto(LibraryManager.library, {
   $skwasm_support_setup__postset: 'skwasm_support_setup();',
   $skwasm_support_setup: function() {
+    if (Module["skwasmSingleThreaded"]) {
+      _skwasm_isSingleThreaded = function() {
+        return true;
+      };
+
+      let messageListener;
+      // In single threaded mode, we simply invoke the message listener as a
+      // microtask, as it's much cheaper than doing a full postMessage
+      skwasm_registerMessageListener = function(threadId, listener) {
+        messageListener = listener;
+      }
+      skwasm_getCurrentTimestamp = function() {
+        return performance.now();
+      };
+      skwasm_postMessage = function(message, transfers, threadId) {
+        // If we're in single-threaded mode, we shouldn't use postMessage, as
+        // it ends up being quite expensive. Instead, just queue a microtask.
+        queueMicrotask(() => messageListener(message));
+      };
+    } else {
+      _skwasm_isSingleThreaded = function() {
+        return false;
+      };
+
+      // This value represents the difference between the time origin of the main
+      // thread and whichever web worker this code is running on. This is so that
+      // when we report frame timings, that they are in the same time domain
+      // regardless of whether they are captured on the main thread or the web
+      // worker.
+      let timeOriginDelta = 0;
+      skwasm_registerMessageListener = function(threadId, listener) {
+        const eventListener = function({data}) {
+          const skwasmMessage = data.skwasmMessage;
+          if (!skwasmMessage) {
+            return;
+          }
+          if (skwasmMessage == 'syncTimeOrigin') {
+            timeOriginDelta = performance.timeOrigin - data.timeOrigin;
+            return;
+          }
+          listener(data);
+        };
+        if (!threadId) {
+          addEventListener("message", eventListener);
+        } else {
+          _wasmWorkers[threadId].addEventListener("message", eventListener);
+          _wasmWorkers[threadId].postMessage({
+            skwasmMessage: 'syncTimeOrigin',
+            timeOrigin: performance.timeOrigin,
+          });
+        }
+      };
+      skwasm_getCurrentTimestamp = function() {
+        return performance.now() + timeOriginDelta;
+      };
+      skwasm_postMessage = function(message, transfers, threadId) {
+        if (threadId) {
+          _wasmWorkers[threadId].postMessage(message, { transfer: transfers } );
+        } else {
+          postMessage(message, { transfer: transfers });
+        }
+      };
+    }
+
     const handleToCanvasMap = new Map();
     const associatedObjectsMap = new Map();
-
     _skwasm_setAssociatedObjectOnThread = function(threadId, pointer, object) {
       skwasm_postMessage({
         skwasmMessage: 'setAssociatedObject',
@@ -175,15 +238,22 @@ mergeInto(LibraryManager.library, {
       });
     }
   },
-  $skwasm_support_setup__deps: [ '$skwasm_threading_setup'],
+  $skwasm_registerMessageListener: function() {},
+  $skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
+  $skwasm_getCurrentTimestamp: function () {},
+  $skwasm_getCurrentTimestamp__deps: ['$skwasm_support_setup'],
+  $skwasm_postMessage: function () {},
+  $skwasm_postMessage__deps: ['$skwasm_support_setup'],
+  skwasm_isSingleThreaded: function() {},
+  skwasm_isSingleThreaded__deps: ['$skwasm_support_setup'],
   skwasm_setAssociatedObjectOnThread: function () {},
-  skwasm_setAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
+  skwasm_setAssociatedObjectOnThread__deps: ['$skwasm_support_setup', '$skwasm_postMessage'],
   skwasm_getAssociatedObject: function () {},
   skwasm_getAssociatedObject__deps: ['$skwasm_support_setup'],
   skwasm_disposeAssociatedObjectOnThread: function () {},
   skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
   skwasm_connectThread: function() {},
-  skwasm_connectThread__deps: ['$skwasm_support_setup'],
+  skwasm_connectThread__deps: ['$skwasm_support_setup', '$skwasm_registerMessageListener', '$skwasm_getCurrentTimestamp'],
   skwasm_dispatchRenderPictures: function() {},
   skwasm_dispatchRenderPictures__deps: ['$skwasm_support_setup'],
   skwasm_createOffscreenCanvas: function () {},

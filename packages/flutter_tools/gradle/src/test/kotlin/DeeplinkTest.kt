@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import org.gradle.internal.impldep.org.junit.Assert.assertThrows
@@ -37,7 +41,7 @@ class DeeplinkTest {
         val deeplink1 = Deeplink("scheme1", "host1", "path1", IntentFilterCheck())
         val deeplink2 = null
 
-        assertThrows(NullPointerException::class.java, { deeplink1.equals(deeplink2) })
+        assertThrows(NullPointerException::class.java) { deeplink1.equals(deeplink2) }
     }
 
     @Test

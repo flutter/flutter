@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
@@ -49,7 +53,7 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 // are updated in DependencyVersionChecker.kt
 private const val SUPPORTED_GRADLE_VERSION: String = "7.4.2"
 private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_11
-private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
+private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 3, 0)
 private const val SUPPORTED_KGP_VERSION: String = "1.8.10"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
@@ -78,7 +82,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `AGP version in warn range results in warning logs`() {
-        val exampleWarnAgpVersion = AndroidPluginVersion(7, 1, 0)
+        val exampleWarnAgpVersion = AndroidPluginVersion(8, 2, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleWarnAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra

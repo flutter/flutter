@@ -44,9 +44,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterRendererTest {
   @Rule(order = 1)
@@ -829,7 +827,8 @@ public class FlutterRendererTest {
   @SuppressWarnings({"deprecation", "removal"})
   public void ImageReaderSurfaceProducerIsCleanedUpOnTrimMemory() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
 
     // Create and set a mock callback.
     TextureRegistry.SurfaceProducer.Callback callback =
@@ -851,7 +850,8 @@ public class FlutterRendererTest {
   public void ImageReaderSurfaceProducerSignalsCleanupBeforeDestroying() throws Exception {
     // Regression test for https://github.com/flutter/flutter/issues/160933.
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
 
     // Ensure the callbacks were actually called.
     // Note this needs to be an object in order to be accessed in the callback.
@@ -902,7 +902,8 @@ public class FlutterRendererTest {
   public void ImageReaderSurfaceProducerUnsubscribesWhenReleased() {
     // Regression test for https://github.com/flutter/flutter/issues/156434.
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
 
     // Create and set a mock callback.
     TextureRegistry.SurfaceProducer.Callback callback =
@@ -924,7 +925,8 @@ public class FlutterRendererTest {
   @SuppressWarnings({"deprecation", "removal"})
   public void ImageReaderSurfaceProducerIsCreatedOnLifecycleResume() throws Exception {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
 
     // Create a callback.
     CountDownLatch latch = new CountDownLatch(1);

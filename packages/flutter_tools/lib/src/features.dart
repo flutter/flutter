@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -46,7 +48,7 @@ abstract class FeatureFlags {
   bool get isCliAnimationEnabled => true;
 
   /// Whether native assets compilation and bundling is enabled.
-  bool get isNativeAssetsEnabled => false;
+  bool get isNativeAssetsEnabled => true;
 
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
@@ -73,7 +75,6 @@ const List<Feature> allFeatures = <Feature>[
   cliAnimation,
   nativeAssets,
   swiftPackageManager,
-  explicitPackageDependencies,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -152,7 +153,8 @@ const Feature nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
-  master: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
@@ -163,21 +165,6 @@ const Feature swiftPackageManager = Feature(
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
-);
-
-/// Enable explicit resolution and generation of package dependencies.
-const Feature explicitPackageDependencies = Feature.fullyEnabled(
-  name: 'support for dev_dependency plugins',
-  configSetting: 'explicit-package-dependencies',
-  extraHelpText:
-      'Plugins that are resolved as result of being in "dev_dependencies" of a '
-      'package are not included in release builds of an app. By enabling this '
-      'feature, the synthetic "package:flutter_gen" can no longer be generated '
-      'and the legacy ".flutter-plugins" tool artifact is no longer generated.\n'
-      '\n'
-      'See also:\n'
-      '* https://flutter.dev/to/flutter-plugins-configuration.\n'
-      '* https://flutter.dev/to/flutter-gen-deprecation.',
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
@@ -275,7 +262,8 @@ class Feature {
 }
 
 /// A description of the conditions to enable a feature for a particular channel.
-class FeatureChannelSetting {
+@immutable
+final class FeatureChannelSetting {
   const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
@@ -288,4 +276,19 @@ class FeatureChannelSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeatureChannelSetting &&
+        available == other.available &&
+        enabledByDefault == other.enabledByDefault;
+  }
+
+  @override
+  int get hashCode => Object.hash(available, enabledByDefault);
+
+  @override
+  String toString() {
+    return 'FeatureChannelSetting <available: $available, enabledByDefault: $enabledByDefault>';
+  }
 }

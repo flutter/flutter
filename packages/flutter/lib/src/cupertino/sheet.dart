@@ -35,7 +35,7 @@ const double _kTopGapRatio = 0.08;
 // the top of the screen. Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, _kTopGapRatio),
+  end: Offset.zero,
 );
 
 // Offset change for when a new sheet covers another sheet. '0.0' represents the
@@ -94,7 +94,7 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///
 /// When `useNestedNavigation` is set to `true`, any route pushed to the stack
 /// from within the context of the [CupertinoSheetRoute] will display within that
-/// sheet. System back gestures and programatic pops on the initial route in a
+/// sheet. System back gestures and programmatic pops on the initial route in a
 /// sheet will also be intercepted to pop the whole [CupertinoSheetRoute]. If
 /// a custom [Navigator] setup is needed, like for example to enable named routes
 /// or the pages API, then it is recommended to directly push a [CupertinoSheetRoute]
@@ -258,8 +258,6 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
@@ -276,26 +274,39 @@ class CupertinoSheetTransition extends StatefulWidget {
             )
             : child;
 
-    return SlideTransition(
-      position: slideAnimation,
-      child: ScaleTransition(
-        scale: scaleAnimation,
-        filterQuality: FilterQuality.medium,
-        alignment: Alignment.topCenter,
-        child: AnimatedBuilder(
-          animation: radiusAnimation,
-          child: child,
-          builder: (BuildContext context, Widget? child) {
-            return ClipRRect(
-              borderRadius:
-                  !secondaryAnimation.isDismissed
-                      ? radiusAnimation.value
-                      : BorderRadius.circular(0),
-              child: contrastedChild,
-            );
-          },
+    final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+
+    return Stack(
+      children: <Widget>[
+        AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light,
+          ),
+          child: SizedBox(height: topGapHeight, width: double.infinity),
         ),
-      ),
+        SlideTransition(
+          position: slideAnimation,
+          child: ScaleTransition(
+            scale: scaleAnimation,
+            filterQuality: FilterQuality.medium,
+            alignment: Alignment.topCenter,
+            child: AnimatedBuilder(
+              animation: radiusAnimation,
+              child: child,
+              builder: (BuildContext context, Widget? child) {
+                return ClipRSuperellipse(
+                  borderRadius:
+                      !secondaryAnimation.isDismissed
+                          ? radiusAnimation.value
+                          : BorderRadius.circular(0),
+                  child: contrastedChild,
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -322,7 +333,7 @@ class CupertinoSheetTransition extends StatefulWidget {
         scale: scaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: child,
         ),
@@ -423,10 +434,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
         scale: _secondaryScaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: child,
-        ),
+        child: child,
       ),
     );
   }
@@ -440,10 +448,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
           context,
           widget.primaryRouteAnimation,
           widget.linearTransition,
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: widget.child,
-          ),
+          widget.child,
         ),
       ),
     );
@@ -494,16 +499,18 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    final double bottomPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
+    final double topPadding = MediaQuery.heightOf(context) * _kTopGapRatio;
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      removeBottom: true,
       child: Padding(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: builder(context)),
+        padding: EdgeInsets.only(top: topPadding),
+        child: ClipRSuperellipse(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: _CupertinoSheetScope(child: builder(context)),
+          ),
         ),
       ),
     );
@@ -517,7 +524,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   /// Pops the entire [CupertinoSheetRoute], if a sheet route exists in the stack.
   ///
-  /// Used if to pop an entire sheet at once, if there is nested navigtion within
+  /// Used if to pop an entire sheet at once, if there is nested navigation within
   /// that sheet.
   static void popSheet(BuildContext context) {
     if (hasParentSheet(context)) {

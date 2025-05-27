@@ -147,7 +147,7 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.loadLibrary(context, "flutter");
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
     FlutterJNI.loadLibraryCalled = true;
   }
 
@@ -254,20 +254,6 @@ public class FlutterJNI {
    */
   @Nullable
   public static String getVMServiceUri() {
-    return vmServiceUri;
-  }
-
-  /**
-   * VM Service URI for the VM instance.
-   *
-   * <p>Its value is set by the native engine once {@link #init(Context, String[], String, String,
-   * String, long, int)} is run.
-   *
-   * @deprecated replaced by {@link #getVMServiceUri()}.
-   */
-  @Deprecated
-  @Nullable
-  public static String getObservatoryUri() {
     return vmServiceUri;
   }
 
@@ -803,7 +789,7 @@ public class FlutterJNI {
    *
    * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
    * here:
-   * https://github.com/flutter/engine/blob/main/shell/platform/android/platform_view_android.cc#L207
+   * https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/platform_view_android.cc#L207
    */
   @SuppressWarnings("unused")
   @UiThread
@@ -822,7 +808,7 @@ public class FlutterJNI {
    *
    * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
    * here:
-   * https://github.com/flutter/engine/blob/main/shell/platform/android/platform_view_android.cc#L207
+   * https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/platform_view_android.cc#L207
    *
    * <p>// TODO(cbracken): expand these docs to include more actionable information.
    */
@@ -938,19 +924,23 @@ public class FlutterJNI {
    */
   @UiThread
   public void registerImageTexture(
-      long textureId, @NonNull TextureRegistry.ImageConsumer imageTexture) {
+      long textureId,
+      @NonNull TextureRegistry.ImageConsumer imageTexture,
+      boolean resetOnBackground) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRegisterImageTexture(
         nativeShellHolderId,
         textureId,
-        new WeakReference<TextureRegistry.ImageConsumer>(imageTexture));
+        new WeakReference<TextureRegistry.ImageConsumer>(imageTexture),
+        resetOnBackground);
   }
 
   private native void nativeRegisterImageTexture(
       long nativeShellHolderId,
       long textureId,
-      @NonNull WeakReference<TextureRegistry.ImageConsumer> imageTexture);
+      @NonNull WeakReference<TextureRegistry.ImageConsumer> imageTexture,
+      boolean resetOnBackground);
 
   /**
    * Call this method to inform Flutter that a texture previously registered with {@link

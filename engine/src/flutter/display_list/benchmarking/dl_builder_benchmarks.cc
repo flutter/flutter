@@ -63,13 +63,13 @@ static void Complete(DisplayListBuilder& builder,
   auto display_list = builder.Build();
   switch (type) {
     case DisplayListBuilderBenchmarkType::kBounds:
-      display_list->bounds();
+      display_list->GetBounds();
       break;
     case DisplayListBuilderBenchmarkType::kRtree:
       display_list->rtree();
       break;
     case DisplayListBuilderBenchmarkType::kBoundsAndRtree:
-      display_list->bounds();
+      display_list->GetBounds();
       display_list->rtree();
       break;
     case DisplayListBuilderBenchmarkType::kDefault:

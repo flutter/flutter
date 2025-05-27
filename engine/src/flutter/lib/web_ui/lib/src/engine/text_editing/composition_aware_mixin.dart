@@ -59,26 +59,26 @@ mixin CompositionAwareMixin {
     domElement.removeEventListener(_kCompositionEnd, _compositionEndListener);
   }
 
-  JSVoid _handleCompositionStart(DomEvent event) {
+  void _handleCompositionStart(DomEvent event) {
     composingText = null;
   }
 
-  JSVoid _handleCompositionUpdate(DomEvent event) {
-    if (domInstanceOfString(event, 'CompositionEvent')) {
+  void _handleCompositionUpdate(DomEvent event) {
+    if (event.isA<DomCompositionEvent>()) {
       composingText = (event as DomCompositionEvent).data;
     }
   }
 
-  JSVoid _handleCompositionEnd(DomEvent event) {
+  void _handleCompositionEnd(DomEvent event) {
     composingText = null;
   }
 
   EditingState determineCompositionState(EditingState editingState) {
-    if (editingState.extentOffset == null || composingText == null || editingState.text == null) {
+    if (composingText == null) {
       return editingState;
     }
 
-    final int composingBase = editingState.extentOffset! - composingText!.length;
+    final int composingBase = editingState.extentOffset - composingText!.length;
 
     if (composingBase < 0) {
       return editingState;

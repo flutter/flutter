@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_ROUND_RECT_H_
 #define FLUTTER_IMPELLER_GEOMETRY_ROUND_RECT_H_
 
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/geometry/point.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/rounding_radii.h"
@@ -136,6 +137,63 @@ struct RoundRect {
 
   Rect bounds_;
   RoundingRadii radii_;
+
+  // Helps with RoundRectPathSource and DiffRoundRectPathSource
+  void Dispatch(PathReceiver& receiver, bool include_end = true) const;
+
+  friend class RoundRectPathSource;
+  friend class DiffRoundRectPathSource;
+};
+
+class RoundRectPathSource : public PathSource {
+ public:
+  explicit RoundRectPathSource(const RoundRect& round_rect);
+
+  ~RoundRectPathSource();
+
+  const RoundRect& GetRoundRect() const { return round_rect_; }
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const RoundRect round_rect_;
+};
+
+class DiffRoundRectPathSource : public PathSource {
+ public:
+  explicit DiffRoundRectPathSource(const RoundRect& outer,
+                                   const RoundRect& inner);
+
+  ~DiffRoundRectPathSource();
+
+  const RoundRect& GetOuter() const { return outer_; }
+  const RoundRect& GetInner() const { return inner_; }
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const RoundRect outer_;
+  const RoundRect inner_;
 };
 
 }  // namespace impeller

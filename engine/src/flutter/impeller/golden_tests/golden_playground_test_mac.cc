@@ -222,10 +222,16 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   AiksContext renderer(GetContext(), typographer_context_);
 
   std::unique_ptr<testing::Screenshot> screenshot;
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
+
+  ISize physical_window_size(
+      std::round(pimpl_->window_size.width * content_scale.x),
+      std::round(pimpl_->window_size.height * content_scale.y));
   for (int i = 0; i < 2; ++i) {
     auto display_list = callback();
     auto texture =
-        DisplayListToTexture(display_list, pimpl_->window_size, renderer);
+        DisplayListToTexture(display_list, physical_window_size, renderer);
     screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, texture);
   }
   return SaveScreenshot(std::move(screenshot));
@@ -320,9 +326,14 @@ fml::Status GoldenPlaygroundTest::SetCapabilities(
 std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
   AiksContext renderer(GetContext(), typographer_context_);
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
 
+  ISize physical_window_size(
+      std::round(pimpl_->window_size.width * content_scale.x),
+      std::round(pimpl_->window_size.height * content_scale.y));
   return pimpl_->screenshotter->MakeScreenshot(
-      renderer, DisplayListToTexture(list, pimpl_->window_size, renderer));
+      renderer, DisplayListToTexture(list, physical_window_size, renderer));
 }
 
 }  // namespace impeller

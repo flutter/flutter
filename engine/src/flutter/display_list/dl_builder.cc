@@ -11,6 +11,9 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "fml/logging.h"
 
@@ -368,17 +371,17 @@ void DisplayListBuilder::SetAttributesFromPaint(
     setStrokeJoin(paint.getStrokeJoin());
   }
   if (flags.applies_shader()) {
-    setColorSource(paint.getColorSource().get());
+    setColorSource(paint.getColorSourcePtr());
   }
   if (flags.applies_color_filter()) {
     setInvertColors(paint.isInvertColors());
-    setColorFilter(paint.getColorFilter().get());
+    setColorFilter(paint.getColorFilterPtr());
   }
   if (flags.applies_image_filter()) {
-    setImageFilter(paint.getImageFilter().get());
+    setImageFilter(paint.getImageFilterPtr());
   }
   if (flags.applies_mask_filter()) {
-    setMaskFilter(paint.getMaskFilter().get());
+    setMaskFilter(paint.getMaskFilterPtr());
   }
 }
 
@@ -1260,7 +1263,16 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
     OpResult result = PaintResult(current_, flags);
     if (result != OpResult::kNoEffect &&
         AccumulateOpBounds(rse.GetBounds(), flags)) {
-      Push<DrawRoundSuperellipseOp>(0, rse);
+      // DrawRoundSuperellipseOp only supports filling. Anything related to
+      // stroking must use path approximation.
+      if (current_.getDrawStyle() == DlDrawStyle::kFill) {
+        Push<DrawRoundSuperellipseOp>(0, rse);
+      } else {
+        DlPathBuilder builder;
+        builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
+            rse.GetBounds(), rse.GetRadii()));
+        Push<DrawPathOp>(0, builder.TakePath());
+      }
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
     }
@@ -1618,7 +1630,7 @@ void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
 void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                          DlScalar opacity) {
   if (!std::isfinite(opacity) || opacity <= SK_ScalarNearlyZero ||
-      display_list->op_count() == 0 || display_list->bounds().isEmpty() ||
+      display_list->op_count() == 0 || display_list->GetBounds().IsEmpty() ||
       current_info().is_nop) {
     return;
   }
@@ -1789,7 +1801,6 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   if (flags.is_geometric()) {
     bool is_stroked = flags.is_stroked(current_.getDrawStyle());
 
-    // Path effect occurs before stroking...
     DisplayListSpecialGeometryFlags special_flags =
         flags.GeometryFlags(is_stroked);
 
@@ -1811,7 +1822,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   }
 
   if (flags.applies_mask_filter()) {
-    auto filter = current_.getMaskFilter();
+    const DlMaskFilter* filter = current_.getMaskFilterPtr();
     if (filter) {
       switch (filter->type()) {
         case DlMaskFilterType::kBlur: {
@@ -1829,7 +1840,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   // a layer.
 
   if (flags.applies_image_filter()) {
-    auto filter = current_.getImageFilterPtr();
+    const DlImageFilter* filter = current_.getImageFilterPtr();
     if (filter) {
       DlRect dl_bounds;
       if (!filter->map_local_bounds(bounds, dl_bounds)) {

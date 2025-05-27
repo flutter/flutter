@@ -21,7 +21,7 @@ namespace impeller {
 /// quality blurs (with exponentially diminishing returns for the same sigma
 /// input). Making this value any lower results in a noticable loss of
 /// quality in the blur.
-constexpr static float kKernelRadiusPerSigma = 1.73205080757;
+constexpr static float kKernelRadiusPerSigma = 1.73205080757f;
 
 struct Radius;
 

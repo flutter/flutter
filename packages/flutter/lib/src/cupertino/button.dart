@@ -266,6 +266,8 @@ class CupertinoButton extends StatefulWidget {
   /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
   ///  * [WidgetState.disabled].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.focused].
   ///
   /// If null, then [MouseCursor.defer] is used when the button is disabled.
   /// When the button is enabled, [SystemMouseCursors.click] is used on Web
@@ -359,7 +361,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   bool _tapInProgress = false;
 
   void _handleTapDown(TapDownDetails event) {
-    _tapInProgress = true;
+    setState(() {
+      _tapInProgress = true;
+    });
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
@@ -367,7 +371,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapUp(TapUpDetails event) {
-    _tapInProgress = false;
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -380,7 +386,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapCancel() {
-    _tapInProgress = false;
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -493,10 +501,32 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
-    final Set<WidgetState> states = <WidgetState>{if (!enabled) WidgetState.disabled};
+    final Set<WidgetState> states = <WidgetState>{
+      if (!enabled) WidgetState.disabled,
+      if (_tapInProgress) WidgetState.pressed,
+      if (isFocused) WidgetState.focused,
+    };
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
+
+    final ShapeDecoration shapeDecoration = ShapeDecoration(
+      shape: RoundedSuperellipseBorder(
+        side:
+            enabled && isFocused
+                ? BorderSide(
+                  color: effectiveFocusOutlineColor,
+                  width: 3.5,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                )
+                : BorderSide.none,
+        borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
+      ),
+      color:
+          backgroundColor != null && !enabled
+              ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+              : backgroundColor,
+    );
 
     return MouseRegion(
       cursor: effectiveMouseCursor,
@@ -546,24 +576,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border:
-                        enabled && isFocused
-                            ? Border.fromBorderSide(
-                              BorderSide(
-                                color: effectiveFocusOutlineColor,
-                                width: 3.5,
-                                strokeAlign: BorderSide.strokeAlignOutside,
-                              ),
-                            )
-                            : null,
-                    borderRadius:
-                        widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
-                    color:
-                        backgroundColor != null && !enabled
-                            ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                            : backgroundColor,
-                  ),
+                  decoration: shapeDecoration,
                   child: Padding(
                     padding: widget.padding ?? kCupertinoButtonPadding[widget.sizeStyle]!,
                     child: Align(

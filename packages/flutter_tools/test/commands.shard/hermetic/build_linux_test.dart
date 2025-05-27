@@ -61,7 +61,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -652,7 +652,16 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
           'set(FLUTTER_VERSION_MINOR 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_PATCH 0 PARENT_SCOPE)',
           'set(FLUTTER_VERSION_BUILD 0 PARENT_SCOPE)',
-          '  "DART_DEFINES=Zm9vLmJhcj0y,Zml6ei5mYXI9Mw==,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI="',
+          '  "DART_DEFINES=${encodeDartDefinesMap(<String, String>{
+            'foo.bar': '2', //
+            'fizz.far': '3',
+            'FLUTTER_VERSION': '0.0.0',
+            'FLUTTER_CHANNEL': 'master',
+            'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+            'FLUTTER_FRAMEWORK_REVISION': '11111',
+            'FLUTTER_ENGINE_REVISION': 'abcde',
+            'FLUTTER_DART_VERSION': '12',
+          })}"',
           '  "DART_OBFUSCATION=true"',
           '  "EXTRA_FRONT_END_OPTIONS=--enable-experiment=non-nullable"',
           '  "EXTRA_GEN_SNAPSHOT_OPTIONS=--enable-experiment=non-nullable"',
@@ -686,7 +695,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "fizz_bar")
 ''');
       fileSystem.file('pubspec.yaml').createSync();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
         fileSystem.currentDirectory,
       );

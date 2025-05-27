@@ -2,11 +2,11 @@ package io.flutter.plugin.platform;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.view.Surface;
+import androidx.annotation.RequiresApi;
 import io.flutter.view.TextureRegistry.SurfaceProducer;
 
-@TargetApi(API_LEVELS.API_29)
+@RequiresApi(API_LEVELS.API_29)
 public class SurfaceProducerPlatformViewRenderTarget implements PlatformViewRenderTarget {
   private static final String TAG = "SurfaceProducerRenderTarget";
   private SurfaceProducer producer;

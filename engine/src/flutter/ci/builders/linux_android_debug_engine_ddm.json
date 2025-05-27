@@ -34,7 +34,6 @@
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
-                "--no-prebuilt-dart-sdk",
                 "--gn-args=dart_dynamic_modules=true",
                 "--rbe",
                 "--no-goma"
@@ -43,6 +42,45 @@
             "description": "Produces experimental debug mode artifacts to target 64-bit arm Android from a Linux host with dynamic modules enabled.",
             "ninja": {
                 "config": "ci/android_debug_arm64_ddm",
+                "targets": [
+                    "flutter"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "name": "ci/android_debug_x64_ddm",
+                    "type": "gcs",
+                    "base_path": "out/ci/android_debug_x64_ddm/zip_archives/",
+                    "include_paths": [
+                        "out/ci/android_debug_x64_ddm/zip_archives/android-x64-ddm/artifacts.zip",
+                        "out/ci/android_debug_x64_ddm/zip_archives/android-x64-ddm/symbols.zip"
+                    ],
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_debug_x64_ddm",
+                "--android",
+                "--android-cpu=x64",
+                "--no-lto",
+                "--gn-args=dart_dynamic_modules=true",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_debug_x64_ddm",
+            "description": "Produces experimental debug mode artifacts to target x64 Android from a Linux host with dynamic modules enabled.",
+            "ninja": {
+                "config": "ci/android_debug_x64_ddm",
                 "targets": [
                     "flutter"
                 ]

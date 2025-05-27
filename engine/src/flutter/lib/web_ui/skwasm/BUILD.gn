@@ -17,6 +17,8 @@ template("skwasm_variant") {
       "fonts.cpp",
       "helpers.h",
       "image.cpp",
+      "live_objects.cpp",
+      "live_objects.h",
       "paint.cpp",
       "path.cpp",
       "picture.cpp",
@@ -47,34 +49,28 @@ template("skwasm_variant") {
       "-lexports.js",
       "-sEXPORTED_FUNCTIONS=[stackAlloc]",
       "-sEXPORTED_RUNTIME_METHODS=[addFunction,wasmExports,wasmMemory,stackAlloc]",
-      "-sINCOMING_MODULE_JS_API=[instantiateWasm,noExitRuntime,mainScriptUrlOrBlob]",
+      "-sINCOMING_MODULE_JS_API=[instantiateWasm,locateFile,noExitRuntime,mainScriptUrlOrBlob,wasmMemory,wasm,skwasmSingleThreaded]",
       "-sUSE_ES6_IMPORT_META=0",
       "--js-library",
       rebase_path("library_skwasm_support.js"),
     ]
 
     inputs = [ rebase_path("library_skwasm_support.js") ]
-
-    if (invoker.multi_threaded) {
-      sources += [ "surface_mt.cpp" ]
-      ldflags += [
-        "-sPTHREAD_POOL_SIZE=1",
-        "-Wno-pthreads-mem-growth",
-        "--js-library",
-        rebase_path("library_skwasm_multi_threaded.js"),
+    if (invoker.is_heavy) {
+      sources += [
+        "animated_image.cpp",
+        "text/paragraph_builder_builtin_icu.cpp",
       ]
-      inputs += [ rebase_path("library_skwasm_multi_threaded.js") ]
     } else {
-      sources += [ "surface_st.cpp" ]
-      ldflags += [
-        "--js-library",
-        rebase_path("library_skwasm_single_threaded.js"),
+      sources += [
+        "animated_image_stub.cpp",
+        "text/paragraph_builder_client_icu.cpp",
       ]
-      inputs += [ rebase_path("library_skwasm_single_threaded.js") ]
     }
 
     if (is_debug) {
       ldflags += [
+        "-sDEMANGLE_SUPPORT=1",
         "-sASSERTIONS=1",
         "-sGL_ASSERTIONS=1",
       ]
@@ -91,9 +87,9 @@ template("skwasm_variant") {
 }
 
 skwasm_variant("skwasm") {
-  multi_threaded = true
+  is_heavy = false
 }
 
-skwasm_variant("skwasm_st") {
-  multi_threaded = false
+skwasm_variant("skwasm_heavy") {
+  is_heavy = true
 }

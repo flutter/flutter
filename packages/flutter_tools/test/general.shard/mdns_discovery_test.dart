@@ -612,7 +612,7 @@ void main() {
             () async => portDiscovery.firstMatchingVmService(client),
             throwsToolExit(
               message:
-                  'Flutter could not connect to the Dart VM service.\n'
+                  'Flutter could not access the local network.\n'
                   '\n'
                   'Please ensure your IDE or terminal app has permission to access '
                   'devices on the local network. This allows Flutter to connect to '
@@ -649,7 +649,7 @@ void main() {
             () async => portDiscovery.firstMatchingVmService(client),
             throwsToolExit(
               message:
-                  'Flutter could not connect to the Dart VM service.\n'
+                  'Flutter could not access the local network.\n'
                   '\n'
                   'Please ensure your IDE or terminal app has permission to access '
                   'devices on the local network. This allows Flutter to connect to '
@@ -657,6 +657,47 @@ void main() {
                   '\n'
                   'You can grant this permission in System Settings > Privacy & '
                   'Security > Local Network.\n',
+            ),
+          );
+        },
+        // [intended] This tool exit message only works for macOS
+        skip: !globals.platform.isMacOS,
+      );
+
+      test(
+        'On macOS, tool prints a helpful message when mDNS lookup throws an uncaught SocketException',
+        () async {
+          final MDnsClient client = FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+            uncaughtSocketExceptionOnLookup: true,
+          );
+
+          final BufferLogger logger = BufferLogger.test();
+
+          final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+            mdnsClient: client,
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          );
+
+          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
+            client,
+            throwOnMissingLocalNetworkPermissionsError: false,
+          );
+
+          expect(result, isNull);
+          expect(
+            logger.errorText,
+            contains(
+              'Flutter could not access the local network.\n'
+              '\n'
+              'Please ensure your IDE or terminal app has permission to access '
+              'devices on the local network. This allows Flutter to connect to '
+              'the Dart VM.\n'
+              '\n'
+              'You can grant this permission in System Settings > Privacy & '
+              'Security > Local Network.\n',
             ),
           );
         },
@@ -1183,6 +1224,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
     InternetAddress? mDnsAddress,
+    Function? onError,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);

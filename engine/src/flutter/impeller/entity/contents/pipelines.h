@@ -43,7 +43,8 @@
 #include "impeller/entity/radial_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/radial_gradient_uniform_fill.frag.h"
 #include "impeller/entity/rrect_blur.frag.h"
-#include "impeller/entity/rrect_blur.vert.h"
+#include "impeller/entity/rrect_like_blur.vert.h"
+#include "impeller/entity/rsuperellipse_blur.frag.h"
 #include "impeller/entity/solid_fill.frag.h"
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/entity/srgb_to_linear_filter.frag.h"
@@ -56,7 +57,8 @@
 #include "impeller/entity/texture_fill_strict_src.frag.h"
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
-#include "impeller/entity/vertices_uber.frag.h"
+#include "impeller/entity/vertices_uber_1.frag.h"
+#include "impeller/entity/vertices_uber_2.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 #include "impeller/renderer/pipeline.h"
 
@@ -98,7 +100,7 @@ using BlendScreenPipeline = AdvancedBlendPipelineHandle;
 using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
 using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
-using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, ColorMatrixColorFilterFragmentShader>;
+using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, ColorMatrixColorFilterFragmentShader>;
 using ConicalGradientFillConicalPipeline = GradientPipelineHandle<ConicalGradientFillConicalFragmentShader>;
 using ConicalGradientFillRadialPipeline = GradientPipelineHandle<ConicalGradientFillRadialFragmentShader>;
 using ConicalGradientFillStripPipeline = GradientPipelineHandle<ConicalGradientFillStripFragmentShader>;
@@ -136,7 +138,8 @@ using PorterDuffBlendPipeline = RenderPipelineHandle<PorterDuffBlendVertexShader
 using RadialGradientFillPipeline = GradientPipelineHandle<RadialGradientFillFragmentShader>;
 using RadialGradientSSBOFillPipeline = GradientPipelineHandle<RadialGradientSsboFillFragmentShader>;
 using RadialGradientUniformFillPipeline = GradientPipelineHandle<RadialGradientUniformFillFragmentShader>;
-using RRectBlurPipeline = RenderPipelineHandle<RrectBlurVertexShader, RrectBlurFragmentShader>;
+using RRectBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader, RrectBlurFragmentShader>;
+using RSuperellipseBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader, RsuperellipseBlurFragmentShader>;
 using SolidFillPipeline = RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>;
 using SrgbToLinearFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, SrgbToLinearFilterFragmentShader>;
 using SweepGradientFillPipeline = GradientPipelineHandle<SweepGradientFillFragmentShader>;
@@ -146,7 +149,8 @@ using TextureDownsamplePipeline = RenderPipelineHandle<TextureFillVertexShader, 
 using TexturePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
 using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillStrictSrcFragmentShader>;
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
-using VerticesUberShader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUberFragmentShader>;
+using VerticesUber1Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber1FragmentShader>;
+using VerticesUber2Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber2FragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on
 

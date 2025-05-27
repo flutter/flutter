@@ -26,7 +26,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterMutatorViewTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

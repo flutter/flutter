@@ -414,6 +414,13 @@ class DisplayListOpFlags : DisplayListFlags {
   static constexpr DisplayListAttributeFlags kDrawShadowFlags{
       kIgnoresPaint  //
   };
+
+  // Flags for usage in drawParagraph internal conversion.
+  static constexpr DisplayListAttributeFlags kDrawParagraphFlags{
+      kBasePaintFlags |         //
+      kBaseStrokeOrFillFlags |  //
+      kAnySpecialGeometryMask   //
+  };
 };
 
 }  // namespace flutter

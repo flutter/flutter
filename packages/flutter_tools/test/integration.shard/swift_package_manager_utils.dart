@@ -26,7 +26,6 @@ class SwiftPackageManagerUtils {
           'Failed to enable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
@@ -45,7 +44,6 @@ class SwiftPackageManagerUtils {
           'Failed to disable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
@@ -252,7 +250,7 @@ class SwiftPackageManagerUtils {
     pubspec.writeAsStringSync(
       pubspecContent.replaceFirst(
         '\n# The following section is specific to Flutter packages.\nflutter:\n',
-        '\n# The following section is specific to Flutter packages.\nflutter:\n  disable-swift-package-manager: true',
+        '\n# The following section is specific to Flutter packages.\nflutter:\n  config: \n    enable-swift-package-manager: false\n',
       ),
     );
   }
