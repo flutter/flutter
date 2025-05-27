@@ -118,6 +118,7 @@ class ReorderableListView extends StatefulWidget {
          'All children of this widget must have a key.',
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
+       itemCount = children.length,
        childCount = children.length,
        separatorBuilder = null;
 
@@ -152,7 +153,7 @@ class ReorderableListView extends StatefulWidget {
   const ReorderableListView.builder({
     super.key,
     required this.itemBuilder,
-    required this.childCount,
+    required this.itemCount,
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
@@ -179,7 +180,7 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
-  }) : assert(childCount >= 0),
+  }) : assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -276,7 +277,8 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   /// When using the [ReorderableListView.separated] constructor, this is the total
   /// number of children in the list, including items and separators.
-  /// The actual number of data items is less.
+  /// When using [ReorderableListView] or the [ReorderableListView.builder] constructor, this is the number of items
+  /// in the list.
   final int childCount;
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
@@ -600,7 +602,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             itemExtent: widget.itemExtent,
             itemExtentBuilder: widget.itemExtentBuilder,
             prototypeItem: widget.prototypeItem,
-            itemCount: widget.childCount,
+            itemCount: widget.itemCount,
             onReorder: (int oldCombinedIndex, int newCombinedIndex) {
               if (widget.separatorBuilder != null) {
                 // oldCombinedIndex will be an even index (item) because separators are not draggable.
