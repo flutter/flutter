@@ -8027,6 +8027,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// See also:
 ///
 ///  * [Builder], the platonic stateless widget.
+
 class StatefulBuilder extends StatefulWidget {
   /// Creates a widget that both has state and delegates its build to a callback.
   const StatefulBuilder({super.key, required this.builder});
