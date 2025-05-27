@@ -187,6 +187,7 @@ class ReorderableListView extends StatefulWidget {
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
+       childCount = itemCount,
        separatorBuilder = null;
 
   /// Creates a reorderable list from widget items that are created on demand,
@@ -223,7 +224,7 @@ class ReorderableListView extends StatefulWidget {
     super.key,
     required IndexedWidgetBuilder itemBuilder,
     required this.separatorBuilder,
-    required int itemCount,
+    required this.itemCount,
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
@@ -259,7 +260,6 @@ class ReorderableListView extends StatefulWidget {
            return separatorBuilder(context, itemIndex);
          }
        }),
-       itemCount = itemCount,
        childCount = _computeActualChildCount(itemCount),
        itemExtent = null,
        itemExtentBuilder = null,
