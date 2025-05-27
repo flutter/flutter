@@ -27,8 +27,7 @@ class SemanticsTester {
   /// for specifying flags, such as [isTextField].
   SemanticsNodeUpdate updateNode({
     required int id,
-    SemanticsFlags flags = SemanticsFlags.none,
-
+    ui.SemanticsFlags? flags,
     // Actions
     int actions = 0,
     bool? hasTap,
@@ -186,7 +185,7 @@ class SemanticsTester {
 
     final SemanticsNodeUpdate update = SemanticsNodeUpdate(
       id: id,
-      flags: flags,
+      flags: flags ?? ui.SemanticsFlags.none,
       actions: actions,
       maxValueLength: maxValueLength ?? 0,
       currentValueLength: currentValueLength ?? 0,

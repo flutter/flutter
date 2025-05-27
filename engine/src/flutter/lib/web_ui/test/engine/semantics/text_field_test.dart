@@ -449,18 +449,23 @@ void testMain() {
         children: <SemanticsNodeUpdate>[
           builder.updateNode(
             id: 1,
-            isEnabled: true,
-            isTextField: true,
+            flags: ui.SemanticsFlags(
+              isEnabled: true,
+              isTextField: true,
+              isFocused: focusFieldId == 1,
+            ),
             value: 'Hello',
-            isFocused: focusFieldId == 1,
+
             rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
           ),
           builder.updateNode(
             id: 2,
-            isEnabled: true,
-            isTextField: true,
+            flags: ui.SemanticsFlags(
+              isEnabled: true,
+              isTextField: true,
+              isFocused: focusFieldId == 2,
+            ),
             value: 'World',
-            isFocused: focusFieldId == 2,
             rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
           ),
         ],
@@ -521,15 +526,17 @@ SemanticsObject createTextFieldSemantics({
   final tester = SemanticsTester(owner());
   tester.updateNode(
     id: 0,
-    isEnabled: isEnabled,
     label: label,
     value: value,
-    isTextField: true,
-    isFocused: isFocused,
-    isMultiline: isMultiline,
-    isObscured: isObscured,
-    hasRequiredState: isRequired != null,
-    isRequired: isRequired,
+    flags: ui.SemanticsFlags(
+      isEnabled: isEnabled,
+      isTextField: true,
+      isFocused: isFocused,
+      isMultiline: isMultiline,
+      isObscured: isObscured,
+      hasRequiredState: isRequired != null,
+      isRequired: isRequired ?? false,
+    ),
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,
