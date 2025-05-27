@@ -275,7 +275,7 @@ class ReorderableListView extends StatefulWidget {
   /// For example, if there is a list with 10 items and 9 separators, this will be 10.
   final int itemCount;
 
-  /// {@macro flutter.widgets.reorderable_list.itemCount}
+  /// {@macro flutter.widgets.reorderable_list.childCount}
   /// When using the [ReorderableListView.separated] constructor, this is the total
   /// number of children in the list, including items and separators.
   /// When using [ReorderableListView] or the [ReorderableListView.builder] constructor, this is the number of items
