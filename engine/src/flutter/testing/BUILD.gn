@@ -81,6 +81,11 @@ source_set("dart") {
     "//flutter/skia",
     "//flutter/third_party/tonic",
   ]
+
+  if (is_fuchsia) {
+    import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+    deps = [ "$fuchsia_sdk/fidl/fuchsia.io" ]
+  }
 }
 
 source_set("skia") {
