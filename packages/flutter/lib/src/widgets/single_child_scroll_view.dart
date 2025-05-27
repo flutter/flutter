@@ -159,16 +159,27 @@ class SingleChildScrollView extends StatelessWidget {
     this.clipBehavior = Clip.hardEdge,
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
-    this.keyboardDismissBehavior,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.enabled = true,
   }) : assert(
-         !(controller != null && (primary ?? false)),
-         'Primary ScrollViews obtain their ScrollController via inheritance '
-         'from a PrimaryScrollController widget. You cannot both set primary to '
-         'true and pass an explicit controller.',
-       );
+          !(controller != null && (primary ?? false)),
+          'Primary ScrollViews obtain their ScrollController via inheritance '
+          'from a PrimaryScrollController widget. You cannot both set primary to '
+          'true and pass an explicit controller.',
+        );
+
+  /// Whether scrolling behavior is enabled.
+  ///
+  /// If false, the [child] is rendered without any scrolling, behaving as if
+  /// it's a regular widget.
+  ///
+  /// Defaults to true.
+  final bool enabled;
 
   /// {@macro flutter.widgets.scroll_view.scrollDirection}
+  /// The scroll direction of the view.
   final Axis scrollDirection;
+
 
   /// Whether the scroll view scrolls in the reading direction.
   ///
@@ -201,7 +212,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// [ScrollController.animateTo]).
   final ScrollController? controller;
 
-  /// {@macro flutter.widgets.scroll_view.primary}
+  /// Whether this is the primary scroll view for the given axis.
   final bool? primary;
 
   /// How the scroll view should respond to user input.
@@ -220,12 +231,13 @@ class SingleChildScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
-  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  /// The hit test behavior of the scrollable.
   ///
   /// Defaults to [HitTestBehavior.opaque].
   final HitTestBehavior hitTestBehavior;
@@ -237,25 +249,32 @@ class SingleChildScrollView extends StatelessWidget {
   ///
   /// If [keyboardDismissBehavior] is null then it will fallback to the inherited
   /// [ScrollBehavior.getKeyboardDismissBehavior].
-  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   AxisDirection _getDirection(BuildContext context) {
-    return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
+    return getAxisDirectionFromAxisReverseAndDirectionality( context, scrollDirection, reverse );
   }
 
   @override
   Widget build(BuildContext context) {
-    final AxisDirection axisDirection = _getDirection(context);
     Widget? contents = child;
+
     if (padding != null) {
       contents = Padding(padding: padding!, child: contents);
     }
-    final bool effectivePrimary =
-        primary ??
-        controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
-    final ScrollController? scrollController =
-        effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
+    if (!enabled) {
+      // Just return the child with padding (if any), no scroll behavior
+      return contents ?? const SizedBox.shrink();
+    }
+
+    final AxisDirection axisDirection = _getDirection(context);
+    final bool effectivePrimary = primary ??
+        controller == null &&
+            PrimaryScrollController.shouldInherit(context, scrollDirection);
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.maybeOf(context)
+        : controller;
 
     Widget scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
@@ -275,11 +294,8 @@ class SingleChildScrollView extends StatelessWidget {
       },
     );
 
-    final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
-        keyboardDismissBehavior ??
-        ScrollConfiguration.of(context).getKeyboardDismissBehavior(context);
-
-    if (effectiveKeyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+    if (keyboardDismissBehavior ==
+        ScrollViewKeyboardDismissBehavior.onDrag) {
       scrollable = NotificationListener<ScrollUpdateNotification>(
         child: scrollable,
         onNotification: (ScrollUpdateNotification notification) {
@@ -301,6 +317,8 @@ class SingleChildScrollView extends StatelessWidget {
         : scrollable;
   }
 }
+
+
 
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
