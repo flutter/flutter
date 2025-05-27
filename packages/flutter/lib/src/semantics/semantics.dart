@@ -404,8 +404,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsContentInfo(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      final SemanticsData nodeData = currentNode.getSemanticsData();
-      if (_isLandmarkRole(nodeData)) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
         return FlutterError(
           'The contentInfo landmark role should not contained within any other landmark roles.',
         );
@@ -425,7 +424,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsMain(SemanticsNode node) {
     SemanticsNode? currentNode = node.parent;
     while (currentNode != null) {
-      if (_isLandmarkRole(currentNode)) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
         return FlutterError(
           'The main landmark role should not contained within any other landmark roles.',
         );

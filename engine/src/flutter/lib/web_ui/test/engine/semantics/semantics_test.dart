@@ -5129,15 +5129,15 @@ void _testLandmarks() {
       ],
     );
     tester.apply();
-    final SemanticsObject object = tester.getSemanticsObject(1);
-    expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
-    expect(object.element.getAttribute('role'), 'contentinfo');
-    expect(object.element.getAttribute('aria-label'), 'contentInfo 1');
+    final SemanticsObject object1 = tester.getSemanticsObject(1);
+    expect(object1.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object1.element.getAttribute('role'), 'contentinfo');
+    expect(object1.element.getAttribute('aria-label'), 'contentInfo 1');
 
-    final SemanticsObject object = tester.getSemanticsObject(2);
-    expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
-    expect(object.element.getAttribute('role'), 'contentinfo');
-    expect(object.element.getAttribute('aria-label'), 'contentInfo 2');
+    final SemanticsObject object2 = tester.getSemanticsObject(2);
+    expect(object2.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object2.element.getAttribute('role'), 'contentinfo');
+    expect(object2.element.getAttribute('aria-label'), 'contentInfo 2');
   });
 
   test('nodes with main role', () {
@@ -5186,15 +5186,15 @@ void _testLandmarks() {
       ],
     );
     tester.apply();
-    final SemanticsObject object = tester.getSemanticsObject(1);
-    expect(object.semanticRole?.kind, EngineSemanticsRole.main);
-    expect(object.element.getAttribute('role'), 'main');
-    expect(object.element.getAttribute('aria-label'), 'main 1');
+    final SemanticsObject object1 = tester.getSemanticsObject(1);
+    expect(object1.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object1.element.getAttribute('role'), 'main');
+    expect(object1.element.getAttribute('aria-label'), 'main 1');
 
-    final SemanticsObject object = tester.getSemanticsObject(2);
-    expect(object.semanticRole?.kind, EngineSemanticsRole.main);
-    expect(object.element.getAttribute('role'), 'main');
-    expect(object.element.getAttribute('aria-label'), 'main 2');
+    final SemanticsObject object2 = tester.getSemanticsObject(2);
+    expect(object2.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object2.element.getAttribute('role'), 'main');
+    expect(object2.element.getAttribute('aria-label'), 'main 2');
   });
 
   test('nodes with navigation role', () {
