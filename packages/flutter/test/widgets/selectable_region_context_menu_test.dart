@@ -134,6 +134,33 @@ void main() {
     expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157579
+  testWidgets('prevents default action of mousedown events', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    final web.HTMLElement element =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+
+    for (int i = 0; i <= 4; i++) {
+      final web.MouseEvent event = web.MouseEvent(
+        'mousedown',
+        web.MouseEventInit(button: i, clientX: 200, clientY: 300, cancelable: true),
+      );
+      element.dispatchEvent(event);
+      expect(event.defaultPrevented, isTrue);
+    }
+  });
 }
 
 void removeAllStyleElements() {
