@@ -39,7 +39,6 @@ class _OverlayExampleState extends State<OverlayExample> {
         initialEntries: [
           OverlayEntry(
             builder: (BuildContext context) {
-              // Add a Material widget HERE to provide a context for the Ink
               return SelectionArea(
                 child: Column(
                   children: [
