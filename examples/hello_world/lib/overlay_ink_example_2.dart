@@ -39,6 +39,7 @@ class _OverlayExampleState extends State<OverlayExample> {
         initialEntries: [
           OverlayEntry(
             builder: (BuildContext context) {
+              // Add a Material widget HERE to provide a context for the Ink
               return Ink(child: Container(width: 111, height: 112, color: Colors.red));
             },
             opaque: true,

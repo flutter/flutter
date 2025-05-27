@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/root',
               builder: (context, __) {
+                // Add a Material widget HERE to provide a context for the Ink
                 return Ink(
                   child: InkWell(
                     onTap: () => context.push('/root/sub'),
