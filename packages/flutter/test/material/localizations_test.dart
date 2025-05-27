@@ -34,6 +34,7 @@ void main() {
     expect(localizations.scanTextButtonLabel, isNotNull);
     expect(localizations.lookUpButtonLabel, isNotNull);
     expect(localizations.searchWebButtonLabel, isNotNull);
+    expect(localizations.translateButtonLabel, isNotNull);
     expect(localizations.shareButtonLabel, isNotNull);
     expect(localizations.okButtonLabel, isNotNull);
     expect(localizations.pasteButtonLabel, isNotNull);

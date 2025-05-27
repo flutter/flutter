@@ -393,6 +393,7 @@ void main() {
       const IOSSystemContextMenuItemDataPaste(),
       const IOSSystemContextMenuItemDataSelectAll(),
       const IOSSystemContextMenuItemDataSearchWeb(title: 'Special Search'),
+      const IOSSystemContextMenuItemDataTranslate(title: 'Translate'),
       // TODO(justinmc): Support the "custom" item type.
       // https://github.com/flutter/flutter/issues/103163
     ];

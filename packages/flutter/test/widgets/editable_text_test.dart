@@ -160,6 +160,7 @@ void main() {
                     onLookUp: null,
                     onSearchWeb: null,
                     onShare: null,
+                    onTranslate: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },

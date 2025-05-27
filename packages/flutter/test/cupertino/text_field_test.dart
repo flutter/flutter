@@ -386,6 +386,56 @@ void main() {
   );
 
   testWidgets(
+    'Translate shows up on iOS only',
+        (WidgetTester tester) async {
+      String? lastSearch;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+            (MethodCall methodCall) async {
+          if (methodCall.method == 'Translate.invoke') {
+            expect(methodCall.arguments, isA<String>());
+            lastSearch = methodCall.arguments as String;
+          }
+          return null;
+        },
+      );
+
+      final TextEditingController controller = TextEditingController(text: 'Test');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      );
+
+      final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
+
+      // Long press to put the cursor after the "s".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+      expect(find.text('Translate'), isTargetPlatformiOS ? findsOneWidget : findsNothing);
+
+      if (isTargetPlatformiOS) {
+        await tester.tap(find.text('Translate'));
+        expect(lastSearch, 'Test');
+      }
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+    }),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
+  testWidgets(
     'Share shows up on iOS and Android',
     (WidgetTester tester) async {
       String? lastShare;
