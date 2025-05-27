@@ -2438,6 +2438,30 @@ class EngineSemantics {
 
   static EngineSemantics? _instance;
 
+  bool _semanticsEventHandlingInitialized = false;
+
+  void _initializeSemanticsEventHandling() {
+    printWarning('[DEBUG] EngineSemantics._initializeSemanticsEventHandling called');
+    if (_semanticsEventHandlingInitialized) {
+      printWarning('[DEBUG] Semantics event handling already initialized, returning');
+      return;
+    }
+
+    printWarning('[DEBUG] Initializing semantics event handling for the first time');
+    _semanticsEventHandlingInitialized = true;
+    EnginePlatformDispatcher.instance.onSemanticsEvent = (ui.SemanticsEvent event) {
+      printWarning(
+        '[DEBUG] EngineSemantics received SemanticsEvent: ${event.type} for nodeId: ${event.nodeId}',
+      );
+      // Route to all active view semantics owners
+      for (final EngineFlutterView view in EnginePlatformDispatcher.instance.views) {
+        printWarning('[DEBUG] Routing event to view ${view.viewId}');
+        view.semantics.handleSemanticsEvent(event);
+      }
+    };
+    printWarning('[DEBUG] Semantics event handling initialization complete');
+  }
+
   /// The tag name for the accessibility announcements host.
   static const String announcementsHostTagName = 'flt-announcement-host';
 
@@ -2500,6 +2524,11 @@ class EngineSemantics {
         view.semantics.reset();
       }
       _gestureModeClock?.datetime = null;
+    }
+    // Initialize semantic event handling when semantics is first enabled
+    if (!_semanticsEnabled && value) {
+      printWarning('[DEBUG] Semantics being enabled for first time, initializing event handling');
+      _initializeSemanticsEventHandling();
     }
     EnginePlatformDispatcher.instance.updateSemanticsEnabled(_semanticsEnabled);
   }
@@ -3059,6 +3088,76 @@ AFTER: $description
   /// precedence than autofocus.
   void willRequestFocus() {
     _hasNodeRequestingFocus = true;
+  }
+
+  /// Handles semantic events sent from the framework.
+  void handleSemanticsEvent(ui.SemanticsEvent event) {
+    printWarning('[DEBUG] EngineSemanticsOwner.handleSemanticsEvent called for view $viewId');
+    printWarning('[DEBUG] Event type: ${event.type}, nodeId: ${event.nodeId}, data: ${event.data}');
+
+    if (!EngineSemantics.instance.semanticsEnabled) {
+      printWarning('[DEBUG] Semantics not enabled, ignoring event');
+      return;
+    }
+
+    printWarning('[DEBUG] Processing semantic event...');
+    switch (event.type) {
+      case 'focus':
+        printWarning('[DEBUG] Handling focus event');
+        _handleFocusEvent(event.data);
+        break;
+      default:
+        printWarning('[DEBUG] Unknown event type: ${event.type}');
+        break;
+    }
+  }
+
+  void _handleFocusEvent(Map<String, dynamic> data) {
+    printWarning('[DEBUG] _handleFocusEvent called with data: $data');
+    final int? nodeId = data['nodeId'] as int?;
+    printWarning('[DEBUG] Extracted nodeId: $nodeId');
+
+    if (nodeId == null) {
+      printWarning('[DEBUG] nodeId is null, aborting focus event');
+      return;
+    }
+
+    final SemanticsObject? target = _semanticsTree[nodeId];
+    printWarning('[DEBUG] Found target semantics object: ${target != null}');
+    printWarning('[DEBUG] Current semantics tree has ${_semanticsTree.length} nodes');
+
+    if (target == null) {
+      printWarning('[DEBUG] No semantics object found for nodeId: $nodeId');
+      printWarning('[DEBUG] Available nodes in tree: ${_semanticsTree.keys.toList()}');
+      return;
+    }
+
+    printWarning(
+      '[DEBUG] Target element: ${target.element.tagName}, innerText: "${target.element.innerText}"',
+    );
+    printWarning('[DEBUG] Target has semanticRole: ${target.semanticRole?.runtimeType}');
+    printWarning(
+      '[DEBUG] Current activeElement: ${domDocument.activeElement?.tagName}, text: "${domDocument.activeElement?.innerText}"',
+    );
+
+    // Use existing focus management infrastructure
+    if (target.semanticRole != null) {
+      printWarning('[DEBUG] Using semanticRole.focusAsRouteDefault()');
+      target.semanticRole!.focusAsRouteDefault();
+      printWarning(
+        '[DEBUG] After focusAsRouteDefault - activeElement: ${domDocument.activeElement?.tagName}, text: "${domDocument.activeElement?.innerText}"',
+      );
+    } else {
+      printWarning('[DEBUG] Using direct element focus');
+      // Focus the element directly
+      target.element.tabIndex = -1;
+      target.element.focusWithoutScroll();
+      printWarning(
+        '[DEBUG] After direct focus - activeElement: ${domDocument.activeElement?.tagName}, text: "${domDocument.activeElement?.innerText}"',
+      );
+    }
+
+    printWarning('[DEBUG] Focus event processing completed');
   }
 }
 

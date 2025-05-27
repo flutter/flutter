@@ -43,6 +43,27 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
+/// Signature for a callback that receives semantic events.
+typedef SemanticsEventCallback = void Function(SemanticsEvent semanticsEvent);
+
+/// Event data for semantic events sent from framework to engine.
+class SemanticsEvent {
+  /// Creates a [SemanticsEvent].
+  const SemanticsEvent({required this.type, required this.data, this.nodeId});
+
+  /// The type of semantic event.
+  final String type;
+
+  /// The event data payload.
+  final Map<String, dynamic> data;
+
+  /// Optional node ID associated with the event.
+  final int? nodeId;
+
+  @override
+  String toString() => 'SemanticsEvent($type, nodeId: $nodeId)';
+}
+
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [PlatformDispatcher.sendPlatformMessage] and
@@ -1308,6 +1329,24 @@ class PlatformDispatcher {
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback) {
     _onSemanticsActionEvent = callback;
     _onSemanticsActionEventZone = Zone.current;
+  }
+
+  /// A callback that is invoked when a semantic event is sent from the framework.
+  ///
+  /// This callback is used when the framework sends semantic events to the engine
+  /// for processing, such as focus restoration events.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  SemanticsEventCallback? get onSemanticsEvent => _onSemanticsEvent;
+  SemanticsEventCallback? _onSemanticsEvent;
+  Zone _onSemanticsEventZone = Zone.root;
+  set onSemanticsEvent(SemanticsEventCallback? callback) {
+    print(
+      '[DEBUG] PlatformDispatcher.onSemanticsEvent setter called - callback: ${callback != null ? 'NOT NULL' : 'NULL'}',
+    );
+    _onSemanticsEvent = callback;
+    _onSemanticsEventZone = Zone.current;
   }
 
   // Called from the engine via hooks.dart.

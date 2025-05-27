@@ -11,6 +11,7 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
+typedef SemanticsEventCallback = void Function(SemanticsEvent semanticsEvent);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
@@ -141,6 +142,9 @@ abstract class PlatformDispatcher {
 
   SemanticsActionEventCallback? get onSemanticsActionEvent;
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback);
+
+  SemanticsEventCallback? get onSemanticsEvent;
+  set onSemanticsEvent(SemanticsEventCallback? callback);
 
   ErrorCallback? get onError;
   set onError(ErrorCallback? callback);
@@ -569,6 +573,24 @@ class SemanticsActionEvent {
 
   @override
   String toString() => 'SemanticsActionEvent($type, view: $viewId, node: $nodeId)';
+}
+
+/// Event data for semantic events sent from framework to engine.
+class SemanticsEvent {
+  /// Creates a [SemanticsEvent].
+  const SemanticsEvent({required this.type, required this.data, this.nodeId});
+
+  /// The type of semantic event.
+  final String type;
+
+  /// The event data payload.
+  final Map<String, dynamic> data;
+
+  /// Optional node ID associated with the event.
+  final int? nodeId;
+
+  @override
+  String toString() => 'SemanticsEvent($type, nodeId: $nodeId, data: $data)';
 }
 
 final class ViewFocusEvent {
