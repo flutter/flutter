@@ -229,7 +229,7 @@ void main() {
         final CreateCommand command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
+        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
         expect(
           (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
           'swift',
@@ -238,7 +238,7 @@ void main() {
         await runner.run(<String>[
           'create',
           '--no-pub',
-          '--template=app',
+          '--template=plugin',
           '--ios-language=objc',
           'testy',
         ]);

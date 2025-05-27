@@ -1779,7 +1779,14 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '-t', 'plugin', '--ios-language=objc', projectDir.path]);
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '-t',
+        'plugin',
+        '--ios-language=objc',
+        projectDir.path,
+      ]);
       expect(
         logger.warningText,
         contains(
