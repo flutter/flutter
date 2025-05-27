@@ -40,7 +40,7 @@ class DropdownMenuThemeData with Diagnosticable {
   /// The input decoration theme for the [TextField]s in a [DropdownMenu].
   ///
   /// If this is null, the [DropdownMenu] provides its own defaults.
-  final InputDecorationThemeData? inputDecorationTheme;
+  final InputDecorationTheme? inputDecorationTheme;
 
   /// Overrides the menu's default style in a [DropdownMenu].
   ///
@@ -52,7 +52,7 @@ class DropdownMenuThemeData with Diagnosticable {
   /// new values.
   DropdownMenuThemeData copyWith({
     TextStyle? textStyle,
-    InputDecorationThemeData? inputDecorationTheme,
+    InputDecorationTheme? inputDecorationTheme,
     MenuStyle? menuStyle,
   }) {
     return DropdownMenuThemeData(
@@ -96,7 +96,7 @@ class DropdownMenuThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<InputDecorationThemeData>(
+      DiagnosticsProperty<InputDecorationTheme>(
         'inputDecorationTheme',
         inputDecorationTheme,
         defaultValue: null,

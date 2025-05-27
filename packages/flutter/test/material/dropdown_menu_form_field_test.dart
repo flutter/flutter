@@ -456,7 +456,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.inputDecorationTheme, null);
 
-    const InputDecorationThemeData inputDecorationTheme = InputDecorationThemeData();
+    const InputDecorationTheme inputDecorationTheme = InputDecorationTheme();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

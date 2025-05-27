@@ -85,9 +85,7 @@ void main() {
       hourMinuteShape: RoundedRectangleBorder(side: BorderSide(color: Color(0xffffffff))),
       hourMinuteTextColor: Color(0xfffffff0),
       hourMinuteTextStyle: TextStyle(color: Color(0xfffffff1)),
-      inputDecorationTheme: InputDecorationThemeData(
-        labelStyle: TextStyle(color: Color(0xfffffff2)),
-      ),
+      inputDecorationTheme: InputDecorationTheme(labelStyle: TextStyle(color: Color(0xfffffff2))),
       padding: EdgeInsets.all(1.0),
       shape: RoundedRectangleBorder(side: BorderSide(color: Color(0xfffffff3))),
       timeSelectorSeparatorColor: WidgetStatePropertyAll<Color>(Color(0xfffffff4)),
@@ -124,7 +122,7 @@ void main() {
         'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
         'hourMinuteTextColor: ${const Color(0xfffffff0)}',
         'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
-        'inputDecorationTheme: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
+        'inputDecorationTheme.data: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
         'padding: EdgeInsets.all(1.0)',
         'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
         'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
@@ -1029,7 +1027,7 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
     dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
     inputDecorationTheme:
         includeInputDecoration
-            ? const InputDecorationThemeData(
+            ? const InputDecorationTheme(
               filled: true,
               fillColor: Colors.purple,
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),

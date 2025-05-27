@@ -1074,7 +1074,7 @@ void main() {
   });
 
   testWidgets('Custom searchFieldDecorationTheme value', (WidgetTester tester) async {
-    const InputDecorationThemeData searchFieldDecorationTheme = InputDecorationThemeData(
+    const InputDecorationTheme searchFieldDecorationTheme = InputDecorationTheme(
       hintStyle: TextStyle(color: _TestSearchDelegate.hintTextColor),
     );
     final _TestSearchDelegate delegate = _TestSearchDelegate(
@@ -1087,7 +1087,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme.data);
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
