@@ -444,7 +444,6 @@ void main() {
         expect(pageController.page, 1.0);
       },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
     );
 
     testWidgets('mouse single-click selection collapses the selection', (
@@ -6261,7 +6260,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Copy'), findsNothing);
       },
-      skip: !kIsWeb, // [intended]
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
   });
 
