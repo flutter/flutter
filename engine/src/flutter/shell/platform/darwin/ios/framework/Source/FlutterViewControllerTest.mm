@@ -22,8 +22,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
-#import "flutter/third_party/spring_animation/spring_animation.h"
 #import "flutter/testing/ios/IosUnitTests/App/AppDelegate.h"
+#import "flutter/third_party/spring_animation/spring_animation.h"
 
 FLUTTER_ASSERT_ARC
 
