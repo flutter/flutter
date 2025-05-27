@@ -257,8 +257,12 @@ FLUTTER_DARWIN_EXPORT
 /**
  * The plugin registrant that will be executed when the FlutterViewController is
  * created with a NIB.
+ *
+ * This is only necessary when working with NIBs (XIBs and Storyboards). When
+ * programatically creating FlutterViewControllers, plugins can be registered
+ * directly.
  */
-@property(nonatomic, strong) IBOutlet NSObject<FlutterPluginRegistrant>* pluginRegistrant;
+@property(nonatomic, weak) IBOutlet NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 
 @end
 
