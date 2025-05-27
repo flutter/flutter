@@ -1,51 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Overlay].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() {
+  // debugRepaintRainbowEnabled = true;
+  // debugPrintMarkNeedsLayoutStacks = true;
+  // debugPrintMarkNeedsPaintStacks = true;
+  // debugPrintLayouts = true;
+  runApp(const OverlayApp());
+}
+
+class OverlayApp extends StatelessWidget {
+  const OverlayApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final router = GoRouter(
-      // Default to the nested location
-      // Or for a more realistic use-case, navigate to the url /a/b on the web
-      initialLocation: '/root/sub',
-      routes: [
-        GoRoute(
-          path: '/root',
-          builder: (_, __) {
-            // With selection area here, error will occur
-            return const SelectionArea(
-              child: Column(
-                children: [
-                  // Must be at least two selectable texts
-                  Text('rootA'),
-                  Text('rootB'),
-                ],
-              ),
-            );
-          },
-          routes: [
-            GoRoute(
-              path: 'sub',
-              builder: (_, __) {
-                return const SelectionArea(
-                  child: Column(
-                    children: [
-                      // Must be at least two selectable texts
-                      Text('subA'),
-                      Text('subB'),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ],
+    return const MaterialApp(home: OverlayExample());
+  }
+}
+
+class OverlayExample extends StatefulWidget {
+  const OverlayExample({super.key});
+
+  @override
+  State<OverlayExample> createState() => _OverlayExampleState();
+}
+
+class _OverlayExampleState extends State<OverlayExample> {
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Overlay(
+        initialEntries: [
+          OverlayEntry(
+            builder: (BuildContext context) {
+              // Add a Material widget HERE to provide a context for the Ink
+              return SelectionArea(
+                child: Column(
+                  children: [
+                    // Must be at least two selectable texts
+                    Text('rootA'),
+                    Text('rootB'),
+                  ],
+                ),
+              );
+            },
+            opaque: true,
+            canSizeOverlay: true,
+            maintainState: true,
+          ),
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return Text('subA');
+            },
+            opaque: true,
+            canSizeOverlay: true,
+            maintainState: true,
+          ),
+        ],
+      ),
     );
-    return MaterialApp.router(routerConfig: router);
   }
 }
