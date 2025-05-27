@@ -21,14 +21,6 @@ class SemanticComplementary extends SemanticRole {
   }
 
   @override
-  void update() {
-    super.update();
-    if (semanticsObject.label != null) {
-      setAttribute('aria-label', semanticsObject.label!);
-    }
-  }
-
-  @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
@@ -45,14 +37,6 @@ class SemanticContentInfo extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('contentinfo');
-  }
-
-  @override
-  void update() {
-    super.update();
-    if (semanticsObject.label != null) {
-      setAttribute('aria-label', semanticsObject.label!);
-    }
   }
 
   @override
@@ -75,14 +59,6 @@ class SemanticMain extends SemanticRole {
   }
 
   @override
-  void update() {
-    super.update();
-    if (semanticsObject.label != null) {
-      setAttribute('aria-label', semanticsObject.label!);
-    }
-  }
-
-  @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
@@ -102,14 +78,6 @@ class SemanticNavigation extends SemanticRole {
   }
 
   @override
-  void update() {
-    super.update();
-    if (semanticsObject.label != null) {
-      setAttribute('aria-label', semanticsObject.label!);
-    }
-  }
-
-  @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
@@ -126,14 +94,6 @@ class SemanticRegion extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('region');
-  }
-
-  @override
-  void update() {
-    super.update();
-    if (semanticsObject.label != null) {
-      setAttribute('aria-label', semanticsObject.label!);
-    }
   }
 
   @override
