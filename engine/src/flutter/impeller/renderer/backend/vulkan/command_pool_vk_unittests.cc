@@ -82,7 +82,7 @@ TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
     auto const pool = recycler->Get();
 
     // This normally is called at the end of a frame.
-    recycler->Dispose();
+    recycler->Dispose(*context);
   }
 
   // Add something to the resource manager and have it notify us when it's
@@ -124,7 +124,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
     pool->CollectCommandBuffer(std::move(buffer));
 
     // This normally is called at the end of a frame.
-    recycler->Dispose();
+    recycler->Dispose(*context);
   }
 
   // Wait for the pool to be reclaimed.
@@ -148,7 +148,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
     pool->CollectCommandBuffer(std::move(buffer));
 
     // This normally is called at the end of a frame.
-    recycler->Dispose();
+    recycler->Dispose(*context);
   }
 
   // Now check that we only ever created one pool and one command buffer.
@@ -177,7 +177,7 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     }
 
     // This normally is called at the end of a frame.
-    recycler->Dispose();
+    recycler->Dispose(*context);
   }
 
   // Wait for the pool to be reclaimed.
@@ -203,7 +203,7 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     auto pool = recycler->Get();
 
     // This normally is called at the end of a frame.
-    recycler->Dispose();
+    recycler->Dispose(*context);
   }
 
   // Wait for the pool to be reclaimed.
@@ -226,6 +226,23 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
             1u);
 
   context->Shutdown();
+}
+
+TEST(CommandPoolRecyclerVKTest, RecyclerGlobalPoolMapSize) {
+  auto context = MockVulkanContextBuilder().Build();
+  auto const recycler = context->GetCommandPoolRecycler();
+
+  // The global pool list for this context should initially be empty.
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+
+  // Creating a pool for this thread should insert the pool into the global map.
+  auto pool = recycler->Get();
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 1);
+
+  // Disposing this thread's pool should remove it from the global map.
+  pool.reset();
+  recycler->Dispose(*context);
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
 }
 
 }  // namespace testing

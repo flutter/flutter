@@ -103,8 +103,6 @@ class CommandPoolVK final {
 class CommandPoolRecyclerVK final
     : public std::enable_shared_from_this<CommandPoolRecyclerVK> {
  public:
-  ~CommandPoolRecyclerVK();
-
   /// A unique command pool and zero or more recycled command buffers.
   struct RecycledData {
     vk::UniqueCommandPool pool;
@@ -115,7 +113,7 @@ class CommandPoolRecyclerVK final
   ///             associated with the given context.
   ///
   /// @param[in]  context The context.
-  static void DestroyThreadLocalPools(const ContextVK* context);
+  static void DestroyThreadLocalPools(const ContextVK& context);
 
   /// @brief      Creates a recycler for the given |ContextVK|.
   ///
@@ -137,8 +135,11 @@ class CommandPoolRecyclerVK final
                std::vector<vk::UniqueCommandBuffer>&& buffers,
                bool should_trim = false);
 
-  /// @brief      Clears all recycled command pools to let them be reclaimed.
-  void Dispose();
+  /// @brief      Clears this context's thread-local command pool.
+  void Dispose(const ContextVK& context);
+
+  // Visible for testing.
+  static int GetGlobalPoolCount(const ContextVK& context);
 
  private:
   std::weak_ptr<ContextVK> context_;

@@ -134,7 +134,7 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
-  CommandPoolRecyclerVK::DestroyThreadLocalPools(this);
+  CommandPoolRecyclerVK::DestroyThreadLocalPools(*this);
 }
 
 Context::BackendType ContextVK::GetBackendType() const {
@@ -720,7 +720,7 @@ void ContextVK::DisposeThreadLocalCachedResources() {
     Lock lock(desc_pool_mutex_);
     cached_descriptor_pool_.erase(std::this_thread::get_id());
   }
-  command_pool_recycler_->Dispose();
+  command_pool_recycler_->Dispose(*this);
 }
 
 const std::shared_ptr<YUVConversionLibraryVK>&
