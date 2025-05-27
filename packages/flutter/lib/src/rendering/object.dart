@@ -2337,8 +2337,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _owner = owner;
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout) {
-      // TODO
+    if (_needsLayout && _constraints != null) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
       _needsLayout = false;
@@ -2459,16 +2458,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   static bool debugCheckingIntrinsics = false;
 
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    RenderObject node = this;
-    while (!node._isRelayoutBoundary) {
-      assert(node.parent != null);
-      node = node.parent!;
-      if ((!node._needsLayout) && (!node._debugDoingThisLayout)) {
-        debugDumpRenderTree();
-        throw FlutterError.fromParts([node.describeForError('The clean node was')]);
-      }
+    final bool alreadyMarkedNeedsLayout = _needsLayout || _debugDoingThisLayout;
+    if (!alreadyMarkedNeedsLayout) {
+      return false;
     }
-    return true;
+    return _isRelayoutBoundary ||
+        (debugLayoutParent?._debugRelayoutBoundaryAlreadyMarkedNeedsLayout() ?? true);
   }
 
   /// Mark this render object's layout information as dirty, and either register
@@ -2515,18 +2510,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       assert(_debugRelayoutBoundaryAlreadyMarkedNeedsLayout());
       return;
     }
+    _needsLayout = true;
     if (_isRelayoutBoundary) {
-      _needsLayout = true;
-      if (owner != null) {
-        assert(() {
-          if (debugPrintMarkNeedsLayoutStacks) {
-            debugPrintStack(label: 'markNeedsLayout() called for $this');
-          }
-          return true;
-        }());
-        owner!._nodesNeedingLayout.add(this);
-        owner!.requestVisualUpdate();
+      if (owner == null) {
+        return;
       }
+      assert(() {
+        if (debugPrintMarkNeedsLayoutStacks) {
+          debugPrintStack(label: 'markNeedsLayout() called for $this');
+        }
+        return true;
+      }());
+      owner!._nodesNeedingLayout.add(this);
+      owner!.requestVisualUpdate();
     } else if (parent != null) {
       markParentNeedsLayout();
     }
@@ -3844,14 +3840,14 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
-      if (!_isRelayoutBoundary) {
+      if (_constraints != null && !_isRelayoutBoundary) {
         int count = 1;
-        for (RenderObject? target = parent; target != null; target = target.parent) {
-          if (target._isRelayoutBoundary) {
-            header += ' relayoutBoundary=up$count';
-          }
+        RenderObject? target = parent;
+        while (target != null && !target._isRelayoutBoundary) {
+          target = target.parent;
           count += 1;
         }
+        header += ' relayoutBoundary=up$count';
       }
       if (_needsLayout) {
         header += ' NEEDS-LAYOUT';
