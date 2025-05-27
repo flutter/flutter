@@ -23,23 +23,18 @@ class LabeledRadioApp extends StatelessWidget {
 }
 
 class LabeledRadio extends StatelessWidget {
-  const LabeledRadio({
-    super.key,
-    required this.label,
-    required this.padding,
-    required this.value,
-    required this.onInkWellTap,
-  });
+  const LabeledRadio({super.key, required this.label, required this.padding, required this.value});
 
   final String label;
   final EdgeInsets padding;
   final bool value;
-  final VoidCallback onInkWellTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onInkWellTap,
+      onTap: () {
+        RadioGroup.maybeOf<bool>(context)?.onChanged(value);
+      },
       child: Padding(
         padding: padding,
         child: Row(children: <Widget>[Radio<bool>(value: value), Text(label)]),
@@ -75,25 +70,11 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
               label: 'This is the first label text',
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               value: true,
-              onInkWellTap: () {
-                if (!_isRadioSelected) {
-                  setState(() {
-                    _isRadioSelected = true;
-                  });
-                }
-              },
             ),
             LabeledRadio(
               label: 'This is the second label text',
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               value: false,
-              onInkWellTap: () {
-                if (_isRadioSelected) {
-                  setState(() {
-                    _isRadioSelected = false;
-                  });
-                }
-              },
             ),
           ],
         ),
