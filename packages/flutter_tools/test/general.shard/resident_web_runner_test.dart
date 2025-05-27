@@ -47,6 +47,7 @@ import '../src/fakes.dart' as test_fakes;
 import '../src/package_config.dart';
 import '../src/test_build_system.dart';
 import '../src/throwing_pub.dart';
+import 'resident_runner_helpers.dart';
 
 const List<VmServiceExpectation> kSetPauseIsolatesOnStartExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
@@ -742,13 +743,10 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           ...kAttachExpectations,
-          const FakeVmServiceRequest(
-            method: kGetVMServiceName,
-            jsonResponse: <String, Object>{'type': 'VM', 'success': true},
-          ),
+          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': ''},
+            args: <String, Object>{'isolateId': '1'},
             jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
           ),
           const FakeVmServiceRequest(

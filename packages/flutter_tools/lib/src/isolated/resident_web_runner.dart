@@ -509,7 +509,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           final DateTime reloadStart = _systemClock.now();
           final vmservice.VM vm = await _vmService.service.getVM();
           final vmservice.ReloadReport report = await _vmService.service.reloadSources(
-            vm.isolates?.firstOrNull?.id ?? '',
+            vm.isolates!.first.id!,
           );
           reloadDuration = _systemClock.now().difference(reloadStart);
           final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
@@ -796,7 +796,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             'pause_isolates_on_start',
             'true',
           );
-          if (result.type != 'Success') {
+          if (result is! vmservice.Success) {
             _logger.printError('setFlag failure: $result');
           }
         } on Exception catch (e) {

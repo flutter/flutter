@@ -35,7 +35,6 @@ const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
 const String kFlutterToolAlias = 'Flutter Tools';
 
-const String kGetVMServiceName = 'getVM';
 const String kReloadSourcesServiceName = 'reloadSources';
 const String kHotRestartServiceName = 'hotRestart';
 const String kFlutterVersionServiceName = 'flutterVersion';
