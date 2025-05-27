@@ -179,7 +179,8 @@ class ReorderableList extends StatefulWidget {
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
-       );
+       ),
+       childCount = itemCount;
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
   /// Called, as needed, to build list item widgets.
@@ -202,6 +203,14 @@ class ReorderableList extends StatefulWidget {
   /// the widget occupies no space.
   /// {@endtemplate}
   final int itemCount;
+
+  /// {@template flutter.widgets.reorderable_list.childCount}
+  /// The total number of children in the list.
+  ///
+  /// For regular lists, this is the same as [itemCount]. For lists with separators,
+  /// this includes both items and separators.
+  /// {@endtemplate}
+  final int childCount;
 
   /// {@template flutter.widgets.reorderable_list.onReorder}
   /// A callback used by the list to report that a list item has been dragged
