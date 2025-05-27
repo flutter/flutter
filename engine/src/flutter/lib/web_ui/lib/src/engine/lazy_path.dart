@@ -556,12 +556,12 @@ class LazyPath implements ScenePath, Collectable {
 
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    _addCommand(AddPathCommand(path as LazyPath, offset));
+    _addCommand(AddPathCommand(path as LazyPath, offset, matrix4: matrix4));
   }
 
   @override
   void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    _addCommand(ExtendWithPathCommand(path as LazyPath, offset));
+    _addCommand(ExtendWithPathCommand(path as LazyPath, offset, matrix4: matrix4));
   }
 
   @override
@@ -615,15 +615,11 @@ class LazyPath implements ScenePath, Collectable {
 }
 
 class LazyPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
-  LazyPathMetrics({required this.path, required this.forceClosed});
-
-  LazyPath path;
-  bool forceClosed;
+  LazyPathMetrics({required LazyPath path, required bool forceClosed})
+    : iterator = LazyPathMetricIterator(path, forceClosed);
 
   @override
-  LazyPathMetricIterator get iterator {
-    return LazyPathMetricIterator(path, forceClosed);
-  }
+  final LazyPathMetricIterator iterator;
 }
 
 class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
@@ -634,22 +630,34 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
   int _nextIndex = 0;
   DisposablePathMetricIterator? _cachedIterator;
   final List<DisposablePathMetric> _metrics = [];
+  bool _isAtEnd = false;
 
   @override
   ui.PathMetric get current {
-    assert(_nextIndex > 0);
+    if (_nextIndex == 0 || _isAtEnd) {
+      throw RangeError(
+        'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
+        '- The iteration has not started yet. If so, call "moveNext" to start iteration.\n'
+        '- The iterator ran out of elements. If so, check that "moveNext" returns true prior to calling "current".',
+      );
+    }
     return LazyPathMetric(this, _nextIndex - 1);
   }
 
   @override
   bool moveNext() {
+    if (_isAtEnd) {
+      return false;
+    }
     buildIterator();
-    _nextIndex++;
+    assert(_cachedIterator != null);
     assert(_nextIndex == _metrics.length);
+    _nextIndex++;
     if (_cachedIterator!.moveNext()) {
       _metrics.add(_cachedIterator!.current);
       return true;
     } else {
+      _isAtEnd = true;
       return false;
     }
   }
