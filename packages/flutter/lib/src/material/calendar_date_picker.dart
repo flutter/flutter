@@ -1208,7 +1208,8 @@ class _DayState extends State<_Day> {
       ),
     );
 
-    // Conform to M3 spec in portrait mode (landscape mode is not specified).
+    // Adds padding as per M3 guidelines for portrait mode. Not applied in landscape
+    // mode currently due to unclear specifications.
     final Orientation orientation = MediaQuery.orientationOf(context);
     if (Theme.of(context).useMaterial3 && orientation == Orientation.portrait) {
       dayWidget = Padding(padding: const EdgeInsets.all(4.0), child: dayWidget);
