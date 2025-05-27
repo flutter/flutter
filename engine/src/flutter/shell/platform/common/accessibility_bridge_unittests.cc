@@ -15,6 +15,8 @@ namespace testing {
 
 using ::testing::Contains;
 
+FlutterSemanticsFlags kEmptyFlags = FlutterSemanticsFlags{};
+
 FlutterSemanticsNode2 CreateSemanticsNode(
     int32_t id,
     const char* label,
@@ -34,6 +36,7 @@ FlutterSemanticsNode2 CreateSemanticsNode(
       .children_in_traversal_order = children ? children->data() : nullptr,
       .custom_accessibility_actions_count = 0,
       .tooltip = "",
+      .flags2 = &kEmptyFlags,
   };
 }
 
@@ -209,12 +212,10 @@ TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-
   auto flags = FlutterSemanticsFlags{
       .is_text_field = true,
-      .is_read_only = true,
+      .is_focused = true,
   };
-
   root.flags2 = &flags;
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -247,7 +248,6 @@ TEST(AccessibilityBridgeTest, DoesNotAssignEditableRootToSelectableText) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   auto flags = FlutterSemanticsFlags{
-
       .is_text_field = true,
       .is_read_only = true,
   };

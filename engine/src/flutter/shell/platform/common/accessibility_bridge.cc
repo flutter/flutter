@@ -571,6 +571,9 @@ AccessibilityBridge::FromFlutterSemanticsNode(
     const FlutterSemanticsNode2& flutter_node) {
   SemanticsNode result;
   result.id = flutter_node.id;
+  FML_DCHECK(flutter_node.flags2)
+      << "FlutterSemanticsNode2::flags2 must not be null";
+
   result.flags = flutter_node.flags2;
   result.actions = flutter_node.actions;
   result.text_selection_base = flutter_node.text_selection_base;
