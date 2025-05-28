@@ -80,7 +80,7 @@ void main() {
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -133,7 +133,7 @@ $_doubleIndent
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -223,7 +223,7 @@ let package = Package(
             );
 
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -268,7 +268,7 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
@@ -289,7 +289,7 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
@@ -310,13 +310,13 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
               project: project,
               platform: platform,
-              deploymentTarget: platform == SupportedPlatform.ios ? '12.0' : '10.14',
+              deploymentTarget: platform == SupportedPlatform.ios ? '13.0' : '10.15',
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
@@ -331,7 +331,7 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(

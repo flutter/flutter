@@ -13,7 +13,6 @@
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
-#include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/typographer/text_frame.h"
 
 namespace flutter {
@@ -487,7 +486,6 @@ struct TransformResetOp final : TransformClipOpBase {
 // DlRoundRect is 48 more bytes, which rounds up to 48 bytes
 //         which packs into 56 bytes total
 // DlRoundSuperellipse is the same as DlRoundRect
-// CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
 //
 // We could pack the clip_op and the bool both into the free 4 bytes after
 // the header, but the Windows compiler keeps wanting to expand that
@@ -517,7 +515,7 @@ DEFINE_CLIP_SHAPE_OP(RoundRect, DlRoundRect, Difference)
 DEFINE_CLIP_SHAPE_OP(RoundSuperellipse, DlRoundSuperellipse, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
-// 4 byte header + 20 byte payload packs evenly into 24 bytes
+// 4 byte header + 28 byte payload packs evenly into 32 bytes
 #define DEFINE_CLIP_PATH_OP(clipop)                                       \
   struct Clip##clipop##PathOp final : TransformClipOpBase {               \
     static constexpr auto kType = DisplayListOpType::kClip##clipop##Path; \
@@ -601,8 +599,8 @@ DEFINE_DRAW_1ARG_OP(RoundRect, DlRoundRect, rrect)
 DEFINE_DRAW_1ARG_OP(RoundSuperellipse, DlRoundSuperellipse, rse)
 #undef DEFINE_DRAW_1ARG_OP
 
-// 4 byte header + 16 byte payload uses 20 bytes but is rounded
-// up to 24 bytes (4 bytes unused)
+// 4 byte header + 24 byte payload uses 28 bytes but is rounded
+// up to 32 bytes (4 bytes unused)
 struct DrawPathOp final : DrawOpBase {
   static constexpr auto kType = DisplayListOpType::kDrawPath;
 
@@ -1033,7 +1031,7 @@ struct DrawTextFrameOp final : DrawOpBase {
   }
 };
 
-// 4 byte header + 44 byte payload packs evenly into 48 bytes
+// 4 byte header + 52 byte payload packs evenly into 56 bytes
 #define DEFINE_DRAW_SHADOW_OP(name, transparent_occluder)                     \
   struct Draw##name##Op final : DrawOpBase {                                  \
     static constexpr auto kType = DisplayListOpType::kDraw##name;             \

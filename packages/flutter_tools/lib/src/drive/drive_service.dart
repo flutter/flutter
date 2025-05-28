@@ -90,11 +90,11 @@ abstract class DriverService {
   /// If --use-existing-app is provided, configured the correct VM Service URI.
   Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions);
 
-  /// Start the test file with the provided [arguments] and [environment], returning
-  /// the test process exit code.
+  /// Start the test file with the provided [arguments] and current environment,
+  /// returning the test process exit code.
   ///
-  /// if [profileMemory] is provided, it will be treated as a file path to write a
-  /// devtools memory profile.
+  /// If [profileMemory] is provided, it will be treated as a file path to
+  /// write a devtools memory profile.
   Future<int> startTest(
     String testFile,
     List<String> arguments,

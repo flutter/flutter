@@ -7,7 +7,6 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';

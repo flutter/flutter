@@ -145,6 +145,9 @@ void runSemanticsTests() {
   group('requirable', () {
     _testRequirable();
   });
+  group('SemanticsValidationResult', () {
+    _testSemanticsValidationResult();
+  });
 }
 
 void _testSemanticRole() {
@@ -902,26 +905,22 @@ void _testLongestIncreasingSubsequence() {
 }
 
 void _testLabels() {
-  test('computeDomSemanticsLabel combines tooltip, label, value, and hint', () {
+  test('computeDomSemanticsLabel combines tooltip, label, and value', () {
     expect(computeDomSemanticsLabel(tooltip: 'tooltip'), 'tooltip');
     expect(computeDomSemanticsLabel(label: 'label'), 'label');
     expect(computeDomSemanticsLabel(value: 'value'), 'value');
-    expect(computeDomSemanticsLabel(hint: 'hint'), 'hint');
-    expect(
-      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint', value: 'value'),
-      '''
-tooltip
-label hint value''',
-    );
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', hint: 'hint', value: 'value'), '''
-tooltip
-hint value''');
     expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
 tooltip
 label value''');
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint'), '''
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', value: 'value'), '''
 tooltip
-label hint''');
+value''');
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
+tooltip
+label value''');
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label'), '''
+tooltip
+label''');
   });
 
   test('computeDomSemanticsLabel collapses empty labels to null', () {
@@ -929,12 +928,123 @@ label hint''');
     expect(computeDomSemanticsLabel(tooltip: ''), isNull);
     expect(computeDomSemanticsLabel(label: ''), isNull);
     expect(computeDomSemanticsLabel(value: ''), isNull);
-    expect(computeDomSemanticsLabel(hint: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', hint: '', value: ''), isNull);
     expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', value: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', label: ''), isNull);
   });
+
+  test('LabelAndValue splits label and hint for all representations', () async {
+    semantics().semanticsEnabled = true;
+    final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+
+    for (final representation in LabelRepresentation.values) {
+      final SemanticsTester tester = SemanticsTester(owner());
+      // For container nodes, children force ariaLabel, so test as a leaf node (no children)
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final element = node.element;
+
+      // Set the preferred representation directly (simulate what a custom role would do)
+      node.semanticRole?.labelAndValue?.preferredRepresentation = representation;
+      node.semanticRole?.labelAndValue?.update();
+
+      // Check label is present in the correct place
+      switch (representation) {
+        case LabelRepresentation.ariaLabel:
+          expect(element.getAttribute('aria-label'), 'Label');
+        case LabelRepresentation.domText:
+          expect(element.text, 'Label');
+        case LabelRepresentation.sizedSpan:
+          final span = element.querySelector('span');
+          expect(span, isNotNull);
+          expect(span!.text, 'Label');
+      }
+
+      // Check hint is present as aria-description or aria-describedby
+      LabelAndValue.supportsAriaDescriptionForTest = true;
+      node.semanticRole?.labelAndValue?.update();
+      expect(element.getAttribute('aria-description'), 'Hint');
+      expect(element.getAttribute('aria-describedby'), isNull);
+
+      LabelAndValue.supportsAriaDescriptionForTest = false;
+      node.semanticRole?.labelAndValue?.update();
+      expect(element.getAttribute('aria-description'), isNull);
+      final ariaDescribedBy = element.getAttribute('aria-describedby');
+      expect(ariaDescribedBy, isNotNull);
+      final describedNode = domDocument.getElementById(ariaDescribedBy!);
+      expect(describedNode, isNotNull);
+      expect(describedNode!.text, 'Hint');
+    }
+
+    LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+    semantics().semanticsEnabled = false;
+  });
+
+  test(
+    'LabelAndValue fallback appends aria-describedby span to document.body when no parent',
+    () async {
+      semantics().semanticsEnabled = true;
+      final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+
+      LabelAndValue.supportsAriaDescriptionForTest = false;
+
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final element = node.element;
+
+      final ariaDescribedBy = element.getAttribute('aria-describedby');
+      expect(ariaDescribedBy, isNotNull);
+
+      // Verify the span was created and has the correct content
+      final describedNode = domDocument.getElementById(ariaDescribedBy!);
+      expect(describedNode, isNotNull);
+      expect(describedNode!.text, 'Hint');
+      expect(describedNode.getAttribute('hidden'), '');
+
+      // The span should be attached somewhere in the DOM
+      expect(describedNode.isConnected, isTrue);
+
+      // Test that the fallback logic works: when we manually remove the element from its parent
+      // and call update again, the span should be appended to document.body as fallback
+      final originalParent = element.parentElement;
+      element.remove();
+
+      // Verify the span is still there but potentially orphaned
+      final describedNodeAfterRemove = domDocument.getElementById(ariaDescribedBy);
+      expect(describedNodeAfterRemove, isNotNull);
+
+      // Update should trigger fallback logic
+      node.semanticRole?.labelAndValue?.update();
+
+      // The span should still exist and be connected
+      final describedNodeAfterUpdate = domDocument.getElementById(ariaDescribedBy);
+      expect(describedNodeAfterUpdate, isNotNull);
+      expect(describedNodeAfterUpdate!.isConnected, isTrue);
+
+      // Re-attach element to its original parent for proper cleanup
+      if (originalParent != null) {
+        originalParent.append(element);
+      }
+
+      LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+      semantics().semanticsEnabled = false;
+    },
+  );
 }
 
 void _testContainer() {
@@ -1609,7 +1719,7 @@ void _testVerticalScrolling() {
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
-    expect(scrollable.scrollTop, isPositive);
+    expect(scrollable.scrollTop, 0);
     semantics().semanticsEnabled = false;
   });
 
@@ -1646,8 +1756,8 @@ void _testVerticalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral scrollTop
-    // is still a positive number.
-    expect(scrollable.scrollTop, isPositive);
+    // is 0.
+    expect(scrollable.scrollTop, 0);
 
     semantics().semanticsEnabled = false;
   });
@@ -1700,18 +1810,7 @@ void _testVerticalScrolling() {
 
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10 or 9.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 20;
@@ -1719,21 +1818,44 @@ void _testVerticalScrolling() {
     ui.SemanticsActionEvent capturedEvent = await capturedEventFuture;
 
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollUp);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 20.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+
+    // Update scrollPosition to scrollTop value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollTop >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 5);
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollDown);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 5.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
   });
 
   test('scrollable switches to pointer event mode on a wheel event', () async {
@@ -1780,27 +1902,22 @@ void _testVerticalScrolling() {
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
 
-    void expectNeutralPosition() {
-      // Browsers disagree on the exact value, but it's always close to 10.
-      expect((scrollable.scrollTop - 10).abs(), lessThan(2));
-    }
-
-    // Initially, starting with a neutral scroll position, everything should be
+    // Initially, starting at "scrollTop" 0, everything should be
     // in browser gesture mode, react to DOM scroll events, and generate
     // semantic actions.
-    expectNeutralPosition();
+    expect(scrollable.scrollTop, 0);
     expect(semantics().gestureMode, GestureMode.browserGestures);
     scrollable.scrollTop = 20;
     expect(scrollable.scrollTop, 20);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(actionLog, hasLength(1));
     final capturedEvent = actionLog.removeLast();
-    expect(capturedEvent.type, ui.SemanticsAction.scrollUp);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
 
-    // Now, starting with a neutral mode, observing a DOM "wheel" event should
+    // Now, starting at the "scrollTop" 20 we set, observing a DOM "wheel" event should
     // swap into pointer event mode, and the scrollable becomes a plain clip,
     // i.e. `overflow: hidden`.
-    expectNeutralPosition();
+    expect(scrollable.scrollTop, 20);
     expect(semantics().gestureMode, GestureMode.browserGestures);
     expect(scrollable.style.overflowY, 'scroll');
 
@@ -1867,8 +1984,8 @@ void _testHorizontalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral
-    // scrollLeft is still a positive number.
-    expect(scrollable.scrollLeft, isPositive);
+    // scrollLeft is still 0.
+    expect(scrollable.scrollLeft, 0);
 
     semantics().semanticsEnabled = false;
   });
@@ -1921,17 +2038,7 @@ void _testHorizontalScrolling() {
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollLeft, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 20;
@@ -1939,21 +2046,44 @@ void _testHorizontalScrolling() {
     ui.SemanticsActionEvent capturedEvent = await capturedEventFuture;
 
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollLeft);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll position back to neutral.
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 20.0;
+    expectedOffset[1] = 0.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+
+    // Update scrollPosition to scrollLeft value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollLeft >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollLeft, 5);
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollRight);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 5.0;
+    expectedOffset[1] = 0.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
   });
 }
 
@@ -2556,13 +2686,28 @@ void _testSelectables() {
           id: 2,
           isSelectable: true,
           isSelected: false,
+          role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
           isSelectable: true,
           isSelected: true,
+          role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+        // Add two new nodes to test the aria-current fallback
+        tester.updateNode(
+          id: 4,
+          isSelectable: true,
+          isSelected: false,
+          rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+        ),
+        tester.updateNode(
+          id: 5,
+          isSelectable: true,
+          isSelected: true,
+          rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
     );
@@ -2571,35 +2716,55 @@ void _testSelectables() {
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="false"></sem>
-    <sem aria-selected="true"></sem>
+    <sem role="row" aria-selected="false"></sem>
+    <sem role="tab" aria-selected="true"></sem>
+    <sem aria-current="false"></sem>
+    <sem aria-current="true"></sem>
 </sem>
 ''');
 
     // Missing attributes cannot be expressed using HTML patterns, so check directly.
-    final nonSelectable = owner().debugSemanticsTree![1]!.element;
+    final nonSelectable = owner().debugSemanticsTree![0]!.element;
     expect(nonSelectable.getAttribute('aria-selected'), isNull);
+    expect(nonSelectable.getAttribute('aria-current'), isNull);
 
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
       isSelectable: true,
       isSelected: true,
+      role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
       isSelectable: true,
       isSelected: false,
+      role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    // Flip the values for the aria-current fallback nodes
+    tester.updateNode(
+      id: 4,
+      isSelectable: true,
+      isSelected: true,
+      rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+    );
+    tester.updateNode(
+      id: 5,
+      isSelectable: true,
+      isSelected: false,
+      rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="true"></sem>
-    <sem aria-selected="false"></sem>
+    <sem role="row" aria-selected="true"></sem>
+    <sem role="tab" aria-selected="false"></sem>
+    <sem aria-current="true"></sem>
+    <sem aria-current="false"></sem>
 </sem>
 ''');
 
@@ -3433,7 +3598,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a route label"><sem></sem></sem>
+      <sem aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3470,9 +3635,8 @@ void _testRoute() {
       'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled route, but it is missing the label. A route should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
     ]);
 
-    // But still sets the dialog role.
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label=""><sem></sem></sem>
+      <sem aria-label=""><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3503,7 +3667,7 @@ void _testRoute() {
       tester.apply();
 
       expectSemanticsTree(owner(), '''
-        <sem role="dialog" aria-describedby="flt-semantic-node-2">
+        <sem aria-describedby="flt-semantic-node-2">
             <sem>
                 <sem><span>$label</span></sem>
             </sem>
@@ -3525,7 +3689,7 @@ void _testRoute() {
     semantics().semanticsEnabled = false;
   });
 
-  test('scopesRoute alone sets the SemanticRoute role and "dialog" ARIA role with no label', () {
+  test('scopesRoute alone sets the SemanticRoute role and with no label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3535,7 +3699,7 @@ void _testRoute() {
     tester.apply();
 
     expectSemanticsTree(owner(), '''
-      <sem role="dialog"></sem>
+      <sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -4763,6 +4927,58 @@ void _testRequirable() {
   });
 }
 
+void _testSemanticsValidationResult() {
+  test('renders validation result', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 1),
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 3, validationResult: ui.SemanticsValidationResult.invalid),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid--missing></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid="true"></sem>
+</sem>''');
+
+    // Shift all values, observe that the values changed accordingly
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 1, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.invalid),
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 3),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="true"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid--missing></sem>
+</sem>''');
+  });
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -4804,6 +5020,7 @@ void updateNode(
   String? linkUrl,
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -4847,6 +5064,7 @@ void updateNode(
     headingLevel: headingLevel,
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
+    inputType: inputType,
   );
 }
 

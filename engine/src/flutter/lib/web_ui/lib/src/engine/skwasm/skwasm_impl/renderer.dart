@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ffi';
 import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -333,21 +335,30 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image from data');
     }
-    final SkwasmImageDecoder baseDecoder = SkwasmImageDecoder(
-      contentType: contentType.mimeType,
-      dataSource: list.toJS,
-      debugSource: 'encoded image bytes',
-    );
-    await baseDecoder.initialize();
-    if (targetWidth == null && targetHeight == null) {
-      return baseDecoder;
+    if (browserSupportsImageDecoder) {
+      final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
+        contentType: contentType.mimeType,
+        dataSource: list.toJS,
+        debugSource: 'encoded image bytes',
+      );
+      await baseDecoder.initialize();
+      if (targetWidth == null && targetHeight == null) {
+        return baseDecoder;
+      }
+      return ResizingCodec(
+        baseDecoder,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+        allowUpscaling: allowUpscaling,
+      );
+    } else {
+      if (contentType.isAnimated) {
+        return SkwasmAnimatedImageDecoder(list, targetWidth, targetHeight);
+      } else {
+        final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
+        return SkwasmDomImageDecoder(blob, targetWidth, targetHeight);
+      }
     }
-    return ResizingCodec(
-      baseDecoder,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-      allowUpscaling: allowUpscaling,
-    );
   }
 
   @override
@@ -360,13 +371,28 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image at url $uri');
     }
-    final SkwasmImageDecoder decoder = SkwasmImageDecoder(
-      contentType: contentType,
-      dataSource: response.body,
-      debugSource: uri.toString(),
-    );
-    await decoder.initialize();
-    return decoder;
+    if (browserSupportsImageDecoder) {
+      final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
+        contentType: contentType,
+        dataSource: response.body,
+        debugSource: uri.toString(),
+      );
+      await decoder.initialize();
+      return decoder;
+    } else {
+      final ByteBuffer buffer = await response.arrayBuffer();
+      final Uint8List data = buffer.asUint8List();
+      final ImageType? parsedContentType = detectImageType(data);
+      if (parsedContentType == null) {
+        throw Exception('Could not determine content type of image from data');
+      }
+      if (parsedContentType.isAnimated) {
+        return SkwasmAnimatedImageDecoder(data);
+      } else {
+        final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
+        return SkwasmDomImageDecoder(blob);
+      }
+    }
   }
 
   @override
@@ -464,10 +490,74 @@ class SkwasmRenderer implements Renderer {
     );
   }
 
+  String _generateDebugFilename(String filePrefix) {
+    final now = DateTime.now();
+    final String y = now.year.toString().padLeft(4, '0');
+    final String mo = now.month.toString().padLeft(2, '0');
+    final String d = now.day.toString().padLeft(2, '0');
+    final String h = now.hour.toString().padLeft(2, '0');
+    final String mi = now.minute.toString().padLeft(2, '0');
+    final String s = now.second.toString().padLeft(2, '0');
+    return '$filePrefix-$y-$mo-$d-$h-$mi-$s.json';
+  }
+
+  void _dumpDebugInfo(String filePrefix, Map<String, dynamic> json) {
+    final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
+    final blob = createDomBlob([jsonString], {'type': 'application/json'});
+    final url = domWindow.URL.createObjectURL(blob);
+    final element = domDocument.createElement('a');
+    element.setAttribute('href', url);
+    element.setAttribute('download', _generateDebugFilename(filePrefix));
+    element.click();
+  }
+
   @override
   void dumpDebugInfo() {
-    for (final view in _sceneViews.values) {
-      view.dumpDebugInfo();
+    if (kDebugMode) {
+      withStackScope((StackScope scope) {
+        final Pointer<Uint32> counts = scope.allocUint32Array(28);
+        skwasmGetLiveObjectCounts(counts);
+        final Map<String, dynamic> countsJson = <String, dynamic>{
+          'lineBreakBufferCount': counts[0],
+          'unicodePositionBufferCount': counts[1],
+          'lineMetricsCount': counts[2],
+          'textBoxListCount': counts[3],
+          'paragraphBuilderCount': counts[4],
+          'paragraphCount': counts[5],
+          'strutStyleCount': counts[6],
+          'textStyleCount': counts[7],
+          'animatedImageCount': counts[8],
+          'countourMeasureIterCount': counts[9],
+          'countourMeasureCount': counts[10],
+          'dataCount': counts[11],
+          'colorFilterCount': counts[12],
+          'imageFilterCount': counts[13],
+          'maskFilterCount': counts[14],
+          'typefaceCount': counts[15],
+          'fontCollectionCount': counts[16],
+          'imageCount': counts[17],
+          'paintCount': counts[18],
+          'pathCount': counts[19],
+          'pictureCount': counts[20],
+          'pictureRecorderCount': counts[21],
+          'shaderCount': counts[22],
+          'runtimeEffectCount': counts[23],
+          'stringCount': counts[24],
+          'string16Count': counts[25],
+          'surfaceCount': counts[26],
+          'verticesCount': counts[27],
+        };
+        _dumpDebugInfo('live_object_counts', countsJson);
+      });
+
+      int i = 0;
+      for (final view in _sceneViews.values) {
+        final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
+        if (debugJson != null) {
+          _dumpDebugInfo('flutter-scene$i', debugJson);
+          i++;
+        }
+      }
     }
   }
 }

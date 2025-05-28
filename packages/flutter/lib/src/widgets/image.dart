@@ -421,6 +421,12 @@ class Image extends StatefulWidget {
   ///    [repeat], filtering, and blurring.
   ///
   /// By default, this feature is turned off ([WebHtmlElementStrategy.never]).
+  ///
+  /// ### Android Permissions
+  ///
+  /// Images fetched from the network require the internet permission.
+  /// Ensure that all AndroidMainifest.xml variants (especially release) have the internet permission.
+  /// See https://docs.flutter.dev/data-and-backend/networking for more information.
   Image.network(
     String src, {
     super.key,
@@ -1293,6 +1299,26 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _completerHandle = _imageStream!.completer!.keepAlive();
     }
 
+    // It's almost time to remove the last listener, which triggers the
+    // disposal. But before that, add an ephemeral listener to potentially
+    // suppress errors.
+    //
+    // Reason: When an app provides an `Image` widget with an `errorBuilder`, it
+    // expects the widget to never report errors through `FlutterError` in any
+    // cases. This is hard if the stream fails after the disposal, because an
+    // image stream must have no listeners to be disposed, which then has
+    // nothing to suppress the errors. This is solve with the help of an
+    // ephemeral listener, which also suppresses the error but does not hinder
+    // disposal. For more details, see
+    // https://github.com/flutter/flutter/issues/97077 .
+    if (_imageStream!.completer != null && widget.errorBuilder != null) {
+      _imageStream!.completer!.addEphemeralErrorListener((
+        Object exception,
+        StackTrace? stackTrace,
+      ) {
+        // Intentionally blank.
+      });
+    }
     _imageStream!.removeListener(_getListener());
     _isListeningToStream = false;
   }

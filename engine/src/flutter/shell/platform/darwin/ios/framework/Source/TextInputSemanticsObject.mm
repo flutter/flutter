@@ -212,7 +212,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
   [super setSemanticsNode:node];
   _inactive_text_input.text = @(node->value.data());
   FlutterTextInputView* textInput = (FlutterTextInputView*)[self bridge]->textInputView();
-  if ([self node].HasFlag(flutter::SemanticsFlags::kIsFocused)) {
+  if ([self node].flags.isFocused) {
     textInput.backingTextInputAccessibilityObject = self;
     // The text input view must have a non-trivial size for the accessibility
     // system to send text editing events.
@@ -233,7 +233,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
  * we use an FlutterInactiveTextInput.
  */
 - (UIView<UITextInput>*)textInputSurrogate {
-  if ([self node].HasFlag(flutter::SemanticsFlags::kIsFocused)) {
+  if ([self node].flags.isFocused) {
     return [self bridge]->textInputView();
   } else {
     return _inactive_text_input;
@@ -264,7 +264,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
   if (![self isAccessibilityBridgeAlive]) {
     return false;
   }
-  return [self node].HasFlag(flutter::SemanticsFlags::kIsFocused);
+  return [self node].flags.isFocused;
 }
 
 - (BOOL)accessibilityActivate {

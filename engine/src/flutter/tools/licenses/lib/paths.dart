@@ -101,6 +101,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'flutter/third_party/gradle',
   r'flutter/third_party/harfbuzz/docs',
+  r'flutter/third_party/harfbuzz/perf',
+  r'flutter/third_party/harfbuzz/src/hb-bit-vector.hh',
+  r'flutter/third_party/harfbuzz/src/hb-directwrite.hh',
+  r'flutter/third_party/harfbuzz/src/hb-directwrite-shape.cc',
+  r'flutter/third_party/harfbuzz/src/hb-fontations.h',
   r'flutter/third_party/harfbuzz/util', // utils are command line tools that do not end up in the binary
   r'flutter/third_party/icu/filters',
   r'flutter/third_party/icu/fuzzers',

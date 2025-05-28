@@ -193,6 +193,7 @@ void main() {
         'navActionTextStyle',
         'pickerTextStyle',
         'dateTimePickerTextStyle',
+        'selectionHandleColor',
       }),
       isTrue,
     );
@@ -219,6 +220,14 @@ void main() {
     expect(c, isNot(equals(a)));
     expect(b, isNot(equals(c)));
     expect(c, isNot(equals(b)));
+  });
+
+  testWidgets('NoDefaultCupertinoThemeData equality', (WidgetTester tester) async {
+    const NoDefaultCupertinoThemeData a = NoDefaultCupertinoThemeData();
+    final NoDefaultCupertinoThemeData b = a.copyWith();
+    final NoDefaultCupertinoThemeData c = a.copyWith(brightness: Brightness.light);
+    expect(a, equals(b));
+    expect(a, isNot(c));
   });
 
   late Brightness currentBrightness;
@@ -264,6 +273,7 @@ void main() {
       colorMatches(theme.primaryContrastingColor, CupertinoColors.white);
       colorMatches(theme.barBackgroundColor, barBackgroundColor);
       colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.selectionHandleColor, CupertinoColors.systemBlue);
       colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
       colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
       colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);

@@ -148,7 +148,7 @@ class Animator final {
   std::deque<uint64_t> trace_flow_ids_;
   bool has_rendered_ = false;
 
-  fml::WeakPtrFactory<Animator> weak_factory_;
+  fml::TaskRunnerAffineWeakPtrFactory<Animator> weak_factory_;
 
   friend class testing::ShellTest;
 

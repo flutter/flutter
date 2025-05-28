@@ -14,7 +14,6 @@ import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
-import 'common.dart';
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
@@ -34,13 +33,15 @@ abstract class DartBuild extends Target {
     } else {
       final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
+      final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        fileSystem.file(environment.packageConfigPath),
+        packageConfigFile,
         logger: environment.logger,
       );
       final Uri projectUri = environment.projectDir.uri;
       final String? runPackageName =
           packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
@@ -49,6 +50,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName!,
+            pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
         environmentDefines: environment.defines,
@@ -118,8 +120,9 @@ abstract class DartBuild extends Target {
 class DartBuildForNative extends DartBuild {
   const DartBuildForNative({@visibleForTesting super.buildRunner});
 
+  // TODO(dcharkes): Add `KernelSnapshot()` for AOT builds only when adding tree-shaking information. https://github.com/dart-lang/native/issues/153
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot()];
+  List<Target> get dependencies => const <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.

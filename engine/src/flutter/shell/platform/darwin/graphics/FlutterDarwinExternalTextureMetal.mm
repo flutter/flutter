@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "impeller/base/validation.h"

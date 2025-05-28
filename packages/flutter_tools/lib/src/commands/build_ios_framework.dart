@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -117,9 +118,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   @protected
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
-
-  @override
-  bool get reportNullSafety => false;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -444,7 +442,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.platform              = :ios, '12.0'
+  s.platform              = :ios, '13.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -489,6 +487,11 @@ end
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     final List<Directory> frameworks = <Directory>[];
 
+    // Dev dependencies are removed from release builds if the explicit package
+    // dependencies flag is on.
+    final bool devDependenciesEnabled =
+        !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
+
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
         final Directory outputBuildDirectory = switch (sdkType) {
@@ -511,6 +514,7 @@ end
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
+            kDevDependenciesEnabled: devDependenciesEnabled.toString(),
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,

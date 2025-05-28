@@ -197,7 +197,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
           image_color_source->vertical_tile_mode());
       auto sampler_descriptor =
           skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
-      auto effect_transform = image_color_source->matrix();
+      // See https://github.com/flutter/flutter/issues/165205
+      flutter::DlMatrix effect_transform = image_color_source->matrix().To3x3();
 
       auto contents = std::make_shared<TiledTextureContents>();
       contents->SetOpacityFactor(color.alpha);
@@ -363,7 +364,7 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     std::shared_ptr<TextureContents> texture_contents,
-    RectGeometry* rect_geom) const {
+    FillRectGeometry* rect_geom) const {
   Scalar expand_amount = GaussianBlurFilterContents::CalculateBlurRadius(
       GaussianBlurFilterContents::ScaleSigma(sigma.sigma));
   texture_contents->SetSourceRect(
@@ -375,7 +376,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (coverage) {
     texture_contents->SetDestinationRect(
         coverage.value().Expand(expand_amount, expand_amount));
-    *rect_geom = RectGeometry(coverage.value());
+    *rect_geom = FillRectGeometry(coverage.value());
     geometry = rect_geom;
   }
   mask->SetGeometry(geometry);
@@ -395,7 +396,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     std::shared_ptr<ColorSourceContents> color_source_contents,
     const flutter::DlColorFilter* color_filter,
     bool invert_colors,
-    RectGeometry* rect_geom) const {
+    FillRectGeometry* rect_geom) const {
   // If it's a solid color then we can just get  away with doing one Gaussian
   // blur. The color filter will always be applied on the CPU.
   if (color_source_contents->IsSolidColor()) {
@@ -424,7 +425,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (!expanded_local_bounds.has_value()) {
     expanded_local_bounds = Rect();
   }
-  *rect_geom = RectGeometry(expanded_local_bounds.value());
+  *rect_geom = FillRectGeometry(expanded_local_bounds.value());
   color_source_contents->SetGeometry(rect_geom);
   std::shared_ptr<Contents> color_contents = color_source_contents;
 

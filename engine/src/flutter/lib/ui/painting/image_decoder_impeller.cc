@@ -105,8 +105,11 @@ ImageDecoderImpeller::ImageDecoderImpeller(
   context_ = context_promise.get_future();
   runners_.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [promise = std::move(context_promise), io_manager]() mutable {
-        promise.set_value(io_manager ? io_manager->GetImpellerContext()
-                                     : nullptr);
+        if (io_manager) {
+          promise.set_value(io_manager->GetImpellerContext());
+        } else {
+          promise.set_value(nullptr);
+        }
       }));
 }
 
@@ -176,7 +179,8 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
         base_image_info.makeWH(decode_size.width(), decode_size.height())
             .makeColorType(
                 ChooseCompatibleColorType(base_image_info.colorType()))
-            .makeAlphaType(alpha_type);
+            .makeAlphaType(alpha_type)
+            .makeColorSpace(SkColorSpace::MakeSRGB());
   }
 
   const auto pixel_format = ToPixelFormat(image_info.colorType());

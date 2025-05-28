@@ -271,12 +271,14 @@ TaskFunction createFlutterGalleryStartupTest({
   String target = 'lib/main.dart',
   Map<String, String>? runEnvironment,
   bool enableLazyShaderMode = false,
+  bool enableHCPP = false,
 }) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
     runEnvironment: runEnvironment,
     enableLazyShaderMode: enableLazyShaderMode,
+    enableHCPP: enableHCPP,
   ).run;
 }
 
@@ -699,6 +701,28 @@ TaskFunction createPathTessellationDynamicPerfTest() {
   ).run;
 }
 
+TaskFunction createPathStrokeTessellationStaticPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_static',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_static_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createPathStrokeTessellationDynamicPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_dynamic',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_dynamic_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -895,11 +919,13 @@ class StartupTest {
     this.target = 'lib/main.dart',
     this.runEnvironment,
     this.enableLazyShaderMode = false,
+    this.enableHCPP = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final bool enableLazyShaderMode;
+  final bool enableHCPP;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -912,6 +938,9 @@ class StartupTest {
 
       if (enableLazyShaderMode) {
         _addLazyShaderMode(testDirectory);
+      }
+      if (enableHCPP) {
+        _addSurfaceControlSupportToManifest(testDirectory);
       }
 
       try {
@@ -1726,6 +1755,12 @@ class CompileTest {
 
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
+      final Map<String, String> environment = Platform.environment;
+      final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+      final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      final String? provisioningProfile =
+          environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
       int releaseSizeInBytes = 0;
@@ -1733,6 +1768,7 @@ class CompileTest {
 
       watch.start();
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        '-allowProvisioningUpdates',
         '-scheme',
         'hello_world_swiftui',
         '-target',
@@ -1744,6 +1780,9 @@ class CompileTest {
         '-archivePath',
         '$testDirectory/hello_world_swiftui',
         'archive',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
@@ -1796,17 +1835,7 @@ class CompileTest {
         options.add('--tree-shake-icons');
         options.add('--split-debug-info=infos/');
         watch.start();
-        await flutter(
-          'build',
-          options: options,
-          environment: <String, String>{
-            // iOS 12.1 and lower did not have Swift ABI compatibility so Swift apps embedded the Swift runtime.
-            // https://developer.apple.com/documentation/xcode-release-notes/swift-5-release-notes-for-xcode-10_2#App-Thinning
-            // The gallery pulls in Swift plugins. Set lowest version to 12.2 to avoid benchmark noise.
-            // This should be removed when when Flutter's minimum supported version is >12.2.
-            'FLUTTER_XCODE_IPHONEOS_DEPLOYMENT_TARGET': '12.2',
-          },
-        );
+        await flutter('build', options: options);
         watch.stop();
         final Directory buildDirectory = dir(path.join(cwd, 'build'));
         final String? appPath = _findDarwinAppInBuildDirectory(buildDirectory.path);

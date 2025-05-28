@@ -638,6 +638,10 @@ final List<LicenseReferencePattern> csReferencesByIdentifyingReference = <Licens
   ),
 
   LicenseReferencePattern(
+    pattern: RegExp(kIndent + r'For terms of use and license, see ([^ \n]+)', multiLine: true),
+  ),
+
+  LicenseReferencePattern(
     pattern: RegExp(kIndent + r'License & terms of use: ([^ \n]+)', multiLine: true),
   ),
 

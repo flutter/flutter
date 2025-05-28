@@ -62,6 +62,10 @@ const Duration _kExpand = Duration(milliseconds: 200);
 ///
 /// Remember to dispose of the [ExpansionTileController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
+@Deprecated(
+  'Use ExpansibleController instead. '
+  'This feature was deprecated after v3.31.0-0.1.pre.',
+)
 typedef ExpansionTileController = ExpansibleController;
 
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
@@ -390,9 +394,9 @@ class ExpansionTile extends StatefulWidget {
 
   /// If provided, the controller can be used to expand and collapse tiles.
   ///
-  /// In cases were control over the tile's state is needed from a callback triggered
-  /// by a widget within the tile, [ExpansionTileController.of] may be more convenient
-  /// than supplying a controller.
+  /// In cases where control over the tile's state is needed from a callback
+  /// triggered by a widget within the tile, [ExpansibleController.of] may be
+  /// more convenient than supplying a controller.
   final ExpansionTileController? controller;
 
   /// {@macro flutter.material.ListTile.dense}
