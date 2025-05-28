@@ -1259,6 +1259,7 @@ Future<DateTimeRange?> showDateRangePicker({
     keyboardType: keyboardType,
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+    calendarDelegate: calendarDelegate,
   );
 
   if (textDirection != null) {

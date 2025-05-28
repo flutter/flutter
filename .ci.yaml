@@ -4702,7 +4702,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6552,7 +6552,6 @@ targets:
 
   - name: Windows web_tool_tests_1_2
     recipe: flutter/flutter_drone
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/168863
     timeout: 60
     properties:
       dependencies: >-
@@ -6566,7 +6565,7 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
