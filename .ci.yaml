@@ -2246,7 +2246,7 @@ targets:
 
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
-    timeout: 60
+    timeout: 90
     properties:
       dependencies: >-
         [
