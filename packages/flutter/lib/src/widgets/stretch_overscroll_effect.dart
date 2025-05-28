@@ -5,7 +5,10 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'image_filter.dart';
 
 /// A widget that replicates the native Android stretch overscroll effect.
 ///
@@ -91,9 +94,7 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   @override
   void initState() {
     super.initState();
-    if (!_StretchOverscrollEffectShader._initCalled) {
-      _StretchOverscrollEffectShader.initializeShader();
-    }
+    _StretchOverscrollEffectShader.initializeShader();
   }
 
   @override
@@ -117,7 +118,7 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
       _fragmentShader?.dispose();
       _fragmentShader = null;
 
-      imageFilter = ui.ImageFilter.matrix(Matrix4.identity().storage);
+      imageFilter = kEmptyFilter;
     }
 
     return ImageFiltered(
@@ -142,7 +143,7 @@ class _StretchOverscrollEffectPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint =
         Paint()
-          ..color = const Color.fromRGBO(0, 0, 0, 0.00000003)
+          ..color = const Color.fromARGB(1, 0, 0, 0)
           ..style = PaintingStyle.fill;
 
     canvas.drawPoints(ui.PointMode.points, <Offset>[

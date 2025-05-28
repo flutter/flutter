@@ -19,7 +19,7 @@ import 'package:flutter/physics.dart' show Tolerance, nearEqual;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../material/stretch_overscroll_effect.dart';
+import '../widgets/stretch_overscroll_effect.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
