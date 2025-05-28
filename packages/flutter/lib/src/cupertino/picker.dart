@@ -400,10 +400,12 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
         start: capStartEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
         end: capEndEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
       ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadiusDirectional.horizontal(
-          start: capStartEdge ? radius : Radius.zero,
-          end: capEndEdge ? radius : Radius.zero,
+      decoration: ShapeDecoration(
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadiusDirectional.horizontal(
+            start: capStartEdge ? radius : Radius.zero,
+            end: capEndEdge ? radius : Radius.zero,
+          ),
         ),
         color: CupertinoDynamicColor.resolve(background, context),
       ),
