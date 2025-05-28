@@ -289,6 +289,7 @@ TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
 TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
@@ -298,6 +299,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   root.decreased_value = "";
   root.tooltip = "";
   root.child_count = 1;
+  root.flags2 = &flags;
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
@@ -312,6 +314,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   child1.decreased_value = "";
   child1.tooltip = "";
   child1.child_count = 0;
+  child1.flags2 = &flags;
   child1.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(child1);
 
