@@ -394,31 +394,4 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   return [fileDate timeIntervalSince1970];
 }
 
-- (UISceneConfiguration*)application:(UIApplication*)application
-    configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
-                                   options:(UISceneConnectionOptions*)options {
-  NSDictionary* sceneManifest =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
-  NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
-
-  if (sceneConfigs.count > 0) {
-    return connectingSceneSession.configuration;
-  } else {
-    UISceneConfiguration* config =
-        [UISceneConfiguration configurationWithName:@"flutter"
-                                        sessionRole:connectingSceneSession.role];
-    config.delegateClass = [FlutterSceneDelegate class];
-
-    NSString* mainStoryboard =
-        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIMainStoryboardFile"];
-
-    if (mainStoryboard) {
-      UIStoryboard* storyboard = [UIStoryboard storyboardWithName:mainStoryboard
-                                                           bundle:[NSBundle mainBundle]];
-      config.storyboard = storyboard;
-    }
-    return config;
-  }
-}
-
 @end
