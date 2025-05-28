@@ -418,9 +418,20 @@ void ContextMTL::FlushTasksAwaitingGPU() {
     Lock lock(tasks_awaiting_gpu_mutex_);
     std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
   }
-  for (const auto& task : tasks_awaiting_gpu) {
-    task.task();
-  }
+  is_gpu_disabled_sync_switch_->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfFalse([&] {
+            for (const auto& task : tasks_awaiting_gpu) {
+              task.task();
+            }
+          })
+          .SetIfTrue([&] {
+            // Lost access to the GPU immediately after it was activated. This
+            // may happen if the app was quickly foregrounded/backgrounded from
+            // a push notification. Store the tasks on the context again.
+            Lock lock(tasks_awaiting_gpu_mutex_);
+            std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
+          }));
 }
 
 ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
