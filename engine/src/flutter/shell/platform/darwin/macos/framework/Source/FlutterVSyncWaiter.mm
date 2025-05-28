@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
 
@@ -106,7 +107,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   }
 
   if (_pendingBaton.has_value()) {
-    FML_LOG(WARNING) << "Engine requested vsync while another was pending";
+    [FlutterLogger logWarning:@"Engine requested vsync while another was pending"];
     _block(0, 0, *_pendingBaton);
     _pendingBaton = std::nullopt;
   }
@@ -152,7 +153,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
 
 - (void)dealloc {
   if (_pendingBaton.has_value()) {
-    FML_LOG(WARNING) << "Deallocating FlutterVSyncWaiter with a pending vsync";
+    [FlutterLogger logWarning:@"Deallocating FlutterVSyncWaiter with a pending vsync"];
   }
   // It is possible that block running on UI thread held the last reference to
   // the waiter, in which case reschedule to main thread.

@@ -49,14 +49,11 @@ class FillPathSourceGeometry : public Geometry {
   FillPathSourceGeometry& operator=(const FillPathSourceGeometry&) = delete;
 };
 
-/// @brief A Geometry that produces fillable vertices from a |DlPath| or
-///        |impeller::Path| object using the |FillPathSourceGeometry|
-///        base class and a |DlPath| object to perform path iteration.
+/// @brief A Geometry that produces fillable vertices from a |DlPath| object
+///        using the |FillPathSourceGeometry| base class and the inherent
+///        ability for a |DlPath| object to perform path iteration.
 class FillPathGeometry final : public FillPathSourceGeometry {
  public:
-  explicit FillPathGeometry(const Path& path,
-                            std::optional<Rect> inner_rect = std::nullopt);
-
   explicit FillPathGeometry(const flutter::DlPath& path,
                             std::optional<Rect> inner_rect = std::nullopt);
 
@@ -65,6 +62,45 @@ class FillPathGeometry final : public FillPathSourceGeometry {
 
  private:
   const flutter::DlPath path_;
+};
+
+/// @brief A Geometry that produces fillable vertices from a |DlPath| object
+///        that containing an arc with the provided oval bounds using the
+///        |FillPathSourceGeometry| base class and the inherent ability for
+///        a |DlPath| object to perform path iteration.
+///
+/// Note that this class will override the bounds to enforce the arc bounds
+/// since paths constructed from arcs sometimes have control opints outside
+/// the arc bounds, but don't draw pixels outside those bounds.
+class ArcFillPathGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit ArcFillPathGeometry(const flutter::DlPath& path,
+                               const Rect& oval_bounds);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const flutter::DlPath path_;
+  const Rect oval_bounds_;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+};
+
+/// @brief A Geometry that produces fillable vertices for the gap between
+///        a pair of |RoundRect| objects using the |FillPathSourceGeometry|
+///        base class.
+class FillDiffRoundRectGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit FillDiffRoundRectGeometry(const RoundRect& outer,
+                                     const RoundRect& inner);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const DiffRoundRectPathSource source_;
 };
 
 }  // namespace impeller

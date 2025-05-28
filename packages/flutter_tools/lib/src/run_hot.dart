@@ -266,11 +266,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
-
-    if (debuggingOptions.serveObservatory) {
-      await enableObservatory();
-    }
-
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     if (debuggingOptions.enableDevTools) {
       // The method below is guaranteed never to return a failing future.
@@ -744,8 +739,8 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  /// Returns [true] if the reload was successful.
-  /// Prints errors if [printErrors] is [true].
+  /// Returns `true` if the reload was successful.
+  /// Prints errors if [printErrors] is `true`.
   static bool validateReloadReport(
     vm_service.ReloadReport? reloadReport, {
     bool printErrors = true,

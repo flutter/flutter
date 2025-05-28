@@ -320,7 +320,7 @@ class ThemeData with Diagnosticable {
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
-    BottomAppBarTheme? bottomAppBarTheme,
+    BottomAppBarThemeData? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
@@ -526,7 +526,7 @@ class ThemeData with Diagnosticable {
     appBarTheme ??= const AppBarTheme();
     badgeTheme ??= const BadgeThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
-    bottomAppBarTheme ??= const BottomAppBarTheme();
+    bottomAppBarTheme ??= const BottomAppBarThemeData();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     cardTheme ??= const CardThemeData();
@@ -1292,7 +1292,7 @@ class ThemeData with Diagnosticable {
   final MaterialBannerThemeData bannerTheme;
 
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
-  final BottomAppBarTheme bottomAppBarTheme;
+  final BottomAppBarThemeData bottomAppBarTheme;
 
   /// A theme for customizing the appearance and layout of [BottomNavigationBar]
   /// widgets.
@@ -1519,7 +1519,7 @@ class ThemeData with Diagnosticable {
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
-    BottomAppBarTheme? bottomAppBarTheme,
+    BottomAppBarThemeData? bottomAppBarTheme,
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
@@ -1955,7 +1955,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       badgeTheme: BadgeThemeData.lerp(a.badgeTheme, b.badgeTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
-      bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
+      bottomAppBarTheme: BottomAppBarThemeData.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(
         a.bottomNavigationBarTheme,
         b.bottomNavigationBarTheme,
@@ -2036,7 +2036,6 @@ class ThemeData with Diagnosticable {
         // order in every place that they are separated by section comments (e.g.
         // GENERAL CONFIGURATION). Each section except for deprecations should be
         // alphabetical by symbol name.
-        // GENERAL CONFIGURATION
         mapEquals(other.adaptationMap, adaptationMap) &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
@@ -2529,7 +2528,7 @@ class ThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<BottomAppBarTheme>(
+      DiagnosticsProperty<BottomAppBarThemeData>(
         'bottomAppBarTheme',
         bottomAppBarTheme,
         defaultValue: defaultData.bottomAppBarTheme,
@@ -2986,11 +2985,14 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
 
   @override
   CupertinoThemeData resolveFrom(BuildContext context) {
-    // Only the cupertino override theme part will be resolved.
+    // Only the cupertino override theme part will be resolved, as well as the
+    // default text theme.
     // If the color comes from the material theme it's not resolved.
+    final NoDefaultCupertinoThemeData cupertinoOverrideThemeWithTextTheme = _cupertinoOverrideTheme
+        .copyWith(textTheme: textTheme);
     return MaterialBasedCupertinoThemeData._(
       _materialTheme,
-      _cupertinoOverrideTheme.resolveFrom(context),
+      cupertinoOverrideThemeWithTextTheme.resolveFrom(context),
     );
   }
 }

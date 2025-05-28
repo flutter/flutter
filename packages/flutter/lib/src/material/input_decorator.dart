@@ -322,7 +322,6 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void initState() {
     super.initState();
     _controller = AnimationController(duration: _kTransitionDuration, vsync: this);
-    // TODO(ash2moon): https://github.com/flutter/flutter/issues/168022
     if (_hasError) {
       _error = _buildError();
       _controller.value = 1.0;
@@ -400,31 +399,26 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    return Builder(
-      builder: (BuildContext context) {
-        return Semantics(
-          container: true,
-          liveRegion: !MediaQuery.announceOf(context),
-          child: FadeTransition(
-            opacity: _controller,
-            child: FractionalTranslation(
-              translation: Tween<Offset>(
-                begin: const Offset(0.0, -0.25),
-                end: Offset.zero,
-              ).evaluate(_controller.view),
-              child:
-                  widget.error ??
-                  Text(
-                    widget.errorText!,
-                    style: widget.errorStyle,
-                    textAlign: widget.textAlign,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: widget.errorMaxLines,
-                  ),
-            ),
-          ),
-        );
-      },
+    return Semantics(
+      container: true,
+      child: FadeTransition(
+        opacity: _controller,
+        child: FractionalTranslation(
+          translation: Tween<Offset>(
+            begin: const Offset(0.0, -0.25),
+            end: Offset.zero,
+          ).evaluate(_controller.view),
+          child:
+              widget.error ??
+              Text(
+                widget.errorText!,
+                style: widget.errorStyle,
+                textAlign: widget.textAlign,
+                overflow: TextOverflow.ellipsis,
+                maxLines: widget.errorMaxLines,
+              ),
+        ),
+      ),
     );
   }
 
@@ -3933,7 +3927,6 @@ class InputDecoration {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
-    SemanticsService? semanticsService,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,

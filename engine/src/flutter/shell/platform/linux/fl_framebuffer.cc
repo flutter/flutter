@@ -20,6 +20,9 @@ struct _FlFramebuffer {
 
   // Texture backing framebuffer.
   GLuint texture_id;
+
+  // Stencil buffer associated with this framebuffer.
+  GLuint depth_stencil;
 };
 
 G_DEFINE_TYPE(FlFramebuffer, fl_framebuffer, G_TYPE_OBJECT)
@@ -29,6 +32,7 @@ static void fl_framebuffer_dispose(GObject* object) {
 
   glDeleteFramebuffers(1, &self->framebuffer_id);
   glDeleteTextures(1, &self->texture_id);
+  glDeleteRenderbuffers(1, &self->depth_stencil);
 
   G_OBJECT_CLASS(fl_framebuffer_parent_class)->dispose(object);
 }
@@ -63,19 +67,17 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          provider->texture_id, 0);
 
-  GLuint depth_stencil;
-  glGenRenderbuffers(1, &depth_stencil);
-  glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
+  glGenRenderbuffers(1, &provider->depth_stencil);
+  glBindRenderbuffer(GL_RENDERBUFFER, provider->depth_stencil);
   glRenderbufferStorage(GL_RENDERBUFFER,      // target
                         GL_DEPTH24_STENCIL8,  // internal format
                         width,                // width
                         height                // height
   );
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                            GL_RENDERBUFFER, depth_stencil);
+                            GL_RENDERBUFFER, provider->depth_stencil);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                            GL_RENDERBUFFER, depth_stencil);
-  glDeleteRenderbuffers(1, &depth_stencil);
+                            GL_RENDERBUFFER, provider->depth_stencil);
 
   return provider;
 }

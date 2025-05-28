@@ -103,9 +103,6 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
   boldText,
 
-  /// Specifies the aspect corresponding to [MediaQueryData.announce].
-  announce,
-
   /// Specifies the aspect corresponding to [MediaQueryData.navigationMode].
   navigationMode,
 
@@ -213,7 +210,6 @@ class MediaQueryData {
     this.onOffSwitchLabels = false,
     this.disableAnimations = false,
     this.boldText = false,
-    this.announce = false,
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
@@ -299,7 +295,6 @@ class MediaQueryData {
           platformData?.disableAnimations ??
           view.platformDispatcher.accessibilityFeatures.disableAnimations,
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
-      announce = platformData?.announce ?? view.platformDispatcher.accessibilityFeatures.announce,
       highContrast =
           platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
       onOffSwitchLabels =
@@ -315,9 +310,7 @@ class MediaQueryData {
           view.platformDispatcher.supportsShowingSystemContextMenu;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
-    final double scaleFactor =
-        platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor;
-    return scaleFactor == 1.0 ? TextScaler.noScaling : TextScaler.linear(scaleFactor);
+    return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
   }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -591,23 +584,6 @@ class MediaQueryData {
   ///    originates.
   final bool boldText;
 
-  /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are allowed on the current platform.
-  ///
-  /// Returns `false` on Android, where platform announcements are deprecated
-  /// by the underlying platform.
-  ///
-  /// Returns `true` on all other platforms (iOS, web, desktop) where such
-  /// announcements are generally supported without discouragement.
-  ///
-  /// Use this flag to conditionally avoid making announcements on Android.
-  ///
-  /// See also:
-  ///
-  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
-  ///    originates.
-  final bool announce;
-
   /// Describes the navigation mode requested by the platform.
   ///
   /// Some user interfaces are better navigated using a directional pad (DPAD)
@@ -689,7 +665,6 @@ class MediaQueryData {
     bool? invertColors,
     bool? accessibleNavigation,
     bool? boldText,
-    bool? announce,
     NavigationMode? navigationMode,
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
@@ -715,7 +690,6 @@ class MediaQueryData {
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
-      announce: announce ?? this.announce,
       navigationMode: navigationMode ?? this.navigationMode,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
@@ -918,7 +892,6 @@ class MediaQueryData {
         other.invertColors == invertColors &&
         other.accessibleNavigation == accessibleNavigation &&
         other.boldText == boldText &&
-        other.announce == announce &&
         other.navigationMode == navigationMode &&
         other.gestureSettings == gestureSettings &&
         listEquals(other.displayFeatures, displayFeatures) &&
@@ -1740,27 +1713,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeBoldTextOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.boldText)?.boldText;
 
-  /// Returns the [MediaQueryData.announce] accessibility setting for the
-  /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static bool announceOf(BuildContext context) => maybeAnnounceOf(context) ?? false;
-
-  /// Returns the [MediaQueryData.announce] accessibility setting for the
-  /// nearest [MediaQuery] ancestor or null, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static bool? maybeAnnounceOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.announce)?.announce;
-
   /// Returns [MediaQueryData.navigationMode] for the nearest [MediaQuery]
   /// ancestor or throws an exception, if no such ancestor exists.
   ///
@@ -1891,7 +1843,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.disableAnimations =>
               data.disableAnimations != oldWidget.data.disableAnimations,
             _MediaQueryAspect.boldText => data.boldText != oldWidget.data.boldText,
-            _MediaQueryAspect.announce => data.announce != oldWidget.data.announce,
             _MediaQueryAspect.navigationMode =>
               data.navigationMode != oldWidget.data.navigationMode,
             _MediaQueryAspect.gestureSettings =>
@@ -2066,12 +2017,58 @@ class _UnspecifiedTextScaler implements TextScaler {
   const _UnspecifiedTextScaler();
 
   @override
-  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) =>
+  Never clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) =>
       throw UnimplementedError();
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+}
+
+/// A [TextScaler] that reflects the user's font scale preferences from the
+/// platform's accessibility settings.
+final class SystemTextScaler extends TextScaler {
+  SystemTextScaler._(this._platformDispatcher)
+    : textScaleFactor = _platformDispatcher.textScaleFactor;
+
+  final ui.PlatformDispatcher _platformDispatcher;
+  @override
+  double scale(double fontSize) => _platformDispatcher.scaleFontSize(fontSize);
+
+  /// A value that represents the current user preference for the scaling factor
+  /// for fonts.
+  ///
+  /// This numeric value is typically used to compare [SystemTextScaler]s. Two
+  /// [SystemTextScaler] instances with the same [textScaleFactor] are considered
+  /// equal as their [scale] methods produce the same output when given the same
+  /// input font size. However, [textScaleFactor] should not be used in arithmetic
+  /// operations.
+  // TODO(LongCatIsLooong): consider changing the type to Comparable<OpaqueWrapper>
+  // once  `MediaQueryData.textScaleFactor` is removed:
+  // https://github.com/flutter/flutter/issues/128825.
+  @override
+  final double textScaleFactor;
 
   @override
-  double scale(double fontSize) => throw UnimplementedError();
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return switch (other) {
+      // The system's text scale factor is used for the equality check because the
+      // `scale` function's output monotonically increases with the text scale factor.
+      SystemTextScaler(:final double textScaleFactor) => this.textScaleFactor == textScaleFactor,
+      // When textScaleFactor is 1.0, the two TextScalers are extensionally
+      // equivalent.
+      TextScaler.noScaling => textScaleFactor == 1.0,
+      _ => false,
+    };
+  }
 
   @override
-  double get textScaleFactor => throw UnimplementedError();
+  int get hashCode => textScaleFactor.hashCode;
+
+  @override
+  String toString() =>
+      'SystemTextScaler (${textScaleFactor == 1.0 ? "no scaling" : "${textScaleFactor}x"})';
 }

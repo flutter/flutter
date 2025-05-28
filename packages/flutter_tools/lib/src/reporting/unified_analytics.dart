@@ -18,7 +18,7 @@ import '../version.dart';
 /// will be enabled to ensure usage of this class is within GA4 limitations.
 ///
 /// For testing purposes, pass in a [FakeAnalytics] instance initialized with
-/// an in-memory [FileSystem] to prevent writing to disk.
+/// an in-memory file system to prevent writing to disk.
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,

@@ -1289,23 +1289,23 @@ void main() {
       final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
 
       expect(key.currentState!.focusNode.hasFocus, isFalse);
-      expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
-      expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+      expect(semantics.flagsCollection.isFocused, isFalse);
+      expect(semantics.flagsCollection.isFocusable, isTrue);
 
       FocusScope.of(key.currentContext!).requestFocus(key.currentState!.focusNode);
       await tester.pumpAndSettle();
 
       expect(key.currentState!.focusNode.hasFocus, isTrue);
-      expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
-      expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+      expect(semantics.flagsCollection.isFocused, isTrue);
+      expect(semantics.flagsCollection.isFocusable, isTrue);
 
       key.currentState!.focusNode.canRequestFocus = false;
       await tester.pumpAndSettle();
 
       expect(key.currentState!.focusNode.hasFocus, isFalse);
       expect(key.currentState!.focusNode.canRequestFocus, isFalse);
-      expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
-      expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
+      expect(semantics.flagsCollection.isFocused, isFalse);
+      expect(semantics.flagsCollection.isFocusable, isFalse);
     });
 
     testWidgets('Setting canRequestFocus on focus node causes update.', (
