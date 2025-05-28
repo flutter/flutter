@@ -60,6 +60,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel,
     this.noFrequencyBasedMinification = false,
     super.sourceMaps = true,
+    this.minify,
     super.renderer = WebRendererMode.defaultForJs,
   });
 
@@ -69,23 +70,16 @@ class JsCompilerConfig extends WebCompilerConfig {
     required WebRendererMode renderer,
   }) : this(nativeNullAssertions: nativeNullAssertions, renderer: renderer);
 
-  /// Build environment flag for [dumpInfo].
-  static const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
-
-  /// Build environment flag for [noFrequencyBasedMinification].
-  static const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
-
-  /// Build environment flag for [csp].
-  static const String kCspMode = 'cspMode';
-
-  /// Build environment flag for [nativeNullAssertions].
-  static const String kNativeNullAssertions = 'NativeNullAssertions';
-
   /// Whether to disable dynamic generation code to satisfy CSP policies.
   final bool csp;
 
   /// If `--dump-info` should be passed to the compiler.
   final bool dumpInfo;
+
+  /// If minification should be used in the JS compiler.
+  ///
+  /// If `null`, minifies in release mode only.
+  final bool? minify;
 
   /// Whether native null assertions are enabled.
   final bool nativeNullAssertions;
@@ -119,7 +113,7 @@ class JsCompilerConfig extends WebCompilerConfig {
   ///
   /// Includes the contents of [toSharedCommandOptions].
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-    if (buildMode != BuildMode.release) '--no-minify',
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     ...toSharedCommandOptions(buildMode),
     '-O${optimizationLevelForBuildMode(buildMode)}',
     if (dumpInfo) '--stage=dump-info-all',
@@ -135,6 +129,7 @@ class JsCompilerConfig extends WebCompilerConfig {
       'dumpInfo': dumpInfo,
       'nativeNullAssertions': nativeNullAssertions,
       'noFrequencyBasedMinification': noFrequencyBasedMinification,
+      'minify': minify,
       'sourceMaps': sourceMaps,
     };
     return jsonEncode(settings);

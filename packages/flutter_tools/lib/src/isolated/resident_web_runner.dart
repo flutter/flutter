@@ -506,10 +506,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
               _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
           await _vmService.service.callMethod(hotRestartMethod);
         } else {
-          // Isolates don't work on web. For lack of a better value, pass an
-          // empty string for the isolate id.
           final DateTime reloadStart = _systemClock.now();
-          final vmservice.ReloadReport report = await _vmService.service.reloadSources('');
+          final vmservice.VM vm = await _vmService.service.getVM();
+          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
+            vm.isolates!.first.id!,
+          );
           reloadDuration = _systemClock.now().difference(reloadStart);
           final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
@@ -786,6 +787,24 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       void onLogEvent(vmservice.Event event) {
         final String message = processVmServiceMessage(event);
         _logger.printStatus(message);
+      }
+
+      // This flag is needed to manage breakpoints properly.
+      if (debuggingOptions.startPaused && debuggingOptions.debuggingEnabled) {
+        try {
+          final vmservice.Response result = await _vmService.service.setFlag(
+            'pause_isolates_on_start',
+            'true',
+          );
+          if (result is! vmservice.Success) {
+            _logger.printError('setFlag failure: $result');
+          }
+        } on Exception catch (e) {
+          _logger.printError(
+            'Failed to set pause_isolates_on_start=true, proceeding. '
+            'Error: $e',
+          );
+        }
       }
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);

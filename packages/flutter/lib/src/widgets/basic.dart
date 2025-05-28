@@ -4242,7 +4242,14 @@ class IndexedStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
-      return Visibility.maintain(visible: i == index, child: children[i]);
+      return Visibility(
+        visible: i == index,
+        maintainInteractivity: true,
+        maintainSize: true,
+        maintainState: true,
+        maintainAnimation: true,
+        child: children[i],
+      );
     });
     return _RawIndexedStack(
       alignment: alignment,
@@ -4265,7 +4272,13 @@ class _RawIndexedStack extends Stack {
     StackFit sizing = StackFit.loose,
     this.index = 0,
     super.children,
-  }) : super(fit: sizing);
+  }) : assert(
+         index == null ||
+             (index == 0 && children.length == 0) ||
+             (index >= 0 && index < children.length),
+         'The index must be null or within the range of children.',
+       ),
+       super(fit: sizing);
 
   /// The index of the child to show.
   final int? index;
@@ -6977,7 +6990,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
 ///  * [debugRepaintRainbowEnabled], a debugging flag to help visually monitor
 ///    render tree repaints in a running app.
 ///  * [debugProfilePaintsEnabled], a debugging flag to show render tree
-///    repaints in the observatory's timeline view.
+///    repaints in Flutter DevTools' timeline view.
 class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// Creates a widget that isolates repaints.
   const RepaintBoundary({super.key, super.child});
@@ -7790,7 +7803,10 @@ class IndexedSemantics extends SingleChildRenderObjectWidget {
 ///
 /// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
-  /// Creates a widget that builds its child.
+  /// Creates a widget that builds its child while assigning it a key.
+  ///
+  /// This is useful when you want to preserve the state of a widget when it moves
+  /// around in the widget tree by associating it with a consistent key.
   const KeyedSubtree({super.key, required this.child});
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
