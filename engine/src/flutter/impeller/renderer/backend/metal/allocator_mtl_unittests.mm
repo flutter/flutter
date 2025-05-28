@@ -10,7 +10,6 @@
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
-#include "impeller/renderer/backend/metal/lazy_drawable_holder.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/capabilities.h"
 

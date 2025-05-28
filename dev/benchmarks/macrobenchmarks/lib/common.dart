@@ -12,6 +12,7 @@ const String kPictureCacheComplexityScoringRouteName = '/picture_cache_complexit
 const String kLargeImageChangerRouteName = '/large_image_changer';
 const String kLargeImagesRouteName = '/large_images';
 const String kPathTessellationRouteName = '/path_tessellation';
+const String kPathStrokeTessellationRouteName = '/path_stroke_tessellation';
 const String kTextRouteName = '/text';
 const String kVeryLongPictureScrollingRouteName = '/very_long_picture_scrolling';
 const String kFullscreenTextRouteName = '/fullscreen_text';
@@ -41,6 +42,7 @@ const String kDrawVerticesPageRouteName = '/draw_vertices';
 const String kDrawAtlasPageRouteName = '/draw_atlas';
 const String kAnimatedAdvancedBlend = '/animated_advanced_blend';
 const String kRRectBlurRouteName = '/rrect_blur';
+const String kRSuperellipseBlurRouteName = '/rsuperellipse_blur';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName =

@@ -405,7 +405,7 @@ packages:
 sdks:
   dart: ">=2.14.0 <3.0.0"
 ''');
-    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
   }
 
   @override

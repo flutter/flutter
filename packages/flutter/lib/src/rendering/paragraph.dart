@@ -299,6 +299,15 @@ mixin RenderInlineChildrenContainerDefaults
   }
 }
 
+class _UnspecifiedTextScaler extends TextScaler {
+  const _UnspecifiedTextScaler();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
+}
+
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with
@@ -321,7 +330,7 @@ class RenderParagraph extends RenderBox
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
+    TextScaler textScaler = const _UnspecifiedTextScaler(),
     int? maxLines,
     Locale? locale,
     StrutStyle? strutStyle,
@@ -333,7 +342,7 @@ class RenderParagraph extends RenderBox
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
-         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         identical(textScaler, const _UnspecifiedTextScaler()) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
        _softWrap = softWrap,
@@ -344,7 +353,9 @@ class RenderParagraph extends RenderBox
          textAlign: textAlign,
          textDirection: textDirection,
          textScaler:
-             textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+             textScaler == const _UnspecifiedTextScaler()
+                 ? TextScaler.linear(textScaleFactor)
+                 : textScaler,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,

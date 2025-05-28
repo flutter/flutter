@@ -75,8 +75,14 @@ class FileSystemUtils {
     if (!entity.existsSync()) {
       return true;
     }
-    return referenceFile.existsSync() &&
-        referenceFile.statSync().modified.isAfter(entity.statSync().modified);
+    if (!referenceFile.existsSync()) {
+      return false;
+    }
+
+    final DateTime referenceModified = referenceFile.statSync().modified;
+    final DateTime entityModified = entity.statSync().modified;
+
+    return referenceModified.isAfter(entityModified);
   }
 
   /// Return the absolute path of the user's home directory.

@@ -24,6 +24,7 @@ import '../exceptions.dart';
 import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
+import 'darwin.dart';
 import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
@@ -238,7 +239,7 @@ class DebugUniversalFramework extends Target {
 /// This class is abstract to share logic between the three concrete
 /// implementations. The shelling out is done to avoid complications with
 /// preserving special files (e.g., symbolic links) in the framework structure.
-abstract class UnpackIOS extends Target {
+abstract class UnpackIOS extends UnpackDarwin {
   const UnpackIOS();
 
   @override
@@ -270,7 +271,20 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    await _copyFramework(environment, sdkRoot);
+
+    // Copy Flutter framework.
+    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+      sdkRoot,
+      environment.fileSystem,
+    );
+    await copyFramework(
+      environment,
+      environmentType: environmentType,
+      framework: Artifact.flutterFramework,
+      targetPlatform: TargetPlatform.ios,
+      buildMode: buildMode,
+    );
+    await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
 
     final File frameworkBinary = environment.outputDir
         .childDirectory('Flutter.framework')
@@ -279,40 +293,15 @@ abstract class UnpackIOS extends Target {
     if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    await _thinFramework(environment, frameworkBinaryPath, archs);
+    await thinFramework(environment, frameworkBinaryPath, archs);
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
-  Future<void> _copyFramework(Environment environment, String sdkRoot) async {
-    // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
-      sdkRoot,
-      environment.fileSystem,
-    );
-    final String basePath = environment.artifacts.getArtifactPath(
-      Artifact.flutterFramework,
-      platform: TargetPlatform.ios,
-      mode: buildMode,
-      environmentType: environmentType,
-    );
-
-    final ProcessResult result = await environment.processManager.run(<String>[
-      'rsync',
-      '-av',
-      '--delete',
-      '--filter',
-      '- .DS_Store/',
-      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-      basePath,
-      environment.outputDir.path,
-    ]);
-    if (result.exitCode != 0) {
-      throw Exception(
-        'Failed to copy framework (exit ${result.exitCode}:\n'
-        '${result.stdout}\n---\n${result.stderr}',
-      );
-    }
-
+  Future<void> _copyFrameworkDysm(
+    Environment environment, {
+    required String sdkRoot,
+    EnvironmentType? environmentType,
+  }) async {
     // Copy Flutter framework dSYM (debug symbol) bundle, if present.
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
@@ -339,63 +328,6 @@ abstract class UnpackIOS extends Target {
           '${result.stdout}\n---\n${result.stderr}',
         );
       }
-    }
-  }
-
-  /// Destructively thin Flutter.framework to include only the specified architectures.
-  Future<void> _thinFramework(
-    Environment environment,
-    String frameworkBinaryPath,
-    String archs,
-  ) async {
-    final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = await environment.processManager.run(<String>[
-      'lipo',
-      '-info',
-      frameworkBinaryPath,
-    ]);
-    final String lipoInfo = infoResult.stdout as String;
-
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
-      'lipo',
-      frameworkBinaryPath,
-      '-verify_arch',
-      ...archList,
-    ]);
-
-    if (verifyResult.exitCode != 0) {
-      throw Exception(
-        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
-        '\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
-    }
-
-    // Skip thinning for non-fat executables.
-    if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
-      return;
-    }
-
-    // Thin in-place.
-    final ProcessResult extractResult = await environment.processManager.run(<String>[
-      'lipo',
-      '-output',
-      frameworkBinaryPath,
-      for (final String arch in archList) ...<String>['-extract', arch],
-      ...<String>[frameworkBinaryPath],
-    ]);
-
-    if (extractResult.exitCode != 0) {
-      throw Exception(
-        'Failed to extract architectures "$archs" for $frameworkBinaryPath.\n'
-        '\n'
-        'stderr:\n'
-        '${extractResult.stderr}\n\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
     }
   }
 }
@@ -552,6 +484,37 @@ class DebugIosLLDBInit extends IosLLDBInit {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+class CheckDevDependenciesIos extends CheckDevDependencies {
+  const CheckDevDependenciesIos();
+
+  @override
+  String get name => 'check_dev_dependencies_ios';
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      ...super.inputs,
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+      ),
+
+      // The generated Xcode properties file contains
+      // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
+      // This target should re-run whenever that value changes.
+      Source.fromProject((FlutterProject project) => project.ios.generatedXcodePropertiesFile),
+    ];
+  }
+
+  @override
+  String get debugBuildCommand => 'flutter build ios --config-only --debug';
+
+  @override
+  String get profileBuildCommand => 'flutter build ios --config-only --profile';
+
+  @override
+  String get releaseBuildCommand => 'flutter build ios --config-only --release';
+}
+
 /// The base class for all iOS bundle targets.
 ///
 /// This is responsible for setting up the basic App.framework structure, including:
@@ -704,6 +667,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
+    const CheckDevDependenciesIos(),
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
     ...super.dependencies,
@@ -735,7 +699,11 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    AotAssemblyProfile(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Build a release iOS application bundle.
@@ -746,7 +714,11 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'release_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyRelease(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    AotAssemblyRelease(),
+    InstallCodeAssets(),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -810,9 +782,9 @@ Future<void> _createStubAppFramework(
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=12.0'
+        '-miphoneos-version-min=13.0'
       else
-        '-miphonesimulator-version-min=12.0',
+        '-miphonesimulator-version-min=13.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

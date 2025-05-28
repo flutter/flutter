@@ -295,10 +295,6 @@ struct MouseState {
   FlutterDartProject* _project;
 
   std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
-
-  // FlutterViewController does not actually uses the synchronizer, but only
-  // passes it to FlutterView.
-  FlutterThreadSynchronizer* _threadSynchronizer;
 }
 
 // Synthesize properties declared readonly.
@@ -426,6 +422,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   if ([self attached]) {
     [_engine removeViewController:self];
   }
+  [self.flutterView shutDown];
 }
 
 #pragma mark - Public methods
@@ -472,19 +469,14 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)setUpWithEngine:(FlutterEngine*)engine
-         viewIdentifier:(FlutterViewIdentifier)viewIdentifier
-     threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer {
+         viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
   _viewIdentifier = viewIdentifier;
-  _threadSynchronizer = threadSynchronizer;
-  [_threadSynchronizer registerView:_viewIdentifier];
 }
 
 - (void)detachFromEngine {
   NSAssert(_engine != nil, @"Not attached to any engine.");
-  [_threadSynchronizer deregisterView:_viewIdentifier];
-  _threadSynchronizer = nil;
   _engine = nil;
 }
 
@@ -801,7 +793,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
-                             threadSynchronizer:_threadSynchronizer
                                  viewIdentifier:_viewIdentifier];
 }
 

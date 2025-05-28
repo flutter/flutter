@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide NetworkImage;
@@ -16,10 +17,19 @@ import 'package:web/web.dart' as web;
 import '../image_data.dart';
 import '_test_http_request.dart';
 
+late final ui.Image testImage;
+
 void runTests() {
+  _TestBinding.ensureInitialized();
+
+  setUpAll(() async {
+    testImage = await createTestImage();
+  });
+
   tearDown(() {
     debugRestoreHttpRequestFactory();
     debugRestoreImgElementFactory();
+    _TestBinding.instance.overrideCodec = null;
   });
 
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
@@ -35,7 +45,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network('https://www.example.com/images/frame.png', headers: headers);
+    final Image image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
 
@@ -56,10 +66,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(
-      'https://www.example.com/images/frame2.png',
-      headers: headers,
-    );
+    final Image image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
     expect(
@@ -85,16 +92,11 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(
-      'https://www.example.com/images/frame3.png',
-      headers: headers,
-    );
+    final String url = _uniqueUrl(tester.testDescription);
+    final Image image = Image.network(url, headers: headers);
 
     await tester.pumpWidget(image);
-    expect(
-      tester.takeException().toString(),
-      'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png',
-    );
+    expect(tester.takeException().toString(), 'HTTP request failed, statusCode: 200, $url');
   });
 
   testWidgets('When strategy is default, emits an error if the image is cross-origin', (
@@ -114,7 +116,7 @@ void runTests() {
       throw UnimplementedError();
     };
 
-    const NetworkImage networkImage = NetworkImage('https://www.example.com/images/frame4.png');
+    final NetworkImage networkImage = NetworkImage(_uniqueUrl(tester.testDescription));
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -159,8 +161,9 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage(
-      'https://www.example.com/images/frame5.png',
+    final String url = _uniqueUrl(tester.testDescription);
+    final NetworkImage networkImage = NetworkImage(
+      url,
       webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
     );
     ImageInfo? imageInfo;
@@ -190,7 +193,7 @@ void runTests() {
     expect(imageInfo, isA<WebImageInfo>());
 
     final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
-    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame5.png'));
+    expect(webImageInfo.htmlImage.src, equals(url));
   });
 
   testWidgets(
@@ -211,8 +214,8 @@ void runTests() {
         return testImg.getMock() as web_shim.HTMLImageElement;
       };
 
-      const NetworkImage networkImage = NetworkImage(
-        'https://www.example.com/images/frame6.png',
+      final NetworkImage networkImage = NetworkImage(
+        _uniqueUrl(tester.testDescription),
         webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
       );
       ImageInfo? imageInfo;
@@ -261,8 +264,9 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage(
-      'https://www.example.com/images/frame7.png',
+    final String url = _uniqueUrl(tester.testDescription);
+    final NetworkImage networkImage = NetworkImage(
+      url,
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
     );
     ImageInfo? imageInfo;
@@ -292,7 +296,7 @@ void runTests() {
     expect(imageInfo, isA<WebImageInfo>());
 
     final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
-    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame7.png'));
+    expect(webImageInfo.htmlImage.src, equals(url));
   });
 
   testWidgets('When strategy is .prefer, emits a normal image if headers is not null', (
@@ -313,10 +317,10 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage(
-      'https://www.example.com/images/frame8.png',
+    final NetworkImage networkImage = NetworkImage(
+      _uniqueUrl(tester.testDescription),
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-      headers: <String, String>{'flutter': 'flutter', 'second': 'second'},
+      headers: const <String, String>{'flutter': 'flutter', 'second': 'second'},
     );
     ImageInfo? imageInfo;
     Object? recordedError;
@@ -369,6 +373,87 @@ void runTests() {
     expect(find.byType(RawWebImage), findsOneWidget);
     expect(find.byType(PlatformViewLink), findsOneWidget);
   });
+
+  testWidgets('Does not crash when disposed between frames', (WidgetTester tester) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 200
+          ..mockEvent = MockEvent('load', web.Event('test error'))
+          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+
+    httpRequestFactory = () {
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+
+    final Completer<void> secondFrameLock = Completer<void>();
+
+    // Override the codec so that the 2nd frame is delayed.
+    _TestBinding.instance.overrideCodec = _TwoFrameCodec(
+      onFrame: (int frameNumber) async {
+        if (frameNumber == 1) {
+          await secondFrameLock.future;
+        }
+      },
+    );
+
+    // Mount the image, displaying the 1st frame.
+    await tester.pumpWidget(Image.network(_uniqueUrl(tester.testDescription)));
+    // Clear the image cache, so that the image completer will be disposed as
+    // soon as the image is unmounted.
+    imageCache.clear();
+    // The image is unmounted, disposing `MultiFrameImageStreamCompleter`.
+    await tester.pumpWidget(Container());
+    // Finish decoding the 2nd frame. If the image completer has been properly
+    // disposed, nothing will happen; otherwise the
+    // `MultiFrameImageStreamCompleter` is still alive and will call
+    // of `_ForwardingImageStreamCompleter.setImage` and causes a crash.
+    secondFrameLock.complete();
+    expect(imageCache.currentSize, 0);
+    // The test passes if there are no crashes.
+  });
+}
+
+// Generates a unique URL based on the provided key, preventing unintended caching.
+//
+// Requests within this file must each have a unique URL; otherwise, responses
+// may be cached inadvertently. This often leads to subtle, frustrating bugs
+// that are difficult to debug.
+//
+// Test cases that only contain one request each can use
+// `tester.testDescription` as the key.
+String _uniqueUrl(Object key) {
+  return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
+}
+
+// A normal `AutomatedTestWidgetsFlutterBinding` except that it allows certain
+// overrides.
+class _TestBinding extends AutomatedTestWidgetsFlutterBinding {
+  static late final _TestBinding instance;
+  @override
+  void initInstances() {
+    super.initInstances();
+    instance = this;
+  }
+
+  // If this value is not null, then [instantiateImageCodecWithSize] always
+  // return this codec instead of decoding the image stream.
+  ui.Codec? overrideCodec;
+
+  @override
+  Future<ui.Codec> instantiateImageCodecWithSize(
+    ui.ImmutableBuffer buffer, {
+    ui.TargetImageSizeCallback? getTargetSize,
+  }) {
+    if (overrideCodec != null) {
+      return Future<ui.Codec>.value(overrideCodec);
+    }
+    return super.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
+  }
+
+  static _TestBinding ensureInitialized() {
+    _TestBinding();
+    return _TestBinding.instance;
+  }
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
@@ -454,4 +539,43 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     final List<ImageStreamListener> listenersCopy = listeners.toList();
     listenersCopy.forEach(removeListener);
   }
+}
+
+typedef _OnFrameCallback = Future<void> Function(int frameNumber);
+
+// An image with two frames (_TestFrameInfo).
+//
+// This codec calls and awaits on the `onFrame` callback before returning each
+// frame, whose argument `frameNumber` is a zero-based index.
+class _TwoFrameCodec implements ui.Codec {
+  _TwoFrameCodec({required this.onFrame});
+
+  final _OnFrameCallback onFrame;
+  int _frameNumber = -1;
+
+  @override
+  int get frameCount => 2;
+
+  @override
+  int get repetitionCount => 0;
+
+  @override
+  Future<ui.FrameInfo> getNextFrame() async {
+    _frameNumber += 1;
+    await onFrame(_frameNumber);
+    return _TestFrameInfo(testImage);
+  }
+
+  @override
+  void dispose() {}
+}
+
+class _TestFrameInfo implements ui.FrameInfo {
+  _TestFrameInfo(this.image);
+
+  @override
+  final Duration duration = Duration.zero;
+
+  @override
+  final ui.Image image;
 }

@@ -76,5 +76,12 @@ TEST(CapabilitiesTest, MaxRenderPassAttachmentSize) {
   EXPECT_EQ(mutated->GetMaximumRenderPassAttachmentSize(), ISize(100, 100));
 }
 
+TEST(CapabilitiesTest, MinUniformAlignment) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_EQ(defaults->GetMinimumUniformAlignment(), 256u);
+  auto mutated = CapabilitiesBuilder().SetMinimumUniformAlignment(16).Build();
+  EXPECT_EQ(mutated->GetMinimumUniformAlignment(), 16u);
+}
+
 }  // namespace testing
 }  // namespace impeller

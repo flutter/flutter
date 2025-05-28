@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "ค้นหาบนอินเทอร์เน็ต",
   "shareButtonLabel": "แชร์...",
   "clearButtonLabel": "ล้าง",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "ยกเลิก",
+  "backButtonLabel": "กลับ"
 }

@@ -157,14 +157,7 @@ Future<void> main() async {
 
         final String defaultPath = path.join(project.rootPath, 'android', 'app', '.cxx');
 
-        final String modifiedPath = path.join(
-          project.rootPath,
-          'build',
-          'app',
-          'intermediates',
-          'flutter',
-          '.cxx',
-        );
+        final String modifiedPath = path.join(project.rootPath, 'build', '.cxx');
         if (Directory(defaultPath).existsSync()) {
           throw TaskResult.failure('Producing unexpected build artifacts in $defaultPath');
         }

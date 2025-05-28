@@ -7,12 +7,12 @@
 #include <sstream>
 #include <string>
 
-#include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
 
@@ -315,10 +315,24 @@ bool PipelineLibraryGLES::HasPipeline(const PipelineDescriptor& descriptor) {
 // |PipelineLibrary|
 void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
-  fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
-  });
+  Lock lock(programs_mutex_);
+
+  PipelineMap::iterator it = pipelines_.begin();
+  while (it != pipelines_.end()) {
+    const PipelineDescriptor& desc = it->first;
+    if (desc.GetEntrypointForStage(function->GetStage())->IsEqual(*function)) {
+      const std::shared_ptr<const ShaderFunction>& vert_function =
+          desc.GetEntrypointForStage(ShaderStage::kVertex);
+      const std::shared_ptr<const ShaderFunction>& frag_function =
+          desc.GetEntrypointForStage(ShaderStage::kFragment);
+      ProgramKey program_key{vert_function, frag_function,
+                             desc.GetSpecializationConstants()};
+      programs_.erase(program_key);
+      it = pipelines_.erase(it);
+    } else {
+      it++;
+    }
+  }
 }
 
 // |PipelineLibrary|

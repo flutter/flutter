@@ -7,6 +7,7 @@ library;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
 import '../integration.shard/test_data/basic_project.dart';
@@ -35,7 +36,7 @@ void main() {
     // No need to start paused as all breakpoint would be eventually reached.
     await flutter.run(
       withDebugger: true,
-      chrome: true,
+      device: GoogleChromeDevice.kChromeDeviceId,
       additionalCommandArgs: <String>[if (verbose) '--verbose'],
     );
   }
