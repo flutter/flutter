@@ -115,8 +115,8 @@ class SimControl {
   final ProcessUtils _processUtils;
   final Xcode _xcode;
 
-  /// Runs `simctl list --json` and returns the JSON of the corresponding
-  /// [section].
+  /// Runs `simctl list --json` and returns the JSON of
+  /// the corresponding section.
   Future<Map<String, Object?>> _listBootedDevices() async {
     // Sample output from `simctl list available booted --json`:
     //

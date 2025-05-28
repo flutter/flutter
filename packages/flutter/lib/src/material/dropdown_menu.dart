@@ -120,6 +120,8 @@ enum DropdownMenuCloseBehavior {
 /// A dropdown menu that can be opened from a [TextField]. The selected
 /// menu item is displayed in that field.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=giV9AbM2gd8}
+///
 /// This widget is used to help people make a choice from a menu and put the
 /// selected item into the text input field. People can also filter the list based
 /// on the text input or search one item in the menu list.
@@ -599,7 +601,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      if (widget.controller != null) {
+      if (widget.controller != null && oldWidget.controller == null) {
         _localTextEditingController?.dispose();
       }
       _localTextEditingController = widget.controller ?? TextEditingController();
