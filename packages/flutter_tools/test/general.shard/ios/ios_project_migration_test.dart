@@ -25,7 +25,6 @@ import 'package:flutter_tools/src/migrations/xcode_thin_binary_build_phase_input
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
-import 'package:xml/xml.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
