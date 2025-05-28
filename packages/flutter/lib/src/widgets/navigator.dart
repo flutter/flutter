@@ -79,6 +79,9 @@ typedef RestorableRouteBuilder<T> = Route<T> Function(BuildContext context, Obje
 /// Signature for the [Navigator.popUntil] predicate argument.
 typedef RoutePredicate = bool Function(Route<dynamic> route);
 
+/// Signature for the [Navigator.popUntil] return value predicate argument.
+typedef RouteResultPredicate = Object? Function(Route<dynamic> route);
+
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
@@ -2787,15 +2790,11 @@ class Navigator extends StatefulWidget {
   /// To pop until a route with a certain name, use the [RoutePredicate]
   /// returned from [ModalRoute.withName].
   ///
-  /// If `result` is not specified, then all routes are closed
+  /// If `resultPredicate` is not specified, then all routes are closed
   /// with null as their `return` value.
-  /// If `result` is specified, then the last popped route will be closed with
-  /// `result` as its return value.
-  ///
-  /// The `T` type argument is the type of the return value of the last popped route.
-  ///
-  /// The type of `result`, if provided, must match the type argument of the
-  /// class of the last popped route (`T`).
+  /// If `resultPredicate` is specified, the each route is closed with the
+  /// result of the `resultPredicate` function, which is called with the
+  /// next route in the history.
   ///
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
@@ -2810,13 +2809,12 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  @optionalTypeArgs
-  static void popUntil<T extends Object?>(
+  static void popUntil(
     BuildContext context,
     RoutePredicate predicate, [
-    T? result,
+    RouteResultPredicate? resultPredicate,
   ]) {
-    Navigator.of(context).popUntil<T>(predicate, result);
+    Navigator.of(context).popUntil(predicate, resultPredicate);
   }
 
   /// Immediately remove `route` from the navigator that most tightly encloses
@@ -5634,21 +5632,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  @optionalTypeArgs
-  void popUntil<T extends Object?>(RoutePredicate predicate, [T? result]) {
+  void popUntil(RoutePredicate predicate, [RouteResultPredicate? resultPredicate]) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     while (candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
 
-      // Check what would be next if we pop this route
       final _RouteEntry? next = _lastRouteEntryWhereOrNull(
         (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
       );
-
-      if (next != null && predicate(next.route)) {
-        pop<T>(result);
+      if (next != null && resultPredicate != null) {
+        pop(resultPredicate(next.route));
       } else {
         pop();
       }
