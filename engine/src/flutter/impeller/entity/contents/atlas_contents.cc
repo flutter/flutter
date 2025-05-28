@@ -233,6 +233,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
           Vector4(src_rect.GetX(), src_rect.GetY(), src_rect.GetBottom(),
                   src_rect.GetRight());
       frag_info.use_strict_source_rect = 1.0;
+    } else {
+      frag_info.use_strict_source_rect = 0.0;
     }
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));

@@ -476,6 +476,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
                     ? dst_snapshot->opacity * alpha.value_or(1.0)
                     : 1.0,
                 1, 0, 0);
+    frag_info.use_strict_source_rect = 0.0;
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
