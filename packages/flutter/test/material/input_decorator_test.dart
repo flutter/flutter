@@ -14428,6 +14428,8 @@ void main() {
       final ValueNotifier<String?> errorTextNotifier = ValueNotifier<String?>('initial error');
       const String helperTextValue = 'helper text';
 
+      addTearDown(errorTextNotifier.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
