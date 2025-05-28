@@ -253,12 +253,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  void adoptChild(RenderObject child) {
+  void adoptChild(covariant RenderBox child) {
     super.adoptChild(child);
     final SliverMultiBoxAdaptorParentData childParentData =
         child.parentData! as SliverMultiBoxAdaptorParentData;
     if (!childParentData._keptAlive) {
-      childManager.didAdoptChild(child as RenderBox);
+      childManager.didAdoptChild(child);
     }
   }
 

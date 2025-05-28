@@ -2050,6 +2050,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child.attached == attached);
     assert(child.parentData != null);
     child._isRelayoutBoundary = false;
+    assert(() {
+      child._debugLaidOutByThisParentBefore = false;
+      return true;
+    }());
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
@@ -2337,7 +2341,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _owner = owner;
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _constraints != null) {
+    if (_needsLayout) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
       _needsLayout = false;
@@ -2393,32 +2397,31 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   bool _needsLayout = true;
 
-  /// The nearest relayout boundary enclosing this render object, if known.
+  /// Whether this [RenderObject] is a known relayout boundary.
   ///
-  /// When a render object is marked as needing layout, its parent may
-  /// as a result also need to be marked as needing layout.
-  /// For details, see [markNeedsLayout].
-  /// A render object where relayout does not require relayout of the parent
-  /// (because its size cannot change on relayout, or because
-  /// its parent does not use the child's size for its own layout)
-  /// is a "relayout boundary".
+  /// A relayout boundary is a [RenderObject] whose parent does not rely on the
+  /// child [RenderObject]'s size in its own layout algorithm (from here on out,
+  /// "size" refer not just to [RenderBox.size], but any layout artifacts
+  /// produced by the child's [performLayout] implementation, such as the baseline
+  /// location. See also the `parentUsesSize` parameter in [RenderObject.layout]).
+  /// In other words, if a [RenderObject]'s [performLayout] implementation does
+  /// not consult the size of a child at all (including the case where it does
+  /// depend on the child's size but is able to compute the child's size by itself
+  /// without consulting the child), **the child** is a relayout boundary.
   ///
-  /// This property is set in [layout], and consulted by [markNeedsLayout] in
-  /// deciding whether to recursively mark the parent as also needing layout.
+  /// Relayout boundaries enable an important layout optimization in Flutter:
+  /// the parent not depending on the size of a child means the child changing
+  /// size changes does not affect the layout of the parent. When a relayout
+  /// boundary is marked as needing layout, its parent typically does not have to
+  /// marked as dirty too, hence the name. For details, see [markNeedsLayout].
   ///
-  /// This property is initially null, and becomes null again if this
-  /// render object is removed from the tree (with [dropChild]);
-  /// it remains null until the first layout of this render object
-  /// after it was most recently added to the tree.
-  /// This property can also be null while an ancestor in the tree is
-  /// currently doing layout, until this render object itself does layout.
+  /// This flag is typically set in [RenderObject.layout], and consulted by
+  /// [markNeedsLayout] in deciding whether to recursively mark the parent as
+  /// also needing layout.
   ///
-  /// When not null, the relayout boundary is either this render object itself
-  /// or one of its ancestors, and all the render objects in the ancestry chain
-  /// up through that ancestor have the same [_isRelayoutBoundary].
-  /// Equivalently: when not null, the relayout boundary is either this render
-  /// object itself or the same as that of its parent.  (So [_isRelayoutBoundary]
-  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
+  /// The flag is initially set to false when [layout] has yet been called.
+  /// Setting this to false is always correct as this is a performance
+  /// optimization.
   bool _isRelayoutBoundary = false;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
@@ -2457,11 +2460,35 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// (where it will always be false).
   static bool debugCheckingIntrinsics = false;
 
+  /// This flag is true if [layout] has been called on this [RenderObject] by its
+  /// current parent.
+  ///
+  /// If a parent calls [dropChild] and [adoptChild] on this child, this flag
+  /// will still be set to false.
+  //
+  // DO NOT USE: This flag is for replicating the legacy behavior of
+  // relayoutBoundary which RenderSliverMultiBoxAdaptor relies on to bypass the
+  // _debugRelayoutBoundaryAlreadyMarkedNeedsLayout check. See that method for
+  // more details.
+  bool _debugLaidOutByThisParentBefore = false;
+
+  // TODO(LongCatIsLooong): consider removing this check entirely, or introduce
+  // a new flag on RenderObject so the rendering layer knows when a child subtree
+  // is being skipped for layout.
+  //
+  // This debug method verifies that every node with _needsLayout set to true is
+  // reachable via tree-walk. However RenderObjects who deliberately skips
+  // children (e.g., RenderSliverMultiBoxAdaptor or _RenderTheater) want to make
+  // part of the tree unreachable for performance reasons.
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
+    if (!_debugLaidOutByThisParentBefore) {
+      return true;
+    }
     final bool alreadyMarkedNeedsLayout = _needsLayout || _debugDoingThisLayout;
     if (!alreadyMarkedNeedsLayout) {
       return false;
     }
+
     return _isRelayoutBoundary ||
         (debugLayoutParent?._debugRelayoutBoundaryAlreadyMarkedNeedsLayout() ?? true);
   }
@@ -2719,6 +2746,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _constraints = constraints;
 
     _isRelayoutBoundary = isRelayoutBoundary;
+    assert(() {
+      _debugLaidOutByThisParentBefore = true;
+      return true;
+    }());
 
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -3840,7 +3871,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
-      if (_constraints != null && !_isRelayoutBoundary) {
+      if (_debugLaidOutByThisParentBefore && !_isRelayoutBoundary) {
         int count = 1;
         RenderObject? target = parent;
         while (target != null && !target._isRelayoutBoundary) {
@@ -4893,12 +4924,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   @override
   _RenderObjectSemantics get owner => this;
 
-  bool get parentDataDirty {
-    if (isRoot) {
-      return false;
-    }
-    return parentData == null;
-  }
+  bool get parentDataDirty => !isRoot && parentData == null;
 
   /// If this forms a semantics node, all of the properties in config are
   /// used in creating the node. There is nothing to be merged up.
