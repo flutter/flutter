@@ -48,7 +48,7 @@ class ParagraphStyle final
 
   void SetLocale(std::string locale);
 
-  void SetEllipsis(std::string string);
+  void SetEllipsis(const std::string& string);
 
   txt::TextStyle CreateTextStyle() const;
 

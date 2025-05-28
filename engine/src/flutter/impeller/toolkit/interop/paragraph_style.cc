@@ -86,7 +86,7 @@ void ParagraphStyle::SetTextDecoration(
   decoration_ = decoration;
 }
 
-void ParagraphStyle::SetEllipsis(std::string string) {
+void ParagraphStyle::SetEllipsis(const std::string& string) {
   if (string.empty()) {
     style_.ellipsis = {};
     return;
