@@ -442,9 +442,36 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
 - (void)showTranslateViewController:(NSString*)term {
   UIViewController* engineViewController = [self.engine viewController];
+  FlutterTranslateController* translateController;
 
-  FlutterTranslateController* translateController =
-      [[FlutterTranslateController alloc] initWithTerm:term];
+  if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    // On iPad, the translate screen is presented in a popover view, and requires a rect to use as bounds
+    FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
+    UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
+
+    // firstRectForRange cannot be used here as it's current implementation does
+    // not always return the full rect of the range.
+    CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.start];
+    CGRect transformedFirstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:firstRect];
+    CGRect lastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.end];
+    CGRect transformedLastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:lastRect];
+
+    CGRect ipadBounds =
+        CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
+                   transformedFirstRect.origin.y,
+                   abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
+                   transformedFirstRect.size.height);
+
+    translateController = [[FlutterTranslateController alloc] initWithTerm:term
+                                                                ipadBounds:ipadBounds];
+
+  } else {
+    translateController = [[FlutterTranslateController alloc] initWithTerm:term];
+  }
 
   [engineViewController addChildViewController:translateController];
   [engineViewController.view addSubview:translateController.view];

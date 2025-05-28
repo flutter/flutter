@@ -12,47 +12,61 @@ import Translation
 public class FlutterTranslateController: UIViewController {
 
   private let originalText: String
+  private let ipadBounds: CGRect?
 
   @objc public init(term: String) {
-    self.originalText = term;
+    self.originalText = term
+    self.ipadBounds = nil
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  @objc public init(term: String, ipadBounds: CGRect) {
+    self.originalText = term
+    self.ipadBounds = ipadBounds
     super.init(nibName: nil, bundle: nil)
   }
 
   @available(*, unavailable)
   required init?(coder aDecoder: NSCoder) {
-    self.originalText = ""
-    super.init(coder: aDecoder)
+    fatalError("init(coder:) has not been implemented")
   }
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    let swiftUIController = getSwiftUITranslateController(termToTranslate: originalText)
+    let swiftUIViewController = makeTranslateHostingController(termToTranslate: originalText)
 
-    addChild(swiftUIController)
-    view.addSubview(swiftUIController.view)
-    swiftUIController.didMove(toParent: self) 
+    addChild(swiftUIViewController)
+    view.addSubview(swiftUIViewController.view)
+
+    swiftUIViewController.view.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        swiftUIViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+        swiftUIViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        swiftUIViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+        swiftUIViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+    ])
+
+    swiftUIViewController.didMove(toParent: self)
   }
 
-  @available(iOS 17.4, *)
-  @objc public func getSwiftUITranslateController(termToTranslate: String) -> UIViewController {
-    let hostingController = UIHostingController(rootView: ContentView(termToTranslate: termToTranslate))
+  @objc public func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
+    let hostingController = UIHostingController(rootView: ContentView(termToTranslate: termToTranslate, ipadBounds: ipadBounds))
     hostingController.view.backgroundColor = .clear
-    return hostingController;
+    return hostingController
   }
 }
 
 @available(iOS 17.4, *)
 struct ContentView: View {
   @State private var isTranslationPopoverShown = true
-  let termToTranslate : String;
+  let termToTranslate : String
+  let ipadBounds: CGRect?
   var body: some View {
     Color.clear
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .translationPresentation(
-          isPresented: $isTranslationPopoverShown, text: termToTranslate)
+          isPresented: $isTranslationPopoverShown,
+          text: termToTranslate,
+          attachmentAnchor: ipadBounds != nil ? .rect(.rect(ipadBounds!)) : .rect(.bounds))
   }
 }
-
-
-
-
