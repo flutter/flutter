@@ -792,7 +792,7 @@ class FlutterPlugin : Plugin<Project> {
      * This is true when the property `android.injected.invoked.from.ide` is passed to Gradle.
      * This property is set by Android Studio when it invokes a Gradle task.
      */
-    private fun isInvokedFromAndroidStudio() {
+    private fun isInvokedFromAndroidStudio(): Boolean {
         return project.hasProperty("android.injected.invoked.from.ide")
     }
 }
