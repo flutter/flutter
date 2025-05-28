@@ -59,6 +59,18 @@ struct Radians {
   constexpr Radians operator-(Radians r) {
     return Radians{radians - r.radians};
   }
+
+  constexpr bool operator>(Radians r) { return radians > r.radians; }
+
+  constexpr bool operator>=(Radians r) { return radians >= r.radians; }
+
+  constexpr bool operator==(Radians r) { return radians == r.radians; }
+
+  constexpr bool operator!=(Radians r) { return radians != r.radians; }
+
+  constexpr bool operator<=(Radians r) { return radians <= r.radians; }
+
+  constexpr bool operator<(Radians r) { return radians < r.radians; }
 };
 
 struct Degrees {
@@ -83,6 +95,18 @@ struct Degrees {
   constexpr Degrees operator-(Degrees d) const {
     return Degrees{degrees - d.degrees};
   }
+
+  constexpr bool operator>(Degrees d) { return degrees > d.degrees; }
+
+  constexpr bool operator>=(Degrees d) { return degrees >= d.degrees; }
+
+  constexpr bool operator==(Degrees d) { return degrees == d.degrees; }
+
+  constexpr bool operator!=(Degrees d) { return degrees != d.degrees; }
+
+  constexpr bool operator<=(Degrees d) { return degrees <= d.degrees; }
+
+  constexpr bool operator<(Degrees d) { return degrees < d.degrees; }
 
   constexpr Degrees GetPositive() const {
     Scalar deg = std::fmod(degrees, 360.0f);

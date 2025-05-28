@@ -66,20 +66,29 @@ GeometryResult ArcGeometry::GetPositionBuffer(const ContentContext& renderer,
 }
 
 std::optional<Rect> ArcGeometry::GetCoverage(const Matrix& transform) const {
-  Scalar half_width =  //
+  Scalar padding =  //
       stroke_width_ < 0
           ? 0.0
           : LineGeometry::ComputePixelHalfWidth(transform, stroke_width_);
 
   if (sweep_.degrees <= -360 || sweep_.degrees >= 360) {
-    return oval_bounds_.Expand(half_width).TransformAndClipBounds(transform);
+    return oval_bounds_.Expand(padding).TransformAndClipBounds(transform);
   }
 
-  Point center = oval_bounds_.GetCenter();
-  Size size = oval_bounds_.GetSize();
+  if (cap_ == Cap::kSquare) {
+    padding = padding * kSqrt2;
+  }
 
-  Degrees start = start_.GetPositive();
-  Degrees end = start + sweep_;
+  Degrees start_angle, end_angle;
+  if (sweep_.degrees < 0) {
+    start_angle = (start_ + sweep_).GetPositive();
+    end_angle = start_angle - sweep_;
+  } else {
+    start_angle = start_.GetPositive();
+    end_angle = start_angle + sweep_;
+  }
+  FML_DCHECK(start_angle.degrees >= 0 && start_angle.degrees < 360);
+  FML_DCHECK(end_angle > start_angle && end_angle.degrees < 720);
 
   // 1. start vector
   // 2. end vector
@@ -88,37 +97,38 @@ std::optional<Rect> ArcGeometry::GetCoverage(const Matrix& transform) const {
   Point extrema[7];
   int count = 0;
 
-  extrema[count++] = Matrix::CosSin(start);
-  extrema[count++] = Matrix::CosSin(end);
+  extrema[count++] = Matrix::CosSin(start_angle);
+  extrema[count++] = Matrix::CosSin(end_angle);
 
   if (include_center_) {
+    // We don't handle strokes with include_center so the stroking
+    // parameters should be the default.
+    FML_DCHECK(stroke_width_ < 0 && cap_ == Cap::kButt && padding == 0.0f);
     extrema[count++] = {0, 0};
   }
 
-  if (start.degrees <= 90 && end.degrees >= 90) {
-    extrema[count++] = {0, 1};
-  }
-  if (start.degrees <= 180 && end.degrees >= 180) {
-    extrema[count++] = {-1, 0};
-  }
-  if (start.degrees <= 270 && end.degrees >= 270) {
-    extrema[count++] = {0, -1};
-  }
-  if (start.degrees <= 360 && end.degrees >= 360) {
-    extrema[count++] = {1, 0};
+  // cur_axis will be pre-incremented before recording the following axis
+  int cur_axis = std::floor(start_angle.degrees / 90.0f);
+  // end_axis is a non-inclusive end of the range
+  int end_axis = std::ceil(end_angle.degrees / 90.0f);
+  while (++cur_axis < end_axis) {
+    extrema[count++] = kQuadrantAxes[cur_axis & 3];
   }
 
   FML_DCHECK(count <= 7);
 
+  Point center = oval_bounds_.GetCenter();
+  Size radii = oval_bounds_.GetSize() * 0.5f;
+
   for (int i = 0; i < count; i++) {
-    extrema[i] = transform * (center + extrema[i] * size);
+    extrema[i] = transform * (center + extrema[i] * radii);
   }
   auto opt_rect = Rect::MakePointBounds(extrema, extrema + count);
   if (opt_rect.has_value()) {
     // Pretty much guaranteed because count >= 2...
     opt_rect = opt_rect  //
                    .value()
-                   .Expand(half_width)
+                   .Expand(padding)
                    .TransformAndClipBounds(transform);
   }
   return opt_rect;

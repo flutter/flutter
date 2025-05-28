@@ -289,13 +289,6 @@ class GLESPathVertexWriter : public impeller::PathTessellator::VertexWriter {
   std::vector<uint16_t>& indices_;
 };
 
-static constexpr impeller::Vector2 kQuadrantAxes[4] = {
-    {1.0f, 0.0f},
-    {0.0f, 1.0f},
-    {-1.0f, 0.0f},
-    {0.0f, -1.0f},
-};
-
 }  // namespace
 
 namespace impeller {
@@ -972,10 +965,8 @@ Tessellator::ArcIteration Tessellator::ComputeArcQuadrantIterations(
 
   start = start.GetPositive();
   Degrees end = start + sweep;
-  FML_DCHECK(start.degrees >= 0.0f &&  //
-             start.degrees < 360.0f);
-  FML_DCHECK(end.degrees >= start.degrees &&
-             end.degrees < start.degrees + 360.0f);
+  FML_DCHECK(start.degrees >= 0.0f && start.degrees < 360.0f);
+  FML_DCHECK(end >= start && end.degrees < start.degrees + 360.0f);
 
   ArcIteration iterations;
   iterations.start = impeller::Matrix::CosSin(start);
@@ -986,7 +977,7 @@ Tessellator::ArcIteration Tessellator::ComputeArcQuadrantIterations(
   // arc.
   Degrees nudge = Degrees((90.0f / steps) * 0.1f);
 
-  if ((start + nudge).degrees >= (end - nudge).degrees) {
+  if ((start + nudge) >= (end - nudge)) {
     iterations.quadrant_count = 0u;
     return iterations;
   }
@@ -1009,7 +1000,7 @@ Tessellator::ArcIteration Tessellator::ComputeArcQuadrantIterations(
 
   int i = 0;
   iterations.quadrants[i] = {
-      kQuadrantAxes[cur_quadrant % 4],
+      kQuadrantAxes[cur_quadrant & 3],
       next_step(start + nudge, cur_quadrant),
       steps,
   };
