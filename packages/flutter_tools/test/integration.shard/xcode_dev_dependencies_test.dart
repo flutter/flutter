@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/features.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -14,12 +13,6 @@ void main() {
   late Directory projectDir;
 
   setUpAll(() async {
-    // TODO(team-ios): Remove after `explicit-package-dependencies` is enabled by default.
-    // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!explicitPackageDependencies.master.enabledByDefault) {
-      processManager.runSync(<String>[flutterBin, 'config', '--explicit-package-dependencies']);
-    }
-
     tempDir = createResolvedTempDirectorySync('xcode_dev_dependencies_test.');
     projectDir = tempDir.childDirectory('project')..createSync();
     final Directory tempPluginADir = tempDir.childDirectory('plugin_a')..createSync();
@@ -54,12 +47,6 @@ void main() {
   });
 
   tearDownAll(() {
-    // TODO(team-ios): Remove after `explicit-package-dependencies` is enabled by default.
-    // See https://github.com/flutter/flutter/issues/160257 for details.
-    if (!explicitPackageDependencies.master.enabledByDefault) {
-      processManager.runSync(<String>[flutterBin, 'config', '--no-explicit-package-dependencies']);
-    }
-
     tryToDelete(tempDir);
   });
 
