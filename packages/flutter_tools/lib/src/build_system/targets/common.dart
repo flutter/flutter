@@ -308,10 +308,18 @@ class KernelSnapshot extends Target {
     if (flavor == null) {
       return;
     }
-    if (!dartDefines.any((String element) => element.startsWith(kAppFlavor))) {
-      // If the flavor is not already in the dart defines, add it.
-      dartDefines.add('$kAppFlavor=$flavor');
-    }
+
+    // It is possible there is a flavor already in dartDefines, from another
+    // part of the build process, but this should take precedence as it happens
+    // last (xcodebuild execution).
+    //
+    // See https://github.com/flutter/flutter/issues/169598.
+
+    // If the flavor is already in the dart defines, remove it.
+    dartDefines.removeWhere((String define) => define.startsWith(kAppFlavor));
+
+    // Then, add it to the end.
+    dartDefines.add('$kAppFlavor=$flavor');
   }
 }
 
