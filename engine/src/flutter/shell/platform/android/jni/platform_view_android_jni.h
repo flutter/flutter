@@ -237,6 +237,10 @@ class PlatformViewAndroidJNI {
                                       int32_t viewHeight,
                                       MutatorsStack mutators_stack) = 0;
 
+  virtual void resetOcclusionRects() = 0;
+
+  virtual void addOcclusionRect(int x, int y, int width, int height) = 0;
+
   virtual void showOverlaySurface2() = 0;
 
   virtual void hideOverlaySurface2() = 0;
