@@ -10,6 +10,22 @@ import '../utils.dart';
 const String _dartCommand = 'dart';
 const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
 
+/// Runs the gradle lockfiles check script and verifies that all lockfiles
+/// are staged within git.
+///
+/// It executes `dev/tools/bin/generate_gradle_lockfiles.dart --no-gradle-generation`
+/// to ensure Gradle lockfiles are consistent. It then checks `git status` for
+/// any `.lockfile` files that are modified, new, or deleted but not staged.
+///
+///
+/// Parameters:
+///  - `runCommand`: Callable to execute shell commands. Defaults to `runCommand`.
+///  - `outputMode`: Command output mode. Defaults to `OutputMode.print`.
+///  - `flutterRootOverride`: Optional Flutter root path. Defaults to `flutterRoot`.
+///
+/// Throws an [Exception] if:
+///  - `git status` fails.
+///  - Unstaged or modified `.lockfile` files are present.
 Future<void> runGradleLockFilesCheck({
   RunCommandCallable runCommand = runCommand,
   OutputMode outputMode = OutputMode.print,
@@ -31,7 +47,7 @@ Future<void> runGradleLockFilesCheck({
     runCommand: runCommand,
     outputMode: outputMode,
   );
-  final Set<String> fileChanges = getFileChangesFromGitStatus(gitStatus);
+  final Set<String> fileChanges = _getFileChangesFromGitStatus(gitStatus);
   final Set<String> filesNeedTracking = <String>{};
 
   if (fileChanges.isNotEmpty) {
@@ -65,7 +81,7 @@ Future<void> runGradleLockFilesCheck({
   throw Exception(message.toString());
 }
 
-Set<String> getFileChangesFromGitStatus(String currentGitState) {
+Set<String> _getFileChangesFromGitStatus(String currentGitState) {
   final Set<String> fileChanges = <String>{};
   final List<String> lines = currentGitState.split('\n');
   fileChanges.addAll(lines.map((String e) => e.trim()).where((String e) => e.isNotEmpty));
