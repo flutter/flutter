@@ -928,7 +928,7 @@ class HeroController extends NavigatorObserver {
     // For pop transitions driven by a user gesture: if the "to" page has
     // maintainState = true, then the hero's final dimensions can be measured
     // immediately because their page's layout is still valid. Unless due to directly
-    // adding routes to the pages stack caused the route to never get laid out.
+    // adding routes to the pages stack causing the route to never get laid out.
     final bool needsLayout = toRoute.subtreeContext?.findRenderObject()?.debugNeedsLayout ?? true;
     if (isUserGestureTransition &&
         flightType == HeroFlightDirection.pop &&
