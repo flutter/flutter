@@ -146,7 +146,7 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.region => _semanticsRegion,
     SemanticsRole.form => _noCheckRequired,
     SemanticsRole.loadingSpinner => _noCheckRequired,
-    SemanticsRole.progressBar => _noCheckRequired,
+    SemanticsRole.progressBar => _semanticsProgressBar,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
@@ -160,6 +160,48 @@ sealed class _DebugSemanticsRoleChecks {
       FlutterError('Missing checks for role ${node.getSemanticsData().role}');
 
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
+
+  static FlutterError? _semanticsProgressBar(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+
+    // Check if value is present
+    if (data.value.isEmpty) {
+      return FlutterError('A progress bar must have a value');
+    }
+
+    // Check if minValue and maxValue are present
+    if (data.minValue == null) {
+      return FlutterError('A progress bar must have a minValue');
+    }
+
+    if (data.maxValue == null) {
+      return FlutterError('A progress bar must have a maxValue');
+    }
+
+    // Validate that value is within min and max range
+    try {
+      final double currentValue = double.parse(data.value);
+      final double minVal = double.parse(data.minValue!);
+      final double maxVal = double.parse(data.maxValue!);
+
+      if (currentValue < minVal || currentValue > maxVal) {
+        return FlutterError(
+          'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
+        );
+      }
+
+      if (minVal >= maxVal) {
+        return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
+      }
+    } catch (e) {
+      return FlutterError(
+        'Progress bar value, minValue, and maxValue must be valid numbers. '
+        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
+
+    return null;
+  }
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
@@ -3709,8 +3751,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       validationResult: data.validationResult,
       inputType: data.inputType,
       locale: data.locale,
-      minValue: data.minValue ?? '0.0',
-      maxValue: data.maxValue ?? '1.0',
+      minValue: data.minValue ?? '0',
+      maxValue: data.maxValue ?? '100',
     );
     _dirty = false;
   }
