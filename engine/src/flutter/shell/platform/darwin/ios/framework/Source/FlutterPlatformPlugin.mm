@@ -445,7 +445,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   FlutterTranslateController* translateController;
 
   if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-    // On iPad, the translate screen is presented in a popover view, and requires a rect to use as bounds
+    // On iPad, the translate screen is presented in a popover view, and requires a rect to use as
+    // bounds
     FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
     UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
 
