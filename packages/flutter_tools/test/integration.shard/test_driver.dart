@@ -537,7 +537,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     String device = FlutterTesterDevices.kTesterDeviceId,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
-    bool serveObservatory = false,
     bool noDevtools = false,
     bool verbose = false,
     String? script,
@@ -562,7 +561,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
         if (noDevtools) '--no-devtools',
-        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
         ...deviceArgs,
@@ -582,7 +580,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -592,7 +589,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
-        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         '-d',
         'flutter-tester',
         '--debug-port',
