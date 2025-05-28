@@ -11,9 +11,9 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../features.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
+import '../macos/swift_package_manager.dart';
 import '../project.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
@@ -27,7 +27,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required Logger logger,
     required FileSystem fileSystem,
     required PlistParser plistParser,
-    required FeatureFlags features,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
@@ -35,17 +34,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _fileSystem = fileSystem,
        _plistParser = plistParser,
-       _features = features,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
   final SupportedPlatform _platform;
-  final BuildInfo _buildInfo;
+  final BuildInfo? _buildInfo;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
-  final FeatureFlags _features;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const String _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -57,6 +54,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// New identifier for FlutterGeneratedPluginSwiftPackage XCSwiftPackageProductDependency.
   static const String _flutterPluginsSwiftPackageProductDependencyIdentifier =
       '78A3181F2AECB46A00862997';
+
+  /// New identifier for FlutterGeneratedPluginSwiftPackage PBXFileReference.
+  static const String _flutterPluginsSwiftPackageFileIdentifer = '78E0A7A72DC9AD7400C4905E';
+
+  /// Existing iOS identifer for Flutter PBXGroup.
+  static const String _iosFlutterGroupIdentifier = '9740EEB11CF90186004384FC';
+
+  /// Existing macOS identifer for Flutter PBXGroup.
+  static const String _macosFlutterGroupIdentifier = '33CEB47122A05771004F2AC0';
 
   /// Existing iOS identifier for Runner PBXFrameworksBuildPhase.
   static const String _iosRunnerFrameworksBuildPhaseIdentifier = '97C146EB1CF9000F007C117D';
@@ -95,6 +101,22 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     return _platform == SupportedPlatform.ios ? _iosProjectIdentifier : _macosProjectIdentifier;
   }
 
+  String get _flutterGroupIdentifier {
+    return _platform == SupportedPlatform.ios
+        ? _iosFlutterGroupIdentifier
+        : _macosFlutterGroupIdentifier;
+  }
+
+  /// The leading path for the `PBXFileReference` relative to the Flutter `PBXGroup`.
+  ///
+  /// The actual location for both iOS and macOS is `Flutter/ephemeral`. However,
+  /// including the `Flutter/` prefix for macOS will cause it to resolve to
+  /// `Flutter/Flutter/ephemeral`. This is likely due to the macOS Flutter `PBXGroup`
+  /// using `path` whereas the iOS Flutter `PBXGroup` uses `name`.
+  String get _relativeEphemeralPath {
+    return _platform == SupportedPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
+  }
+
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
       logger.printTrace('Restoring project settings from backup file...');
@@ -110,7 +132,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// will revert any changes made and throw an error.
   @override
   Future<void> migrate() async {
-    if (!_features.isSwiftPackageManagerEnabled) {
+    if (!_xcodeProject.usesSwiftPackageManager) {
       logger.printTrace(
         'The Swift Package Manager feature is off. '
         'Skipping the migration that adds Swift Package Manager integration...',
@@ -139,7 +161,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       // Check for specific strings in the xcscheme and pbxproj to see if the
       // project has been already migrated, whether automatically or manually.
       final bool isSchemeMigrated = _isSchemeMigrated(schemeInfo);
-      final bool isPbxprojMigrated = _xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+      final bool isPbxprojMigrated = _quickCheckIsPbxprojMigrated(_xcodeProjectInfoFile);
       if (isSchemeMigrated && isPbxprojMigrated) {
         return;
       }
@@ -355,6 +377,20 @@ $newContent
     }
   }
 
+  /// Check if the project has had migrations performed already.
+  bool _quickCheckIsPbxprojMigrated(File xcodeProjectInfoFile) {
+    // Initial migration added the `FlutterGeneratedPluginSwiftPackage` and other settings to the pbxproj file.
+    final bool initialMigrationComplete = _xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+
+    // Secondary migration added the `FlutterGeneratedPluginSwiftPackage` as a root package (via PBXFileReference)
+    final bool rootFlutterGeneratedPluginSwiftPackageMigrationComplete = xcodeProjectInfoFile
+        .readAsStringSync()
+        .contains(
+          '$_flutterPluginsSwiftPackageFileIdentifer /* $kFlutterGeneratedPluginSwiftPackageName */ = {isa = PBXFileReference',
+        );
+    return initialMigrationComplete && rootFlutterGeneratedPluginSwiftPackageMigrationComplete;
+  }
+
   /// Checks if all sections have been migrated. If [logErrorIfNotMigrated] is
   /// true, will log an error for each section that is not migrated.
   bool _isPbxprojMigratedCorrectly(
@@ -365,9 +401,20 @@ $newContent
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
+    final bool packageFileReferenceMigrated = _isFileReferenceMigrated(
+      projectInfo,
+      logErrorIfNotMigrated: logErrorIfNotMigrated,
+      identifer: _flutterPluginsSwiftPackageFileIdentifer,
+      name: kFlutterGeneratedPluginSwiftPackageName,
+    );
     final bool frameworksBuildPhaseMigrated = _isFrameworksBuildPhaseMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
+    );
+    final bool groupPluginPackageMigrated = _isGroupMigrated(
+      projectInfo,
+      logErrorIfNotMigrated: logErrorIfNotMigrated,
+      fileReferenceIdentifier: _flutterPluginsSwiftPackageFileIdentifer,
     );
     final bool nativeTargetsMigrated = _isNativeTargetMigrated(
       projectInfo,
@@ -386,7 +433,9 @@ $newContent
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
     return buildFilesMigrated &&
+        packageFileReferenceMigrated &&
         frameworksBuildPhaseMigrated &&
+        groupPluginPackageMigrated &&
         nativeTargetsMigrated &&
         projectObjectMigrated &&
         localSwiftPackageMigrated &&
@@ -403,7 +452,19 @@ $newContent
 
     List<String> lines = LineSplitter.split(originalProjectContents).toList();
     lines = _migrateBuildFile(lines, parsedInfo);
+    lines = _migrateFileReference(
+      lines,
+      parsedInfo,
+      _flutterPluginsSwiftPackageFileIdentifer,
+      kFlutterGeneratedPluginSwiftPackageName,
+    );
     lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
+    lines = _migrateGroup(
+      lines,
+      parsedInfo,
+      _flutterPluginsSwiftPackageFileIdentifer,
+      kFlutterGeneratedPluginSwiftPackageName,
+    );
     lines = _migrateNativeTarget(lines, parsedInfo);
     lines = _migrateProjectObject(lines, parsedInfo);
     lines = _migrateLocalPackageProductDependencies(lines, parsedInfo);
@@ -419,14 +480,31 @@ $newContent
   }
 
   void _ensureNewIdentifiersNotUsed(String originalProjectContents) {
-    if (originalProjectContents.contains(_flutterPluginsSwiftPackageBuildFileIdentifier)) {
+    if (!originalProjectContents.contains(
+          '$_flutterPluginsSwiftPackageBuildFileIdentifier /* $kFlutterGeneratedPluginSwiftPackageName in Frameworks */',
+        ) &&
+        originalProjectContents.contains(_flutterPluginsSwiftPackageBuildFileIdentifier)) {
       throw Exception('Duplicate id found for PBXBuildFile.');
     }
-    if (originalProjectContents.contains(_flutterPluginsSwiftPackageProductDependencyIdentifier)) {
+    if (!originalProjectContents.contains(
+          '$_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */',
+        ) &&
+        originalProjectContents.contains(_flutterPluginsSwiftPackageProductDependencyIdentifier)) {
       throw Exception('Duplicate id found for XCSwiftPackageProductDependency.');
     }
-    if (originalProjectContents.contains(_localFlutterPluginsSwiftPackageReferenceIdentifier)) {
+    if (!originalProjectContents.contains(
+          '$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference',
+        ) &&
+        originalProjectContents.contains(_localFlutterPluginsSwiftPackageReferenceIdentifier)) {
       throw Exception('Duplicate id found for XCLocalSwiftPackageReference.');
+    }
+    if (!originalProjectContents.contains(
+          '$_flutterPluginsSwiftPackageFileIdentifer /* $kFlutterGeneratedPluginSwiftPackageName */',
+        ) &&
+        originalProjectContents.contains(_flutterPluginsSwiftPackageFileIdentifer)) {
+      throw Exception(
+        'Duplicate id found for $kFlutterGeneratedPluginSwiftPackageName PBXFileReference.',
+      );
     }
   }
 
@@ -447,9 +525,42 @@ $newContent
     }
 
     const String newContent =
-        '		$_flutterPluginsSwiftPackageBuildFileIdentifier /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = $_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */; };';
+        '		$_flutterPluginsSwiftPackageBuildFileIdentifier /* $kFlutterGeneratedPluginSwiftPackageName in Frameworks */ = {isa = PBXBuildFile; productRef = $_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */; };';
 
     final (int _, int endSectionIndex) = _sectionRange('PBXBuildFile', lines);
+
+    lines.insert(endSectionIndex, newContent);
+    return lines;
+  }
+
+  bool _isFileReferenceMigrated(
+    ParsedProjectInfo projectInfo, {
+    bool logErrorIfNotMigrated = false,
+    required String identifer,
+    required String name,
+  }) {
+    final bool migrated = projectInfo.fileReferenceIdentifiers.contains(identifer);
+    if (logErrorIfNotMigrated && !migrated) {
+      logger.printError('PBXFileReference for $name was not migrated or was migrated incorrectly.');
+    }
+    return migrated;
+  }
+
+  List<String> _migrateFileReference(
+    List<String> lines,
+    ParsedProjectInfo projectInfo,
+    String identifier,
+    String name,
+  ) {
+    if (_isFileReferenceMigrated(projectInfo, identifer: identifier, name: name)) {
+      logger.printTrace('PBXFileReference already migrated. Skipping...');
+      return lines;
+    }
+
+    final String newContent =
+        '		$identifier /* $name */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $name; path = $_relativeEphemeralPath/Packages/$name; sourceTree = "<group>"; };';
+
+    final (int _, int endSectionIndex) = _sectionRange('PBXFileReference', lines);
 
     lines.insert(endSectionIndex, newContent);
     return lines;
@@ -519,7 +630,7 @@ $newContent
       // If files is null, the files field is missing and must be added.
       const String newContent = '''
 			files = (
-				$_flutterPluginsSwiftPackageBuildFileIdentifier /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+				$_flutterPluginsSwiftPackageBuildFileIdentifier /* $kFlutterGeneratedPluginSwiftPackageName in Frameworks */,
 			);''';
       lines.insert(runnerFrameworksPhaseStartIndex + 1, newContent);
     } else {
@@ -534,7 +645,7 @@ $newContent
         );
       }
       const String newContent =
-          '				$_flutterPluginsSwiftPackageBuildFileIdentifier /* FlutterGeneratedPluginSwiftPackage in Frameworks */,';
+          '				$_flutterPluginsSwiftPackageBuildFileIdentifier /* $kFlutterGeneratedPluginSwiftPackageName in Frameworks */,';
       lines.insert(startFilesIndex + 1, newContent);
     }
 
@@ -601,7 +712,7 @@ $newContent
       // If packageProductDependencies is null, the packageProductDependencies field is missing and must be added.
       const List<String> newContent = <String>[
         '			packageProductDependencies = (',
-        '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */,',
+        '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */,',
         '			);',
       ];
       lines.insertAll(runnerNativeTargetStartIndex + 1, newContent);
@@ -618,9 +729,85 @@ $newContent
         );
       }
       const String newContent =
-          '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */,';
+          '				$_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */,';
       lines.insert(packageProductDependenciesIndex + 1, newContent);
     }
+    return lines;
+  }
+
+  bool _isGroupMigrated(
+    ParsedProjectInfo projectInfo, {
+    bool logErrorIfNotMigrated = false,
+    required String fileReferenceIdentifier,
+  }) {
+    final bool migrated =
+        projectInfo.parsedGroups
+            .where(
+              (ParsedProjectGroup group) =>
+                  group.identifier == _flutterGroupIdentifier &&
+                  group.children != null &&
+                  group.children!.contains(fileReferenceIdentifier),
+            )
+            .toList()
+            .isNotEmpty;
+    if (logErrorIfNotMigrated && !migrated) {
+      logger.printError('PBXGroup was not migrated or was migrated incorrectly.');
+    }
+    return migrated;
+  }
+
+  List<String> _migrateGroup(
+    List<String> lines,
+    ParsedProjectInfo projectInfo,
+    String fileReferenceIdentifier,
+    String fileReferenceName,
+  ) {
+    if (_isGroupMigrated(projectInfo, fileReferenceIdentifier: fileReferenceIdentifier)) {
+      logger.printTrace('PBXGroup already migrated. Skipping...');
+      return lines;
+    }
+
+    final (int startSectionIndex, int endSectionIndex) = _sectionRange('PBXGroup', lines);
+
+    // Find index where Flutter group begins.
+    final int flutterGroupStartIndex = lines.indexWhere(
+      (String line) => line.trim().startsWith('$_flutterGroupIdentifier /* Flutter */ = {'),
+      startSectionIndex,
+    );
+    if (flutterGroupStartIndex == -1 || flutterGroupStartIndex > endSectionIndex) {
+      throw Exception('Unable to find Flutter PBXGroup.');
+    }
+
+    // Get the Flutter Group from the parsed project info.
+    final ParsedProjectGroup? parsedGroup =
+        projectInfo.parsedGroups
+            .where((ParsedProjectGroup group) => group.identifier == _flutterGroupIdentifier)
+            .toList()
+            .firstOrNull;
+    if (parsedGroup == null) {
+      throw Exception('Unable to find parsed Flutter PBXGroup.');
+    }
+
+    if (parsedGroup.children == null) {
+      // If children is null, the children field is missing and must be added.
+      final String newContent = '''
+			children = (
+				$fileReferenceIdentifier /* $fileReferenceName */,
+			);''';
+      lines.insert(flutterGroupStartIndex + 1, newContent);
+    } else {
+      // Find the children field within the Flutter PBXGroup.
+      final int startChildrenIndex = lines.indexWhere(
+        (String line) => line.trim().contains('children = ('),
+        flutterGroupStartIndex,
+      );
+      if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
+        throw Exception('Unable to children for Flutter PBXGroup.');
+      }
+      final String newContent = '				$fileReferenceIdentifier /* $fileReferenceName */,';
+      lines.insert(startChildrenIndex + 1, newContent);
+    }
+
     return lines;
   }
 
@@ -675,9 +862,9 @@ $newContent
 
     if (projectObject.packageReferences == null) {
       // If packageReferences is null, the packageReferences field is missing and must be added.
-      const List<String> newContent = <String>[
+      final List<String> newContent = <String>[
         '			packageReferences = (',
-        '				$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,',
+        '				$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/$kFlutterGeneratedPluginSwiftPackageName" */,',
         '			);',
       ];
       lines.insertAll(projectStartIndex + 1, newContent);
@@ -693,7 +880,7 @@ $newContent
         );
       }
       const String newContent =
-          '				$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,';
+          '				$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/$kFlutterGeneratedPluginSwiftPackageName" */,';
       lines.insert(packageReferencesIndex + 1, newContent);
     }
     return lines;
@@ -733,9 +920,9 @@ $newContent
       // There isn't a XCLocalSwiftPackageReference section yet, so add it
       final List<String> newContent = <String>[
         '/* Begin XCLocalSwiftPackageReference section */',
-        '		$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+        '		$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/$kFlutterGeneratedPluginSwiftPackageName" */ = {',
         '			isa = XCLocalSwiftPackageReference;',
-        '			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;',
+        '			relativePath = Flutter/ephemeral/Packages/$kFlutterGeneratedPluginSwiftPackageName;',
         '		};',
         '/* End XCLocalSwiftPackageReference section */',
       ];
@@ -750,9 +937,9 @@ $newContent
     }
 
     final List<String> newContent = <String>[
-      '		$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+      '		$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/$kFlutterGeneratedPluginSwiftPackageName" */ = {',
       '			isa = XCLocalSwiftPackageReference;',
-      '			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;',
+      '			relativePath = Flutter/ephemeral/Packages/$kFlutterGeneratedPluginSwiftPackageName;',
       '		};',
     ];
 
@@ -795,9 +982,9 @@ $newContent
       // There isn't a XCSwiftPackageProductDependency section yet, so add it
       final List<String> newContent = <String>[
         '/* Begin XCSwiftPackageProductDependency section */',
-        '		$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */ = {',
+        '		$_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */ = {',
         '			isa = XCSwiftPackageProductDependency;',
-        '			productName = FlutterGeneratedPluginSwiftPackage;',
+        '			productName = $kFlutterGeneratedPluginSwiftPackageName;',
         '		};',
         '/* End XCSwiftPackageProductDependency section */',
       ];
@@ -812,9 +999,9 @@ $newContent
     }
 
     final List<String> newContent = <String>[
-      '		$_flutterPluginsSwiftPackageProductDependencyIdentifier /* FlutterGeneratedPluginSwiftPackage */ = {',
+      '		$_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */ = {',
       '			isa = XCSwiftPackageProductDependency;',
-      '			productName = FlutterGeneratedPluginSwiftPackage;',
+      '			productName = $kFlutterGeneratedPluginSwiftPackageName;',
       '		};',
     ];
 
