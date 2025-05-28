@@ -460,6 +460,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     CGRect transformedLastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
         localRectFromFrameworkTransform:lastRect];
 
+    // In case of RTL Language, get the minimum x coordinate too
     CGRect ipadBounds =
         CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
                    transformedFirstRect.origin.y,
@@ -468,7 +469,6 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
     translateController = [[FlutterTranslateController alloc] initWithTerm:term
                                                                 ipadBounds:ipadBounds];
-
   } else {
     translateController = [[FlutterTranslateController alloc] initWithTerm:term];
   }

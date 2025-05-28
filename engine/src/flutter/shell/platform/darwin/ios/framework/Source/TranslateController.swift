@@ -45,7 +45,6 @@ public class FlutterTranslateController: UIViewController {
         swiftUIViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
         swiftUIViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
     ])
-
     swiftUIViewController.didMove(toParent: self)
   }
 
