@@ -576,7 +576,7 @@ void main() {
             '$flutterPatchedSdkPath/',
             '--target=flutter',
             '--no-print-incremental-dependencies',
-            '-D$kAppFlavor=vanilla',
+            '-D$kAppFlavor=strawberry',
             ...buildModeOptions(BuildMode.debug, <String>[]),
             '--packages',
             '/.dart_tool/package_config.json',
