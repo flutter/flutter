@@ -7,10 +7,10 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
-#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -178,8 +178,7 @@ FLUTTER_ASSERT_ARC
                                                                     arguments:@"Test"];
   FlutterResult result = ^(id result) {
     OCMVerify([mockEngineViewController
-               addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateController class]]
-              ]);
+        addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateController class]]]);
     [presentExpectation fulfill];
   };
   [mockPlugin handleMethodCall:methodCall result:result];
