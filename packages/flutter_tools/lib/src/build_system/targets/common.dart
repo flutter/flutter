@@ -6,16 +6,14 @@ import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
-import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show platform, xcode;
+import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
-import '../../runner/flutter_command.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -310,16 +308,10 @@ class KernelSnapshot extends Target {
     if (flavor == null) {
       return;
     }
-    if (globals.platform.environment[kAppFlavor] != null) {
-      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
+    if (!dartDefines.any((String element) => element.startsWith(kAppFlavor))) {
+      // If the flavor is not already in the dart defines, add it.
+      dartDefines.add('$kAppFlavor=$flavor');
     }
-    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
-      throwToolExit(
-        '$kAppFlavor is used by the framework and cannot be '
-        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
-      );
-    }
-    dartDefines.add('$kAppFlavor=$flavor');
   }
 }
 
