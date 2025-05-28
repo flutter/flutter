@@ -51,12 +51,18 @@ a.txt c.txt d.txt: b.txt
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
     final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
-C:\\a.txt: C:\\b.txt
+C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
 
-    expect(depfile.inputs.single.path, r'C:\b.txt');
-    expect(depfile.outputs.single.path, r'C:\a.txt');
+    expect(depfile.inputs.map((File e) => e.path).toList(), <String>[
+      r'C:\b1.txt',
+      r'C:\b2/b3.txt',
+    ]);
+    expect(depfile.outputs.map((File e) => e.path).toList(), <String>[
+      r'C:\a1.txt',
+      r'C:\a2/a3.txt',
+    ]);
   });
 
   testWithoutContext(
@@ -73,8 +79,9 @@ C:\\a.txt: C:\\b.txt
       final File outputDepfile = fileSystem.file('depfile');
       depfileService.writeToFile(depfile, outputDepfile);
 
-      expect(outputDepfile.readAsStringSync(), contains(r'C:\\Hello\ Flutter\\a.txt'));
-      expect(outputDepfile.readAsStringSync(), contains(r'C:\\Hello\ Flutter\\b.txt'));
+      final String output = outputDepfile.readAsStringSync();
+      expect(output, contains(r'C:\\Hello\ Flutter\\a.txt'));
+      expect(output, contains(r'C:\\Hello\ Flutter\\b.txt'));
     },
   );
 
@@ -88,8 +95,46 @@ C:\\a.txt: C:\\b.txt
     final File outputDepfile = fileSystem.file('depfile');
     depfileService.writeToFile(depfile, outputDepfile);
 
-    expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/a.txt'));
-    expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/b.txt'));
+    final String output = outputDepfile.readAsStringSync();
+    expect(output, contains(r'/Hello\ Flutter/a.txt'));
+    expect(output, contains(r'/Hello\ Flutter/b.txt'));
+  });
+
+  testWithoutContext('Can produce normalized paths', () {
+    final List<(FileSystemStyle style, String input, String output, List<String> expects)> pairs =
+        <(FileSystemStyle style, String input, String output, List<String> expects)>[
+          (
+            FileSystemStyle.posix,
+            r'Hello Flutter\a.txt',
+            r'Hello Flutter\b.txt',
+            <String>[r'/Hello\ Flutter/a.txt', r'/Hello\ Flutter/b.txt'],
+          ),
+          (
+            FileSystemStyle.windows,
+            r'Hello Flutter/a.txt',
+            r'Hello Flutter/b.txt',
+            <String>[r'\\Hello\ Flutter\\a.txt', r'\\Hello\ Flutter\\b.txt'],
+          ),
+        ];
+
+    for (final (FileSystemStyle style, String input, String output, List<String> expects)
+        in pairs) {
+      final FileSystem fileSystem = MemoryFileSystem.test(style: style);
+      final DepfileService depfileService = DepfileService(
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+      );
+      final File inputFile = fileSystem.file(input).absolute..createSync(recursive: true);
+      final File outputFile = fileSystem.file(output).absolute..createSync();
+      final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+      final File outputDepfile = fileSystem.file('depfile');
+      depfileService.writeToFile(depfile, outputDepfile);
+
+      final String outputString = outputDepfile.readAsStringSync();
+      for (final String path in expects) {
+        expect(outputString, contains(path));
+      }
+    }
   });
 
   testWithoutContext('Resilient to weird whitespace', () {
