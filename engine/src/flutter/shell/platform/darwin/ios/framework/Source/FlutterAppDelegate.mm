@@ -21,29 +21,6 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
-@property(nonatomic, strong, nullable) UIWindow* window;
-@end
-
-@implementation FlutterSceneDelegate
-
-- (void)scene:(UIScene*)scene
-    willConnectToSession:(UISceneSession*)session
-                 options:(UISceneConnectionOptions*)connectionOptions {
-  NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
-  if (appDelegate.window.rootViewController) {
-    // If this is not nil we are running into a case where someone is manually
-    // performing root view controller setup in the UIApplicationDelegate.
-    UIWindowScene* windowScene = (UIWindowScene*)scene;
-    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-    self.window.rootViewController = appDelegate.window.rootViewController;
-    appDelegate.window = self.window;
-    [self.window makeKeyAndVisible];
-  }
-}
-
-@end
-
 @interface FlutterAppDelegate () {
   __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
   NSObject<FlutterPluginRegistrant>* _strongRegistrant;
