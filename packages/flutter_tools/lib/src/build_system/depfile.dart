@@ -66,16 +66,19 @@ class DepfileService {
   }
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
+    final bool backslash = _fileSystem.path.style.separator == r'\';
     for (final File outputFile in files) {
-      if (_fileSystem.path.style.separator == r'\') {
-        // backslashes and spaces in a depfile have to be escaped if the
-        // platform separator is a backslash.
-        final String path = outputFile.path.replaceAll(r'\', r'\\').replaceAll(r' ', r'\ ');
-        buffer.write(' $path');
+      // Escape spaces.
+      String path = _fileSystem.path.normalize(outputFile.path).replaceAll(r' ', r'\ ');
+      if (backslash) {
+        // Convert all path separators to backslashes.
+        // Backslashes in a depfile have to be escaped if the platform separator is a backslash.
+        path = path.replaceAll(RegExp(r'[/\\]'), r'\\');
       } else {
-        final String path = outputFile.path.replaceAll(r' ', r'\ ');
-        buffer.write(' $path');
+        // Convert all path separators to forward slashes.
+        path = path.replaceAll(r'\', r'/');
       }
+      buffer.write(' $path');
     }
   }
 
