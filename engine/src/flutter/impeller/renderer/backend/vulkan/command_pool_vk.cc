@@ -214,8 +214,7 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
 
   {
     Lock all_pools_lock(g_all_pools_map_mutex);
-    g_all_pools_map[strong_context->GetHash()][std::this_thread::get_id()] =
-        resource;
+    g_all_pools_map[hash][std::this_thread::get_id()] = resource;
   }
 
   return resource;
