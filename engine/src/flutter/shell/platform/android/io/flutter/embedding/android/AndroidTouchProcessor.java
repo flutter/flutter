@@ -13,7 +13,6 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -227,7 +226,6 @@ public class AndroidTouchProcessor {
   public boolean onGenericMotionEvent(@NonNull MotionEvent event, @NonNull Context context) {
     // Method isFromSource is only available in API 18+ (Jelly Bean MR2)
     // Mouse hover support is not implemented for API < 18.
-    Log.e("HI GRAY", "this is a pointless change to make the engine presubmits run");
     boolean isPointerEvent = event.isFromSource(InputDevice.SOURCE_CLASS_POINTER);
     boolean isMovementEvent =
         (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE
