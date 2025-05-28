@@ -104,6 +104,7 @@ class Dismissible extends StatefulWidget {
     required this.child,
     this.background,
     this.secondaryBackground,
+    this.clipBehaviorOffset,
     this.confirmDismiss,
     this.onResize,
     this.onUpdate,
@@ -131,6 +132,16 @@ class Dismissible extends StatefulWidget {
   /// has been dragged up or to the left. It may only be specified when background
   /// has also been specified.
   final Widget? secondaryBackground;
+
+  /// An offset to adjust the clipping behavior of the background widget when,
+  /// for example, the parent has rounded corners
+  ///
+  /// When the [Dismissible] is dragged, the background is revealed. If the parent
+  /// has rounded corners, this value prevents the background from being clipped
+  /// abruptly. Typically, this should match the largest radius of the parent's
+  /// `BorderRadius` (e.g., if the parent uses `BorderRadius.circular(20)`,
+  /// set this to `20`).
+  final double? clipBehaviorOffset;
 
   /// Gives the app an opportunity to confirm or veto a pending dismissal.
   ///
@@ -263,10 +274,12 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     required this.axis,
     required this.moveAnimation,
+    required this.clipBehaviorOffset,
   }) : super(reclip: moveAnimation);
 
   final Axis axis;
   final Animation<Offset> moveAnimation;
+  final double clipBehaviorOffset;
 
   @override
   Rect getClip(Size size) {
@@ -274,15 +287,15 @@ class _DismissibleClipper extends CustomClipper<Rect> {
       case Axis.horizontal:
         final double offset = moveAnimation.value.dx * size.width;
         if (offset < 0) {
-          return Rect.fromLTRB(size.width + offset, 0.0, size.width, size.height);
+          return Rect.fromLTRB(size.width + offset - clipBehaviorOffset, 0.0, size.width, size.height);
         }
-        return Rect.fromLTRB(0.0, 0.0, offset, size.height);
+        return Rect.fromLTRB(0.0, 0.0, offset + clipBehaviorOffset, size.height);
       case Axis.vertical:
         final double offset = moveAnimation.value.dy * size.height;
         if (offset < 0) {
-          return Rect.fromLTRB(0.0, size.height + offset, size.width, size.height);
+          return Rect.fromLTRB(0.0, size.height + offset - clipBehaviorOffset, size.width, size.height);
         }
-        return Rect.fromLTRB(0.0, 0.0, size.width, offset);
+        return Rect.fromLTRB(0.0, 0.0, size.width, offset + clipBehaviorOffset);
     }
   }
 
@@ -663,6 +676,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
               clipper: _DismissibleClipper(
                 axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
                 moveAnimation: _moveAnimation,
+                clipBehaviorOffset: widget.clipBehaviorOffset ?? 0,
               ),
               child: background,
             ),
