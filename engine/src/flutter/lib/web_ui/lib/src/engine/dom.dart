@@ -994,11 +994,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
 
-  @JS('fillTextCluster')
-  external void _fillTextCluster(JSAny? textCluster, double x, double y);
-
-  void fillTextCluster(DomTextCluster textCluster, double x, double y) =>
-      _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
 }
 
 @JS('WebGLRenderingContext')
@@ -1448,17 +1444,11 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external JSArray<JSAny?> _getTextClusters();
   List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
 
-  @JS('getActualBoundingBox')
-  external DomRectReadOnly _getActualBoundingBox(int begin, int end);
-  DomRectReadOnly getActualBoundingBox(int begin, int end) => _getActualBoundingBox(begin, end);
+  external DomRectReadOnly getActualBoundingBox(int begin, int end);
 
-  @JS('fontBoundingBoxAscent')
-  external double get _fontBoundingBoxAscent;
-  double get fontBoundingBoxAscent => _fontBoundingBoxAscent;
+  external double get fontBoundingBoxAscent;
 
-  @JS('fontBoundingBoxDescent')
-  external double get _fontBoundingBoxDescent;
-  double get fontBoundingBoxDescent => _fontBoundingBoxDescent;
+  external double get fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
   external JSArray<JSAny> _getSelectionRects(int begin, int end);
@@ -2536,19 +2526,8 @@ extension JSArrayExtension on JSArray<JSAny?> {
 extension type DomTextCluster._(JSObject _) implements JSObject {
   // TODO(jlavrova): This has been renamed to `start` in the spec.
   // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  @JS('begin')
-  external int get _begin;
-  int get begin => _begin;
-
-  @JS('end')
-  external int get _end;
-  int get end => _end;
-
-  @JS('x')
-  external double get _x;
-  double get x => _x;
-
-  @JS('y')
-  external double get _y;
-  double get y => _y;
+  external int get begin;
+  external int get end;
+  external double get x;
+  external double get y;
 }

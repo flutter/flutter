@@ -1789,31 +1789,23 @@ extension type SkPicture(JSObject _) implements JSObject {
 }
 
 extension type BidiRegion(JSObject _) implements JSObject {
-  @JS('start')
-  external JSNumber get _start;
-  int get start => _start.toDartInt;
-  @JS('end')
-  external JSNumber get _end;
-  int get end => _end.toDartInt;
-  @JS('level')
-  external JSNumber get _level;
-  int get level => _level.toDartInt;
+  external int get start;
+  external int get end;
+  external int get level;
 }
 
 extension type BidiIndex(JSObject _) implements JSObject {
-  @JS('index')
-  external JSNumber get _index;
-  int get index => _index.toDartInt;
+  external int get index;
 }
 
 extension type BidiNamespace(JSObject _) implements JSObject {
   @JS('getBidiRegions')
-  external JSArray<JSAny?> _getBidiRegions(JSString text, SkTextDirection dir);
+  external JSArray<JSAny?> _getBidiRegions(String text, SkTextDirection dir);
   List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
-      _getBidiRegions(text.toJS, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
+      _getBidiRegions(text, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
 
   @JS('reorderVisual')
-  // TODO(jlavrova): Use a JSInt32Array return type instead.
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
   external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
   List<BidiIndex> reorderVisual(Uint8List visuals) =>
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
