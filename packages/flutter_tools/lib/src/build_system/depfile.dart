@@ -96,7 +96,8 @@ class DepfileService {
         // The tool doesn't write duplicates to these lists. This call is an attempt to
         // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
-        .map(_fileSystem.file)
+        // Normalize the path before creating a file object.
+        .map((String path) => _fileSystem.file(_fileSystem.path.normalize(path)))
         .toList();
   }
 }
