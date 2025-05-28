@@ -558,6 +558,12 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
   if (g_strcmp0(renderer, "software") == 0) {
     self->compositor = FL_COMPOSITOR(fl_compositor_software_new(self));
+    g_warning(
+        "Using the software renderer. Not all features are supported. This is "
+        "not recommended.\n"
+        "\n"
+        "To switch back to the default renderer, unset the "
+        "FLUTTER_LINUX_RENDERER environment variable.");
   } else {
     if (renderer != nullptr && strcmp(renderer, "opengl") != 0) {
       g_warning("Unknown renderer type '%s', defaulting to opengl", renderer);
