@@ -23,11 +23,11 @@ class StretchOverscrollEffect extends StatefulWidget {
     required this.child,
   }) : assert(
          stretchStrengthX >= -1.0 && stretchStrengthX <= 1.0,
-         'overscrollX must be between -1.0 and 1.0',
+         'stretchStrengthX must be between -1.0 and 1.0',
        ),
        assert(
          stretchStrengthY >= -1.0 && stretchStrengthY <= 1.0,
-         'overscrollY must be between -1.0 and 1.0',
+         'stretchStrengthY must be between -1.0 and 1.0',
        );
 
   /// The horizontal overscroll strength applied for the stretching effect.
