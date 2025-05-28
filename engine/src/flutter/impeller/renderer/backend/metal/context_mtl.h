@@ -146,6 +146,9 @@ class ContextMTL final : public Context,
   void StoreTaskForGPU(const fml::closure& task,
                        const fml::closure& failure) override;
 
+  // visible for testing.
+  void FlushTasksAwaitingGPU();
+
  private:
   class SyncSwitchObserver : public fml::SyncSwitch::Observer {
    public:
@@ -190,8 +193,6 @@ class ContextMTL final : public Context,
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;
-
-  void FlushTasksAwaitingGPU();
 
   ContextMTL(const ContextMTL&) = delete;
 
