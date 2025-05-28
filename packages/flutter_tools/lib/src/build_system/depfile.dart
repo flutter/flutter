@@ -70,9 +70,11 @@ class DepfileService {
     for (final File outputFile in files) {
       String path = _fileSystem.path.normalize(outputFile.path);
       if (backslash) {
-        // Convert all path separators to backslashes.
         // Backslashes in a depfile have to be escaped if the platform separator is a backslash.
         path = path.replaceAll(r'\', r'\\');
+      } else {
+        // Convert all path separators to forward slashes.
+        path = path.replaceAll(r'\', r'/');
       }
       // Escape spaces.
       path = path.replaceAll(r' ', r'\ ');
