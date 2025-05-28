@@ -114,7 +114,23 @@ class TextLayout {
       textRange.start,
       textRange.end,
     );
-    assert(rects.length == 1, 'Cluster text must be presented by a single rectangle');
+    if (rects.length != 1) {
+      // TODO(jlavrova): assert that this is a continuous set of rectangles
+      final ui.Rect union = ui.Rect.zero;
+      WebParagraphDebug.log('getAdvance($textRange)');
+      for (final rect in rects) {
+        WebParagraphDebug.log('[${rect.left}:${rect.right})');
+        final r = ui.Rect.fromLTWH(
+          rects.first.left,
+          rects.first.top,
+          rects.first.width,
+          rects.first.height,
+        );
+        union.expandToInclude(r);
+      }
+      return union;
+    }
+    //assert(rects.length == 1, 'Cluster text must be presented by a single rectangle');
     return ui.Rect.fromLTWH(
       rects.first.left,
       rects.first.top,
@@ -139,6 +155,7 @@ class TextLayout {
           '${styleToString(styledBlock.textStyle.fontStyle!)} ${weightToString(styledBlock.textStyle.fontWeight!)} ${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
 
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
+      printTextMetrics(text, blockTextMetrics);
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final ui.Rect advance = getAdvance(
           blockTextMetrics,
@@ -184,7 +201,7 @@ class TextLayout {
     textToClusterMap[paragraph.text!.length] = textClusters.length;
     textClusters.add(ExtendedTextCluster.empty());
 
-    printClusters('Sorted');
+    printClusters('Full text');
   }
 
   ClusterRange convertTextToClusterRange(int textStart, int textEnd) {
@@ -245,6 +262,20 @@ class TextLayout {
         'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right}=${cluster.bounds.width}',
       );
       i += 1;
+    }
+  }
+
+  void printTextMetrics(String text, DomTextMetrics textMetrics) {
+    final clusters = textMetrics.getTextClusters();
+    WebParagraphDebug.log('TextMetrics "$text": ${clusters.length}');
+    int index = 0;
+    for (final cluster in clusters) {
+      final advance = textMetrics.getSelectionRects(cluster.begin, cluster.end);
+      assert(advance.length == 1);
+      WebParagraphDebug.log(
+        '$index: [${cluster.begin}:${cluster.end}) [${advance.first.left}:${advance.first.right})',
+      );
+      index++;
     }
   }
 
@@ -315,8 +346,9 @@ class TextLayout {
     // Arrange line vertically, calculate metrics and bounds
     final String text = getTextFromClusterRange(textClusterRange);
     final DomTextMetrics lineTextMetrics = layoutContext.measureText(text);
+    printTextMetrics(text, lineTextMetrics);
     final TextRange text1 = convertSequentialClusterRangeToText(textClusterRange);
-    WebParagraphDebug.log('LINE "$text" "$text1" $textClusterRange $text1');
+    WebParagraphDebug.log('LINE "$text" $textClusterRange $text1');
     final rect = lineTextMetrics.getActualBoundingBox(0, text1.width);
     final textWidth = rect.width;
 
@@ -353,8 +385,8 @@ class TextLayout {
         // This run is on the line (at least, partially)
         WebParagraphDebug.log(
           'Add bidiRun '
-          '${bidiRun.clusterRange} & $textClusterRange = $intesection1} '
-          '${bidiRun.clusterRange} & $whitespaces = $intesection2} ',
+          '${bidiRun.clusterRange} & $textClusterRange = $intesection1 '
+          '${bidiRun.clusterRange} & $whitespaces = $intesection2 ',
         );
         logicalLevels.add(bidiRun.bidiLevel);
       }
@@ -376,21 +408,27 @@ class TextLayout {
         bidiRun.clusterRange,
         whitespaces,
       );
+
+      if (lineRunClusterRange.isEmpty) {
+        // TODO(jlavrova): what to do with trailing whitespaces? (After implementing queries)
+        assert(!whitespacesClusterRange.isEmpty);
+        continue;
+      }
       final String lineRunText = getTextFromMonodirectionalClusterRange(lineRunClusterRange);
+      final TextRange lineTextRange = convertSequentialClusterRangeToText(textClusterRange);
       final TextRange lineRunTextRange = convertSequentialClusterRangeToText(lineRunClusterRange);
+      final runOffsetInLine = lineRunTextRange.start - lineTextRange.start;
+
       WebParagraphDebug.log(
         'Intersect "$lineRunText" '
-        '${bidiRun.clusterRange} & $textClusterRange = $lineRunClusterRange '
-        '${bidiRun.clusterRange} & $whitespaces = $whitespacesClusterRange',
+        '${bidiRun.clusterRange} & $textClusterRange = $lineRunClusterRange line:$lineTextRange run:$lineRunTextRange offset: $runOffsetInLine',
       );
-      final List<DomRectReadOnly> rects = lineTextMetrics.getSelectionRects(
-        0,
-        lineRunClusterRange.width,
+      final advance = getAdvance(
+        lineTextMetrics,
+        TextRange(start: runOffsetInLine, end: runOffsetInLine + lineRunTextRange.width),
       );
-      assert(rects.length == 1);
-      final bounds = lineTextMetrics.getActualBoundingBox(0, lineRunClusterRange.width);
       WebParagraphDebug.log(
-        'run$lineRunClusterRange: ${rects.first.left}:${rects.first.right} ${rects.first.width} ${bounds.width}',
+        'run$lineRunClusterRange: ${advance.left}:${advance.right}=${advance.width}',
       );
       final ExtendedTextCluster firstVisualClusterInRun =
           bidiRun.bidiLevel.isEven
@@ -404,7 +442,7 @@ class TextLayout {
           lineRunClusterRange,
           bidiRun.bidiLevel,
           lineRunTextRange,
-          bounds.width, //rects.first.width,
+          advance.width,
           shiftInsideLine - firstVisualClusterInRun.shift - firstVisualClusterInRun.advance.left,
         ),
       );
@@ -412,7 +450,7 @@ class TextLayout {
         'Run[${visual.index} + $firstRunIndex]: "$lineRunText" ${bidiRun.bidiLevel.isEven ? 'ltr' : 'rtl'} ${bidiRun.clusterRange}=>$lineRunClusterRange '
         'width=${line.visualRuns.last.width} shift=${line.visualRuns.last.shiftInsideLine}=$shiftInsideLine-${firstVisualClusterInRun.absolutePositionX()}',
       );
-      shiftInsideLine += bounds.width; //rects.first.width;
+      shiftInsideLine += advance.width;
     }
 
     // Fill out styled text ranges

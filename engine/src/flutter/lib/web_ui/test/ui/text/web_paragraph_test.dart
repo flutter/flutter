@@ -46,7 +46,7 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
   });
   */
-  /*
+
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -481,7 +481,6 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multishadows.png', region: region);
   });
-  */
 
   test('Draw WebParagraph multiple decorations on text', () async {
     final PictureRecorder recorder = PictureRecorder();

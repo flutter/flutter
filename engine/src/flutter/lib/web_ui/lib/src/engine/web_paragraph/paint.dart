@@ -139,6 +139,7 @@ class TextPaint {
     // We need it to garantee the same direction and the same text metrics
     // TODO(jlavrova): we actually cannot assume that the text metrics will be the same since Chrome does not garantee it. Should we make sure by comparing ascents/descents (since we only care about them)
     // TODO(jlavrova): do we decorate whitespaces?
+    // TODO(jlavrova): we need to treat each style block as a separate entity with separate ascent&descent (regardless of what Chrome does with fonts) one for all the text, not for each line
     int visualRunIndex = 0;
     int styledTextIndex = 0;
     int textStart = -1;
