@@ -39,5 +39,6 @@
   "searchWebButtonLabel": "Vyhledávat na webu",
   "shareButtonLabel": "Sdílet…",
   "cancelButtonLabel": "Zrušit",
-  "backButtonLabel": "Zpět"
+  "backButtonLabel": "Zpět",
+  "translateButtonLabel": "Translate"
 }

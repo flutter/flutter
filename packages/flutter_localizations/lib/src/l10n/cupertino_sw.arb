@@ -29,5 +29,6 @@
   "shareButtonLabel": "Shiriki...",
   "clearButtonLabel": "Futa",
   "cancelButtonLabel": "Ghairi",
-  "backButtonLabel": "Nyuma"
+  "backButtonLabel": "Nyuma",
+  "translateButtonLabel": "Translate"
 }

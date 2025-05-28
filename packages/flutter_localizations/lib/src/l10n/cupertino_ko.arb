@@ -29,5 +29,6 @@
   "shareButtonLabel": "공유...",
   "clearButtonLabel": "삭제",
   "cancelButtonLabel": "취소",
-  "backButtonLabel": "뒤로"
+  "backButtonLabel": "뒤로",
+  "translateButtonLabel": "Translate"
 }

@@ -29,5 +29,6 @@
   "shareButtonLabel": "გაზიარება...",
   "clearButtonLabel": "გასუფთავება",
   "cancelButtonLabel": "გაუქმება",
-  "backButtonLabel": "უკან"
+  "backButtonLabel": "უკან",
+  "translateButtonLabel": "Translate"
 }

@@ -29,5 +29,6 @@
   "shareButtonLabel": "ແບ່ງປັນ...",
   "clearButtonLabel": "ລຶບລ້າງ",
   "cancelButtonLabel": "ຍົກເລີກ",
-  "backButtonLabel": "ກັບຄືນ"
+  "backButtonLabel": "ກັບຄືນ",
+  "translateButtonLabel": "Translate"
 }

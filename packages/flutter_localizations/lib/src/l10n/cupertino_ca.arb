@@ -29,5 +29,6 @@
   "searchWebButtonLabel": "Cerca al web",
   "shareButtonLabel": "Comparteix...",
   "cancelButtonLabel": "Cancel·la",
-  "backButtonLabel": "Enrere"
+  "backButtonLabel": "Enrere",
+  "translateButtonLabel": "Translate"
 }

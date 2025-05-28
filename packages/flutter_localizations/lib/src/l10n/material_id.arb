@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Telusuri di Web",
   "shareButtonLabel": "Bagikan",
   "clearButtonTooltip": "Hapus teks",
-  "selectedDateLabel": "Dipilih"
+  "selectedDateLabel": "Dipilih",
+  "translateButtonLabel": "Translate"
 }

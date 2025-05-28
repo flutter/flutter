@@ -29,5 +29,6 @@
   "shareButtonLabel": "सेयर गर्नुहोस्...",
   "clearButtonLabel": "हटाउनुहोस्",
   "cancelButtonLabel": "रद्द गर्नुहोस्",
-  "backButtonLabel": "पछाडि"
+  "backButtonLabel": "पछाडि",
+  "translateButtonLabel": "Translate"
 }

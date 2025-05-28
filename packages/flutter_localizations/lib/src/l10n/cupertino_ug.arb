@@ -29,5 +29,6 @@
   "modalBarrierDismissLabel": "بىكار قىلىش",
   "menuDismissLabel": "تىزىملىكنى بىكار قىلىش",
   "cancelButtonLabel": "بىكار قىلىش",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "translateButtonLabel": "Translate"
 }

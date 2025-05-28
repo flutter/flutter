@@ -29,5 +29,6 @@
   "shareButtonLabel": "Бөлісу…",
   "clearButtonLabel": "Өшіру",
   "cancelButtonLabel": "Бас тарту",
-  "backButtonLabel": "Артқа"
+  "backButtonLabel": "Артқа",
+  "translateButtonLabel": "Translate"
 }

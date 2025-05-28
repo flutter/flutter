@@ -29,5 +29,6 @@
   "shareButtonLabel": "பகிர்...",
   "clearButtonLabel": "அழி",
   "cancelButtonLabel": "ரத்துசெய்",
-  "backButtonLabel": "பின்செல்"
+  "backButtonLabel": "பின்செல்",
+  "translateButtonLabel": "Translate"
 }

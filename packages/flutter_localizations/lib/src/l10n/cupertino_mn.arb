@@ -29,5 +29,6 @@
   "shareButtonLabel": "Хуваалцах...",
   "clearButtonLabel": "Арилгах",
   "cancelButtonLabel": "Цуцлах",
-  "backButtonLabel": "Буцах"
+  "backButtonLabel": "Буцах",
+  "translateButtonLabel": "Translate"
 }

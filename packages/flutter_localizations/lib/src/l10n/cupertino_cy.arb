@@ -49,5 +49,6 @@
   "searchWebButtonLabel": "Chwilio'r We",
   "shareButtonLabel": "Rhannu...",
   "cancelButtonLabel": "Canslo",
-  "backButtonLabel": "Nôl"
+  "backButtonLabel": "Nôl",
+  "translateButtonLabel": "Translate"
 }

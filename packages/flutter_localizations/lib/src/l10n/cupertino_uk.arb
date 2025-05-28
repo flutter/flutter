@@ -39,5 +39,6 @@
   "shareButtonLabel": "Поділитися…",
   "clearButtonLabel": "Очистити",
   "cancelButtonLabel": "Скасувати",
-  "backButtonLabel": "Назад"
+  "backButtonLabel": "Назад",
+  "translateButtonLabel": "Translate"
 }

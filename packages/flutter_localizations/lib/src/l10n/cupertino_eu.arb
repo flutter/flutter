@@ -29,5 +29,6 @@
   "shareButtonLabel": "Partekatu...",
   "clearButtonLabel": "Garbitu",
   "cancelButtonLabel": "Utzi",
-  "backButtonLabel": "Atzera"
+  "backButtonLabel": "Atzera",
+  "translateButtonLabel": "Translate"
 }

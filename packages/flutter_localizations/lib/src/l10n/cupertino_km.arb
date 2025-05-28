@@ -29,5 +29,6 @@
   "shareButtonLabel": "ចែករំលែក...",
   "clearButtonLabel": "សម្អាត",
   "cancelButtonLabel": "បោះបង់",
-  "backButtonLabel": "ថយក្រោយ"
+  "backButtonLabel": "ថយក្រោយ",
+  "translateButtonLabel": "Translate"
 }

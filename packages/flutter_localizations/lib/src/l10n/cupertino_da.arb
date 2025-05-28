@@ -29,5 +29,6 @@
   "searchWebButtonLabel": "Søg på nettet",
   "shareButtonLabel": "Del…",
   "cancelButtonLabel": "Annuller",
-  "backButtonLabel": "Tilbage"
+  "backButtonLabel": "Tilbage",
+  "translateButtonLabel": "Translate"
 }

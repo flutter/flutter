@@ -29,5 +29,6 @@
   "shareButtonLabel": "शेयर करें…",
   "clearButtonLabel": "मिटाएं",
   "cancelButtonLabel": "रद्द करें",
-  "backButtonLabel": "वापस जाएं"
+  "backButtonLabel": "वापस जाएं",
+  "translateButtonLabel": "Translate"
 }

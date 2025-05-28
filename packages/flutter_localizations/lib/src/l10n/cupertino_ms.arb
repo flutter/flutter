@@ -29,5 +29,6 @@
   "shareButtonLabel": "Kongsi...",
   "clearButtonLabel": "Kosongkan",
   "cancelButtonLabel": "Batal",
-  "backButtonLabel": "Kembali"
+  "backButtonLabel": "Kembali",
+  "translateButtonLabel": "Translate"
 }

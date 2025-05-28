@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ওয়েবে সার্চ করুন",
   "shareButtonLabel": "শেয়ার করুন",
   "clearButtonTooltip": "টেক্সট মুছুন",
-  "selectedDateLabel": "বেছে নেওয়া হয়েছে"
+  "selectedDateLabel": "বেছে নেওয়া হয়েছে",
+  "translateButtonLabel": "Translate"
 }

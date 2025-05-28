@@ -29,5 +29,6 @@
   "shareButtonLabel": "Deila...",
   "clearButtonLabel": "Hreinsa",
   "cancelButtonLabel": "Hætta við",
-  "backButtonLabel": "Til baka"
+  "backButtonLabel": "Til baka",
+  "translateButtonLabel": "Translate"
 }

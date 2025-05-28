@@ -29,5 +29,6 @@
   "shareButtonLabel": "शेअर करा...",
   "clearButtonLabel": "साफ करा",
   "cancelButtonLabel": "रद्द करा",
-  "backButtonLabel": "मागे जा"
+  "backButtonLabel": "मागे जा",
+  "translateButtonLabel": "Translate"
 }

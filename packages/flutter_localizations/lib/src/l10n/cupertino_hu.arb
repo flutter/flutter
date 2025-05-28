@@ -29,5 +29,6 @@
   "shareButtonLabel": "Megosztás…",
   "clearButtonLabel": "Törlés",
   "cancelButtonLabel": "Mégse",
-  "backButtonLabel": "Vissza"
+  "backButtonLabel": "Vissza",
+  "translateButtonLabel": "Translate"
 }

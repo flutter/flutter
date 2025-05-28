@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "വെബിൽ തിരയുക",
   "shareButtonLabel": "പങ്കിടുക",
   "clearButtonTooltip": "ടെക്സ്റ്റ് മായ്ക്കുക",
-  "selectedDateLabel": "തിരഞ്ഞെടുത്തു"
+  "selectedDateLabel": "തിരഞ്ഞെടുത്തു",
+  "translateButtonLabel": "Translate"
 }

@@ -29,5 +29,6 @@
   "searchWebButtonLabel": "Αναζήτηση στον ιστό",
   "shareButtonLabel": "Κοινοποίηση…",
   "cancelButtonLabel": "Ακύρωση",
-  "backButtonLabel": "Πίσω"
+  "backButtonLabel": "Πίσω",
+  "translateButtonLabel": "Translate"
 }

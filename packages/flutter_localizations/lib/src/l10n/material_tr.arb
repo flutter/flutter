@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Web'de Ara",
   "shareButtonLabel": "Paylaş",
   "clearButtonTooltip": "Metni temizle",
-  "selectedDateLabel": "Seçili"
+  "selectedDateLabel": "Seçili",
+  "translateButtonLabel": "Translate"
 }

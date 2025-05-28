@@ -34,5 +34,6 @@
   "shareButtonLabel": "Trimiteți…",
   "clearButtonLabel": "Ștergeți",
   "cancelButtonLabel": "Anulați",
-  "backButtonLabel": "Înapoi"
+  "backButtonLabel": "Înapoi",
+  "translateButtonLabel": "Translate"
 }

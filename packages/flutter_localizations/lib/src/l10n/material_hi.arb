@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "वेब पर खोजें",
   "shareButtonLabel": "शेयर करें",
   "clearButtonTooltip": "टेक्स्ट मिटाएं",
-  "selectedDateLabel": "चुनी गई"
+  "selectedDateLabel": "चुनी गई",
+  "translateButtonLabel": "Translate"
 }

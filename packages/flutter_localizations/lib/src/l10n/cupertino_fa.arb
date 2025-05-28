@@ -29,5 +29,6 @@
   "shareButtonLabel": "هم‌رسانی…",
   "clearButtonLabel": "پاک کردن",
   "cancelButtonLabel": "لغو",
-  "backButtonLabel": "برگشتن"
+  "backButtonLabel": "برگشتن",
+  "translateButtonLabel": "Translate"
 }
