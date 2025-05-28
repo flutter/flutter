@@ -63,17 +63,17 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
             _isRadioSelected = newValue!;
           });
         },
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <LabeledRadio>[
             LabeledRadio(
               label: 'This is the first label text',
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              padding: EdgeInsets.symmetric(horizontal: 5.0),
               value: true,
             ),
             LabeledRadio(
               label: 'This is the second label text',
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              padding: EdgeInsets.symmetric(horizontal: 5.0),
               value: false,
             ),
           ],
