@@ -79,8 +79,8 @@ class RawRadio<T> extends StatefulWidget {
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
   ///
-  /// To indicate returning to an indeterminate state, [RadioGroup.onChange]
-  /// of the [RadioGroup] above will be called with null.
+  /// To indicate returning to an indeterminate state, [RadioGroup.onChanged]
+  /// of the [RadioGroup] above the widget tree will be called with null.
   ///
   /// If true, [RadioGroup.onChanged] is called with [value] when selected while
   /// [RadioGroup.groupValue] != [value], and with null when selected again while
