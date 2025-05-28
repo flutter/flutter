@@ -254,6 +254,16 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
+/**
+ * The plugin registrant that will be executed when the FlutterViewController is
+ * created with a NIB.
+ *
+ * This is only necessary when working with NIBs (XIBs and Storyboards). When
+ * programatically creating FlutterViewControllers, plugins can be registered
+ * directly.
+ */
+@property(nonatomic, weak) IBOutlet NSObject<FlutterPluginRegistrant>* pluginRegistrant;
+
 @end
 
 NS_ASSUME_NONNULL_END
