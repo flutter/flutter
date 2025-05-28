@@ -82,7 +82,7 @@ TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
     auto const pool = recycler->Get();
 
     // This normally is called at the end of a frame.
-    recycler->Dispose(*context);
+    recycler->Dispose();
   }
 
   // Add something to the resource manager and have it notify us when it's
@@ -124,7 +124,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
     pool->CollectCommandBuffer(std::move(buffer));
 
     // This normally is called at the end of a frame.
-    recycler->Dispose(*context);
+    recycler->Dispose();
   }
 
   // Wait for the pool to be reclaimed.
@@ -148,7 +148,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
     pool->CollectCommandBuffer(std::move(buffer));
 
     // This normally is called at the end of a frame.
-    recycler->Dispose(*context);
+    recycler->Dispose();
   }
 
   // Now check that we only ever created one pool and one command buffer.
@@ -177,7 +177,7 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     }
 
     // This normally is called at the end of a frame.
-    recycler->Dispose(*context);
+    recycler->Dispose();
   }
 
   // Wait for the pool to be reclaimed.
@@ -203,7 +203,7 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     auto pool = recycler->Get();
 
     // This normally is called at the end of a frame.
-    recycler->Dispose(*context);
+    recycler->Dispose();
   }
 
   // Wait for the pool to be reclaimed.
@@ -241,8 +241,10 @@ TEST(CommandPoolRecyclerVKTest, RecyclerGlobalPoolMapSize) {
 
   // Disposing this thread's pool should remove it from the global map.
   pool.reset();
-  recycler->Dispose(*context);
+  recycler->Dispose();
   EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+
+  context->Shutdown();
 }
 
 }  // namespace testing

@@ -176,6 +176,10 @@ static std::unordered_map<
                        std::weak_ptr<CommandPoolVK>>> g_all_pools_map
     IPLR_GUARDED_BY(g_all_pools_map_mutex);
 
+CommandPoolRecyclerVK::CommandPoolRecyclerVK(
+    const std::shared_ptr<ContextVK>& context)
+    : context_(context), context_hash_(context->GetHash()) {}
+
 // Visible for testing.
 // Returns the number of pools in g_all_pools_map for the given context.
 int CommandPoolRecyclerVK::GetGlobalPoolCount(const ContextVK& context) {
@@ -196,8 +200,7 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
     tls_command_pool_map.reset(new CommandPoolMap());
   }
   CommandPoolMap& pool_map = *tls_command_pool_map.get();
-  auto const hash = strong_context->GetHash();
-  auto const it = pool_map.find(hash);
+  auto const it = pool_map.find(context_hash_);
   if (it != pool_map.end()) {
     return it->second;
   }
@@ -210,11 +213,11 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
 
   auto const resource = std::make_shared<CommandPoolVK>(
       std::move(data->pool), std::move(data->buffers), context_);
-  pool_map.emplace(hash, resource);
+  pool_map.emplace(context_hash_, resource);
 
   {
     Lock all_pools_lock(g_all_pools_map_mutex);
-    g_all_pools_map[hash][std::this_thread::get_id()] = resource;
+    g_all_pools_map[context_hash_][std::this_thread::get_id()] = resource;
   }
 
   return resource;
@@ -284,31 +287,31 @@ void CommandPoolRecyclerVK::Reclaim(
       RecycledData{.pool = std::move(pool), .buffers = std::move(buffers)});
 }
 
-void CommandPoolRecyclerVK::Dispose(const ContextVK& context) {
+void CommandPoolRecyclerVK::Dispose() {
   CommandPoolMap* pool_map = tls_command_pool_map.get();
   if (pool_map) {
-    pool_map->erase(context.GetHash());
+    pool_map->erase(context_hash_);
   }
 
   {
     Lock all_pools_lock(g_all_pools_map_mutex);
-    auto found = g_all_pools_map.find(context.GetHash());
+    auto found = g_all_pools_map.find(context_hash_);
     if (found != g_all_pools_map.end()) {
       found->second.erase(std::this_thread::get_id());
     }
   }
 }
 
-void CommandPoolRecyclerVK::DestroyThreadLocalPools(const ContextVK& context) {
+void CommandPoolRecyclerVK::DestroyThreadLocalPools() {
   // Delete the context's entry in this thread's command pool map.
   if (tls_command_pool_map.get()) {
-    tls_command_pool_map.get()->erase(context.GetHash());
+    tls_command_pool_map.get()->erase(context_hash_);
   }
 
   // Destroy all other thread-local CommandPoolVK instances associated with
   // this context.
   Lock all_pools_lock(g_all_pools_map_mutex);
-  auto found = g_all_pools_map.find(context.GetHash());
+  auto found = g_all_pools_map.find(context_hash_);
   if (found != g_all_pools_map.end()) {
     for (auto& [thread_id, weak_pool] : found->second) {
       auto pool = weak_pool.lock();

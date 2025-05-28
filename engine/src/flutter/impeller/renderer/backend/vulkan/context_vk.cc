@@ -134,7 +134,7 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
-  CommandPoolRecyclerVK::DestroyThreadLocalPools(*this);
+  command_pool_recycler_->DestroyThreadLocalPools();
 }
 
 Context::BackendType ContextVK::GetBackendType() const {
@@ -421,7 +421,7 @@ void ContextVK::Setup(Settings settings) {
   }
 
   auto command_pool_recycler =
-      std::make_shared<CommandPoolRecyclerVK>(weak_from_this());
+      std::make_shared<CommandPoolRecyclerVK>(shared_from_this());
   if (!command_pool_recycler) {
     VALIDATION_LOG << "Could not create command pool recycler.";
     return;
@@ -720,7 +720,7 @@ void ContextVK::DisposeThreadLocalCachedResources() {
     Lock lock(desc_pool_mutex_);
     cached_descriptor_pool_.erase(std::this_thread::get_id());
   }
-  command_pool_recycler_->Dispose(*this);
+  command_pool_recycler_->Dispose();
 }
 
 const std::shared_ptr<YUVConversionLibraryVK>&
