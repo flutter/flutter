@@ -2752,6 +2752,7 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_pixel_7pro flavors_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/169567
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
