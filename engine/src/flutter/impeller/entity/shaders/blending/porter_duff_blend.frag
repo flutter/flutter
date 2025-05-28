@@ -55,8 +55,8 @@ void main() {
                      frag_info.source_rect.w)),
           frag_info.use_strict_source_rect);
 
-  f16vec4 dst =
-      Sample(texture_sampler_dst, v_texture_coords, tmx, tmy) * input_alpha;
+  f16vec4 dst = Sample(texture_sampler_dst, texture_coords, tmx, tmy) *
+                float16_t(input_alpha);
   f16vec4 src = v_color;
   frag_color = f16vec4(src * (src_coeff + dst.a * src_coeff_dst_alpha) +
                        dst * (dst_coeff + src.a * dst_coeff_src_alpha +
