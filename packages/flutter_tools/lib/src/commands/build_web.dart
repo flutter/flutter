@@ -175,7 +175,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
 
     final bool sourceMaps = boolArg('source-maps');
-    final bool minify = boolArg('minify');
+    final bool? minify = argResults!.wasParsed('minify') ? boolArg('minify') : null;
 
     final List<WebCompilerConfig> compilerConfigs;
 
