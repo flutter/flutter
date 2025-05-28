@@ -10,10 +10,12 @@
 library;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'icons.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
@@ -186,7 +188,7 @@ class CupertinoApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
   }) : routeInformationProvider = null,
@@ -228,7 +230,7 @@ class CupertinoApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
   }) : assert(routerDelegate != null || routerConfig != null),
@@ -432,7 +434,7 @@ class CupertinoApp extends StatefulWidget {
   @Deprecated(
     'This setting is now ignored. '
     'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
+    'This feature was deprecated after v3.7.0-29.0.pre.',
   )
   final bool useInheritedMediaQuery;
 
@@ -442,8 +444,7 @@ class CupertinoApp extends StatefulWidget {
   /// The [HeroController] used for Cupertino page transitions.
   ///
   /// Used by [CupertinoTabView] and [CupertinoApp].
-  static HeroController createCupertinoHeroController() =>
-      HeroController(); // Linear tweening.
+  static HeroController createCupertinoHeroController() => HeroController(); // Linear tweening.
 }
 
 /// Describes how [Scrollable] widgets behave for [CupertinoApp]s.
@@ -464,7 +465,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -472,10 +473,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         assert(details.controller != null);
-        return CupertinoScrollbar(
-          controller: details.controller,
-          child: child,
-        );
+        return CupertinoScrollbar(controller: details.controller, child: child);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -502,7 +500,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) => MultitouchDragStrategy.averageBoundaryPointers;
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) =>
+      MultitouchDragStrategy.averageBoundaryPointers;
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {
@@ -528,27 +527,60 @@ class _CupertinoAppState extends State<CupertinoApp> {
   // _CupertinoLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null)
-        ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-    return CupertinoButton.filled(
-      padding: EdgeInsets.zero,
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    required GlobalKey key,
+  }) {
+    return _CupertinoInspectorButton.filled(
       onPressed: onPressed,
-      child: const Icon(
-        CupertinoIcons.search,
-        size: 28.0,
-        color: CupertinoColors.white,
-      ),
+      semanticsLabel: semanticsLabel,
+      icon: CupertinoIcons.xmark,
+      buttonKey: key,
+    );
+  }
+
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    bool isLeftAligned = true,
+  }) {
+    return _CupertinoInspectorButton.iconOnly(
+      onPressed: onPressed,
+      semanticsLabel: semanticsLabel,
+      icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+    );
+  }
+
+  Widget _tapBehaviorButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    required bool selectionOnTapEnabled,
+  }) {
+    return _CupertinoInspectorButton.toggle(
+      onPressed: onPressed,
+      semanticsLabel: semanticsLabel,
+      // This unicode icon is also used for the Material-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
+      icon: const IconData(0x1F74A),
+      toggledOn: selectionOnTapEnabled,
     );
   }
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
+    final Color color = CupertinoDynamicColor.resolve(
+      widget.color ?? effectiveThemeData.primaryColor,
+      context,
+    );
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -572,7 +604,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+        tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -606,7 +640,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+      tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
@@ -615,7 +651,16 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
+    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData())
+        .resolveFrom(context);
+
+    // Prefer theme brightness if set, otherwise check system brightness.
+    final Brightness brightness =
+        effectiveThemeData.brightness ?? MediaQuery.platformBrightnessOf(context);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    );
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),
@@ -628,13 +673,91 @@ class _CupertinoAppState extends State<CupertinoApp> {
             cursorColor: effectiveThemeData.primaryColor,
             child: HeroControllerScope(
               controller: _heroController,
-              child: Builder(
-                builder: _buildWidgetApp,
-              ),
+              child: Builder(builder: _buildWidgetApp),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class _CupertinoInspectorButton extends InspectorButton {
+  const _CupertinoInspectorButton.filled({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    super.buttonKey,
+  }) : super.filled();
+
+  const _CupertinoInspectorButton.toggle({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    super.toggledOn,
+  }) : super.toggle();
+
+  const _CupertinoInspectorButton.iconOnly({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+  }) : super.iconOnly();
+
+  @override
+  Widget build(BuildContext context) {
+    final Icon buttonIcon = Icon(
+      icon,
+      semanticLabel: semanticsLabel,
+      size: iconSizeForVariant,
+      color: foregroundColor(context),
+    );
+
+    return Padding(
+      key: buttonKey,
+      padding: const EdgeInsets.all(
+        (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
+      ),
+      child:
+          variant == InspectorButtonVariant.toggle && !toggledOn!
+              ? CupertinoButton.tinted(
+                minSize: InspectorButton.buttonSize,
+                onPressed: onPressed,
+                padding: EdgeInsets.zero,
+                child: buttonIcon,
+              )
+              : CupertinoButton(
+                minSize: InspectorButton.buttonSize,
+                onPressed: onPressed,
+                padding: EdgeInsets.zero,
+                color: backgroundColor(context),
+                child: buttonIcon,
+              ),
+    );
+  }
+
+  @override
+  Color foregroundColor(BuildContext context) {
+    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+    final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+        return secondaryColor;
+      case InspectorButtonVariant.iconOnly:
+        return primaryColor;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? primaryColor : secondaryColor;
+    }
+  }
+
+  @override
+  Color backgroundColor(BuildContext context) {
+    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.toggle:
+        return primaryColor;
+      case InspectorButtonVariant.iconOnly:
+        return const Color(0x00000000);
+    }
   }
 }

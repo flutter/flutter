@@ -1,0 +1,181 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/toolchain/wasm.gni")
+
+# This toolchain is only to be used by canvaskit_group below.
+wasm_toolchain("canvaskit") {
+  extra_toolchain_args = {
+    # Include ICU data.
+    skia_use_icu = true
+    skia_use_client_icu = false
+
+    # Include image codecs.
+    skia_use_libjpeg_turbo_decode = true
+    skia_use_libpng_decode = true
+    skia_use_libwebp_decode = true
+
+    # Disable LTO.
+    enable_lto = false
+  }
+}
+
+copy("canvaskit_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit)" ]
+
+  sources = [
+    "$root_out_dir/canvaskit/canvaskit.js",
+    "$root_out_dir/canvaskit/canvaskit.js.symbols",
+    "$root_out_dir/canvaskit/canvaskit.wasm",
+  ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+
+# This toolchain is only to be used by canvaskit_chromium_group below.
+wasm_toolchain("canvaskit_chromium") {
+  extra_toolchain_args = {
+    # In Chromium browsers, we can use the browser's APIs to get the necessary
+    # ICU data.
+    skia_use_icu = false
+    skia_use_client_icu = true
+    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    # TODO(mdebbar): Set these to false once all image decoding can be done
+    # using the browser's built-in codecs.
+    # https://github.com/flutter/flutter/issues/122331
+    skia_use_libjpeg_turbo_decode = true
+    skia_use_libpng_decode = true
+    skia_use_libwebp_decode = true
+
+    # Disable LTO.
+    enable_lto = false
+  }
+}
+
+copy("canvaskit_chromium_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_chromium)" ]
+
+  sources = [
+    "$root_out_dir/canvaskit_chromium/canvaskit.js",
+    "$root_out_dir/canvaskit_chromium/canvaskit.js.symbols",
+    "$root_out_dir/canvaskit_chromium/canvaskit.wasm",
+  ]
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/canvaskit/chromium/{{source_file_part}}",
+  ]
+}
+
+# This toolchain is only to be used by canvaskit_experimental_webparagraph_group below.
+wasm_toolchain("canvaskit_experimental_webparagraph") {
+  extra_toolchain_args = {
+    # In Chromium browsers, we can use the browser's APIs to get the necessary
+    # ICU data.
+    skia_use_icu = false
+    skia_use_client_icu = false
+    skia_use_bidi = true
+    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    skia_enable_skparagraph = false
+    # TODO(mdebbar): This can't be set to false now because it causes font registration to fail.
+    # Once we update the font registration logic, we can come back and uncomment the next line.
+    # skia_canvaskit_enable_paragraph = false
+
+    # TODO(mdebbar): Set these to false once all image decoding can be done
+    # using the browser's built-in codecs.
+    # https://github.com/flutter/flutter/issues/122331
+    skia_use_libjpeg_turbo_decode = true
+    skia_use_libpng_decode = true
+    skia_use_libwebp_decode = true
+
+    # Disable LTO.
+    enable_lto = false
+  }
+}
+
+copy("canvaskit_experimental_webparagraph_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_experimental_webparagraph)" ]
+
+  sources = [
+    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js",
+    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js.symbols",
+    "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.wasm",
+  ]
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/{{source_file_part}}",
+  ]
+}
+
+# This toolchain is only to be used by skwasm_group below.
+template("skwasm_toolchain") {
+  assert(defined(invoker.skwasm_is_heavy))
+  forward_variables_from(invoker, ["skwasm_is_mt",  "skwasm_is_heavy"])
+  wasm_toolchain(target_name) {
+    extra_toolchain_args = {
+      # In Chromium browsers, we can use the browser's APIs to get the necessary
+      # ICU data. So we use built-in ICU data only in the heavy (non-chromium) case
+      skia_use_icu = skwasm_is_heavy
+      skia_use_client_icu = !skwasm_is_heavy
+      if (!skwasm_is_heavy) {
+        skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+      }
+
+      skia_use_libjpeg_turbo_decode = skwasm_is_heavy
+      skia_use_libpng_decode = skwasm_is_heavy
+      skia_use_libwebp_decode = skwasm_is_heavy
+
+      # We use OffscreenCanvas to produce PNG data instead of skia
+      skia_use_no_png_encode = true
+      skia_use_libpng_encode = false
+
+      # skwasm is multithreaded
+      wasm_use_workers = true
+      wasm_prioritize_size = true
+    }
+  }
+}
+
+skwasm_toolchain("skwasm") {
+  skwasm_is_heavy = false
+}
+
+skwasm_toolchain("skwasm_heavy") {
+  skwasm_is_heavy = true
+}
+
+copy("skwasm_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/lib/web_ui/skwasm(:skwasm)" ]
+
+  sources = [
+    "$root_out_dir/skwasm/skwasm.js",
+    "$root_out_dir/skwasm/skwasm.js.symbols",
+    "$root_out_dir/skwasm/skwasm.wasm",
+  ]
+  if (is_debug) {
+    if (!wasm_use_dwarf) {
+      sources += [ "$root_out_dir/skwasm/skwasm.wasm.map" ]
+    }
+  }
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}
+
+copy("skwasm_heavy_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/lib/web_ui/skwasm:skwasm_heavy(:skwasm_heavy)" ]
+
+  sources = [
+    "$root_out_dir/skwasm_heavy/skwasm_heavy.js",
+    "$root_out_dir/skwasm_heavy/skwasm_heavy.js.symbols",
+    "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm",
+  ]
+  if (is_debug) {
+    if (!wasm_use_dwarf) {
+      sources += [ "$root_out_dir/skwasm_heavy/skwasm_heavy.wasm.map" ]
+    }
+  }
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
+}

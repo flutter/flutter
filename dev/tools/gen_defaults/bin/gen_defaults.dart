@@ -44,9 +44,11 @@ import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/popup_menu_template.dart';
 import 'package:gen_defaults/progress_indicator_template.dart';
 import 'package:gen_defaults/radio_template.dart';
+import 'package:gen_defaults/range_slider_template.dart';
 import 'package:gen_defaults/search_bar_template.dart';
 import 'package:gen_defaults/search_view_template.dart';
 import 'package:gen_defaults/segmented_button_template.dart';
+import 'package:gen_defaults/slider_template.dart';
 import 'package:gen_defaults/snackbar_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
@@ -66,12 +68,7 @@ const String dataDir = 'dev/tools/gen_defaults/data';
 Future<void> main(List<String> args) async {
   // Parse arguments
   final ArgParser parser = ArgParser();
-  parser.addFlag(
-    'verbose',
-    abbr: 'v',
-    help: 'Enable verbose output',
-    negatable: false,
-  );
+  parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output', negatable: false);
   final ArgResults argResults = parser.parse(args);
   final bool verbose = argResults['verbose'] as bool;
 
@@ -95,6 +92,8 @@ Future<void> main(List<String> args) async {
   final Map<String, dynamic> colorLightTokens = _readTokenFile(File('$dataDir/color_light.json'));
   final Map<String, dynamic> colorDarkTokens = _readTokenFile(File('$dataDir/color_dark.json'));
 
+  // The verifyTokenTemplatesUpdateCorrectFiles check in dev/bots/analyze.dart depends on the exact formatting of the next few lines.
+  // dart format off
   // Generate tokens files.
   ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
@@ -138,18 +137,19 @@ Future<void> main(List<String> args) async {
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
+  RangeSliderTemplate('md.comp.slider', 'RangeSlider', '$materialLib/range_slider.dart', tokens).updateFile();
   SearchBarTemplate('SearchBar', '$materialLib/search_anchor.dart', tokens).updateFile();
   SearchViewTemplate('SearchView', '$materialLib/search_anchor.dart', tokens).updateFile();
   SegmentedButtonTemplate('md.comp.outlined-segmented-button', 'SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
   SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
-  // TODO(QuncCccccc): uncomment `SliderTemplate` once `Slider` widget is updated to match the latest M3 specs.
-  // SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
+  SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
   SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
   TimePickerTemplate('TimePicker', '$materialLib/time_picker.dart', tokens).updateFile();
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
   TabsTemplate('Tabs', '$materialLib/tabs.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
+  // dart format on
 
   tokenLogger.printVersionUsage(verbose: verbose);
   tokenLogger.printTokensUsage(verbose: verbose);

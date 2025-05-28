@@ -61,21 +61,23 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
 final RegExp flutterCompileSdkString = RegExp(r'flutter\.compileSdkVersion|flutter\.compileSdk');
+final RegExp flutterMinSdkString = RegExp(r'flutter\.minSdkVersion|flutter\.minSdk');
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
-
   VersionTuple({
     required this.agpVersion,
     required this.gradleVersion,
     required this.kotlinVersion,
     this.compileSdkVersion,
+    this.minSdkVersion,
   });
 
   String agpVersion;
   String gradleVersion;
   String kotlinVersion;
   String? compileSdkVersion;
+  String? minSdkVersion;
 
   @override
   String toString() {
@@ -94,7 +96,8 @@ class VersionTuple {
 Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required List<VersionTuple> versionTuples,
   required Directory tempDir,
-  required LocalFileSystem localFileSystem,}) async {
+  required LocalFileSystem localFileSystem,
+}) async {
   for (final VersionTuple versions in versionTuples) {
     final Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
     try {
@@ -102,25 +105,41 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
       section('Create new app with dependency versions: $versions');
       await flutter(
         'create',
-        options: <String>[
-          'dependency_checker_app',
-          '--platforms=android',
-        ],
+        options: <String>['dependency_checker_app', '--platforms=android'],
         workingDirectory: innerTempDir.path,
       );
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
+      final File appGradleBuild = getAndroidBuildFile(
+        localFileSystem.path.join(appPath, 'android', 'app'),
+      );
       if (versions.compileSdkVersion != null) {
-        final File appGradleBuild = getAndroidBuildFile(localFileSystem.path.join(appPath, 'android', 'app'));
-        final String appBuildContent = appGradleBuild.readAsStringSync()
-            .replaceFirst(flutterCompileSdkString, versions.compileSdkVersion!);
+        final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
+          flutterCompileSdkString,
+          versions.compileSdkVersion!,
+        );
+        appGradleBuild.writeAsStringSync(appBuildContent);
+      }
+
+      if (versions.minSdkVersion != null) {
+        final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
+          flutterMinSdkString,
+          versions.minSdkVersion!,
+        );
         appGradleBuild.writeAsStringSync(appBuildContent);
       }
 
       // Modify gradle version to passed in version.
-      final File gradleWrapperProperties = localFileSystem.file(localFileSystem.path.join(
-          appPath, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'));
+      final File gradleWrapperProperties = localFileSystem.file(
+        localFileSystem.path.join(
+          appPath,
+          'android',
+          'gradle',
+          'wrapper',
+          'gradle-wrapper.properties',
+        ),
+      );
       final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
         gradleReplacementString,
         versions.gradleVersion,
@@ -136,20 +155,23 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
           .replaceFirst(kgpReplacementString, versions.kotlinVersion);
       await gradleSettingsFile.writeAsString(settingsContent, flush: true);
 
-
-      // Ensure that gradle files exists from templates.
-      section("Ensure 'flutter build apk' succeeds with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}");
+      section('Add a dependency on a plugin');
       await flutter(
-        'build',
-        options: <String>[
-          'apk',
-          '--debug',
-        ],
+        'pub',
+        options: <String>['add', 'shared_preferences_android:2.4.7'], // Chosen randomly.
         workingDirectory: appPath,
       );
+
+      // Ensure that gradle files exists from templates.
+      section(
+        "Ensure 'flutter build apk' succeeds with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}",
+      );
+      await flutter('build', options: <String>['apk', '--debug'], workingDirectory: appPath);
     } catch (e) {
       tempDir.deleteSync(recursive: true);
-      return TaskResult.failure('Failed to build app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}, error was:\n$e');
+      return TaskResult.failure(
+        'Failed to build app with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}, error was:\n$e',
+      );
     }
   }
   tempDir.deleteSync(recursive: true);

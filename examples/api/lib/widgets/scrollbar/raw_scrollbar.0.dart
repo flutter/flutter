@@ -16,9 +16,7 @@ class RawScrollbarExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('RawScrollbar Sample')),
-        body: const Center(
-          child: RawScrollbarExample(),
-        ),
+        body: const Center(child: RawScrollbarExample()),
       ),
     );
   }
@@ -32,14 +30,21 @@ class RawScrollbarExample extends StatefulWidget {
 }
 
 class _RawScrollbarExampleState extends State<RawScrollbarExample> {
-  final ScrollController _firstController = ScrollController();
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return Row(
-        children: <Widget>[
-          SizedBox(
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Row(
+          children: <Widget>[
+            SizedBox(
               width: constraints.maxWidth / 2,
               // When using the PrimaryScrollController and a Scrollbar
               // together, only one ScrollPosition can be attached to the
@@ -48,18 +53,20 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
               // from attaching to the PrimaryScrollController.
               child: Scrollbar(
                 thumbVisibility: true,
-                controller: _firstController,
+                controller: _controller,
                 child: ListView.builder(
-                    controller: _firstController,
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Scrollable 1 : Index $index'),
-                      );
-                    }),
-              )),
-          SizedBox(
+                  controller: _controller,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Scrollable 1 : Index $index'),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
               width: constraints.maxWidth / 2,
               // This vertical scroll view has primary set to true, so it is
               // using the PrimaryScrollController. On mobile platforms, the
@@ -69,20 +76,24 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
               child: Scrollbar(
                 thumbVisibility: true,
                 child: ListView.builder(
-                    primary: true,
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                          height: 50,
-                          color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('Scrollable 2 : Index $index'),
-                          ));
-                    }),
-              )),
-        ],
-      );
-    });
+                  primary: true,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      height: 50,
+                      color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Scrollable 2 : Index $index'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

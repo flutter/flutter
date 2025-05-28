@@ -13,10 +13,7 @@ class PrefixIconExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(body: InputDecoratorExample()),
-    );
+    return const MaterialApp(home: Scaffold(body: InputDecoratorExample()));
   }
 }
 
@@ -29,13 +26,7 @@ class InputDecoratorExample extends StatelessWidget {
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Enter name',
-        prefixIcon: Align(
-          widthFactor: 1.0,
-          heightFactor: 1.0,
-          child: Icon(
-            Icons.person,
-          ),
-        ),
+        prefixIcon: Align(widthFactor: 1.0, heightFactor: 1.0, child: Icon(Icons.person)),
       ),
     );
   }

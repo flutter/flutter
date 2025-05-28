@@ -8,7 +8,7 @@
 import java.nio.file.Paths
 
 File pathToThisDirectory = buildscript.sourceFile.parentFile
-apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "groovy", "native_plugin_loader.groovy")
+apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "scripts", "native_plugin_loader.gradle.kts")
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
@@ -26,11 +26,11 @@ gradle.getGradle().projectsLoaded { g ->
         p.subprojects { subproject ->
             if (nativePlugins.name.contains(subproject.name)) {
                 File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
-                        + "plugins_build_output" + File.separator + subproject.name);
+                        + "plugins_build_output" + File.separator + subproject.name)
                 if (!androidPluginBuildOutputDir.exists()) {
                     androidPluginBuildOutputDir.mkdirs()
                 }
-                subproject.buildDir = androidPluginBuildOutputDir
+                subproject.layout.buildDirectory.fileValue(androidPluginBuildOutputDir)
             }
         }
         def _mainModuleName = binding.variables['mainModuleName']

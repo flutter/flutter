@@ -5,88 +5,122 @@
 @TestOn('browser') // This file contains web-only library.
 library;
 
-import 'dart:js_interop';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
+import 'web_platform_view_registry_utils.dart';
+
 extension on web.HTMLCollection {
-  Iterable<web.Element?> get iterable => Iterable<web.Element?>.generate(length, (int index) => item(index));
+  Iterable<web.Element?> get iterable =>
+      Iterable<web.Element?>.generate(length, (int index) => item(index));
 }
+
 extension on web.CSSRuleList {
-  Iterable<web.CSSRule?> get iterable => Iterable<web.CSSRule?>.generate(length, (int index) => item(index));
+  Iterable<web.CSSRule?> get iterable =>
+      Iterable<web.CSSRule?>.generate(length, (int index) => item(index));
 }
 
 void main() {
-  web.HTMLElement? element;
-  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
-    element = fn(0) as web.HTMLElement;
-    // The element needs to be attached to the document body to receive mouse
-    // events.
-    web.document.body!.append(element! as JSAny);
-  };
-  // This force register the dom element.
-  PlatformSelectableRegionContextMenu(child: const Placeholder());
-  PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
+  late FakePlatformViewRegistry fakePlatformViewRegistry;
 
-  test('DOM element is set up correctly', () async {
+  setUp(() {
+    removeAllStyleElements();
+    fakePlatformViewRegistry = FakePlatformViewRegistry();
+    PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory =
+        fakePlatformViewRegistry.registerViewFactory;
+  });
+
+  tearDown(() {
+    PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
+    PlatformSelectableRegionContextMenu.debugResetRegistry();
+  });
+
+  testWidgets('DOM element is set up correctly', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Placeholder(),
+        ),
+      ),
+    );
+
+    final web.HTMLElement element =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+
     expect(element, isNotNull);
-    expect(element!.style.width, '100%');
-    expect(element!.style.height, '100%');
-    expect(element!.classList.length, 1);
-    final String className = element!.className;
+    expect(element.style.width, '100%');
+    expect(element.style.height, '100%');
+    expect(element.classList.length, 1);
 
-    expect(web.document.head!.children.iterable, isNotEmpty);
-    bool foundStyle = false;
-    for (final web.Element? element in web.document.head!.children.iterable) {
-      expect(element, isNotNull);
-      if (element!.tagName != 'STYLE') {
-        continue;
-      }
-      final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
-      if (rules != null) {
-        foundStyle = rules.iterable.any((web.CSSRule? rule) => rule!.cssText.contains(className));
-      }
-      if (foundStyle) {
-        break;
-      }
-    }
-    expect(foundStyle, isTrue);
+    final int numberOfStyleElements = getNumberOfStyleElements();
+    expect(numberOfStyleElements, 1);
+  });
+
+  testWidgets('only one <style> is inserted into the DOM', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          children: <Widget>[
+            SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Placeholder(),
+            ),
+            SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Placeholder(),
+            ),
+            SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Placeholder(),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+
+    final int numberOfStyleElements = getNumberOfStyleElements();
+    expect(numberOfStyleElements, 1);
   });
 
   testWidgets('right click can trigger select word', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: focusNode,
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
-        )
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: SelectionSpy(key: spy),
+        ),
+      ),
     );
+
+    final web.HTMLElement element =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
     expect(element, isNotNull);
 
     focusNode.requestFocus();
     await tester.pump();
 
     // Dispatch right click.
-    element!.dispatchEvent(
-      web.MouseEvent(
-        'mousedown',
-        web.MouseEventInit(
-          button: 2,
-          clientX: 200,
-          clientY: 300,
-        ),
-      ),
+    element.dispatchEvent(
+      web.MouseEvent('mousedown', web.MouseEventInit(button: 2, clientX: 200, clientY: 300)),
     );
-    final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+    final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(
+      find.byKey(spy),
+    );
     expect(renderSelectionSpy.events, isNotEmpty);
 
     SelectWordSelectionEvent? selectWordEvent;
@@ -100,29 +134,79 @@ void main() {
     expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157579
+  testWidgets('prevents default action of mousedown events', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    final web.HTMLElement element =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+
+    for (int i = 0; i <= 4; i++) {
+      final web.MouseEvent event = web.MouseEvent(
+        'mousedown',
+        web.MouseEventInit(button: i, clientX: 200, clientY: 300, cancelable: true),
+      );
+      element.dispatchEvent(event);
+      expect(event.defaultPrevented, isTrue);
+    }
+  });
+}
+
+void removeAllStyleElements() {
+  final List<web.Element?> styles = web.document.head!.children.iterable.toList();
+  for (final web.Element? element in styles) {
+    if (element!.tagName == 'STYLE') {
+      element.remove();
+    }
+  }
+}
+
+int getNumberOfStyleElements() {
+  expect(web.document.head!.children.iterable, isNotEmpty);
+
+  int count = 0;
+  for (final web.Element? element in web.document.head!.children.iterable) {
+    expect(element, isNotNull);
+    if (element!.tagName != 'STYLE') {
+      continue;
+    }
+    final web.CSSRuleList? rules = (element as web.HTMLStyleElement).sheet?.rules;
+    if (rules != null) {
+      if (rules.iterable.any(
+        (web.CSSRule? rule) => rule!.cssText.contains('web-selectable-region-context-menu'),
+      )) {
+        count++;
+      }
+    }
+  }
+  return count;
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
-  const SelectionSpy({
-    super.key,
-  });
+  const SelectionSpy({super.key});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderSelectionSpy(
-      SelectionContainer.maybeOf(context),
-    );
+    return RenderSelectionSpy(SelectionContainer.maybeOf(context));
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {}
 }
 
-class RenderSelectionSpy extends RenderProxyBox
-    with Selectable, SelectionRegistrant {
-  RenderSelectionSpy(
-      SelectionRegistrar? registrar,
-      ) {
+class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  RenderSelectionSpy(SelectionRegistrar? registrar) {
     this.registrar = registrar;
   }
 
@@ -130,19 +214,16 @@ class RenderSelectionSpy extends RenderProxyBox
   List<SelectionEvent> events = <SelectionEvent>[];
 
   @override
-  Size get size => _size;
-  Size _size = Size.zero;
-
-  @override
   List<Rect> get boundingBoxes => _boundingBoxes;
   final List<Rect> _boundingBoxes = <Rect>[];
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    _size = Size(constraints.maxWidth, constraints.maxHeight);
-    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
-    return _size;
+  void performLayout() {
+    _boundingBoxes.add(Offset.zero & (size = computeDryLayout(constraints)));
   }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);
@@ -162,6 +243,14 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
+  SelectedContentRange? getSelection() {
+    return null;
+  }
+
+  @override
+  int get contentLength => 1;
+
+  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
@@ -178,5 +267,5 @@ class RenderSelectionSpy extends RenderProxyBox
   );
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
 }

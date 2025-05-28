@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -41,15 +40,7 @@ void main() {
       // for blur and saturation, but checking if it's a _ComposeImageFilter
       // should be enough. Outer and inner parameters don't matter, we just need
       // a new _ComposeImageFilter to get its runtimeType.
-      //
-      // As web doesn't support ImageFilter.compose, we use just blur when
-      // kIsWeb.
-      kIsWeb
-          ? ImageFilter.blur().runtimeType
-          : ImageFilter.compose(
-              outer: ImageFilter.blur(),
-              inner: ImageFilter.blur(),
-            ).runtimeType,
+      ImageFilter.compose(outer: ImageFilter.blur(), inner: ImageFilter.blur()).runtimeType,
     );
   });
 
@@ -77,10 +68,7 @@ void main() {
       ),
     );
 
-    expect(
-      (decoratedBox.decoration as BoxDecoration).boxShadow,
-      isNotNull,
-    );
+    expect((decoratedBox.decoration as ShapeDecoration).shadows, isNotNull);
   });
 
   testWidgets('is translucent', (WidgetTester tester) async {
@@ -110,10 +98,7 @@ void main() {
         // The second DecoratedBox should be the one with color.
         .elementAt(1);
 
-    expect(
-      (decoratedBox.decoration as BoxDecoration).color!.opacity,
-      lessThan(1.0),
-    );
+    expect((decoratedBox.decoration as ShapeDecoration).color!.opacity, lessThan(1.0));
   });
 
   testWidgets('positions itself at the anchor', (WidgetTester tester) async {
@@ -137,8 +122,7 @@ void main() {
     );
 
     expect(
-      tester
-          .getTopLeft(find.byType(CupertinoDesktopTextSelectionToolbarButton)),
+      tester.getTopLeft(find.byType(CupertinoDesktopTextSelectionToolbarButton)),
       // Greater than due to padding internal to the toolbar.
       greaterThan(anchor),
     );

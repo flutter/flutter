@@ -99,7 +99,8 @@ class AppContext {
       if (index >= 0) {
         // We're already in the process of trying to generate this type.
         throw ContextDependencyCycleException._(
-            UnmodifiableListView<Type>(_reentrantChecks!.sublist(index)));
+          UnmodifiableListView<Type>(_reentrantChecks!.sublist(index)),
+        );
       }
 
       _reentrantChecks!.add(type);
@@ -114,7 +115,7 @@ class AppContext {
     });
   }
 
-  /// Gets the value associated with the specified [type], or `null` if no
+  /// Gets the value associated with the specified [T], or `null` if no
   /// such value has been associated.
   T? get<T>() {
     dynamic value = _generateIfNecessary(T, _overrides);

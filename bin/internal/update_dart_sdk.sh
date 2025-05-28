@@ -19,17 +19,10 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
-ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
 OS="$(uname -s)"
 
-ENGINE_VERSION=""
-if [ -f "$FLUTTER_ROOT/bin/internal/engine.version" ]; then
-  ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
-else
-  # Calculate the engine hash from tracked git files.
-  # The array takes the first part of the sha1sum string.
-  ENGINE_VERSION=($(git ls-tree HEAD -r engine DEPS | sha1sum))
-fi
+ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/cache/engine.stamp")
+ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/cache/engine.realm" | tr -d '[:space:]')
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
   command -v curl > /dev/null 2>&1 || {
@@ -178,7 +171,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
     >&2 echo "If this problem persists, please report the problem at:"
-    >&2 echo "  https://github.com/flutter/flutter/issues/new?template=1_activation.yml"
+    >&2 echo "  https://github.com/flutter/flutter/issues/new?template=01_activation.yml"
     >&2 echo
     rm -f -- "$DART_SDK_ZIP"
     exit 1

@@ -12,16 +12,17 @@ void main() {
     // The point is to mainly test the cupertino icons that we don't have a
     // dependency against in the flutter/cupertino package directly.
 
+    // Set window orientation to portrait.
+    tester.view.physicalSize = const Size(2400.0, 3000.0);
+    addTearDown(tester.view.reset);
+
     final Future<ByteData> font = rootBundle.load(
-      'packages/cupertino_icons/assets/CupertinoIcons.ttf'
+      'packages/cupertino_icons/assets/CupertinoIcons.ttf',
     );
 
-    await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font))
-      .load();
+    await (FontLoader('packages/cupertino_icons/CupertinoIcons')..addFont(font)).load();
 
-    await tester.pumpWidget(CupertinoApp(
-      home: CupertinoNavigationDemo(randomSeed: 123456),
-    ));
+    await tester.pumpWidget(CupertinoApp(home: CupertinoNavigationDemo(randomSeed: 123456)));
 
     await expectLater(
       find.byType(CupertinoNavigationDemo),

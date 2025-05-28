@@ -20,8 +20,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'arc.dart';
+import 'button_style.dart';
 import 'colors.dart';
-import 'floating_action_button.dart';
+import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
@@ -255,7 +256,7 @@ class MaterialApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
@@ -306,7 +307,7 @@ class MaterialApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
@@ -763,7 +764,7 @@ class MaterialApp extends StatefulWidget {
   @Deprecated(
     'This setting is now ignored. '
     'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
+    'This feature was deprecated after v3.7.0-29.0.pre.',
   )
   final bool useInheritedMediaQuery;
 
@@ -856,10 +857,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             assert(details.controller != null);
-            return Scrollbar(
-              controller: details.controller,
-              child: child,
-            );
+            return Scrollbar(controller: details.controller, child: child);
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
@@ -872,9 +870,10 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    final AndroidOverscrollIndicator indicator = Theme.of(context).useMaterial3
-        ? AndroidOverscrollIndicator.stretch
-        : AndroidOverscrollIndicator.glow;
+    final AndroidOverscrollIndicator indicator =
+        Theme.of(context).useMaterial3
+            ? AndroidOverscrollIndicator.stretch
+            : AndroidOverscrollIndicator.glow;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -927,19 +926,62 @@ class _MaterialAppState extends State<MaterialApp> {
   // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null)
-        ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
       DefaultMaterialLocalizations.delegate,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-    return FloatingActionButton(
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    required GlobalKey key,
+  }) {
+    return _MaterialInspectorButton.filled(
       onPressed: onPressed,
-      mini: true,
-      child: const Icon(Icons.search),
+      semanticsLabel: semanticsLabel,
+      icon: Icons.close,
+      isDarkTheme: _isDarkTheme(context),
+      buttonKey: key,
     );
+  }
+
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    bool isLeftAligned = true,
+  }) {
+    return _MaterialInspectorButton.iconOnly(
+      onPressed: onPressed,
+      semanticsLabel: semanticsLabel,
+      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+      isDarkTheme: _isDarkTheme(context),
+    );
+  }
+
+  Widget _tapBehaviorButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    required bool selectionOnTapEnabled,
+  }) {
+    return _MaterialInspectorButton.toggle(
+      onPressed: onPressed,
+      semanticsLabel: semanticsLabel,
+      // This unicode icon is also used for the Cupertino-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
+      icon: const IconData(0x1F74A),
+      isDarkTheme: _isDarkTheme(context),
+      toggledOn: selectionOnTapEnabled,
+    );
+  }
+
+  bool _isDarkTheme(BuildContext context) {
+    return widget.themeMode == ThemeMode.dark ||
+        widget.themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark;
   }
 
   ThemeData _themeBuilder(BuildContext context) {
@@ -947,8 +989,9 @@ class _MaterialAppState extends State<MaterialApp> {
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-    final bool useDarkTheme = mode == ThemeMode.dark
-      || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
+    final bool useDarkTheme =
+        mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
     if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
@@ -957,14 +1000,20 @@ class _MaterialAppState extends State<MaterialApp> {
     } else if (highContrast && widget.highContrastTheme != null) {
       theme = widget.highContrastTheme;
     }
-    theme ??= widget.theme ?? ThemeData.light();
+    theme ??= widget.theme ?? ThemeData();
+    SystemChrome.setSystemUIOverlayStyle(
+      theme.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    );
+
     return theme;
   }
 
   Widget _materialBuilder(BuildContext context, Widget? child) {
     final ThemeData theme = _themeBuilder(context);
-    final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-    final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
+    final Color effectiveSelectionColor =
+        theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+    final Color effectiveCursorColor =
+        theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
     Widget childWidget = child ?? const SizedBox.shrink();
 
@@ -986,6 +1035,16 @@ class _MaterialAppState extends State<MaterialApp> {
         },
       );
     }
+
+    childWidget = ScaffoldMessenger(
+      key: widget.scaffoldMessengerKey,
+      child: DefaultSelectionStyle(
+        selectionColor: effectiveSelectionColor,
+        cursorColor: effectiveCursorColor,
+        child: childWidget,
+      ),
+    );
+
     if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
       childWidget = AnimatedTheme(
         data: theme,
@@ -994,20 +1053,10 @@ class _MaterialAppState extends State<MaterialApp> {
         child: childWidget,
       );
     } else {
-      childWidget = Theme(
-        data: theme,
-        child: childWidget,
-      );
+      childWidget = Theme(data: theme, child: childWidget);
     }
 
-    return ScaffoldMessenger(
-      key: widget.scaffoldMessengerKey,
-      child: DefaultSelectionStyle(
-        selectionColor: effectiveSelectionColor,
-        cursorColor: effectiveCursorColor,
-        child: childWidget,
-      ),
-    );
+    return childWidget;
   }
 
   Widget _buildWidgetApp(BuildContext context) {
@@ -1041,7 +1090,9 @@ class _MaterialAppState extends State<MaterialApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+        tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -1075,7 +1126,9 @@ class _MaterialAppState extends State<MaterialApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+      tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
@@ -1089,7 +1142,7 @@ class _MaterialAppState extends State<MaterialApp> {
       canRequestFocus: false,
       onKeyEvent: (FocusNode node, KeyEvent event) {
         if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
-             event.logicalKey != LogicalKeyboardKey.escape) {
+            event.logicalKey != LogicalKeyboardKey.escape) {
           return KeyEventResult.ignored;
         }
         return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
@@ -1110,10 +1163,112 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: HeroControllerScope(
-        controller: _heroController,
-        child: result,
-      ),
+      child: HeroControllerScope(controller: _heroController, child: result),
     );
+  }
+}
+
+class _MaterialInspectorButton extends InspectorButton {
+  const _MaterialInspectorButton.filled({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    required this.isDarkTheme,
+    super.buttonKey,
+  }) : super.filled();
+
+  const _MaterialInspectorButton.toggle({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    required this.isDarkTheme,
+    super.toggledOn,
+  }) : super.toggle();
+
+  const _MaterialInspectorButton.iconOnly({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    required this.isDarkTheme,
+  }) : super.iconOnly();
+
+  final bool isDarkTheme;
+
+  static const EdgeInsets _buttonPadding = EdgeInsets.zero;
+  static const BoxConstraints _buttonConstraints = BoxConstraints.tightFor(
+    width: InspectorButton.buttonSize,
+    height: InspectorButton.buttonSize,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: buttonKey,
+      onPressed: onPressed,
+      iconSize: iconSizeForVariant,
+      padding: _buttonPadding,
+      constraints: _buttonConstraints,
+      style: _selectionButtonsIconStyle(context),
+      icon: Icon(icon, semanticLabel: semanticsLabel),
+    );
+  }
+
+  ButtonStyle _selectionButtonsIconStyle(BuildContext context) {
+    final Color foreground = foregroundColor(context);
+    final Color background = backgroundColor(context);
+
+    return IconButton.styleFrom(
+      foregroundColor: foreground,
+      backgroundColor: background,
+      side: _borderSide(color: foreground),
+      tapTargetSize: MaterialTapTargetSize.padded,
+    );
+  }
+
+  BorderSide? _borderSide({required Color color}) {
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.iconOnly:
+        return null;
+      case InspectorButtonVariant.toggle:
+        return toggledOn == false ? BorderSide(color: color) : null;
+    }
+  }
+
+  @override
+  Color foregroundColor(BuildContext context) {
+    final Color primaryColor = _primaryColor(context);
+    final Color secondaryColor = _secondaryColor(context);
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+        return primaryColor;
+      case InspectorButtonVariant.iconOnly:
+        return secondaryColor;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? secondaryColor : primaryColor;
+    }
+  }
+
+  @override
+  Color backgroundColor(BuildContext context) {
+    final Color secondaryColor = _secondaryColor(context);
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+        return secondaryColor;
+      case InspectorButtonVariant.iconOnly:
+        return Colors.transparent;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? Colors.transparent : secondaryColor;
+    }
+  }
+
+  Color _primaryColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primaryContainer;
+  }
+
+  Color _secondaryColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
   }
 }

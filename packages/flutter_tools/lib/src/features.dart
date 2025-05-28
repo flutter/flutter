@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -46,13 +48,13 @@ abstract class FeatureFlags {
   bool get isCliAnimationEnabled => true;
 
   /// Whether native assets compilation and bundling is enabled.
-  bool get isNativeAssetsEnabled => false;
-
-  /// Whether native assets compilation and bundling is enabled.
-  bool get isPreviewDeviceEnabled => true;
+  bool get isNativeAssetsEnabled => true;
 
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
+
+  /// Whether explicit package dependency management is enabled.
+  bool get isExplicitPackageDependenciesEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -72,14 +74,14 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   cliAnimation,
   nativeAssets,
-  previewDevice,
   swiftPackageManager,
 ];
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures =>
+    allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -126,34 +128,24 @@ const Feature flutterFuchsiaFeature = Feature(
   name: 'Flutter for Fuchsia',
   configSetting: 'enable-fuchsia',
   environmentOverride: 'FLUTTER_FUCHSIA',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
 );
 
 const Feature flutterCustomDevicesFeature = Feature(
   name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
-
-const String kCliAnimationsFeatureName = 'cli-animations';
 
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: kCliAnimationsFeatureName,
+  configSetting: 'cli-animations',
 );
 
 /// Enable native assets compilation and bundling.
@@ -161,38 +153,18 @@ const Feature nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-);
-
-/// Enable Flutter preview prebuilt device.
-const Feature previewDevice = Feature(
-  name: 'Flutter preview prebuilt device',
-  configSetting: 'enable-flutter-preview',
-  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
-  environmentOverride: 'SWIFT_PACKAGE_MANAGER',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-  ),
+  environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
@@ -212,27 +184,18 @@ class Feature {
     this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
-    this.stable = const FeatureChannelSetting()
+    this.stable = const FeatureChannelSetting(),
   });
 
   /// Creates a [Feature] that is fully enabled across channels.
-  const Feature.fullyEnabled(
-      {required this.name,
-      this.environmentOverride,
-      this.configSetting,
-      this.extraHelpText})
-      : master = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        ),
-        beta = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        ),
-        stable = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        );
+  const Feature.fullyEnabled({
+    required this.name,
+    this.environmentOverride,
+    this.configSetting,
+    this.extraHelpText,
+  }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
 
   /// The user visible name for this feature.
   final String name;
@@ -299,11 +262,9 @@ class Feature {
 }
 
 /// A description of the conditions to enable a feature for a particular channel.
-class FeatureChannelSetting {
-  const FeatureChannelSetting({
-    this.available = false,
-    this.enabledByDefault = false,
-  });
+@immutable
+final class FeatureChannelSetting {
+  const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
   ///
@@ -315,4 +276,19 @@ class FeatureChannelSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeatureChannelSetting &&
+        available == other.available &&
+        enabledByDefault == other.enabledByDefault;
+  }
+
+  @override
+  int get hashCode => Object.hash(available, enabledByDefault);
+
+  @override
+  String toString() {
+    return 'FeatureChannelSetting <available: $available, enabledByDefault: $enabledByDefault>';
+  }
 }

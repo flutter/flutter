@@ -10,8 +10,8 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
-import 'cocoon.dart';
 import 'devices.dart';
+import 'metrics_result_writer.dart';
 import 'task_result.dart';
 import 'utils.dart';
 
@@ -49,7 +49,7 @@ Future<void> runTasks(
   for (final String taskName in taskNames) {
     TaskResult result = TaskResult.success(null);
     int failureCount = 0;
-    while (failureCount <= Cocoon.retryNumber) {
+    while (failureCount <= MetricsResultWriter.retryNumber) {
       result = await rerunTask(
         taskName,
         deviceId: deviceId,
@@ -74,7 +74,9 @@ Future<void> runTasks(
       } else {
         section('Flaky status for "$taskName"');
         if (failureCount > 0) {
-          print('Total ${failureCount+1} executions: $failureCount failures and 1 false positive.');
+          print(
+            'Total ${failureCount + 1} executions: $failureCount failures and 1 false positive.',
+          );
           print('flaky: true');
           // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
           // if exitOnFirstTestFailure is true.
@@ -135,7 +137,7 @@ Future<TaskResult> rerunTask(
   section('Finished task "$taskName"');
 
   if (resultsPath != null) {
-    final Cocoon cocoon = Cocoon();
+    final MetricsResultWriter cocoon = MetricsResultWriter();
     await cocoon.writeTaskResultToFile(
       builderName: luciBuilder,
       gitBranch: gitBranch,
@@ -197,17 +199,16 @@ Future<TaskResult> runTask(
       taskExecutable,
       ...?taskArgs,
     ],
-    environment: <String, String>{
-      if (deviceId != null)
-        DeviceIdEnvName: deviceId,
-    },
+    environment: <String, String>{if (deviceId != null) DeviceIdEnvName: deviceId},
   );
 
   bool runnerFinished = false;
 
-  unawaited(runner.exitCode.whenComplete(() {
-    runnerFinished = true;
-  }));
+  unawaited(
+    runner.exitCode.whenComplete(() {
+      runnerFinished = true;
+    }),
+  );
 
   final Completer<Uri> uri = Completer<Uri>();
 
@@ -215,42 +216,44 @@ Future<TaskResult> runTask(
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('The Dart VM service is listening on '));
-      if (serviceUri != null) {
-        uri.complete(serviceUri);
-      }
-    }
-    if (!silent) {
-      stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
-    }
-  });
+        if (!uri.isCompleted) {
+          final Uri? serviceUri = parseServiceUri(
+            line,
+            prefix: RegExp('The Dart VM service is listening on '),
+          );
+          if (serviceUri != null) {
+            uri.complete(serviceUri);
+          }
+        }
+        if (!silent) {
+          stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
+        }
+      });
 
   final StreamSubscription<String> stderrSub = runner.stderr
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    stderr.writeln('[${DateTime.now()}] [STDERR] $line');
-  });
+        stderr.writeln('[${DateTime.now()}] [STDERR] $line');
+      });
 
   try {
     final ConnectionResult result = await _connectToRunnerIsolate(await uri.future);
     print('[$taskName] Connected to VM server.');
-    isolateParams = isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
+    isolateParams =
+        isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
     final VmService service = result.vmService;
     final String isolateId = result.isolate.id!;
-    final Map<String, dynamic> taskResultJson = (await service.callServiceExtension(
-      'ext.cocoonRunTask',
-      args: isolateParams,
-      isolateId: isolateId,
-    )).json!;
+    final Map<String, dynamic> taskResultJson =
+        (await service.callServiceExtension(
+          'ext.cocoonRunTask',
+          args: isolateParams,
+          isolateId: isolateId,
+        )).json!;
     // Notify the task process that the task result has been received and it
     // can proceed to shutdown.
-    await _acknowledgeTaskResultReceived(
-      service: service,
-      isolateId: isolateId,
-    );
+    await _acknowledgeTaskResultReceived(service: service, isolateId: isolateId);
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
@@ -288,7 +291,10 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
       }
       final IsolateRef isolate = vm.isolates!.first;
       // Sanity check to ensure we're talking with the main isolate.
-      final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
+      final Response response = await client.callServiceExtension(
+        'ext.cocoonRunnerReady',
+        isolateId: isolate.id,
+      );
       if (response.json!['result'] != 'success') {
         throw 'not ready yet';
       }
@@ -309,14 +315,11 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
 }
 
 Future<void> _acknowledgeTaskResultReceived({
-    required VmService service,
-    required String isolateId,
-  }) async {
+  required VmService service,
+  required String isolateId,
+}) async {
   try {
-    await service.callServiceExtension(
-      'ext.cocoonTaskResultReceived',
-      isolateId: isolateId,
-    );
+    await service.callServiceExtension('ext.cocoonTaskResultReceived', isolateId: isolateId);
   } on RPCError {
     // The target VM may shutdown before the response is received.
   }

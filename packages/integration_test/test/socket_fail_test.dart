@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '_requires_vm_service.dart';
+
 class SocketExceptionHttpClient extends Fake implements HttpClient {
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) {
@@ -15,7 +17,8 @@ class SocketExceptionHttpClient extends Fake implements HttpClient {
 }
 
 Future<void> main() async {
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   test('Prints an appropriate message on socket exception', () async {
     bool gotStateError = false;
@@ -28,5 +31,5 @@ Future<void> main() async {
       fail('Did not expect a socket exception.');
     }
     expect(gotStateError, true);
-  });
+  }, skip: !(await hasVmServiceEnabled())); // [intended] avoid local failures
 }

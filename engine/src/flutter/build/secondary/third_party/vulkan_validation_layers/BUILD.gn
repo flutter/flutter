@@ -1,0 +1,596 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build_overrides/vulkan_validation_layers.gni")
+
+_checkout_dir = "//flutter/third_party/vulkan-deps/vulkan-validation-layers/src"
+
+vulkan_undefine_configs = []
+if (is_win) {
+  vulkan_undefine_configs += [ "//build/config/win:unicode" ]
+}
+
+config("generated_layers_config") {
+  if (is_clang) {
+    cflags = [
+      "-Wno-conversion",
+      "-Wno-deprecated-copy",
+      "-Wno-extra-semi",
+      "-Wno-implicit-fallthrough",
+      "-Wno-missing-field-initializers",
+      "-Wno-newline-eof",
+      "-Wno-sign-compare",
+      "-Wno-unused-const-variable",
+    ]
+  }
+}
+
+config("vulkan_internal_config") {
+  defines = [ "VK_ENABLE_BETA_EXTENSIONS" ]
+
+  cflags = []
+  if (is_clang || !is_win) {
+    cflags += [ "-Wno-unused-function" ]
+  }
+  if (is_clang && is_mac) {
+    cflags += [ "-Wno-unguarded-availability-new" ]
+  }
+
+  # Suppress warnings the vulkan code doesn't comply with.
+  if (is_fuchsia) {
+    configs = [ "//build/config:Wno-unused-but-set-variable" ]
+  }
+  if (is_clang) {
+    cflags += [ "-Wno-extra-semi" ]
+  }
+}
+
+# The validation layers
+# ---------------------
+
+config("vulkan_layer_config") {
+  include_dirs = [
+    "$_checkout_dir/layers",
+    "$_checkout_dir/layers/external",
+    "$_checkout_dir/layers/vulkan",
+  ]
+  if (is_clang) {
+    cflags = [ "-Wno-extra-semi" ]
+  }
+}
+
+vvl_sources = [
+  "$vulkan_headers_dir/include/vulkan/vk_layer.h",
+  "$vulkan_headers_dir/include/vulkan/vulkan.h",
+  "$_checkout_dir/layers/best_practices/best_practices_utils.cpp",
+  "$_checkout_dir/layers/best_practices/best_practices_validation.h",
+  "$_checkout_dir/layers/best_practices/bp_buffer.cpp",
+  "$_checkout_dir/layers/best_practices/bp_cmd_buffer.cpp",
+  "$_checkout_dir/layers/best_practices/bp_cmd_buffer_nv.cpp",
+  "$_checkout_dir/layers/best_practices/bp_copy_blit_resolve.cpp",
+  "$_checkout_dir/layers/best_practices/bp_descriptor.cpp",
+  "$_checkout_dir/layers/best_practices/bp_device_memory.cpp",
+  "$_checkout_dir/layers/best_practices/bp_drawdispatch.cpp",
+  "$_checkout_dir/layers/best_practices/bp_framebuffer.cpp",
+  "$_checkout_dir/layers/best_practices/bp_image.cpp",
+  "$_checkout_dir/layers/best_practices/bp_instance_device.cpp",
+  "$_checkout_dir/layers/best_practices/bp_pipeline.cpp",
+  "$_checkout_dir/layers/best_practices/bp_ray_tracing.cpp",
+  "$_checkout_dir/layers/best_practices/bp_render_pass.cpp",
+  "$_checkout_dir/layers/best_practices/bp_state.h",
+  "$_checkout_dir/layers/best_practices/bp_synchronization.cpp",
+  "$_checkout_dir/layers/best_practices/bp_video.cpp",
+  "$_checkout_dir/layers/best_practices/bp_wsi.cpp",
+  "$_checkout_dir/layers/chassis/chassis.h",
+  "$_checkout_dir/layers/chassis/chassis_handle_data.h",
+  "$_checkout_dir/layers/chassis/chassis_manual.cpp",
+  "$_checkout_dir/layers/chassis/chassis_modification_state.h",
+  "$_checkout_dir/layers/chassis/dispatch_object.h",
+  "$_checkout_dir/layers/chassis/dispatch_object_manual.cpp",
+  "$_checkout_dir/layers/chassis/validation_object.h",
+  "$_checkout_dir/layers/containers/custom_containers.h",
+  "$_checkout_dir/layers/containers/qfo_transfer.h",
+  "$_checkout_dir/layers/containers/range_vector.h",
+  "$_checkout_dir/layers/containers/subresource_adapter.cpp",
+  "$_checkout_dir/layers/containers/subresource_adapter.h",
+  "$_checkout_dir/layers/core_checks/cc_android.cpp",
+  "$_checkout_dir/layers/core_checks/cc_buffer.cpp",
+  "$_checkout_dir/layers/core_checks/cc_buffer_address.h",
+  "$_checkout_dir/layers/core_checks/cc_cmd_buffer.cpp",
+  "$_checkout_dir/layers/core_checks/cc_cmd_buffer_dynamic.cpp",
+  "$_checkout_dir/layers/core_checks/cc_copy_blit_resolve.cpp",
+  "$_checkout_dir/layers/core_checks/cc_descriptor.cpp",
+  "$_checkout_dir/layers/core_checks/cc_device.cpp",
+  "$_checkout_dir/layers/core_checks/cc_device_memory.cpp",
+  "$_checkout_dir/layers/core_checks/cc_device_generated_commands.cpp",
+  "$_checkout_dir/layers/core_checks/cc_drawdispatch.cpp",
+  "$_checkout_dir/layers/core_checks/cc_external_object.cpp",
+  "$_checkout_dir/layers/core_checks/cc_image.cpp",
+  "$_checkout_dir/layers/core_checks/cc_image_layout.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline_compute.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline_graphics.cpp",
+  "$_checkout_dir/layers/core_checks/cc_pipeline_ray_tracing.cpp",
+  "$_checkout_dir/layers/core_checks/cc_query.cpp",
+  "$_checkout_dir/layers/core_checks/cc_queue.cpp",
+  "$_checkout_dir/layers/core_checks/cc_ray_tracing.cpp",
+  "$_checkout_dir/layers/core_checks/cc_render_pass.cpp",
+  "$_checkout_dir/layers/core_checks/cc_shader_interface.cpp",
+  "$_checkout_dir/layers/core_checks/cc_shader_object.cpp",
+  "$_checkout_dir/layers/core_checks/cc_spirv.cpp",
+  "$_checkout_dir/layers/core_checks/cc_state_tracker.cpp",
+  "$_checkout_dir/layers/core_checks/cc_state_tracker.h",
+  "$_checkout_dir/layers/core_checks/cc_submit.cpp",
+  "$_checkout_dir/layers/core_checks/cc_submit.h",
+  "$_checkout_dir/layers/core_checks/cc_synchronization.cpp",
+  "$_checkout_dir/layers/core_checks/cc_synchronization.h",
+  "$_checkout_dir/layers/core_checks/cc_video.cpp",
+  "$_checkout_dir/layers/core_checks/cc_vuid_maps.cpp",
+  "$_checkout_dir/layers/core_checks/cc_vuid_maps.h",
+  "$_checkout_dir/layers/core_checks/cc_wsi.cpp",
+  "$_checkout_dir/layers/core_checks/cc_ycbcr.cpp",
+  "$_checkout_dir/layers/core_checks/core_validation.h",
+  "$_checkout_dir/layers/drawdispatch/descriptor_validator.cpp",
+  "$_checkout_dir/layers/drawdispatch/descriptor_validator.h",
+  "$_checkout_dir/layers/drawdispatch/drawdispatch_vuids.cpp",
+  "$_checkout_dir/layers/drawdispatch/drawdispatch_vuids.h",
+  "$_checkout_dir/layers/error_message/error_location.cpp",
+  "$_checkout_dir/layers/error_message/error_location.h",
+  "$_checkout_dir/layers/error_message/error_strings.h",
+  "$_checkout_dir/layers/error_message/logging.cpp",
+  "$_checkout_dir/layers/error_message/logging.h",
+  "$_checkout_dir/layers/error_message/record_object.h",
+  "$_checkout_dir/layers/error_message/log_message_type.h",
+  "$_checkout_dir/layers/error_message/spirv_logging.cpp",
+  "$_checkout_dir/layers/error_message/spirv_logging.h",
+  "$_checkout_dir/layers/external/inplace_function.h",
+  "$_checkout_dir/layers/external/vma/vk_mem_alloc.h",
+  "$_checkout_dir/layers/external/vma/vma.cpp",
+  "$_checkout_dir/layers/external/vma/vma.h",
+  "$_checkout_dir/layers/external/xxhash.h",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_validation_cmd_common.cpp",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_validation_cmd_common.h",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_copy_buffer_to_image.cpp",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_copy_buffer_to_image.h",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_dispatch.cpp",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_dispatch.h",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_draw.cpp",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_draw.h",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_trace_rays.cpp",
+  "$_checkout_dir/layers/gpuav/validation_cmd/gpuav_trace_rays.h",
+  "$_checkout_dir/layers/gpuav/core/gpuav_settings.h",
+  "$_checkout_dir/layers/gpuav/core/gpuav.h",
+  "$_checkout_dir/layers/gpuav/core/gpuav_constants.h",
+  "$_checkout_dir/layers/gpuav/core/gpuav_record.cpp",
+  "$_checkout_dir/layers/gpuav/core/gpuav_setup.cpp",
+  "$_checkout_dir/layers/gpuav/debug_printf/debug_printf.cpp",
+  "$_checkout_dir/layers/gpuav/debug_printf/debug_printf.h",
+  "$_checkout_dir/layers/gpuav/descriptor_validation/gpuav_descriptor_set.cpp",
+  "$_checkout_dir/layers/gpuav/descriptor_validation/gpuav_descriptor_set.h",
+  "$_checkout_dir/layers/gpuav/descriptor_validation/gpuav_descriptor_validation.cpp",
+  "$_checkout_dir/layers/gpuav/descriptor_validation/gpuav_descriptor_validation.h",
+  "$_checkout_dir/layers/gpuav/descriptor_validation/gpuav_image_layout.cpp",
+  "$_checkout_dir/layers/gpuav/descriptor_validation/gpuav_image_layout.h",
+  "$_checkout_dir/layers/gpuav/error_message/gpuav_vuids.cpp",
+  "$_checkout_dir/layers/gpuav/error_message/gpuav_vuids.h",
+  "$_checkout_dir/layers/gpuav/instrumentation/gpuav_shader_instrumentor.cpp",
+  "$_checkout_dir/layers/gpuav/instrumentation/gpuav_shader_instrumentor.h",
+  "$_checkout_dir/layers/gpuav/instrumentation/gpuav_instrumentation.cpp",
+  "$_checkout_dir/layers/gpuav/instrumentation/gpuav_instrumentation.h",
+  "$_checkout_dir/layers/gpuav/resources/gpuav_vulkan_objects.cpp",
+  "$_checkout_dir/layers/gpuav/resources/gpuav_vulkan_objects.h",
+  "$_checkout_dir/layers/gpuav/resources/gpuav_shader_resources.h",
+  "$_checkout_dir/layers/gpuav/resources/gpuav_state_trackers.cpp",
+  "$_checkout_dir/layers/gpuav/resources/gpuav_state_trackers.h",
+  "$_checkout_dir/layers/gpuav/shaders/validation_cmd/draw_push_data.h",
+  "$_checkout_dir/layers/gpuav/shaders/gpuav_error_codes.h",
+  "$_checkout_dir/layers/gpuav/shaders/gpuav_error_header.h",
+  "$_checkout_dir/layers/gpuav/shaders/gpuav_shaders_constants.h",
+  "$_checkout_dir/layers/gpuav/spirv/descriptor_indexing_oob_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/descriptor_indexing_oob_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/descriptor_class_general_buffer_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/descriptor_class_general_buffer_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/descriptor_class_texel_buffer_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/descriptor_class_texel_buffer_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/buffer_device_address_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/buffer_device_address_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/post_process_descriptor_indexing_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/post_process_descriptor_indexing_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/vertex_attribute_fetch_oob.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/vertex_attribute_fetch_oob.h",
+  "$_checkout_dir/layers/gpuav/spirv/function_basic_block.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/function_basic_block.h",
+  "$_checkout_dir/layers/gpuav/spirv/instruction.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/instruction.h",
+  "$_checkout_dir/layers/gpuav/spirv/interface.h",
+  "$_checkout_dir/layers/gpuav/spirv/link.h",
+  "$_checkout_dir/layers/gpuav/spirv/module.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/module.h",
+  "$_checkout_dir/layers/gpuav/spirv/inject_conditional_function_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/inject_conditional_function_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/inject_function_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/inject_function_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/ray_query_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/ray_query_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/debug_printf_pass.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/debug_printf_pass.h",
+  "$_checkout_dir/layers/gpuav/spirv/type_manager.cpp",
+  "$_checkout_dir/layers/gpuav/spirv/type_manager.h",
+  "$_checkout_dir/layers/layer_options.cpp",
+  "$_checkout_dir/layers/layer_options.h",
+  "$_checkout_dir/layers/object_tracker/object_lifetime_validation.h",
+  "$_checkout_dir/layers/object_tracker/object_tracker_utils.cpp",
+  "$_checkout_dir/layers/state_tracker/buffer_state.cpp",
+  "$_checkout_dir/layers/state_tracker/buffer_state.h",
+  "$_checkout_dir/layers/state_tracker/cmd_buffer_state.cpp",
+  "$_checkout_dir/layers/state_tracker/cmd_buffer_state.h",
+  "$_checkout_dir/layers/state_tracker/descriptor_sets.cpp",
+  "$_checkout_dir/layers/state_tracker/descriptor_sets.h",
+  "$_checkout_dir/layers/state_tracker/device_generated_commands_state.cpp",
+  "$_checkout_dir/layers/state_tracker/device_generated_commands_state.h",
+  "$_checkout_dir/layers/state_tracker/device_memory_state.cpp",
+  "$_checkout_dir/layers/state_tracker/device_memory_state.h",
+  "$_checkout_dir/layers/state_tracker/device_state.cpp",
+  "$_checkout_dir/layers/state_tracker/device_state.h",
+  "$_checkout_dir/layers/state_tracker/fence_state.cpp",
+  "$_checkout_dir/layers/state_tracker/fence_state.h",
+  "$_checkout_dir/layers/state_tracker/image_layout_map.cpp",
+  "$_checkout_dir/layers/state_tracker/image_layout_map.h",
+  "$_checkout_dir/layers/state_tracker/image_state.cpp",
+  "$_checkout_dir/layers/state_tracker/image_state.h",
+  "$_checkout_dir/layers/state_tracker/pipeline_layout_state.cpp",
+  "$_checkout_dir/layers/state_tracker/pipeline_layout_state.h",
+  "$_checkout_dir/layers/state_tracker/pipeline_state.cpp",
+  "$_checkout_dir/layers/state_tracker/pipeline_state.h",
+  "$_checkout_dir/layers/state_tracker/pipeline_sub_state.cpp",
+  "$_checkout_dir/layers/state_tracker/pipeline_sub_state.h",
+  "$_checkout_dir/layers/state_tracker/query_state.h",
+  "$_checkout_dir/layers/state_tracker/queue_state.cpp",
+  "$_checkout_dir/layers/state_tracker/queue_state.h",
+  "$_checkout_dir/layers/state_tracker/ray_tracing_state.h",
+  "$_checkout_dir/layers/state_tracker/render_pass_state.cpp",
+  "$_checkout_dir/layers/state_tracker/render_pass_state.h",
+  "$_checkout_dir/layers/state_tracker/sampler_state.h",
+  "$_checkout_dir/layers/state_tracker/semaphore_state.cpp",
+  "$_checkout_dir/layers/state_tracker/semaphore_state.h",
+  "$_checkout_dir/layers/state_tracker/shader_instruction.cpp",
+  "$_checkout_dir/layers/state_tracker/shader_instruction.h",
+  "$_checkout_dir/layers/state_tracker/shader_module.cpp",
+  "$_checkout_dir/layers/state_tracker/shader_module.h",
+  "$_checkout_dir/layers/state_tracker/shader_object_state.cpp",
+  "$_checkout_dir/layers/state_tracker/shader_object_state.h",
+  "$_checkout_dir/layers/state_tracker/shader_stage_state.cpp",
+  "$_checkout_dir/layers/state_tracker/shader_stage_state.h",
+  "$_checkout_dir/layers/state_tracker/state_object.cpp",
+  "$_checkout_dir/layers/state_tracker/state_object.h",
+  "$_checkout_dir/layers/state_tracker/state_tracker.cpp",
+  "$_checkout_dir/layers/state_tracker/state_tracker.h",
+  "$_checkout_dir/layers/state_tracker/submission_reference.h",
+  "$_checkout_dir/layers/state_tracker/vertex_index_buffer_state.h",
+  "$_checkout_dir/layers/state_tracker/video_session_state.cpp",
+  "$_checkout_dir/layers/state_tracker/video_session_state.h",
+  "$_checkout_dir/layers/stateless/sl_buffer.cpp",
+  "$_checkout_dir/layers/stateless/sl_cmd_buffer.cpp",
+  "$_checkout_dir/layers/stateless/sl_cmd_buffer_dynamic.cpp",
+  "$_checkout_dir/layers/stateless/sl_descriptor.cpp",
+  "$_checkout_dir/layers/stateless/sl_device_generated_commands.cpp",
+  "$_checkout_dir/layers/stateless/sl_device_memory.cpp",
+  "$_checkout_dir/layers/stateless/sl_external_object.cpp",
+  "$_checkout_dir/layers/stateless/sl_framebuffer.cpp",
+  "$_checkout_dir/layers/stateless/sl_image.cpp",
+  "$_checkout_dir/layers/stateless/sl_instance_device.cpp",
+  "$_checkout_dir/layers/stateless/sl_pipeline.cpp",
+  "$_checkout_dir/layers/stateless/sl_ray_tracing.cpp",
+  "$_checkout_dir/layers/stateless/sl_render_pass.cpp",
+  "$_checkout_dir/layers/stateless/sl_shader_object.cpp",
+  "$_checkout_dir/layers/stateless/sl_synchronization.cpp",
+  "$_checkout_dir/layers/stateless/sl_utils.cpp",
+  "$_checkout_dir/layers/stateless/sl_vuid_maps.cpp",
+  "$_checkout_dir/layers/stateless/sl_vuid_maps.h",
+  "$_checkout_dir/layers/stateless/sl_wsi.cpp",
+  "$_checkout_dir/layers/stateless/stateless_validation.h",
+  "$_checkout_dir/layers/sync/sync_access_context.cpp",
+  "$_checkout_dir/layers/sync/sync_access_context.h",
+  "$_checkout_dir/layers/sync/sync_access_state.cpp",
+  "$_checkout_dir/layers/sync/sync_access_state.h",
+  "$_checkout_dir/layers/sync/sync_commandbuffer.cpp",
+  "$_checkout_dir/layers/sync/sync_commandbuffer.h",
+  "$_checkout_dir/layers/sync/sync_common.cpp",
+  "$_checkout_dir/layers/sync/sync_common.h",
+  "$_checkout_dir/layers/sync/sync_error_messages.cpp",
+  "$_checkout_dir/layers/sync/sync_error_messages.h",
+  "$_checkout_dir/layers/sync/sync_image.h",
+  "$_checkout_dir/layers/sync/sync_op.cpp",
+  "$_checkout_dir/layers/sync/sync_op.h",
+  "$_checkout_dir/layers/sync/sync_renderpass.cpp",
+  "$_checkout_dir/layers/sync/sync_renderpass.h",
+  "$_checkout_dir/layers/sync/sync_reporting.cpp",
+  "$_checkout_dir/layers/sync/sync_reporting.h",
+  "$_checkout_dir/layers/sync/sync_settings.h",
+  "$_checkout_dir/layers/sync/sync_stats.cpp",
+  "$_checkout_dir/layers/sync/sync_stats.h",
+  "$_checkout_dir/layers/sync/sync_submit.cpp",
+  "$_checkout_dir/layers/sync/sync_submit.h",
+  "$_checkout_dir/layers/sync/sync_utils.cpp",
+  "$_checkout_dir/layers/sync/sync_utils.h",
+  "$_checkout_dir/layers/sync/sync_validation.cpp",
+  "$_checkout_dir/layers/sync/sync_validation.h",
+  "$_checkout_dir/layers/sync/sync_vuid_maps.cpp",
+  "$_checkout_dir/layers/sync/sync_vuid_maps.h",
+  "$_checkout_dir/layers/thread_tracker/thread_safety_validation.cpp",
+  "$_checkout_dir/layers/thread_tracker/thread_safety_validation.h",
+  "$_checkout_dir/layers/utils/android_ndk_types.h",
+  "$_checkout_dir/layers/utils/android_ndk_types.h",
+  "$_checkout_dir/layers/utils/cast_utils.h",
+  "$_checkout_dir/layers/utils/convert_utils.cpp",
+  "$_checkout_dir/layers/utils/convert_utils.h",
+  "$_checkout_dir/layers/utils/hash_util.cpp",
+  "$_checkout_dir/layers/utils/hash_util.h",
+  "$_checkout_dir/layers/utils/hash_vk_types.h",
+  "$_checkout_dir/layers/utils/image_layout_utils.cpp",
+  "$_checkout_dir/layers/utils/image_layout_utils.h",
+  "$_checkout_dir/layers/utils/ray_tracing_utils.cpp",
+  "$_checkout_dir/layers/utils/ray_tracing_utils.h",
+  "$_checkout_dir/layers/utils/shader_utils.cpp",
+  "$_checkout_dir/layers/utils/shader_utils.h",
+  "$_checkout_dir/layers/utils/vk_layer_extension_utils.cpp",
+  "$_checkout_dir/layers/utils/vk_layer_extension_utils.h",
+  "$_checkout_dir/layers/utils/vk_layer_utils.cpp",
+  "$_checkout_dir/layers/utils/vk_layer_utils.h",
+  "$_checkout_dir/layers/utils/vk_struct_compare.cpp",
+  "$_checkout_dir/layers/utils/vk_struct_compare.h",
+  "$_checkout_dir/layers/vk_layer_config.cpp",
+  "$_checkout_dir/layers/vk_layer_config.h",
+  "$_checkout_dir/layers/vulkan/generated/best_practices.cpp",
+  "$_checkout_dir/layers/vulkan/generated/best_practices_device_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/best_practices_instance_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/chassis.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_copy_buffer_to_image_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_copy_buffer_to_image_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_dispatch_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_dispatch_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_count_buffer_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_count_buffer_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_first_instance_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_first_instance_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_draw_indexed_indirect_index_buffer_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_draw_indexed_indirect_index_buffer_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_draw_mesh_indirect_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_draw_mesh_indirect_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_trace_rays_rgen.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_cmd_trace_rays_rgen.h",
+  "$_checkout_dir/layers/vulkan/generated/command_validation.cpp",
+  "$_checkout_dir/layers/vulkan/generated/device_features.cpp",
+  "$_checkout_dir/layers/vulkan/generated/device_features.h",
+  "$_checkout_dir/layers/vulkan/generated/dispatch_functions.h",
+  "$_checkout_dir/layers/vulkan/generated/dispatch_object.cpp",
+  "$_checkout_dir/layers/vulkan/generated/dispatch_object_device_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/dispatch_object_instance_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/dispatch_vector.cpp",
+  "$_checkout_dir/layers/vulkan/generated/dispatch_vector.h",
+  "$_checkout_dir/layers/vulkan/generated/dynamic_state_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/dynamic_state_helper.h",
+  "$_checkout_dir/layers/vulkan/generated/enum_flag_bits.h",
+  "$_checkout_dir/layers/vulkan/generated/error_location_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/error_location_helper.h",
+  "$_checkout_dir/layers/vulkan/generated/feature_requirements_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/feature_requirements_helper.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_indexing_oob_bindless_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_indexing_oob_bindless_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_indexing_oob_non_bindless_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_indexing_oob_non_bindless_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_class_general_buffer_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_class_general_buffer_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_class_texel_buffer_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_descriptor_class_texel_buffer_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_buffer_device_address_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_buffer_device_address_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_ray_query_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_ray_query_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_post_process_descriptor_index_comp.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_post_process_descriptor_index_comp.h",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_vertex_attribute_fetch_oob_vert.cpp",
+  "$_checkout_dir/layers/vulkan/generated/instrumentation_vertex_attribute_fetch_oob_vert.h",
+  "$_checkout_dir/layers/vulkan/generated/object_tracker.cpp",
+  "$_checkout_dir/layers/vulkan/generated/object_tracker_device_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/object_tracker_instance_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/pnext_chain_extraction.cpp",
+  "$_checkout_dir/layers/vulkan/generated/pnext_chain_extraction.h",
+  "$_checkout_dir/layers/vulkan/generated/spirv_grammar_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/spirv_grammar_helper.h",
+  "$_checkout_dir/layers/vulkan/generated/spirv_tools_commit_id.h",
+  "$_checkout_dir/layers/vulkan/generated/spirv_validation_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/stateless_device_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/stateless_instance_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/stateless_validation_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/sync_validation_types.cpp",
+  "$_checkout_dir/layers/vulkan/generated/sync_validation_types.h",
+  "$_checkout_dir/layers/vulkan/generated/thread_safety.cpp",
+  "$_checkout_dir/layers/vulkan/generated/thread_safety_device_defs.h",
+  "$_checkout_dir/layers/vulkan/generated/thread_safety_instance_defs.h",
+  "$_checkout_dir/layers/vulkan/generated/valid_enum_values.cpp",
+  "$_checkout_dir/layers/vulkan/generated/valid_enum_values.h",
+  "$_checkout_dir/layers/vulkan/generated/valid_flag_values.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_object.cpp",
+  "$_checkout_dir/layers/vulkan/generated/validation_object_methods.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_api_version.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_api_version.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_dispatch_table_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/vk_dispatch_table_helper.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_extension_helper.cpp",
+  "$_checkout_dir/layers/vulkan/generated/vk_extension_helper.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_function_pointers.cpp",
+  "$_checkout_dir/layers/vulkan/generated/vk_function_pointers.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_layer_dispatch_table.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_object_types.cpp",
+  "$_checkout_dir/layers/vulkan/generated/vk_object_types.h",
+  "$_checkout_dir/layers/vulkan/generated/vk_validation_error_messages.h",
+]
+
+layers = [ [
+      "khronos_validation",
+      vvl_sources,
+      [ ":vulkan_core_validation_glslang" ],
+      [],
+    ] ]
+
+if (!is_android) {
+  action("vulkan_gen_json_files") {
+    vulkan_data_dir = "$root_out_dir/$vulkan_data_subdir"
+
+    script = "$_checkout_dir/scripts/gn/generate_vulkan_layers_json.py"
+
+    deps = [ "$vulkan_headers_dir:vulkan_headers" ]
+
+    sources = [ "$_checkout_dir/layers/VkLayer_khronos_validation.json.in" ]
+
+    outputs = [ "$vulkan_data_dir/VkLayer_khronos_validation.json" ]
+
+    if (is_linux) {
+      _platform = "Linux"
+    } else if (is_win) {
+      _platform = "Windows"
+    } else if (is_mac) {
+      _platform = "Darwin"
+    } else if (is_fuchsia) {
+      _platform = "Fuchsia"
+    } else {
+      _platform = "Other"
+    }
+
+    args = [
+             "--platform",
+             _platform,
+             rebase_path("$_checkout_dir/layers/", root_build_dir),
+             rebase_path(vulkan_data_dir, root_build_dir),
+           ] + rebase_path(sources, root_build_dir)
+    if (is_fuchsia) {
+      args += [ "--no-path-prefix" ]
+    }
+
+    # The layer JSON files are part of the necessary data deps.
+    data = outputs
+  }
+}
+
+config("vulkan_memory_allocator_config") {
+  if (is_clang) {
+    cflags_cc = [ "-Wno-nullability-completeness" ]
+  }
+}
+
+source_set("vulkan_layer_utils") {
+  include_dirs = [
+    "$_checkout_dir/layers",
+    "$_checkout_dir/layers/external",
+    "$_checkout_dir/layers/vulkan",
+  ]
+  sources = [
+    "$vulkan_headers_dir/include/vulkan/vk_layer.h",
+    "$vulkan_headers_dir/include/vulkan/vulkan.h",
+  ]
+  public_configs = [
+    ":vulkan_internal_config",
+    ":vulkan_memory_allocator_config",
+  ]
+  public_deps = [
+    "$vulkan_headers_dir:vulkan_headers",
+    "$vulkan_utility_libraries_dir:vulkan_layer_settings",
+  ]
+
+  configs -= vulkan_undefine_configs
+  if (!is_fuchsia) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+config("vulkan_core_validation_config") {
+  include_dirs = [ "$vvl_glslang_dir" ]
+}
+
+source_set("vulkan_core_validation_glslang") {
+  public_deps = [
+    "${vvl_spirv_tools_dir}:spvtools",
+    "${vvl_spirv_tools_dir}:spvtools_link",
+    "${vvl_spirv_tools_dir}:spvtools_opt",
+    "${vvl_spirv_tools_dir}:spvtools_val",
+  ]
+  public_configs = [
+    "$vulkan_headers_dir:vulkan_headers_config",
+    ":vulkan_core_validation_config",
+  ]
+}
+
+config("vulkan_stateless_validation_config") {
+  if (is_clang) {
+    cflags_cc = [ "-Wno-unused-const-variable" ]
+  }
+}
+
+if (is_fuchsia) {
+  library_type = "loadable_module"
+} else {
+  library_type = "shared_library"
+}
+
+foreach(layer_info, layers) {
+  name = layer_info[0]
+  target(library_type, "VkLayer_$name") {
+    defines = []
+    ldflags = []
+    if (is_fuchsia) {
+      configs -= [ "//build/config:thread_safety_annotations" ]
+      ldflags += [ "-static-libstdc++" ]
+      configs += [ "//build/config:rtti" ]
+    } else {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+      configs -= [ "//build/config/compiler:no_rtti" ]
+      configs += [ "//build/config/compiler:rtti" ]
+    }
+    configs -= vulkan_undefine_configs
+    configs += [ ":generated_layers_config" ]
+    public_configs = [ ":vulkan_layer_config" ]
+    deps = [
+      ":vulkan_layer_utils",
+      "$vulkan_utility_libraries_dir:vulkan_layer_settings",
+    ]
+    if (layer_info[2] != "") {
+      deps += layer_info[2]
+    }
+    sources = layer_info[1]
+    if (is_win) {
+      defines += [ "NOMINMAX" ]
+      sources += [ "$_checkout_dir/layers/VkLayer_$name.def" ]
+    }
+    if (defined(ozone_platform_x11) && ozone_platform_x11) {
+      defines += [ "VK_USE_PLATFORM_XLIB_KHR" ]
+    }
+    if (is_android) {
+      libs = [
+        "log",
+        "nativewindow",
+      ]
+      # Note: config edit removed by Flutter
+      # configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
+    }
+    defines += layer_info[3]
+  }
+}
+
+group("vulkan_validation_layers") {
+  public_deps = []
+  data_deps = []
+  foreach(layer_info, layers) {
+    name = layer_info[0]
+    if (is_fuchsia) {
+      public_deps += [ ":VkLayer_$name" ]
+    } else {
+      data_deps += [ ":VkLayer_$name" ]
+    }
+  }
+}

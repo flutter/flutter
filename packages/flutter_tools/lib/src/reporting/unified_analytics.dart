@@ -18,7 +18,7 @@ import '../version.dart';
 /// will be enabled to ensure usage of this class is within GA4 limitations.
 ///
 /// For testing purposes, pass in a [FakeAnalytics] instance initialized with
-/// an in-memory [FileSystem] to prevent writing to disk.
+/// an in-memory file system to prevent writing to disk.
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
@@ -31,8 +31,8 @@ Analytics getAnalytics({
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
   final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
 
-  if (// Ignore local user branches.
-      version.startsWith('[user-branch]') ||
+  if ( // Ignore local user branches.
+  version.startsWith('[user-branch]') ||
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
       // Ignore bots.
@@ -67,9 +67,7 @@ String? getEnabledFeatures(Config config) {
     return configSetting != null && config.getValue(configSetting) == true;
   });
   return enabledFeatures.isNotEmpty
-      ? enabledFeatures
-          .map((Feature feature) => feature.configSetting)
-          .join(',')
+      ? enabledFeatures.map((Feature feature) => feature.configSetting).join(',')
       : null;
 }
 

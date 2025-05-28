@@ -24,8 +24,7 @@ An example build: [Linux color_filter_and_fade_perf__e2e_summary](https://ci.chr
 ### What to do
 1. Check if the infra failure has happened on earlier builds by clicking (i)
 2. Check if issue already exists in the [infra bug pool](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22team%3A+infra%22)
-3. If not, file [an infra bug](https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml)
-4. If this is a blocking failure, please add Projects [`Infra Ticket Queue`](./Infra-Ticket-Queue.md). The infra gardener will scan through the queue frequently.
+3. If not, file [an infra bug](https://github.com/flutter/flutter/issues/new?template=06_infrastructure.yml)
 5. If you want to get an immediate help, please ask in the discord `hackers-infra` channel
 6. If this is an infra flake, and a retry is needed
    *  For pre-submit test, click `Re-run` in the [check run page](https://github.com/flutter/flutter/pull/83894/checks?check_run_id=2738146673). ![The presubmit rerun interface](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/luci_pre_submit_rerun.png)
@@ -51,3 +50,5 @@ Please refer to the above example of the infra failure.
 4. Check if a flaky bug has been filed in [the flaky issues list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22c%3A+flake%22)
 5. File a new bug if needed
 6. If a rerun is needed, please refer to step 6 in the above infra failure session.
+
+See also: [How to fix a PR's failing checks](../contributing/testing/Fix-failing-checks.md)
