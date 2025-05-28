@@ -677,11 +677,15 @@ class _HeroFlight {
       final HeroFlightDirection type = initialManifest.type;
       switch (type) {
         case HeroFlightDirection.pop:
-          return initial.value == 1.0 && initialManifest.isUserGestureTransition
+          return initialManifest.isUserGestureTransition
               // During user gesture transitions, the animation controller isn't
-              // driving the reverse transition, but should still be in a previously
-              // completed stage with the initial value at 1.0.
-              ? initial.status == AnimationStatus.completed
+              // driving the reverse transition, but should have a starting value
+              // approaching 1.0. In cases where the toRoute begane offstage, there
+              // is a slight delay while the toRoute laysout before the hero's
+              // flight begins, so the animation may not begin completed.
+              ? initial.value == 1.0
+                  ? initial.status == AnimationStatus.completed
+                  : initial.status == AnimationStatus.forward
               : initial.status == AnimationStatus.reverse;
         case HeroFlightDirection.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
@@ -923,8 +927,13 @@ class HeroController extends NavigatorObserver {
 
     // For pop transitions driven by a user gesture: if the "to" page has
     // maintainState = true, then the hero's final dimensions can be measured
-    // immediately because their page's layout is still valid.
-    if (isUserGestureTransition && flightType == HeroFlightDirection.pop && toRoute.maintainState) {
+    // immediately because their page's layout is still valid. Unless due to directly
+    // adding routes to the pages stack caused the route to never get laid out.
+    final bool needsLayout = toRoute.subtreeContext?.findRenderObject()?.debugNeedsLayout ?? true;
+    if (isUserGestureTransition &&
+        flightType == HeroFlightDirection.pop &&
+        toRoute.maintainState &&
+        !needsLayout) {
       _startHeroTransition(fromRoute, toRoute, flightType, isUserGestureTransition);
     } else {
       // Otherwise, delay measuring until the end of the next frame to allow
@@ -934,7 +943,6 @@ class HeroController extends NavigatorObserver {
       // frame completes, we'll know where the heroes in the `to` route are
       // going to end up, and the `to` route will go back onstage.
       toRoute.offstage = toRoute.animation!.value == 0.0;
-
       WidgetsBinding.instance.addPostFrameCallback((Duration value) {
         if (fromRoute.navigator == null || toRoute.navigator == null) {
           return;
