@@ -418,20 +418,27 @@ void ContextMTL::FlushTasksAwaitingGPU() {
     Lock lock(tasks_awaiting_gpu_mutex_);
     std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
   }
-  is_gpu_disabled_sync_switch_->Execute(
-      fml::SyncSwitch::Handlers()
-          .SetIfFalse([&] {
-            for (const auto& task : tasks_awaiting_gpu) {
-              task.task();
-            }
-          })
-          .SetIfTrue([&] {
-            // Lost access to the GPU immediately after it was activated. This
-            // may happen if the app was quickly foregrounded/backgrounded from
-            // a push notification. Store the tasks on the context again.
-            Lock lock(tasks_awaiting_gpu_mutex_);
-            std::swap(tasks_awaiting_gpu, tasks_awaiting_gpu_);
-          }));
+  std::vector<PendingTasks> tasks_to_queue;
+  for (const auto& task : tasks_awaiting_gpu) {
+    is_gpu_disabled_sync_switch_->Execute(fml::SyncSwitch::Handlers()
+                                              .SetIfFalse([&] { task.task(); })
+                                              .SetIfTrue([&] {
+                                                // Lost access to the GPU
+                                                // immediately after it was
+                                                // activated. This may happen if
+                                                // the app was quickly
+                                                // foregrounded/backgrounded
+                                                // from a push notification.
+                                                // Store the tasks on the
+                                                // context again.
+                                                tasks_to_queue.push_back(task);
+                                              }));
+  }
+  if (!tasks_to_queue.empty()) {
+    Lock lock(tasks_awaiting_gpu_mutex_);
+    tasks_awaiting_gpu_.insert(tasks_awaiting_gpu_.end(),
+                               tasks_to_queue.begin(), tasks_to_queue.end());
+  }
 }
 
 ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
