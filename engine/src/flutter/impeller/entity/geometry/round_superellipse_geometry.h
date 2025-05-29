@@ -7,8 +7,8 @@
 
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
-#include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/round_superellipse.h"
+#include "impeller/geometry/rounding_radii.h"
 
 namespace impeller {
 /// @brief A Geometry class that generates fillable vertices (with or without
@@ -16,11 +16,11 @@ namespace impeller {
 ///        regardless of radii uniformity.
 ///
 /// A rounded superellipse is a shape similar to a typical rounded rectangle
-/// (`RoundSuperellipse`), but with smoother transitions between the straight sides and
-/// the rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI
-/// with the `.continuous` corner style. Technically, it is created by replacing
-/// the four corners of a superellipse (also known as a Lamé curve) with
-/// circular arcs.
+/// (`RoundSuperellipse`), but with smoother transitions between the straight
+/// sides and the rounded corners. It resembles the `RoundedRectangle` shape in
+/// SwiftUI with the `.continuous` corner style. Technically, it is created by
+/// replacing the four corners of a superellipse (also known as a Lamé curve)
+/// with circular arcs.
 ///
 /// The `bounds` defines the position and size of the shape. The `corner_radius`
 /// corresponds to SwiftUI's `cornerRadius` parameter, which is close to, but
@@ -69,7 +69,7 @@ class RoundSuperellipseGeometry final : public Geometry {
 class StrokeRoundSuperellipseGeometry final : public StrokePathSourceGeometry {
  public:
   StrokeRoundSuperellipseGeometry(const RoundSuperellipse& round_superellipse,
-                          const StrokeParameters& parameters);
+                                  const StrokeParameters& parameters);
 
  protected:
   // |StrokePathSourceGeometry|
