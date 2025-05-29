@@ -280,7 +280,7 @@ void main() {
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
       'TREE_SHAKE_ICONS': 'true',
       'TRACK_WIDGET_CREATION': 'true',
-      'DART_DEFINES': 'Zm9vPTI=,YmFyPTI=',
+      'DART_DEFINES': encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'}),
       'DART_OBFUSCATION': 'true',
       'SPLIT_DEBUG_INFO': 'foo/',
       'FRONTEND_SERVER_STARTER_PATH': 'foo/bar/frontend_server_starter.dart',
@@ -288,7 +288,6 @@ void main() {
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
       'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
-      'FLAVOR': 'strawberry',
     });
   });
 

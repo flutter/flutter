@@ -315,7 +315,6 @@ class BuildInfo {
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       'PACKAGE_CONFIG': packageConfigPath,
       if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
-      if (flavor != null) 'FLAVOR': flavor!,
     };
   }
 

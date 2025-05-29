@@ -610,9 +610,6 @@ class Context {
       targetPlatform,
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
-      // FLAVOR is set by the Flutter CLI in the Flutter/Generated.xcconfig file
-      // when the --flavor flag is used, so it may not always be present.
-      if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
       '-dConfiguration=${environment['CONFIGURATION']}',
       platformArches,
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
