@@ -985,10 +985,11 @@ void main() {
     expect(rebuilt, isTrue);
   });
 
-  testWidgets('LayoutBuilder does not crash when its relayout boundary changes', (
+  testWidgets('LayoutBuilder does not crash when it becomes kept-alive', (
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final Widget layoutBuilderWithParent = SizedBox(
       key: GlobalKey(),
       child: LayoutBuilder(
