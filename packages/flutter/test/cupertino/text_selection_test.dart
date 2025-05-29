@@ -712,7 +712,7 @@ void main() {
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select All'), findsNothing);
         expect(findOverflowBackButton(), findsNothing);
-        expect(findOverflowNextButton(), findsNothing);
+        expect(findOverflowNextButton(), findsOneWidget);
 
         // The menu appears at the top of the visible selection.
         final Offset selectionOffset = tester.getTopLeft(

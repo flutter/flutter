@@ -10508,6 +10508,7 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(home: CupertinoTextField(focusNode: focusNode, enabled: false)),
       );
+
       expect(
         semantics,
         hasSemantics(
@@ -10554,6 +10555,7 @@ void main() {
           ignoreTransform: true,
         ),
       );
+
 
       expect(focusNode.hasFocus, isFalse);
       semanticsOwner.performAction(4, SemanticsAction.focus);

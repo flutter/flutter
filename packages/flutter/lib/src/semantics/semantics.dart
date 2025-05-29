@@ -2110,7 +2110,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///   keyboard shortcuts.
   ///
   /// Focus behavior is specific to the platform and to the assistive technology
-  /// used. See the documentation of [SemanticsAction.focus] for more detail.
+  /// used. See the documentation of [SemanticsAction] for more detail.
   ///
   /// See also:
   ///
