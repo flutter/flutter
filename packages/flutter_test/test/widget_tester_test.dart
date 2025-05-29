@@ -182,11 +182,19 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(
+        const Duration(
+          milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds + 1,
+        ),
+      );
 
       await tester.pageBack();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(
+        const Duration(
+          milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds + 1,
+        ),
+      );
 
       expect(find.text('Next'), findsOneWidget);
       expect(find.text('Page 2'), findsNothing);
@@ -222,7 +230,9 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(
+        const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds + 1),
+      );
 
       await tester.pageBack();
       await tester.pump();
