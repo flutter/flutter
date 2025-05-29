@@ -191,6 +191,7 @@
 ../../../flutter/impeller/renderer/backend/gles/test
 ../../../flutter/impeller/renderer/backend/gles/unique_handle_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/metal/allocator_mtl_unittests.mm
+../../../flutter/impeller/renderer/backend/metal/context_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/swapchain_transients_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/texture_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk_unittests.cc
@@ -3672,6 +3673,7 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.google.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.gpio/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.i2c/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.khadas.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.mailbox/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/meta.json
