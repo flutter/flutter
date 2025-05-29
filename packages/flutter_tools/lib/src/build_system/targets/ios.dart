@@ -11,7 +11,6 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
-import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;

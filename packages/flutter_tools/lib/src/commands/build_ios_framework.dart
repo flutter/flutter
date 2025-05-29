@@ -370,6 +370,16 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
     }
 
+    if (!project.isModule && buildInfos.any((BuildInfo info) => info.isDebug)) {
+      // Add-to-App must manually add the LLDB Init File to their native Xcode
+      // project, so provide the files and instructions.
+      final File lldbInitSourceFile = project.ios.lldbInitFile;
+      final File lldbInitTargetFile = outputDirectory.childFile(lldbInitSourceFile.basename);
+      final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
+      lldbInitSourceFile.copySync(lldbInitTargetFile.path);
+      lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
+    }
+
     return FlutterCommandResult.success();
   }
 

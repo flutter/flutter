@@ -1350,19 +1350,3 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }
 }
 
-/// Capture console print events into a string buffer.
-Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
-  final StringBuffer buffer = StringBuffer();
-  await runZoned<Future<void>>(
-    () async {
-      // Service the event loop.
-      await body();
-    },
-    zoneSpecification: ZoneSpecification(
-      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-        buffer.writeln(line);
-      },
-    ),
-  );
-  return buffer;
-}
