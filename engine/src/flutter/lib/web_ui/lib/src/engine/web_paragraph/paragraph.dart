@@ -308,6 +308,10 @@ class TextRange {
 
   bool get isEmpty => start == end;
 
+  TextRange translate(int offset) {
+    return TextRange(start: start + offset, end: end + offset);
+  }
+
   static TextRange empty = TextRange(start: 0, end: 0);
 
   int start;

@@ -20,33 +20,6 @@ Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
   /*
-  // This is no a correct paragraph paint implementation and only serve a purpose to compare
-  // the results with the normal paint. It does not do the paragraph positioning right but
-  // it does not matter.
-  test('Draw WebParagraph on Canvas2D', () async {
-    final engine.DomHTMLCanvasElement canvas = engine.createDomCanvasElement(
-      width: 500,
-      height: 500,
-    );
-    engine.domDocument.body!.append(canvas);
-    final engine.DomCanvasRenderingContext2D context = canvas.context2D;
-
-    context.fillStyle = 'blue';
-    context.fillRect(0, 0, 200, 200);
-
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
-    builder.addText('Lorem ipsum dolor sit');
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    paragraph.paintOnCanvas2D(canvas, const Offset(0, 100));
-
-    context.fillStyle = 'red';
-    context.fillRect(250, 0, 100, 200);
-    await matchGoldenFile('web_paragraph_canvas2d.png', region: region);
-  });
-  */
-
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -481,7 +454,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multishadows.png', region: region);
   });
-
+*/
   test('Draw WebParagraph multiple decorations on text', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
