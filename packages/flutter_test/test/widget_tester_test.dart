@@ -231,7 +231,9 @@ void main() {
       await tester.tap(find.text('Next'));
       await tester.pump();
       await tester.pump(
-        const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds + 1),
+        const Duration(
+          milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds + 1,
+        ),
       );
 
       await tester.pageBack();
