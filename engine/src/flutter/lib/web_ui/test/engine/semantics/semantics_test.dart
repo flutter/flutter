@@ -2614,7 +2614,7 @@ void _testCheckables() {
 
         // The following combination of actions and flags describe a checkbox.
         hasTap: true,
-        flags:  ui.SemanticsFlags(
+        flags: ui.SemanticsFlags(
           hasEnabledState: true,
           isEnabled: true,
           hasCheckedState: true,
@@ -3016,7 +3016,7 @@ void _testTappable() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
-        flags:  ui.SemanticsFlags(
+        flags: ui.SemanticsFlags(
           // The following combination of actions and flags describe a button.
           hasEnabledState: true,
           isEnabled: true,
