@@ -15,6 +15,9 @@ on:
 
 jobs:
   Linux_tool-tests-general:
+    permissions:
+      contents: read
+
     runs-on: ubuntu-latest
 
     steps:
