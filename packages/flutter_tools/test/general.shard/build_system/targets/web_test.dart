@@ -520,15 +520,20 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with csp',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '--csp',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -539,14 +544,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '--csp',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -561,14 +559,18 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with minify false',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -579,12 +581,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -600,15 +597,19 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -619,13 +620,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -641,16 +636,20 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '--enable-experiment=non-nullable',
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '--enable-experiment=non-nullable',
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -661,14 +660,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '--enable-experiment=non-nullable',
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -683,15 +675,19 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in profile mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -702,13 +698,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -723,15 +713,19 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -742,13 +736,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -763,16 +751,20 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode with native null assertions',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--native-null-assertions',
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--native-null-assertions',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -783,14 +775,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--minify',
-            '--native-null-assertions',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -807,15 +792,19 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O3',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O3',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -826,13 +815,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--minify',
-            '--no-source-maps',
-            '-O3',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -849,15 +832,19 @@ name: foo
     'Dart2JSTarget produces expected depfile',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -871,13 +858,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -904,17 +885,21 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -925,15 +910,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            ..._kStandardFlutterWebDefines,
-            '--minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -949,14 +926,18 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[WebCompilerConfig.kSourceMapsEnabled] = 'true';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -967,12 +948,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            ..._kStandardFlutterWebDefines,
-            '--minify',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -988,17 +964,21 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -1009,15 +989,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -1033,17 +1005,21 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'debug';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '--enable-asserts',
+        '-O1',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '--enable-asserts',
-            '-O1',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -1054,15 +1030,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '--enable-asserts',
-            '-O1',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -1077,14 +1045,18 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with dump-info',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
+            ...common,
             '-o',
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
@@ -1096,12 +1068,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
+            ...common,
             '--stage=dump-info-all',
             '-o',
             environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -1120,15 +1087,22 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with no-frequency-based-minification',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '--no-frequency-based-minification',
+        '-o',
+      ];
+
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -1139,14 +1113,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            ..._kStandardFlutterWebDefines,
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '--no-frequency-based-minification',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],

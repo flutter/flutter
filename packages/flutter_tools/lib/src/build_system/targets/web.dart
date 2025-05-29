@@ -337,7 +337,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
-
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,

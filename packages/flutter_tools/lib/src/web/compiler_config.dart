@@ -98,6 +98,9 @@ class JsCompilerConfig extends WebCompilerConfig {
     if (!sourceMaps) '--no-source-maps',
     if (buildMode == BuildMode.debug) '--enable-asserts',
     '-O${optimizationLevelForBuildMode(buildMode)}',
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
+    if (csp) '--csp',
   ];
 
   @override
@@ -116,11 +119,8 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// Includes the contents of [toSharedCommandOptions].
   @override
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     ...toSharedCommandOptions(buildMode),
     if (dumpInfo) '--stage=dump-info-all',
-    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-    if (csp) '--csp',
   ];
 
   @override
