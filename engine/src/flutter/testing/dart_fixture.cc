@@ -30,8 +30,10 @@ DartFixture::DartFixture(std::string kernel_filename,
 Settings DartFixture::CreateSettingsForFixture() {
   Settings settings;
   settings.leak_vm = false;
-  settings.task_observer_add = [](intptr_t, const fml::closure&) {};
-  settings.task_observer_remove = [](intptr_t) {};
+  settings.task_observer_add = [](intptr_t, const fml::closure&) {
+    return fml::TaskQueueId::Invalid();
+  };
+  settings.task_observer_remove = [](fml::TaskQueueId, intptr_t) {};
   settings.isolate_create_callback = [this]() {
     native_resolver_->SetNativeResolverForIsolate();
   };

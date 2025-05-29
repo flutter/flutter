@@ -121,8 +121,9 @@ class RuntimeController : public PlatformConfigurationClient,
       const fml::closure& isolate_shutdown_callback,
       const std::shared_ptr<const fml::Mapping>& persistent_isolate_data,
       fml::WeakPtr<IOManager> io_manager,
-      fml::WeakPtr<ImageDecoder> image_decoder,
-      fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+      fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+      fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+          image_generator_registry,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   // |PlatformConfigurationClient|
@@ -677,6 +678,8 @@ class RuntimeController : public PlatformConfigurationClient,
   std::shared_ptr<PlatformIsolateManager> GetPlatformIsolateManager() override {
     return platform_isolate_manager_;
   }
+
+  void SetRootIsolateOwnerToCurrentThread();
 
   //--------------------------------------------------------------------------
   /// @brief      Shuts down all registered platform isolates. Must be called

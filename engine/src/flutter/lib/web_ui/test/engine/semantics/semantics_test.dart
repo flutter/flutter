@@ -905,26 +905,22 @@ void _testLongestIncreasingSubsequence() {
 }
 
 void _testLabels() {
-  test('computeDomSemanticsLabel combines tooltip, label, value, and hint', () {
+  test('computeDomSemanticsLabel combines tooltip, label, and value', () {
     expect(computeDomSemanticsLabel(tooltip: 'tooltip'), 'tooltip');
     expect(computeDomSemanticsLabel(label: 'label'), 'label');
     expect(computeDomSemanticsLabel(value: 'value'), 'value');
-    expect(computeDomSemanticsLabel(hint: 'hint'), 'hint');
-    expect(
-      computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint', value: 'value'),
-      '''
-tooltip
-label hint value''',
-    );
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', hint: 'hint', value: 'value'), '''
-tooltip
-hint value''');
     expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
 tooltip
 label value''');
-    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', hint: 'hint'), '''
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', value: 'value'), '''
 tooltip
-label hint''');
+value''');
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label', value: 'value'), '''
+tooltip
+label value''');
+    expect(computeDomSemanticsLabel(tooltip: 'tooltip', label: 'label'), '''
+tooltip
+label''');
   });
 
   test('computeDomSemanticsLabel collapses empty labels to null', () {
@@ -932,12 +928,123 @@ label hint''');
     expect(computeDomSemanticsLabel(tooltip: ''), isNull);
     expect(computeDomSemanticsLabel(label: ''), isNull);
     expect(computeDomSemanticsLabel(value: ''), isNull);
-    expect(computeDomSemanticsLabel(hint: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', hint: '', value: ''), isNull);
     expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
-    expect(computeDomSemanticsLabel(tooltip: '', label: '', hint: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', value: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', label: '', value: ''), isNull);
+    expect(computeDomSemanticsLabel(tooltip: '', label: ''), isNull);
   });
+
+  test('LabelAndValue splits label and hint for all representations', () async {
+    semantics().semanticsEnabled = true;
+    final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+
+    for (final representation in LabelRepresentation.values) {
+      final SemanticsTester tester = SemanticsTester(owner());
+      // For container nodes, children force ariaLabel, so test as a leaf node (no children)
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final element = node.element;
+
+      // Set the preferred representation directly (simulate what a custom role would do)
+      node.semanticRole?.labelAndValue?.preferredRepresentation = representation;
+      node.semanticRole?.labelAndValue?.update();
+
+      // Check label is present in the correct place
+      switch (representation) {
+        case LabelRepresentation.ariaLabel:
+          expect(element.getAttribute('aria-label'), 'Label');
+        case LabelRepresentation.domText:
+          expect(element.text, 'Label');
+        case LabelRepresentation.sizedSpan:
+          final span = element.querySelector('span');
+          expect(span, isNotNull);
+          expect(span!.text, 'Label');
+      }
+
+      // Check hint is present as aria-description or aria-describedby
+      LabelAndValue.supportsAriaDescriptionForTest = true;
+      node.semanticRole?.labelAndValue?.update();
+      expect(element.getAttribute('aria-description'), 'Hint');
+      expect(element.getAttribute('aria-describedby'), isNull);
+
+      LabelAndValue.supportsAriaDescriptionForTest = false;
+      node.semanticRole?.labelAndValue?.update();
+      expect(element.getAttribute('aria-description'), isNull);
+      final ariaDescribedBy = element.getAttribute('aria-describedby');
+      expect(ariaDescribedBy, isNotNull);
+      final describedNode = domDocument.getElementById(ariaDescribedBy!);
+      expect(describedNode, isNotNull);
+      expect(describedNode!.text, 'Hint');
+    }
+
+    LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+    semantics().semanticsEnabled = false;
+  });
+
+  test(
+    'LabelAndValue fallback appends aria-describedby span to document.body when no parent',
+    () async {
+      semantics().semanticsEnabled = true;
+      final originalSupportsAriaDescription = LabelAndValue.supportsAriaDescription;
+
+      LabelAndValue.supportsAriaDescriptionForTest = false;
+
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Label',
+        hint: 'Hint',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final element = node.element;
+
+      final ariaDescribedBy = element.getAttribute('aria-describedby');
+      expect(ariaDescribedBy, isNotNull);
+
+      // Verify the span was created and has the correct content
+      final describedNode = domDocument.getElementById(ariaDescribedBy!);
+      expect(describedNode, isNotNull);
+      expect(describedNode!.text, 'Hint');
+      expect(describedNode.getAttribute('hidden'), '');
+
+      // The span should be attached somewhere in the DOM
+      expect(describedNode.isConnected, isTrue);
+
+      // Test that the fallback logic works: when we manually remove the element from its parent
+      // and call update again, the span should be appended to document.body as fallback
+      final originalParent = element.parentElement;
+      element.remove();
+
+      // Verify the span is still there but potentially orphaned
+      final describedNodeAfterRemove = domDocument.getElementById(ariaDescribedBy);
+      expect(describedNodeAfterRemove, isNotNull);
+
+      // Update should trigger fallback logic
+      node.semanticRole?.labelAndValue?.update();
+
+      // The span should still exist and be connected
+      final describedNodeAfterUpdate = domDocument.getElementById(ariaDescribedBy);
+      expect(describedNodeAfterUpdate, isNotNull);
+      expect(describedNodeAfterUpdate!.isConnected, isTrue);
+
+      // Re-attach element to its original parent for proper cleanup
+      if (originalParent != null) {
+        originalParent.append(element);
+      }
+
+      LabelAndValue.supportsAriaDescriptionForTest = originalSupportsAriaDescription;
+      semantics().semanticsEnabled = false;
+    },
+  );
 }
 
 void _testContainer() {
@@ -2579,13 +2686,28 @@ void _testSelectables() {
           id: 2,
           isSelectable: true,
           isSelected: false,
+          role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
           isSelectable: true,
           isSelected: true,
+          role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+        // Add two new nodes to test the aria-current fallback
+        tester.updateNode(
+          id: 4,
+          isSelectable: true,
+          isSelected: false,
+          rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+        ),
+        tester.updateNode(
+          id: 5,
+          isSelectable: true,
+          isSelected: true,
+          rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
     );
@@ -2594,35 +2716,55 @@ void _testSelectables() {
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="false"></sem>
-    <sem aria-selected="true"></sem>
+    <sem role="row" aria-selected="false"></sem>
+    <sem role="tab" aria-selected="true"></sem>
+    <sem aria-current="false"></sem>
+    <sem aria-current="true"></sem>
 </sem>
 ''');
 
     // Missing attributes cannot be expressed using HTML patterns, so check directly.
-    final nonSelectable = owner().debugSemanticsTree![1]!.element;
+    final nonSelectable = owner().debugSemanticsTree![0]!.element;
     expect(nonSelectable.getAttribute('aria-selected'), isNull);
+    expect(nonSelectable.getAttribute('aria-current'), isNull);
 
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
       isSelectable: true,
       isSelected: true,
+      role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
       isSelectable: true,
       isSelected: false,
+      role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    // Flip the values for the aria-current fallback nodes
+    tester.updateNode(
+      id: 4,
+      isSelectable: true,
+      isSelected: true,
+      rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+    );
+    tester.updateNode(
+      id: 5,
+      isSelectable: true,
+      isSelected: false,
+      rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="true"></sem>
-    <sem aria-selected="false"></sem>
+    <sem role="row" aria-selected="true"></sem>
+    <sem role="tab" aria-selected="false"></sem>
+    <sem aria-current="true"></sem>
+    <sem aria-current="false"></sem>
 </sem>
 ''');
 
@@ -3456,7 +3598,7 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a route label"><sem></sem></sem>
+      <sem aria-label="this is a route label"><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3493,9 +3635,8 @@ void _testRoute() {
       'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled route, but it is missing the label. A route should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
     ]);
 
-    // But still sets the dialog role.
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label=""><sem></sem></sem>
+      <sem aria-label=""><sem></sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
@@ -3526,7 +3667,7 @@ void _testRoute() {
       tester.apply();
 
       expectSemanticsTree(owner(), '''
-        <sem role="dialog" aria-describedby="flt-semantic-node-2">
+        <sem aria-describedby="flt-semantic-node-2">
             <sem>
                 <sem><span>$label</span></sem>
             </sem>
@@ -3548,7 +3689,7 @@ void _testRoute() {
     semantics().semanticsEnabled = false;
   });
 
-  test('scopesRoute alone sets the SemanticRoute role and "dialog" ARIA role with no label', () {
+  test('scopesRoute alone sets the SemanticRoute role and with no label', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3558,7 +3699,7 @@ void _testRoute() {
     tester.apply();
 
     expectSemanticsTree(owner(), '''
-      <sem role="dialog"></sem>
+      <sem></sem>
     ''');
 
     expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);

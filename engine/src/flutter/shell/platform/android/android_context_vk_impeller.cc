@@ -76,8 +76,8 @@ AndroidContextVKImpeller::AndroidContextVKImpeller(
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
   auto impeller_context = CreateImpellerContext(vulkan_dylib_, settings);
-  SetImpellerContext(impeller_context);
   is_valid_ = !!impeller_context;
+  SetImpellerContext(impeller_context);
 }
 
 AndroidContextVKImpeller::~AndroidContextVKImpeller() = default;

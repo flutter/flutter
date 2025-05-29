@@ -582,8 +582,10 @@ std::shared_ptr<PipelineVK> PipelineVK::CreateVariantForImmutableSamplers(
   if (!device_holder) {
     return nullptr;
   }
+  // Note: immutable sampler variant of a pipeline is the negation of the
+  // existing pipeline key. This keeps the descriptors separate.
   return (immutable_sampler_variants_[cache_key] =
-              Create(desc_, device_holder, library_, pipeline_key_,
+              Create(desc_, device_holder, library_, -1 * pipeline_key_,
                      immutable_sampler));
 }
 
