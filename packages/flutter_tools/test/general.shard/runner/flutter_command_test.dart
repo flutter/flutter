@@ -1767,30 +1767,8 @@ class FakeFeatureFlags implements FeatureFlags {
   final List<FakeFeature> allFeatures;
 
   @override
-  bool get isLinuxEnabled => throw UnimplementedError();
-  @override
-  bool get isMacOSEnabled => throw UnimplementedError();
-  @override
-  bool get isWebEnabled => throw UnimplementedError();
-  @override
-  bool get isWindowsEnabled => throw UnimplementedError();
-  @override
-  bool get isAndroidEnabled => throw UnimplementedError();
-  @override
-  bool get isIOSEnabled => throw UnimplementedError();
-  @override
-  bool get isFuchsiaEnabled => throw UnimplementedError();
-  @override
-  bool get areCustomDevicesEnabled => throw UnimplementedError();
-  @override
-  bool get isCliAnimationEnabled => throw UnimplementedError();
-  @override
-  bool get isNativeAssetsEnabled => throw UnimplementedError();
-  @override
-  bool get isSwiftPackageManagerEnabled => throw UnimplementedError();
-  @override
-  bool get isExplicitPackageDependenciesEnabled => throw UnimplementedError();
+  bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
 
   @override
-  bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
