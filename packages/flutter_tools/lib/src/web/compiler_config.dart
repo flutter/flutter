@@ -97,6 +97,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     if (nativeNullAssertions) '--native-null-assertions',
     if (!sourceMaps) '--no-source-maps',
     if (buildMode == BuildMode.debug) '--enable-asserts',
+    '-O${optimizationLevelForBuildMode(buildMode)}',
   ];
 
   @override
@@ -117,7 +118,6 @@ class JsCompilerConfig extends WebCompilerConfig {
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
     if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     ...toSharedCommandOptions(buildMode),
-    '-O${optimizationLevelForBuildMode(buildMode)}',
     if (dumpInfo) '--stage=dump-info-all',
     if (noFrequencyBasedMinification) '--no-frequency-based-minification',
     if (csp) '--csp',
