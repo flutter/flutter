@@ -3737,7 +3737,10 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   String? _tooltipMessage;
 
-  bool _leftAligned = true;
+  // Indicates whether the button is using the default alignment based on text direction.
+  // For LTR, the default alignment is on the left.
+  // For RTL, the default alignment is on the right.
+  bool _usesDefaultAlignment = true;
 
   ValueNotifier<bool> get _selectionOnTapEnabled =>
       WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabled;
@@ -3751,7 +3754,8 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
     final TextDirection textDirection = Directionality.of(context);
 
-    final String buttonLabel = 'Move to the ${_leftAligned ? (textDirection == TextDirection.ltr ? 'right' : 'left') : (textDirection == TextDirection.rtl ? 'right' : 'left')}';
+    final String buttonLabel =
+        'Move to the ${_usesDefaultAlignment ? (textDirection == TextDirection.ltr ? 'right' : 'left') : (textDirection == TextDirection.rtl ? 'right' : 'left')}';
 
     return _WidgetInspectorButton(
       button: buttonBuilder(
@@ -3761,7 +3765,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           _onTooltipHidden();
         },
         semanticsLabel: buttonLabel,
-        isLeftAligned: _leftAligned,
+        isLeftAligned: _usesDefaultAlignment,
       ),
       onTooltipVisible: () {
         _changeTooltipMessage(buttonLabel);
@@ -3822,16 +3826,16 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           painter: _ExitWidgetSelectionTooltipPainter(
             tooltipMessage: _tooltipMessage,
             buttonKey: _exitWidgetSelectionButtonKey,
-            isLeftAligned: _leftAligned,
+            isLeftAligned: _usesDefaultAlignment,
           ),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (_leftAligned) selectionModeButtons,
+            if (_usesDefaultAlignment) selectionModeButtons,
             if (_moveExitWidgetSelectionButton != null) _moveExitWidgetSelectionButton!,
-            if (!_leftAligned) selectionModeButtons,
+            if (!_usesDefaultAlignment) selectionModeButtons,
           ],
         ),
       ],
@@ -3839,8 +3843,8 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
     return Positioned.directional(
       textDirection: Directionality.of(context),
-      start: _leftAligned ? _kExitWidgetSelectionButtonMargin : null,
-      end: _leftAligned ? null : _kExitWidgetSelectionButtonMargin,
+      start: _usesDefaultAlignment ? _kExitWidgetSelectionButtonMargin : null,
+      end: _usesDefaultAlignment ? null : _kExitWidgetSelectionButtonMargin,
       bottom: _kExitWidgetSelectionButtonMargin,
       child: buttonGroup,
     );
@@ -3872,7 +3876,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   void _changeButtonGroupAlignment() {
     if (mounted) {
       setState(() {
-        _leftAligned = !_leftAligned;
+        _usesDefaultAlignment = !_usesDefaultAlignment;
       });
     }
   }
