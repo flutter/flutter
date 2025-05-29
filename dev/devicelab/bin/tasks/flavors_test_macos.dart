@@ -92,7 +92,7 @@ Future<void> main() async {
 
 Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   await inDirectory(projectDir, () async {
-    // This will put FLAVOR=free in the Flutter/ephemeral/Flutter-Generated.xcconfig file
+    // This will put DART_DEFINES=FLUTTER_APP_FLAVOR=free in the Flutter/ephemeral/Flutter-Generated.xcconfig file
     await flutter(
       'build',
       options: <String>['macos', '--config-only', '--debug', '--flavor', 'free'],
@@ -102,12 +102,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
   final File generatedXcconfig = File(
     path.join(projectDir, 'macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
   );
-  if (!generatedXcconfig.existsSync()) {
-    throw TaskResult.failure('Unable to find Generated.xcconfig');
-  }
-  if (!generatedXcconfig.readAsStringSync().contains('FLAVOR=free')) {
-    throw TaskResult.failure('Generated.xcconfig does not contain FLAVOR=free');
-  }
+  await checkFlavorInGeneratedXCConfig(generatedXcconfig, expectedFlavor: 'free');
 
   const String configuration = 'Debug-paid';
   const String productName = 'Debug Paid';
@@ -138,9 +133,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('App not found at $appPath');
   }
 
-  if (!generatedXcconfig.readAsStringSync().contains('FLAVOR=free')) {
-    throw TaskResult.failure('Generated.xcconfig does not contain FLAVOR=free');
-  }
+  await checkFlavorInGeneratedXCConfig(generatedXcconfig, expectedFlavor: 'free');
 
   // Despite FLAVOR=free being in the Generated.xcconfig, the flavor found in
   // the test should be "paid" because it was built with the "Debug-paid" configuration.

@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'host_agent.dart';
+import 'task_result.dart';
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
@@ -294,4 +295,55 @@ File? _createDisabledSandboxEntitlementFile(String platformDirectory, String con
 /// Returns global (external) symbol table entries, delimited by new lines.
 Future<String> dumpSymbolTable(String filePath) {
   return eval('nm', <String>['--extern-only', '--just-symbol-name', filePath, '-arch', 'arm64']);
+}
+
+/// Given a `Flutter-Generated.xcconfig` file, checks for `DART_DEFINES=<FLUTTER_APP_FLAVOR=$expectedFlavor>`.
+Future<void> checkFlavorInGeneratedXCConfig(
+  File generatedXcconfig, {
+  required String expectedFlavor,
+}) async {
+  if (!generatedXcconfig.existsSync()) {
+    throw TaskResult.failure('Unable to find Generated.xcconfig');
+  }
+  final Map<String, String> generatedXcconfigVars = _extractFlutterGeneratedXCConfig(
+    generatedXcconfig,
+  );
+  if (!generatedXcconfigVars.containsKey('DART_DEFINES')) {
+    throw TaskResult.failure('Unable to find DART_DEFINES=... in $generatedXcconfigVars');
+  }
+  final Map<String, String> dartDefines = _decodeBase64DartDefines(
+    generatedXcconfigVars['DART_DEFINES']!,
+  );
+  if (dartDefines['FLUTTER_APP_FLAVOR'] != expectedFlavor) {
+    throw TaskResult.failure('Unable to find FLUTTER_APP_FLAVOR=$expectedFlavor in $dartDefines');
+  }
+}
+
+final RegExp _defineVar = RegExp(r'^([A-Z_][A-Z0-9_]*)=(.*)$');
+
+(String, String)? _toPair(String define) {
+  final RegExpMatch? match = _defineVar.firstMatch(define);
+  if (match == null) {
+    return null;
+  }
+  final String key = match.group(1)!;
+  final String value = match.group(2)!;
+  return (key, value);
+}
+
+/// Extracts key-value pairs defined in a `Flutter-Generated.xcconfig` file.
+Map<String, String> _extractFlutterGeneratedXCConfig(File file) {
+  return <String, String>{
+    for (final String line in file.readAsLinesSync())
+      if (_toPair(line) case (final String key, final String value)) key: value,
+  };
+}
+
+/// Decodes an encoded `DART_DEFINES` string into individual definitions.
+Map<String, String> _decodeBase64DartDefines(String base64EncodedDefines) {
+  return <String, String>{
+    for (final String define in base64EncodedDefines.split(','))
+      if (_toPair(utf8.decode(base64Decode(define))) case (final String key, final String value))
+        key: value,
+  };
 }
