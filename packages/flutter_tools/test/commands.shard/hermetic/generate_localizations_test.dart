@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart' show Depfile;
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
@@ -515,6 +516,42 @@ format: true
       expect(processManager, hasNoRemainingExpectations);
     },
   );
+
+  testUsingContext('generates normalized input & output file paths', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!"
+}''');
+    final File configFile = fileSystem.file('l10n.yaml')..createSync();
+    // Writing both forward and backward slashes to test both cases.
+    configFile.writeAsStringSync(r'''
+arb-dir: lib/l10n
+output-dir: lib\l10n
+format: false
+''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+
+    processManager.addCommand(const FakeCommand(command: <String>[]));
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: artifacts,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    const Target buildTarget = GenerateLocalizationsTarget();
+    await buildTarget.build(environment);
+
+    final File dependencyFile = environment.buildDir.childFile(buildTarget.depfiles.single);
+    final Depfile depfile = environment.depFileService.parse(dependencyFile);
+
+    final String oppositeSeparator = fileSystem.path.separator == '/' ? r'\' : '/';
+    expect(depfile.inputs, everyElement(isNot(contains(oppositeSeparator))));
+    expect(depfile.outputs, everyElement(isNot(contains(oppositeSeparator))));
+  });
 
   testUsingContext(
     'nullable-getter defaults to true',
