@@ -2342,8 +2342,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
     if (_needsLayout) {
-      // Don't enter this block if we've never laid out at all;
-      // scheduleInitialLayout() will handle it
       _needsLayout = false;
       markNeedsLayout();
     }
