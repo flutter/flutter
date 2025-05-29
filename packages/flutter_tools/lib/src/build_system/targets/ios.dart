@@ -376,10 +376,7 @@ Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
   Pattern usage,
   Pattern terminator,
 ) async {
-  final Stream<String> lines = file
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(const LineSplitter());
+  final List<String> lines = file.readAsLinesSync();
 
   bool inDidFinishLaunchingWithOptions = false;
   int lineNumber = 0;
