@@ -5981,6 +5981,134 @@ void main() {
         expect(find.text('page1'), findsOneWidget);
         expect(page1.popInvoked, <CanPopPageInvoke>[(false, 1)]);
       });
+
+      testWidgets(
+        'using both handlesBacksWhenNested and NavigatorPopHandler',
+        (WidgetTester tester) async {
+          late StateSetter builderSetState;
+          final List<_Page> pages = <_Page>[_Page.home];
+          final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  builderSetState = setState;
+                  // This setup mimics someone that manually handled nested
+                  // Navigators before handlesBacksWhenNested was introduced in
+                  // https://github.com/flutter/flutter/pull/152330.
+                  return NavigatorPopHandler<void>(
+                    onPopWithResult: (void result) async {
+                      _nestedNavigatorKey.currentState!.maybePop();
+                    },
+                    child: Navigator(
+                      key: _nestedNavigatorKey,
+                      onDidRemovePage: (Page<void> page) {
+                        final bool pageIsPresent =
+                            pages.where((_Page testPage) {
+                              return testPage.toString() == page.name;
+                            }).isNotEmpty;
+                        if (!pageIsPresent) {
+                          return;
+                        }
+                        setState(() {
+                          pages.removeWhere((_Page testPage) {
+                            return testPage.toString() == page.name;
+                          });
+                        });
+                      },
+                      pages:
+                          pages.map((_Page page) {
+                            switch (page) {
+                              case _Page.home:
+                                return MaterialPage<void>(
+                                  name: _Page.home.toString(),
+                                  child: _LinksPage(
+                                    title: 'Home page',
+                                    buttons: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            pages.add(_Page.one);
+                                          });
+                                        },
+                                        child: const Text('Go to _Page.one'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            pages.add(_Page.noPop);
+                                          });
+                                        },
+                                        child: const Text('Go to _Page.noPop'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              case _Page.one:
+                                return MaterialPage<void>(
+                                  name: _Page.one.toString(),
+                                  child: const _LinksPage(title: 'Page one'),
+                                );
+                              case _Page.noPop:
+                                return MaterialPage<void>(
+                                  name: _Page.noPop.toString(),
+                                  child: const _LinksPage(title: 'Cannot pop page', canPop: false),
+                                );
+                            }
+                          }).toList(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+
+          expect(find.text('Home page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isFalse);
+
+          await tester.tap(find.text('Go to _Page.one'));
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home, _Page.one});
+          expect(find.text('Page one'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isTrue);
+
+          await simulateSystemBack();
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home});
+          expect(find.text('Home page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isFalse);
+
+          await tester.tap(find.text('Go to _Page.noPop'));
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
+          expect(find.text('Cannot pop page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isTrue);
+
+          await simulateSystemBack();
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
+          expect(find.text('Cannot pop page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isTrue);
+
+          // Circumvent "Cannot pop page" by directly modifying pages.
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
+          builderSetState(() {
+            pages.removeLast();
+          });
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home});
+          expect(find.text('Home page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isFalse);
+        },
+        variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
     });
   });
 
