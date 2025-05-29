@@ -16,6 +16,9 @@ FLUTTER_ASSERT_ARC
                  options:(UISceneConnectionOptions*)connectionOptions {
   NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
   if (appDelegate.window.rootViewController) {
+    NSLog(@"WARNING - The UIApplicationDelegate is setting up the UIWindow and "
+          @"UIWindow.rootViewController at launch. This was deprecated after the "
+          @"UISceneDelegate adoption. Setup logic should be moved to a UISceneDelegate.");
     // If this is not nil we are running into a case where someone is manually
     // performing root view controller setup in the UIApplicationDelegate.
     UIWindowScene* windowScene = (UIWindowScene*)scene;
