@@ -368,6 +368,56 @@ void main() {
     }
   });
 
+  testWidgets('Scaffold uses bottomSheetScrimBuilder if defined', (WidgetTester tester) async {
+    final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
+    const double kBottomSheetDominatesPercentage = 0.3;
+
+    const Key scrimKey = Key('scrim');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomSheetScrimBuilder: (BuildContext context, Animation<double> animation) {
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (BuildContext context, Widget? child) {
+                return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(animation.value));
+              },
+            );
+          },
+          bottomSheet: DraggableScrollableSheet(
+            expand: false,
+            controller: draggableController,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return SingleChildScrollView(controller: scrollController, child: const SizedBox());
+            },
+          ),
+        ),
+      ),
+    );
+    Finder findScrim() => find.byKey(scrimKey);
+    Finder findModalBarrier() =>
+        find.descendant(of: find.byType(Scaffold), matching: find.byType(ModalBarrier));
+    double getOpacity() => tester.firstWidget<ColoredBox>(findScrim()).color.opacity;
+
+    for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {
+      draggableController.jumpTo(extent);
+      await tester.pump();
+
+      final double extentRemaining = 1.0 - extent;
+      if (extentRemaining < kBottomSheetDominatesPercentage) {
+        final double animationValue = 1 - extentRemaining / kBottomSheetDominatesPercentage;
+
+        expect(findModalBarrier(), findsNothing);
+        expect(findScrim(), findsOneWidget);
+        expect(getOpacity(), moreOrLessEquals(animationValue, epsilon: 0.02));
+      } else {
+        expect(findScrim(), findsNothing);
+      }
+    }
+  });
+
   testWidgets('Floating action button directionality', (WidgetTester tester) async {
     Widget build(TextDirection textDirection) {
       return Directionality(
@@ -821,6 +871,33 @@ void main() {
     );
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
     expect(initialPoint, finalPoint);
+  });
+
+  testWidgets('Persistent bottom buttons can apply decoration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              child: Container(color: Colors.amber[500], height: 5000.0, child: const Text('body')),
+            ),
+            persistentFooterDecoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: Colors.red)),
+            ),
+            persistentFooterButtons: const <Widget>[Placeholder()],
+          ),
+        ),
+      ),
+    );
+
+    final Finder persistentFooter =
+        find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Container)).first;
+    final Decoration decoration = tester.widget<Container>(persistentFooter).decoration!;
+
+    expect(decoration, isA<BoxDecoration>());
+    expect((decoration as BoxDecoration).border!.top.color, Colors.red);
   });
 
   group('back arrow', () {

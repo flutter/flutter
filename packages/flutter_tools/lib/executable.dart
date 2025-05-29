@@ -99,6 +99,17 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
+  // Silently add --start-paused if running with -d web-server and --web-experimental-hot-reload,
+  // and --start-paused is not already present. This is to support hot reload in web-server environment.
+  // TODO(yjessy): Remove this workaround once https://github.com/dart-lang/sdk/issues/60688 is resolved.
+
+  if (args.contains('-d') &&
+      args.contains('web-server') &&
+      args.contains('--web-experimental-hot-reload') &&
+      !args.contains('--start-paused')) {
+    args = List<String>.from(args)..add('--start-paused');
+  }
+
   await runner.run(
     args,
     () => generateCommands(verboseHelp: verboseHelp, verbose: verbose),

@@ -13,7 +13,7 @@ library canvaskit_api;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -44,7 +44,7 @@ external set windowFlutterCanvasKit(CanvasKit? value);
 external CanvasKit? get windowFlutterCanvasKit;
 
 @JS('window.flutterCanvasKitLoaded')
-external JSPromise<JSAny>? get windowFlutterCanvasKitLoaded;
+external JSPromise<CanvasKit>? get windowFlutterCanvasKitLoaded;
 
 extension type CanvasKit(JSObject _) implements JSObject {
   external SkBlendModeEnum get BlendMode;
@@ -1790,10 +1790,10 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   );
 
   bool RequiresClientICU() {
-    if (!js_util.hasProperty(this, 'RequiresClientICU')) {
+    if (!has('RequiresClientICU')) {
       return false;
     }
-    return js_util.callMethod(this, 'RequiresClientICU', const <Object>[]) as bool;
+    return callMethod<JSBoolean>('RequiresClientICU'.toJS).toDart;
   }
 }
 
