@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_canvas.dart';
@@ -239,6 +240,46 @@ class WebTextStyle implements ui.TextStyle {
       return true;
     }());
     return result;
+  }
+
+  String fontWeightIndexToCss({int fontWeightIndex = 3}) {
+    switch (fontWeightIndex) {
+      case 0:
+        return '100';
+      case 1:
+        return '200';
+      case 2:
+        return '300';
+      case 3:
+        return 'normal';
+      case 4:
+        return '500';
+      case 5:
+        return '600';
+      case 6:
+        return 'bold';
+      case 7:
+        return '800';
+      case 8:
+        return '900';
+    }
+
+    assert(() {
+      throw AssertionError('Failed to convert font weight $fontWeightIndex to CSS.');
+    }());
+
+    return '';
+  }
+
+  String buildCssFontString() {
+    final String cssFontStyle =
+        (fontStyle == null || fontStyle == ui.FontStyle.normal) ? 'normal' : 'italic';
+    final String cssFontWeight =
+        fontWeight == null ? 'normal' : fontWeightIndexToCss(fontWeightIndex: fontWeight!.index);
+    final int cssFontSize = fontSize == null ? 14 : fontSize!.floor();
+    final String cssFontFamily = engine.canonicalizeFontFamily(originalFontFamily)!;
+
+    return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
   }
 }
 
@@ -497,6 +538,10 @@ class WebParagraph implements ui.Paragraph {
 
   TextLayout getLayout() {
     return _layout;
+  }
+
+  String getText(TextRange textRange) {
+    return text!.substring(textRange.start, textRange.end);
   }
 
   late final TextLayout _layout = TextLayout(this);

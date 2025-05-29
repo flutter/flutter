@@ -311,10 +311,7 @@ class TextPaint {
         .translate(lineOffset.dx, lineOffset.dy)
         .translate(-shift, 0);
 
-    final String text = paragraph.text!.substring(
-      webTextCluster.textRange.start,
-      webTextCluster.textRange.end,
-    );
+    final String text = paragraph.getText(webTextCluster.textRange);
 
     paintContext.fillStyle = textStyle.foreground?.color.toCssString();
 
@@ -413,10 +410,7 @@ class TextPaint {
         .translate(lineOffset.dx, lineOffset.dy)
         .translate(-shift, 0);
 
-    final String text = paragraph.text!.substring(
-      webTextCluster.textRange.start,
-      webTextCluster.textRange.end,
-    );
+    final String text = paragraph.getText(webTextCluster.textRange);
 
     WebParagraphDebug.log(
       'cluster "$text" source: ${sourceRect.left}:${sourceRect.right} => target: ${targetRect.left}:${targetRect.right} ${targetRect.top}:${targetRect.bottom} pos $pos shift $shift ',

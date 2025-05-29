@@ -82,9 +82,7 @@ class TextWrapper {
         }
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
-          _widthText,
           ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-          _widthWhitespaces,
           hardLineBreak,
           _top,
         );
@@ -165,9 +163,7 @@ class TextWrapper {
         // Add the line
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
-          _widthText,
           ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-          _widthWhitespaces,
           hardLineBreak,
           _top,
         );
@@ -193,9 +189,7 @@ class TextWrapper {
 
     _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),
-      _widthText,
       ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-      _widthWhitespaces,
       hardLineBreak,
       _top,
     );
