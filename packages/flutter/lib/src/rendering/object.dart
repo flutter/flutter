@@ -2458,36 +2458,32 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// (where it will always be false).
   static bool debugCheckingIntrinsics = false;
 
-  /// This flag is true if [layout] has been called on this [RenderObject] by its
-  /// current parent.
+  /// This flag is true if [layout] has been called at least once for this
+  /// [RenderObject] by its current parent.
   ///
   /// If a parent calls [dropChild] and [adoptChild] on this child, this flag
-  /// will still be set to false.
-  //
-  // DO NOT USE: This flag is for replicating the legacy behavior of
-  // relayoutBoundary which RenderSliverMultiBoxAdaptor relies on to bypass the
-  // _debugRelayoutBoundaryAlreadyMarkedNeedsLayout check. See that method for
-  // more details.
+  /// will still be reset to false.
   bool _debugLaidOutByThisParentBefore = false;
 
   // TODO(LongCatIsLooong): consider removing this check entirely, or introduce
   // a new flag on RenderObject so the rendering layer knows when a child subtree
-  // is being skipped for layout.
-  //
-  // This debug method verifies that every node with _needsLayout set to true is
-  // reachable via tree-walk. However RenderObjects who deliberately skips
-  // children (e.g., RenderSliverMultiBoxAdaptor or _RenderTheater) want to make
-  // part of the tree unreachable for performance reasons.
+  // is being skipped for layout, see the comments regarding the use of
+  // _debugLaidOutByThisParentBefore.
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    if (!_debugLaidOutByThisParentBefore) {
-      return true;
-    }
     final bool alreadyMarkedNeedsLayout = _needsLayout || _debugDoingThisLayout;
     if (!alreadyMarkedNeedsLayout) {
       return false;
     }
 
-    return _isRelayoutBoundary ||
+    // This debug method verifies that every node with _needsLayout sets to true
+    // is reachable via tree-walk. However RenderObjects who deliberately skips
+    // children (e.g., RenderSliverMultiBoxAdaptor or _RenderTheater) want to
+    // make part of the tree unreachable for performance reasons. The implementation
+    // here tries to detect such cases by checking _debugLaidOutByThisParentBefore:
+    // if this RenderObject has never been laid out by the current parent, then
+    // we assume that the parent will layout the subtree when needed.
+    return !_debugLaidOutByThisParentBefore ||
+        _isRelayoutBoundary ||
         (debugLayoutParent?._debugRelayoutBoundaryAlreadyMarkedNeedsLayout() ?? true);
   }
 
