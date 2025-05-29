@@ -2401,19 +2401,17 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// A relayout boundary is a [RenderObject] whose parent does not rely on the
   /// child [RenderObject]'s size in its own layout algorithm (from here on out,
-  /// "size" refer not just to [RenderBox.size], but any layout artifacts
-  /// produced by the child's [performLayout] implementation, such as the baseline
-  /// location. See also the `parentUsesSize` parameter in [RenderObject.layout]).
-  /// In other words, if a [RenderObject]'s [performLayout] implementation does
-  /// not consult the size of a child at all (including the case where it does
-  /// depend on the child's size but is able to compute the child's size by itself
-  /// without consulting the child), **the child** is a relayout boundary.
+  /// "size" refers not just to [RenderBox.size], but any layout artifacts
+  /// produced by the child's [performLayout] implementation, such as baseline
+  /// locations). In other words, if a [RenderObject]'s [performLayout]
+  /// implementation does not ask the child for its size at all, **the child** is
+  /// a relayout boundary.
   ///
-  /// Relayout boundaries enable an important layout optimization in Flutter:
-  /// the parent not depending on the size of a child means the child changing
-  /// size changes does not affect the layout of the parent. When a relayout
-  /// boundary is marked as needing layout, its parent typically does not have to
-  /// marked as dirty too, hence the name. For details, see [markNeedsLayout].
+  /// Relayout boundaries enable an important layout optimization: the parent not
+  /// depending on the size of a child means the child changing size does not
+  /// affect the layout of the parent. When a relayout boundary is marked as
+  /// needing layout, its parent does not have to be marked as dirty, hence the
+  /// name. For details, see [markNeedsLayout].
   ///
   /// This flag is typically set in [RenderObject.layout], and consulted by
   /// [markNeedsLayout] in deciding whether to recursively mark the parent as
