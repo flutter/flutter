@@ -248,7 +248,7 @@ class FontFallbackManager {
 
   NotoFont _selectFont(List<NotoFont> fonts) {
     NotoFont? bestFont;
-    // Priority is given to fonts that match the languate
+    // Priority is given to fonts that match the language
     switch (_language) {
       case 'zh-Hans' || 'zh-CN' || 'zh-SG' || 'zh-MY':
         bestFont = fonts.firstWhereOrNull(_isNotoSansSC);
