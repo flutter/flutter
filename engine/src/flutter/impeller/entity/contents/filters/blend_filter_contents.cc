@@ -471,11 +471,12 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     frame_info.texture_sampler_y_coord_scale =
         dst_snapshot->texture->GetYCoordScale();
 
-    frag_info.input_alpha =
-        absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
-            ? dst_snapshot->opacity * alpha.value_or(1.0)
-            : 1.0;
-    frag_info.output_alpha = 1.0;
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+                    ? dst_snapshot->opacity * alpha.value_or(1.0)
+                    : 1.0,
+                1, 0, 0);
+    frag_info.use_strict_source_rect = 0.0;
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));

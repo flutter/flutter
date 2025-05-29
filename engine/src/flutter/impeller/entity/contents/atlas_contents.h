@@ -39,6 +39,12 @@ class AtlasGeometry {
   virtual BlendMode GetBlendMode() const = 0;
 
   virtual bool ShouldInvertBlendMode() const { return true; }
+
+  /// @brief The source rect of the draw if a strict source rect should
+  ///        be applied, or nullopt.
+  ///
+  /// See also `Canvas::AttemptColorFilterOptimization`
+  virtual std::optional<Rect> GetStrictSrcRect() const { return std::nullopt; }
 };
 
 /// @brief An atlas geometry that adapts for drawImageRect.
@@ -49,7 +55,8 @@ class DrawImageRectAtlasGeometry : public AtlasGeometry {
                              const Rect& destination,
                              const Color& color,
                              BlendMode blend_mode,
-                             const SamplerDescriptor& desc);
+                             const SamplerDescriptor& desc,
+                             bool use_strict_src_rect = false);
 
   ~DrawImageRectAtlasGeometry();
 
@@ -71,6 +78,8 @@ class DrawImageRectAtlasGeometry : public AtlasGeometry {
 
   bool ShouldInvertBlendMode() const override;
 
+  std::optional<Rect> GetStrictSrcRect() const override;
+
  private:
   const std::shared_ptr<Texture> texture_;
   const Rect source_;
@@ -78,6 +87,7 @@ class DrawImageRectAtlasGeometry : public AtlasGeometry {
   const Color color_;
   const BlendMode blend_mode_;
   const SamplerDescriptor desc_;
+  const bool use_strict_src_rect_;
 };
 
 class AtlasContents final : public Contents {
