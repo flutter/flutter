@@ -22,7 +22,7 @@ void main() {
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Large title is visible and at lower position.
-    expect(tester.getBottomLeft(find.text('Contacts').first).dy, 88.0);
+    expect(tester.getBottomLeft(find.text('Contacts').first).dy, 80.0);
     await tester.fling(find.text('Drag me up'), titleDragUp, 500.0);
     await tester.pumpAndSettle();
 
@@ -45,18 +45,18 @@ void main() {
 
     // Middle, large title, and search field are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
-    expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 132.0);
+    expect(tester.getBottomLeft(find.text('Family').first).dy, 80.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 88.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 124.0);
 
     await tester.fling(find.text('Drag me up'), bottomDragUp, 50.0);
     await tester.pumpAndSettle();
 
     // Search field is hidden, but large title and middle title are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
-    expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
+    expect(tester.getBottomLeft(find.text('Family').first).dy, 80.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 88.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 88.0);
 
     await tester.fling(find.text('Drag me up'), titleDragUp, 50.0);
     await tester.pumpAndSettle();
@@ -82,9 +82,9 @@ void main() {
 
     // Middle, large title, and search field are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
-    expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 132.0);
+    expect(tester.getBottomLeft(find.text('Family').first).dy, 80.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 88.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 124.0);
 
     await tester.fling(find.text('Drag me up'), titleDragUp, 50.0);
     await tester.pumpAndSettle();

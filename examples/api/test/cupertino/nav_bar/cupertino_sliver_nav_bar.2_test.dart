@@ -34,7 +34,7 @@ void main() {
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Large title is visible and at lower position.
-    expect(tester.getBottomLeft(find.text('Contacts').first).dy, 88.0);
+    expect(tester.getBottomLeft(find.text('Contacts').first).dy, 80.0);
     await tester.fling(find.text('Drag me up'), dragUp, 500.0);
     await tester.pumpAndSettle();
 
@@ -59,7 +59,7 @@ void main() {
 
     // Both middle and large titles are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
-    expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
+    expect(tester.getBottomLeft(find.text('Family').first).dy, 80.0);
 
     await tester.fling(find.text('Drag me up'), dragUp, 500.0);
     await tester.pumpAndSettle();

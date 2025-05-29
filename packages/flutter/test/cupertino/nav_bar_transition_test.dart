@@ -1144,7 +1144,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).first).dy,
-      moreOrLessEquals(52.2, epsilon: 0.01),
+      moreOrLessEquals(44.5, epsilon: 0.01),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last).dx,
@@ -1152,7 +1152,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Page 1')).last).dy,
-      moreOrLessEquals(52.2, epsilon: 0.01),
+      moreOrLessEquals(44.5, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -1362,7 +1362,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('A title too long to fit'))).dy,
-      moreOrLessEquals(52.2, epsilon: 0.01),
+      moreOrLessEquals(44.5, epsilon: 0.01),
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Back'))).dx,
@@ -1370,7 +1370,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(flying(tester, find.text('Back'))).dy,
-      moreOrLessEquals(52.2, epsilon: 0.01),
+      moreOrLessEquals(44.5, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -1522,7 +1522,7 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 2'))).dx,
       moreOrLessEquals(661.64, epsilon: 0.01),
     );
-    expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 54.0);
+    expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 46.0);
 
     await tester.pump(const Duration(milliseconds: 150));
 
@@ -1531,7 +1531,7 @@ void main() {
       tester.getTopLeft(flying(tester, find.text('Page 2'))).dx,
       moreOrLessEquals(96.57, epsilon: 0.01),
     );
-    expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 54.0);
+    expect(tester.getTopLeft(flying(tester, find.text('Page 2'))).dy, 46.0);
   });
 
   testWidgets('Top large title fades in and slides in from the left in RTL', (
@@ -1554,7 +1554,7 @@ void main() {
       tester.getTopRight(flying(tester, find.text('Page 2'))).dx,
       moreOrLessEquals(138.36, epsilon: 0.01),
     );
-    expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 54.0);
+    expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 46.0);
 
     await tester.pump(const Duration(milliseconds: 150));
 
@@ -1563,7 +1563,7 @@ void main() {
       tester.getTopRight(flying(tester, find.text('Page 2'))).dx,
       moreOrLessEquals(703.43, epsilon: 0.01),
     );
-    expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 54.0);
+    expect(tester.getTopRight(flying(tester, find.text('Page 2'))).dy, 46.0);
   });
 
   testWidgets('Top CupertinoSliverNavigationBar.bottom is aligned with top large title animation', (

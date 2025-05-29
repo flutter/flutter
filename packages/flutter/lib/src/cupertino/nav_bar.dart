@@ -47,7 +47,7 @@ const double _kNavBarPersistentHeight = kMinInteractiveDimensionCupertino;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
 /// configuration in a [CustomScrollView].
-const double _kNavBarLargeTitleHeightExtension = 52.0;
+const double _kNavBarLargeTitleHeightExtension = kMinInteractiveDimensionCupertino;
 
 /// Number of logical pixels scrolled down before the title text is transferred
 /// from the normal navigation bar to a big title below the navigation bar.
@@ -759,7 +759,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double persistentHeight =
         _kNavBarPersistentHeight + bottomHeight + MediaQuery.paddingOf(context).top;
-    final double largeHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
+    final double largeHeight =
+        persistentHeight + _kNavBarLargeTitleHeightExtension + _kNavBarBottomPadding;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -805,7 +806,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     child: _LargeTitle(
-                      height: _kNavBarLargeTitleHeightExtension,
+                      height: _kNavBarLargeTitleHeightExtension + _kNavBarBottomPadding,
                       child: components.largeTitle,
                     ),
                   ),
