@@ -759,8 +759,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double persistentHeight =
         _kNavBarPersistentHeight + bottomHeight + MediaQuery.paddingOf(context).top;
-    final double largeHeight =
-        persistentHeight + _kNavBarLargeTitleHeightExtension + _kNavBarBottomPadding;
+    final double largeHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -806,7 +805,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     child: _LargeTitle(
-                      height: _kNavBarLargeTitleHeightExtension + _kNavBarBottomPadding,
+                      height: _kNavBarLargeTitleHeightExtension,
                       child: components.largeTitle,
                     ),
                   ),
