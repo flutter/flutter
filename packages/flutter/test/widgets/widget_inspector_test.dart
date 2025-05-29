@@ -996,105 +996,155 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     );
 
     testWidgets(
-      'WidgetInspector Move Exit Selection Mode button to the right / left in LTR and RTL',
+      '[LTR] WidgetInspector Move Exit Selection Mode button to the right then left',
       (WidgetTester tester) async {
-        for (final TextDirection direction in <ui.TextDirection>[
-          TextDirection.ltr,
-          TextDirection.rtl,
-        ]) {
-          // Reset before each direction test
-          WidgetInspectorService.instance.isSelectMode = true;
+        WidgetInspectorService.instance.isSelectMode = true;
+        final GlobalKey inspectorKey = GlobalKey();
+        setupDefaultPubRootDirectory(service);
 
-          final GlobalKey inspectorKey = GlobalKey();
-          setupDefaultPubRootDirectory(service);
-
-          Widget exitWidgetSelectionButtonBuilder(
-            BuildContext context, {
-            required VoidCallback onPressed,
-            required String semanticsLabel,
-            required GlobalKey key,
-          }) {
-            return Material(
-              child: ElevatedButton(
-                onPressed: onPressed,
-                key: key,
-                child: const Text('EXIT SELECT MODE'),
-              ),
-            );
-          }
-
-          Widget moveWidgetSelectionButtonBuilder(
-            BuildContext context, {
-            required VoidCallback onPressed,
-            required String semanticsLabel,
-            bool isLeftAligned = true,
-          }) {
-            return Material(
-              child: ElevatedButton(
-                onPressed: onPressed,
-                child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
-              ),
-            );
-          }
-
-          Finder buttonFinder(String buttonText) {
-            return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
-          }
-
-          await tester.pumpWidget(
-            Directionality(
-              textDirection: direction,
-              child: WidgetInspector(
-                key: inspectorKey,
-                exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
-                moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
-                tapBehaviorButtonBuilder: null,
-                child: const Text('APP'),
-              ),
+        Widget exitWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required String semanticsLabel,
+          required GlobalKey key,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              key: key,
+              child: const Text('EXIT SELECT MODE'),
             ),
           );
-
-          // Initially the exit select button is on the left (for LTR) or right (for RTL).
-          final Finder exitButton = buttonFinder('EXIT SELECT MODE');
-          expect(exitButton, findsOneWidget);
-          final Finder moveRightButton = buttonFinder('MOVE RIGHT');
-          expect(moveRightButton, findsOneWidget);
-          final double initialExitButtonX = tester.getCenter(exitButton).dx;
-
-          // Move the button
-          await tester.tap(moveRightButton);
-          await tester.pump();
-
-          expect(moveRightButton, findsNothing);
-          final Finder moveLeftButton = buttonFinder('MOVE LEFT');
-          expect(moveLeftButton, findsOneWidget);
-          final double movedExitButtonX = tester.getCenter(exitButton).dx;
-
-          // Directional expectations
-          if (direction == TextDirection.ltr) {
-            expect(
-              initialExitButtonX,
-              lessThan(movedExitButtonX),
-              reason: 'LTR: should move right',
-            );
-          } else {
-            expect(
-              initialExitButtonX,
-              greaterThan(movedExitButtonX),
-              reason: 'RTL: should move left',
-            );
-          }
-
-          // Move back to original position
-          await tester.tap(moveLeftButton);
-          await tester.pump();
-
-          expect(moveLeftButton, findsNothing);
-          expect(moveRightButton, findsOneWidget);
-          final double finalExitButtonX = tester.getCenter(exitButton).dx;
-
-          expect(finalExitButtonX, equals(initialExitButtonX));
         }
+
+        Widget moveWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required String semanticsLabel,
+          bool isLeftAligned = true,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+            ),
+          );
+        }
+
+        Finder buttonFinder(String buttonText) {
+          return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
+        }
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: WidgetInspector(
+              key: inspectorKey,
+              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
+              tapBehaviorButtonBuilder: null,
+              child: const Text('APP'),
+            ),
+          ),
+        );
+
+        final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+        expect(exitButton, findsOneWidget);
+        final Finder moveRightButton = buttonFinder('MOVE RIGHT');
+        expect(moveRightButton, findsOneWidget);
+        final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+        await tester.tap(moveRightButton);
+        await tester.pump();
+
+        final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+        expect(moveLeftButton, findsOneWidget);
+        final double movedExitButtonX = tester.getCenter(exitButton).dx;
+
+        expect(initialExitButtonX, lessThan(movedExitButtonX), reason: 'LTR: should move right');
+
+        await tester.tap(moveLeftButton);
+        await tester.pump();
+
+        final double finalExitButtonX = tester.getCenter(exitButton).dx;
+        expect(finalExitButtonX, equals(initialExitButtonX));
+      },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
+    );
+
+    testWidgets(
+      '[RTL] WidgetInspector Move Exit Selection Mode button to the left then right',
+      (WidgetTester tester) async {
+        WidgetInspectorService.instance.isSelectMode = true;
+        final GlobalKey inspectorKey = GlobalKey();
+        setupDefaultPubRootDirectory(service);
+
+        Widget exitWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required String semanticsLabel,
+          required GlobalKey key,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              key: key,
+              child: const Text('EXIT SELECT MODE'),
+            ),
+          );
+        }
+
+        Widget moveWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required String semanticsLabel,
+          bool isLeftAligned = true,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+            ),
+          );
+        }
+
+        Finder buttonFinder(String buttonText) {
+          return find.ancestor(of: find.text(buttonText), matching: find.byType(ElevatedButton));
+        }
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: WidgetInspector(
+              key: inspectorKey,
+              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: moveWidgetSelectionButtonBuilder,
+              tapBehaviorButtonBuilder: null,
+              child: const Text('APP'),
+            ),
+          ),
+        );
+
+        final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+        expect(exitButton, findsOneWidget);
+        final Finder moveRightButton = buttonFinder('MOVE RIGHT');
+        expect(moveRightButton, findsOneWidget);
+        final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+        await tester.tap(moveRightButton);
+        await tester.pump();
+
+        final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+        expect(moveLeftButton, findsOneWidget);
+        final double movedExitButtonX = tester.getCenter(exitButton).dx;
+
+        expect(initialExitButtonX, greaterThan(movedExitButtonX), reason: 'RTL: should move left');
+
+        await tester.tap(moveLeftButton);
+        await tester.pump();
+
+        final double finalExitButtonX = tester.getCenter(exitButton).dx;
+        expect(finalExitButtonX, equals(initialExitButtonX));
       },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
