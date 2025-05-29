@@ -73,8 +73,8 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   bool get highContrast => _kHighContrastIndex & _index != 0;
   @override
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
-  // This is an inverted check on _index since there are many more platforms
-  // that support announce whereas don't.
+  // This index check is inverted (== 0 vs != 0); far more platforms support
+  // "announce" than discourage it.
   @override
   bool get announce => _kNoAnnounceIndex & _index == 0;
 
@@ -156,8 +156,7 @@ class EngineAccessibilityFeaturesBuilder {
   bool get reduceMotion => EngineAccessibilityFeatures._kReduceMotionIndex & _index != 0;
   bool get highContrast => EngineAccessibilityFeatures._kHighContrastIndex & _index != 0;
   bool get onOffSwitchLabels => EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex & _index != 0;
-  // This is an inverted check on _index since there are many more platforms
-  // that support announce whereas don't.
+  // This index check is inverted (== 0 vs != 0); far more platforms support
   bool get announce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
 
   set accessibleNavigation(bool value) {

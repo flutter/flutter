@@ -970,17 +970,17 @@ class AccessibilityFeatures {
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
   /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are allowed on the current platform.
+  /// are supported on the current platform.
   ///
-  /// Returns `false` on Android, where platform announcements are deprecated
-  /// by the underlying platform.
+  /// Returns `false` on platforms where announcements are deprecated or
+  /// unsupported by the underlying platform.
   ///
-  /// Returns `true` on all other platforms (iOS, web, desktop) where such
-  /// announcements are generally supported without discouragement.
+  /// Returns `true` on platforms where such announcements are
+  /// generally supported without discouragement. (iOS, web etc)
   ///
   /// Use this flag to conditionally avoid making announcements on Android.
-  // This is an inverted check on _index since there are many more platforms
-  // that support announce whereas don't.
+  // This index check is inverted (== 0 vs != 0); far more platforms support
+  // "announce" than discourage it.
   bool get announce => _kNoAnnounceIndex & _index == 0;
 
   @override
