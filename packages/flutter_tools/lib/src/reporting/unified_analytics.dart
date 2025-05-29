@@ -62,7 +62,7 @@ Analytics getAnalytics({
 /// Uses the [Config] object to get enabled features.
 String? getEnabledFeatures(Config config) {
   // Create string with all enabled features to send as user property
-  final Iterable<Feature> enabledFeatures = allFeatures.where((Feature feature) {
+  final Iterable<Feature> enabledFeatures = featureFlags.allFeatures.where((Feature feature) {
     final String? configSetting = feature.configSetting;
     return configSetting != null && config.getValue(configSetting) == true;
   });
