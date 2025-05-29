@@ -1,4 +1,4 @@
-Signature: aebc333eca857a2ca876b998e04ccf66
+Signature: ddb6b26375f26587a0adee6403c032d1
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9895,6 +9895,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPUContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
@@ -9926,6 +9927,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Serializat
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp
 FILE: ../../../flutter/third_party/skia/include/core/SkCPUContext.h
 FILE: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h
 FILE: ../../../flutter/third_party/skia/include/core/SkRecorder.h
