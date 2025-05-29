@@ -955,38 +955,6 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
-class _Shape {
-  const _Shape({
-    required this.width,
-    required this.height,
-    required this.tlRadiusX,
-    required this.tlRadiusY,
-    required this.trRadiusX,
-    required this.trRadiusY,
-    required this.brRadiusX,
-    required this.brRadiusY,
-    required this.blRadiusX,
-    required this.blRadiusY,
-    required this.uniformRadii,
-  });
-
-  final double width;
-  final double height;
-  final double tlRadiusX;
-  final double tlRadiusY;
-  Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
-  final double trRadiusX;
-  final double trRadiusY;
-  Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
-  final double brRadiusX;
-  final double brRadiusY;
-  Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
-  final double blRadiusX;
-  final double blRadiusY;
-  Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
-  final bool uniformRadii;
-}
-
 class RSuperellipse extends _RRectLike<RSuperellipse> {
   RSuperellipse.fromLTRBXY(
     double left,
