@@ -679,14 +679,9 @@ class _HeroFlight {
         case HeroFlightDirection.pop:
           return initialManifest.isUserGestureTransition
               // During user gesture transitions, the animation controller isn't
-              // driving the reverse transition, but should have a starting value
-              // approaching 1.0. In cases where the toRoute begane offstage, there
-              // is a slight delay while the toRoute laysout before the hero's
-              // flight begins, so the animation may not begin completed.
-              ? initial.value == 1.0
-                  ? initial.status == AnimationStatus.completed
-                  : initial.status == AnimationStatus.forward
-              : initial.status == AnimationStatus.reverse;
+              // driving the reverse transition, so the status is not important.
+              ||
+              initial.status == AnimationStatus.reverse;
         case HeroFlightDirection.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
@@ -929,11 +924,13 @@ class HeroController extends NavigatorObserver {
     // maintainState = true, then the hero's final dimensions can be measured
     // immediately because their page's layout is still valid. Unless due to directly
     // adding routes to the pages stack causing the route to never get laid out.
-    final bool needsLayout = toRoute.subtreeContext?.findRenderObject()?.debugNeedsLayout ?? true;
+    final RenderBox? fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
+    final bool hasLayout =
+        (fromRouteRenderBox?.hasSize ?? false) && fromRouteRenderBox!.size.isFinite;
     if (isUserGestureTransition &&
         flightType == HeroFlightDirection.pop &&
         toRoute.maintainState &&
-        !needsLayout) {
+        hasLayout) {
       _startHeroTransition(fromRoute, toRoute, flightType, isUserGestureTransition);
     } else {
       // Otherwise, delay measuring until the end of the next frame to allow
