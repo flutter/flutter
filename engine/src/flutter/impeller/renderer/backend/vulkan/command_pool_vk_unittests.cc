@@ -228,5 +228,24 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
   context->Shutdown();
 }
 
+TEST(CommandPoolRecyclerVKTest, RecyclerGlobalPoolMapSize) {
+  auto context = MockVulkanContextBuilder().Build();
+  auto const recycler = context->GetCommandPoolRecycler();
+
+  // The global pool list for this context should initially be empty.
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+
+  // Creating a pool for this thread should insert the pool into the global map.
+  auto pool = recycler->Get();
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 1);
+
+  // Disposing this thread's pool should remove it from the global map.
+  pool.reset();
+  recycler->Dispose();
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+
+  context->Shutdown();
+}
+
 }  // namespace testing
 }  // namespace impeller
