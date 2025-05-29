@@ -20,7 +20,10 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterAppDelegate ()
+@interface FlutterAppDelegate () {
+  __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
+  NSObject<FlutterPluginRegistrant>* _strongRegistrant;
+}
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @end
@@ -227,6 +230,26 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 }
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
+
+- (NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (_weakRegistrant) {
+    return _weakRegistrant;
+  }
+  if (_strongRegistrant) {
+    return _strongRegistrant;
+  }
+  return nil;
+}
+
+- (void)setPluginRegistrant:(NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (pluginRegistrant == (id)self) {
+    _weakRegistrant = pluginRegistrant;
+    _strongRegistrant = nil;
+  } else {
+    _weakRegistrant = nil;
+    _strongRegistrant = pluginRegistrant;
+  }
+}
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   FlutterViewController* flutterRootViewController = [self rootFlutterViewController];

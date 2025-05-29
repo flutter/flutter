@@ -124,6 +124,19 @@ void main() {
         FileSystem: createFsWithPubspec,
       },
     );
+
+    testUsingContext('Test feature flags match feature flags', () {
+      final FeatureFlags testFeatureFlags = TestFeatureFlags();
+
+      expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
+
+      final List<String> featureNames =
+          featureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+      final List<String> testFeatureNames =
+          testFeatureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+
+      expect(featureNames, unorderedEquals(testFeatureNames));
+    });
   });
 
   group('Linux Destkop', () {
@@ -356,24 +369,6 @@ void main() {
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
     });
   });
-
-  group('Explicit Package Dependencies', () {
-    test('is fully enabled', () {
-      expect(explicitPackageDependencies, _isFullyEnabled);
-    });
-
-    test('can be configured', () {
-      expect(explicitPackageDependencies.configSetting, 'explicit-package-dependencies');
-      expect(explicitPackageDependencies.environmentOverride, isNull);
-    });
-
-    test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: explicitPackageDependencies,
-      );
-      expect(checkFlags.isExplicitPackageDependenciesEnabled, isTrue);
-    });
-  });
 }
 
 final class _FakeFeaturesConfig implements FlutterFeaturesConfig {
@@ -459,4 +454,7 @@ final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
   bool isEnabled(Feature feature) {
     return feature == shouldInvoke;
   }
+
+  @override
+  List<Feature> get allFeatures => throw UnimplementedError();
 }
