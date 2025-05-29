@@ -22,7 +22,6 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../features.dart';
 import '../project.dart';
 import '../version.dart';
 
@@ -192,7 +191,6 @@ abstract class Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   });
 }
@@ -242,8 +240,6 @@ class _DefaultPub implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
@@ -700,15 +696,6 @@ class _DefaultPub implements Pub {
   ///
   /// Creates a corresponding `package_config_subset` file that is used by the
   /// build system to avoid rebuilds caused by an updated pub timestamp.
-  ///
-  /// if `project.generateSyntheticPackage` is `true` then insert flutter_gen
-  /// synthetic package into the package configuration. This is used by the l10n
-  /// localization tooling to insert a new reference into the package_config
-  /// file, allowing the import of a package URI that is not specified in the
-  /// pubspec.yaml
-  ///
-  /// For more information, see:
-  ///   * [generateLocalizations]
   Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
@@ -718,47 +705,6 @@ class _DefaultPub implements Pub {
     packageConfigFile.parent
         .childFile('package_config_subset')
         .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
-
-    // If we aren't generating localizations, short-circuit.
-    if (!project.manifest.generateLocalizations) {
-      return;
-    }
-
-    // Workaround for https://github.com/flutter/flutter/issues/164864.
-    // If this flag is set, synthetic packages cannot be used, so we short-circut.
-    if (featureFlags.isExplicitPackageDependenciesEnabled) {
-      return;
-    }
-
-    if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
-      throwToolExit(
-        '`generate: true` is not supported within workspaces unless flutter config '
-        '--explicit-package-dependencies is set.',
-      );
-    }
-
-    if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
-      return;
-    }
-
-    // TODO(jonahwillams): Using raw json manipulation here because
-    // savePackageConfig always writes to local io, and it changes absolute
-    // paths to relative on round trip.
-    // See: https://github.com/dart-lang/package_config/issues/99,
-    // and: https://github.com/dart-lang/package_config/issues/100.
-
-    // Because [loadPackageConfigWithLogging] succeeded [packageConfigFile]
-    // we can rely on the file to exist and be correctly formatted.
-    final Map<String, dynamic> jsonContents =
-        json.decode(packageConfigFile.readAsStringSync()) as Map<String, dynamic>;
-
-    (jsonContents['packages'] as List<dynamic>).add(<String, dynamic>{
-      'name': 'flutter_gen',
-      'rootUri': 'flutter_gen',
-      'languageVersion': '2.12',
-    });
-
-    packageConfigFile.writeAsStringSync(json.encode(jsonContents));
   }
 
   // Subset the package config file to only the parts that are relevant for
