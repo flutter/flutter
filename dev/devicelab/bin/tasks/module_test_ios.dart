@@ -295,7 +295,7 @@ dependencies:
             !podFailure.contains(
               'Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins',
             )) {
-          print(podfile.readAsLinesSync());
+          print(podfile.readAsStringSync());
           throw TaskResult.failure(
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );

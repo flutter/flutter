@@ -294,7 +294,7 @@ void main() {
         expect(
           context.stderr,
           contains(
-            'error: Your project is currently configured for debug mode. '
+            'error: Your Flutter project is currently configured for debug mode. '
             'Please run `flutter build ${platform.name} --config-only --release` '
             'in your Flutter project to update your settings.',
           ),
@@ -359,7 +359,7 @@ void main() {
         expect(
           context.stderr,
           contains(
-            'warning: Your project is currently configured for debug mode. '
+            'warning: Your Flutter project is currently configured for debug mode. '
             'Please run `flutter build ${platform.name} --config-only --release` '
             'in your Flutter project to update your settings.',
           ),

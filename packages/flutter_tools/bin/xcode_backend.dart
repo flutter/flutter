@@ -539,7 +539,8 @@ class Context {
   /// Validate that the build mode targeted matches the build mode set by the
   /// Flutter CLI.
   /// If it doesn't match, print a warning unless the Xcode action is `install`,
-  /// which means the app is being archived for distribution.
+  /// which means the app is being archived for distribution. In that case, print
+  /// an error and fail the build.
   ///
   /// The targeted build mode might not match the one set by Flutter CLI when it
   /// is changed and ran directly through Xcode.
@@ -570,7 +571,7 @@ class Context {
     }
     if (currentBuildMode != buildModeCLILastUsed) {
       final String message =
-          'Your project is currently configured for $buildModeCLILastUsed mode. '
+          'Your Flutter project is currently configured for $buildModeCLILastUsed mode. '
           'Please run `flutter build ${platform.name} --config-only --$currentBuildMode` '
           'in your Flutter project to update your settings.\n';
       if (fatal) {

@@ -142,7 +142,7 @@ void main() {
             xcodeResult,
             const ProcessResultMatcher(
               exitCode: 65,
-              stdoutPattern: 'error: Your project is currently configured for debug mode.',
+              stdoutPattern: 'error: Your Flutter project is currently configured for debug mode.',
               stderrPattern: '** ARCHIVE FAILED **',
             ),
           );
@@ -192,7 +192,8 @@ void main() {
           expect(
             xcodeResult,
             const ProcessResultMatcher(
-              stdoutPattern: 'warning: Your project is currently configured for release mode.',
+              stdoutPattern:
+                  'warning: Your Flutter project is currently configured for release mode.',
             ),
           );
         },
@@ -347,7 +348,7 @@ void main() {
             xcodeResult,
             const ProcessResultMatcher(
               exitCode: 65,
-              stdoutPattern: 'error: Your project is currently configured for debug mode.',
+              stdoutPattern: 'error: Your Flutter project is currently configured for debug mode.',
               stderrPattern: '** ARCHIVE FAILED **',
             ),
           );
@@ -423,7 +424,8 @@ void main() {
           expect(
             xcodeResult,
             const ProcessResultMatcher(
-              stdoutPattern: 'warning: Your project is currently configured for release mode.',
+              stdoutPattern:
+                  'warning: Your Flutter project is currently configured for release mode.',
             ),
           );
         },
@@ -524,7 +526,7 @@ void main() {
             xcodeResult,
             const ProcessResultMatcher(
               exitCode: 65,
-              stdoutPattern: 'error: Your project is currently configured for debug mode.',
+              stdoutPattern: 'error: Your Flutter project is currently configured for debug mode.',
               stderrPattern: '** ARCHIVE FAILED **',
             ),
           );
@@ -574,7 +576,8 @@ void main() {
           expect(
             xcodeResult,
             const ProcessResultMatcher(
-              stdoutPattern: 'warning: Your project is currently configured for release mode.',
+              stdoutPattern:
+                  'warning: Your Flutter project is currently configured for release mode.',
             ),
           );
         },
