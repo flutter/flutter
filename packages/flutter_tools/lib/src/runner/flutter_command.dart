@@ -1501,7 +1501,7 @@ abstract class FlutterCommand extends Command<void> {
         '$kEnabledFeatureFlags is used by the framework and cannot be '
         'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}.\n'
         '\n'
-        'Use the "flutter config" command to enable feature flags.'
+        'Use the "flutter config" command to enable feature flags.',
       );
     }
 
