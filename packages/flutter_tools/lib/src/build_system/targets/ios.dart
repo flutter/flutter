@@ -399,7 +399,7 @@ Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
           '\tnote: \n' // The space after `note:` is meaningful, it is required associate the note with the warning in Xcode.
           '\tAfter the UISceneDelegate migration the `UIApplicationDelegate.window` and '
           '`UIWindow.rootViewController` properties will not be set in '
-          '`application:didFinishLaunchingWithOptions:`. If you are relying on on that '
+          '`application:didFinishLaunchingWithOptions:`. If you are relying on that '
           'in order to register platform channels at application launch use the '
           '`FlutterPluginRegistry` API instead. Other setup can be moved to a '
           'FlutterViewController subclass (ex: `awakeFromNib`).',
@@ -646,7 +646,11 @@ abstract class IosAssetBundle extends Target {
   const IosAssetBundle();
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+    InstallCodeAssets(),
+    _IssueLaunchRootViewControllerAccess(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -790,7 +794,6 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const CheckDevDependenciesIos(),
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
-    const _IssueLaunchRootViewControllerAccess(),
     ...super.dependencies,
   ];
 }
