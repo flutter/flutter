@@ -75,45 +75,18 @@ DEF_SWITCH(DeviceVMServiceHost,
            "The hostname/IP address on which the Dart VM Service should "
            "be served. If not set, defaults to 127.0.0.1 or ::1 depending on "
            "whether --ipv6 is specified.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(
-    DeviceObservatoryHost,
-    "observatory-host",
-    "(deprecated) The hostname/IP address on which the Dart VM Service should "
-    "be served. If not set, defaults to 127.0.0.1 or ::1 depending on "
-    "whether --ipv6 is specified.")
 DEF_SWITCH(DeviceVMServicePort,
            "vm-service-port",
            "A custom Dart VM Service port. The default is to pick a randomly "
-           "available open port.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(DeviceObservatoryPort,
-           "observatory-port",
-           "(deprecated) A custom Dart VM Service port. The default is to pick "
-           "a randomly "
            "available open port.")
 DEF_SWITCH(
     DisableVMService,
     "disable-vm-service",
     "Disable the Dart VM Service. The Dart VM Service is never available "
     "in release mode.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(DisableObservatory,
-           "disable-observatory",
-           "(deprecated) Disable the Dart VM Service. The Dart VM Service is "
-           "never available "
-           "in release mode.")
 DEF_SWITCH(DisableVMServicePublication,
            "disable-vm-service-publication",
            "Disable mDNS Dart VM Service publication.")
-// TODO(bkonyi): remove once flutter_tools no longer uses this option.
-// See https://github.com/dart-lang/sdk/issues/50233
-DEF_SWITCH(DisableObservatoryPublication,
-           "disable-observatory-publication",
-           "(deprecated) Disable mDNS Dart VM Service publication.")
 DEF_SWITCH(IPv6,
            "ipv6",
            "Bind to the IPv6 localhost address for the Dart VM Service. "

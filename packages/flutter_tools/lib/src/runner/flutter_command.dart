@@ -169,9 +169,6 @@ abstract class FlutterCommand extends Command<void> {
   /// The option name for a custom VM Service port.
   static const String vmServicePortOption = 'vm-service-port';
 
-  /// The option name for a custom VM Service port.
-  static const String observatoryPortOption = 'observatory-port';
-
   /// The option name for a custom DevTools server address.
   static const String kDevToolsServerAddress = 'devtools-server-address';
 
@@ -519,16 +516,6 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
     );
     argParser.addOption(
-      observatoryPortOption,
-      help:
-          '(deprecated; use host-vmservice-port instead) '
-          'Listen to the given port for a Dart VM Service connection.\n'
-          'Specifying port 0 (the default) will find a random free port.\n '
-          'if the Dart Development Service (DDS) is enabled, this will not be the port '
-          'of the VmService instance advertised on the command line.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
       'device-vmservice-port',
       help:
           'Look for vmservice connections only from the specified port.\n'
@@ -608,14 +595,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addServeObservatoryOptions({required bool verboseHelp}) {
-    argParser.addFlag(
-      'serve-observatory',
-      hide: !verboseHelp,
-      help: 'Serve the legacy Observatory developer tooling through the VM service.',
-    );
-  }
-
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -646,12 +625,10 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get _hostVmServicePortProvided =>
       (argResults?.wasParsed(vmServicePortOption) ?? false) ||
-      (argResults?.wasParsed(observatoryPortOption) ?? false) ||
       (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort =
-        stringArg(vmServicePortOption) ?? stringArg(observatoryPortOption);
+    final String? vmServicePort = stringArg(vmServicePortOption);
     final String? hostPort = stringArg('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
@@ -697,7 +674,6 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     if ((argResults?.wasParsed(vmServicePortOption) ?? false) &&
-        (argResults?.wasParsed(observatoryPortOption) ?? false) &&
         (argResults?.wasParsed('host-vmservice-port') ?? false)) {
       throwToolExit(
         'Only one of "--vm-service-port" and '
@@ -864,9 +840,6 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
-
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
 
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false) &&
@@ -1438,6 +1411,18 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
+    if (globals.platform.environment[kAppFlavor] != null) {
+      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
+      throwToolExit(
+        '$kAppFlavor is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
+    if (flavor != null) {
+      dartDefines.add('$kAppFlavor=$flavor');
+    }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
 
     return BuildInfo(
@@ -1897,11 +1882,11 @@ abstract class FlutterCommand extends Command<void> {
     return runCommand();
   }
 
-  /// Whether to run [regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
   ///
   /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
   /// builds sequentially in one-go) may choose to override this and provide `false`, instead
-  /// calling [regeneratePlatformSpecificTooling] manually when applicable.
+  /// calling [FlutterProject.regeneratePlatformSpecificTooling] manually when applicable.
   @visibleForOverriding
   bool get regeneratePlatformSpecificToolingDuringVerify => true;
 

@@ -11,8 +11,6 @@
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/constants.h"
-#include "impeller/geometry/path_builder.h"
-#include "impeller/geometry/path_component.h"
 #include "impeller/geometry/separated_vector.h"
 #include "impeller/geometry/wangs_formula.h"
 #include "impeller/tessellator/path_tessellator.h"
@@ -786,7 +784,12 @@ GeometryResult::Mode StrokePathSourceGeometry::GetResultMode() const {
 
 std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
     const Matrix& transform) const {
-  auto path_bounds = GetSource().GetBounds();
+  return GetStrokeCoverage(transform, GetSource().GetBounds());
+}
+
+std::optional<Rect> StrokePathSourceGeometry::GetStrokeCoverage(
+    const Matrix& transform,
+    const Rect& path_bounds) const {
   if (path_bounds.IsEmpty()) {
     return std::nullopt;
   }
@@ -808,16 +811,39 @@ std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
   return path_bounds.Expand(max_radius).TransformBounds(transform);
 }
 
-StrokePathGeometry::StrokePathGeometry(const Path& path,
-                                       const StrokeParameters& parameters)
-    : StrokePathSourceGeometry(parameters), path_(path) {}
-
 StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
                                        const StrokeParameters& parameters)
     : StrokePathSourceGeometry(parameters), path_(path) {}
 
 const PathSource& StrokePathGeometry::GetSource() const {
   return path_;
+}
+
+ArcStrokePathGeometry::ArcStrokePathGeometry(const flutter::DlPath& path,
+                                             const Rect& oval_bounds,
+                                             const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      path_(path),
+      oval_bounds_(oval_bounds) {}
+
+const PathSource& ArcStrokePathGeometry::GetSource() const {
+  return path_;
+}
+
+std::optional<Rect> ArcStrokePathGeometry::GetCoverage(
+    const Matrix& transform) const {
+  return GetStrokeCoverage(transform,
+                           path_.GetBounds().IntersectionOrEmpty(oval_bounds_));
+}
+
+StrokeDiffRoundRectGeometry::StrokeDiffRoundRectGeometry(
+    const RoundRect& outer,
+    const RoundRect& inner,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters), source_(outer, inner) {}
+
+const PathSource& StrokeDiffRoundRectGeometry::GetSource() const {
+  return source_;
 }
 
 }  // namespace impeller

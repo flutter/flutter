@@ -7,17 +7,16 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/depfile.dart' show Depfile;
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -25,12 +24,6 @@ void main() {
   late BufferLogger logger;
   late Artifacts artifacts;
   late FakeProcessManager processManager;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   setUpAll(() {
     Cache.disableLocking();
@@ -71,7 +64,6 @@ void main() {
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -144,7 +136,6 @@ flutter:
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
     },
   );
 
@@ -216,7 +207,6 @@ flutter:
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -293,7 +283,6 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -330,7 +319,6 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -379,7 +367,6 @@ format: true
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -418,7 +405,6 @@ format: false
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -479,7 +465,6 @@ untranslated-messages-file: lib/l10n/untranslated.json
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -530,8 +515,43 @@ format: true
       expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
   );
+
+  testUsingContext('generates normalized input & output file paths', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!"
+}''');
+    final File configFile = fileSystem.file('l10n.yaml')..createSync();
+    // Writing both forward and backward slashes to test both cases.
+    configFile.writeAsStringSync(r'''
+arb-dir: lib/l10n
+output-dir: lib\l10n
+format: false
+''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+
+    processManager.addCommand(const FakeCommand(command: <String>[]));
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: artifacts,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+    const Target buildTarget = GenerateLocalizationsTarget();
+    await buildTarget.build(environment);
+
+    final File dependencyFile = environment.buildDir.childFile(buildTarget.depfiles.single);
+    final Depfile depfile = environment.depFileService.parse(dependencyFile);
+
+    final String oppositeSeparator = fileSystem.path.separator == '/' ? r'\' : '/';
+    expect(depfile.inputs, everyElement(isNot(contains(oppositeSeparator))));
+    expect(depfile.outputs, everyElement(isNot(contains(oppositeSeparator))));
+  });
 
   testUsingContext(
     'nullable-getter defaults to true',
@@ -564,7 +584,6 @@ format: true
       );
     },
     overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
@@ -706,7 +725,6 @@ format: true
         expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
       },
       overrides: <Type, Generator>{
-        FeatureFlags: enableExplicitPackageDependencies,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       },

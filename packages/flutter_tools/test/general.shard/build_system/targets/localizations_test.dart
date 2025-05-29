@@ -51,6 +51,7 @@ nullable-getter: false
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      fileSystem: fileSystem,
       defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       defaultSyntheticPackage: true,
     );
@@ -90,6 +91,7 @@ nullable-getter: false
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      fileSystem: fileSystem,
       defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       defaultSyntheticPackage: true,
     );
@@ -118,6 +120,7 @@ nullable-getter: false
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      fileSystem: fileSystem,
       defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       defaultSyntheticPackage: false,
     );
@@ -136,6 +139,7 @@ preferred-supported-locales: ['en_US', 'de']
       final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        fileSystem: fileSystem,
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
         defaultSyntheticPackage: true,
       );
@@ -156,6 +160,7 @@ use-deferred-loading: string
         () => parseLocalizationsOptionsFromYAML(
           file: configFile,
           logger: BufferLogger.test(),
+          fileSystem: fileSystem,
           defaultArbDir: fileSystem.path.join('lib', 'l10n'),
           defaultSyntheticPackage: true,
         ),
@@ -174,6 +179,7 @@ template-arb-file: {name}_en.arb
       () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        fileSystem: fileSystem,
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
         defaultSyntheticPackage: true,
       ),

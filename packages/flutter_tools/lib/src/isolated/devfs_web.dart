@@ -191,7 +191,8 @@ class WebAssetServer implements AssetReader {
   /// contains a list of objects each with two fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
-  /// bundle.
+  /// bundle. To support embedded libraries, the path should include the
+  /// `baseUri` of the web server.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
   ///
@@ -199,7 +200,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "<file_name>",
+  ///     "src": "<baseUri>/<file_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
   /// ]
@@ -215,7 +216,8 @@ class WebAssetServer implements AssetReader {
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
+      final String moduleUri = baseUri != null ? '$baseUri/$module' : module;
+      moduleToLibrary.add(<String, Object>{'src': moduleUri, 'libraries': libraries});
     }
     writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
   }
@@ -374,6 +376,15 @@ class WebAssetServer implements AssetReader {
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen(log);
 
+    // Retrieve connected web devices.
+    final List<Device>? devices = await globals.deviceManager?.getAllDevices();
+    final Set<String> connectedWebDeviceIds =
+        devices
+            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
+            .map((Device d) => d.id)
+            .toSet() ??
+        <String>{};
+
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
@@ -424,10 +435,12 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
-      // Defaults to 'chrome' if deviceManager or specifiedDeviceId is null,
-      // ensuring the condition is true by default.
+      // Inject the debugging support code if connected web devices are present,
+      // and user specified a device id that matches a connected web device.
+      // If the user did not specify a device id, we use chrome as the default.
       injectDebuggingSupportCode:
-          (globals.deviceManager?.specifiedDeviceId ?? 'chrome') == 'chrome',
+          connectedWebDeviceIds.isNotEmpty &&
+          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {

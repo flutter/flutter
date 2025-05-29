@@ -36,10 +36,6 @@ void main() {
   const ProcessManager processManager = LocalProcessManager();
   final String constraint = _getPackageFfiTemplatePubspecVersion();
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   // Test building a host, iOS, and APK (Android) target where possible.
   for (final String buildCommand in <String>[
     // Current (Host) OS.

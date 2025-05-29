@@ -17,6 +17,7 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
+import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -117,6 +118,7 @@ abstract class AssetBundle {
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,
+    bool includeAssetsFromDevDependencies = false,
   });
 }
 
@@ -239,6 +241,7 @@ class ManifestAssetBundle implements AssetBundle {
     bool deferredComponentsEnabled = false,
     TargetPlatform? targetPlatform,
     String? flavor,
+    bool includeAssetsFromDevDependencies = false,
   }) async {
     if (flutterProject == null) {
       try {
@@ -332,9 +335,32 @@ class ManifestAssetBundle implements AssetBundle {
       primary: true,
     );
 
-    // Add fonts, assets, and licenses from packages.
+    // Add fonts, assets, and licenses from packages in the project's
+    // dependencies.
+    // To avoid bundling assets from dev_dependencies and other pub workspace
+    // packages, we compute the set of transitive dependencies.
+    final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
+      flutterProject,
+      packageConfig,
+      _fileSystem,
+    );
     final Map<String, List<File>> additionalLicenseFiles = <String, List<File>>{};
-    for (final Package package in packageConfig.packages) {
+    for (final Dependency dependency in transitiveDependencies) {
+      if (!includeAssetsFromDevDependencies && dependency.isExclusiveDevDependency) {
+        continue;
+      }
+      final String packageName = dependency.name;
+      final Package? package = packageConfig[packageName];
+      if (package == null) {
+        // This can happen with eg. `flutter run --no-pub`.
+        //
+        // We usually expect the package config to be up to date with the
+        // current pubspec.yaml - but because we can force pub get to not be run
+        // with `flutter run --no-pub` we can end up with a new dependency in
+        // pubspec.yaml that is not yet discovered by pub and placed in the
+        // package config.
+        throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`.');
+      }
       final Uri packageUri = package.packageUriRoot;
       if (packageUri.scheme == 'file') {
         final String packageManifestPath = _fileSystem.path.fromUri(
@@ -827,7 +853,7 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   /// Prefixes family names and asset paths of fonts included from packages with
-  /// 'packages/<package_name>'
+  /// `packages/<package_name>`.
   List<Font> _parsePackageFonts(
     FlutterManifest manifest,
     String packageName,

@@ -1820,7 +1820,7 @@ mixin WidgetInspectorService {
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
   /// the Dart garbage collector from collecting objects between when
   /// the value is returned over the VM service protocol and when the
-  /// separate observatory protocol command has to be used to retrieve its full
+  /// separate VM service protocol command has to be used to retrieve its full
   /// contents.
   //
   // TODO(jacobr): Replace this with a better solution once
@@ -1990,14 +1990,55 @@ mixin WidgetInspectorService {
     List<DiagnosticsNode> nodes,
     InspectorSerializationDelegate delegate,
   ) {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[
-      for (final DiagnosticsNode child in nodes)
-        if (!delegate.summaryTree || _shouldShowInSummaryTree(child))
-          child
-        else
-          ..._getChildrenFiltered(child, delegate),
-    ];
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+
+    for (final DiagnosticsNode child in nodes) {
+      // Check to see if the current node is enabling or disabling the widget inspector for its
+      // children and update the delegate.
+      final InspectorSerializationDelegate? updatedDelegate =
+          _updateDelegateForWidgetInspectorEnabledState(delegate: delegate, node: child);
+
+      // We don't report the current node if:
+      //   - the current node is a reference to a DisableWidgetInspectorScope
+      //   - the current node is a reference to an EnableWidgetInspectorScope
+      //   - DisableWidgetInspectorScope was previously encountered in a parent node and
+      //     EnableWidgetInspectorScope hasn't been encountered as a descendant
+      //   - we're building a summary tree and the node is filtered
+      final bool inDisableWidgetInspectorScope =
+          (updatedDelegate?.inDisableWidgetInspectorScope ?? false) ||
+          delegate.inDisableWidgetInspectorScope;
+      if (!inDisableWidgetInspectorScope &&
+          (!delegate.summaryTree || _shouldShowInSummaryTree(child))) {
+        children.add(child);
+      } else {
+        children.addAll(_getChildrenFiltered(child, updatedDelegate ?? delegate));
+      }
+    }
     return children;
+  }
+
+  /// Returns a new [InspectorSerializationDelegate] if [node] references either an
+  /// [EnableWidgetInspectorScope] or [DisableWidgetInspectorScope] and the value of
+  /// `delegate.inDisableInspectorWidgetScope` is updated.
+  ///
+  /// If [EnableWidgetInspectorScope] is encountered and `delegate.inDisableInspectorWidgetScope`
+  /// is already false, null is returned.
+  ///
+  /// If [DisableWidgetInspectorScope] is encountered and `delegate.inDisableInspectorWidgetScope`
+  /// is already true, null is returned.
+  InspectorSerializationDelegate? _updateDelegateForWidgetInspectorEnabledState({
+    required InspectorSerializationDelegate delegate,
+    required DiagnosticsNode node,
+  }) {
+    final Object? value = node.value;
+    if (!delegate.inDisableWidgetInspectorScope &&
+        value is _DisableWidgetInspectorScopeProxyElement) {
+      return delegate.copyWith(inDisableWidgetInspectorScope: true);
+    } else if (delegate.inDisableWidgetInspectorScope &&
+        value is _EnableWidgetInspectorScopeProxyElement) {
+      return delegate.copyWith(inDisableWidgetInspectorScope: false);
+    }
+    return null;
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -2305,7 +2346,7 @@ mixin WidgetInspectorService {
 
               final ParentData? parentData = renderObject.parentData;
               if (parentData is FlexParentData) {
-                additionalJson['flexFactor'] = parentData.flex!;
+                additionalJson['flexFactor'] = parentData.flex ?? 0;
                 additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
               } else if (parentData is BoxParentData) {
                 final Offset offset = parentData.offset;
@@ -2763,8 +2804,7 @@ class _WidgetForTypeTests extends Widget {
 /// Select a location on your device or emulator and view what widgets and
 /// render object that best matches the location. An outline of the selected
 /// widget and terse summary information is shown on device with detailed
-/// information is shown in the observatory or in IntelliJ when using the
-/// Flutter Plugin.
+/// information is shown in Flutter DevTools.
 ///
 /// The inspector has a select mode and a view mode.
 ///
@@ -3024,6 +3064,60 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           ),
       ],
     );
+  }
+}
+
+/// Enables the Flutter DevTools Widget Inspector for a [Widget] subtree.
+///
+/// The widget inspector is enabled by default, so this widget is only useful if
+/// it is a descendant of [DisableWidgetInspectorScope] in the widget tree.
+///
+/// See also:
+///
+///  * [DisableWidgetInspectorScope], the widget used to enable the inspector for a widget subtree.
+///  * [WidgetInspector], the widget used to provide inspector support for a widget subtree.
+class EnableWidgetInspectorScope extends ProxyWidget {
+  /// Enables the Flutter DevTools Widget Inspector for the [Widget] subtree rooted at [child].
+  const EnableWidgetInspectorScope({super.key, required super.child});
+
+  @override
+  Element createElement() => _EnableWidgetInspectorScopeProxyElement(this);
+}
+
+class _EnableWidgetInspectorScopeProxyElement extends ProxyElement {
+  _EnableWidgetInspectorScopeProxyElement(super.widget);
+
+  @override
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Do nothing.
+  }
+}
+
+/// Disables the Flutter DevTools Widget Inspector for a [Widget] subtree.
+///
+/// This is useful for hiding implementation details of widgets in contexts where the additional
+/// information may be confusing to end users. For example, a widget previewer may display multiple
+/// previews of user defined widgets and decide to only display the user defined widgets in the
+/// inspector while hiding the scaffolding used to host the widgets in the previewer.
+///
+/// See also:
+///
+///  * [EnableWidgetInspectorScope], the widget used to enable the inspector for a widget subtree.
+///  * [WidgetInspector], the widget used to provide inspector support for a widget subtree.
+class DisableWidgetInspectorScope extends ProxyWidget {
+  /// Disables the Flutter DevTools Widget Inspector for the [Widget] subtree rooted at [child].
+  const DisableWidgetInspectorScope({super.key, required super.child});
+
+  @override
+  Element createElement() => _DisableWidgetInspectorScopeProxyElement(this);
+}
+
+class _DisableWidgetInspectorScopeProxyElement extends ProxyElement {
+  _DisableWidgetInspectorScopeProxyElement(super.widget);
+
+  @override
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Do nothing.
   }
 }
 
@@ -3501,7 +3595,7 @@ class _InspectorOverlayLayer extends Layer {
     if (!targetRect.hasNaN) {
       final Offset target = Offset(targetRect.left, targetRect.center.dy);
       const double offsetFromWidget = 9.0;
-      final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
+      final double verticalOffset = targetRect.height / 2 + offsetFromWidget;
 
       _paintDescription(
         canvas,
@@ -4258,6 +4352,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     this.includeProperties = false,
     required this.service,
     this.addAdditionalPropertiesCallback,
+    this.inDisableWidgetInspectorScope = false,
   });
 
   /// Service used by GUI tools to interact with the [WidgetInspector].
@@ -4284,6 +4379,10 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   final bool expandPropertyValues;
+
+  /// If true, tree nodes will not be reported in responses until an EnableWidgetInspectorScope is
+  /// encountered.
+  final bool inDisableWidgetInspectorScope;
 
   /// Callback to add additional experimental serialization properties.
   ///
@@ -4360,10 +4459,11 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 
   @override
-  DiagnosticsSerializationDelegate copyWith({
+  InspectorSerializationDelegate copyWith({
     int? subtreeDepth,
     bool? includeProperties,
     bool? expandPropertyValues,
+    bool? inDisableWidgetInspectorScope,
   }) {
     return InspectorSerializationDelegate(
       groupName: groupName,
@@ -4374,6 +4474,8 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
       includeProperties: includeProperties ?? this.includeProperties,
       service: service,
       addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
+      inDisableWidgetInspectorScope:
+          inDisableWidgetInspectorScope ?? this.inDisableWidgetInspectorScope,
     );
   }
 }

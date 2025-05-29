@@ -273,8 +273,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsPaint();
   }
 
-  bool _isAbove(double childHeight) =>
-      anchorAbove.dy >= childHeight - _kToolbarArrowSize.height * 2;
+  bool _isAbove(double childHeight) => anchorAbove.dy >= childHeight - _kToolbarArrowSize.height;
 
   BoxConstraints _constraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(

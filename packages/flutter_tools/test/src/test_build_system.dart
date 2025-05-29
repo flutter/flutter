@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 
 class TestBuildSystem implements BuildSystem {
@@ -70,4 +71,19 @@ class TestBuildSystem implements BuildSystem {
     }
     return _results[_nextResult++];
   }
+}
+
+/// Encodes a map of key-value pairs into a comma-separated base64 encoded string.
+///
+/// ## Example
+///
+/// ```dart
+/// print(encodeDartDefines({'FLUTTER_WEB': 'true', 'FLUTTER_WEB_CANVASKIT_URL': 'https://example.com'}));
+/// // RkxVVFRFUl9XRUI9dHJ1ZQo=,RkxVVFRFUl9XRUJfQ0FOVkFTS0lUX1VSTD1odHRwczovL2V4YW1wbGUuY29t
+/// ```
+String encodeDartDefinesMap(Map<String, String> defines) {
+  final List<String> flattened = <String>[
+    for (final MapEntry<String, String> entry in defines.entries) '${entry.key}=${entry.value}',
+  ];
+  return encodeDartDefines(flattened);
 }

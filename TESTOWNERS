@@ -38,6 +38,7 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/devtools_profile_start_test.dart @bkonyi @flutter/tool
+/dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @jtmcdole @flutter/engine
@@ -64,6 +65,7 @@
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @reidbaker @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @bkonyi @flutter/tool
+/dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/image_list_reported_duration.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/large_image_changer_perf_android.dart @jtmcdole @flutter/engine
@@ -133,7 +135,6 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/drive_perf_debug_warning.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/external_textures_integration_test.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/fading_child_animation_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart @jtmcdole @flutter/engine
@@ -145,7 +146,6 @@
 /dev/devicelab/bin/tasks/hello_world_impeller.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/home_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle__benchmark.dart @bkonyi @flutter/tool
-/dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @stuartmorgan-g @flutter/plugin
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf__timeline_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_driver.dart @bkonyi @flutter/tool
@@ -154,6 +154,7 @@
 /dev/devicelab/bin/tasks/integration_ui_screenshot.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/integration_ui_textfield.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks.dart @jtmcdole @flutter/engine
+/dev/devicelab/bin/tasks/native_assets_android.dart @dcharkes @flutter/android
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_impeller__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_impeller_old_zoom__transition_perf.dart @jonahwilliams @flutter/engine
@@ -207,7 +208,6 @@
 /dev/devicelab/bin/tasks/keyboard_hot_restart_ios.dart @loic-sharma @flutter/ios
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/microbenchmarks_ios.dart @louisehsu @flutter/engine
-/dev/devicelab/bin/tasks/native_assets_android.dart @dcharkes @flutter/android
 /dev/devicelab/bin/tasks/native_assets_ios.dart @dcharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @jtmcdole @flutter/engine

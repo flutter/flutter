@@ -112,7 +112,7 @@ String _defaultSyntheticPackagePath(FileSystem fileSystem) =>
 /// The default path used when the `_useSyntheticPackage` setting is set to true
 /// in [LocalizationsGenerator].
 ///
-/// See [LocalizationsGenerator.initialize] for where and how it is used by the
+/// See [LocalizationsGenerator.new] for where and how it is used by the
 /// localizations tool.
 String _syntheticL10nPackagePath(FileSystem fileSystem) =>
     fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
@@ -526,7 +526,7 @@ String _generateDelegateClass({
 
 class LocalizationsGenerator {
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
-  /// [outputFile] and [className].
+  /// [baseOutputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
   /// by [LocalizationsGenerator].
@@ -545,7 +545,7 @@ class LocalizationsGenerator {
     String? headerFile,
     bool useDeferredLoading = false,
     String? inputsAndOutputsListPath,
-    bool useSyntheticPackage = true,
+    bool useSyntheticPackage = false,
     String? projectPathString,
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,
@@ -658,12 +658,12 @@ class LocalizationsGenerator {
   /// The directory to generate the project's localizations files in.
   ///
   /// It is assumed that all output files (e.g. The localizations
-  /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
+  /// [baseOutputFile], `messages_<locale>.dart` and `messages_all.dart`)
   /// will reside here.
   final Directory outputDirectory;
 
   /// The input arb file which defines all of the messages that will be
-  /// exported by the generated class that's written to [outputFile].
+  /// exported by the generated class that's written to [baseOutputFile].
   final File templateArbFile;
 
   /// The file to write the generated abstract localizations and
@@ -672,7 +672,7 @@ class LocalizationsGenerator {
   /// filename as a prefix and the locale as the suffix.
   final File baseOutputFile;
 
-  /// The class name to be used for the localizations class in [outputFile].
+  /// The class name to be used for the localizations class in [baseOutputFile].
   ///
   /// For example, if 'AppLocalizations' is passed in, a class named
   /// AppLocalizations will be used for localized message lookups.
@@ -726,7 +726,7 @@ class LocalizationsGenerator {
   /// deferred, allowing for lazy loading of each locale in Flutter web.
   ///
   /// This can reduce a web app’s initial startup time by decreasing the size of
-  /// the JavaScript bundle. When [_useDeferredLoading] is set to true, the
+  /// the JavaScript bundle. When [useDeferredLoading] is set to `true`, the
   /// messages for a particular locale are only downloaded and loaded by the
   /// Flutter app as they are needed. For projects with a lot of different
   /// locales and many localization strings, it can be an performance
@@ -1000,6 +1000,14 @@ class LocalizationsGenerator {
     return true;
   }
 
+  void _addToFileList(List<String> fileList, String path) {
+    fileList.add(_fs.path.normalize(path));
+  }
+
+  void _addAllToFileList(List<String> fileList, Iterable<String> paths) {
+    fileList.addAll(paths.map(_fs.path.normalize));
+  }
+
   // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in inputDirectory. Also initialized: supportedLocales.
   void loadResources() {
@@ -1030,7 +1038,8 @@ class LocalizationsGenerator {
             .toList();
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
-      _inputFileList.addAll(
+      _addAllToFileList(
+        _inputFileList,
         _allBundles.bundles.map((AppResourceBundle bundle) {
           return bundle.file.absolute.path;
         }),
@@ -1492,7 +1501,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     // Generate the required files for localizations.
     _languageFileMap.forEach((File file, String contents) {
       file.writeAsStringSync(useCRLF ? contents.replaceAll('\n', '\r\n') : contents);
-      _outputFileList.add(file.absolute.path);
+      _addToFileList(_outputFileList, file.absolute.path);
     });
 
     baseOutputFile.writeAsStringSync(
@@ -1527,7 +1536,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       );
     }
     final File? inputsAndOutputsListFileLocal = inputsAndOutputsListFile;
-    _outputFileList.add(baseOutputFile.absolute.path);
+    _addToFileList(_outputFileList, baseOutputFile.absolute.path);
     if (inputsAndOutputsListFileLocal != null) {
       // Generate a JSON file containing the inputs and outputs of the gen_l10n script.
       if (!inputsAndOutputsListFileLocal.existsSync()) {
@@ -1548,7 +1557,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
   void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
       untranslatedMessagesFile.writeAsStringSync('{}');
-      _outputFileList.add(untranslatedMessagesFile.absolute.path);
+      _addToFileList(_outputFileList, untranslatedMessagesFile.absolute.path);
       return;
     }
 
@@ -1576,6 +1585,6 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
 
     resultingFile += '}\n';
     untranslatedMessagesFile.writeAsStringSync(resultingFile);
-    _outputFileList.add(untranslatedMessagesFile.absolute.path);
+    _addToFileList(_outputFileList, untranslatedMessagesFile.absolute.path);
   }
 }

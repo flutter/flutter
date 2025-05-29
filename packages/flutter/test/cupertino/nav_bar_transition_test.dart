@@ -665,21 +665,15 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 2',
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(
-                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+            builder: (BuildContext context) => scaffoldForNavBar(null)!,
           ),
         );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('nav_bar_transition.large_title.expanded.png'),
-    );
+    final int numComponents =
+        tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length;
 
     await tester.pumpAndSettle();
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -693,22 +687,85 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             title: 'Page 2',
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(
-                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+            builder: (BuildContext context) => scaffoldForNavBar(null)!,
           ),
         );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await expectLater(
-      find.byType(CupertinoApp),
-      matchesGoldenFile('nav_bar_transition.large_title.collapsed.png'),
+    // The bottom nav bar transition background box has been added.
+    expect(
+      tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length,
+      equals(numComponents + 1),
     );
   });
+
+  testWidgets(
+    'Opaque extended large title background keeps bottom nav bar transition background box ',
+    (WidgetTester tester) async {
+      setWindowToPortrait(tester);
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: const <Widget>[
+                CupertinoSliverNavigationBar(
+                  largeTitle: Text('Page 1'),
+                  automaticBackgroundVisibility: false,
+                ),
+                SliverToBoxAdapter(child: SizedBox(height: 1200.0)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 2',
+              builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      final int numComponents =
+          tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length;
+
+      await tester.pumpAndSettle();
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pumpAndSettle();
+
+      scrollController.jumpTo(600.0);
+      await tester.pumpAndSettle();
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 2',
+              builder: (BuildContext context) => scaffoldForNavBar(null)!,
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The bottom nav bar transition background box has been added.
+      expect(
+        tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length,
+        equals(numComponents),
+      );
+    },
+  );
 
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
@@ -1195,7 +1252,7 @@ void main() {
   });
 
   testWidgets(
-    'CupertinoSliverNavigationBar.bottom clips its contents mid-transition when scrolled',
+    'CupertinoSliverNavigationBar searchable-to-searchable transition clips its contents mid-transition when scrolled',
     (WidgetTester tester) async {
       setWindowToPortrait(tester);
       await tester.pumpWidget(
@@ -1245,38 +1302,6 @@ void main() {
               builder:
                   (BuildContext context) =>
                       scaffoldForNavBar(
-                        const CupertinoNavigationBar(
-                          bottom: PreferredSize(
-                            preferredSize: Size.fromHeight(20),
-                            child: ColoredBox(color: Color(0xffff0000)),
-                          ),
-                        ),
-                      )!,
-            ),
-          );
-
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(2));
-      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(2));
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('nav_bar_transition.search.bottom.png'),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(CupertinoIcons.mic_solid), findsNothing);
-      expect(find.byIcon(CupertinoIcons.search), findsNothing);
-
-      tester
-          .state<NavigatorState>(find.byType(Navigator))
-          .push(
-            CupertinoPageRoute<void>(
-              title: 'Page 3',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
                         const CupertinoSliverNavigationBar.search(
                           searchField: CupertinoSearchTextField(
                             suffixMode: OverlayVisibilityMode.always,
@@ -1287,29 +1312,30 @@ void main() {
             ),
           );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
-      final TestGesture scrollGesture2 = await tester.startGesture(
-        tester.getCenter(find.byType(CustomScrollView)),
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(4));
+      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(4));
+      expect(
+        find.ancestor(
+          of: find.byType(CupertinoSearchTextField),
+          matching: find.byElementPredicate((Element element) {
+            final Widget widget = element.widget;
+            if (widget is ClipRect && widget.clipBehavior == Clip.hardEdge) {
+              final RenderObject? renderObject = element.renderObject;
+              return renderObject != null && !renderObject.debugNeedsPaint;
+            }
+            return false;
+          }),
+        ),
+        // Two ClipRects for the top and bottom search fields in transition.
+        findsNWidgets(2),
       );
-      await scrollGesture2.moveBy(const Offset(0, -300));
-      await scrollGesture2.up();
       await tester.pumpAndSettle();
 
       expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.search), findsOneWidget);
-
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(2));
-      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(2));
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('nav_bar_transition.search.top.png'),
-      );
-      await tester.pumpAndSettle();
     },
   );
 

@@ -75,10 +75,6 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (debuggingEnabled && debuggingOptions.serveObservatory) {
-      await enableObservatory();
-    }
-
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     if (debuggingEnabled && debuggingOptions.enableDevTools) {
       // The method below is guaranteed never to return a failing future.
@@ -158,10 +154,6 @@ class ColdRunner extends ResidentRunner {
       for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
-    }
-
-    if (debuggingEnabled && debuggingOptions.serveObservatory) {
-      await enableObservatory();
     }
 
     appStartedCompleter?.complete();

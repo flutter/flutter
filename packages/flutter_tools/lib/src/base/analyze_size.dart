@@ -90,7 +90,7 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
-  /// Analyzes [apk] and [aotSnapshot] to output a [Map] object that includes
+  /// Analyzes [zipFile] and [aotSnapshot] to output a [Map] object that includes
   /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
   /// under 'lib/arm64-v8a/$_appFilename'.
   ///

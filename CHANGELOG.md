@@ -29,6 +29,15 @@ Our goal is to make the list easy for them to scan.
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
+## Flutter 3.32 Changes
+
+### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) [Android] Fix regression in NDK version checking for projects with old AGP versions.
+- [flutter/168847](https://github.com/flutter/flutter/pull/168847) [Widget Inspector] Fix missing cupertino icon in on-device inspector.
+
+### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
+Initial stable release.
+
 ## Flutter 3.29 Changes
 
 ### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
@@ -51,7 +60,6 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/163175](https://github.com/flutter/flutter/pull/163175) - Improve performance of CanvasKit rendering for web.
 - [flutter/164628](https://github.com/flutter/flutter/issues/164628) - iOS Fixes crash when allocation of surface for toImage/toImageSync fails.
 - [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
-- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
 - [flutter/164024](https://github.com/flutter/flutter/issues/164024): - Add back an empty io.flutter.app.FlutterApplication for Android apps post v2 embedder migration.
 - [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
 - [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.

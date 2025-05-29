@@ -234,27 +234,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   // Enable the VM Service
   settings.enable_vm_service =
-      !command_line.HasOption(FlagForSwitch(Switch::DisableVMService)) &&
-      // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-      // See https://github.com/dart-lang/sdk/issues/50233
-      !command_line.HasOption(FlagForSwitch(Switch::DisableObservatory));
+      !command_line.HasOption(FlagForSwitch(Switch::DisableVMService));
 
   // Enable mDNS VM Service Publication
-  settings.enable_vm_service_publication =
-      !command_line.HasOption(
-          FlagForSwitch(Switch::DisableVMServicePublication)) &&
-      !command_line.HasOption(
-          FlagForSwitch(Switch::DisableObservatoryPublication));
+  settings.enable_vm_service_publication = !command_line.HasOption(
+      FlagForSwitch(Switch::DisableVMServicePublication));
 
   // Set VM Service Host
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServiceHost))) {
     command_line.GetOptionValue(FlagForSwitch(Switch::DeviceVMServiceHost),
-                                &settings.vm_service_host);
-  } else if (command_line.HasOption(
-                 FlagForSwitch(Switch::DeviceObservatoryHost))) {
-    // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-    // See https://github.com/dart-lang/sdk/issues/50233
-    command_line.GetOptionValue(FlagForSwitch(Switch::DeviceObservatoryHost),
                                 &settings.vm_service_host);
   }
   // Default the VM Service port based on --ipv6 if not set.
@@ -267,16 +255,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   // Set VM Service Port
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServicePort))) {
     if (!GetSwitchValue(command_line, Switch::DeviceVMServicePort,
-                        &settings.vm_service_port)) {
-      FML_LOG(INFO)
-          << "VM Service port specified was malformed. Will default to "
-          << settings.vm_service_port;
-    }
-  } else if (command_line.HasOption(
-                 FlagForSwitch(Switch::DeviceObservatoryPort))) {
-    // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-    // See https://github.com/dart-lang/sdk/issues/50233
-    if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,
                         &settings.vm_service_port)) {
       FML_LOG(INFO)
           << "VM Service port specified was malformed. Will default to "

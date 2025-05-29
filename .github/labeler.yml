@@ -224,6 +224,7 @@ team-infra:
   - changed-files:
     - any-glob-to-any-file:
       - docs/infra/**/*
+      - docs/releases/**/*
 
 # Keep this synced with CODEOWNERS.
 team-ios:
@@ -236,11 +237,6 @@ team-ios:
       - packages/flutter_tools/**/*xcode*
       - packages/flutter_tools/**/*ios*
       - packages/flutter_tools/**/*macos*
-
-team-release:
-  - changed-files:
-    - any-glob-to-any-file:
-      - docs/releases/**/*
 
 team-tool:
   - changed-files:

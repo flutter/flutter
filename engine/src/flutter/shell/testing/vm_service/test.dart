@@ -58,23 +58,11 @@ Future<void> testWebSocketProtocolRequest(Uri uri) async {
   }
 }
 
-// Test accessing an Observatory UI asset.
-Future<void> testHttpAssetRequest(Uri uri) async {
-  uri = uri.replace(path: 'third_party/trace_viewer_full.html');
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(uri);
-  final HttpClientResponse response = await request.close();
-  Expect.equals(response.statusCode, 200);
-  await response.drain<void>();
-  client.close();
-}
-
 typedef TestFunction = Future<void> Function(Uri uri);
 
 final List<TestFunction> basicTests = <TestFunction>[
   testHttpProtocolRequest,
   testWebSocketProtocolRequest,
-  testHttpAssetRequest,
 ];
 
 Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {

@@ -361,9 +361,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) async {
-    return FakeVmServiceHost(
-      requests: <VmServiceExpectation>[const FakeVmServiceRequest(method: '_serveObservatory')],
-    ).vmService;
+    return FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService;
   }
 
   @override

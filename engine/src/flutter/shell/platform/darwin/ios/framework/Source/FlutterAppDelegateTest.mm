@@ -198,4 +198,20 @@ FLUTTER_ASSERT_ARC
                    completionHandler:[OCMArg any]]);
 }
 
+- (void)testSetGetPluginRegistrant {
+  id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
+  self.appDelegate.pluginRegistrant = mockRegistrant;
+  XCTAssertEqual(self.appDelegate.pluginRegistrant, mockRegistrant);
+}
+
+- (void)testSetGetPluginRegistrantSelf {
+  __weak FlutterAppDelegate* appDelegate = self.appDelegate;
+  @autoreleasepool {
+    appDelegate.pluginRegistrant = (id)appDelegate;
+    self.appDelegate = nil;
+  }
+  // A retain cycle would keep this alive.
+  XCTAssertNil(appDelegate);
+}
+
 @end

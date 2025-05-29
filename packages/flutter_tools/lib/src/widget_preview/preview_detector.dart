@@ -12,7 +12,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
 import '../base/file_system.dart';
@@ -60,150 +59,74 @@ extension on ParsedUnitResult {
 final class PreviewDetails {
   PreviewDetails({required this.functionName, required this.isBuilder});
 
-  @visibleForTesting
-  PreviewDetails.test({
-    required this.functionName,
-    required this.isBuilder,
-    String? name,
-    String? size,
-    String? textScaleFactor,
-    String? wrapper,
-    String? wrapperLibraryUri = '',
-    String? theme,
-    String? themeLibraryUri = '',
-    String? brightness,
-    String? brightnessLibraryUri = '',
-  }) : _name = name,
-       _size = size,
-       _textScaleFactor = textScaleFactor,
-       _wrapper = wrapper,
-       _wrapperLibraryUri = wrapperLibraryUri,
-       _theme = theme,
-       _themeLibraryUri = themeLibraryUri,
-       _brightness = brightness,
-       _brightnessLibraryUri = brightnessLibraryUri;
-
-  @visibleForTesting
-  PreviewDetails copyWith({
-    String? functionName,
-    bool? isBuilder,
-    String? name,
-    String? size,
-    String? textScaleFactor,
-    String? wrapper,
-    String? wrapperLibraryUri,
-    String? theme,
-    String? themeLibraryUri,
-    String? brightness,
-    String? brightnessLibraryUri,
-  }) {
-    return PreviewDetails.test(
-      functionName: functionName ?? this.functionName,
-      isBuilder: isBuilder ?? this.isBuilder,
-      name: name ?? this.name,
-      size: size ?? this.size,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
-      wrapper: wrapper ?? this.wrapper,
-      wrapperLibraryUri: wrapperLibraryUri ?? this.wrapperLibraryUri,
-      theme: theme ?? this.theme,
-      themeLibraryUri: themeLibraryUri ?? this.themeLibraryUri,
-      brightness: brightness ?? this.brightness,
-      brightnessLibraryUri: brightnessLibraryUri ?? this.brightnessLibraryUri,
-    );
-  }
-
   static const String kName = 'name';
   static const String kSize = 'size';
-  static const String kSizeLibraryUri = 'sizeLibraryUrl';
   static const String kTextScaleFactor = 'textScaleFactor';
   static const String kWrapper = 'wrapper';
-  static const String kWrapperLibraryUri = 'wrapperLibraryUrl';
   static const String kTheme = 'theme';
-  static const String kThemeLibraryUri = 'themeLibraryUrl';
   static const String kBrightness = 'brightness';
-  static const String kBrightnessLibraryUri = 'brightnessLibraryUrl';
 
   /// The name of the function returning the preview.
   final String functionName;
 
-  /// Set to `true` if the preview function is returning a [WidgetBuilder]
-  /// instead of a [Widget].
+  /// Set to `true` if the preview function is returning a `WidgetBuilder`
+  /// instead of a `Widget`.
   final bool isBuilder;
 
   /// A description to be displayed alongside the preview.
   ///
   /// If not provided, no name will be associated with the preview.
-  String? get name => _name;
-  String? _name;
+  Expression? get name => _name;
+  Expression? _name;
 
-  /// Artificial constraints to be applied to the [child].
+  /// Artificial constraints to be applied to the `child`.
   ///
   /// If not provided, the previewed widget will attempt to set its own
   /// constraints and may result in an unbounded constraint error.
-  String? get size => _size;
-  String? _size;
+  Expression? get size => _size;
+  Expression? _size;
 
-  String? get sizeLibraryUri => _sizeLibraryUri;
-  String? _sizeLibraryUri;
-
-  /// Applies font scaling to text within the [child].
+  /// Applies font scaling to text within the `child`.
   ///
-  /// If not provided, the default text scaling factor provided by [MediaQuery]
+  /// If not provided, the default text scaling factor provided by `MediaQuery`
   /// will be used.
-  String? get textScaleFactor => _textScaleFactor;
-  String? _textScaleFactor;
+  Expression? get textScaleFactor => _textScaleFactor;
+  Expression? _textScaleFactor;
 
-  /// The name of a tear-off used to wrap the [Widget] returned by the preview
+  /// The name of a tear-off used to wrap the `Widget` returned by the preview
   /// function defined by [functionName].
   ///
-  /// If not provided, the [Widget] returned by [functionName] will be used by
+  /// If not provided, the `Widget` returned by [functionName] will be used by
   /// the previewer directly.
-  String? get wrapper => _wrapper;
-  String? _wrapper;
-
-  /// The URI for the library containing the declaration of [wrapper].
-  String? get wrapperLibraryUri => _wrapperLibraryUri;
-  String? _wrapperLibraryUri;
+  Identifier? get wrapper => _wrapper;
+  Identifier? _wrapper;
 
   bool get hasWrapper => _wrapper != null;
 
-  String? get theme => _theme;
-  String? _theme;
+  Identifier? get theme => _theme;
+  Identifier? _theme;
 
-  String? get themeLibraryUri => _themeLibraryUri;
-  String? _themeLibraryUri;
-
-  String? get brightness => _brightness;
-  String? _brightness;
-
-  String? get brightnessLibraryUri => _brightnessLibraryUri;
-  String? _brightnessLibraryUri;
+  Expression? get brightness => _brightness;
+  Expression? _brightness;
 
   void _setField({required NamedExpression node}) {
     final String key = node.name.label.name;
     final Expression expression = node.expression;
-    final String source = expression.toSource();
-    final String? libraryUri =
-        expression is SimpleIdentifier ? expression.element!.library2!.identifier : null;
     switch (key) {
       case kName:
-        _name = source;
+        _name = expression;
       case kSize:
-        _size = source;
-        _sizeLibraryUri = libraryUri;
+        _size = expression;
       case kTextScaleFactor:
-        _textScaleFactor = source;
+        _textScaleFactor = expression;
       case kWrapper:
-        _wrapper = source;
-        _wrapperLibraryUri = libraryUri;
+        _wrapper = expression as Identifier;
       case kTheme:
-        _theme = source;
-        _themeLibraryUri = libraryUri;
+        _theme = expression as Identifier;
       case kBrightness:
-        _brightness = source;
-        _brightnessLibraryUri = libraryUri;
+        _brightness = expression;
       default:
-        throw StateError('Unknown Preview field "$name": $source');
+        throw StateError('Unknown Preview field "$name": ${expression.toSource()}');
     }
   }
 
@@ -218,23 +141,17 @@ final class PreviewDetails {
         other.functionName == functionName &&
         other.isBuilder == isBuilder &&
         other.size == size &&
-        other.sizeLibraryUri == sizeLibraryUri &&
         other.textScaleFactor == textScaleFactor &&
         other.wrapper == wrapper &&
-        other.wrapperLibraryUri == wrapperLibraryUri &&
         other.theme == theme &&
-        other.themeLibraryUri == themeLibraryUri &&
-        other.brightness == brightness &&
-        other.brightnessLibraryUri == brightnessLibraryUri;
+        other.brightness == brightness;
   }
 
   @override
   String toString() =>
       'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
-      '$kSize: $size $kSizeLibraryUri: $sizeLibraryUri $kTextScaleFactor: $textScaleFactor '
-      '$kWrapper: $wrapper $kWrapperLibraryUri: $wrapperLibraryUri $kTheme: $theme '
-      '$kThemeLibraryUri: $themeLibraryUri $kBrightness: $_brightness '
-      '$kBrightnessLibraryUri: $_brightnessLibraryUri)';
+      '$kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
+      '$kTheme: $theme $kBrightness: $_brightness)';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -242,14 +159,10 @@ final class PreviewDetails {
     functionName,
     isBuilder,
     size,
-    sizeLibraryUri,
     textScaleFactor,
     wrapper,
-    wrapperLibraryUri,
     theme,
-    themeLibraryUri,
     brightness,
-    brightnessLibraryUri,
   ]);
 }
 
