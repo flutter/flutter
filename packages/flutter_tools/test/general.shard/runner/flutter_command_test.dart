@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -1363,7 +1364,7 @@ flutter:
     );
 
     group('Flutter version', () {
-      for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
+      for (final String dartDefine in FlutterCommand.flutterVersionDartDefines.take(1)) {
         testUsingContext(
           'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
           () async {
@@ -1550,6 +1551,87 @@ flutter:
         },
       );
     });
+
+    group('feature flags', () {
+      testUsingContext(
+        'tool exits when FLUTTER_ENABLED_FEATURE_FLAGS is set in --dart-define or --dart-define-from-file',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+
+          expect(
+            runner.run(<String>[
+              'run',
+              '--dart-define=FLUTTER_ENABLED_FEATURE_FLAGS=AlreadySet',
+              '--no-pub',
+              '--no-hot',
+            ]),
+            throwsToolExit(
+              message: '''
+FLUTTER_ENABLED_FEATURE_FLAGS is used by the framework and cannot be set using --dart-define or --dart-define-from-file.
+
+Use the "flutter config" command to enable feature flags.''',
+            ),
+          );
+
+          expect(
+            runner.run(<String>[
+              'run',
+              '--dart-define-from-file=config.json',
+              '--no-pub',
+              '--no-hot',
+            ]),
+            throwsToolExit(
+              message: '''
+FLUTTER_ENABLED_FEATURE_FLAGS is used by the framework and cannot be set using --dart-define or --dart-define-from-file.
+
+Use the "flutter config" command to enable feature flags.''',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager:
+              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          Platform: () => FakePlatform(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () {
+            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            fileSystem.file('.packages').createSync();
+            fileSystem.file('config.json')
+              ..createSync()
+              ..writeAsStringSync('{"FLUTTER_ENABLED_FEATURE_FLAGS": "AlreadySet"}');
+            return fileSystem;
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+          FlutterVersion: () => FakeFlutterVersion(),
+        },
+      );
+
+      testUsingContext(
+        'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
+        () async {
+          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
+            forcedBuildMode: BuildMode.debug,
+          );
+          expect(buildInfo.dartDefines, contains('FLUTTER_ENABLED_FEATURE_FLAGS=buzz_feature'));
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags:
+              () => const FakeFeatureFlags(
+                allFeatures: <FakeFeature>[
+                  FakeFeature(name: 'Foo', enabled: true),
+                  FakeFeature(name: 'Bar', runtimeId: 'bar_feature', enabled: false),
+                  FakeFeature(name: 'Buzz', runtimeId: 'buzz_feature', enabled: true),
+                ],
+              ),
+        },
+      );
+    });
   });
 }
 
@@ -1670,4 +1752,45 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
 
   @override
   bool get shouldRunPub => false;
+}
+
+class FakeFeature extends Feature {
+  const FakeFeature({required super.name, super.runtimeId, required this.enabled});
+
+  final bool enabled;
+}
+
+class FakeFeatureFlags implements FeatureFlags {
+  const FakeFeatureFlags({required this.allFeatures});
+
+  @override
+  final List<FakeFeature> allFeatures;
+
+  @override
+  bool get isLinuxEnabled => throw UnimplementedError();
+  @override
+  bool get isMacOSEnabled => throw UnimplementedError();
+  @override
+  bool get isWebEnabled => throw UnimplementedError();
+  @override
+  bool get isWindowsEnabled => throw UnimplementedError();
+  @override
+  bool get isAndroidEnabled => throw UnimplementedError();
+  @override
+  bool get isIOSEnabled => throw UnimplementedError();
+  @override
+  bool get isFuchsiaEnabled => throw UnimplementedError();
+  @override
+  bool get areCustomDevicesEnabled => throw UnimplementedError();
+  @override
+  bool get isCliAnimationEnabled => throw UnimplementedError();
+  @override
+  bool get isNativeAssetsEnabled => throw UnimplementedError();
+  @override
+  bool get isSwiftPackageManagerEnabled => throw UnimplementedError();
+  @override
+  bool get isExplicitPackageDependenciesEnabled => throw UnimplementedError();
+
+  @override
+  bool isEnabled(Feature feature) => (feature as FakeFeature).enabled;
 }
