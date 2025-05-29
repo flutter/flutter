@@ -15,8 +15,8 @@ import 'basic_types.dart';
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [
-/// Alignment] and its variants, or [AlignmentDirectional.new].
+/// A property or argument of this type accepts classes created either with
+/// [Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
@@ -31,6 +31,33 @@ abstract class AlignmentGeometry {
 
   /// Creates a directional alignment, or [AlignmentDirectional].
   const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
+
+  /// The top left corner.
+  static const AlignmentGeometry topLeft = Alignment.topLeft;
+
+  /// The center point along the top edge.
+  static const AlignmentGeometry topCenter = Alignment.topCenter;
+
+  /// The top right corner.
+  static const AlignmentGeometry topRight = Alignment.topRight;
+
+  /// The center point along the left edge.
+  static const AlignmentGeometry centerLeft = Alignment.centerLeft;
+
+  /// The center point, both horizontally and vertically.
+  static const AlignmentGeometry center = Alignment.center;
+
+  /// The center point along the right edge.
+  static const AlignmentGeometry centerRight = Alignment.centerRight;
+
+  /// The bottom left corner.
+  static const AlignmentGeometry bottomLeft = Alignment.bottomLeft;
+
+  /// The center point along the bottom edge.
+  static const AlignmentGeometry bottomCenter = Alignment.bottomCenter;
+
+  /// The bottom right corner.
+  static const AlignmentGeometry bottomRight = Alignment.bottomRight;
 
   double get _x;
 
