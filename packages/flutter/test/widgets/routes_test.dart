@@ -1382,11 +1382,19 @@ void main() {
       expect(find.byKey(containerKey), findsOneWidget);
 
       // Container should be present halfway through the transition.
-      await tester.pump(const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds ~/ 2));
+      await tester.pump(
+        const Duration(
+          milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds ~/ 2,
+        ),
+      );
       expect(find.byKey(containerKey), findsOneWidget);
 
       // Container should be present at the very end of the transition.
-      await tester.pump(const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds ~/ 2));
+      await tester.pump(
+        const Duration(
+          milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds ~/ 2,
+        ),
+      );
       expect(find.byKey(containerKey), findsOneWidget);
 
       // Container have transitioned out after 300ms.
