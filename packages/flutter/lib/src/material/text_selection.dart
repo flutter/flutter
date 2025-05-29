@@ -112,7 +112,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return switch (type) {
-      TextSelectionHandleType.collapsed => const Offset(_kHandleSize / 2, -4),
+      TextSelectionHandleType.collapsed => const Offset(_kHandleSize / 2.15, -5),
       TextSelectionHandleType.left => const Offset(_kHandleSize, 0),
       TextSelectionHandleType.right => Offset.zero,
     };
