@@ -15,7 +15,6 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
-import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -234,10 +233,6 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     try {
-      // Dev dependencies are removed from release builds if the explicit package
-      // dependencies flag is on.
-      final bool devDependenciesEnabled =
-          !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
         packageConfigPath: packageConfigPath(),
@@ -251,7 +246,6 @@ end
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
           ).map((DarwinArch e) => e.name).join(' '),
-          kDevDependenciesEnabled: devDependenciesEnabled.toString(),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,

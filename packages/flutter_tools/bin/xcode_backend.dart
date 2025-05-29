@@ -506,6 +506,8 @@ class Context {
 
     final String buildMode = parseFlutterBuildMode();
 
+    _validateBuildMode(platform, buildMode);
+
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: 'build',
       buildMode: buildMode,
@@ -532,6 +534,53 @@ class Context {
     streamOutput(' └─Compiling, linking and signing...');
 
     echo('Project $projectPath built and packaged successfully.');
+  }
+
+  /// Validate that the build mode targeted matches the build mode set by the
+  /// Flutter CLI.
+  /// If it doesn't match, print a warning unless the Xcode action is `install`,
+  /// which means the app is being archived for distribution. In that case, print
+  /// an error and fail the build.
+  ///
+  /// The targeted build mode might not match the one set by Flutter CLI when it
+  /// is changed and ran directly through Xcode.
+  ///
+  /// Flutter may change settings or files depending on the build mode. For
+  /// example, dev dependencies are excluded from release builds and requires
+  /// the Flutter CLI to update certain files.
+  void _validateBuildMode(TargetPlatform platform, String currentBuildMode) {
+    final String? buildModeCLILastUsed = environment['FLUTTER_CLI_BUILD_MODE'];
+
+    // Also fail the build if ACTION=install, which indicates the app is being
+    // built for distribution.
+    final String? action = environment['ACTION'];
+    final bool fatal = action == 'install';
+
+    if (buildModeCLILastUsed == null) {
+      final String message =
+          'Your Flutter build settings are outdated. Please run '
+          '"flutter build ${platform.name} --config-only --$currentBuildMode" in your Flutter '
+          'project and try again.\n';
+      if (fatal) {
+        echoXcodeError(message);
+        exitApp(-1);
+      } else {
+        echoXcodeWarning(message);
+        return;
+      }
+    }
+    if (currentBuildMode != buildModeCLILastUsed) {
+      final String message =
+          'Your Flutter project is currently configured for $buildModeCLILastUsed mode. '
+          'Please run `flutter build ${platform.name} --config-only --$currentBuildMode` '
+          'in your Flutter project to update your settings.\n';
+      if (fatal) {
+        echoXcodeError(message);
+        exitApp(-1);
+      } else {
+        echoXcodeWarning(message);
+      }
+    }
   }
 
   List<String> _generateFlutterArgsForAssemble({
@@ -626,7 +675,6 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
-      '-dDevDependenciesEnabled=${environment['FLUTTER_DEV_DEPENDENCIES_ENABLED'] ?? ''}',
     ]);
 
     if (platform == TargetPlatform.ios) {

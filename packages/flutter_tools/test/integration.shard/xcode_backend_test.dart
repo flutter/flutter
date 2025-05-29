@@ -58,7 +58,11 @@ void main() {
     final ProcessResult result = await Process.run(
       xcodeBackendPath,
       <String>['build'],
-      environment: <String, String>{'CONFIGURATION': 'Debug', 'ACTION': 'install'},
+      environment: <String, String>{
+        'CONFIGURATION': 'Debug',
+        'ACTION': 'install',
+        'FLUTTER_CLI_BUILD_MODE': 'debug',
+      },
     );
     expect(result.stderr, contains('warning: Flutter archive not built in Release mode.'));
     expect(result.exitCode, isNot(0));
