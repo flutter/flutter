@@ -2473,6 +2473,18 @@ void ImpellerParagraphStyleSetLocale(
     const char* IMPELLER_NONNULL locale);
 
 //------------------------------------------------------------------------------
+/// @brief      Set the UTF-8 string to use as the ellipsis. Pass `nullptr` to
+///             clear the setting to default.
+///
+/// @param[in]  paragraph_style  The paragraph style.
+/// @param[in]  data             The ellipsis string UTF-8 data, or null.
+///
+IMPELLER_EXPORT
+void ImpellerParagraphStyleSetEllipsis(
+    ImpellerParagraphStyle IMPELLER_NONNULL paragraph_style,
+    const char* IMPELLER_NULLABLE ellipsis);
+
+//------------------------------------------------------------------------------
 // Paragraph Builder
 //------------------------------------------------------------------------------
 
