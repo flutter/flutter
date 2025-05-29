@@ -58,22 +58,14 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   return {};
 }
 
-void TextureSourceVK::SetCachedFramebuffer(
-    const SharedHandleVK<vk::Framebuffer>& framebuffer) {
-  framebuffer_ = framebuffer;
+void TextureSourceVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
+                                         SampleCount sample_count) {
+  frame_data_[static_cast<int>(sample_count) / 4] = data;
 }
 
-void TextureSourceVK::SetCachedRenderPass(
-    const SharedHandleVK<vk::RenderPass>& render_pass) {
-  render_pass_ = render_pass;
-}
-
-SharedHandleVK<vk::Framebuffer> TextureSourceVK::GetCachedFramebuffer() const {
-  return framebuffer_;
-}
-
-SharedHandleVK<vk::RenderPass> TextureSourceVK::GetCachedRenderPass() const {
-  return render_pass_;
+const FramebufferAndRenderPass& TextureSourceVK::GetCachedFrameData(
+    SampleCount sample_count) const {
+  return frame_data_[static_cast<int>(sample_count) / 4];
 }
 
 }  // namespace impeller

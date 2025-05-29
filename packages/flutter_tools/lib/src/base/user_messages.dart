@@ -330,6 +330,8 @@ class UserMessages {
       'You are using a locally built engine (--local-engine) but have not specified --local-engine-host.\n'
       'You may be building with a different engine than the one you are running with. '
       'See https://github.com/flutter/flutter/issues/132245 for details.';
+  String get runnerHostEngineRequiresLocalEngine =>
+      'You must specify --local-engine if you are using --local-engine-host.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
   String runnerNoWebSdk(String webSdkPath) => 'No Flutter web sdk found at $webSdkPath.';

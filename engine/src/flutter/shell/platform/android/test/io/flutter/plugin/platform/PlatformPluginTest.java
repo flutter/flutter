@@ -39,6 +39,7 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.FragmentActivity;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel.Brightness;
@@ -57,7 +58,6 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
-@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PlatformPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -646,51 +646,56 @@ public class PlatformPluginTest {
     verify(mockActivity, never()).finish();
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity.
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void popSystemNavigatorFlutterFragment() {
-    // Migrate to ActivityScenario by following https://github.com/robolectric/robolectric/pull/4736
-    FragmentActivity activity = spy(Robolectric.setupActivity(FragmentActivity.class));
-    final AtomicBoolean onBackPressedCalled = new AtomicBoolean(false);
-    OnBackPressedCallback backCallback =
-        new OnBackPressedCallback(true) {
-          @Override
-          public void handleOnBackPressed() {
-            onBackPressedCalled.set(true);
-          }
-        };
-    activity.getOnBackPressedDispatcher().addCallback(backCallback);
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          fragmentActivity -> {
+            FragmentActivity activity = spy(fragmentActivity);
+            final AtomicBoolean onBackPressedCalled = new AtomicBoolean(false);
+            OnBackPressedCallback backCallback =
+                new OnBackPressedCallback(true) {
+                  @Override
+                  public void handleOnBackPressed() {
+                    onBackPressedCalled.set(true);
+                  }
+                };
+            activity.getOnBackPressedDispatcher().addCallback(backCallback);
 
-    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
-    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
-    PlatformPlugin platformPlugin =
-        new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
+            PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+            when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(false);
+            PlatformPlugin platformPlugin =
+                new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
 
-    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+            platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
-    verify(activity, never()).finish();
-    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
-    assertTrue(onBackPressedCalled.get());
+            verify(activity, never()).finish();
+            verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+            assertTrue(onBackPressedCalled.get());
+          });
+    }
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity.
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void doesNotDoAnythingByDefaultIfFragmentPopSystemNavigatorOverridden() {
-    FragmentActivity activity = spy(Robolectric.setupActivity(FragmentActivity.class));
-    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
-    when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
-    PlatformPlugin platformPlugin =
-        new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          fragmentActivity -> {
+            FragmentActivity activity = spy(fragmentActivity);
+            PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+            when(mockPlatformPluginDelegate.popSystemNavigator()).thenReturn(true);
+            PlatformPlugin platformPlugin =
+                new PlatformPlugin(activity, mockPlatformChannel, mockPlatformPluginDelegate);
 
-    platformPlugin.mPlatformMessageHandler.popSystemNavigator();
+            platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
-    verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
-    // No longer perform the default action when overridden.
-    verify(activity, never()).finish();
+            verify(mockPlatformPluginDelegate, times(1)).popSystemNavigator();
+            // No longer perform the default action when overridden.
+            verify(activity, never()).finish();
+          });
+    }
   }
 
   @Test

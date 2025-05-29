@@ -4,11 +4,11 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:yaml/yaml.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
@@ -179,7 +179,7 @@ Future<void> installCodeAssets({
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
 ///
-/// It enables mocking `package:native_assets_builder` package.
+/// It enables mocking `package:hooks_runner` package.
 /// It also enables mocking native toolchain discovery via [cCompilerConfig].
 abstract interface class FlutterNativeAssetsBuildRunner {
   /// All packages in the transitive dependencies that have a `build.dart`.
@@ -204,7 +204,7 @@ abstract interface class FlutterNativeAssetsBuildRunner {
   Future<CCompilerConfig?> get ndkCCompilerConfig;
 }
 
-/// Uses `package:native_assets_builder` for its implementation.
+/// Uses `package:hooks_runner` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
     this.packageConfigPath,
@@ -254,18 +254,12 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     runPackageName,
   );
 
-  late final Map<String, Map<String, Object?>?> userDefines = () {
-    final String pubspecContents = fileSystem.file(pubspecPath).readAsStringSync();
-    final YamlMap pubspec = loadYaml(pubspecContents) as YamlMap;
-    return NativeAssetsBuildRunner.readHooksUserDefinesFromPubspec(pubspec);
-  }();
-
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
     packageLayout: packageLayout,
-    userDefines: userDefines,
+    userDefines: UserDefines(workspacePubspec: Uri.file(pubspecPath)),
   );
 
   @override
@@ -280,16 +274,32 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   Future<BuildResult?> build({
     required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
-  }) {
-    return _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
+  }) async {
+    final Result<BuildResult, HooksRunnerFailure> result = await _buildRunner.build(
+      linkingEnabled: linkingEnabled,
+      extensions: extensions,
+    );
+    if (result.isSuccess) {
+      return result.success;
+    } else {
+      return null;
+    }
   }
 
   @override
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
-  }) {
-    return _buildRunner.link(extensions: extensions, buildResult: buildResult);
+  }) async {
+    final Result<LinkResult, HooksRunnerFailure> result = await _buildRunner.link(
+      extensions: extensions,
+      buildResult: buildResult,
+    );
+    if (result.isSuccess) {
+      return result.success;
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -647,7 +657,13 @@ Future<DartBuildResult> _runDartBuild({
       dependencies.addAll(linkResult.dependencies);
     }
   }
-
+  if (codeAssets.isNotEmpty) {
+    globals.logger.printTrace(
+      'Note: You are using the dart build hooks feature which is currently '
+      'in preview. Please see '
+      'https://dart.dev/interop/c-interop#native-assets for more details.',
+    );
+  }
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }

@@ -17,12 +17,7 @@ impeller_component("geometry") {
     "matrix.h",
     "matrix_decomposition.cc",
     "matrix_decomposition.h",
-    "path.cc",
-    "path.h",
-    "path_builder.cc",
-    "path_builder.h",
-    "path_component.cc",
-    "path_component.h",
+    "path_source.cc",
     "path_source.h",
     "point.cc",
     "point.h",
@@ -82,7 +77,7 @@ impeller_component("geometry_unittests") {
   sources = [
     "geometry_unittests.cc",
     "matrix_unittests.cc",
-    "path_unittests.cc",
+    "path_source_unittests.cc",
     "rational_unittests.cc",
     "rect_unittests.cc",
     "round_rect_unittests.cc",
@@ -97,6 +92,7 @@ impeller_component("geometry_unittests") {
   deps = [
     ":geometry",
     ":geometry_asserts",
+    "//flutter/display_list/testing:display_list_testing",
     "//flutter/testing:testing_lib",
   ]
 }

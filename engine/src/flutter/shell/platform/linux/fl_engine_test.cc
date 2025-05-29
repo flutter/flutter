@@ -439,6 +439,57 @@ TEST(FlEngineTest, EngineId) {
   EXPECT_EQ(fl_engine_for_id(engine_id), engine);
 }
 
+TEST(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  fl_dart_project_set_ui_thread_policy(
+      project, FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD);
+
+  bool same_task_runner = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&same_task_runner](size_t version, const FlutterRendererConfig* config,
+                           const FlutterProjectArgs* args, void* user_data,
+                           FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        same_task_runner = args->custom_task_runners->platform_task_runner ==
+                           args->custom_task_runners->ui_task_runner;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(same_task_runner);
+}
+
+TEST(FlEngineTest, UIIsolateOnSeparateThread) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  fl_dart_project_set_ui_thread_policy(
+      project, FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD);
+
+  bool separate_thread = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&separate_thread](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        separate_thread = args->custom_task_runners->ui_task_runner == nullptr;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(separate_thread);
+}
+
 TEST(FlEngineTest, Locales) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:en_US", TRUE);
