@@ -1432,6 +1432,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('$kAppFlavor=$flavor');
     }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
+    _addFeatureFlagsToDartDefines(dartDefines);
 
     return BuildInfo(
       buildMode,
@@ -1492,6 +1493,39 @@ abstract class FlutterCommand extends Command<void> {
       '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
       '$flutterDartVersionDefine=${version.dartSdkVersion}',
     ]);
+  }
+
+  void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
+    if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
+      throwToolExit(
+        '$kEnabledFeatureFlags is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}.\n'
+        '\n'
+        'Use the "flutter config" command to enable feature flags.'
+      );
+    }
+
+    final StringBuffer enabledFeatureFlags = StringBuffer();
+    for (final Feature feature in featureFlags.allFeatures) {
+      if (!featureFlags.isEnabled(feature)) {
+        continue;
+      }
+
+      final String? runtimeId = feature.runtimeId;
+      if (runtimeId == null) {
+        continue;
+      }
+
+      if (enabledFeatureFlags.isNotEmpty) {
+        enabledFeatureFlags.write(',');
+      }
+
+      enabledFeatureFlags.write(runtimeId);
+    }
+
+    if (enabledFeatureFlags.isNotEmpty) {
+      dartDefines.add('$kEnabledFeatureFlags=$enabledFeatureFlags');
+    }
   }
 
   void setupApplicationPackages() {
