@@ -54,7 +54,7 @@ void main() {
       expect(
         testLogger.statusText,
         'All Settings:\n'
-        '${allFeatures.where((Feature e) => e.configSetting != null).map((Feature e) => '  ${e.configSetting}: (Not set)').join('\n')}'
+        '${featureFlags.allFeatures.where((Feature e) => e.configSetting != null).map((Feature e) => '  ${e.configSetting}: (Not set)').join('\n')}'
         '\n\n',
       );
     });
