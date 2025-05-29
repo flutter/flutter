@@ -272,7 +272,7 @@ void main() {
 
   group('scroll', () {
     testWidgets(
-      'scrolling calls onSelectedItemChanged and triggers haptic feedback',
+      'scrolling calls onSelectedItemChanged and triggers haptic feedback when scroll passes middle of item',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
@@ -300,21 +300,28 @@ void main() {
             ),
           ),
         );
-
+        // Drag to almost the middle of the next item.
         await tester.drag(
           find.text('0'),
-          const Offset(0.0, -100.0),
+          const Offset(0.0, -90.0),
           warnIfMissed: false,
         ); // has an IgnorePointer
+        // Expect that the item changed, but haptics were not triggered yet,
+        // since we are not in the middle of the item.
         expect(selectedItems, <int>[1]);
+        expect(systemCalls, isEmpty);
+
+        // Let the scroll settle and end up in the middle of the item.
+        await tester.pumpAndSettle();
         expect(
           systemCalls.single,
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
 
+        // Overscroll a little to pass the middle of the item.
         await tester.drag(
           find.text('0'),
-          const Offset(0.0, 100.0),
+          const Offset(0.0, 110.0),
           warnIfMissed: false,
         ); // has an IgnorePointer
         expect(selectedItems, <int>[1, 0]);
@@ -362,6 +369,10 @@ void main() {
           const Offset(0.0, -100.0),
           warnIfMissed: false,
         ); // has an IgnorePointer
+
+        // Allow the scroll to settle in the middle of the item.
+        await tester.pumpAndSettle();
+
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
       },
