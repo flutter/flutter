@@ -99,6 +99,9 @@ TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
 
 TEST(EntityGeometryTest, FillArcGeometryCoverage) {
   Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+  Matrix transform45 = Matrix::MakeTranslation(oval_bounds.GetCenter()) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-oval_bounds.GetCenter());
 
   {  // Sweeps <=-360 or >=360
     for (int start = -720; start <= 720; start += 10) {
@@ -240,6 +243,24 @@ TEST(EntityGeometryTest, FillArcGeometryCoverage) {
       }
     }
   }
+  {  // 45 degree tilted full circle
+    auto geometry =
+        Geometry::MakeFilledArc(oval_bounds, Degrees(0), Degrees(360), false);
+    ASSERT_TRUE(oval_bounds.TransformBounds(transform45).Contains(oval_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(oval_bounds));
+  }
+  {  // 45 degree tilted mostly full circle
+    auto geometry =
+        Geometry::MakeFilledArc(oval_bounds, Degrees(3), Degrees(359), false);
+    ASSERT_TRUE(oval_bounds.TransformBounds(transform45).Contains(oval_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(oval_bounds));
+  }
 }
 
 TEST(EntityGeometryTest, StrokeArcGeometryCoverage) {
@@ -247,6 +268,9 @@ TEST(EntityGeometryTest, StrokeArcGeometryCoverage) {
   Rect expanded_bounds = Rect::MakeLTRB(95, 95, 205, 205);
   Rect squared_bounds = Rect::MakeLTRB(100 - 5 * kSqrt2, 100 - 5 * kSqrt2,
                                        200 + 5 * kSqrt2, 200 + 5 * kSqrt2);
+  Matrix transform45 = Matrix::MakeTranslation(oval_bounds.GetCenter()) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-oval_bounds.GetCenter());
 
   StrokeParameters butt_params = {
       .width = 10.0f,
@@ -397,6 +421,46 @@ TEST(EntityGeometryTest, StrokeArcGeometryCoverage) {
             << "start: " << start + 225;
       }
     }
+  }
+  {  // 45 degree tilted full circle, butt caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(0), Degrees(360), butt_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(expanded_bounds));
+  }
+  {  // 45 degree tilted full circle, square caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(0), Degrees(360), square_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(squared_bounds));
+  }
+  {  // 45 degree tilted mostly full circle, butt caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(3), Degrees(359), butt_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(expanded_bounds));
+  }
+  {  // 45 degree tilted mostly full circle, square caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(3), Degrees(359), square_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(squared_bounds));
   }
 }
 

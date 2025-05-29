@@ -121,7 +121,7 @@ std::optional<Rect> ArcGeometry::GetCoverage(const Matrix& transform) const {
   Size radii = oval_bounds_.GetSize() * 0.5f;
 
   for (int i = 0; i < count; i++) {
-    extrema[i] = transform * (center + extrema[i] * radii);
+    extrema[i] = center + extrema[i] * radii;
   }
   auto opt_rect = Rect::MakePointBounds(extrema, extrema + count);
   if (opt_rect.has_value()) {
