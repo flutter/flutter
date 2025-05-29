@@ -74,12 +74,11 @@ Future<void> testMain() async {
           id: 1,
           flags: const ui.SemanticsFlags(
             isFocusable: true,
-            hasTap: true,
             hasEnabledState: true,
             isEnabled: true,
             isButton: true,
           ),
-
+          hasTap: true,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
       ],

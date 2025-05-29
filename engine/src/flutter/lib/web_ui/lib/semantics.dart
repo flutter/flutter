@@ -300,7 +300,7 @@ class SemanticsFlags {
     this.hasRequiredState = false,
     this.isRequired = false,
   });
-  static final SemanticsFlags none = SemanticsFlags();
+  static const SemanticsFlags none = SemanticsFlags();
   final bool hasCheckedState;
   final bool isChecked;
   final bool isSelected;
