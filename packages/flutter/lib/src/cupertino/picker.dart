@@ -219,12 +219,16 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   int? _lastHapticIndex;
   FixedExtentScrollController? _controller;
 
+  FixedExtentScrollController get _effectiveController => widget.scrollController ?? _controller!;
+
   @override
   void initState() {
     super.initState();
     if (widget.scrollController == null) {
       _controller = FixedExtentScrollController();
     }
+
+    _effectiveController.addListener(_handleScroll);
   }
 
   @override
@@ -233,42 +237,59 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     if (widget.scrollController != null && oldWidget.scrollController == null) {
       _controller?.dispose();
       _controller = null;
+      widget.scrollController!.addListener(_handleScroll);
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);
+      oldWidget.scrollController!.removeListener(_handleScroll);
       _controller = FixedExtentScrollController();
+      _controller!.addListener(_handleScroll);
     }
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    if (widget.scrollController != null) {
+      widget.scrollController!.removeListener(_handleScroll);
+    }
     super.dispose();
   }
 
-  void _handleSelectedItemChanged(int index) {
-    // Only the haptic engine hardware on iOS devices would produce the
-    // intended effects.
-    final bool hasSuitableHapticHardware;
+  void _handleHapticFeedback(int index) {
+    // Skip haptic feedback on the first item.
+    if (_lastHapticIndex == null) {
+      _lastHapticIndex = index;
+      return;
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-        hasSuitableHapticHardware = true;
+        if (index != _lastHapticIndex) {
+          _lastHapticIndex = index;
+          HapticFeedback.selectionClick();
+        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        hasSuitableHapticHardware = false;
+        // No haptic feedback on these platforms.
+        return;
     }
-    if (hasSuitableHapticHardware && index != _lastHapticIndex) {
-      _lastHapticIndex = index;
-      HapticFeedback.selectionClick();
-    }
-
-    widget.onSelectedItemChanged?.call(index);
   }
 
-  void _handleChildTap(int index, FixedExtentScrollController controller) {
-    controller.animateToItem(
+  void _handleScroll() {
+    final int index = _effectiveController.selectedItem;
+
+    final double currentItemOffset = _effectiveController.offset / widget.itemExtent - index;
+    // Check if the current scroll offset is passing through the center point of an item
+    // This happens when the fractional part is very close to 0.0.
+    if (currentItemOffset.abs() <= 0.1) {
+      _handleHapticFeedback(index);
+    }
+  }
+
+  void _handleChildTap(int index) {
+    _effectiveController.animateToItem(
       index,
       duration: _kCupertinoPickerTapToScrollDuration,
       curve: _kCupertinoPickerTapToScrollCurve,
@@ -298,7 +319,6 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     );
 
     assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
-    final FixedExtentScrollController controller = widget.scrollController ?? _controller!;
     final Widget result = DefaultTextStyle(
       style: textStyle.copyWith(
         color: CupertinoDynamicColor.maybeResolve(textStyle.color, context),
@@ -307,9 +327,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         children: <Widget>[
           Positioned.fill(
             child: _CupertinoPickerSemantics(
-              scrollController: controller,
+              scrollController: _effectiveController,
               child: ListWheelScrollView.useDelegate(
-                controller: controller,
+                controller: _effectiveController,
                 physics: const FixedExtentScrollPhysics(),
                 diameterRatio: widget.diameterRatio,
                 offAxisFraction: widget.offAxisFraction,
@@ -318,11 +338,11 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 overAndUnderCenterOpacity: _kOverAndUnderCenterOpacity,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
-                onSelectedItemChanged: _handleSelectedItemChanged,
+                onSelectedItemChanged: widget.onSelectedItemChanged,
                 dragStartBehavior: DragStartBehavior.down,
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
-                  onTappedChild: (int index) => _handleChildTap(index, controller),
+                  onTappedChild: _handleChildTap,
                 ),
               ),
             ),
