@@ -83,7 +83,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the Flutter engine, add `team-engine`.
 - If it's about the Flutter framework, add `team-framework`.
 - If it's about the Flutter tool, add `team-tool`.
-- If it's about developers tools, add `team-devexp`.
+- If it's about developer tools, add `team-devexp`.
 - If it's about a first-party package:
   - If it's about `go_router` or `go_router_builder`, add `team-go_router`.
   - If it's about `two_dimensional_scrollables`, add `team-framework`.
