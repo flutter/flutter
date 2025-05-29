@@ -168,10 +168,7 @@ void foundError(List<String> messages) {
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
-  final int width = math.max(
-    15,
-    (hasColor && stdout.hasTerminal ? stdout.terminalColumns : 80) - 1,
-  );
+  final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
   final String title = 'ERROR #${_errorMessages.length + 1}';
   print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
