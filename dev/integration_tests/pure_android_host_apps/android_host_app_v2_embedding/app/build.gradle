@@ -29,8 +29,15 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    buildTypes {
+        profile {
+            initWith debug
+        }
+    }
 }
 
 dependencies {
-    implementation project(':flutter')
+    debugImplementation 'io.flutter.devicelab.hello:flutter_debug:1.0'
+    profileImplementation 'io.flutter.devicelab.hello:flutter_profile:1.0'
+    releaseImplementation 'io.flutter.devicelab.hello:flutter_release:1.0'
 }
