@@ -3522,6 +3522,37 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  /// This is a regression test for https://github.com/flutter/flutter/issues/168545
+  testWidgets('The Tooltip on the ModalBottomSheet can still be displayed after showMenu.', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(navigatorKey: navigatorKey, home: const Scaffold(body: Placeholder())),
+    );
+    showModalBottomSheet<void>(
+      context: navigatorKey.currentContext!,
+      builder: (_) {
+        return const Center(child: Tooltip(message: 'Hello', child: Text('World')));
+      },
+    );
+    await tester.pumpAndSettle();
+    showMenu<void>(
+      context: navigatorKey.currentContext!,
+      items: <PopupMenuEntry<int>>[const PopupMenuItem<int>(value: 0, child: Text('item 1'))],
+      position: RelativeRect.fill,
+    );
+    await tester.pumpAndSettle();
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.text('World')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello'), findsOne);
+    await gesture.removePointer();
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
