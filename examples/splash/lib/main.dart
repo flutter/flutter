@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
+
+@Preview(name: 'Testing')
+Widget foo() => Text('Tests2ing');
 
 void main() {
   runApp(
