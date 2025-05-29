@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "वेब पर खोजें",
   "shareButtonLabel": "शेयर करें",
   "pasteButtonLabel": "चिपकाएं",
-  "selectAllButtonLabel": "सभी को चुनें"
+  "selectAllButtonLabel": "सभी को चुनें",
+  "translateButtonLabel": "Translate"
 }

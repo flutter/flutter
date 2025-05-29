@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Søg på nettet",
   "shareButtonLabel": "Del",
   "pasteButtonLabel": "Indsæt",
-  "selectAllButtonLabel": "Markér alt"
+  "selectAllButtonLabel": "Markér alt",
+  "translateButtonLabel": "Translate"
 }

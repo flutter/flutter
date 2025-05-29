@@ -24,5 +24,7 @@
   "pasteButtonLabel": "Paste",
   "@pasteButtonLabel": {"description":"The label for paste buttons and menu items."},
   "selectAllButtonLabel": "Select all",
-  "@selectAllButtonLabel": {"description":"The label for select-all buttons and menu items."}
+  "@selectAllButtonLabel": {"description":"The label for select-all buttons and menu items."},
+  "translateButtonLabel": "Translate",
+  "@translateButtonLabel": {"description":"The label for translation buttons and menu items."}
 }

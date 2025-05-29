@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "වෙබය සොයන්න",
   "shareButtonLabel": "බෙදා ගන්න",
   "pasteButtonLabel": "අලවන්න",
-  "selectAllButtonLabel": "සියල්ල තෝරන්න"
+  "selectAllButtonLabel": "සියල්ල තෝරන්න",
+  "translateButtonLabel": "Translate"
 }

@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Hľadať na webe",
   "shareButtonLabel": "Zdieľať",
   "pasteButtonLabel": "Prilepiť",
-  "selectAllButtonLabel": "Vybrať všetko"
+  "selectAllButtonLabel": "Vybrať všetko",
+  "translateButtonLabel": "Translate"
 }

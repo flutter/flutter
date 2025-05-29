@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Cerca al web",
   "shareButtonLabel": "Comparteix",
   "pasteButtonLabel": "Enganxa",
-  "selectAllButtonLabel": "Selecciona-ho tot"
+  "selectAllButtonLabel": "Selecciona-ho tot",
+  "translateButtonLabel": "Translate"
 }

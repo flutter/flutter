@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Kërko në ueb",
   "shareButtonLabel": "Ndaj",
   "pasteButtonLabel": "Ngjit",
-  "selectAllButtonLabel": "Zgjidh të gjitha"
+  "selectAllButtonLabel": "Zgjidh të gjitha",
+  "translateButtonLabel": "Translate"
 }

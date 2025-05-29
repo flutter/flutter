@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Bilatu sarean",
   "shareButtonLabel": "Partekatu",
   "pasteButtonLabel": "Itsatsi",
-  "selectAllButtonLabel": "Hautatu guztiak"
+  "selectAllButtonLabel": "Hautatu guztiak",
+  "translateButtonLabel": "Translate"
 }

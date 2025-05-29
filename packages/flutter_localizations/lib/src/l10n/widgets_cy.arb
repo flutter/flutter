@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Chwilio'r We",
   "shareButtonLabel": "Rhannu",
   "pasteButtonLabel": "Gludo",
-  "selectAllButtonLabel": "Dewis y Cyfan"
+  "selectAllButtonLabel": "Dewis y Cyfan",
+  "translateButtonLabel": "Translate"
 }

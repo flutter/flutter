@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Maghanap sa Web",
   "shareButtonLabel": "I-share",
   "pasteButtonLabel": "I-paste",
-  "selectAllButtonLabel": "Piliin lahat"
+  "selectAllButtonLabel": "Piliin lahat",
+  "translateButtonLabel": "Translate"
 }

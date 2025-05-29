@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jagamine",
   "pasteButtonLabel": "Kleebi",
-  "selectAllButtonLabel": "Vali kõik"
+  "selectAllButtonLabel": "Vali kõik",
+  "translateButtonLabel": "Translate"
 }

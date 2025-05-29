@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Deursoek web",
   "shareButtonLabel": "Deel",
   "pasteButtonLabel": "Plak",
-  "selectAllButtonLabel": "Kies alles"
+  "selectAllButtonLabel": "Kies alles",
+  "translateButtonLabel": "Translate"
 }

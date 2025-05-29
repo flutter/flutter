@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Web'de Ara",
   "shareButtonLabel": "Paylaş",
   "pasteButtonLabel": "Yapıştır",
-  "selectAllButtonLabel": "Tümünü seç"
+  "selectAllButtonLabel": "Tümünü seç",
+  "translateButtonLabel": "Translate"
 }

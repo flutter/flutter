@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Որոնել համացանցում",
   "shareButtonLabel": "Կիսվել",
   "pasteButtonLabel": "Տեղադրել",
-  "selectAllButtonLabel": "Նշել բոլորը"
+  "selectAllButtonLabel": "Նշել բոլորը",
+  "translateButtonLabel": "Translate"
 }
