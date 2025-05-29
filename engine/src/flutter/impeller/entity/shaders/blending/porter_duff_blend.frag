@@ -30,22 +30,20 @@ frag_info;
 
 float input_alpha = frag_info.input_alpha_output_alpha_tmx_tmy.x;
 float output_alpha = frag_info.input_alpha_output_alpha_tmx_tmy.y;
-float tmx = frag_info.input_alpha_output_alpha_tmx_tmy.z;
-float tmy = frag_info.input_alpha_output_alpha_tmx_tmy.w;
+float tile_mode_x = frag_info.input_alpha_output_alpha_tmx_tmy.z;
+float tile_mode_y = frag_info.input_alpha_output_alpha_tmx_tmy.w;
 
 in vec2 v_texture_coords;
 in f16vec4 v_color;
 
 out vec4 frag_color;
 
-f16vec4 Sample(f16sampler2D texture_sampler,
-               vec2 texture_coords,
-               float tmx,
-               float tmy) {
+f16vec4 Sample(f16sampler2D texture_sampler, vec2 texture_coords) {
   if (supports_decal > 0.0) {
     return texture(texture_sampler, texture_coords);
   }
-  return IPHalfSampleWithTileMode(texture_sampler, texture_coords, tmx, tmy);
+  return IPHalfSampleWithTileMode(texture_sampler, texture_coords, tile_mode_x,
+                                  tile_mode_y);
 }
 
 void main() {
@@ -57,8 +55,8 @@ void main() {
                      frag_info.source_rect.w)),
           frag_info.use_strict_source_rect);
 
-  f16vec4 dst = Sample(texture_sampler_dst, texture_coords, tmx, tmy) *
-                float16_t(input_alpha);
+  f16vec4 dst =
+      Sample(texture_sampler_dst, texture_coords) * float16_t(input_alpha);
   f16vec4 src = v_color;
   frag_color = f16vec4(src * (src_coeff + dst.a * src_coeff_dst_alpha) +
                        dst * (dst_coeff + src.a * dst_coeff_src_alpha +
