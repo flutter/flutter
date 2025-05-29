@@ -8,6 +8,7 @@
 #import <UIKit/UIKit.h>
 
 @class FlutterEngine;
+@protocol FlutterPluginRegistrant;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
