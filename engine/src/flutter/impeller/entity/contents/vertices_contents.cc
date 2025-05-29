@@ -164,8 +164,9 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale = texture->GetYCoordScale();
     frame_info.mvp = geometry_result.transform;
 
-    frag_info.ai_ao_tmx_tmy = Vector4(1, alpha_, static_cast<int>(tile_mode_x_),
-                                      static_cast<int>(tile_mode_y_));
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(1, alpha_, static_cast<int>(tile_mode_x_),
+                static_cast<int>(tile_mode_y_));
     frag_info.use_strict_source_rect = 0.0;
 
     auto& host_buffer = renderer.GetTransientsBuffer();

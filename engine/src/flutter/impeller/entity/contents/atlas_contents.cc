@@ -224,7 +224,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale =
         geometry_->GetAtlas()->GetYCoordScale();
 
-    frag_info.ai_ao_tmx_tmy =
+    frag_info.input_alpha_output_alpha_tmx_tmy =
         Vector4(1.0, alpha_, static_cast<int>(Entity::TileMode::kDecal),
                 static_cast<int>(Entity::TileMode::kDecal));
     if (auto rect = geometry_->GetStrictSrcRect(); rect.has_value()) {

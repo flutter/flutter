@@ -349,9 +349,7 @@ void Canvas::DrawPaint(const Paint& paint) {
 // Optimization: if the texture has a color filter that is a simple
 // porter-duff blend or matrix filter, then instead of performing a save layer
 // we should swap out the shader for the porter duff blend shader and avoid a
-// saveLayer. This can only be done for imageRects without a strict source
-// rect, as the porter duff shader does not support this feature. This
-// optimization is important for Flame.
+// saveLayer. This optimization is important for Flame.
 bool Canvas::AttemptColorFilterOptimization(
     const std::shared_ptr<Texture>& image,
     Rect source,

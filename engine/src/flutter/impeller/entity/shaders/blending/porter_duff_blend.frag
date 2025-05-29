@@ -20,16 +20,18 @@ layout(constant_id = 5) const float dst_coeff_src_color = 1.0;
 uniform f16sampler2D texture_sampler_dst;
 
 uniform FragInfo {
-  vec4 ai_ao_tmx_tmy;
+  // packed input, output alpha and x/y tilemodes.
+  vec4 input_alpha_output_alpha_tmx_tmy;
   vec4 source_rect;
+  // When value is non-zero, uses texture coordinates clamped by `source_rect`.
   float use_strict_source_rect;
 }
 frag_info;
 
-float input_alpha = frag_info.ai_ao_tmx_tmy.x;
-float output_alpha = frag_info.ai_ao_tmx_tmy.y;
-float tmx = frag_info.ai_ao_tmx_tmy.z;
-float tmy = frag_info.ai_ao_tmx_tmy.w;
+float input_alpha = frag_info.input_alpha_output_alpha_tmx_tmy.x;
+float output_alpha = frag_info.input_alpha_output_alpha_tmx_tmy.y;
+float tmx = frag_info.input_alpha_output_alpha_tmx_tmy.z;
+float tmy = frag_info.input_alpha_output_alpha_tmx_tmy.w;
 
 in vec2 v_texture_coords;
 in f16vec4 v_color;
