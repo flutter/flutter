@@ -419,7 +419,8 @@ Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(Logger logger
       RegExp('self.*?window.*?rootViewController'),
       RegExp('^}'),
     );
-  } on Exception catch (_) {}
+  // ignore: avoid_catches_without_on_clauses
+  } catch (_) {}
 }
 
 /// Checks [file] representing swift code for deprecated usage of the
@@ -436,7 +437,8 @@ Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
       'window?.rootViewController',
       RegExp(r'^.*?func\s*?\S*?\('),
     );
-  } on Exception catch (_) {}
+  // ignore: avoid_catches_without_on_clauses
+  } catch (_) {}
 }
 
 void _printWarning(Logger logger, String path, int line, String warning) {
