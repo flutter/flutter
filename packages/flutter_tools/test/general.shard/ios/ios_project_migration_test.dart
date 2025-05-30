@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/ios/migrations/project_build_location_migratio
 import 'package:flutter_tools/src/ios/migrations/remove_bitcode_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/uiapplicationmain_deprecation_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/uiscenedelegate_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/cocoapods_script_symlink.dart';
@@ -867,6 +868,59 @@ platform :ios, '13.0'
 
         expect(infoPlistFile.lastModifiedSync(), infoPlistFileLastModified);
         expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('UISceneDelegate migration', () async {
+        const String xmlString = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>MyKey</key>
+    <string>MyValue</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+  </dict>
+</plist>
+''';
+        infoPlistFile.writeAsStringSync(xmlString);
+
+        final UISceneDelegateMigration migration = UISceneDelegateMigration(project, testLogger);
+        await migration.migrate();
+
+        expect(infoPlistFile.readAsStringSync(), '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>MyKey</key>
+    <string>MyValue</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+      <key>UIApplicationSupportsMultipleScenes</key>
+      <false/>
+      <key>UISceneConfigurations</key>
+      <dict>
+        <key>UIWindowSceneSessionRoleApplication</key>
+        <array>
+          <dict>
+            <key>UISceneClassName</key>
+            <string>UIWindowScene</string>
+            <key>UISceneDelegateClassName</key>
+            <string>FlutterSceneDelegate</string>
+            <key>UISceneConfigurationName</key>
+            <string>flutter</string>
+            <key>UISceneStoryboardFile</key>
+            <string>Main</string>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </dict>
+</plist>
+''');
       });
 
       testWithoutContext('info.plist is migrated', () async {
