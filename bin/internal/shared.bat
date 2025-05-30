@@ -52,12 +52,7 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
-  REM Check that git exists and get the revision.
-  WHERE git >NUL 2>&1
-  IF "%ERRORLEVEL%" NEQ "0" (
-    REM Could not find git. Exit without /B to avoid retrying.
-    ECHO Error: Unable to find git in your PATH. && EXIT 1
-  )
+  REM Get the Git revision.
   2>NUL (
     REM 'FOR /f' spawns a new terminal instance to run the command. If an
     REM 'AutoRun' command is defined in the user's registry, that command could
