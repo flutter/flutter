@@ -119,44 +119,22 @@ typedef RawMenuAnchorChildBuilder =
 
 /// Signature for a callback that shows the menu overlay of a [RawMenuAnchor].
 ///
-/// This callback will add the menu to the widget tree, and should be called
-/// before opening animations begin.
-///
-/// The `showOverlay` callback will add the menu overlay to the widget tree. Its
-/// `position` argument will be supplied to [RawMenuAnchor.overlayBuilder].
-///
 /// This signature is used by the `showOverlay` argument in
-/// [RawMenuAnchorOpenRequestedCallback].
+/// [RawMenuAnchor.onOpenRequested]. See [RawMenuAnchor.onOpenRequested] for
+/// more information.
 typedef RawMenuAnchorShowOverlayCallback = void Function({Offset? position});
 
 /// Signature for a callback that hides the menu overlay of a [RawMenuAnchor].
 ///
-/// This callback will remove the menu overlay to the widget tree, and should be
-/// called after closing animations end.
-///
 /// This signature is used by the `hideOverlay` parameter in
-/// [RawMenuAnchorCloseRequestedCallback].
+/// [RawMenuAnchor.onCloseRequested]. See [RawMenuAnchor.onCloseRequested] for
+/// more information.
 typedef RawMenuAnchorHideOverlayCallback = VoidCallback;
 
 /// Signature for the callback used by [RawMenuAnchor.onOpenRequested] to
 /// intercept requests to open a menu.
 ///
-/// Typically, [RawMenuAnchor.onOpenRequested] is called in response to a user
-/// action, such as a tap or a keyboard shortcut.
-///
-/// The `position` argument is the same argument that `MenuController.open` was
-/// called with.
-///
-/// The `showOverlay` callback will add the menu overlay to the widget tree. Its
-/// `position` argument will be supplied to [RawMenuAnchor.overlayBuilder].
-///
-/// When animating the menu open, `showOverlay` should be called before any
-/// animation begins. This will make the menu immediately interactive, which
-/// allows screen readers to announce the menu items immediately and allows
-/// keyboard focus to be set on the menu items.
-///
-/// On the other hand, if a delay is added before the menu is shown,
-/// `showOverlay` should be called after the delay completes.
+/// See [RawMenuAnchor.onOpenRequested] for more information.
 typedef RawMenuAnchorOpenRequestedCallback =
     void Function(Offset? position, RawMenuAnchorShowOverlayCallback showOverlay);
 
@@ -166,8 +144,7 @@ typedef RawMenuAnchorOpenRequestedCallback =
 /// The `hideOverlay` callback will remove the menu overlay from the widget
 /// tree, and should be called when the menu is ready to be hidden.
 ///
-/// When animating the menu closed, `hideOverlay` should be called after closing
-/// animations end.
+/// See [RawMenuAnchor.onCloseRequested] for more information.
 typedef RawMenuAnchorCloseRequestedCallback =
     void Function(RawMenuAnchorHideOverlayCallback hideOverlay);
 
@@ -208,6 +185,28 @@ class _MenuControllerScope extends InheritedWidget {
 /// passed to the `info` argument of the `overlayBuilder` function.
 ///
 /// The [RawMenuAnchor] does not manage semantics and focus of the menu.
+///
+/// ### Adding animations to menus
+///
+/// A `RawMenuAnchor` has no knowledge of animations, as evident from its APIs,
+/// which don't involve [AnimationController] at all. It is only knows whether
+/// the overlay is shown or hidden.
+///
+/// If another widget intends to implement a menu with opening and closing
+/// transitions, `RawMenuAnchor`'s overlay should remain visible throughout both
+/// the opening and closing animation durations.
+///
+/// This means that the `showOverlay` callback passed to [onOpenRequested]
+/// should be called before the first frame of the opening animation.
+/// Conversely, `hideOverlay` within [onCloseRequested] should only be called
+/// after the closing animation has completed.
+///
+/// This also means that, if [MenuController.open] is called while the overlay
+/// is already visible, `RawMenuAnchor` has no way of knowing whether the menu
+/// is currently opening, closing, or stably displayed. The parent widget will
+/// need to manage additional information (such as the state of an
+/// [AnimationController]) to determine how to respond in such scenarios.
+///
 ///
 /// {@tool dartpad}
 ///
@@ -258,7 +257,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// usage is to respond when the menu first becomes interactive, such as by
   /// setting focus to a menu item.
   ///
-  /// This callback is not called when an already open menu is repositioned.
+  /// This callback is called regardless of whether the menu is already open or
+  /// the menu's position has changed.
   final VoidCallback? onOpen;
 
   /// Called when the menu overlay is hidden.
@@ -276,31 +276,23 @@ class RawMenuAnchor extends StatefulWidget {
   /// typically with the intent of adding a delay or an animation.
   ///
   /// After an open request is intercepted, the handler is responsible for
-  /// eventually calling `showOverlay` to add the menu overlay to the widget
-  /// tree and start the opening animation.
+  /// eventually calling `showOverlay`. If needed, the call can be made after a
+  /// delay, or not at all. The `showOverlay` call sets [MenuController.isOpen]
+  /// to true, builds (or rebuilds) the [RawMenuAnchor] its overlay (the widget
+  /// built by [overlayBuilder]), and ensures that the menu overlay is showing.
+  /// If a `RawMenuAnchor` is used in a themed menu that plays an opening
+  /// animation, `showOverlay` should come before the opening animation, since
+  /// the animation plays on the overlay itself.
   ///
-  /// The `showOverlay` call displays the overlay and generally precedes the
-  /// opening animation, since the animation plays on the overlay itself. After
-  /// this call, [MenuController.isOpen] becomes true, and the menus are
-  /// expected to be interactive.
-  ///
-  /// The `position` argument is the position passed to [MenuController.open].
-  /// Handlers should provide this argument to `showOverlay` so that the
-  /// `overlayBuilder` can use it to position the menu. When a menu is
-  /// repositioned, [onOpenRequested] may be called with a new `position` value
-  /// while the menu is still open. In this case, opening delays or animations
-  /// should be skipped, and `showOverlay` should be called with the new
-  /// `position` value.
+  /// The `position` argument is the `position` [MenuController.open] was called
+  /// with. When a menu is repositioned, [onOpenRequested] may be called with a
+  /// new `position` value while the menu is still open.
   ///
   /// A typical [onOpenRequested] consists of the following steps:
   ///
   ///  1. Optional delay.
   ///  2. Call `showOverlay` (whose call chain eventually invokes [onOpen]).
   ///  3. Optionally starts the opening animation.
-  ///
-  /// While [onOpenRequested] will always be called when [MenuController.open]
-  /// is called, [onOpen] will only be called when a closed menu is shown, or
-  /// when a menu is repositioned.
   ///
   /// Defaults to a callback that immediately shows the menu.
   final RawMenuAnchorOpenRequestedCallback onOpenRequested;
@@ -312,8 +304,14 @@ class RawMenuAnchor extends StatefulWidget {
   /// menu is hidden.
   ///
   /// After a close request is intercepted, handlers are responsible for
-  /// eventually calling `hideOverlay` to remove the menu from the widget tree.
-  /// This should typically be after closing animations have completed.
+  /// eventually calling `hideOverlay`. If needed, the call can be made after a
+  /// delay, or not at all. The `hideOverlay` callback sets
+  /// [MenuController.isOpen] to false and ensures that the menu overlay is
+  /// hidden. If the `RawMenuAnchor` is used in a themed menu that plays a
+  /// closing animation, `hideOverlay` should be called after the closing
+  /// animation has ended, since the animation plays on the overlay itself. This
+  /// means that [MenuController.isOpen] will true while closing animations are
+  /// running.
   ///
   /// [MenuController.isOpen] will be set to false after `hideOverlay` is
   /// called, meaning [MenuController.isOpen] will typically be true while
@@ -324,8 +322,8 @@ class RawMenuAnchor extends StatefulWidget {
   ///  1. Optionally starts the closing animation and waits for it to complete.
   ///  2. Call `hideOverlay` (whose call chain eventually invokes [onClose]).
   ///
-  /// Throughout the closing sequence, menus should not be focusable or
-  /// interactive.
+  /// Throughout the closing sequence, menus should typically not be focusable
+  /// or interactive.
   ///
   /// Defaults to a callback that immediately hides the menu.
   final RawMenuAnchorCloseRequestedCallback onCloseRequested;
