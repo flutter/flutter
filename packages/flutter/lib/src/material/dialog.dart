@@ -251,12 +251,12 @@ class Dialog extends StatelessWidget {
   /// Defaults to [SemanticsRole.dialog].
   final SemanticsRole semanticsRole;
 
+  /// {@template flutter.material.dialog.constraints}
   /// Constrains the size of the [Dialog].
   ///
-  /// By default it is
-  /// ```dart
-  /// const BoxConstraints(minWidth: 280.0)
-  /// ```
+  /// If null, then [DialogThemeData.constraints] is used. If that is also null, the
+  /// default is const BoxConstraints(minWidth: 280.0).
+  /// {@endtemplate}
   final BoxConstraints? constraints;
 
   @override
