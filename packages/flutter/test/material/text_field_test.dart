@@ -17082,6 +17082,70 @@ void main() {
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
+
+    testWidgets(
+      'iOS system context menu, tapping the selection toggles the toolbar',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(
+                child: TextField(controller: _textEditingController(text: 'one two three')),
+              ),
+            ),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle(kDoubleTapTimeout);
+
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+
+        // Tap the selection to toggle the toolbar.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        // Simulate system hiding the menu as a result of tapping outside of it.
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'ContextMenu.onDismissSystemContextMenu',
+        });
+        Object? error;
+        try {
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            'flutter/platform',
+            messageBytes,
+            (ByteData? data) {},
+          );
+        } catch (e) {
+          error = e;
+        }
+        await tester.pumpAndSettle();
+
+        expect(error, isNull);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        await tester.pumpAndSettle(kDoubleTapTimeout);
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle();
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   group('magnifier builder', () {
