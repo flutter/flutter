@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @Tags(<String>['flutter-test-driver'])
-@Skip('https://github.com/flutter/flutter/issues/169304')
 library;
 
 import '../src/common.dart';

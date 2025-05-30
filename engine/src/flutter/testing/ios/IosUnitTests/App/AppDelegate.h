@@ -7,9 +7,14 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol FlutterPluginRegistrant;
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-@property(strong, nonatomic) UIWindow* window;
+@property(nonatomic, strong, nullable) UIWindow* window;
+
+//  A mirror of the FlutterAppDelegate API for integration testing.
+@property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 
 @end
 

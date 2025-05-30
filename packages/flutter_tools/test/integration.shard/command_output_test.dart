@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/features.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import 'test_utils.dart';
 
 // This test file does not use [getLocalEngineArguments] because it is testing
@@ -58,7 +59,7 @@ void main() {
     expect(result.stdout, contains('Shutdown hooks complete'));
   });
 
-  testWithoutContext('flutter config --list contains all features', () async {
+  testUsingContext('flutter config --list contains all features', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'config', '--list']);
 
     // contains all of the experiments in features.dart
