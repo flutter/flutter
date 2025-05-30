@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -321,7 +322,7 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataLookUp], which specifies the data to be sent
 ///    to the platform for this same button.
-final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemLookUp].
   const IOSSystemContextMenuItemLookUp({this.title});
 
@@ -334,8 +335,9 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemLookUp(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('title', title));
   }
 }
 
@@ -356,7 +358,7 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataSearchWeb], which specifies the data to be
 ///    sent to the platform for this same button.
-final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
   const IOSSystemContextMenuItemSearchWeb({this.title});
 
@@ -371,8 +373,9 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemSearchWeb(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('title', title));
   }
 }
 
@@ -430,7 +433,7 @@ final class IOSSystemContextMenuItemTranslate extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataShare], which specifies the data to be sent
 ///    to the platform for this same button.
-final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemShare].
   const IOSSystemContextMenuItemShare({this.title});
 
@@ -443,8 +446,9 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemShare(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
