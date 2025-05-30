@@ -44,7 +44,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsNothing = _FindsCountMatcher(null, 0);
 
-/// Asserts that the [Finder] locates at least one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at least one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAny] method.
 ///
@@ -78,7 +78,7 @@ const Matcher findsWidgets = _FindsCountMatcher(1, null);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsAny = _FindsCountMatcher(1, null);
 
-/// Asserts that the [Finder] locates at exactly one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at exactly one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsOne] method.
 ///
@@ -112,7 +112,7 @@ const Matcher findsOneWidget = _FindsCountMatcher(1, 1);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsOne = _FindsCountMatcher(1, 1);
 
-/// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates the specified number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsExactly] method.
 ///
@@ -146,7 +146,7 @@ Matcher findsNWidgets(int n) => _FindsCountMatcher(n, n);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 Matcher findsExactly(int n) => _FindsCountMatcher(n, n);
 
-/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates at least a number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAtLeast] method.
 ///
@@ -180,7 +180,7 @@ Matcher findsAtLeastNWidgets(int n) => _FindsCountMatcher(n, null);
 ///  * [findsExactly], when you want the finder to find a specific number of candidates.
 Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 
-/// Asserts that the [Finder] locates a single widget that has at
+/// Asserts that the [FinderBase] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
 ///
 /// It's important to use a full finder, since by default finders exclude
@@ -197,7 +197,7 @@ Matcher findsAtLeast(int n) => _FindsCountMatcher(n, null);
 ///  * [isOnstage], the opposite.
 const Matcher isOffstage = _IsOffstage();
 
-/// Asserts that the [Finder] locates a single widget that has no
+/// Asserts that the [FinderBase] locates a single widget that has no
 /// [Offstage] widget ancestors.
 ///
 /// See also:
@@ -205,7 +205,7 @@ const Matcher isOffstage = _IsOffstage();
 ///  * [isOffstage], the opposite.
 const Matcher isOnstage = _IsOnstage();
 
-/// Asserts that the [Finder] locates a single widget that has at
+/// Asserts that the [FinderBase] locates a single widget that has at
 /// least one [Card] widget ancestor.
 ///
 /// See also:
@@ -213,7 +213,7 @@ const Matcher isOnstage = _IsOnstage();
 ///  * [isNotInCard], the opposite.
 const Matcher isInCard = _IsInCard();
 
-/// Asserts that the [Finder] locates a single widget that has no
+/// Asserts that the [FinderBase] locates a single widget that has no
 /// [Card] widget ancestors.
 ///
 /// This is equivalent to `isNot(isInCard)`.
@@ -466,10 +466,10 @@ Matcher coversSameAreaAs(Path expectedPath, {required Rect areaToCompare, int sa
 // late Future<ByteData> someFont;
 // late WidgetTester tester;
 
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
+/// Asserts that a [FinderBase], [Future<ui.Image>], or [ui.Image] matches the
 /// golden image file identified by [key], with an optional [version] number.
 ///
-/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// For the case of a [FinderBase], the [FinderBase] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
 /// treated as the image for the widget. As such, you may choose to wrap a test
 /// widget in a [RepaintBoundary] to specify a particular focus for the test.
@@ -593,10 +593,10 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   };
 }
 
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
+/// Asserts that a [FinderBase], [Future<ui.Image>], or [ui.Image] matches a
 /// reference image identified by [image].
 ///
-/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// For the case of a [FinderBase], the [FinderBase] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
 /// treated as the image for the widget.
 ///
@@ -628,7 +628,7 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 /// See also:
 ///
 ///  * [matchesGoldenFile], which should be used instead if you need to verify
-///    that a [Finder] or [ui.Image] matches a golden image.
+///    that a [FinderBase] or [ui.Image] matches a golden image.
 AsyncMatcher matchesReferenceImage(ui.Image image) {
   return _MatchesReferenceImage(image);
 }
@@ -644,7 +644,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -842,7 +842,7 @@ Matcher matchesSemantics({
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -1801,31 +1801,31 @@ class _IsMethodCall extends Matcher {
   }
 }
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// Asserts that a [FinderBase] locates a single object whose root RenderObject
 /// is a [RenderClipRect] with no clipper set, or an equivalent
 /// [RenderClipPath].
 const Matcher clipsWithBoundingRect = _ClipsWithBoundingRect();
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject is
+/// Asserts that a [FinderBase] locates a single object whose root RenderObject is
 /// not a [RenderClipRect], [RenderClipRRect], [RenderClipOval], or
 /// [RenderClipPath].
 const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// Asserts that a [FinderBase] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
 Matcher clipsWithBoundingRRect({required BorderRadius borderRadius}) {
   return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// Asserts that a [FinderBase] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
 Matcher clipsWithShapeBorder({required ShapeBorder shape}) {
   return _ClipsWithShapeBorder(shape: shape);
 }
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// Asserts that a [FinderBase] locates a single object whose root RenderObject
 /// is a [RenderPhysicalModel] or a [RenderPhysicalShape].
 ///
 /// - If the render object is a [RenderPhysicalModel]
@@ -1846,7 +1846,7 @@ Matcher rendersOnPhysicalModel({BoxShape? shape, BorderRadius? borderRadius, dou
   return _RendersOnPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation);
 }
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// Asserts that a [FinderBase] locates a single object whose root RenderObject
 /// is [RenderPhysicalShape] that uses a [ShapeBorderClipper] that clips to
 /// [shape] as its clipper.
 /// If [elevation] is non null asserts that [RenderPhysicalShape.elevation] is
