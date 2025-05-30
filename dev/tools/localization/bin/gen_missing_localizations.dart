@@ -42,6 +42,7 @@ Future<void> main(List<String> rawArgs) async {
   );
   updateMissingResources(localizationPath, 'material', removeUndefined: removeUndefined);
   updateMissingResources(localizationPath, 'cupertino', removeUndefined: removeUndefined);
+  updateMissingResources(localizationPath, 'widgets', removeUndefined: removeUndefined);
 }
 
 Map<String, dynamic> loadBundle(File file) {
