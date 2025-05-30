@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -35,12 +34,6 @@ void main() {
   late FakeFlutterDevice mockFlutterDevice;
   late FakeWebDevFS mockWebDevFS;
   late MemoryFileSystem fileSystem;
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -89,7 +82,6 @@ name: my_app
       BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );
@@ -122,7 +114,6 @@ name: my_app
       BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );
@@ -155,7 +146,6 @@ name: my_app
       BuildSystem: () => TestBuildSystem.error(Exception('foo')),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );
@@ -191,7 +181,6 @@ name: my_app
       BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );
@@ -232,7 +221,6 @@ name: my_app
           ]),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: enableExplicitPackageDependencies,
       Pub: ThrowingPub.new,
     },
   );

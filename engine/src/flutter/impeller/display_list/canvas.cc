@@ -31,6 +31,7 @@
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
+#include "impeller/entity/contents/solid_rsuperellipse_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -43,8 +44,6 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
-#include "impeller/entity/geometry/round_rect_geometry.h"
-#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
@@ -175,6 +174,25 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
 }
 
 }  // namespace
+
+std::shared_ptr<SolidRRectLikeBlurContents>
+Canvas::RRectBlurShape::BuildBlurContent() {
+  return std::make_shared<SolidRRectBlurContents>();
+}
+
+Geometry& Canvas::RRectBlurShape::BuildGeometry(Rect rect, Scalar radius) {
+  return geom_.emplace(rect, Size{radius, radius});
+}
+
+std::shared_ptr<SolidRRectLikeBlurContents>
+Canvas::RSuperellipseBlurShape::BuildBlurContent() {
+  return std::make_shared<SolidRSuperellipseBlurContents>();
+}
+
+Geometry& Canvas::RSuperellipseBlurShape::BuildGeometry(Rect rect,
+                                                        Scalar radius) {
+  return geom_.emplace(rect, radius);
+}
 
 Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
@@ -331,9 +349,7 @@ void Canvas::DrawPaint(const Paint& paint) {
 // Optimization: if the texture has a color filter that is a simple
 // porter-duff blend or matrix filter, then instead of performing a save layer
 // we should swap out the shader for the porter duff blend shader and avoid a
-// saveLayer. This can only be done for imageRects without a strict source
-// rect, as the porter duff shader does not support this feature. This
-// optimization is important for Flame.
+// saveLayer. This optimization is important for Flame.
 bool Canvas::AttemptColorFilterOptimization(
     const std::shared_ptr<Texture>& image,
     Rect source,
@@ -341,11 +357,10 @@ bool Canvas::AttemptColorFilterOptimization(
     const Paint& paint,
     const SamplerDescriptor& sampler,
     SourceRectConstraint src_rect_constraint) {
-  if (src_rect_constraint == SourceRectConstraint::kStrict ||  //
-      !paint.color_filter ||                                   //
-      paint.image_filter != nullptr ||                         //
-      paint.invert_colors ||                                   //
-      paint.mask_blur_descriptor.has_value() ||                //
+  if (!paint.color_filter ||                     //
+      paint.image_filter != nullptr ||           //
+      paint.invert_colors ||                     //
+      paint.mask_blur_descriptor.has_value() ||  //
       !IsPipelineBlendOrMatrixFilter(paint.color_filter)) {
     return false;
   }
@@ -359,7 +374,9 @@ bool Canvas::AttemptColorFilterOptimization(
         /*destination=*/dest,
         /*color=*/skia_conversions::ToColor(blend_filter->color()),
         /*blend_mode=*/blend_filter->mode(),
-        /*desc=*/sampler);
+        /*desc=*/sampler,
+        /*use_strict_src_rect=*/src_rect_constraint ==
+            SourceRectConstraint::kStrict);
 
     auto atlas_contents = std::make_shared<AtlasContents>();
     atlas_contents->SetGeometry(&geometry);
@@ -372,6 +389,12 @@ bool Canvas::AttemptColorFilterOptimization(
 
     AddRenderEntityToCurrentPass(entity);
   } else {
+    // src_rect_constraint is only supported in the porter-duff mode
+    // for now.
+    if (src_rect_constraint == SourceRectConstraint::kStrict) {
+      return false;
+    }
+
     const flutter::DlMatrixColorFilter* matrix_filter =
         paint.color_filter->asMatrix();
 
@@ -381,7 +404,9 @@ bool Canvas::AttemptColorFilterOptimization(
         /*destination=*/dest,
         /*color=*/Color::Khaki(),            // ignored
         /*blend_mode=*/BlendMode::kSrcOver,  // ignored
-        /*desc=*/sampler);
+        /*desc=*/sampler,
+        /*use_strict_src_rect=*/src_rect_constraint ==
+            SourceRectConstraint::kStrict);
 
     auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
     atlas_contents->SetGeometry(&geometry);
@@ -403,6 +428,22 @@ bool Canvas::AttemptColorFilterOptimization(
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Size corner_radii,
                                      const Paint& paint) {
+  RRectBlurShape rrect_shape;
+  return AttemptDrawBlurredRRectLike(rect, corner_radii, paint, rrect_shape);
+}
+
+bool Canvas::AttemptDrawBlurredRSuperellipse(const Rect& rect,
+                                             Size corner_radii,
+                                             const Paint& paint) {
+  RSuperellipseBlurShape rsuperellipse_shape;
+  return AttemptDrawBlurredRRectLike(rect, corner_radii, paint,
+                                     rsuperellipse_shape);
+}
+
+bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
+                                         Size corner_radii,
+                                         const Paint& paint,
+                                         RRectLikeBlurShape& shape) {
   if (paint.style != Paint::Style::kFill) {
     return false;
   }
@@ -424,6 +465,7 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
   if (fabsf(corner_radii.width - corner_radii.height) > kEhCloseEnough) {
     return false;
   }
+  Scalar corner_radius = corner_radii.width;
 
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
@@ -483,12 +525,13 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
     Save(1u);
   }
 
-  auto draw_blurred_rrect = [this, &rect, &corner_radii, &rrect_paint]() {
-    auto contents = std::make_shared<SolidRRectBlurContents>();
+  auto draw_blurred_rrect = [this, &rect, corner_radius, &rrect_paint,
+                             &shape]() {
+    auto contents = shape.BuildBlurContent();
 
     contents->SetColor(rrect_paint.color);
     contents->SetSigma(rrect_paint.mask_blur_descriptor->sigma);
-    contents->SetRRect(rect, corner_radii);
+    contents->SetShape(rect, corner_radius);
 
     Entity blurred_rrect_entity;
     blurred_rrect_entity.SetTransform(GetCurrentTransform());
@@ -513,19 +556,19 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
       entity.SetTransform(GetCurrentTransform());
       entity.SetBlendMode(rrect_paint.blend_mode);
 
-      RoundRectGeometry geom(rect, corner_radii);
+      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, rrect_paint,
                                               /*reuse_depth=*/true);
       break;
     }
     case FilterContents::BlurStyle::kOuter: {
-      RoundRectGeometry geom(rect, corner_radii);
+      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
       ClipGeometry(geom, Entity::ClipOperation::kDifference);
       draw_blurred_rrect();
       break;
     }
     case FilterContents::BlurStyle::kInner: {
-      RoundRectGeometry geom(rect, corner_radii);
+      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
       ClipGeometry(geom, Entity::ClipOperation::kIntersect);
       draw_blurred_rrect();
       break;
@@ -696,15 +739,19 @@ void Canvas::DrawDiffRoundRect(const RoundRect& outer,
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                                    const Paint& paint) {
+  auto& rect = rse.GetBounds();
+  auto& radii = rse.GetRadii();
+  if (radii.AreAllCornersSame() &&
+      AttemptDrawBlurredRSuperellipse(rect, radii.top_left, paint)) {
+    return;
+  }
+
   if (paint.style == Paint::Style::kFill) {
-    // TODO(dkwingsmt): Investigate if RSE can use the `AttemptDrawBlurredRRect`
-    // optimization at some point, such as a large enough mask radius.
-    // https://github.com/flutter/flutter/issues/163893
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
     entity.SetBlendMode(paint.blend_mode);
 
-    RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetRadii());
+    RoundSuperellipseGeometry geom(rect, radii);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
     return;
   }

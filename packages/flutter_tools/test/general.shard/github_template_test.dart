@@ -13,6 +13,33 @@ import 'package:flutter_tools/src/reporting/github_template.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+const String _kPluginsFile = '''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "camera",
+        "path": "/fake/pub.dartlang.org/camera-0.5.7+2/"
+      },
+      {
+        "name": "device_info",
+        "path": "/fake/pub.dartlang.org/device_info-0.4.1+4/"
+      }
+    ],
+    "android": [
+      {
+        "name": "camera",
+        "path": "/fake/pub.dartlang.org/camera-0.5.7+2/"
+      },
+      {
+        "name": "device_info",
+        "path": "/fake/pub.dartlang.org/device_info-0.4.1+4/"
+      }
+    ]
+  }
+}
+''';
+
 void main() {
   late BufferLogger logger;
   late FileSystem fs;
@@ -199,11 +226,8 @@ flutter:
     iosBundleIdentifier: com.example.failing.ios
 ''');
 
-          final File pluginsFile = projectDirectory.childFile('.flutter-plugins');
-          pluginsFile.writeAsStringSync('''
-camera=/fake/pub.dartlang.org/camera-0.5.7+2/
-device_info=/fake/pub.dartlang.org/pub.dartlang.org/device_info-0.4.1+4/
-        ''');
+          final File pluginsFile = projectDirectory.childFile('.flutter-plugins-dependencies');
+          pluginsFile.writeAsStringSync(_kPluginsFile);
 
           final File metadataFile = projectDirectory.childFile('.metadata');
           metadataFile.writeAsStringSync('''

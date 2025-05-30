@@ -168,6 +168,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleRelease)                             \
   PROC(ImpellerParagraphStyleRetain)                              \
   PROC(ImpellerParagraphStyleSetBackground)                       \
+  PROC(ImpellerParagraphStyleSetEllipsis)                         \
   PROC(ImpellerParagraphStyleSetFontFamily)                       \
   PROC(ImpellerParagraphStyleSetFontSize)                         \
   PROC(ImpellerParagraphStyleSetFontStyle)                        \
@@ -1085,6 +1086,14 @@ class ParagraphStyle
   ///
   ParagraphStyle& SetLocale(const char* locale) {
     gGlobalProcTable.ImpellerParagraphStyleSetLocale(Get(), locale);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetEllipsis
+  ///
+  ParagraphStyle& SetEllipsis(const char* ellipsis) {
+    gGlobalProcTable.ImpellerParagraphStyleSetEllipsis(Get(), ellipsis);
     return *this;
   }
 
