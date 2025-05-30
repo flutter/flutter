@@ -58,6 +58,3 @@ asynchronously (typically a few minutes, though may take longer when postsubmit
 queues are under load):
 
 ![Example](https://github.com/user-attachments/assets/077094b6-5f7e-4e1b-952c-2a3d1abf6f8f)
-
-To enable a branch for "Run all tasks", reach out to `team-infra`. It's a [bit
-of a hack](https://github.com/flutter/cocoon/blob/249ffc063ddd43aec681c776a2953d5c26f294a3/app_dart/lib/src/request_handlers/scheduler/batch_backfiller.dart#L64-L72) at the moment.
