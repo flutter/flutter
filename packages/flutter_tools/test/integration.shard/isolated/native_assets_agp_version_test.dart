@@ -54,8 +54,7 @@ void main() {
                 .childDirectory('android')
                 .childFile('settings.gradle.kts');
             if (!settingsGradleFile.existsSync()) {
-              settingsGradleFile = exampleDirectory
-                  .childFile('settings.gradle.kts');
+              settingsGradleFile = exampleDirectory.childFile('settings.gradle.kts');
             }
 
             expect(appBuildGradleFile, exists);
