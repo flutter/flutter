@@ -881,8 +881,8 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
                            dst_snapshot->texture->GetSize(),  //
                            cmd_buffer,                        //
                            subpass_callback,                  //
-                           /*msaa_enabled=*/false,            //
-                           /*depth_stencil_enabled=*/false    //
+                           /*msaa_enabled=*/true,             //
+                           /*depth_stencil_enabled=*/true     //
       );
 
   if (!render_target.ok()) {
