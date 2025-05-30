@@ -39,9 +39,9 @@ jobs:
 
       # The following step is only run LOCALLY - Github runners have everything on them
       - name: install android
-        if: ${{ env.ACT }}      
+        if: ${{ env.ACT }}
         run: |
-          sdkmanager install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Checkout code
         uses: actions/checkout@v4
