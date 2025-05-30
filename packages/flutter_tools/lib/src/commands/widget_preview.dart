@@ -139,7 +139,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         // Should only be used for testing.
         hide: !verbose,
       )
-      ..addFlag(kHeadlessWeb, help: 'Launches Chrome in headless mode for testing.', hide: !verbose)
+      ..addFlag(kHeadless, help: 'Launches Chrome in headless mode for testing.', hide: !verbose)
       ..addOption(
         kWidgetPreviewScaffoldOutputDir,
         help:
@@ -150,8 +150,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const String kLaunchPreviewer = 'launch-previewer';
-  static const String kUseFlutterDesktop = 'desktop';
-  static const String kHeadlessWeb = 'headless-web';
+  static const String kHeadless = 'headless';
   static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   /// Environment variable used to pass the DTD URI to the widget preview scaffold.
@@ -386,7 +385,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           useLocalCanvasKit: true,
         ),
         webEnableExposeUrl: false,
-        webRunHeadless: boolArg(kHeadlessWeb),
+        webRunHeadless: boolArg(kHeadless),
       );
       final String target = bundle.defaultMainPath;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
