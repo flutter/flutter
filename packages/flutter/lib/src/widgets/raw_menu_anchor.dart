@@ -745,7 +745,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleOpenRequest({ui.Offset? position}) {
-    widget.onOpenRequested(position,  ({Offset? position}) {
+    widget.onOpenRequested(position, ({Offset? position}) {
       _menuPosition = position;
       open(position: position);
     });
