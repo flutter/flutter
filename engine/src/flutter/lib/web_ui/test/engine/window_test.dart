@@ -335,16 +335,16 @@ Future<void> testMain() async {
   });
 
   test('onAccessibilityFeaturesChanged is called when semantics is enabled', () {
-    final Completer<void> completer = Completer<void>();
+    bool a11yChangeInvoked = false;
     myWindow.onAccessibilityFeaturesChanged = () {
-      completer.complete();
+      a11yChangeInvoked = true;
     };
 
     expect(EngineSemantics.instance.semanticsEnabled, isFalse);
     EngineSemantics.instance.semanticsEnabled = true;
 
     expect(EngineSemantics.instance.semanticsEnabled, isTrue);
-    expect(completer.future.timeout(const Duration(milliseconds: 100)), completes);
+    expect(a11yChangeInvoked, isTrue);
   });
 
   test('onPlatformMessage preserves the zone', () {
