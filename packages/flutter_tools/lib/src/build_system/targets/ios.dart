@@ -380,7 +380,7 @@ Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
 
   bool inDidFinishLaunchingWithOptions = false;
   int lineNumber = 0;
-  await for (final String line in lines) {
+  for (final String line in lines) {
     lineNumber += 1;
     if (!inDidFinishLaunchingWithOptions) {
       if (line.contains('didFinishLaunchingWithOptions')) {
