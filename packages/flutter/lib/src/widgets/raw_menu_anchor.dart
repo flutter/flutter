@@ -188,12 +188,12 @@ class _MenuControllerScope extends InheritedWidget {
 ///
 /// ### Adding animations to menus
 ///
-/// A `RawMenuAnchor` has no knowledge of animations, as evident from its APIs,
+/// A [RawMenuAnchor] has no knowledge of animations, as evident from its APIs,
 /// which don't involve [AnimationController] at all. It is only knows whether
 /// the overlay is shown or hidden.
 ///
 /// If another widget intends to implement a menu with opening and closing
-/// transitions, `RawMenuAnchor`'s overlay should remain visible throughout both
+/// transitions, [RawMenuAnchor]'s overlay should remain visible throughout both
 /// the opening and closing animation durations.
 ///
 /// This means that the `showOverlay` callback passed to [onOpenRequested]
@@ -202,7 +202,7 @@ class _MenuControllerScope extends InheritedWidget {
 /// after the closing animation has completed.
 ///
 /// This also means that, if [MenuController.open] is called while the overlay
-/// is already visible, `RawMenuAnchor` has no way of knowing whether the menu
+/// is already visible, [RawMenuAnchor] has no way of knowing whether the menu
 /// is currently opening, closing, or stably displayed. The parent widget will
 /// need to manage additional information (such as the state of an
 /// [AnimationController]) to determine how to respond in such scenarios.
@@ -280,7 +280,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// delay, or not at all. The `showOverlay` call sets [MenuController.isOpen]
   /// to true, builds (or rebuilds) the [RawMenuAnchor] its overlay (the widget
   /// built by [overlayBuilder]), and ensures that the menu overlay is showing.
-  /// If a `RawMenuAnchor` is used in a themed menu that plays an opening
+  /// If a [RawMenuAnchor] is used in a themed menu that plays an opening
   /// animation, `showOverlay` should come before the opening animation, since
   /// the animation plays on the overlay itself.
   ///
@@ -307,7 +307,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// eventually calling `hideOverlay`. If needed, the call can be made after a
   /// delay, or not at all. The `hideOverlay` callback sets
   /// [MenuController.isOpen] to false and ensures that the menu overlay is
-  /// hidden. If the `RawMenuAnchor` is used in a themed menu that plays a
+  /// hidden. If the [RawMenuAnchor] is used in a themed menu that plays a
   /// closing animation, `hideOverlay` should be called after the closing
   /// animation has ended, since the animation plays on the overlay itself. This
   /// means that [MenuController.isOpen] will true while closing animations are
