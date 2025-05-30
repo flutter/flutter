@@ -4243,8 +4243,7 @@ abstract class ImageFilter {
   /// the engine to contain the filter input.
   ///
   /// When Impeller uses the OpenGL(ES) backend, the y-axis direction is
-  /// reversed. Normall Flutter's high level rendering abstractions account for
-  /// this automatically. Custom fragment shaders must invert the y-axis on
+  /// reversed. Custom fragment shaders must invert the y-axis on
   /// GLES or they will render upside-down.
   ///
   /// For example, the following is a valid fragment shader that can be used
@@ -4263,7 +4262,7 @@ abstract class ImageFilter {
   ///
   /// void main() {
   ///   vec2 uv = FlutterFragCoord().xy / u_size;
-  /// // Reverse y direction for OpenGL
+  /// // Reverse y axis for OpenGL backend.
   /// #ifdef IMPELLER_TARGET_OPENGLES
   ///   uv.y = 1.0 - uv.y
   /// #endif
