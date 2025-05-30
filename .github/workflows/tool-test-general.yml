@@ -47,7 +47,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - run: |
-          git fetch --no-tags --prune --depth=1 origin
+          git fetch --no-tags --prune --depth=1 origin HEAD
 
       - name: Path Update
         run: |
