@@ -419,7 +419,7 @@ Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(Logger logger
       RegExp('self.*?window.*?rootViewController'),
       RegExp('^}'),
     );
-  // ignore: avoid_catches_without_on_clauses
+    // ignore: avoid_catches_without_on_clauses
   } catch (_) {}
 }
 
@@ -437,7 +437,7 @@ Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
       'window?.rootViewController',
       RegExp(r'^.*?func\s*?\S*?\('),
     );
-  // ignore: avoid_catches_without_on_clauses
+    // ignore: avoid_catches_without_on_clauses
   } catch (_) {}
 }
 
