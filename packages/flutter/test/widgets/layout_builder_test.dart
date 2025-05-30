@@ -989,7 +989,9 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
     addTearDown(focusNode.dispose);
+    addTearDown(controller.dispose);
     final Widget layoutBuilderWithParent = SizedBox(
       key: GlobalKey(),
       child: LayoutBuilder(
@@ -1000,7 +1002,7 @@ void main() {
             backgroundCursorColor: const Color(0xFFFFFFFF),
             cursorColor: const Color(0xFFFFFFFF),
             style: const TextStyle(),
-            controller: TextEditingController(),
+            controller: controller,
           );
         },
       ),
