@@ -996,7 +996,7 @@ class SemanticsObject {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   ui.SemanticsFlags get flags => _flags;
-  ui.SemanticsFlags _flags = ui.SemanticsFlags();
+  ui.SemanticsFlags _flags = ui.SemanticsFlags.none;
 
   /// Whether the [flags] field has been updated but has not been applied to the
   /// DOM yet.

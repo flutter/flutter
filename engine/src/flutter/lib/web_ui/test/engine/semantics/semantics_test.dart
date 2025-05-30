@@ -2682,7 +2682,7 @@ void _testSelectables() {
         ),
         tester.updateNode(
           id: 2,
-          flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: false),
+          flags: const ui.SemanticsFlags(hasSelectedState: true),
           role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
@@ -2695,7 +2695,7 @@ void _testSelectables() {
         // Add two new nodes to test the aria-current fallback
         tester.updateNode(
           id: 4,
-          flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: false),
+          flags: const ui.SemanticsFlags(hasSelectedState: true),
           rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
         ),
         tester.updateNode(
@@ -2731,7 +2731,7 @@ void _testSelectables() {
     );
     tester.updateNode(
       id: 3,
-      flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: false),
+      flags: const ui.SemanticsFlags(hasSelectedState: true),
       role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
@@ -2743,7 +2743,7 @@ void _testSelectables() {
     );
     tester.updateNode(
       id: 5,
-      flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: false),
+      flags: const ui.SemanticsFlags(hasSelectedState: true),
       rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
@@ -2805,12 +2805,12 @@ void _testExpandables() {
         tester.updateNode(
           id: 1,
 
-          flags: const ui.SemanticsFlags(hasSelectedState: false),
+          flags: ui.SemanticsFlags.none,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
         ),
         tester.updateNode(
           id: 2,
-          flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: false),
+          flags: const ui.SemanticsFlags(hasExpandedState: true),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
@@ -2842,7 +2842,7 @@ void _testExpandables() {
     );
     tester.updateNode(
       id: 3,
-      flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: false),
+      flags: const ui.SemanticsFlags(hasExpandedState: true),
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     tester.apply();
@@ -2899,12 +2899,7 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      flags: const ui.SemanticsFlags(
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: false,
-        isButton: true,
-      ),
+      flags: const ui.SemanticsFlags(isFocusable: true, hasEnabledState: true, isButton: true),
       hasTap: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2925,14 +2920,8 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      flags: const ui.SemanticsFlags(
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
-
-        // Not a button
-        isButton: false,
-      ),
+      // Not a button
+      flags: const ui.SemanticsFlags(isFocusable: true, hasEnabledState: true, isEnabled: true),
 
       // But has a tap action and no children
       hasTap: true,
