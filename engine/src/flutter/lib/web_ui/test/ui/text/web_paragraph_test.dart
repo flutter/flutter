@@ -378,7 +378,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
   });
-
+*/
   test('Draw WebParagraph multiple shadows text', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -454,7 +454,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multishadows.png', region: region);
   });
-*/
+
   test('Draw WebParagraph multiple decorations on text', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -466,6 +466,7 @@ Future<void> testMain() async {
     const Color redColor = Color(0xFFFF0000);
     const Color blueColor = Color(0xFF0000FF);
     const Color greenColor = Color(0xFF00FF00);
+    const Color grayColor = Color(0xFF888888);
 
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
@@ -500,6 +501,15 @@ Future<void> testMain() async {
       decorationColor: greenColor,
     );
 
+    final WebTextStyle wavy = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      decoration: TextDecoration.underline,
+      decorationThickness: 1,
+      decorationStyle: TextDecorationStyle.wavy,
+      decorationColor: grayColor,
+    );
+
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
 
     builder.pushStyle(underlined);
@@ -512,6 +522,10 @@ Future<void> testMain() async {
 
     builder.pushStyle(overlined);
     builder.addText('Overlined double green decoration. ');
+    builder.pop();
+
+    builder.pushStyle(wavy);
+    builder.addText('Underlined wavy gray decoration. ');
     builder.pop();
 
     final WebParagraph paragraph = builder.build();

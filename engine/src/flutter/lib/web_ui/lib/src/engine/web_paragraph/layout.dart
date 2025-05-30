@@ -447,7 +447,7 @@ class TextLayout {
             styleTextRange,
             advance.width,
             shiftInsideLine - firstVisualClusterInBlock.advance.left,
-            styleTextRange.start,
+            styledTextBlock.textRange.start,
           ),
         );
         WebParagraphDebug.log(

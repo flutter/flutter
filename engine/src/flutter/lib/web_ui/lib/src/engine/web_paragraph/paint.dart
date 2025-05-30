@@ -436,23 +436,26 @@ class TextPaint {
     ui.Rect textBounds,
     double thickness,
   ) {
+    final double quarterWave = thickness;
+
     int waveCount = 0;
     double xStart = 0;
-    final double quarterWave = thickness;
-    paintContext.moveTo(x, y);
+    final double yStart = y + quarterWave;
+
+    WebParagraphDebug.log(
+      'calculateWaves($x, $y, '
+      '${textBounds.left}:${textBounds.right}x${textBounds.top}:${textBounds.bottom} )'
+      '$thickness $xStart $yStart',
+    );
+    paintContext.beginPath();
+    //paintContext.moveTo(x, y + quarterWave);
     while (xStart + quarterWave * 2 < textBounds.width) {
-      paintContext.quadraticCurveTo(
-        quarterWave,
-        waveCount % 2 != 0 ? quarterWave : -quarterWave,
-        quarterWave * 2,
-        0,
-      );
-      //result.quadraticCurveTo(
-      //  quarterWave,
-      //  wave_count % 2 != 0 ? quarterWave : -quarterWave,
-      //  quarterWave * 2,
-      //  0,
-      //);
+      final double x1 = xStart;
+      final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
+      final double x2 = xStart + quarterWave * 2;
+      final double y2 = yStart;
+      WebParagraphDebug.log('wave: $x1, $y1, $x2, $y2');
+      paintContext.quadraticCurveTo(x1, y1, x2, y2);
       xStart += quarterWave * 2;
       ++waveCount;
     }
@@ -460,14 +463,19 @@ class TextPaint {
     // The rest of the wave
     final double remaining = textBounds.width - xStart;
     if (remaining > 0) {
-      final double x1 = remaining / 2;
-      final double y1 = remaining / 2 * (waveCount.isEven ? -1 : 1);
-      final double x2 = remaining;
-      final double y2 =
-          (remaining - remaining * remaining / (quarterWave * 2)) * (waveCount.isEven ? -1 : 1);
+      final double x1 = xStart;
+      final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
+      //final double y1 = yStart + remaining / 2 * (waveCount.isEven ? 1 : -1);
+      final double x2 = xStart + remaining;
+      final double y2 = yStart;
+      //final double y2 = yStart + remaining + remaining / quarterWave * y1;
+      WebParagraphDebug.log(
+        'remaining: ${textBounds.width} - $xStart = $remaining '
+        '$x1, $y1, $x2, $y2',
+      );
       paintContext.quadraticCurveTo(x1, y1, x2, y2);
-      //fPath.rQuadTo(x1, y1, x2, y2);
     }
+    paintContext.stroke();
   }
 
   void drawLineAsRect(double x, double y, double width, double thickness) {
