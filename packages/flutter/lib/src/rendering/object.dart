@@ -2398,7 +2398,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Whether this [RenderObject] is a known relayout boundary.
   ///
   /// A relayout boundary is a [RenderObject] whose parent does not rely on the
-  /// child [RenderObject]'s size in its own layout algorithm . In other words,
+  /// child [RenderObject]'s size in its own layout algorithm. In other words,
   /// if a [RenderObject]'s [performLayout] implementation does not ask the child
   /// for its size at all, **the child** is a relayout boundary.
   ///
