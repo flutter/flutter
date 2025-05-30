@@ -89,7 +89,7 @@ If old deprecations have reached the point where they can be fixed without losin
 File GitHub issues if none are already open.
 1. The title should include the name of the failing test.
 1. Assign the issue to the test owner with a `P1` priority.
-1. Add the `team` label.
+1. Add the [`c: contributor-productivity`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22c%3A%20contributor-productivity%22) label.
 1. Include links to the failing tests. Download any relevant logs and attach them to the issue, even if the link to the failing tests has the same information. This prevents the issues from becoming stale when logs are expunged.
 1. @ mention the test owner in the [hackers-ecosystem channel] on [Discord] with a link to the GitHub issue. If they are unavailable, escalate to another team member. Continue escalating until someone acknowledges the issue is being investigated.
 1. Investigation updates and questions should not be posted in the [tree-status channel]. This channel should remain free of noise to discourage notification muting.

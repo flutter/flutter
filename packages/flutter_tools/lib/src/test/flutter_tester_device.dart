@@ -8,7 +8,6 @@ import 'dart:io' as io; // flutter_ignore: dart_io_import;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/dds.dart';
 import '../base/file_system.dart';
@@ -189,20 +188,12 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        final FlutterVmService vmService = await connectToVmServiceImpl(
+        await connectToVmServiceImpl(
           forwardingUri!,
           compileExpression: compileExpression,
           logger: logger,
         );
         logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
-        if (debuggingOptions.serveObservatory) {
-          try {
-            await vmService.callMethodWrapper('_serveObservatory');
-          } on vm_service.RPCError {
-            logger.printWarning('Unable to enable Observatory');
-          }
-        }
-
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
           await _startDevTools(forwardingUri, _ddsLauncher);

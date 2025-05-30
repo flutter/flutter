@@ -14,12 +14,9 @@ import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import java.io.FileNotFoundException
-import java.nio.charset.StandardCharsets
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -75,82 +72,7 @@ class PluginHandler(
         return pluginDependencies!!
     }
 
-    // TODO(54566, 48918): Can remove once the issues are resolved.
-    //  This means all references to `.flutter-plugins` are then removed and
-    //  apps only depend exclusively on the `plugins` property in `.flutter-plugins-dependencies`.
-
-    /**
-     * Workaround to load non-native plugins for developers who may still use an
-     * old `settings.gradle` which includes all the plugins from the
-     * `.flutter-plugins` file, even if not made for Android.
-     * The settings.gradle then:
-     *     1) tries to add the android plugin implementation, which does not
-     *        exist at all, but is also not included successfully
-     *        (which does not throw an error and therefore isn't a problem), or
-     *     2) includes the plugin successfully as a valid android plugin
-     *        directory exists, even if the surrounding flutter package does not
-     *        support the android platform (see e.g. apple_maps_flutter: 1.0.1).
-     *        So as it's included successfully it expects to be added as API.
-     *        This is only possible by taking all plugins into account, which
-     *        only appear on the `dependencyGraph` and in the `.flutter-plugins` file.
-     * So in summary the plugins are currently selected from the `dependencyGraph`
-     * and filtered then with the [pluginSupportsAndroidPlatform] method instead of
-     * just using the `plugins.android` list.
-     */
-    private fun configureLegacyPluginEachProjects(engineVersionValue: String) {
-        try {
-            // Read the contents of the settings.gradle file.
-            // Remove block/line comments
-            var settingsText =
-                FlutterPluginUtils
-                    .getSettingsGradleFileFromProjectDir(
-                        project.projectDir,
-                        project.logger
-                    ).readText(StandardCharsets.UTF_8)
-            settingsText =
-                settingsText
-                    .replace(Regex("""(?s)/\*.*?\*/"""), "")
-                    .replace(Regex("""(?m)//.*$"""), "")
-            if (!settingsText.contains("'.flutter-plugins'")) {
-                return
-            }
-        } catch (ignored: FileNotFoundException) {
-            throw GradleException(
-                "settings.gradle/settings.gradle.kts does not exist: " +
-                    FlutterPluginUtils
-                        .getSettingsGradleFileFromProjectDir(
-                            project.projectDir,
-                            project.logger
-                        ).absolutePath
-            )
-        }
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
-        project.logger.quiet(
-            legacyFlutterPluginsWarning
-        )
-        val deps: List<Map<String?, Any?>> = getPluginDependencies()
-        val pluginsNameSet = HashSet<String>()
-        getPluginList().mapTo(pluginsNameSet) { plugin -> plugin["name"] as String }
-        deps.filterNot { plugin -> pluginsNameSet.contains(plugin["name"]) }
-        deps.forEach { plugin: Map<String?, Any?> ->
-            val pluginProject = project.rootProject.findProject(":${plugin["name"]}")
-            if (pluginProject == null) {
-                // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
-                project.logger.error(
-                    "Plugin project :${plugin["name"]} listed, but not found. Please fix your settings.gradle/settings.gradle.kts."
-                )
-            } else if (pluginSupportsAndroidPlatform(project)) {
-                // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
-                // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
-                configurePluginProject(project, plugin, engineVersionValue)
-            } else {
-                // Plugin has no or an empty `android` folder. No action required.
-            }
-        }
-    }
-
     internal fun configurePlugins(engineVersionValue: String) {
-        configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->
             configurePluginProject(

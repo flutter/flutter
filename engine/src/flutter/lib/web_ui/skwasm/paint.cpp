@@ -4,6 +4,7 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "live_objects.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -20,6 +21,7 @@ SKWASM_EXPORT SkPaint* paint_create(bool isAntiAlias,
                                     SkPaint::Cap strokeCap,
                                     SkPaint::Join strokeJoin,
                                     SkScalar strokeMiterLimit) {
+  livePaintCount++;
   auto paint = new SkPaint();
   paint->setAntiAlias(isAntiAlias);
   paint->setBlendMode(blendMode);
@@ -33,6 +35,7 @@ SKWASM_EXPORT SkPaint* paint_create(bool isAntiAlias,
 }
 
 SKWASM_EXPORT void paint_dispose(SkPaint* paint) {
+  livePaintCount--;
   delete paint;
 }
 

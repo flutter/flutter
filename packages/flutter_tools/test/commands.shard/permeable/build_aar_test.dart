@@ -25,8 +25,8 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -54,11 +54,6 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['aar', ...?arguments, target]);
     return command;
-  }
-
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
   }
 
   group('Usage', () {
@@ -154,8 +149,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: () => FakePubWithPrimedDeps(allowGet: true),
+        Pub: FakePub.new,
       },
     );
 
@@ -381,7 +375,14 @@ void main() {
               '-PbuildNumber=1.0',
               '-q',
               '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
@@ -567,4 +568,19 @@ final class _FakeAndroidSdk with Fake implements AndroidSdk {
 final class _FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext? context,
+    required FlutterProject project,
+    bool upgrade = false,
+    bool offline = false,
+    bool generateSyntheticPackage = false,
+    String? flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    PubOutputMode outputMode = PubOutputMode.all,
+  }) async {}
 }

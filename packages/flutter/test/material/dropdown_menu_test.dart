@@ -4238,6 +4238,69 @@ void main() {
     final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.restorationId, restorationId);
   });
+
+  testWidgets(
+    'DropdownMenu does not include the default trailing icon when showTrailingIcon is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              showTrailingIcon: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down);
+      expect(iconButton, findsNothing);
+    },
+  );
+
+  testWidgets(
+    'DropdownMenu does not include the provided trailing icon when showTrailingIcon is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              trailingIcon: const Icon(Icons.ac_unit),
+              showTrailingIcon: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder iconButton = find.widgetWithIcon(IconButton, Icons.ac_unit);
+      expect(iconButton, findsNothing);
+    },
+  );
+
+  testWidgets('Explicitly provided controllers should not be disposed when switched out.', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    Future<void> pumpDropdownMenu(TextEditingController? controller) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(controller: controller, dropdownMenuEntries: menuChildren),
+          ),
+        ),
+      );
+    }
+
+    await pumpDropdownMenu(controller1);
+    await pumpDropdownMenu(controller2);
+    controller1.dispose();
+    controller2.dispose();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 enum TestMenu {

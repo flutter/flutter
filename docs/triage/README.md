@@ -1,6 +1,6 @@
 # Primary issue triage process
 
-The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+-label%3A%22will+need+additional+triage%22+-label%3Ateam-release%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input+) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input) as described in this section, so as to make that list empty.
 
 _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
@@ -69,7 +69,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 
 - If it's about the flutter/news_toolkit repository, add `team-news`.
 - If it's about a codelab, add `team-codelab`.
-- If it's about the release process or tooling (e.g., `conductor`), add `team-release`.
+- If it's about the release process or tooling (e.g., `conductor`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
@@ -83,6 +83,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the Flutter engine, add `team-engine`.
 - If it's about the Flutter framework, add `team-framework`.
 - If it's about the Flutter tool, add `team-tool`.
+- If it's about developer tools, add `team-devexp`.
 - If it's about a first-party package:
   - If it's about `go_router` or `go_router_builder`, add `team-go_router`.
   - If it's about `two_dimensional_scrollables`, add `team-framework`.
@@ -92,7 +93,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 
 _It is expected that some bugs will end up being re-assigned to a different team during secondary triage. If there are specific categories of issues where this always happens, the flow chart above should be updated accordingly, but having it happen occasionally is just the process working as expected; in some cases only the engineers working on an issue will know how the work is divided among teams._
 
-Bugs relating to the developer tools should be moved to the `flutter/devtools` repo, unless it looks like the first step is a change to the core parts of Flutter (in which case it should receive the `d: devtools` label as well as the pertinent labels for where the work should occur). Issues tagged with `d: devtools` or moved to the `flutter/devtools` repo will be triaged as described by [flutter/devtools/wiki/Triage](https://github.com/flutter/devtools/wiki/Triage).
+Bugs relating to the developer tools should be moved to the `flutter/devtools` repo, unless it looks like the first step is a change to the core parts of Flutter (in which case it should receive the `a: devtools` label as well as the pertinent labels for where the work should occur). Issues tagged with `team-devexp` and/or `a: devtools`, or moved to the `flutter/devtools` repo, will be triaged as described by [flutter/devtools/wiki/Triage](https://github.com/flutter/devtools/wiki/Triage).
 
 Bugs relating to the IntelliJ IDEs should be moved to the `flutter/flutter-intellij` repo, unless it looks like the first step is a change to the core parts of Flutter (in which case it should receive the `d: intellij` label as well as the pertinent labels for where the work should occur).
 Issues tagged with `d: intellij` will be reviewed by the Flutter IntelliJ team as described by [flutter/flutter-intellij/wiki/Triaging](https://github.com/flutter/flutter-intellij/wiki/Triaging).
@@ -245,9 +246,9 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 ### Framework team (`team-framework`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-framework+label%3AP0+sort%3Aupdated-asc)
-- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+sort%3Acreated-desc+draft%3Afalse)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-framework%2Cfyi-framework+-label%3Atriaged-framework+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+customer+response%22+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2C%22p%3A%20go_router%22%20label%3AP0%20sort%3Aupdated-desc)
+- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework%2C%22p%3A+go_router%22+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%2C%22p%3A%20go_router%22%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20customer%20response%22%20sort%3Aupdated-desc)
 
 ### Games team (`team-games`)
 
@@ -289,11 +290,6 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-news%2Cfyi-news+-label%3Atriaged-news+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-news+label%3AP0+sort%3Aupdated-asc)
-
-### Release team (`team-release`)
-
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-release%2Cfyi-release+-label%3Atriaged-release+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-release+label%3AP0+sort%3Aupdated-asc)
 
 ### Text Input team (`team-text-input`)
 

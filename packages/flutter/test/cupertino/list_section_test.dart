@@ -150,7 +150,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(ClipRRect), findsOneWidget);
+    expect(find.byType(ClipRSuperellipse), findsOneWidget);
   });
 
   testWidgets('not setting clipBehavior does not clip children section', (
@@ -166,7 +166,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(ClipRRect), findsNothing);
+    expect(find.byType(ClipRSuperellipse), findsNothing);
   });
 
   testWidgets('CupertinoListSection respects separatorColor', (WidgetTester tester) async {

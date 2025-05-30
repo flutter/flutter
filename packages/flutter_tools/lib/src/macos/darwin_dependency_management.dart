@@ -111,7 +111,8 @@ class DarwinDependencyManagement {
       isModule: _project.isModule,
       swiftPackageManagerUsable: xcodeProject.usesSwiftPackageManager,
       swiftPackageManagerFeatureEnabled: _featureFlags.isSwiftPackageManagerEnabled,
-      projectDisabledSwiftPackageManager: _project.manifest.disabledSwiftPackageManager,
+      // TODO(matanlurey): Remove from unified_analytics and then remove this key.
+      projectDisabledSwiftPackageManager: !_featureFlags.isSwiftPackageManagerEnabled,
       projectHasSwiftPackageManagerIntegration:
           xcodeProject.flutterPluginSwiftPackageInProjectSettings,
       pluginCount: totalCount,

@@ -17,9 +17,11 @@ Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
   return (left * ratio_right + right * ratio_left) / (ratio_left + ratio_right);
 }
 
-// Return the same Point, but each NaN coordinate is replaced by 1.
-inline Point ReplanceNaNWithOne(Point in) {
-  return Point{std::isnan(in.x) ? 1 : in.x, std::isnan(in.y) ? 1 : in.y};
+// Return the same Point, but each NaN coordinate is replaced by that of
+// `default_size`.
+inline Point ReplanceNaNWithDefault(Point in, Size default_size) {
+  return Point{std::isnan(in.x) ? default_size.width : in.x,
+               std::isnan(in.y) ? default_size.height : in.y};
 }
 
 // Swap the x and y coordinate of a point.
@@ -151,6 +153,8 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 
         .se_a = a,
         .se_n = 0,
+
+        .circle_start = {a, a},
     };
   }
 
@@ -192,11 +196,15 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 // radii.
 //
 // The `corner` is the coordinate of the corner point in the same coordinate
-// space as `center`, which specifies both the half size of the bounding box and
-// which quadrant the curve should be.
+// space as `center`, which specifies the half size of the bounding box.
+//
+// The `sign` is a vector of {±1, ±1} that specifies which quadrant the curve
+// should be, which should have the same sign as `corner - center` except that
+// the latter may have a 0.
 RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Point corner,
-                                                 Size in_radii) {
+                                                 Size in_radii,
+                                                 Size sign) {
   Point corner_vector = corner - center;
   Size radii = in_radii.Abs();
 
@@ -207,7 +215,8 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   Scalar norm_radius = radii.MinDimension();
   Size forward_scale = norm_radius == 0 ? Size{1, 1} : radii / norm_radius;
   Point norm_half_size = corner_vector.Abs() / forward_scale;
-  Point signed_scale = ReplanceNaNWithOne(corner_vector / norm_half_size);
+  Point signed_scale =
+      ReplanceNaNWithDefault(corner_vector / norm_half_size, sign);
 
   // Each quadrant curve is composed of two octant curves, each of which belongs
   // to a square-like rounded rectangle. For the two octants to connect at the
@@ -294,7 +303,8 @@ bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
 
 class RoundSuperellipseBuilder {
  public:
-  explicit RoundSuperellipseBuilder(PathBuilder& builder) : builder_(builder) {}
+  explicit RoundSuperellipseBuilder(PathReceiver& receiver)
+      : receiver_(receiver) {}
 
   // Draws an arc representing 1/4 of a rounded superellipse.
   //
@@ -307,14 +317,14 @@ class RoundSuperellipseBuilder {
     auto transform = Matrix::MakeTranslateScale(param.signed_scale * scale_sign,
                                                 param.offset);
     if (param.top.se_n < 2 || param.right.se_n < 2) {
-      builder_.LineTo(transform * (param.top.offset +
-                                   Point(param.top.se_a, param.top.se_a)));
+      receiver_.LineTo(transform * (param.top.offset +
+                                    Point(param.top.se_a, param.top.se_a)));
       if (!reverse) {
-        builder_.LineTo(transform *
-                        (param.top.offset + Point(param.top.se_a, 0)));
+        receiver_.LineTo(transform *
+                         (param.top.offset + Point(param.top.se_a, 0)));
       } else {
-        builder_.LineTo(transform *
-                        (param.top.offset + Point(0, param.top.se_a)));
+        receiver_.LineTo(transform *
+                         (param.top.offset + Point(0, param.top.se_a)));
       }
       return;
     }
@@ -386,17 +396,17 @@ class RoundSuperellipseBuilder {
     auto se_points = SuperellipseArcPoints(param);
 
     if (!reverse) {
-      builder_.CubicCurveTo(transform * se_points[1], transform * se_points[2],
-                            transform * se_points[3]);
-      builder_.CubicCurveTo(transform * circle_points[1],
-                            transform * circle_points[2],
-                            transform * circle_points[3]);
+      receiver_.CubicTo(transform * se_points[1], transform * se_points[2],
+                        transform * se_points[3]);
+      receiver_.CubicTo(transform * circle_points[1],
+                        transform * circle_points[2],
+                        transform * circle_points[3]);
     } else {
-      builder_.CubicCurveTo(transform * circle_points[2],
-                            transform * circle_points[1],
-                            transform * circle_points[0]);
-      builder_.CubicCurveTo(transform * se_points[2], transform * se_points[1],
-                            transform * se_points[0]);
+      receiver_.CubicTo(transform * circle_points[2],
+                        transform * circle_points[1],
+                        transform * circle_points[0]);
+      receiver_.CubicTo(transform * se_points[2], transform * se_points[1],
+                        transform * se_points[0]);
     }
   };
 
@@ -446,7 +456,7 @@ class RoundSuperellipseBuilder {
                                      frac * kPrecomputedVariables[left + 1][1]};
   }
 
-  PathBuilder& builder_;
+  PathReceiver& receiver_;
 
   // A matrix that swaps the coordinates of a point.
   // clang-format off
@@ -460,6 +470,16 @@ class RoundSuperellipseBuilder {
 
 }  // namespace
 
+RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadius(
+    const Rect& bounds,
+    Scalar radius) {
+  return RoundSuperellipseParam{
+      .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
+                                   {radius, radius}, {-1, 1}),
+      .all_corners_same = true,
+  };
+}
+
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const Rect& bounds,
     const RoundingRadii& radii) {
@@ -468,7 +488,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     // treatment on border containment and therefore is not `all_corners_same`.
     return RoundSuperellipseParam{
         .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
-                                     radii.top_right),
+                                     radii.top_right, {-1, 1}),
         .all_corners_same = true,
     };
   }
@@ -483,26 +503,29 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
                             radii.top_left.height, radii.bottom_left.height);
 
   return RoundSuperellipseParam{
-      .top_right = ComputeQuadrant(Point{top_split, right_split},
-                                   bounds.GetRightTop(), radii.top_right),
+      .top_right =
+          ComputeQuadrant(Point{top_split, right_split}, bounds.GetRightTop(),
+                          radii.top_right, {1, -1}),
       .bottom_right =
           ComputeQuadrant(Point{bottom_split, right_split},
-                          bounds.GetRightBottom(), radii.bottom_right),
-      .bottom_left = ComputeQuadrant(Point{bottom_split, left_split},
-                                     bounds.GetLeftBottom(), radii.bottom_left),
-      .top_left = ComputeQuadrant(Point{top_split, left_split},
-                                  bounds.GetLeftTop(), radii.top_left),
+                          bounds.GetRightBottom(), radii.bottom_right, {1, 1}),
+      .bottom_left =
+          ComputeQuadrant(Point{bottom_split, left_split},
+                          bounds.GetLeftBottom(), radii.bottom_left, {-1, 1}),
+      .top_left =
+          ComputeQuadrant(Point{top_split, left_split}, bounds.GetLeftTop(),
+                          radii.top_left, {-1, -1}),
       .all_corners_same = false,
   };
 }
 
-void RoundSuperellipseParam::AddToPath(PathBuilder& path_builder) const {
-  RoundSuperellipseBuilder builder(path_builder);
+void RoundSuperellipseParam::AddToPath(PathReceiver& path_receiver) const {
+  RoundSuperellipseBuilder builder(path_receiver);
 
   Point start = top_right.offset +
                 top_right.signed_scale *
                     (top_right.top.offset + Point(0, top_right.top.se_a));
-  path_builder.MoveTo(start);
+  path_receiver.MoveTo(start, true);
 
   if (all_corners_same) {
     builder.AddQuadrant(top_right, /*reverse=*/false, Point(1, 1));
@@ -516,8 +539,8 @@ void RoundSuperellipseParam::AddToPath(PathBuilder& path_builder) const {
     builder.AddQuadrant(top_left, /*reverse=*/true);
   }
 
-  path_builder.LineTo(start);
-  path_builder.Close();
+  path_receiver.LineTo(start);
+  path_receiver.Close();
 }
 
 bool RoundSuperellipseParam::Contains(const Point& point) const {
