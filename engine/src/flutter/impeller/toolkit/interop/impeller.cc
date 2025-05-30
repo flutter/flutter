@@ -1160,6 +1160,12 @@ void ImpellerParagraphStyleSetLocale(ImpellerParagraphStyle paragraph_style,
 }
 
 IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetEllipsis(ImpellerParagraphStyle paragraph_style,
+                                       const char* ellipsis) {
+  GetPeer(paragraph_style)->SetEllipsis(ReadString(ellipsis));
+}
+
+IMPELLER_EXTERN_C
 void ImpellerDisplayListBuilderDrawParagraph(ImpellerDisplayListBuilder builder,
                                              ImpellerParagraph paragraph,
                                              const ImpellerPoint* point) {
