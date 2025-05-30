@@ -424,12 +424,7 @@ void main() {
             expect(config.renderer, WebRendererMode.canvaskit);
             expect(config.compileTarget, CompileTarget.js);
             final List<String> options = config.toCommandOptions(BuildMode.release);
-            expect(options, <String>[
-              '--native-null-assertions',
-              '--no-source-maps',
-              '-O4',
-              '--minify',
-            ]);
+            expect(options, <String>['--native-null-assertions', '--no-source-maps', '-O4']);
           }),
     },
   );

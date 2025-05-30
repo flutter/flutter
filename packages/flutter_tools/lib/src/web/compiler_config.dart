@@ -100,7 +100,10 @@ class JsCompilerConfig extends WebCompilerConfig {
     if (!sourceMaps) '--no-source-maps',
     if (buildMode == BuildMode.debug) '--enable-asserts',
     '-O${optimizationLevelForBuildMode(buildMode)}',
-    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+    if (minify != null)
+      minify! ? '--minify' : '--no-minify'
+    else if (buildMode != BuildMode.release)
+      '--no-minify',
     if (noFrequencyBasedMinification) '--no-frequency-based-minification',
     if (csp) '--csp',
   ];
