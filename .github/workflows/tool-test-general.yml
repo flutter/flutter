@@ -28,7 +28,7 @@ jobs:
       
       - name: Fetching base and master if pull_request
         if: github.event_name == 'pull_request'
-      - run: |
+        run: |
           git fetch --no-tags --prune --depth=1 origin ${{ github.event.pull_request.base.sha }}
           git fetch --no-tags --prune --depth=1 origin master
 
