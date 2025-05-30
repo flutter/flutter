@@ -759,6 +759,213 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+namespace {
+struct ArcFarmOptions {
+  bool use_center;
+  bool full_circles;
+  Scalar vertical_scale = 1.0f;
+};
+
+void RenderArcFarm(DisplayListBuilder& builder,
+                   const DlPaint& paint,
+                   const ArcFarmOptions& opts) {
+  builder.Save();
+  builder.Translate(50, 50);
+  const Rect arc_bounds = Rect::MakeLTRB(0, 0, 42, 42 * opts.vertical_scale);
+  for (int start = 0; start <= 360; start += 30) {
+    builder.Save();
+    for (int sweep = 30; sweep <= 360; sweep += 30) {
+      builder.DrawArc(arc_bounds, start, opts.full_circles ? 360 : sweep,
+                      opts.use_center, paint);
+      builder.Translate(50, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, 50);
+  }
+  builder.Restore();
+}
+}  // namespace
+
+TEST_P(AiksTest, FilledArcsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, FilledArcsRenderCorrectlyWithCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, NonSquareFilledArcsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                    .vertical_scale = 0.8f,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, NonSquareFilledArcsRenderCorrectlyWithCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .vertical_scale = 0.8f,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithButtEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(8.0f);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kRed());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsCoverFullArcWithButtEnds) {
+  // This test compares the rendering of a full circle arc against a partial
+  // arc by drawing a one over the other in high contrast. If the partial
+  // arc misses any pixels that were drawn by the full arc, there will be
+  // some "pixel dirt" around the missing "erased" parts of the arcs. This
+  // case arises while rendering a CircularProgressIndicator with a background
+  // color where we want the rendering of the background full arc to hit the
+  // same pixels around the edges as the partial arc that covers it.
+  //
+  // In this case we draw a full blue circle and then draw a partial arc
+  // over it in the background color (white).
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  // First draw full circles in blue to establish the pixels to be erased
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = true,
+                });
+
+  paint.setColor(DlColor::kWhite());
+
+  // Then draw partial arcs in white over the circles to "erase" them
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);

@@ -331,6 +331,14 @@ using UintPoint32 = TPoint<uint32_t>;
 using Vector2 = Point;
 using Quad = std::array<Point, 4>;
 
+[[maybe_unused]]
+static constexpr impeller::Vector2 kQuadrantAxes[4] = {
+    {1.0f, 0.0f},
+    {0.0f, 1.0f},
+    {-1.0f, 0.0f},
+    {0.0f, -1.0f},
+};
+
 #undef ONLY_ON_FLOAT
 #undef ONLY_ON_FLOAT_M
 
