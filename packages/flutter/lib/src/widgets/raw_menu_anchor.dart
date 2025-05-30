@@ -283,9 +283,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// animation, `showOverlay` should come before the opening animation, since
   /// the animation plays on the overlay itself.
   ///
-  /// The `position` argument is the `position` [MenuController.open] was called
-  /// with. When a menu is repositioned, [onOpenRequested] may be called with a
-  /// new `position` value while the menu is still open.
+  /// The `position` argument is the `position` that [MenuController.open] was
+  /// called with. When a menu is repositioned, [onOpenRequested] may be called
+  /// with a new `position` value while the menu is still open.
   ///
   /// A typical [onOpenRequested] consists of the following steps:
   ///
