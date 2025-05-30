@@ -1021,12 +1021,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           BuildContext context, {
           required VoidCallback onPressed,
           required String semanticsLabel,
-          bool isLeftAligned = true,
+          bool usesDefaultAlignment = true,
         }) {
           return Material(
             child: ElevatedButton(
               onPressed: onPressed,
-              child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+              child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
             ),
           );
         }
@@ -1069,6 +1069,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final double finalExitButtonX = tester.getCenter(exitButton).dx;
         expect(finalExitButtonX, equals(initialExitButtonX));
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
@@ -1098,12 +1099,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           BuildContext context, {
           required VoidCallback onPressed,
           required String semanticsLabel,
-          bool isLeftAligned = true,
+          bool usesDefaultAlignment = true,
         }) {
           return Material(
             child: ElevatedButton(
               onPressed: onPressed,
-              child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+              child: Text(usesDefaultAlignment ? 'MOVE RIGHT' : 'MOVE LEFT'),
             ),
           );
         }
@@ -1146,6 +1147,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final double finalExitButtonX = tester.getCenter(exitButton).dx;
         expect(finalExitButtonX, equals(initialExitButtonX));
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 

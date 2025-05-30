@@ -55,7 +55,7 @@ typedef MoveExitWidgetSelectionButtonBuilder =
       BuildContext context, {
       required VoidCallback onPressed,
       required String semanticsLabel,
-      bool isLeftAligned,
+      bool usesDefaultAlignment,
     });
 
 /// Signature for the builder callback used by
@@ -3737,9 +3737,9 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   String? _tooltipMessage;
 
-  // Indicates whether the button is using the default alignment based on text direction.
-  // For LTR, the default alignment is on the left.
-  // For RTL, the default alignment is on the right.
+  /// Indicates whether the button is using the default alignment based on text direction.
+  /// For LTR, the default alignment is on the left.
+  /// For RTL, the default alignment is on the right.
   bool _usesDefaultAlignment = true;
 
   ValueNotifier<bool> get _selectionOnTapEnabled =>
@@ -3755,7 +3755,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
     final TextDirection textDirection = Directionality.of(context);
 
     final String buttonLabel =
-        'Move to the ${_usesDefaultAlignment ? (textDirection == TextDirection.ltr ? 'right' : 'left') : (textDirection == TextDirection.rtl ? 'right' : 'left')}';
+        'Move to the ${_usesDefaultAlignment == (textDirection == TextDirection.ltr) ? 'right' : 'left'}';
 
     return _WidgetInspectorButton(
       button: buttonBuilder(
@@ -3765,7 +3765,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           _onTooltipHidden();
         },
         semanticsLabel: buttonLabel,
-        isLeftAligned: _usesDefaultAlignment,
+        usesDefaultAlignment: _usesDefaultAlignment,
       ),
       onTooltipVisible: () {
         _changeTooltipMessage(buttonLabel);
@@ -3826,7 +3826,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           painter: _ExitWidgetSelectionTooltipPainter(
             tooltipMessage: _tooltipMessage,
             buttonKey: _exitWidgetSelectionButtonKey,
-            isLeftAligned: _usesDefaultAlignment,
+            usesDefaultAlignment: _usesDefaultAlignment,
           ),
         ),
         Row(
@@ -3982,12 +3982,12 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
   _ExitWidgetSelectionTooltipPainter({
     required this.tooltipMessage,
     required this.buttonKey,
-    required this.isLeftAligned,
+    required this.usesDefaultAlignment,
   });
 
   final String? tooltipMessage;
   final GlobalKey buttonKey;
-  final bool isLeftAligned;
+  final bool usesDefaultAlignment;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -4029,7 +4029,7 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     final double tooltipHeight = textHeight + (tooltipPadding * 2);
 
     final double tooltipXOffset =
-        isLeftAligned ? 0 - buttonWidth : 0 - (tooltipWidth - buttonWidth);
+        usesDefaultAlignment ? 0 - buttonWidth : 0 - (tooltipWidth - buttonWidth);
     final double tooltipYOffset = 0 - tooltipHeight - tooltipSpacing;
 
     // Draw tooltip background.
