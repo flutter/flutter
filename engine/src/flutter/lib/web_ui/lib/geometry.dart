@@ -405,29 +405,7 @@ class Radius {
   }
 }
 
-abstract class _RRectLike<T extends _RRectLike<T>> {
-  const _RRectLike({
-    required this.left,
-    required this.top,
-    required this.right,
-    required this.bottom,
-    required this.tlRadiusX,
-    required this.tlRadiusY,
-    required this.trRadiusX,
-    required this.trRadiusY,
-    required this.brRadiusX,
-    required this.brRadiusY,
-    required this.blRadiusX,
-    required this.blRadiusY,
-  }) : assert(tlRadiusX >= 0),
-       assert(tlRadiusY >= 0),
-       assert(trRadiusX >= 0),
-       assert(trRadiusY >= 0),
-       assert(brRadiusX >= 0),
-       assert(brRadiusY >= 0),
-       assert(blRadiusX >= 0),
-       assert(blRadiusY >= 0);
-
+mixin _RRectLike<T extends _RRectLike<T>> {
   T _create({
     required double left,
     required double top,
@@ -443,21 +421,21 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required double blRadiusY,
   });
 
-  final double left;
-  final double top;
-  final double right;
-  final double bottom;
-  final double tlRadiusX;
-  final double tlRadiusY;
+  double get left;
+  double get top;
+  double get right;
+  double get bottom;
+  double get tlRadiusX;
+  double get tlRadiusY;
   Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
-  final double trRadiusX;
-  final double trRadiusY;
+  double get trRadiusX;
+  double get trRadiusY;
   Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
-  final double brRadiusX;
-  final double brRadiusY;
+  double get brRadiusX;
+  double get brRadiusY;
   Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
-  final double blRadiusX;
-  final double blRadiusY;
+  double get blRadiusX;
+  double get blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
   T shift(Offset offset) {
@@ -731,7 +709,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   }
 }
 
-class RRect extends _RRectLike<RRect> {
+class RRect with _RRectLike<RRect> {
   const RRect.fromLTRBXY(
     double left,
     double top,
@@ -848,19 +826,45 @@ class RRect extends _RRectLike<RRect> {
        );
 
   const RRect._raw({
-    super.left = 0.0,
-    super.top = 0.0,
-    super.right = 0.0,
-    super.bottom = 0.0,
-    super.tlRadiusX = 0.0,
-    super.tlRadiusY = 0.0,
-    super.trRadiusX = 0.0,
-    super.trRadiusY = 0.0,
-    super.brRadiusX = 0.0,
-    super.brRadiusY = 0.0,
-    super.blRadiusX = 0.0,
-    super.blRadiusY = 0.0,
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+    this.tlRadiusX = 0.0,
+    this.tlRadiusY = 0.0,
+    this.trRadiusX = 0.0,
+    this.trRadiusY = 0.0,
+    this.brRadiusX = 0.0,
+    this.brRadiusY = 0.0,
+    this.blRadiusX = 0.0,
+    this.blRadiusY = 0.0,
   });
+
+  @override
+  final double left;
+  @override
+  final double top;
+  @override
+  final double right;
+  @override
+  final double bottom;
+  @override
+  @override
+  final double tlRadiusX;
+  @override
+  final double tlRadiusY;
+  @override
+  final double trRadiusX;
+  @override
+  final double trRadiusY;
+  @override
+  final double brRadiusX;
+  @override
+  final double brRadiusY;
+  @override
+  final double blRadiusX;
+  @override
+  final double blRadiusY;
 
   @override
   RRect _create({
@@ -955,57 +959,84 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
-class RSuperellipse extends _RRectLike<RSuperellipse> {
-  RSuperellipse.fromLTRBXY(
+class _RRectLikeShape {
+  const _RRectLikeShape({
+    required this.width,
+    required this.height,
+    required this.tlRadiusX,
+    required this.tlRadiusY,
+    required this.trRadiusX,
+    required this.trRadiusY,
+    required this.brRadiusX,
+    required this.brRadiusY,
+    required this.blRadiusX,
+    required this.blRadiusY,
+    required this.uniformRadii,
+  });
+
+  final double width;
+  final double height;
+  final double tlRadiusX;
+  final double tlRadiusY;
+  Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
+  final double trRadiusX;
+  final double trRadiusY;
+  Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
+  final double brRadiusX;
+  final double brRadiusY;
+  Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
+  final double blRadiusX;
+  final double blRadiusY;
+  Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
+  final bool uniformRadii;
+}
+
+class _RSuperellipseCache {
+  Path? basePath;
+}
+
+class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
+  const RSuperellipse.fromLTRBXY(
     double left,
     double top,
     double right,
     double bottom,
     double radiusX,
-    double radiusY, {
-    RSuperellipse? maybeCache,
-  }) : this._raw(
-         top: top,
-         left: left,
-         right: right,
-         bottom: bottom,
-         tlRadiusX: radiusX,
-         tlRadiusY: radiusY,
-         trRadiusX: radiusX,
-         trRadiusY: radiusY,
-         blRadiusX: radiusX,
-         blRadiusY: radiusY,
-         brRadiusX: radiusX,
-         brRadiusY: radiusY,
-         maybeCache: maybeCache,
-         uniformRadii: true,
-       );
+    double radiusY,
+  ) : this._raw(
+        top: top,
+        left: left,
+        right: right,
+        bottom: bottom,
+        tlRadiusX: radiusX,
+        tlRadiusY: radiusY,
+        trRadiusX: radiusX,
+        trRadiusY: radiusY,
+        blRadiusX: radiusX,
+        blRadiusY: radiusY,
+        brRadiusX: radiusX,
+        brRadiusY: radiusY,
+        uniformRadii: true,
+      );
 
-  RSuperellipse.fromLTRBR(
-    double left,
-    double top,
-    double right,
-    double bottom,
-    Radius radius, {
-    RSuperellipse? maybeCache,
-  }) : this._raw(
-         top: top,
-         left: left,
-         right: right,
-         bottom: bottom,
-         tlRadiusX: radius.x,
-         tlRadiusY: radius.y,
-         trRadiusX: radius.x,
-         trRadiusY: radius.y,
-         blRadiusX: radius.x,
-         blRadiusY: radius.y,
-         brRadiusX: radius.x,
-         brRadiusY: radius.y,
-         maybeCache: maybeCache,
-         uniformRadii: true,
-       );
+  RSuperellipse.fromLTRBR(double left, double top, double right, double bottom, Radius radius)
+    : this._raw(
+        top: top,
+        left: left,
+        right: right,
+        bottom: bottom,
+        tlRadiusX: radius.x,
+        tlRadiusY: radius.y,
+        trRadiusX: radius.x,
+        trRadiusY: radius.y,
+        blRadiusX: radius.x,
+        blRadiusY: radius.y,
+        brRadiusX: radius.x,
+        brRadiusY: radius.y,
+        uniformRadii: true,
+      );
 
-  RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY, {RSuperellipse? maybeCache})
+  RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY)
     : this._raw(
         top: rect.top,
         left: rect.left,
@@ -1019,11 +1050,10 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
-        maybeCache: maybeCache,
         uniformRadii: true,
       );
 
-  RSuperellipse.fromRectAndRadius(Rect rect, Radius radius, {RSuperellipse? maybeCache})
+  RSuperellipse.fromRectAndRadius(Rect rect, Radius radius)
     : this._raw(
         top: rect.top,
         left: rect.left,
@@ -1037,7 +1067,6 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
-        maybeCache: maybeCache,
         uniformRadii: true,
       );
 
@@ -1050,7 +1079,6 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     Radius topRight = Radius.zero,
     Radius bottomRight = Radius.zero,
     Radius bottomLeft = Radius.zero,
-    RSuperellipse? maybeCache,
   }) : this._raw(
          top: top,
          left: left,
@@ -1064,7 +1092,6 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
-         maybeCache: maybeCache,
          uniformRadii: false,
        );
 
@@ -1074,7 +1101,6 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     Radius topRight = Radius.zero,
     Radius bottomRight = Radius.zero,
     Radius bottomLeft = Radius.zero,
-    RSuperellipse? maybeCache,
   }) : this._raw(
          top: rect.top,
          left: rect.left,
@@ -1088,40 +1114,180 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
-         maybeCache: maybeCache,
          uniformRadii: false,
        );
 
-  RSuperellipse._raw({
-    super.left = 0.0,
-    super.top = 0.0,
-    super.right = 0.0,
-    super.bottom = 0.0,
-    super.tlRadiusX = 0.0,
-    super.tlRadiusY = 0.0,
-    super.trRadiusX = 0.0,
-    super.trRadiusY = 0.0,
-    super.brRadiusX = 0.0,
-    super.brRadiusY = 0.0,
-    super.blRadiusX = 0.0,
-    super.blRadiusY = 0.0,
-    RSuperellipse? maybeCache,
+  const RSuperellipse._raw({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+    this.tlRadiusX = 0.0,
+    this.tlRadiusY = 0.0,
+    this.trRadiusX = 0.0,
+    this.trRadiusY = 0.0,
+    this.brRadiusX = 0.0,
+    this.brRadiusY = 0.0,
+    this.blRadiusX = 0.0,
+    this.blRadiusY = 0.0,
     this.uniformRadii = false,
-  }) : _maybeCache = maybeCache;
+  });
 
+  @override
+  final double left;
+  @override
+  final double top;
+  @override
+  final double right;
+  @override
+  final double bottom;
+  @override
+  final double tlRadiusX;
+  @override
+  final double tlRadiusY;
+  @override
+  final double trRadiusX;
+  @override
+  final double trRadiusY;
+  @override
+  final double brRadiusX;
+  @override
+  final double brRadiusY;
+  @override
+  final double blRadiusX;
+  @override
+  final double blRadiusY;
+  @override
   final bool uniformRadii;
-  final RSuperellipse? _maybeCache;
-  Path? _basePath;
-  Path _ensurePath() {
-    _buildRSuperellipsePath(this, _maybeCache);
-    return _basePath!;
+
+  @override
+  RSuperellipse _create({
+    required double left,
+    required double top,
+    required double right,
+    required double bottom,
+    required double tlRadiusX,
+    required double tlRadiusY,
+    required double trRadiusX,
+    required double trRadiusY,
+    required double brRadiusX,
+    required double brRadiusY,
+    required double blRadiusX,
+    required double blRadiusY,
+  }) => RSuperellipse._raw(
+    top: top,
+    left: left,
+    right: right,
+    bottom: bottom,
+    tlRadiusX: tlRadiusX,
+    tlRadiusY: tlRadiusY,
+    trRadiusX: trRadiusX,
+    trRadiusY: trRadiusY,
+    blRadiusX: blRadiusX,
+    blRadiusY: blRadiusY,
+    brRadiusX: brRadiusX,
+    brRadiusY: brRadiusY,
+    uniformRadii: false,
+  );
+
+  RSuperellipse computed({RSuperellipse? reference}) {
+    return _NativeRSuperellipse(top: top, left: left, shape: this, reference: reference);
+  }
+
+  // Approximates a rounded superellipse with a round rectangle to the
+  // best practical accuracy.
+  //
+  // This workaround is needed until the rounded superellipse is implemented on
+  // Web. https://github.com/flutter/flutter/issues/163718
+  RRect toApproximateRRect() {
+    // Experiments have shown that using the same corner radii for the RRect
+    // provides an approximation that is close to optimal, as achieving a perfect
+    // match is not feasible.
+    return RRect._raw(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      tlRadiusX: tlRadiusX,
+      tlRadiusY: tlRadiusY,
+      trRadiusX: trRadiusX,
+      trRadiusY: trRadiusY,
+      blRadiusX: blRadiusX,
+      blRadiusY: blRadiusY,
+      brRadiusX: brRadiusX,
+      brRadiusY: brRadiusY,
+    );
+  }
+
+  bool contains(Offset point) {
+    return getPath().contains(point);
+  }
+
+  _RSuperellipseCache? _getCache() {
+    return null;
   }
 
   Path getPath([Path? basePath]) {
-    final Path path = basePath ?? Path();
-    path.addPath(_ensurePath(), Offset(left, top));
-    return path;
+    return _RSuperellipsePathBuilder.exact(this, basePath).path;
   }
+
+  static final RSuperellipse zero = RSuperellipse._raw();
+
+  static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
+    if (a == null) {
+      if (b == null) {
+        return null;
+      }
+      return b._lerpTo(null, 1 - t);
+    }
+    return a._lerpTo(b, t);
+  }
+
+  @override
+  String toString() {
+    return _toString(className: 'RSuperellipse');
+  }
+}
+
+class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellipse {
+  _NativeRSuperellipse({
+    required this.top,
+    required this.left,
+    required _RRectLikeShape shape,
+    required RSuperellipse? reference,
+  }) : _shape = shape,
+       _cache = _takeCache(reference, shape);
+
+  _RRectLikeShape _shape;
+
+  _RSuperellipseCache _cache;
+
+  @override
+  final double left;
+  @override
+  final double top;
+  @override
+  double get right => left + _shape.width;
+  @override
+  double get bottom => top + _shape.height;
+  @override
+  double get tlRadiusX => _shape.tlRadiusX;
+  @override
+  double get tlRadiusY => _shape.tlRadiusY;
+  @override
+  double get trRadiusX => _shape.trRadiusX;
+  @override
+  double get trRadiusY => _shape.trRadiusY;
+  @override
+  double get brRadiusX => _shape.brRadiusX;
+  @override
+  double get brRadiusY => _shape.brRadiusY;
+  @override
+  double get blRadiusX => _shape.blRadiusX;
+  @override
+  double get blRadiusY => _shape.blRadiusY;
+  @override
+  bool get uniformRadii => _shape.uniformRadii;
 
   @override
   RSuperellipse _create({
@@ -1152,11 +1318,36 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
-  // Approximates a rounded superellipse with a round rectangle to the
-  // best practical accuracy.
-  //
-  // This workaround is needed until the rounded superellipse is implemented on
-  // Web. https://github.com/flutter/flutter/issues/163718
+  @override
+  RSuperellipse computed({RSuperellipse? reference}) {
+    return _NativeRSuperellipse(top: top, left: left, shape: _shape, reference: reference);
+  }
+
+  bool contains(Offset point) {
+    _ensureCacheInitialized();
+    return _cache.basePath!.contains(point - Offset(left, top));
+  }
+
+  @override
+  _RSuperellipseCache? _getCache() {
+    return _cache;
+  }
+
+  void _ensureCacheInitialized() {
+    _cache.basePath ??= _RSuperellipsePathBuilder.normalized(this).path;
+  }
+
+  Path getPath([Path? basePath]) {
+    _ensureCacheInitialized();
+    return (basePath ?? Path())..addPath(_cache.basePath!, Offset(left, top));
+  }
+
+  @override
+  String toString() {
+    return _toString(className: '_NativeRSuperellipse');
+  }
+
+  @override
   RRect toApproximateRRect() {
     // Experiments have shown that using the same corner radii for the RRect
     // provides an approximation that is close to optimal, as achieving a perfect
@@ -1177,27 +1368,18 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     );
   }
 
-  bool contains(Offset point) {
-    return _ensurePath().contains(point - Offset(left, top));
-  }
-
-  static final RSuperellipse zero = RSuperellipse._raw();
-
-  static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
-    if (a == null) {
-      if (b == null) {
-        return null;
-      }
-      return b._lerpTo(null, 1 - t);
+  static _RSuperellipseCache _takeCache(RSuperellipse? reference, _RRectLikeShape targetShape) {
+    final _RSuperellipseCache? refCache = reference?._getCache();
+    if (refCache == null) {
+      return _RSuperellipseCache();
     }
-    return a._lerpTo(b, t);
-  }
-
-  @override
-  String toString() {
-    return _toString(className: 'RSuperellipse');
+    if (_shapeNearlyEqualTo(reference!, targetShape)) {
+      return refCache!;
+    }
+    return _RSuperellipseCache();
   }
 }
+
 // Modeled after Skia's SkRSXform.
 
 class RSTransform {

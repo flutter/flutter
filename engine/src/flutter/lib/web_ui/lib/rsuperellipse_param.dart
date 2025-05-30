@@ -4,26 +4,27 @@
 
 part of ui;
 
-void _buildRSuperellipsePath(RSuperellipse target, RSuperellipse? maybeCache) {
-  if (target._basePath != null) {
-    return;
-  }
-  if (maybeCache != null &&
-      maybeCache._basePath != null &&
-      _shapeNearlyEqualTo(target, maybeCache, 1e-6)) {
-    target._basePath = maybeCache._basePath;
-  } else {
-    target._basePath = _RSuperellipsePathBuilder().buildPath(target);
-  }
-}
+// void _buildRSuperellipsePath(RSuperellipse target, RSuperellipse? maybeCache) {
+//   if (target._basePath != null) {
+//     return;
+//   }
+//   if (maybeCache != null &&
+//       maybeCache._basePath != null &&
+//       _shapeNearlyEqualTo(target, maybeCache, 1e-6)) {
+//     target._basePath = maybeCache._basePath;
+//   } else {
+//     target._basePath = _RSuperellipsePathBuilder().buildPath(target);
+//   }
+// }
 
-bool _shapeNearlyEqualTo(RSuperellipse a, RSuperellipse b, double tolerance) {
+bool _shapeNearlyEqualTo(_RRectLikeShape a, _RRectLikeShape b) {
   if (identical(a, b)) {
     return true;
   }
 
   bool ScalarNearlyEqual(double x, double y) {
-    return (x - y).abs() <= tolerance;
+    const double kTolerance = 1e-6;
+    return (x - y).abs() <= kTolerance;
   }
 
   if (a.uniformRadii && b.uniformRadii) {
@@ -83,7 +84,7 @@ _Transform _scale(Offset scale) {
   return (Offset p) => Offset(p.dx * scale.dx, p.dy * scale.dy);
 }
 
-// _RSuperellipseOctant Class
+// An octant of an RSuperellipse, used in _RSuperellipseQuadrant.
 class _RSuperellipseOctant {
   const _RSuperellipseOctant({
     required this.offset,
@@ -221,7 +222,7 @@ class _RSuperellipseOctant {
   );
 }
 
-// _RSuperellipseQuadrant Class
+// A quadrant of an RSuperellipse, used in _RSuperellipsePathBuilder.
 class _RSuperellipseQuadrant {
   const _RSuperellipseQuadrant({
     required this.offset,
@@ -268,15 +269,22 @@ class _RSuperellipseQuadrant {
 }
 
 class _RSuperellipsePathBuilder {
-  _RSuperellipsePathBuilder() : path = Path();
+  // Build a path for the provided RSuperellipse.
+  _RSuperellipsePathBuilder.exact(RSuperellipse r, Path? basePath) : path = basePath ?? Path() {
+    _buildPath(r, top: r.top, left: r.left);
+  }
+
+  // Build a path for a translated version of the provided RSuperellipse, so
+  // that the top left corner of the bound is placed at the origin.
+  _RSuperellipsePathBuilder.normalized(RSuperellipse r) : path = Path() {
+    _buildPath(r, top: 0, left: 0);
+  }
 
   final Path path;
 
-  Path buildPath(RSuperellipse r) {
-    final double left = 0;
-    final double right = r.width;
-    final double top = 0;
-    final double bottom = r.height;
+  Path _buildPath(RSuperellipse r, {required double top, required double left}) {
+    final double right = left + r.width;
+    final double bottom = top + r.height;
     final double topSplit = _split(left, right, r.tlRadiusX, r.trRadiusX);
     final double rightSplit = _split(top, bottom, r.trRadiusY, r.brRadiusY);
     final _RSuperellipseQuadrant topRight = _RSuperellipseQuadrant.computeQuadrant(
@@ -294,10 +302,10 @@ class _RSuperellipsePathBuilder {
     path.moveTo(start.dx, start.dy);
 
     if (r.uniformRadii) {
-      _addQuadrant(topRight, false, Offset(1, 1));
-      _addQuadrant(topRight, true, Offset(1, -1));
-      _addQuadrant(topRight, false, Offset(-1, -1));
-      _addQuadrant(topRight, true, Offset(-1, 1));
+      _addQuadrant(topRight, false, const Offset(1, 1));
+      _addQuadrant(topRight, true, const Offset(1, -1));
+      _addQuadrant(topRight, false, const Offset(-1, -1));
+      _addQuadrant(topRight, true, const Offset(-1, 1));
     } else {
       final double bottomSplit = _split(left, right, r.blRadiusX, r.brRadiusX);
       final double leftSplit = _split(top, bottom, r.tlRadiusY, r.blRadiusY);
