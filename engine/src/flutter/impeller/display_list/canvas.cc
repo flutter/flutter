@@ -349,9 +349,7 @@ void Canvas::DrawPaint(const Paint& paint) {
 // Optimization: if the texture has a color filter that is a simple
 // porter-duff blend or matrix filter, then instead of performing a save layer
 // we should swap out the shader for the porter duff blend shader and avoid a
-// saveLayer. This can only be done for imageRects without a strict source
-// rect, as the porter duff shader does not support this feature. This
-// optimization is important for Flame.
+// saveLayer. This optimization is important for Flame.
 bool Canvas::AttemptColorFilterOptimization(
     const std::shared_ptr<Texture>& image,
     Rect source,
@@ -359,11 +357,10 @@ bool Canvas::AttemptColorFilterOptimization(
     const Paint& paint,
     const SamplerDescriptor& sampler,
     SourceRectConstraint src_rect_constraint) {
-  if (src_rect_constraint == SourceRectConstraint::kStrict ||  //
-      !paint.color_filter ||                                   //
-      paint.image_filter != nullptr ||                         //
-      paint.invert_colors ||                                   //
-      paint.mask_blur_descriptor.has_value() ||                //
+  if (!paint.color_filter ||                     //
+      paint.image_filter != nullptr ||           //
+      paint.invert_colors ||                     //
+      paint.mask_blur_descriptor.has_value() ||  //
       !IsPipelineBlendOrMatrixFilter(paint.color_filter)) {
     return false;
   }
@@ -377,7 +374,9 @@ bool Canvas::AttemptColorFilterOptimization(
         /*destination=*/dest,
         /*color=*/skia_conversions::ToColor(blend_filter->color()),
         /*blend_mode=*/blend_filter->mode(),
-        /*desc=*/sampler);
+        /*desc=*/sampler,
+        /*use_strict_src_rect=*/src_rect_constraint ==
+            SourceRectConstraint::kStrict);
 
     auto atlas_contents = std::make_shared<AtlasContents>();
     atlas_contents->SetGeometry(&geometry);
@@ -390,6 +389,12 @@ bool Canvas::AttemptColorFilterOptimization(
 
     AddRenderEntityToCurrentPass(entity);
   } else {
+    // src_rect_constraint is only supported in the porter-duff mode
+    // for now.
+    if (src_rect_constraint == SourceRectConstraint::kStrict) {
+      return false;
+    }
+
     const flutter::DlMatrixColorFilter* matrix_filter =
         paint.color_filter->asMatrix();
 
@@ -399,7 +404,9 @@ bool Canvas::AttemptColorFilterOptimization(
         /*destination=*/dest,
         /*color=*/Color::Khaki(),            // ignored
         /*blend_mode=*/BlendMode::kSrcOver,  // ignored
-        /*desc=*/sampler);
+        /*desc=*/sampler,
+        /*use_strict_src_rect=*/src_rect_constraint ==
+            SourceRectConstraint::kStrict);
 
     auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
     atlas_contents->SetGeometry(&geometry);
