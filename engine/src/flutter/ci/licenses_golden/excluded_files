@@ -1730,7 +1730,7 @@
 ../../../flutter/third_party/expat/.mailmap
 ../../../flutter/third_party/expat/Brewfile
 ../../../flutter/third_party/expat/README.md
-../../../flutter/third_party/expat/appveyor.yml
+../../../flutter/third_party/expat/SECURITY.md
 ../../../flutter/third_party/expat/expat/.clang-format
 ../../../flutter/third_party/expat/expat/.gitignore
 ../../../flutter/third_party/expat/expat/AUTHORS
@@ -1748,6 +1748,8 @@
 ../../../flutter/third_party/expat/expat/conftools/ax-append-link-flags.m4
 ../../../flutter/third_party/expat/expat/conftools/ax-check-compile-flag.m4
 ../../../flutter/third_party/expat/expat/conftools/ax-check-link-flag.m4
+../../../flutter/third_party/expat/expat/conftools/ax-cxx-compile-stdcxx-11.m4
+../../../flutter/third_party/expat/expat/conftools/ax-cxx-compile-stdcxx.m4
 ../../../flutter/third_party/expat/expat/conftools/ax-require-defined.m4
 ../../../flutter/third_party/expat/expat/conftools/expat.m4
 ../../../flutter/third_party/expat/expat/conftools/expatcfg-compiler-supports-visibility.m4
@@ -1759,12 +1761,14 @@
 ../../../flutter/third_party/expat/expat/gennmtab/.gitignore
 ../../../flutter/third_party/expat/expat/lib/.gitignore
 ../../../flutter/third_party/expat/expat/lib/libexpat.def.cmake
+../../../flutter/third_party/expat/expat/m4/.gitignore
 ../../../flutter/third_party/expat/expat/memory-sanitizer-blacklist.txt
 ../../../flutter/third_party/expat/expat/tests
 ../../../flutter/third_party/expat/expat/win32/.gitignore
 ../../../flutter/third_party/expat/expat/win32/MANIFEST.txt
 ../../../flutter/third_party/expat/expat/win32/README.txt
 ../../../flutter/third_party/expat/expat/win32/expat.iss
+../../../flutter/third_party/expat/expat/win32/version.rc.cmake
 ../../../flutter/third_party/expat/expat/xmlwf/.gitignore
 ../../../flutter/third_party/expat/expat/xmlwf/xmlwf_helpgen.py
 ../../../flutter/third_party/expat/testdata
