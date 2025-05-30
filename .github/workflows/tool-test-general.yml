@@ -23,6 +23,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Fetching base and master if pull_request
+        if: github.event_name == 'pull_request'
+      - run: |
+          git fetch --no-tags --prune --depth=1 origin ${{ github.event.pull_request.base.sha }}
+          git fetch --no-tags --prune --depth=1 origin master
+
       # The following step is only run LOCALLY - Github runners have everything on them
       - name: Set up our JDK environment
         if: ${{ env.ACT }}
@@ -43,13 +52,7 @@ jobs:
         if: ${{ env.ACT }}
         run: |
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - run: |
-          git branch -r
-          git fetch --no-tags --prune --depth=1 origin HEAD
-
+    
       - name: Path Update
         run: |
           echo "$PWD/bin" >> "$GITHUB_PATH"
