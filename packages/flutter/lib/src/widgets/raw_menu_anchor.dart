@@ -207,7 +207,6 @@ class _MenuControllerScope extends InheritedWidget {
 /// need to manage additional information (such as the state of an
 /// [AnimationController]) to determine how to respond in such scenarios.
 ///
-///
 /// {@tool dartpad}
 ///
 /// This example uses a [RawMenuAnchor] to build a basic select menu with
