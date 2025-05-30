@@ -23,7 +23,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -701,7 +700,6 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
-          featureFlags: featureFlags,
           targetOverride: mainPath,
         );
       }
@@ -945,7 +943,6 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: flutterProject,
           buildInfo: debuggingOptions.buildInfo,
-          featureFlags: featureFlags,
           targetOverride: mainPath,
           configurationBuildDir: bundle.parent.absolute.path,
         );
@@ -1462,7 +1459,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
-  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  /// Log reader will listen to [IOSDeployDebugger.logLines] and
+  /// will detach debugger on dispose.
   IOSDeployDebugger? get debuggerStream => _iosDeployDebugger;
 
   /// Send messages from ios-deploy debugger stream to device log reader stream.
@@ -1493,8 +1491,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
   String _debuggerLineHandler(String line) =>
       _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
-  /// Start and listen to idevicesyslog to get device logs for iOS versions
-  /// prior to 13 or if [useBothLogDeviceReaders] is true.
+  /// Start and listen to `idevicesyslog` to get device logs for iOS versions
+  /// prior to 13 or if [useSyslogLogging] and [useIOSDeployLogging] are `true`.
   void _listenToSysLog() {
     if (!useSyslogLogging) {
       return;

@@ -10,7 +10,8 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
-import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice, WebServerDevice;
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -139,7 +140,10 @@ abstract final class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
-  Future<void> get done async => _process?.exitCode;
+  /// Completes when process exits with the given exit code.
+  ///
+  /// If the process has never been started, complets with `null`.
+  Future<int?> get done async => _process?.exitCode;
 
   Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
@@ -530,10 +534,9 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    String device = 'flutter-tester',
+    String device = FlutterTesterDevices.kTesterDeviceId,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
-    bool serveObservatory = false,
     bool noDevtools = false,
     bool verbose = false,
     String? script,
@@ -547,10 +550,8 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
           '--web-run-headless',
           if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
         ];
-      case WebServerDevice.kWebServerDeviceId:
-        deviceArgs = <String>[WebServerDevice.kWebServerDeviceId];
       default:
-        deviceArgs = <String>['flutter-tester'];
+        deviceArgs = <String>[device];
     }
 
     await _setupProcess(
@@ -560,7 +561,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
         if (noDevtools) '--no-devtools',
-        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
         ...deviceArgs,
@@ -580,7 +580,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -590,7 +589,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
-        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         '-d',
         'flutter-tester',
         '--debug-port',
