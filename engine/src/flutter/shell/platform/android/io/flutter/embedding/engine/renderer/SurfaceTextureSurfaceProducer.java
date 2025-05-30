@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 
+import io.flutter.Log;
+
 /** Uses a {@link android.graphics.SurfaceTexture} to populate the texture registry. */
 final class SurfaceTextureSurfaceProducer
     implements TextureRegistry.SurfaceProducer, TextureRegistry.GLTextureConsumer {
@@ -92,10 +94,17 @@ final class SurfaceTextureSurfaceProducer
 
   @Override
   public Surface getSurface() {
-    if (surface == null) {
+    if (surface == null || !surface.isValid()) {
+      Log.e("CAMILLE", "1: getting new surface!");
       surface = new Surface(texture.surfaceTexture());
     }
+    Log.e("CAMILLE", "2: potentially returning old surface!");
     return surface;
+  }
+
+  @Override
+    public void invalidateSurface() {
+      surface = null;
   }
 
   @Override

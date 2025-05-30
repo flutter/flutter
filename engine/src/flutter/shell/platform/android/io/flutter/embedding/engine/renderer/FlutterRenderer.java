@@ -577,6 +577,8 @@ public class FlutterRenderer implements TextureRegistry {
           // No more ImageReaders can be pruned this round.
           break;
         }
+        Log.e("CAMILLE", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Image reader queue getting pruned!");
+        Log.e("CAMILLE prune hashcode:", Integer.toString(r.reader.getSurface().hashCode()));
         imageReaderQueue.removeFirst();
         perImageReaders.remove(r.reader);
         r.close();
@@ -830,6 +832,11 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    public void invalidateSurface() {
+      createNewReader = true;
+    }
+
+    @Override
     public void scheduleFrame() {
       if (VERBOSE_LOGS) {
         long now = System.nanoTime();
@@ -855,17 +862,26 @@ public class FlutterRenderer implements TextureRegistry {
 
     private PerImageReader getActiveReader() {
       synchronized (lock) {
-        if (createNewReader) {
-          createNewReader = false;
-          // Create a new ImageReader and add it to the queue.
-          ImageReader reader = createImageReader();
-          if (VERBOSE_LOGS) {
-            Log.i(
-                TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        if (!createNewReader) {
+          // Verify we don't need a new ImageReader anyway because its Surface has been invalidated.
+          PerImageReader lastPerImageReader = imageReaderQueue.peekLast();
+          Surface lastImageReaderSurface = lastPerImageReader.reader.getSurface();
+          boolean lastImageReaderHasValidSurface = true; //lastImageReaderSurface.isValid();
+          if (lastImageReaderHasValidSurface) {
+            Log.e("CAMILLE", "1: last image reader has valid surface!");
+            return lastPerImageReader;
           }
-          return getOrCreatePerImageReader(reader);
         }
-        return imageReaderQueue.peekLast();
+
+        createNewReader = false;
+        // Create a new ImageReader and add it to the queue.
+        ImageReader reader = createImageReader();
+        if (VERBOSE_LOGS) {
+          Log.i(
+              TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        }
+        Log.e("CAMILLE", "2: created new image reader!");
+        return getOrCreatePerImageReader(reader);
       }
     }
 
