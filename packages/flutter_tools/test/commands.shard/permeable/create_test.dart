@@ -3062,6 +3062,34 @@ void main() {
   );
 
   testUsingContext(
+    'plugin includes native Swift unit tests',
+    () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=ios',
+        '-i',
+        'objc',
+        projectDir.path,
+      ]);
+
+      expect(
+        projectDir
+            .childDirectory('example')
+            .childDirectory('ios')
+            .childDirectory('RunnerTests')
+            .childFile('RunnerTests.swift'),
+        exists,
+      );
+    },
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+  );
+
+  testUsingContext(
     'plugin includes native Windows unit tests',
     () async {
       final CreateCommand command = CreateCommand();

@@ -338,7 +338,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
         );
         if (stringArg('ios-language') == 'objc') {
           globals.printWarning(
-            'Please comment in https://github.com/flutter/flutter/issues/148586 describing your use-case for using Objective-C instead of Swift.',
+            'Please comment in https://github.com/flutter/flutter/issues/169683 describing your use-case for using Objective-C instead of Swift.',
           );
         }
       } else {
