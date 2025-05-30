@@ -23,7 +23,7 @@ jobs:
 
     steps:
       # Real checkout on github actions for pull requests
-      - name: Checkout code (non-act)
+      - name: Checkout code (non-act pull_request)
         uses: actions/checkout@v4
         if: github.event_name == 'pull_request' && !env.ACT
         with:
@@ -33,7 +33,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       # Real checkout on github actions for post submit
-      - name: Checkout code (non-act)
+      - name: Checkout code (non-act push)
         uses: actions/checkout@v4
         if: github.event_name == 'push' && !env.ACT
         with:
@@ -43,7 +43,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       # Fake checkout if running locally
-      - name: Checkout code (act)
+      - name: Checkout code (act local)
         uses: actions/checkout@v4
         if: env.ACT
 
