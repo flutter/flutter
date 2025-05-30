@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [master]
     paths:
+      - '.github/workflows/tool-test-general.yml'
       - 'dev/**'
       - 'packages/flutter_tools/**'
       - 'bin/**'
