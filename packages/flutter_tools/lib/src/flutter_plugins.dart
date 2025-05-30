@@ -22,7 +22,6 @@ import 'compute_dev_dependencies.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
-import 'dart/pub.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'macos/darwin_dependency_management.dart';
@@ -58,7 +57,7 @@ Future<Plugin?> _pluginFromPackage(
   String name,
   Uri packageRoot,
   Set<String> appDependencies, {
-  required Set<String> devDependencies,
+  required bool isDevDependency,
   FileSystem? fileSystem,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
@@ -95,7 +94,7 @@ Future<Plugin?> _pluginFromPackage(
     dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
     fileSystem: fs,
     appDependencies: appDependencies,
-    isDevDependency: devDependencies.contains(name),
+    isDevDependency: isDevDependency,
   );
 }
 
@@ -111,23 +110,28 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
     logger: globals.logger,
     throwOnError: throwOnError,
   );
-  final Set<String> devDependencies;
-  if (!featureFlags.isExplicitPackageDependenciesEnabled) {
-    devDependencies = <String>{};
-  } else {
-    devDependencies = await computeExclusiveDevDependencies(
-      pub,
-      logger: globals.logger,
-      project: project,
-    );
-  }
-  for (final Package package in packageConfig.packages) {
-    final Uri packageRoot = package.packageUriRoot.resolve('..');
+  final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
+    project,
+    packageConfig,
+    fs,
+  );
+  for (final Dependency dependency in transitiveDependencies) {
+    final String packageName = dependency.name;
+    final Package? package = packageConfig[packageName];
+    if (package == null) {
+      if (throwOnError) {
+        throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
+      } else {
+        globals.logger.printTrace('Could not locate package:$packageName');
+        continue;
+      }
+    }
     final Plugin? plugin = await _pluginFromPackage(
-      package.name,
-      packageRoot,
+      packageName,
+      dependency.rootUri,
       project.manifest.dependencies,
-      devDependencies: devDependencies,
+      isDevDependency:
+          featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -381,33 +385,6 @@ List<Object?> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
     });
   }
   return directAppDependencies;
-}
-
-// The .flutter-plugins file will be DEPRECATED in favor of .flutter-plugins-dependencies.
-// TODO(franciscojma): Remove this method once deprecated.
-// https://github.com/flutter/flutter/issues/48918
-//
-/// Writes the `.flutter-plugins` files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk.
-///
-/// Finally, returns `true` if `.flutter-plugins` has changed, otherwise returns `false`.
-bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
-  final File pluginsFile = project.flutterPluginsFile;
-  if (plugins.isEmpty) {
-    return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
-  }
-
-  const String info = 'This is a generated file; do not edit or check into version control.';
-  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
-
-  for (final Plugin plugin in plugins) {
-    flutterPluginsBuffer.write('${plugin.name}=${globals.fsUtils.escapePath(plugin.path)}\n');
-  }
-  final String? oldPluginFileContent = _readFileContent(pluginsFile);
-  final String pluginFileContent = flutterPluginsBuffer.toString();
-  pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
-
-  return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 
 /// Returns the contents of [File] or `null` if that file does not exist.
@@ -1191,16 +1168,10 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
-  bool? generateLegacyPlugins,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
-  // TODO(matanlurey): Remove once migration is complete.
-  // Write the legacy plugin files to avoid breaking existing apps.
-  generateLegacyPlugins ??= !featureFlags.isExplicitPackageDependenciesEnabled;
-  final bool legacyChanged =
-      generateLegacyPlugins && _writeFlutterPluginsListLegacy(project, plugins);
 
   bool swiftPackageManagerEnabledIos = false;
   bool swiftPackageManagerEnabledMacos = false;
@@ -1219,7 +1190,7 @@ Future<void> refreshPluginsList(
     swiftPackageManagerEnabledIos: swiftPackageManagerEnabledIos,
     swiftPackageManagerEnabledMacos: swiftPackageManagerEnabledMacos,
   );
-  if (changed || legacyChanged || forceCocoaPodsOnly) {
+  if (changed || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
     if (iosPlatform) {
       globals.cocoaPods?.invalidatePodInstallOutput(project.ios);
@@ -1285,7 +1256,6 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   List<Plugin> plugins = await findPlugins(project);
-
   if (releaseMode) {
     plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
   }
@@ -1509,7 +1479,6 @@ _resolvePluginImplementationsByPlatform(
 
   // Key: the plugin name, value: the plugin which provides an implementation for [platformKey].
   final Map<String, Plugin> pluginResolution = <String, Plugin>{};
-
   // Now resolve all the possible resolutions to a single option for each
   // plugin, or throw if that's not possible.
   for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {

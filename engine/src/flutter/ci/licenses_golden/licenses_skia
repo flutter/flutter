@@ -1,37 +1,71 @@
-Signature: ebf1dd1fac20570e7efb3e095daf86ee
+Signature: bd667b6ca0efec22759648aee7aa8daa
 
 ====================================================================================================
 LIBRARY: etc1
 LIBRARY: vulkan
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_icd.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_layer.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_platform.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_av1std.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_av1std_decode.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_av1std_encode.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std_decode.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std_encode.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std_decode.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std_encode.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codecs_common.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_android.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_beta.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_core.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_directfb.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_fuchsia.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_ggp.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_ios.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_macos.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_metal.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_screen.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_vi.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_wayland.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_win32.h
 ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_xcb.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_xlib.h
+ORIGIN: Apache-2.0 referenced by ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_xlib_xrandr.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/skia/third_party/etc1/etc1.cpp
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/skia/third_party/etc1/etc1.h
 TYPE: LicenseType.apache
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_icd.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_layer.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_platform.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_av1std.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_av1std_decode.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_av1std_encode.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std_decode.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h264std_encode.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std_decode.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codec_h265std_encode.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vk_video/vulkan_video_codecs_common.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_android.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_beta.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_core.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_directfb.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_fuchsia.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_ggp.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_ios.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_macos.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_metal.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_screen.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_vi.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_wayland.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_win32.h
 FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_xcb.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_xlib.h
+FILE: ../../../flutter/third_party/skia/include/third_party/vulkan/vulkan/vulkan_xlib_xrandr.h
 FILE: ../../../flutter/third_party/skia/third_party/etc1/etc1.cpp
 FILE: ../../../flutter/third_party/skia/third_party/etc1/etc1.h
 ----------------------------------------------------------------------------------------------------
@@ -327,13 +361,13 @@ ORIGIN: ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/.bazelignore
 FILE: ../../../flutter/third_party/skia/.bazelproject
-FILE: ../../../flutter/third_party/skia/Cargo.toml
 FILE: ../../../flutter/third_party/skia/MODULE.bazel
 FILE: ../../../flutter/third_party/skia/MODULE.bazel.lock
 FILE: ../../../flutter/third_party/skia/OWNERS_build_files.android
 FILE: ../../../flutter/third_party/skia/RELEASE_NOTES.md
 FILE: ../../../flutter/third_party/skia/go.mod
 FILE: ../../../flutter/third_party/skia/go.sum
+FILE: ../../../flutter/third_party/skia/include/config/MODULE.bazel
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/catchExceptionNop.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/color.js
@@ -410,12 +444,8 @@ FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_gpu.minified.sks
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_gpu.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag.unoptimized.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag_es2.minified.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_frag_es2.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert.unoptimized.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert_es2.minified.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_graphite_vert_es2.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_public.minified.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_public.unoptimized.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_rt_shader.minified.sksl
@@ -429,9 +459,7 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_compute.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_frag.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_gpu.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_frag.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_frag_es2.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_vert.sksl
-FILE: ../../../flutter/third_party/skia/src/sksl/sksl_graphite_vert_es2.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_public.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
@@ -9867,43 +9895,69 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPUContext.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/VulkanPrecompileShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorderImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/SkGaneshRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RecorderOptionsPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp
+FILE: ../../../flutter/third_party/skia/include/core/SkCPUContext.h
+FILE: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h
+FILE: ../../../flutter/third_party/skia/include/core/SkRecorder.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
+FILE: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/VulkanPrecompileShader.h
 FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp
-FILE: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.cpp
-FILE: ../../../flutter/third_party/skia/modules/skcapture/SkCaptureCanvas.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h
+FILE: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h
+FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorderImpl.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h
 FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h
+FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/SkGaneshRecorder.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RecorderOptionsPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileImageShader.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC
 
@@ -9939,8 +9993,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/tools.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
+FILE: ../../../flutter/third_party/skia/tools.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC.
 
