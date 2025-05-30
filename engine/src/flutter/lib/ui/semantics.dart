@@ -1633,14 +1633,6 @@ abstract class SemanticsUpdateBuilder {
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
   ///
-  /// The `elevation` describes the distance in z-direction between this node
-  /// and the `elevation` of the parent.
-  ///
-  /// The `thickness` describes how much space this node occupies in the
-  /// z-direction starting at `elevation`. Basically, in the z-direction the
-  /// node starts at `elevation` above the parent and ends at `elevation` +
-  /// `thickness` above the parent.
-  ///
   /// The `headingLevel` describes that this node is a heading and the hierarchy
   /// level this node represents as a heading. A value of 0 indicates that this
   /// node is not a heading. A value of 1 or greater indicates that this node is
@@ -1680,8 +1672,6 @@ abstract class SemanticsUpdateBuilder {
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -1759,8 +1749,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -1809,8 +1797,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       rect.top,
       rect.right,
       rect.bottom,
-      elevation,
-      thickness,
       identifier,
       label,
       labelAttributes,
@@ -1850,8 +1836,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Int32,
       Int32,
-      Double,
-      Double,
       Double,
       Double,
       Double,
@@ -1902,8 +1886,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     String? identifier,
     String label,
     List<StringAttribute> labelAttributes,

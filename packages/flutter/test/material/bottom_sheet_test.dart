@@ -1100,16 +1100,9 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  label: 'BottomSheet',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
+                            TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
                           ],
                         ),
                       ],
@@ -1174,17 +1167,12 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'BottomSheet',
+                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: 'Dismiss',
                           textDirection: TextDirection.ltr,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
-                              label: 'Dismiss',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
                         ),
+                        TestSemantics(label: 'BottomSheet', textDirection: TextDirection.ltr),
                       ],
                     ),
                   ],

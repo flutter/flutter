@@ -279,10 +279,8 @@ fuchsia::ui::gfx::BoundingBox AccessibilityBridge::GetNodeLocation(
   fuchsia::ui::gfx::BoundingBox box;
   box.min.x = node.rect.fLeft;
   box.min.y = node.rect.fTop;
-  box.min.z = static_cast<float>(node.elevation);
   box.max.x = node.rect.fRight;
   box.max.y = node.rect.fBottom;
-  box.max.z = static_cast<float>(node.thickness);
   return box;
 }
 
