@@ -719,7 +719,6 @@ name: foo
         ..._kStandardFlutterWebDefines,
         '--no-source-maps',
         '-O4',
-        '--minify',
         '-o',
       ];
       processManager.addCommand(
@@ -758,7 +757,6 @@ name: foo
         '--native-null-assertions',
         '--no-source-maps',
         '-O4',
-        '--minify',
         '-o',
       ];
       processManager.addCommand(
@@ -798,7 +796,6 @@ name: foo
         ..._kStandardFlutterWebDefines,
         '--no-source-maps',
         '-O3',
-        '--minify',
         '-o',
       ];
       processManager.addCommand(
@@ -838,7 +835,6 @@ name: foo
         ..._kStandardFlutterWebDefines,
         '--no-source-maps',
         '-O4',
-        '--minify',
         '-o',
       ];
       processManager.addCommand(
@@ -893,7 +889,6 @@ name: foo
         ..._kStandardFlutterWebDefines,
         '--no-source-maps',
         '-O4',
-        '--minify',
         '-o',
       ];
       processManager.addCommand(
@@ -931,7 +926,6 @@ name: foo
         '-Ddart.vm.product=true',
         ..._kStandardFlutterWebDefines,
         '-O4',
-        '--minify',
         '-o',
       ];
       processManager.addCommand(
