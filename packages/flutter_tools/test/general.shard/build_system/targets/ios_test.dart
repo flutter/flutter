@@ -1349,4 +1349,3 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }
-
