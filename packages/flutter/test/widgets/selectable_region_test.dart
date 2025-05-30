@@ -443,8 +443,88 @@ void main() {
         expect(pageController.page, isNotNull);
         expect(pageController.page, 1.0);
       },
-      variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+      }),
+      // [intended] Web does not support double tap + drag gestures on the tested platforms.
+      skip: kIsWeb,
+    );
+
+    testWidgets(
+      'Vertical PageView beats SelectionArea child touch drag gestures on iOS',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/150897.
+        final PageController pageController = PageController();
+        const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+        addTearDown(pageController.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: PageView(
+              scrollDirection: Axis.vertical,
+              controller: pageController,
+              children: <Widget>[
+                Center(
+                  child: SelectableRegion(
+                    selectionControls: materialTextSelectionControls,
+                    child: const Text(testValue),
+                  ),
+                ),
+                const SizedBox(height: 200.0, child: Center(child: Text('Page 2'))),
+              ],
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(testValue), matching: find.byType(RichText)),
+        );
+        final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
+        final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
+
+        // A double tap + drag should take precedence over parent drags.
+        final TestGesture gesture = await tester.startGesture(gPos);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await gesture.down(gPos);
+        await tester.pumpAndSettle();
+        await gesture.moveTo(pPos);
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections, isNotEmpty);
+        expect(
+          paragraph.selections[0],
+          TextSelection(
+            baseOffset: testValue.indexOf('g'),
+            extentOffset: testValue.indexOf('p') + 3,
+          ),
+        );
+
+        expect(pageController.page, isNotNull);
+        expect(pageController.page, 0.0);
+        // A vertical drag directly on the SelectableRegion should move the page
+        // view to the next page.
+        final Rect selectableTextRect = tester.getRect(find.byType(SelectableRegion));
+        // Simulate a pan by drag vertically first.
+        await gesture.down(selectableTextRect.center);
+        await tester.pump();
+        await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -200.0));
+        // Introduce horizontal movement.
+        await gesture.moveTo(selectableTextRect.center + const Offset(5.0, -300.0));
+        await gesture.moveTo(selectableTextRect.center + const Offset(-10.0, -400.0));
+        // Continue dragging vertically.
+        await gesture.moveTo(selectableTextRect.center + const Offset(0.0, -500.0));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(pageController.page, isNotNull);
+        expect(pageController.page, 1.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
 
     testWidgets('mouse single-click selection collapses the selection', (
@@ -6261,7 +6341,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Copy'), findsNothing);
       },
-      skip: !kIsWeb, // [intended]
+      skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
   });
 
