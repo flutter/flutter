@@ -474,13 +474,8 @@ class _IssueLaunchRootViewControllerAccess extends Target {
       const Source.pattern(
         '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
       ),
-      Source.fromProject((FlutterProject project) {
-        if (project.ios.appDelegateSwift.existsSync()) {
-          return project.ios.appDelegateSwift;
-        } else {
-          return project.ios.appDelegateObjc;
-        }
-      }),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc, optional: true),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
     ];
   }
 
