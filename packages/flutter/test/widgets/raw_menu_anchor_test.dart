@@ -2368,20 +2368,34 @@ void main() {
         ),
       );
 
-      expect(onOpenCalled, equals(0));
       expect(onOpenRequestedCalled, equals(0));
+      expect(onOpenCalled, equals(0));
 
       controller.open();
       await tester.pump();
 
-      expect(onOpenCalled, equals(0));
       expect(onOpenRequestedCalled, equals(1));
+      expect(onOpenCalled, equals(0));
+
+      controller.open();
+      await tester.pump();
+
+      // Calling open again will trigger onOpenRequested again.
+      expect(onOpenRequestedCalled, equals(2));
+      expect(onOpenCalled, equals(0));
 
       showMenuOverlay!();
       await tester.pump();
 
+      expect(onOpenRequestedCalled, equals(2));
       expect(onOpenCalled, equals(1));
-      expect(onOpenRequestedCalled, equals(1));
+
+      // Calling showOverlay again will trigger onOpen again.
+      showMenuOverlay!();
+      await tester.pump();
+
+      expect(onOpenRequestedCalled, equals(2));
+      expect(onOpenCalled, equals(2));
     });
 
     testWidgets('showOverlay shows the menu at a position', (WidgetTester tester) async {

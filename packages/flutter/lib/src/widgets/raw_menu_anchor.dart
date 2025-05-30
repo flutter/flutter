@@ -686,12 +686,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   void open({Offset? position}) {
     assert(menuController._anchor == this);
     if (isOpen) {
-      if (position == _menuPosition) {
-        assert(_debugMenuInfo("Not opening $this because it's already open"));
-        // The menu is open and not being moved, so just return.
-        return;
-      }
-
       // The menu is already open, but we need to move to another location, so
       // close it first.
       close();
@@ -704,7 +698,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     assert(!_overlayController.isShowing);
 
     _parent?._childChangedOpenState();
-    _menuPosition = position;
     _overlayController.show();
 
     if (_isRootOverlayAnchor) {
@@ -752,7 +745,10 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleOpenRequest({ui.Offset? position}) {
-    widget.onOpenRequested(position, open);
+    widget.onOpenRequested(position,  ({Offset? position}) {
+      _menuPosition = position;
+      open(position: position);
+    });
   }
 
   @override
