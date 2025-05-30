@@ -138,6 +138,8 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.status => _noLiveRegion,
     SemanticsRole.list => _noCheckRequired,
     SemanticsRole.listItem => _semanticsListItem,
+    SemanticsRole.loadingSpinner => _noCheckRequired,
+    SemanticsRole.progressBar => _semanticsProgressBar,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
@@ -145,8 +147,6 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.comboBox => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
-    SemanticsRole.loadingSpinner => _unimplemented,
-    SemanticsRole.progressBar => _unimplemented,
     SemanticsRole.hotKey => _unimplemented,
   }(node);
 
@@ -154,6 +154,48 @@ sealed class _DebugSemanticsRoleChecks {
       FlutterError('Missing checks for role ${node.getSemanticsData().role}');
 
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
+
+  static FlutterError? _semanticsProgressBar(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+
+    // Check if value is present
+    if (data.value.isEmpty) {
+      return FlutterError('A progress bar must have a value');
+    }
+
+    // Check if minValue and maxValue are present
+    if (data.minValue == null) {
+      return FlutterError('A progress bar must have a minValue');
+    }
+
+    if (data.maxValue == null) {
+      return FlutterError('A progress bar must have a maxValue');
+    }
+
+    // Validate that value is within min and max range
+    try {
+      final double currentValue = double.parse(data.value);
+      final double minVal = double.parse(data.minValue!);
+      final double maxVal = double.parse(data.maxValue!);
+
+      if (currentValue < minVal || currentValue > maxVal) {
+        return FlutterError(
+          'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
+        );
+      }
+
+      if (minVal >= maxVal) {
+        return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
+      }
+    } catch (e) {
+      return FlutterError(
+        'Progress bar value, minValue, and maxValue must be valid numbers. '
+        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
+
+    return null;
+  }
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
@@ -741,6 +783,8 @@ class SemanticsData with Diagnosticable {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1019,6 +1063,12 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
+  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
+  final String? maxValue;
+
+  /// {@macro flutter.semantics.SemanticsProperties.minValue}
+  final String? minValue;
+
   /// Whether [flags] contains the given flag.
   @Deprecated(
     'Use flagsCollection instead. '
@@ -1092,6 +1142,8 @@ class SemanticsData with Diagnosticable {
         ),
       );
     }
+    properties.add(StringProperty('minValue', minValue, defaultValue: null));
+    properties.add(StringProperty('maxValue', maxValue, defaultValue: null));
   }
 
   @override
@@ -1127,7 +1179,9 @@ class SemanticsData with Diagnosticable {
         other.validationResult == validationResult &&
         other.inputType == inputType &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
-        setEquals<String>(controlsNodes, other.controlsNodes);
+        setEquals<String>(controlsNodes, other.controlsNodes) &&
+        minValue == other.minValue &&
+        maxValue == other.maxValue;
   }
 
   @override
@@ -1164,6 +1218,8 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
+      minValue,
+      maxValue,
     ),
   );
 
@@ -1336,6 +1392,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
+    this.minValue,
+    this.maxValue,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -2190,6 +2248,28 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsInputType? inputType;
 
+  /// {@template flutter.semantics.SemanticsProperties.maxValue}
+  /// The maximum value of the node.
+  ///
+  /// Used in conjunction with [value] to define the current value and range
+  /// of a node. A typical usage is for progress indicators, where [value]
+  /// represents the current progress and [maxValue] defines the maximum
+  /// possible value.
+  ///
+  /// {@endtemplate}
+  final String? maxValue;
+
+  /// {@template flutter.semantics.SemanticsProperties.minValue}
+  /// The minimum value of the node.
+  ///
+  /// Used in conjunction with [value] to define the current value and range
+  /// of a node. A typical usage is for progress indicators, where [value]
+  /// represents the current progress and [minValue] defines the minimum
+  /// possible value.
+  ///
+  /// {@endtemplate}
+  final String? minValue;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -2825,7 +2905,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
         _role != config.role ||
-        _validationResult != config.validationResult;
+        _validationResult != config.validationResult ||
+        _minValue != config._minValue ||
+        _maxValue != config._maxValue;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3173,6 +3255,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsProperties.minValue}
+  String? get minValue => _minValue;
+  String? _minValue;
+
+  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
@@ -3258,7 +3348,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
     _inputType = config._inputType;
-
+    _minValue = config.minValue;
+    _maxValue = config.maxValue;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3311,6 +3402,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
     SemanticsInputType inputType = _inputType;
+    String? minValue = _minValue;
+    String? maxValue = _maxValue;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3418,6 +3511,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
           controlsNodes = <String>{...controlsNodes!, ...node._controlsNodes!};
         }
 
+        minValue ??= node._minValue;
+        maxValue ??= node._maxValue;
+
         if (validationResult == SemanticsValidationResult.none) {
           validationResult = node._validationResult;
         } else if (validationResult == SemanticsValidationResult.valid) {
@@ -3465,6 +3561,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      minValue: minValue,
+      maxValue: maxValue,
     );
   }
 
@@ -3553,6 +3651,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
       inputType: data.inputType,
+      minValue: data.minValue ?? '0',
+      maxValue: data.maxValue ?? '100',
     );
     _dirty = false;
   }
@@ -3747,6 +3847,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
     }
+    properties.add(StringProperty('minValue', _minValue, defaultValue: null));
+    properties.add(StringProperty('maxValue', _maxValue, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -5752,6 +5854,22 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+  set maxValue(String? value) {
+    _maxValue = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.minValue}
+  String? get minValue => _minValue;
+  String? _minValue;
+  set minValue(String? value) {
+    _minValue = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -5840,6 +5958,12 @@ class SemanticsConfiguration {
       return false;
     }
     if (_hasExplicitRole && other._hasExplicitRole) {
+      return false;
+    }
+    if (_minValue != null && other._minValue != null) {
+      return false;
+    }
+    if (_maxValue != null && other._maxValue != null) {
       return false;
     }
     return true;
@@ -5943,6 +6067,8 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
+    _minValue ??= child._minValue;
+    _maxValue ??= child._maxValue;
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -5988,7 +6114,9 @@ class SemanticsConfiguration {
       .._role = _role
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
-      .._inputType = _inputType;
+      .._inputType = _inputType
+      .._minValue = _minValue
+      .._maxValue = _maxValue;
   }
 }
 

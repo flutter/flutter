@@ -123,6 +123,8 @@ class SemanticsTester {
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
+    String? minValue,
+    String? maxValue,
   }) {
     // Flags
     if (hasCheckedState ?? false) {
@@ -347,6 +349,8 @@ class SemanticsTester {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      minValue: minValue ?? 0,
+      maxValue: maxValue ?? 0,
     );
     _nodeUpdates.add(update);
     return update;
