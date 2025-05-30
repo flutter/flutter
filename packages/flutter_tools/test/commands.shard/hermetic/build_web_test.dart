@@ -400,7 +400,7 @@ void main() {
   );
 
   testUsingContext(
-    'Defaults to web renderer canvaskit mode when no option is specified',
+    'Defaults to web renderer canvaskit and minify mode when no option is specified',
     () async {
       final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -419,8 +419,17 @@ void main() {
           ) {
             expect(target, isA<WebServiceWorker>());
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
-            expect(configs.length, 1);
-            expect(configs.first.renderer, WebRendererMode.canvaskit);
+            expect(configs, hasLength(1));
+            final WebCompilerConfig config = configs.single;
+            expect(config.renderer, WebRendererMode.canvaskit);
+            expect(config.compileTarget, CompileTarget.js);
+            final List<String> options = config.toCommandOptions(BuildMode.release);
+            expect(options, <String>[
+              '--minify',
+              '--native-null-assertions',
+              '--no-source-maps',
+              '-O4',
+            ]);
           }),
     },
   );
@@ -445,7 +454,7 @@ void main() {
           ) {
             expect(target, isA<WebServiceWorker>());
             final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
-            expect(configs.length, 2);
+            expect(configs, hasLength(2));
             expect(configs[0].renderer, WebRendererMode.skwasm);
             expect(configs[0].compileTarget, CompileTarget.wasm);
             expect(configs[1].renderer, WebRendererMode.canvaskit);
