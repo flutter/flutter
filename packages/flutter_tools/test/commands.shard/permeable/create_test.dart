@@ -1793,7 +1793,7 @@ void main() {
           'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
         ),
       );
-      expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/148586'));
+      expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/169683'));
     },
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
