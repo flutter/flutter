@@ -93,6 +93,8 @@ class JsCompilerConfig extends WebCompilerConfig {
   CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
+  ///
+  /// NOTE: MOST args should be passed here!
   List<String> toSharedCommandOptions(BuildMode buildMode) => <String>[
     if (nativeNullAssertions) '--native-null-assertions',
     if (!sourceMaps) '--no-source-maps',
@@ -116,7 +118,8 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
-  /// Includes the contents of [toSharedCommandOptions].
+  /// Includes the contents of [toSharedCommandOptions]. That is where MOST
+  /// JS compiler flags should be passed!
   @override
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
     ...toSharedCommandOptions(buildMode),
