@@ -96,7 +96,7 @@ void main() {
     ]);
 
     // Check that the large font title is at the right spot.
-    expect(tester.getTopLeft(find.byWidget(titles[1].widget)), const Offset(16.0, 46.0));
+    expect(tester.getTopLeft(find.byWidget(titles[1].widget)), const Offset(16.0, 54.0));
 
     // The smaller, initially invisible title, should still be positioned in the
     // center.

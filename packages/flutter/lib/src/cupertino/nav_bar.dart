@@ -47,7 +47,7 @@ const double _kNavBarPersistentHeight = kMinInteractiveDimensionCupertino;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
 /// configuration in a [CustomScrollView].
-const double _kNavBarLargeTitleHeightExtension = kMinInteractiveDimensionCupertino;
+const double _kNavBarLargeTitleHeightExtension = 52.0;
 
 /// Number of logical pixels scrolled down before the title text is transferred
 /// from the normal navigation bar to a big title below the navigation bar.
@@ -3060,7 +3060,6 @@ class _NavigationBarComponentsTransition {
     final KeyedSubtree? bottomLargeTitle =
         bottomComponents.largeTitleKey.currentWidget as KeyedSubtree?;
     final KeyedSubtree? topBackLabel = topComponents.backLabelKey.currentWidget as KeyedSubtree?;
-    final KeyedSubtree? topLeading = topComponents.leadingKey.currentWidget as KeyedSubtree?;
 
     if (bottomLargeTitle == null || !bottomLargeExpanded) {
       return null;
@@ -3093,32 +3092,28 @@ class _NavigationBarComponentsTransition {
       );
     }
 
-    if (topLeading != null) {
-      // Unlike bottom middle, the bottom large title moves when it can't
-      // transition to the top back label position.
-      final RelativeRect from = positionInTransitionBox(
-        bottomComponents.largeTitleKey,
-        from: bottomNavBarBox,
-      );
+    // Unlike bottom middle, the bottom large title moves when it can't
+    // transition to the top back label position.
+    final RelativeRect from = positionInTransitionBox(
+      bottomComponents.largeTitleKey,
+      from: bottomNavBarBox,
+    );
 
-      final RelativeRectTween positionTween = RelativeRectTween(
-        begin: from,
-        end: from.shift(Offset(forwardDirection * bottomNavBarBox.size.width / 4.0, 0.0)),
-      );
+    final RelativeRectTween positionTween = RelativeRectTween(
+      begin: from,
+      end: from.shift(Offset(forwardDirection * bottomNavBarBox.size.width / 4.0, 0.0)),
+    );
 
-      // Just shift slightly towards the trailing edge instead of moving to the
-      // back label position.
-      return PositionedTransition(
-        rect: animation.drive(positionTween),
-        child: FadeTransition(
-          opacity: fadeOutBy(0.4),
-          // Keep the font when transitioning into a non-back-label leading.
-          child: DefaultTextStyle(style: bottomLargeTitleTextStyle!, child: bottomLargeTitle.child),
-        ),
-      );
-    }
-
-    return null;
+    // Just shift slightly towards the trailing edge instead of moving to the
+    // back label position.
+    return PositionedTransition(
+      rect: animation.drive(positionTween),
+      child: FadeTransition(
+        opacity: fadeOutBy(0.4),
+        // Keep the font when transitioning into a non-back-label leading.
+        child: DefaultTextStyle(style: bottomLargeTitleTextStyle!, child: bottomLargeTitle.child),
+      ),
+    );
   }
 
   Widget? get bottomTrailing {

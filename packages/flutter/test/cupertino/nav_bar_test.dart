@@ -500,7 +500,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(trailingKey)), const Offset(800.0 - 16.0 - 40.0, 10.0));
 
     // Top and left padding is applied to large title.
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 46.0 + 10.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 54.0 + 10.0));
   });
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
@@ -546,7 +546,7 @@ void main() {
     ]);
 
     expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -617,7 +617,7 @@ void main() {
     expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
 
     expect(tester.getTopLeft(find.widgetWithText(ClipRect, 'Title').first).dy, 44.0);
-    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 44.0);
+    expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 52.0);
 
     scrollController.jumpTo(600.0);
     await tester.pump(); // Once to trigger the opacity animation.
@@ -730,7 +730,7 @@ void main() {
 
     expect(
       tester.getBottomLeft(find.text('Title')).dy,
-      44.0 + 44.0 - 8.0,
+      44.0 + 52.0 - 8.0,
     ); // Static part + extension - padding.
 
     scrollController.jumpTo(600.0);
@@ -2218,16 +2218,16 @@ void main() {
     // The persistent navigation bar, large title, and search field are all
     // visible.
     expect(tester.getTopLeft(largeTitleFinder).dy, persistentHeight);
-    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight - 8.0);
-    expect(tester.getTopLeft(bottomFinder).dy, 88.0);
-    expect(tester.getBottomLeft(bottomFinder).dy, 88.0 + bottomHeight);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getTopLeft(bottomFinder).dy, 96.0);
+    expect(tester.getBottomLeft(bottomFinder).dy, 96.0 + bottomHeight);
 
     // Scroll the length of the navigation bar search text field.
     controller.jumpTo(bottomHeight);
     await tester.pump();
 
     // The search field is hidden, but the large title remains visible.
-    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight - 8.0);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
     expect(tester.getBottomLeft(bottomFinder).dy - tester.getTopLeft(bottomFinder).dy, 0.0);
 
     // Scroll until the large title scrolls under the persistent navigation bar.
@@ -2274,9 +2274,9 @@ void main() {
     // The persistent navigation bar, large title, and search field are all
     // visible.
     expect(tester.getTopLeft(largeTitleFinder).dy, persistentHeight);
-    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight - 8.0);
-    expect(tester.getTopLeft(bottomFinder).dy, 88.0);
-    expect(tester.getBottomLeft(bottomFinder).dy, 88.0 + bottomHeight);
+    expect(tester.getBottomLeft(largeTitleFinder).dy, persistentHeight + largeTitleHeight);
+    expect(tester.getTopLeft(bottomFinder).dy, 96.0);
+    expect(tester.getBottomLeft(bottomFinder).dy, 96.0 + bottomHeight);
 
     // Scroll until the large title scrolls under the persistent navigation bar.
     await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -400.0), 10.0);
@@ -2322,7 +2322,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const double bottomHeight = 10.0;
-    const double bottomDisplacement = 88.0;
+    const double bottomDisplacement = 96.0;
     setWindowToPortrait(tester);
 
     await tester.pumpWidget(
@@ -2370,7 +2370,7 @@ void main() {
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 44.0;
+      const double largeTitleHeight = 52.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2402,7 +2402,7 @@ void main() {
       final TestGesture scrollGesture = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable)),
       );
-      await scrollGesture.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 10));
+      await scrollGesture.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
       await scrollGesture.up();
       await tester.pumpAndSettle();
 
@@ -2417,7 +2417,7 @@ void main() {
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 44.0;
+      const double largeTitleHeight = 52.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
@@ -2463,8 +2463,7 @@ void main() {
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 44.0;
-      const double largeTitlePadding = 8.0;
+      const double largeTitleHeight = 52.0;
       const double bottomHeight = 100.0;
       setWindowToPortrait(tester);
 
@@ -2515,9 +2514,7 @@ void main() {
       final TestGesture scrollGesture2 = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable)),
       );
-      await scrollGesture2.moveBy(
-        const Offset(0.0, -((largeTitleHeight + largeTitlePadding) / 2) - 1),
-      );
+      await scrollGesture2.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
       await scrollGesture2.up();
       await tester.pumpAndSettle();
 
@@ -2532,7 +2529,7 @@ void main() {
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 44.0;
+      const double largeTitleHeight = 52.0;
       const double bottomHeight = 100.0;
       setWindowToPortrait(tester);
 
@@ -2602,8 +2599,7 @@ void main() {
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 44.0;
-      const double largeTitlePadding = 8.0;
+      const double largeTitleHeight = 52.0;
       const double bottomHeight = 100.0;
       setWindowToPortrait(tester);
 
@@ -2641,9 +2637,7 @@ void main() {
       final TestGesture scrollGesture1 = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable)),
       );
-      await scrollGesture1.moveBy(
-        const Offset(0.0, -((largeTitleHeight + largeTitlePadding) / 2) - 1),
-      );
+      await scrollGesture1.moveBy(const Offset(0.0, -(largeTitleHeight / 2) - 1));
       await scrollGesture1.up();
       await tester.pumpAndSettle();
 
@@ -2674,7 +2668,7 @@ void main() {
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const double largeTitleHeight = 44.0;
+      const double largeTitleHeight = 52.0;
       setWindowToPortrait(tester);
 
       await tester.pumpWidget(
