@@ -890,6 +890,13 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// For advanced uses, an optional [middle] widget can be supplied to show a
 /// different widget in the middle of the navigation bar when the sliver is collapsed.
 ///
+/// This navigation bar is expanded only in portrait orientation. In landscape
+/// mode, the navigation bar remains collapsed. When collapsed (either by
+/// scrolling in portrait or by being in landscape), the [middle] widget is
+/// displayed. However, if no [middle] widget is provided, the [largeTitle]
+/// widget itself will be used in the [middle]'s position, rendered in its
+/// smaller, collapsed style.
+///
 /// Like [CupertinoNavigationBar], it also supports a [leading] and [trailing]
 /// widget on the static section on top that remains while scrolling.
 ///
@@ -1085,10 +1092,12 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
   ///
-  /// This widget is visible in both collapsed and expanded states if
-  /// [alwaysShowMiddle] is true, otherwise just in collapsed state. The text
-  /// supplied in [largeTitle] will no longer appear in collapsed state if a
-  /// [middle] widget is provided.
+  /// If [alwaysShowMiddle] is true, this widget is visible in both the
+  /// collapsed and expanded states of the navigation bar. Else, it is visible
+  /// only in the collapsed state.
+  ///
+  /// If null, [largeTitle] will be displayed in the navigation bar's collapsed
+  /// state.
   final Widget? middle;
 
   /// {@macro flutter.cupertino.CupertinoNavigationBar.trailing}
