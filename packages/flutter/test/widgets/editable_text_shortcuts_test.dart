@@ -2868,7 +2868,7 @@ void main() {
   group(
     'Web does not accept',
     () {
-      testWidgets('character modifier + arrowLeft in compposing', (WidgetTester tester) async {
+      testWidgets('character modifier + arrowLeft in composing', (WidgetTester tester) async {
         const SingleActivator arrowLeft = SingleActivator(
           LogicalKeyboardKey.arrowLeft,
           shift: true,
@@ -2895,7 +2895,7 @@ void main() {
         );
       });
 
-      testWidgets('character modifier + arrowRight in compposing', (WidgetTester tester) async {
+      testWidgets('character modifier + arrowRight in composing', (WidgetTester tester) async {
         const SingleActivator arrowRight = SingleActivator(
           LogicalKeyboardKey.arrowLeft,
           shift: true,
@@ -2922,7 +2922,7 @@ void main() {
         );
       });
 
-      testWidgets('character modifier + arrowUp in compposing', (WidgetTester tester) async {
+      testWidgets('character modifier + arrowUp in composing', (WidgetTester tester) async {
         const SingleActivator arrowUp = SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
 
         controller.value = const TextEditingValue(
@@ -2946,7 +2946,7 @@ void main() {
         );
       });
 
-      testWidgets('character modifier + arrowDown in compposing', (WidgetTester tester) async {
+      testWidgets('character modifier + arrowDown in composing', (WidgetTester tester) async {
         const SingleActivator arrowDown = SingleActivator(
           LogicalKeyboardKey.arrowDown,
           shift: true,
@@ -2973,7 +2973,7 @@ void main() {
         );
       });
 
-      testWidgets('home in compposing', (WidgetTester tester) async {
+      testWidgets('home in composing', (WidgetTester tester) async {
         const SingleActivator home = SingleActivator(LogicalKeyboardKey.home);
 
         controller.value = const TextEditingValue(
@@ -2997,7 +2997,7 @@ void main() {
         );
       });
 
-      testWidgets('end in compposing', (WidgetTester tester) async {
+      testWidgets('end in composing', (WidgetTester tester) async {
         const SingleActivator end = SingleActivator(LogicalKeyboardKey.end);
 
         controller.value = const TextEditingValue(

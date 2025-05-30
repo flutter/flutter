@@ -5574,7 +5574,7 @@ class EditableTextState extends State<EditableText>
       ),
     ),
     ScrollToDocumentBoundaryIntent: _makeOverridable(
-      _WebComposingDisabllingPageBoundaryAction<ScrollToDocumentBoundaryIntent>(
+      _WebComposingDisablingCallbackAction<ScrollToDocumentBoundaryIntent>(
         this,
         onInvoke: _scrollToDocumentBoundary,
       ),
@@ -6580,8 +6580,8 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   }
 }
 
-class _WebComposingDisabllingPageBoundaryAction<T extends Intent> extends CallbackAction<T> {
-  _WebComposingDisabllingPageBoundaryAction(this.state, {required super.onInvoke});
+class _WebComposingDisablingCallbackAction<T extends Intent> extends CallbackAction<T> {
+  _WebComposingDisablingCallbackAction(this.state, {required super.onInvoke});
 
   final EditableTextState state;
 
