@@ -2465,8 +2465,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This flag is true if [layout] has been called at least once for this
   /// [RenderObject] by its current parent.
   ///
-  /// If a parent calls [dropChild] and [adoptChild] on this child, this flag
-  /// will still be reset to false.
+  /// In debug mode, this flag is set to false in [dropChild] and set to true in
+  /// [layout]. This flag is always false when asserts are disabled.
   bool _debugLaidOutByThisParentBefore = false;
 
   // TODO(LongCatIsLooong): consider removing this check entirely, or introduce
