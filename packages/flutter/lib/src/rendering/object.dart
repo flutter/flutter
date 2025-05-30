@@ -2398,12 +2398,18 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Whether this [RenderObject] is a known relayout boundary.
   ///
   /// A relayout boundary is a [RenderObject] whose parent does not rely on the
-  /// child [RenderObject]'s size in its own layout algorithm (from here on out,
-  /// "size" refers not just to [RenderBox.size], but any layout artifacts
-  /// produced by the child's [performLayout] implementation, such as baseline
-  /// locations). In other words, if a [RenderObject]'s [performLayout]
-  /// implementation does not ask the child for its size at all, **the child** is
-  /// a relayout boundary.
+  /// child [RenderObject]'s size in its own layout algorithm . In other words,
+  /// if a [RenderObject]'s [performLayout] implementation does not ask the child
+  /// for its size at all, **the child** is a relayout boundary.
+  ///
+  /// The type of "size" is typically defined by the coordinate system a
+  /// [RenderObject] subclass uses. For instance, [RenderSliver]s produce
+  /// [SliverGeometry] and [RenderBox]es produce [Size]. A parent [RenderObject]
+  /// may not read the child's size but still depend on the child's layout (using
+  /// a [RenderBox] child's baseline location, for example), this flag does not
+  /// reflect such dependencies and the [RenderObject] subclass must handle those
+  /// cases in its own implementation. See [RenderBox.markNeedsLayout] for an
+  /// example.
   ///
   /// Relayout boundaries enable an important layout optimization: the parent not
   /// depending on the size of a child means the child changing size does not
