@@ -32,9 +32,15 @@ jobs:
       # The following step is only run LOCALLY - Github runners have everything on them
       - name: Setup Android SDK
         if: ${{ env.ACT }}
-        uses: amyu/setup-android@v4
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
         with:
-          sdk-version: 36
+          cmdline-tools-version: 13114758
+
+      # The following step is only run LOCALLY - Github runners have everything on them
+      - name: install android
+        if: ${{ env.ACT }}      
+        run: |
+          sdkmanager install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Checkout code
         uses: actions/checkout@v4
