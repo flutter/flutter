@@ -420,7 +420,7 @@ class LazyPath implements ScenePath, Collectable {
     }
 
     _cachedPath = path;
-    renderer.frameArena.add(this);
+    EnginePlatformDispatcher.instance.frameArena.add(this);
     return path;
   }
 
@@ -574,6 +574,7 @@ class LazyPath implements ScenePath, Collectable {
     _commands.clear();
     fillType = ui.PathFillType.nonZero;
     _cachedPath?.dispose();
+    _cachedPath = null;
     initializer = constructors.createNew;
   }
 
@@ -685,7 +686,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
         break;
       }
     }
-    renderer.frameArena.add(this);
+    EnginePlatformDispatcher.instance.frameArena.add(this);
   }
 
   DisposablePathMetric builtMetricAtIndex(int index) {

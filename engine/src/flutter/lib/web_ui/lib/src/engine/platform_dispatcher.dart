@@ -44,6 +44,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   late StreamSubscription<int> _onViewDisposedListener;
 
+  final Arena frameArena = Arena();
+
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
@@ -260,7 +262,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
-    renderer.frameArena.collect();
+    frameArena.collect();
   }
 
   /// A callback that is invoked when pointer data is available.

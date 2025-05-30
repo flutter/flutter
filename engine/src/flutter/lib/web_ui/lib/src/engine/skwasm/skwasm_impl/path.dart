@@ -234,7 +234,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
       SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 
   @override
-  DisposablePathMetrics computeMetrics({bool forceClosed = false}) {
+  SkwasmPathMetrics computeMetrics({bool forceClosed = false}) {
     return SkwasmPathMetrics(path: this, forceClosed: forceClosed);
   }
 

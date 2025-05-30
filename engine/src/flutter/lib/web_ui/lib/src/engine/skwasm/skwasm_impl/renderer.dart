@@ -24,9 +24,6 @@ class SkwasmRenderer implements Renderer {
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
   @override
-  final Arena frameArena = Arena();
-
-  @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
 
   @override

@@ -35,7 +35,6 @@ abstract class Renderer {
     }
   }
 
-  Arena get frameArena;
   String get rendererTag;
   FlutterFontCollection get fontCollection;
 
