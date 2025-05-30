@@ -122,6 +122,11 @@ class Playground {
       std::function<void*(void* instance, const char* proc_name)>;
   VKProcAddressResolver CreateVKProcAddressResolver() const;
 
+  /// @brief Mark the GPU as unavilable.
+  ///
+  /// Only supported on the Metal backend.
+  void SetGPUDisabled(bool disabled) const;
+
  protected:
   const PlaygroundSwitches switches_;
 
