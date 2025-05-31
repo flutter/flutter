@@ -2004,6 +2004,10 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
+  RSuperellipse computed() {
+    return this;
+  }
+
   _NativeRSuperellipse _native() {
     return _NativeRSuperellipse(this);
   }
