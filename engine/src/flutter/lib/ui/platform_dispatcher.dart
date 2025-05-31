@@ -43,6 +43,9 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
+/// Signature for [PlatformDispatcher.onGetSemanticsNode].
+typedef GetSemanticsNodeCallback = SemanticsUpdate Function(int viewId, int nodeId);
+
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [PlatformDispatcher.sendPlatformMessage] and
@@ -1345,6 +1348,26 @@ class PlatformDispatcher {
         arguments: args,
       ),
     );
+  }
+
+  /// A callback to get semantics node.
+  GetSemanticsNodeCallback? get onGetSemanticsNode => _onGetSemanticsNode;
+  GetSemanticsNodeCallback? _onGetSemanticsNode;
+  Zone _onGetSemanticsNodeZone = Zone.root;
+  set onGetSemanticsNode(GetSemanticsNodeCallback? callback) {
+    _onGetSemanticsNode = callback;
+    _onGetSemanticsNodeZone = Zone.current;
+  }
+
+  // Called from the engine, via hooks.dart
+  _NativeSemanticsUpdate _getSemanticsNode(int viewId, int nodeId) {
+    return _invokeAndReturn2<SemanticsUpdate, int, int>(
+          onGetSemanticsNode,
+          _onGetSemanticsNodeZone,
+          viewId,
+          nodeId,
+        )!
+        as _NativeSemanticsUpdate;
   }
 
   ErrorCallback? _onError;
