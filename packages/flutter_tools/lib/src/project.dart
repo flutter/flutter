@@ -501,7 +501,7 @@ class AndroidProject extends FlutterProjectPlatform {
   static final RegExp _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
-  /// containing the `app/` subdirectory and the `settings.gradle` file that
+  /// containing the `android/app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
     if (!isModule || _editableHostAppDirectory.existsSync()) {
@@ -516,7 +516,7 @@ class AndroidProject extends FlutterProjectPlatform {
   Directory get _flutterLibGradleRoot => isModule ? ephemeralDirectory : _editableHostAppDirectory;
 
   Directory get ephemeralDirectory => parent.directory.childDirectory('.android');
-  Directory get _editableHostAppDirectory => parent.directory.childDirectory('android');
+  Directory get _editableHostAppDirectory => parent.directory;
 
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
@@ -645,6 +645,7 @@ class AndroidProject extends FlutterProjectPlatform {
   File get appManifestFile {
     if (isUsingGradle) {
       return hostAppGradleRoot
+          .childDirectory('android')
           .childDirectory('app')
           .childDirectory('src')
           .childDirectory('main')
