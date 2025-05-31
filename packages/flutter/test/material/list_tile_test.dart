@@ -2303,7 +2303,7 @@ void main() {
 
   testWidgets(
     'IconButtonTheme.style.foregroundColor is preserved in ListTile in non-overriding scenario',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       const Color iconButtonThemeColor = Colors.blue;
       const Icon leadingIcon = Icon(Icons.favorite);
       const Icon trailingIcon = Icon(Icons.close);
@@ -2333,8 +2333,8 @@ void main() {
       TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
           tester
               .widget<RichText>(
-            find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-          )
+                find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+              )
               .text
               .style;
 
