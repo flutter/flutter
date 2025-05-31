@@ -8,8 +8,6 @@
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
 
-#include "third_party/dart/runtime/bin/elf_loader.h"
-
 namespace dart_utils {
 
 class ElfSnapshot {
@@ -35,7 +33,7 @@ class ElfSnapshot {
  private:
   bool Load(int fd);
 
-  Dart_LoadedElf* handle_ = nullptr;
+  void* handle_ = nullptr;
 
   const uint8_t* vm_data_ = nullptr;
   const uint8_t* vm_instrs_ = nullptr;
