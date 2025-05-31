@@ -2301,6 +2301,49 @@ void main() {
     },
   );
 
+  testWidgets(
+    'IconButtonTheme.style.foregroundColor is preserved in ListTile in non-overriding scenario',
+        (WidgetTester tester) async {
+      const Color iconButtonThemeColor = Colors.blue;
+      const Icon leadingIcon = Icon(Icons.favorite);
+      const Icon trailingIcon = Icon(Icons.close);
+
+      Widget buildFrame() {
+        return MaterialApp(
+          theme: ThemeData(
+            iconButtonTheme: IconButtonThemeData(
+              style: IconButton.styleFrom(foregroundColor: iconButtonThemeColor),
+            ),
+          ),
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListTile(
+                    leading: IconButton(icon: leadingIcon, onPressed: () {}),
+                    trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
+          tester
+              .widget<RichText>(
+            find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+          )
+              .text
+              .style;
+
+      await tester.pumpWidget(buildFrame());
+      expect(getIconStyle(tester, leadingIcon.icon!)?.color, iconButtonThemeColor);
+      expect(getIconStyle(tester, trailingIcon.icon!)?.color, iconButtonThemeColor);
+    },
+  );
+
   testWidgets('ListTile respects and combines parent IconButtonThemeData style', (
     WidgetTester tester,
   ) async {
