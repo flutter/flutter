@@ -636,6 +636,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   late _NestedScrollController _outerController;
   late _NestedScrollController _innerController;
 
+  @override
+  bool get isBallisticScrolling {
+    assert(_innerController.position is ScrollActivityDelegate);
+    assert(_outerController.position is ScrollActivityDelegate);
+    final ScrollActivityDelegate inner = _innerController.position as ScrollActivityDelegate;
+    final ScrollActivityDelegate outer = _outerController.position as ScrollActivityDelegate;
+    return inner.isBallisticScrolling || outer.isBallisticScrolling;
+  }
+
   bool get outOfRange {
     return (_outerPosition?.outOfRange ?? false) ||
         _innerPositions.any((_NestedScrollPosition position) => position.outOfRange);
@@ -1233,6 +1242,11 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   @override
   AxisDirection get axisDirection => context.axisDirection;
+
+  @override
+  bool get isBallisticScrolling {
+    return activity is BallisticScrollActivity;
+  }
 
   @override
   void absorb(ScrollPosition other) {
