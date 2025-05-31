@@ -79,6 +79,9 @@ typedef RestorableRouteBuilder<T> = Route<T> Function(BuildContext context, Obje
 /// Signature for the [Navigator.popUntil] predicate argument.
 typedef RoutePredicate = bool Function(Route<dynamic> route);
 
+/// Signature for the [Navigator.popUntil] return value predicate argument.
+typedef RouteResultPredicate = Object? Function(Route<dynamic> route);
+
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
@@ -2784,7 +2787,11 @@ class Navigator extends StatefulWidget {
   /// To pop until a route with a certain name, use the [RoutePredicate]
   /// returned from [ModalRoute.withName].
   ///
-  /// The routes are closed with null as their `return` value.
+  /// If `resultPredicate` is not specified, then all routes are closed
+  /// with null as their `return` value.
+  /// If `resultPredicate` is specified, the each route is closed with the
+  /// result of the `resultPredicate` function, which is called with the
+  /// next route in the history.
   ///
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
@@ -2799,8 +2806,12 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  static void popUntil(BuildContext context, RoutePredicate predicate) {
-    Navigator.of(context).popUntil(predicate);
+  static void popUntil(
+    BuildContext context,
+    RoutePredicate predicate, [
+    RouteResultPredicate? resultPredicate,
+  ]) {
+    Navigator.of(context).popUntil(predicate, resultPredicate);
   }
 
   /// Immediately remove `route` from the navigator that most tightly encloses
@@ -5614,13 +5625,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  void popUntil(RoutePredicate predicate) {
+  void popUntil(RoutePredicate predicate, [RouteResultPredicate? resultPredicate]) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     while (candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
-      pop();
+
+      final _RouteEntry? next = _lastRouteEntryWhereOrNull(
+        (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
+      );
+      if (next != null && resultPredicate != null) {
+        pop(resultPredicate(next.route));
+      } else {
+        pop();
+      }
+
       candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }

@@ -1199,6 +1199,98 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('popUntil with a return value', (WidgetTester tester) async {
+    bool? firstReturnValue;
+    bool? secondReturnValue;
+    bool? thirdReturnValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          final String? routeName = settings.name;
+
+          switch (routeName) {
+            case '/':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: '/',
+                      onTap: () async {
+                        firstReturnValue = await Navigator.pushNamed(context, '/A');
+                      },
+                    ),
+                settings: settings,
+              );
+            case '/A':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: 'A',
+                      onTap: () async {
+                        secondReturnValue = await Navigator.pushNamed(context, '/B');
+                      },
+                    ),
+                settings: settings,
+              );
+            case '/B':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: 'B',
+                      onTap: () async {
+                        thirdReturnValue = await Navigator.pushNamed(context, '/C');
+                      },
+                    ),
+                settings: settings,
+              );
+            case '/C':
+              return MaterialPageRoute<bool>(
+                builder:
+                    (BuildContext context) => OnTapPage(
+                      id: 'C',
+                      onTap: () async {
+                        Navigator.popUntil(context, (Route<dynamic> route) => route.isFirst, (
+                          Route<dynamic> route,
+                        ) {
+                          if (route.settings.name == '/B') {
+                            return true;
+                          } else if (route.settings.name == '/A') {
+                            return false;
+                          }
+                          return null;
+                        });
+                      },
+                    ),
+                settings: settings,
+              );
+            default:
+              return null;
+          }
+        },
+      ),
+    );
+    expect(find.text('/'), findsOneWidget);
+
+    await tester.tap(find.text('/'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+    expect(find.text('B'), findsOneWidget);
+
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsOneWidget);
+
+    expect(firstReturnValue, isNull);
+    expect(secondReturnValue, isFalse);
+    expect(thirdReturnValue, isTrue);
+  });
+
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/':
