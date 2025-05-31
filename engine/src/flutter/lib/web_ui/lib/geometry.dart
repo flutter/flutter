@@ -992,7 +992,7 @@ class _RRectLikeShape {
 }
 
 class _RSuperellipseCache {
-  Path? basePath;
+  Path? normalizedPath;
 }
 
 class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
@@ -1199,36 +1199,39 @@ class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
   //
   // This workaround is needed until the rounded superellipse is implemented on
   // Web. https://github.com/flutter/flutter/issues/163718
-  RRect toApproximateRRect() {
+  static RRect toApproximateRRect(RSuperellipse r) {
     // Experiments have shown that using the same corner radii for the RRect
     // provides an approximation that is close to optimal, as achieving a perfect
     // match is not feasible.
     return RRect._raw(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      tlRadiusX: tlRadiusX,
-      tlRadiusY: tlRadiusY,
-      trRadiusX: trRadiusX,
-      trRadiusY: trRadiusY,
-      blRadiusX: blRadiusX,
-      blRadiusY: blRadiusY,
-      brRadiusX: brRadiusX,
-      brRadiusY: brRadiusY,
+      top: r.top,
+      left: r.left,
+      right: r.right,
+      bottom: r.bottom,
+      tlRadiusX: r.tlRadiusX,
+      tlRadiusY: r.tlRadiusY,
+      trRadiusX: r.trRadiusX,
+      trRadiusY: r.trRadiusY,
+      blRadiusX: r.blRadiusX,
+      blRadiusY: r.blRadiusY,
+      brRadiusX: r.brRadiusX,
+      brRadiusY: r.brRadiusY,
     );
   }
 
   bool contains(Offset point) {
-    return getPath().contains(point);
+    // Use an approximate method, which should be good enough. Properly implementing
+    // a cacheable containment algorithm requires much more code and computation,
+    // which are particularly precious on Web.
+    return toApproximateRRect(this).contains(point);
   }
 
   _RSuperellipseCache? _getCache() {
     return null;
   }
 
-  Path getPath([Path? basePath]) {
-    return _RSuperellipsePathBuilder.exact(this, basePath).path;
+  Path toPath({Path? baseObject}) {
+    return _RSuperellipsePathBuilder.exact(this, baseObject).path;
   }
 
   static final RSuperellipse zero = RSuperellipse._raw();
@@ -1318,14 +1321,19 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
     brRadiusY: brRadiusY,
   );
 
+  void _ensureCacheInitialized() {
+    _cache.normalizedPath ??= _RSuperellipsePathBuilder.normalized(this).path;
+  }
+
   @override
   RSuperellipse computed({RSuperellipse? reference}) {
     return _NativeRSuperellipse(top: top, left: left, shape: _shape, reference: reference);
   }
 
+  @override
   bool contains(Offset point) {
     _ensureCacheInitialized();
-    return _cache.basePath!.contains(point - Offset(left, top));
+    return _cache.normalizedPath!.contains(point - Offset(left, top));
   }
 
   @override
@@ -1333,39 +1341,15 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
     return _cache;
   }
 
-  void _ensureCacheInitialized() {
-    _cache.basePath ??= _RSuperellipsePathBuilder.normalized(this).path;
-  }
-
-  Path getPath([Path? basePath]) {
+  @override
+  Path toPath({Path? baseObject}) {
     _ensureCacheInitialized();
-    return (basePath ?? Path())..addPath(_cache.basePath!, Offset(left, top));
+    return (baseObject ?? Path())..addPath(_cache.normalizedPath!, Offset(left, top));
   }
 
   @override
   String toString() {
     return _toString(className: '_NativeRSuperellipse');
-  }
-
-  @override
-  RRect toApproximateRRect() {
-    // Experiments have shown that using the same corner radii for the RRect
-    // provides an approximation that is close to optimal, as achieving a perfect
-    // match is not feasible.
-    return RRect._raw(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      tlRadiusX: tlRadiusX,
-      tlRadiusY: tlRadiusY,
-      trRadiusX: trRadiusX,
-      trRadiusY: trRadiusY,
-      blRadiusX: blRadiusX,
-      blRadiusY: blRadiusY,
-      brRadiusX: brRadiusX,
-      brRadiusY: brRadiusY,
-    );
   }
 
   static _RSuperellipseCache _takeCache(RSuperellipse? reference, _RRectLikeShape targetShape) {

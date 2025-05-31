@@ -324,9 +324,10 @@ class ClipRSuperellipseOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // Instead of using paths to clip PlatformViews, fallback to RRect for a
-    // similar but much cheaper result.
-    return PlatformViewStyling(clip: PlatformViewRRectClip(rsuperellipse.toApproximateRRect()));
+    // Use RRect for an approximate effect that is good enough.
+    return PlatformViewStyling(
+      clip: PlatformViewRRectClip(ui.RSuperellipse.toApproximateRRect(rsuperellipse)),
+    );
   }
 
   @override
