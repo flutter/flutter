@@ -955,6 +955,87 @@ void main() {
       );
     });
 
+    group('CheckForLaunchRootViewControllerAccessDeprecation', () {
+      testWithoutContext('Swift Positive', () async {
+        final File file = fileSystem.file('AppDelegate.swift');
+        file.writeAsStringSync('''
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+
+    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+  }
+}
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
+        expect(
+          logger.warningText,
+          startsWith(
+            'AppDelegate.swift:6: warning: Flutter deprecation: Accessing rootViewController',
+          ),
+        );
+      });
+
+      testWithoutContext('Swift Negative', () async {
+        final File file = fileSystem.file('AppDelegate.swift');
+        file.writeAsStringSync('''
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+  }
+
+  func doIt() {
+    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+  }
+}
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
+        expect(logger.warningText, equals(''));
+      });
+
+      testWithoutContext('Objc Positive', () async {
+        final File file = fileSystem.file('AppDelegate.m');
+        file.writeAsStringSync('''
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+}
+
+@end
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+        expect(
+          logger.warningText,
+          startsWith('AppDelegate.m:6: warning: Flutter deprecation: Accessing rootViewController'),
+        );
+      });
+
+      testWithoutContext('Objc Negative', () async {
+        final File file = fileSystem.file('AppDelegate.m');
+        file.writeAsStringSync('''
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+}
+
+- (void)doIt {
+ FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+}
+
+@end
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+        expect(logger.warningText, equals(''));
+      });
+    });
+
     testWithoutContext('skips thin framework', () async {
       binary.createSync(recursive: true);
 

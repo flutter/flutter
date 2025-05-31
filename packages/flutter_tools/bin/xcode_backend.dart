@@ -128,6 +128,15 @@ class Context {
       }
       errorOutput.write(resultStderr);
       echoError(errorOutput.toString());
+
+      // Stream stderr to the Flutter build process.
+      // When in verbose mode, `echoError` above will show the logs. So only
+      // stream if not in verbose mode to avoid duplicate logs.
+      // Also, only stream if exitCode is 0 since errors are handled separately
+      // by the tool on failure.
+      if (!verbose && exitCode == 0) {
+        streamOutput(errorOutput.toString());
+      }
     }
     if (!allowFail && result.exitCode != 0) {
       throw Exception('Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}');
