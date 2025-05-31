@@ -11,6 +11,10 @@
 #include "flutter/fml/macros.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 
+#if OS_FUCHSIA
+#include <dlfcn.h>
+#endif
+
 namespace flutter::testing {
 
 inline constexpr const char* kDefaultAOTAppELFFileName = "app_elf_snapshot.so";
@@ -23,14 +27,24 @@ inline constexpr const char* kDefaultAOTAppELFFileName = "app_elf_snapshot.so";
 inline constexpr const char* kDefaultAOTAppELFSplitFileName =
     "app_elf_snapshot.so-2.part.so";
 
+#if OS_FUCHSIA
+struct HandleDeleter {
+  void operator()(void* handle) { ::dlclose(handle); }
+};
+using UniqueHandle = std::unique_ptr<void, HandleDeleter>;
+#else
 struct LoadedELFDeleter {
   void operator()(Dart_LoadedElf* elf) { ::Dart_UnloadELF(elf); }
 };
-
 using UniqueLoadedELF = std::unique_ptr<Dart_LoadedElf, LoadedELFDeleter>;
+#endif
 
 struct ELFAOTSymbols {
+#if OS_FUCHSIA
+  UniqueHandle handle;
+#else
   UniqueLoadedELF loaded_elf;
+#endif
   const uint8_t* vm_snapshot_data = nullptr;
   const uint8_t* vm_snapshot_instrs = nullptr;
   const uint8_t* vm_isolate_data = nullptr;
