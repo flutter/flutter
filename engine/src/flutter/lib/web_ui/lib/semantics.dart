@@ -612,6 +612,11 @@ enum SemanticsRole {
   radioGroup,
   status,
   alert,
+  complementary,
+  contentInfo,
+  main,
+  navigation,
+  region,
 }
 
 // Mirrors engine/src/flutter/lib/ui/semantics.dart
