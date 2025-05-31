@@ -483,10 +483,17 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   Widget build(BuildContext context) {
     final String placeholder =
         widget.placeholder ?? CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
-
+    final Color defaultPlaceholderColor = CupertinoDynamicColor.resolve(
+      CupertinoColors.secondaryLabel,
+      context,
+    );
     final TextStyle placeholderStyle =
         widget.placeholderStyle ??
-        TextStyle(color: CupertinoColors.systemGrey.withOpacity(1.0 - _fadeExtent));
+        TextStyle(
+          color: defaultPlaceholderColor.withAlpha(
+            (255 * (defaultPlaceholderColor.a * (1 - _fadeExtent))).round(),
+          ),
+        );
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
