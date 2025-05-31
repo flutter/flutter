@@ -311,8 +311,8 @@
 /dev/devicelab/bin/tasks/android_display_cutout.dart @reidbaker @flutter/android
 
 ## Host only framework tests
-# Linux docs_deploy_beta
 # Linux docs_deploy_stable
+# Linux docs_generate_release
 # Linux docs_publish
 /dev/bots/docs.sh @Piinks @flutter/framework
 # Linux packages_autoroller
