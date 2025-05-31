@@ -41,6 +41,7 @@ import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web/web_constants.dart';
+import '../web/web_device.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -378,9 +379,14 @@ class WebAssetServer implements AssetReader {
 
     // Retrieve connected web devices.
     final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-    final Set<String> connectedWebDeviceIds =
+    final Set<String> supportedWebDeviceIds =
         devices
-            ?.where((Device d) => d.platformType == PlatformType.web && d.isConnected)
+            ?.where(
+              (Device d) =>
+                  d.platformType == PlatformType.web &&
+                  d.isConnected &&
+                  d.id != WebServerDevice.kWebServerDeviceId,
+            )
             .map((Device d) => d.id)
             .toSet() ??
         <String>{};
@@ -439,8 +445,8 @@ class WebAssetServer implements AssetReader {
       // and user specified a device id that matches a connected web device.
       // If the user did not specify a device id, we use chrome as the default.
       injectDebuggingSupportCode:
-          connectedWebDeviceIds.isNotEmpty &&
-          connectedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
+          supportedWebDeviceIds.isNotEmpty &&
+          supportedWebDeviceIds.contains(globals.deviceManager?.specifiedDeviceId ?? 'chrome'),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
