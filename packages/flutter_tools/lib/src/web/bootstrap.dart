@@ -177,7 +177,7 @@ $_simpleLoaderScript
   ];
 
   // Load ddc_module_loader.js to access DDC's module loader API.
-  console.log('loading prerequisite scripts');
+  console.error('loading prerequisite scripts');
   let prerequisiteLoads = [];
   for (let i = 0; i < prerequisiteScripts.length; i++) {
     prerequisiteLoads.push(forceLoadModule(prerequisiteScripts[i].src));
@@ -196,7 +196,7 @@ $_simpleLoaderScript
   }
 
   var afterPrerequisiteLogic = function() {
-    console.log('loading after prerequisite scripts');
+    console.error('loading after prerequisite scripts');
     window.\$dartLoader.rootDirectories.push(_currentDirectory);
     let scripts = [
       {
@@ -232,7 +232,7 @@ $_simpleLoaderScript
     window.\$dartLoader.loadConfig = loadConfig;
     window.\$dartLoader.loader = loader;
 
-    console.log('starting to load sdk and main_module.bootstrap.js');
+    console.error('starting to load sdk and main_module.bootstrap.js');
     // Begin loading libraries
     loader.nextAttempt();
 
@@ -303,7 +303,7 @@ $_simpleLoaderScript
         xhttp.send();
       });
     }
-    console.log('done with initial bootstrap');
+    console.error('done with initial bootstrap');
   };
 })();
 ''';
@@ -473,7 +473,7 @@ String generateDDCLibraryBundleMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
-  console.log('executing secondary bootstrap');
+  console.error('executing secondary bootstrap');
   let appName = "org-dartlang-app:/$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
@@ -488,12 +488,12 @@ String generateDDCLibraryBundleMainModule({
   window.\$dartLoader.loadConfig.tryLoadBootstrapScript = true;
   // Should be called by $onLoadEndBootstrap once all the scripts have been
   // loaded.
-  console.log('registered onloadendbootstrap');
+  console.error('registered onloadendbootstrap');
   window.$_onLoadEndCallback = function() {
-    console.log('running onloadendcallback');
+    console.error('running onloadendcallback');
     let child = {};
     child.main = function() {
-      console.log('running child.main');
+      console.error('running child.main');
       let sdkOptions = {
         nativeNonNullAsserts: $nativeNullAssertions,
       };
@@ -507,7 +507,7 @@ String generateDDCLibraryBundleMainModule({
 }
 
 String generateDDCLibraryBundleOnLoadEndBootstrap() {
-  return '''console.log('running onloadendbootstrap');window.$_onLoadEndCallback();''';
+  return '''console.error('running onloadendbootstrap');window.$_onLoadEndCallback();''';
 }
 
 /// Generate a synthetic main module which captures the application's main

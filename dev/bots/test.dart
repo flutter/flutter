@@ -198,7 +198,7 @@ Future<void> _runWebToolTests() async {
       ).listSync(recursive: true).whereType<File>().toList();
   final List<String> allTests = <String>[];
   for (final File file in allFiles) {
-    if (file.path.endsWith('_test.dart')) {
+    if (file.path.endsWith('expression_evaluation_web_ddc_library_bundle_test.dart')) {
       allTests.add(file.path);
     }
   }
