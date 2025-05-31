@@ -17,11 +17,13 @@
 #include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
@@ -258,15 +260,33 @@ typedef struct MouseState {
 
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
                   initialRoute:(nullable NSString*)initialRoute {
-  // Need the project to get settings for the view. Initializing it here means
-  // the Engine class won't initialize it later.
-  if (!project) {
-    project = [[FlutterDartProject alloc] init];
+  id appDelegate = FlutterSharedApplication.application.delegate;
+  FlutterEngine* engine;
+  if ([appDelegate respondsToSelector:@selector(takeLaunchEngine)]) {
+    if (self.nibName) {
+      // Only grab the launch engine if it was created with a nib.
+      // FlutterViewControllers created from nibs can't specify their initial
+      // routes so it's safe to take it.
+      engine = [appDelegate takeLaunchEngine];
+    } else {
+      // If we registered plugins with a FlutterAppDelegate without a xib, throw
+      // away the engine that was registered through the FlutterAppDelegate.
+      // That's not a valid usage of the API.
+      [appDelegate takeLaunchEngine];
+    }
   }
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
-                                                      project:project
-                                       allowHeadlessExecution:self.engineAllowHeadlessExecution
-                                           restorationEnabled:self.restorationIdentifier != nil];
+  if (!engine) {
+    // Need the project to get settings for the view. Initializing it here means
+    // the Engine class won't initialize it later.
+    if (!project) {
+      project = [[FlutterDartProject alloc] init];
+    }
+
+    engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
+                                         project:project
+                          allowHeadlessExecution:self.engineAllowHeadlessExecution
+                              restorationEnabled:self.restorationIdentifier != nil];
+  }
   if (!engine) {
     return;
   }
@@ -275,7 +295,7 @@ typedef struct MouseState {
   _engine = engine;
   _flutterView = [[FlutterView alloc] initWithDelegate:_engine
                                                 opaque:_viewOpaque
-                                       enableWideGamut:project.isWideGamutEnabled];
+                                       enableWideGamut:engine.project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
   _engineNeedsLaunch = YES;
   _ongoingTouches = [[NSMutableSet alloc] init];
