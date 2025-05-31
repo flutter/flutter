@@ -1190,8 +1190,40 @@ class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
     uniformRadii: false,
   );
 
+  _RSuperellipseCache? _getCache() {
+    return null;
+  }
+
   RSuperellipse computed({RSuperellipse? reference}) {
     return _NativeRSuperellipse(top: top, left: left, shape: this, reference: reference);
+  }
+
+  bool contains(Offset point) {
+    // Use an approximate method, which should be good enough. Properly implementing
+    // a cacheable containment algorithm requires much more code and computation,
+    // which are particularly precious on Web.
+    return toApproximateRRect(this).contains(point);
+  }
+
+  Path toPath({Path? baseObject}) {
+    return _RSuperellipsePathBuilder.exact(this, top: top, left: left, baseObject: baseObject).path;
+  }
+
+  static final RSuperellipse zero = RSuperellipse._raw();
+
+  static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
+    if (a == null) {
+      if (b == null) {
+        return null;
+      }
+      return b._lerpTo(null, 1 - t);
+    }
+    return a._lerpTo(b, t);
+  }
+
+  @override
+  String toString() {
+    return _toString(className: 'RSuperellipse');
   }
 
   // Approximates a rounded superellipse with a round rectangle to the
@@ -1217,38 +1249,6 @@ class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
       brRadiusX: r.brRadiusX,
       brRadiusY: r.brRadiusY,
     );
-  }
-
-  bool contains(Offset point) {
-    // Use an approximate method, which should be good enough. Properly implementing
-    // a cacheable containment algorithm requires much more code and computation,
-    // which are particularly precious on Web.
-    return toApproximateRRect(this).contains(point);
-  }
-
-  _RSuperellipseCache? _getCache() {
-    return null;
-  }
-
-  Path toPath({Path? baseObject}) {
-    return _RSuperellipsePathBuilder.exact(this, baseObject).path;
-  }
-
-  static final RSuperellipse zero = RSuperellipse._raw();
-
-  static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
-    if (a == null) {
-      if (b == null) {
-        return null;
-      }
-      return b._lerpTo(null, 1 - t);
-    }
-    return a._lerpTo(b, t);
-  }
-
-  @override
-  String toString() {
-    return _toString(className: 'RSuperellipse');
   }
 }
 
@@ -1326,6 +1326,11 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
   }
 
   @override
+  _RSuperellipseCache? _getCache() {
+    return _cache;
+  }
+
+  @override
   RSuperellipse computed({RSuperellipse? reference}) {
     return _NativeRSuperellipse(top: top, left: left, shape: _shape, reference: reference);
   }
@@ -1334,11 +1339,6 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
   bool contains(Offset point) {
     _ensureCacheInitialized();
     return _cache.normalizedPath!.contains(point - Offset(left, top));
-  }
-
-  @override
-  _RSuperellipseCache? _getCache() {
-    return _cache;
   }
 
   @override

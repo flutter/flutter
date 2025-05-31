@@ -250,19 +250,24 @@ typedef _Transform = Offset Function(Offset);
 
 class _RSuperellipsePathBuilder {
   // Build a path for the provided RSuperellipse.
-  _RSuperellipsePathBuilder.exact(RSuperellipse r, Path? basePath) : path = basePath ?? Path() {
-    _buildPath(r, top: r.top, left: r.left);
+  _RSuperellipsePathBuilder.exact(
+    _RRectLikeShape r, {
+    required double top,
+    required double left,
+    Path? baseObject,
+  }) : path = baseObject ?? Path() {
+    _buildPath(r, top: top, left: left);
   }
 
   // Build a path for a translated version of the provided RSuperellipse, so
   // that the top left corner of the bound is placed at the origin.
-  _RSuperellipsePathBuilder.normalized(RSuperellipse r) : path = Path() {
+  _RSuperellipsePathBuilder.normalized(_RRectLikeShape r) : path = Path() {
     _buildPath(r, top: 0, left: 0);
   }
 
   final Path path;
 
-  Path _buildPath(RSuperellipse r, {required double top, required double left}) {
+  Path _buildPath(_RRectLikeShape r, {required double top, required double left}) {
     final double right = left + r.width;
     final double bottom = top + r.height;
     final double topSplit = _split(left, right, r.tlRadiusX, r.trRadiusX);
