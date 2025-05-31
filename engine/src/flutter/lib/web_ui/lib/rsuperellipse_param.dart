@@ -32,45 +32,6 @@ bool _shapeNearlyEqualTo(_RRectLikeShape a, _RRectLikeShape b) {
       ScalarNearlyEqual(a.brRadiusY, b.brRadiusY);
 }
 
-double _split(double left, double right, double ratioLeft, double ratioRight) {
-  if (ratioLeft == 0 && ratioRight == 0) {
-    return (left + right) / 2;
-  }
-  return (left * ratioRight + right * ratioLeft) / (ratioLeft + ratioRight);
-}
-
-Size _replaceNaNWithOne(Size p) {
-  return Size(p.width.isFinite ? p.width : 1, p.height.isFinite ? p.height : 1);
-}
-
-Offset _rotate(Offset p, double radians) {
-  final double cos_a = math.cos(radians);
-  final double sin_a = math.sin(radians);
-  return Offset(p.dx * cos_a - p.dy * sin_a, p.dx * sin_a + p.dy * cos_a);
-}
-
-double _angleTo(Offset a, Offset b) {
-  return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
-}
-
-typedef _Transform = Offset Function(Offset);
-
-_Transform _composite(_Transform second, _Transform first) {
-  return (Offset p) => second(first(p));
-}
-
-Offset _flip(Offset p) {
-  return Offset(p.dy, p.dx);
-}
-
-_Transform _translate(Offset offset) {
-  return (Offset p) => Offset(p.dx + offset.dx, p.dy + offset.dy);
-}
-
-_Transform _scale(Offset scale) {
-  return (Offset p) => Offset(p.dx * scale.dx, p.dy * scale.dy);
-}
-
 // An octant of an RSuperellipse, used in _RSuperellipseQuadrant.
 class _RSuperellipseOctant {
   const _RSuperellipseOctant({
@@ -207,6 +168,10 @@ class _RSuperellipseOctant {
     circleCenter: Offset.zero,
     circleMaxAngle: 0,
   );
+
+  static double _angleTo(Offset a, Offset b) {
+    return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
+  }
 }
 
 // A quadrant of an RSuperellipse, used in _RSuperellipsePathBuilder.
@@ -214,16 +179,32 @@ class _RSuperellipseQuadrant {
   const _RSuperellipseQuadrant({
     required this.offset,
     required this.signedScale,
+    required this.sign,
     required this.top,
     required this.right,
   });
 
   final Offset offset;
   final Size signedScale;
+  final Size sign;
   final _RSuperellipseOctant top;
   final _RSuperellipseOctant right;
 
-  factory _RSuperellipseQuadrant.computeQuadrant(Offset center, Offset corner, Radius inRadii) {
+  // Compute parameters for a quadrant of a rounded superellipse with asymmetrical
+  // radii.
+  //
+  // The `corner` is the coordinate of the corner point in the same coordinate
+  // space as `center`, which specifies the half size of the bounding box.
+  //
+  // The `sign` is a vector of {±1, ±1} that specifies which quadrant the curve
+  // should be, which should have the same sign as `corner - center` except that
+  // the latter may have a 0.
+  factory _RSuperellipseQuadrant.computeQuadrant(
+    Offset center,
+    Offset corner,
+    Radius inRadii,
+    Size sign,
+  ) {
     final Offset cornerVector = corner - center;
     final Size radii = Size(inRadii.x.abs(), inRadii.y.abs());
 
@@ -233,8 +214,9 @@ class _RSuperellipseQuadrant {
       cornerVector.dx.abs() / forwardScale.width,
       cornerVector.dy.abs() / forwardScale.height,
     );
-    final Size signedScale = _replaceNaNWithOne(
+    final Size signedScale = _replaceNaNWith(
       Size(cornerVector.dx / normHalfSize.width, cornerVector.dy / normHalfSize.height),
+      sign,
     );
 
     final double c = normHalfSize.width - normHalfSize.height;
@@ -242,6 +224,7 @@ class _RSuperellipseQuadrant {
     return _RSuperellipseQuadrant(
       offset: center,
       signedScale: signedScale,
+      sign: sign,
       top: _RSuperellipseOctant.computeOctant(Offset(0, -c), normHalfSize.width, normRadius),
       right: _RSuperellipseOctant.computeOctant(Offset(c, 0), normHalfSize.height, normRadius),
     );
@@ -250,10 +233,20 @@ class _RSuperellipseQuadrant {
   static const _RSuperellipseQuadrant zero = _RSuperellipseQuadrant(
     offset: Offset.zero,
     signedScale: const Size(1, 1),
+    sign: const Size(1, 1),
     top: _RSuperellipseOctant.zero,
     right: _RSuperellipseOctant.zero,
   );
+
+  static Size _replaceNaNWith(Size p, Size sign) {
+    return Size(
+      p.width.isFinite ? p.width : sign.width,
+      p.height.isFinite ? p.height : sign.height,
+    );
+  }
 }
+
+typedef _Transform = Offset Function(Offset);
 
 class _RSuperellipsePathBuilder {
   // Build a path for the provided RSuperellipse.
@@ -278,6 +271,7 @@ class _RSuperellipsePathBuilder {
       Offset(topSplit, rightSplit),
       Offset(right, top),
       r.trRadius,
+      const Size(1, -1),
     );
 
     final Offset start =
@@ -302,6 +296,7 @@ class _RSuperellipsePathBuilder {
           Offset(bottomSplit, rightSplit),
           Offset(right, bottom),
           r.brRadius,
+          const Size(1, 1),
         ),
         true,
       );
@@ -310,6 +305,7 @@ class _RSuperellipsePathBuilder {
           Offset(bottomSplit, leftSplit),
           Offset(left, bottom),
           r.blRadius,
+          const Size(-1, 1),
         ),
         false,
       );
@@ -318,6 +314,7 @@ class _RSuperellipsePathBuilder {
           Offset(topSplit, leftSplit),
           Offset(left, top),
           r.tlRadius,
+          const Size(-1, -1),
         ),
         true,
       );
@@ -460,5 +457,36 @@ class _RSuperellipsePathBuilder {
       (1 - frac) * kPrecomputedVariables[left].$1 + frac * kPrecomputedVariables[left + 1].$1,
       (1 - frac) * kPrecomputedVariables[left].$2 + frac * kPrecomputedVariables[left + 1].$2,
     );
+  }
+
+  static double _split(double left, double right, double ratioLeft, double ratioRight) {
+    if (ratioLeft == 0 && ratioRight == 0) {
+      return (left + right) / 2;
+    }
+    return (left * ratioRight + right * ratioLeft) / (ratioLeft + ratioRight);
+  }
+
+  static Offset _rotate(Offset p, double radians) {
+    final double cos_a = math.cos(radians);
+    final double sin_a = math.sin(radians);
+    return Offset(p.dx * cos_a - p.dy * sin_a, p.dx * sin_a + p.dy * cos_a);
+  }
+
+  // Compositable transforms
+
+  static _Transform _composite(_Transform second, _Transform first) {
+    return (Offset p) => second(first(p));
+  }
+
+  static Offset _flip(Offset p) {
+    return Offset(p.dy, p.dx);
+  }
+
+  static _Transform _translate(Offset offset) {
+    return (Offset p) => Offset(p.dx + offset.dx, p.dy + offset.dy);
+  }
+
+  static _Transform _scale(Offset scale) {
+    return (Offset p) => Offset(p.dx * scale.dx, p.dy * scale.dy);
   }
 }
