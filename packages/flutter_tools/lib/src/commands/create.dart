@@ -25,6 +25,7 @@ import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../templates/module/android/constants.dart' as module_constants;
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -138,6 +139,10 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'that can be created with "--sample".',
       valueHelp: 'path',
     );
+    argParser
+      ..addOption('kotlin-version', help: 'Override Kotlin plugin version')
+      ..addOption('agp-version', help: 'Override Android Gradle Plugin version')
+      ..addOption('gradle-wrapper-version', help: 'Override Gradle wrapper version');
   }
 
   @override
@@ -409,6 +414,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
+    // Get merged version settings with priority: CLI flags > pubspec.yaml > built-in defaults
+    final Map<String, String> versionSettings = _mergeVersionSettings(projectDir);
+
     final Map<String, Object?> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
@@ -431,10 +439,16 @@ class CreateCommand extends FlutterCommand with CreateBase {
       windows: includeWindows,
       dartSdkVersionBounds: '^$dartSdk',
       implementationTests: boolArg('implementation-tests'),
-      agpVersion: gradle.templateAndroidGradlePluginVersion,
-      kotlinVersion: gradle.templateKotlinGradlePluginVersion,
-      gradleVersion: gradle.templateDefaultGradleVersion,
+      agpVersion: versionSettings['agpVersion'],
+      kotlinVersion: versionSettings['kotlinVersion'],
+      gradleVersion: versionSettings['gradleWrapperVersion'],
     );
+
+    // Add template variables for Gradle templates
+    templateContext['kotlin_version'] = versionSettings['kotlinVersion'];
+    templateContext['agp_version'] = versionSettings['agpVersion'];
+    templateContext['agp_version_for_module'] = gradle.templateAndroidGradlePluginVersionForModule;
+    templateContext['gradle_wrapper'] = versionSettings['gradleWrapperVersion'];
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
     final bool creatingNewProject = !projectDir.existsSync() || projectDir.listSync().isEmpty;
@@ -913,6 +927,72 @@ Your $application code is in $relativeAppMain.
       return <String>[];
     }
     return stringsArg('platforms');
+  }
+
+  /// Parses version settings from pubspec.yaml under flutter.module section.
+  /// Returns a map with kotlinVersion, agpVersion, and gradleWrapperVersion if found.
+  Map<String, String?> _parseVersionsFromPubspec(Directory projectDir) {
+    final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
+    final FlutterManifest? manifest = FlutterManifest.createFromPath(
+      pubspecPath,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+
+    final Map<String, String?> versions = <String, String?>{
+      'kotlinVersion': null,
+      'agpVersion': null,
+      'gradleWrapperVersion': null,
+    };
+
+    if (manifest != null) {
+      final Map<String, Object?>? moduleSection =
+          manifest.flutterDescriptor['module'] as Map<String, Object?>?;
+
+      if (moduleSection != null) {
+        versions['kotlinVersion'] = moduleSection['kotlinVersion'] as String?;
+        versions['agpVersion'] = moduleSection['agpVersion'] as String?;
+        versions['gradleWrapperVersion'] = moduleSection['gradleWrapperVersion'] as String?;
+      }
+    }
+
+    return versions;
+  }
+
+  /// Merges version settings with priority: CLI flags > pubspec.yaml > built-in defaults.
+  Map<String, String> _mergeVersionSettings(Directory projectDir) {
+    final Map<String, String?> pubspecVersions = _parseVersionsFromPubspec(projectDir);
+
+    final FlutterTemplateType template = _getProjectType(projectDir);
+    final bool isModuleProject = template == FlutterTemplateType.module;
+
+    final String defaultKotlinVersion = isModuleProject
+        ? module_constants.defaultKotlinVersion
+        : gradle.templateKotlinGradlePluginVersion;
+    final String defaultAgpVersion = isModuleProject
+        ? module_constants.defaultAndroidGradlePlugin
+        : gradle.templateAndroidGradlePluginVersion;
+    final String defaultGradleWrapperVersion = isModuleProject
+        ? module_constants.defaultGradleWrapperVersion
+        : gradle.templateDefaultGradleVersion;
+
+    final String kotlinVersion = stringArg('kotlin-version') ??
+        pubspecVersions['kotlinVersion'] ??
+        defaultKotlinVersion;
+
+    final String agpVersion = stringArg('agp-version') ??
+        pubspecVersions['agpVersion'] ??
+        defaultAgpVersion;
+
+    final String gradleWrapperVersion = stringArg('gradle-wrapper-version') ??
+        pubspecVersions['gradleWrapperVersion'] ??
+        defaultGradleWrapperVersion;
+
+    return <String, String>{
+      'kotlinVersion': kotlinVersion,
+      'agpVersion': agpVersion,
+      'gradleWrapperVersion': gradleWrapperVersion,
+    };
   }
 }
 
