@@ -111,9 +111,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
-      final File appGradleBuild = getAndroidBuildFile(
-        localFileSystem.path.join(appPath, 'android', 'app'),
-      );
+      final File appGradleBuild = getAndroidBuildFile(localFileSystem.path.join(appPath));
       if (versions.compileSdkVersion != null) {
         final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
           flutterCompileSdkString,
