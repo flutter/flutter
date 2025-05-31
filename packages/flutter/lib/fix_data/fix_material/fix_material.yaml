@@ -738,6 +738,20 @@ transforms:
           field: legacyDecelerate
           inClass: Easing
 
+  # Change made in https://github.com/flutter/flutter/pull/162223
+  - title: "Migrate 'ShowValueIndicator.always' to 'ShowValueIndicator.onDrag'"
+    date: 2025-03-18
+    element:
+      uris: [ 'material.dart' ]
+      constant: 'always'
+      inEnum: 'ShowValueIndicator'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['material.dart']
+          constant: 'onDrag'
+          inEnum: 'ShowValueIndicator'
+
   # Changes made in https://github.com/flutter/flutter/pull/166382
   - title: "Migrate to 'activeThumbColor'"
     date: 2025-04-03
