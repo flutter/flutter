@@ -29,5 +29,6 @@
   "shareButtonLabel": "Jaa…",
   "clearButtonLabel": "Tyhjennä",
   "cancelButtonLabel": "Peru",
-  "backButtonLabel": "Takaisin"
+  "backButtonLabel": "Takaisin",
+  "translateButtonLabel": "Translate"
 }

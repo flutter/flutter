@@ -29,5 +29,6 @@
   "shareButtonLabel": "Chia sẻ...",
   "clearButtonLabel": "Xoá",
   "cancelButtonLabel": "Huỷ",
-  "backButtonLabel": "Quay lại"
+  "backButtonLabel": "Quay lại",
+  "translateButtonLabel": "Translate"
 }

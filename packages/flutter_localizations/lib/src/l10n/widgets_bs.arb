@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Pretraži Web",
   "shareButtonLabel": "Dijeli",
   "pasteButtonLabel": "Zalijepi",
-  "selectAllButtonLabel": "Odaberi sve"
+  "selectAllButtonLabel": "Odaberi sve",
+  "translateButtonLabel": "Translate"
 }

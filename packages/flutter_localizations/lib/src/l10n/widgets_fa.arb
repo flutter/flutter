@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "جستجو در وب",
   "shareButtonLabel": "هم‌رسانی کردن",
   "pasteButtonLabel": "جای‌گذاری",
-  "selectAllButtonLabel": "انتخاب همه"
+  "selectAllButtonLabel": "انتخاب همه",
+  "translateButtonLabel": "Translate"
 }

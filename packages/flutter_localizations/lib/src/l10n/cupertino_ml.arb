@@ -29,5 +29,6 @@
   "shareButtonLabel": "പങ്കിടുക...",
   "clearButtonLabel": "മായ്ക്കുക",
   "cancelButtonLabel": "റദ്ദാക്കുക",
-  "backButtonLabel": "മടങ്ങുക"
+  "backButtonLabel": "മടങ്ങുക",
+  "translateButtonLabel": "Translate"
 }

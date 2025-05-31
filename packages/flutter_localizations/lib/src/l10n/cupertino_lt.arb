@@ -39,5 +39,6 @@
   "shareButtonLabel": "Bendrinti...",
   "clearButtonLabel": "Išvalyti",
   "cancelButtonLabel": "Atšaukti",
-  "backButtonLabel": "Atgal"
+  "backButtonLabel": "Atgal",
+  "translateButtonLabel": "Translate"
 }

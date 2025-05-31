@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Leita á vefnum",
   "shareButtonLabel": "Deila",
   "pasteButtonLabel": "Líma",
-  "selectAllButtonLabel": "Velja allt"
+  "selectAllButtonLabel": "Velja allt",
+  "translateButtonLabel": "Translate"
 }

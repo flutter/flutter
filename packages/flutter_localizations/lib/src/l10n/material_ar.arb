@@ -157,5 +157,6 @@
   "searchWebButtonLabel": "البحث على الويب",
   "shareButtonLabel": "مشاركة",
   "clearButtonTooltip": "محو النص",
-  "selectedDateLabel": "التاريخ المحدّد"
+  "selectedDateLabel": "التاريخ المحدّد",
+  "translateButtonLabel": "Translate"
 }
