@@ -59,6 +59,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   // migrated (or deleted) one at a time instead of a single large PR.
   @override
   bool get isExplicitPackageDependenciesEnabled => true;
+
+  @override
+  bool get isMultiWindowEnabled => isEnabled(multiWindowFeature);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
