@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/dl_builder.h"
 
+#include "display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_flags.h"
