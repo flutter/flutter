@@ -31,7 +31,7 @@ class SemanticsUpdateBuilder
 
   void updateNode(
       int id,
-      int flags,
+      NativeSemanticsFlags* flags,
       int actions,
       int maxValueLength,
       int currentValueLength,
