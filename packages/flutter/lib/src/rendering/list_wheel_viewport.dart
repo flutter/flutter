@@ -13,6 +13,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
 import 'layer.dart';
+import 'matrix_4_ext.dart';
 import 'object.dart';
 import 'proxy_box.dart';
 import 'viewport.dart';
@@ -1020,7 +1021,7 @@ class RenderListWheelViewport extends RenderBox
     final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
     // Save the final transform that accounts both for the offset and cylindrical transform.
     final Matrix4 transform = _centerOriginTransform(cylindricalTransform)
-      ..translate(paintOriginOffset.dx, paintOriginOffset.dy);
+      ..translateD(paintOriginOffset.dx, paintOriginOffset.dy);
     childParentData.transform = transform;
   }
 
@@ -1028,9 +1029,9 @@ class RenderListWheelViewport extends RenderBox
   /// magnified area.
   Matrix4 _magnifyTransform() {
     final Matrix4 magnify = Matrix4.identity();
-    magnify.translate(size.width * (-_offAxisFraction + 0.5), size.height / 2);
-    magnify.scale(_magnification, _magnification, _magnification);
-    magnify.translate(-size.width * (-_offAxisFraction + 0.5), -size.height / 2);
+    magnify.translateD(size.width * (-_offAxisFraction + 0.5), size.height / 2);
+    magnify.scaleD(_magnification);
+    magnify.translateD(-size.width * (-_offAxisFraction + 0.5), -size.height / 2);
     return magnify;
   }
 
@@ -1039,12 +1040,12 @@ class RenderListWheelViewport extends RenderBox
   Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
     final Matrix4 result = Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
-    result.translate(
+    result.translateD(
       centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
       centerOriginTranslation.dy,
     );
     result.multiply(originalMatrix);
-    result.translate(
+    result.translateD(
       -centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
       -centerOriginTranslation.dy,
     );

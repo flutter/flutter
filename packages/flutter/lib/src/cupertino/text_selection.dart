@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -141,9 +142,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         return Transform(
           transform:
               Matrix4.identity()
-                ..translate(desiredSize.width / 2, desiredSize.height / 2)
+                ..translateD(desiredSize.width / 2, desiredSize.height / 2)
                 ..rotateZ(math.pi)
-                ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
+                ..translateD(-desiredSize.width / 2, -desiredSize.height / 2),
           child: handle,
         );
       // iOS should draw an invisible box so the handle can still receive gestures

@@ -25,6 +25,7 @@ import 'package:flutter/semantics.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'matrix_4_ext.dart';
 
 export 'package:flutter/foundation.dart'
     show
@@ -780,7 +781,7 @@ class PaintingContext extends ClipContext {
     final Matrix4 effectiveTransform =
         Matrix4.translationValues(offset.dx, offset.dy, 0.0)
           ..multiply(transform)
-          ..translate(-offset.dx, -offset.dy);
+          ..translateD(-offset.dx, -offset.dy);
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;

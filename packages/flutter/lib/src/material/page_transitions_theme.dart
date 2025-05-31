@@ -1261,10 +1261,10 @@ void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
   if (scale == 1.0) {
     return;
   }
-  transform.scale(scale, scale);
+  transform.scaleD(scale);
   final double dx = ((size.width * scale) - size.width) / 2;
   final double dy = ((size.height * scale) - size.height) / 2;
-  transform.translate(-dx, -dy);
+  transform.translateD(-dx, -dy);
 }
 
 mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {

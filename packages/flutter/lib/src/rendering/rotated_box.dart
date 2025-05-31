@@ -8,10 +8,11 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
 import 'layer.dart';
+import 'matrix_4_ext.dart';
 import 'object.dart';
 
 const double _kQuarterTurnsInRadians = math.pi / 2.0;
@@ -92,9 +93,9 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
       size = _isVertical ? Size(child!.size.height, child!.size.width) : child!.size;
       _paintTransform =
           Matrix4.identity()
-            ..translate(size.width / 2.0, size.height / 2.0)
+            ..translateD(size.width / 2.0, size.height / 2.0)
             ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
-            ..translate(-child!.size.width / 2.0, -child!.size.height / 2.0);
+            ..translateD(-child!.size.width / 2.0, -child!.size.height / 2.0);
     } else {
       size = constraints.smallest;
     }

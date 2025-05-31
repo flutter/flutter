@@ -52,6 +52,7 @@ export 'src/rendering/layer.dart';
 export 'src/rendering/layout_helper.dart';
 export 'src/rendering/list_body.dart';
 export 'src/rendering/list_wheel_viewport.dart';
+export 'src/rendering/matrix_4_ext.dart';
 export 'src/rendering/mouse_tracker.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';

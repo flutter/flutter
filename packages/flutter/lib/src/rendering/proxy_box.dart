@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
+import 'matrix_4_ext.dart';
 import 'object.dart';
 
 export 'package:flutter/gestures.dart'
@@ -2606,14 +2607,14 @@ class RenderTransform extends RenderProxyBox {
 
   /// Concatenates a translation by (x, y, z) into the transform.
   void translate(double x, [double y = 0.0, double z = 0.0]) {
-    _transform!.translate(x, y, z);
+    _transform!.translateD(x, y, z);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
   void scale(double x, [double? y, double? z]) {
-    _transform!.scale(x, y, z);
+    _transform!.scaleD(x, y, z);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -2625,19 +2626,19 @@ class RenderTransform extends RenderProxyBox {
     }
     final Matrix4 result = Matrix4.identity();
     if (_origin != null) {
-      result.translate(_origin!.dx, _origin!.dy);
+      result.translateD(_origin!.dx, _origin!.dy);
     }
     Offset? translation;
     if (resolvedAlignment != null) {
       translation = resolvedAlignment.alongSize(size);
-      result.translate(translation.dx, translation.dy);
+      result.translateD(translation.dx, translation.dy);
     }
     result.multiply(_transform!);
     if (resolvedAlignment != null) {
-      result.translate(-translation!.dx, -translation.dy);
+      result.translateD(-translation!.dx, -translation.dy);
     }
     if (_origin != null) {
-      result.translate(-_origin!.dx, -_origin!.dy);
+      result.translateD(-_origin!.dx, -_origin!.dy);
     }
     return result;
   }
@@ -2692,7 +2693,7 @@ class RenderTransform extends RenderProxyBox {
         final Matrix4 effectiveTransform =
             Matrix4.translationValues(offset.dx, offset.dy, 0.0)
               ..multiply(transform)
-              ..translate(-offset.dx, -offset.dy);
+              ..translateD(-offset.dx, -offset.dy);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
           effectiveTransform.storage,
           filterQuality: filterQuality!,
@@ -2911,8 +2912,8 @@ class RenderFittedBox extends RenderProxyBox {
       assert(scaleX.isFinite && scaleY.isFinite);
       _transform =
           Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
-            ..scale(scaleX, scaleY, 1.0)
-            ..translate(-sourceRect.left, -sourceRect.top);
+            ..scaleD(scaleX, scaleY, 1.0)
+            ..translateD(-sourceRect.left, -sourceRect.top);
       assert(_transform!.storage.every((double value) => value.isFinite));
     }
   }
@@ -3072,7 +3073,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(translation.dx * size.width, translation.dy * size.height);
+    transform.translateD(translation.dx * size.width, translation.dy * size.height);
   }
 
   @override

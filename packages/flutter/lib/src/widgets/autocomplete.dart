@@ -542,7 +542,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
     };
 
-    final Matrix4 transform = layoutInfo.childPaintTransform.clone()..translate(0.0, originY);
+    final Matrix4 transform = layoutInfo.childPaintTransform.clone()..translateD(0.0, originY);
     final Widget child = Builder(
       builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
     );

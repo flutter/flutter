@@ -333,7 +333,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               begin: widget.expandedTitleScale,
               end: 1.0,
             ).transform(t);
-            final Matrix4 scaleTransform = Matrix4.identity()..scale(scaleValue, scaleValue, 1.0);
+            final Matrix4 scaleTransform = Matrix4.identity()..scaleD(scaleValue, scaleValue, 1.0);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
             children.add(
               Padding(

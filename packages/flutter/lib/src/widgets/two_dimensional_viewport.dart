@@ -242,6 +242,7 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
   // Contains all children, including those that are keyed.
   Map<ChildVicinity, Element> _vicinityToChild = <ChildVicinity, Element>{};
   Map<Key, Element> _keyToChild = <Key, Element>{};
+
   // Used between _startLayout() & _endLayout() to compute the new values for
   // _vicinityToChild and _keyToChild.
   Map<ChildVicinity, Element>? _newVicinityToChild;
@@ -555,6 +556,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Typically a [ScrollPosition].
   ViewportOffset get horizontalOffset => _horizontalOffset;
   ViewportOffset _horizontalOffset;
+
   set horizontalOffset(ViewportOffset value) {
     if (_horizontalOffset == value) {
       return;
@@ -576,6 +578,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// right of the viewport.
   AxisDirection get horizontalAxisDirection => _horizontalAxisDirection;
   AxisDirection _horizontalAxisDirection;
+
   set horizontalAxisDirection(AxisDirection value) {
     if (_horizontalAxisDirection == value) {
       return;
@@ -595,6 +598,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Typically a [ScrollPosition].
   ViewportOffset get verticalOffset => _verticalOffset;
   ViewportOffset _verticalOffset;
+
   set verticalOffset(ViewportOffset value) {
     if (_verticalOffset == value) {
       return;
@@ -616,6 +620,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// bottom of the viewport.
   AxisDirection get verticalAxisDirection => _verticalAxisDirection;
   AxisDirection _verticalAxisDirection;
+
   set verticalAxisDirection(AxisDirection value) {
     if (_verticalAxisDirection == value) {
       return;
@@ -627,6 +632,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Supplies children for layout in the viewport.
   TwoDimensionalChildDelegate get delegate => _delegate;
   TwoDimensionalChildDelegate _delegate;
+
   set delegate(covariant TwoDimensionalChildDelegate value) {
     if (_delegate == value) {
       return;
@@ -656,6 +662,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///    to the [TwoDimensionalScrollView.mainAxis] and shares this value.
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
+
   set mainAxis(Axis value) {
     if (_mainAxis == value) {
       return;
@@ -668,6 +675,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   double get cacheExtent => _cacheExtent ?? RenderAbstractViewport.defaultCacheExtent;
   double? _cacheExtent;
+
   set cacheExtent(double? value) {
     if (_cacheExtent == value) {
       return;
@@ -679,6 +687,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// {@macro flutter.material.Material.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
+
   set clipBehavior(Clip value) {
     if (_clipBehavior == value) {
       return;
@@ -1736,7 +1745,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final Offset paintOffset = parentDataOf(child).paintOffset!;
-    transform.translate(paintOffset.dx, paintOffset.dy);
+    transform.translateD(paintOffset.dx, paintOffset.dy);
   }
 
   @override
@@ -1753,8 +1762,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 /// delegate lets these objects create, reuse and remove children.
 abstract class TwoDimensionalChildManager {
   void _startLayout();
+
   void _buildChild(ChildVicinity vicinity);
+
   void _reuseChild(ChildVicinity vicinity);
+
   void _endLayout();
 }
 

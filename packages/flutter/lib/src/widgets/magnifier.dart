@@ -631,11 +631,11 @@ class _RenderMagnification extends RenderProxyBox {
     final Offset thisCenter = Alignment.center.alongSize(size) + offset;
     final Matrix4 matrix =
         Matrix4.identity()
-          ..translate(
+          ..translateD(
             magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
             magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy,
           )
-          ..scale(magnificationScale);
+          ..scaleD(magnificationScale);
     final ImageFilter filter = ImageFilter.matrix(
       matrix.storage,
       filterQuality: FilterQuality.high,

@@ -30,6 +30,7 @@ import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
+import 'matrix_4_ext.dart';
 import 'object.dart';
 import 'selection.dart';
 
@@ -248,7 +249,7 @@ mixin RenderInlineChildrenContainerDefaults
     if (offset == null) {
       transform.setZero();
     } else {
-      transform.translate(offset.dx, offset.dy);
+      transform.translateD(offset.dx, offset.dy);
     }
   }
 

@@ -370,7 +370,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
-    transform.translate(childParentData.offset.dx, childParentData.offset.dy);
+    transform.translateD(childParentData.offset.dx, childParentData.offset.dy);
     super.applyPaintTransform(child, transform);
   }
 }

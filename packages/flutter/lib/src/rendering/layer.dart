@@ -18,9 +18,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector4;
 
 import 'debug.dart';
+import 'matrix_4_ext.dart';
 
 /// Information collected for an annotation that is found in the layer tree.
 ///
@@ -1491,7 +1492,7 @@ class OffsetLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     assert(child != null);
-    transform.translate(offset.dx, offset.dy);
+    transform.translateD(offset.dx, offset.dy);
   }
 
   @override
@@ -1519,7 +1520,7 @@ class OffsetLayer extends ContainerLayer {
   ui.Scene _createSceneForImage(Rect bounds, {double pixelRatio = 1.0}) {
     final ui.SceneBuilder builder = ui.SceneBuilder();
     final Matrix4 transform = Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1);
-    transform.translate(-(bounds.left + offset.dx), -(bounds.top + offset.dy));
+    transform.translateD(-(bounds.left + offset.dx), -(bounds.top + offset.dy));
     builder.pushTransform(transform.storage);
     return buildScene(builder);
   }
@@ -2578,7 +2579,7 @@ class LeaderLayer extends ContainerLayer {
   @override
   void applyTransform(Layer? child, Matrix4 transform) {
     if (offset != Offset.zero) {
-      transform.translate(offset.dx, offset.dy);
+      transform.translateD(offset.dx, offset.dy);
     }
   }
 
@@ -2826,7 +2827,7 @@ class FollowerLayer extends ContainerLayer {
     // of the leader layer, to account for the leader's additional paint offset
     // and layer offset (LeaderLayer.offset).
     leader.applyTransform(null, forwardTransform);
-    forwardTransform.translate(linkedOffset!.dx, linkedOffset!.dy);
+    forwardTransform.translateD(linkedOffset!.dx, linkedOffset!.dy);
 
     final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
 

@@ -12,10 +12,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
-
-import 'alignment.dart';
-import 'basic_types.dart';
+import 'package:flutter/rendering.dart';
 
 class _ColorsAndStops {
   _ColorsAndStops(this.colors, this.stops);
@@ -121,7 +118,7 @@ class GradientRotation extends GradientTransform {
     final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
 
     return Matrix4.identity()
-      ..translate(originX, originY)
+      ..translateD(originX, originY)
       ..rotateZ(radians);
   }
 

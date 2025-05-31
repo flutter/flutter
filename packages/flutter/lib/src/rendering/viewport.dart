@@ -19,6 +19,7 @@ import 'package:flutter/semantics.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'matrix_4_ext.dart';
 import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
@@ -2087,7 +2088,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     // Hit test logic relies on this always providing an invertible matrix.
     final Offset offset = paintOffsetOf(child as RenderSliver);
-    transform.translate(offset.dx, offset.dy);
+    transform.translateD(offset.dx, offset.dy);
   }
 
   @override
