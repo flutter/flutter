@@ -679,8 +679,8 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  GetCanvas().DrawArc(oval_bounds, start_degrees, sweep_degrees, use_center,
-                      paint_);
+  GetCanvas().DrawArc(oval_bounds, Degrees(start_degrees),
+                      Degrees(sweep_degrees), use_center, paint_);
 }
 
 // |flutter::DlOpReceiver|
