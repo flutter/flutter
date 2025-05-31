@@ -182,11 +182,7 @@ class SkwasmCanvas implements SceneCanvas {
   }
 
   @override
-  void drawRSuperellipse(
-    ui.RSuperellipse rsuperellipse,
-    ui.Paint paint, {
-    ui.RSuperellipse? maybeCache,
-  }) {
+  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     drawPath(rsuperellipse.getPath(), paint);
   }
 

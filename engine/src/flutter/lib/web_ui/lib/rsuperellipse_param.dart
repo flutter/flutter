@@ -4,19 +4,6 @@
 
 part of ui;
 
-// void _buildRSuperellipsePath(RSuperellipse target, RSuperellipse? maybeCache) {
-//   if (target._basePath != null) {
-//     return;
-//   }
-//   if (maybeCache != null &&
-//       maybeCache._basePath != null &&
-//       _shapeNearlyEqualTo(target, maybeCache, 1e-6)) {
-//     target._basePath = maybeCache._basePath;
-//   } else {
-//     target._basePath = _RSuperellipsePathBuilder().buildPath(target);
-//   }
-// }
-
 bool _shapeNearlyEqualTo(_RRectLikeShape a, _RRectLikeShape b) {
   if (identical(a, b)) {
     return true;
