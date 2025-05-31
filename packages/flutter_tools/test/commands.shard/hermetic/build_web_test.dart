@@ -425,10 +425,10 @@ void main() {
             expect(config.compileTarget, CompileTarget.js);
             final List<String> options = config.toCommandOptions(BuildMode.release);
             expect(options, <String>[
-              '--minify',
               '--native-null-assertions',
               '--no-source-maps',
               '-O4',
+              '--minify',
             ]);
           }),
     },
