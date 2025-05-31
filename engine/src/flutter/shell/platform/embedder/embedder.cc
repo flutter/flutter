@@ -2118,6 +2118,15 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
   }
 
+  flutter::PlatformViewEmbedder::ResizeViewCallback resize_view_callback =
+      nullptr;
+  if (SAFE_ACCESS(args, resize_view_callback, nullptr) != nullptr) {
+    resize_view_callback = [ptr = args->resize_view_callback, user_data](
+                               int64_t view_id, double width, double height) {
+      ptr(view_id, width, height, user_data);
+    };
+  }
+
   bool has_update_semantics_2_callback =
       SAFE_ACCESS(args, update_semantics_callback2, nullptr) != nullptr;
   bool has_update_semantics_callback =
@@ -2265,13 +2274,17 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
       {
-          update_semantics_callback,                  //
-          platform_message_response_callback,         //
-          vsync_callback,                             //
-          compute_platform_resolved_locale_callback,  //
-          on_pre_engine_restart_callback,             //
-          channel_update_callback,                    //
-          view_focus_change_request_callback,         //
+          .resize_view_callback = resize_view_callback,
+          .update_semantics_callback = update_semantics_callback,
+          .platform_message_response_callback =
+              platform_message_response_callback,
+          .vsync_callback = vsync_callback,
+          .compute_platform_resolved_locale_callback =
+              compute_platform_resolved_locale_callback,
+          .on_pre_engine_restart_callback = on_pre_engine_restart_callback,
+          .on_channel_update = channel_update_callback,
+          .view_focus_change_request_callback =
+              view_focus_change_request_callback,
       };
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(

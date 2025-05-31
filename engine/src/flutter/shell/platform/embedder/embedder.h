@@ -1725,6 +1725,11 @@ typedef void (*FlutterViewFocusChangeRequestCallback)(
     const FlutterViewFocusChangeRequest* /* request */,
     void* /* user data */);
 
+typedef void (*FlutterResizeViewCallback)(int64_t /* view ID */,
+                                          double /* physical_width */,
+                                          double /* physical_height */,
+                                          void* /* user_data */);
+
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
 
 typedef struct {
@@ -2645,6 +2650,22 @@ typedef struct {
   /// `PlatformDispatcher.instance.engineId`. Can be used in native code to
   /// retrieve the engine instance that is running the Dart code.
   int64_t engine_id;
+
+  /// Resize view callback.
+  ///
+  /// This callback is invoked by the engine when the FlutterView has requested
+  /// a change in platform-specific view dimensions, in physical pixels.
+  ///
+  /// When a Flutter application calls `FlutterView.render` with a content size
+  /// that differs from the existing view size, the new view size needs to be
+  /// communicated to the underlying platform embedder so it can resize the
+  /// Flutter view. The engine cannot access the underlying platform directly
+  /// because of threading considerations.
+  ///
+  /// Currently, this callback is only supported in embedders with a merged UI
+  /// and Platform thread. View resizing is typically only safe to implement on
+  /// the platform task runner.
+  FlutterResizeViewCallback resize_view_callback;
 } FlutterProjectArgs;
 
 typedef struct {

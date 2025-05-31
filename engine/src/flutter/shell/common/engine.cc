@@ -525,6 +525,10 @@ void Engine::Render(int64_t view_id,
   animator_->Render(view_id, std::move(layer_tree), device_pixel_ratio);
 }
 
+void Engine::ResizeView(int64_t view_id, double width, double height) {
+  delegate_.OnEngineResizeView(view_id, width, height);
+}
+
 void Engine::UpdateSemantics(int64_t view_id,
                              SemanticsNodeUpdates update,
                              CustomAccessibilityActionUpdates actions) {
