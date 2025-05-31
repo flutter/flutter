@@ -4,19 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../validators.dart';
-import '../vector_math.dart';
-import 'canvas.dart';
-import 'canvaskit_api.dart';
-import 'image.dart';
-import 'painting.dart';
-import 'path.dart';
-import 'picture.dart';
-import 'picture_recorder.dart';
-import 'text.dart';
-import 'vertices.dart';
 
 /// An implementation of [ui.Canvas] that is backed by a CanvasKit canvas.
 class CanvasKitCanvas implements ui.Canvas {
@@ -140,7 +129,7 @@ class CanvasKitCanvas implements ui.Canvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    _canvas.clipPath(path as CkPath, doAntiAlias);
+    _canvas.clipPath((path as LazyPath).builtPath as CkPath, doAntiAlias);
   }
 
   @override
@@ -264,7 +253,7 @@ class CanvasKitCanvas implements ui.Canvas {
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    _canvas.drawPath(path as CkPath, paint as CkPaint);
+    _canvas.drawPath((path as LazyPath).builtPath as CkPath, paint as CkPaint);
   }
 
   @override
@@ -436,6 +425,11 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   void _drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
-    _canvas.drawShadow(path as CkPath, color, elevation, transparentOccluder);
+    _canvas.drawShadow(
+      (path as LazyPath).builtPath as CkPath,
+      color,
+      elevation,
+      transparentOccluder,
+    );
   }
 }

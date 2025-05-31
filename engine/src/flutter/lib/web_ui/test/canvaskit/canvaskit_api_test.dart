@@ -206,23 +206,21 @@ void _pathOpTests() {
   });
 
   test('Path.combine test', () {
-    final ui.Path path1 = ui.Path();
-    expect(path1, isA<CkPath>());
+    final CkPath path1 = CkPath();
     path1.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
     path1.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
 
-    final ui.Path path2 = ui.Path();
-    expect(path2, isA<CkPath>());
+    final CkPath path2 = CkPath();
     path2.addRect(const ui.Rect.fromLTRB(5, 5, 15, 15));
     path2.addOval(const ui.Rect.fromLTRB(15, 15, 105, 105));
 
-    final ui.Path union = ui.Path.combine(ui.PathOperation.union, path1, path2);
+    final ui.Path union = CkPath.combine(ui.PathOperation.union, path1, path2);
     expect(union, isA<CkPath>());
     expect(union.getBounds(), const ui.Rect.fromLTRB(0, 0, 105, 105));
 
     // Smoke-test other operations.
     for (final ui.PathOperation operation in ui.PathOperation.values) {
-      final ui.Path combined = ui.Path.combine(operation, path1, path2);
+      final ui.Path combined = CkPath.combine(operation, path1, path2);
       expect(combined, isA<CkPath>());
     }
   });
