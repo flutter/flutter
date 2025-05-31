@@ -93,11 +93,16 @@ class JsCompilerConfig extends WebCompilerConfig {
   CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
+  ///
+  /// NOTE: MOST args should be passed here!
   List<String> toSharedCommandOptions(BuildMode buildMode) => <String>[
     if (nativeNullAssertions) '--native-null-assertions',
     if (!sourceMaps) '--no-source-maps',
     if (buildMode == BuildMode.debug) '--enable-asserts',
     '-O${optimizationLevelForBuildMode(buildMode)}',
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
+    if (csp) '--csp',
   ];
 
   @override
@@ -113,14 +118,12 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
-  /// Includes the contents of [toSharedCommandOptions].
+  /// Includes the contents of [toSharedCommandOptions]. That is where MOST
+  /// JS compiler flags should be passed!
   @override
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     ...toSharedCommandOptions(buildMode),
     if (dumpInfo) '--stage=dump-info-all',
-    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-    if (csp) '--csp',
   ];
 
   @override
