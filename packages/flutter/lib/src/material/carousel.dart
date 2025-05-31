@@ -337,7 +337,30 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
-  /// Called when the current item changes.
+  /// Called whenever the current item index changes, either due to
+  /// user scrolling or programmatic navigation.
+  ///
+  /// This callback provides the updated index of the currently item.
+  ///
+  /// It is only called when the index actually changes, not on every scroll update.
+  ///
+  /// Example:
+  /// ```dart
+  ///
+  /// CarouselView(
+  ///   onItemChanged: (index) {
+  ///     print('Current index: $index');
+  ///   },
+  ///   children: [
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///   ],
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///  * [CarouselController.currentIndex], which holds the current index.
   final ValueChanged<int>? onItemChanged;
 
   @override
@@ -490,13 +513,6 @@ class _CarouselViewState extends State<CarouselView> {
         return _buildCarouselItem(index);
       }, childCount: widget.children.length),
     );
-  }
-
-  void _handleItemChanged(int index) {
-    _controller._setIndex(index);
-    if (widget.onItemChanged != null) {
-      widget.onItemChanged!(index);
-    }
   }
 
   @override
@@ -1386,8 +1402,8 @@ class _CarouselMetrics extends FixedScrollMetrics {
 }
 
 class _CarouselPosition extends ScrollPositionWithSingleContext implements _CarouselMetrics {
-  _CarouselPosition(
-    this.onItemChanged, {
+  _CarouselPosition({
+    required this.onItemChanged,
     required super.physics,
     required super.context,
     this.initialItem = 0,
@@ -1409,7 +1425,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // for use when resizing the viewport to non-zero next time.
   double? _cachedItem;
 
-  final ValueChanged<int>? onItemChanged;
+  final ValueChanged<int> onItemChanged;
 
   @override
   bool get consumeMaxWeight => _consumeMaxWeight;
@@ -1460,9 +1476,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   @override
   void didUpdateScrollPositionBy(double delta) {
     super.didUpdateScrollPositionBy(delta);
-    if (onItemChanged == null) {
-      return;
-    }
     if (itemExtent == null && flexWeights == null) {
       // If both itemExtent and flexWeights are null, we cannot determine the
       // item index from pixels.
@@ -1472,7 +1485,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     final int newIndex = item.round();
 
     if (newIndex != _cachedItem?.round()) {
-      onItemChanged?.call(newIndex);
+      onItemChanged.call(newIndex);
       _cachedItem = item;
     }
   }
@@ -1631,11 +1644,6 @@ class CarouselController extends ScrollController {
     }
   }
 
-  // ignore: use_setters_to_change_properties
-  void _setIndex(int index) {
-    _currentIndex = index;
-  }
-
   /// Animates the controlled carousel to the given item index.
   ///
   /// For [CarouselView], this will scroll the carousel so the item at [index] becomes
@@ -1701,7 +1709,10 @@ class CarouselController extends ScrollController {
   ) {
     assert(_carouselState != null);
     return _CarouselPosition(
-      _carouselState!._handleItemChanged,
+      onItemChanged: (int index) {
+        _currentIndex = index;
+        _carouselState!.widget.onItemChanged?.call(index);
+      },
       physics: physics,
       context: context,
       initialItem: initialItem,
