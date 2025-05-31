@@ -20,6 +20,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -96,6 +97,13 @@ class FlutterPlugin : Plugin<Project> {
         rootProject.allprojects {
             repositories.maven {
                 url = uri(repository!!)
+            }
+            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
+                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
+                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
             }
         }
 
@@ -292,19 +300,23 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        rootProject.tasks.register("generateLockfiles") {
-            doLast {
-                rootProject.subprojects.forEach { subproject ->
-                    val gradlew: String =
-                        getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                    val execOps = rootProject.serviceOf<ExecOperations>()
-                    execOps.exec {
-                        workingDir(rootProject.projectDir)
-                        executable(gradlew)
-                        args(":${subproject.name}:dependencies", "--write-locks")
+        try {
+            rootProject.tasks.register("generateLockfiles") {
+                doLast {
+                    rootProject.subprojects.forEach { subproject ->
+                        val gradlew: String =
+                            getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
+                        val execOps = rootProject.serviceOf<ExecOperations>()
+                        execOps.exec {
+                            workingDir(rootProject.projectDir)
+                            executable(gradlew)
+                            args(":${subproject.name}:dependencies", "--write-locks")
+                        }
                     }
                 }
             }
+        } catch (e: TaskInstantiationException) {
+            // ignored
         }
     }
 
@@ -773,4 +785,12 @@ class FlutterPlugin : Plugin<Project> {
             return copyFlutterAssetsTask
         }
     }
+
+    /**
+     * Returns true if the Gradle task is invoked by Android Studio.
+     *
+     * This is true when the property `android.injected.invoked.from.ide` is passed to Gradle.
+     * This property is set by Android Studio when it invokes a Gradle task.
+     */
+    private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
 }
