@@ -158,7 +158,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// in the [InputDecoration.prefixIcon] and [InputDecoration.suffixIcon].
   ///
   /// Except leading and trailing icons, the text field can be configured by the
-  /// [InputDecorationTheme] property. The menu can be configured by the [menuStyle].
+  /// [inputDecorationTheme] property. The menu can be configured by the [menuStyle].
   const DropdownMenu({
     super.key,
     this.enabled = true,
@@ -1087,7 +1087,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
                     : null,
             suffixIcon: widget.showTrailingIcon ? trailingButton : null,
-          ).applyDefaults(effectiveInputDecorationTheme),
+          ).applyDefaults(effectiveInputDecorationTheme.data),
           restorationId: widget.restorationId,
         );
 

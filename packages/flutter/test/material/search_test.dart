@@ -1087,7 +1087,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme.data);
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
@@ -1468,7 +1468,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return theme.copyWith(
       inputDecorationTheme:
           searchFieldDecorationTheme ??
-          InputDecorationTheme(
+          InputDecorationThemeData(
             hintStyle: searchFieldStyle ?? const TextStyle(color: hintTextColor),
           ),
     );

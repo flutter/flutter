@@ -1163,7 +1163,7 @@ void main() {
       });
     });
 
-    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('Input decoration theme is honored', (WidgetTester tester) async {
       // Given a custom paint for an input decoration, extract the border and
       // fill color and test them against the expected values.
       void testInputDecorator(
@@ -1189,7 +1189,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationThemeData(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
@@ -1513,7 +1513,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationThemeData(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
