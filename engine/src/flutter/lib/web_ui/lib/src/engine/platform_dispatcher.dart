@@ -1220,6 +1220,50 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
+  @override
+  ui.SemanticsEventCallback? get onSemanticsEvent => _onSemanticsEvent;
+  ui.SemanticsEventCallback? _onSemanticsEvent;
+  Zone _onSemanticsEventZone = Zone.root;
+  @override
+  set onSemanticsEvent(ui.SemanticsEventCallback? callback) {
+    printWarning(
+      '[DEBUG] Web PlatformDispatcher.onSemanticsEvent setter called - callback: ${callback != null ? 'NOT NULL' : 'NULL'}',
+    );
+    _onSemanticsEvent = callback;
+    _onSemanticsEventZone = Zone.current;
+  }
+
+  /// Engine code should use this method to invoke semantic events.
+  /// Otherwise zones won't work properly.
+  void invokeOnSemanticsEvent(String type, Map<String, dynamic> data, {int? nodeId}) {
+    printWarning(
+      '[DEBUG] Web PlatformDispatcher.invokeOnSemanticsEvent called - Type: $type, NodeId: $nodeId, Data: $data',
+    );
+    printWarning(
+      '[DEBUG] _onSemanticsEvent callback is: ${_onSemanticsEvent != null ? 'SET' : 'NULL'}',
+    );
+
+    void sendEventToFramework() {
+      printWarning('[DEBUG] About to invoke SemanticsEvent callback with type: $type');
+      invoke1<ui.SemanticsEvent>(
+        _onSemanticsEvent,
+        _onSemanticsEventZone,
+        ui.SemanticsEvent(type: type, data: data, nodeId: nodeId),
+      );
+      printWarning('[DEBUG] SemanticsEvent callback invoked successfully');
+    }
+
+    // Semantic events should not be sent to the framework while the framework
+    // is rendering a frame, similar to semantic actions.
+    if (FrameService.instance.isRenderingFrame) {
+      printWarning('[DEBUG] Framework is rendering, scheduling event for later');
+      Timer.run(sendEventToFramework);
+    } else {
+      printWarning('[DEBUG] Framework not rendering, sending event immediately');
+      sendEventToFramework();
+    }
+  }
+
   // TODO(dnfield): make this work on web.
   // https://github.com/flutter/flutter/issues/100277
   ui.ErrorCallback? _onError;

@@ -395,6 +395,166 @@ void testMain() {
       expect(beginFrameCalled, true);
       expect(drawFrameCalled.isCompleted, true);
     });
+
+    group('SemanticsEvent', () {
+      test('onSemanticsEvent getter returns null initially', () {
+        expect(dispatcher.onSemanticsEvent, isNull);
+      });
+
+      test('onSemanticsEvent setter stores callback', () {
+        ui.SemanticsEvent? receivedEvent;
+
+        void callback(ui.SemanticsEvent event) {
+          receivedEvent = event;
+        }
+
+        dispatcher.onSemanticsEvent = callback;
+        expect(dispatcher.onSemanticsEvent, equals(callback));
+      });
+
+      test('onSemanticsEvent setter accepts null', () {
+        void callback(ui.SemanticsEvent event) {}
+
+        dispatcher.onSemanticsEvent = callback;
+        expect(dispatcher.onSemanticsEvent, isNotNull);
+
+        dispatcher.onSemanticsEvent = null;
+        expect(dispatcher.onSemanticsEvent, isNull);
+      });
+
+      test('invokeOnSemanticsEvent calls callback when set', () {
+        ui.SemanticsEvent? receivedEvent;
+
+        void callback(ui.SemanticsEvent event) {
+          receivedEvent = event;
+        }
+
+        dispatcher.onSemanticsEvent = callback;
+
+        dispatcher.invokeOnSemanticsEvent('focus', <String, dynamic>{'test': true}, nodeId: 123);
+
+        expect(receivedEvent, isNotNull);
+        expect(receivedEvent!.type, equals('focus'));
+        expect(receivedEvent!.nodeId, equals(123));
+        expect(receivedEvent!.data['test'], isTrue);
+      });
+
+      test('invokeOnSemanticsEvent handles null callback gracefully', () {
+        dispatcher.onSemanticsEvent = null;
+
+        // Should not throw
+        expect(() {
+          dispatcher.invokeOnSemanticsEvent('focus', <String, dynamic>{'test': true}, nodeId: 123);
+        }, returnsNormally);
+      });
+
+      test('invokeOnSemanticsEvent handles nodeId parameter correctly', () {
+        ui.SemanticsEvent? receivedEvent;
+
+        void callback(ui.SemanticsEvent event) {
+          receivedEvent = event;
+        }
+
+        dispatcher.onSemanticsEvent = callback;
+
+        // Test with nodeId
+        dispatcher.invokeOnSemanticsEvent('focus', <String, dynamic>{'test': true}, nodeId: 456);
+
+        expect(receivedEvent!.nodeId, equals(456));
+
+        // Test without nodeId
+        dispatcher.invokeOnSemanticsEvent('announce', <String, dynamic>{'message': 'Hello'});
+
+        expect(receivedEvent!.nodeId, isNull);
+        expect(receivedEvent!.type, equals('announce'));
+      });
+
+      test('invokeOnSemanticsEvent preserves zone context', () {
+        Zone? callbackZone;
+        Zone? currentZone;
+
+        void callback(ui.SemanticsEvent event) {
+          callbackZone = Zone.current;
+        }
+
+        runZoned(() {
+          currentZone = Zone.current;
+          dispatcher.onSemanticsEvent = callback;
+        });
+
+        // Invoke from a different zone
+        runZoned(() {
+          dispatcher.invokeOnSemanticsEvent('focus', <String, dynamic>{});
+        });
+
+        expect(callbackZone, equals(currentZone));
+      });
+
+      test('invokeOnSemanticsEvent handles complex data structures', () {
+        ui.SemanticsEvent? receivedEvent;
+
+        void callback(ui.SemanticsEvent event) {
+          receivedEvent = event;
+        }
+
+        dispatcher.onSemanticsEvent = callback;
+
+        final complexData = <String, dynamic>{
+          'nested': <String, dynamic>{'key': 'value', 'number': 42},
+          'list': <int>[1, 2, 3],
+          'bool': true,
+        };
+
+        dispatcher.invokeOnSemanticsEvent('focus', complexData, nodeId: 789);
+
+        expect(receivedEvent!.data['nested']['key'], equals('value'));
+        expect(receivedEvent!.data['nested']['number'], equals(42));
+        expect(receivedEvent!.data['list'], equals(<int>[1, 2, 3]));
+        expect(receivedEvent!.data['bool'], isTrue);
+      });
+
+      test('multiple callbacks can be set sequentially', () {
+        final List<ui.SemanticsEvent> events1 = <ui.SemanticsEvent>[];
+        final List<ui.SemanticsEvent> events2 = <ui.SemanticsEvent>[];
+
+        void callback1(ui.SemanticsEvent event) {
+          events1.add(event);
+        }
+
+        void callback2(ui.SemanticsEvent event) {
+          events2.add(event);
+        }
+
+        // Set first callback
+        dispatcher.onSemanticsEvent = callback1;
+        dispatcher.invokeOnSemanticsEvent('focus', <String, dynamic>{});
+
+        expect(events1, hasLength(1));
+        expect(events2, isEmpty);
+
+        // Set second callback
+        dispatcher.onSemanticsEvent = callback2;
+        dispatcher.invokeOnSemanticsEvent('announce', <String, dynamic>{});
+
+        expect(events1, hasLength(1)); // No new events
+        expect(events2, hasLength(1)); // New event
+      });
+
+      test('invokeOnSemanticsEvent handles empty data', () {
+        ui.SemanticsEvent? receivedEvent;
+
+        void callback(ui.SemanticsEvent event) {
+          receivedEvent = event;
+        }
+
+        dispatcher.onSemanticsEvent = callback;
+
+        dispatcher.invokeOnSemanticsEvent('focus', <String, dynamic>{});
+
+        expect(receivedEvent!.data, isEmpty);
+        expect(receivedEvent!.type, equals('focus'));
+      });
+    });
     // https://github.com/flutter/flutter/issues/160096
   }, skip: ui_web.browser.isFirefox);
 }
