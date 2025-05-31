@@ -15,8 +15,8 @@ import 'basic_types.dart';
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [
-/// Alignment] and its variants, or [AlignmentDirectional.new].
+/// A property or argument of this type accepts classes created either with
+/// [Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
@@ -31,6 +31,69 @@ abstract class AlignmentGeometry {
 
   /// Creates a directional alignment, or [AlignmentDirectional].
   const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
+
+  /// The top left corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topLeft], which is the same thing.
+  static const AlignmentGeometry topLeft = Alignment.topLeft;
+
+  /// The center point along the top edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topCenter], which is the same thing.
+  static const AlignmentGeometry topCenter = Alignment.topCenter;
+
+  /// The top right corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topRight], which is the same thing.
+  static const AlignmentGeometry topRight = Alignment.topRight;
+
+  /// The center point along the left edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.centerLeft], which is the same thing.
+  static const AlignmentGeometry centerLeft = Alignment.centerLeft;
+
+  /// The center point, both horizontally and vertically.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.center], which is the same thing.
+  static const AlignmentGeometry center = Alignment.center;
+
+  /// The center point along the right edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.centerRight], which is the same thing.
+  static const AlignmentGeometry centerRight = Alignment.centerRight;
+
+  /// The bottom left corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomLeft], which is the same thing.
+  static const AlignmentGeometry bottomLeft = Alignment.bottomLeft;
+
+  /// The center point along the bottom edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomCenter], which is the same thing.
+  static const AlignmentGeometry bottomCenter = Alignment.bottomCenter;
+
+  /// The bottom right corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomRight], which is the same thing.
+  static const AlignmentGeometry bottomRight = Alignment.bottomRight;
 
   double get _x;
 
