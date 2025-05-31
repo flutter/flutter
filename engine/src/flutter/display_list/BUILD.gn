@@ -280,36 +280,38 @@ if (enable_unittests) {
   }
 }
 
-source_set("display_list_benchmarks_source") {
-  testonly = true
+if (enable_unittests) {
+  source_set("display_list_benchmarks_source") {
+    testonly = true
 
-  sources = [
-    "benchmarking/dl_benchmarks.cc",
-    "benchmarking/dl_benchmarks.h",
-  ]
+    sources = [
+      "benchmarking/dl_benchmarks.cc",
+      "benchmarking/dl_benchmarks.h",
+    ]
 
-  deps = [
-    ":display_list",
-    ":display_list_fixtures",
-    "$dart_src/runtime:libdart_jit",  # for tracing
-    "//flutter/benchmarking",
-    "//flutter/common/graphics",
-    "//flutter/display_list/testing:display_list_surface_provider",
-    "//flutter/display_list/testing:display_list_testing",
-    "//flutter/fml",
-    "//flutter/skia",
-    "//flutter/testing:skia",
-    "//flutter/testing:testing_lib",
-  ]
+    deps = [
+      ":display_list",
+      ":display_list_fixtures",
+      "$dart_src/runtime:libdart_jit",  # for tracing
+      "//flutter/benchmarking",
+      "//flutter/common/graphics",
+      "//flutter/display_list/testing:display_list_surface_provider",
+      "//flutter/display_list/testing:display_list_testing",
+      "//flutter/fml",
+      "//flutter/skia",
+      "//flutter/testing:skia",
+      "//flutter/testing:testing_lib",
+    ]
+  }
+
+  executable("display_list_benchmarks") {
+    testonly = true
+
+    deps = [ ":display_list_benchmarks_source" ]
+  }
 }
 
-executable("display_list_benchmarks") {
-  testonly = true
-
-  deps = [ ":display_list_benchmarks_source" ]
-}
-
-if (is_ios) {
+if (is_ios && enable_unittests) {
   shared_library("ios_display_list_benchmarks") {
     testonly = true
     visibility = [ ":*" ]
