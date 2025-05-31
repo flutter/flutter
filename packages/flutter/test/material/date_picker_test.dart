@@ -157,7 +157,7 @@ void main() {
       }
 
       const Size calendarLandscapeDialogSize = Size(496.0, 346.0);
-      const Size calendarPortraitDialogSizeM3 = Size(328.0, 512.0);
+      const Size calendarPortraitDialogSizeM3 = Size(360.0, 568.0);
 
       // Test landscape layout.
       await showPicker(tester, wideWindowSize);
@@ -1788,6 +1788,20 @@ void main() {
         );
       });
       semantics.dispose();
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/158325.
+    testWidgets('Calendar mode respects tap target guidelines in portrait orientation', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+
+      await prepareDatePicker(tester, useMaterial3: true, (Future<DateTime?> date) async {
+        expect(find.byType(DatePickerDialog), findsOneWidget);
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      });
     });
 
     testWidgets('input mode', (WidgetTester tester) async {
