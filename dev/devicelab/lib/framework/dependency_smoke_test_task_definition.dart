@@ -130,7 +130,8 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
       // Modify gradle version to passed in version.
       final File gradleWrapperProperties = localFileSystem.file(
-        localFileSystem.path.join(appPath,
+        localFileSystem.path.join(
+          appPath,
           'android',
           'gradle',
           'wrapper',
