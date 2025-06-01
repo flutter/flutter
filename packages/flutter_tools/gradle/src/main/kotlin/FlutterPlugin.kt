@@ -153,7 +153,12 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
                 if (!buildType.isDebuggable) {
                     buildType.ndk.abiFilters.clear()
-                    buildType.ndk.abiFilters.addAll(setOf("arm64-v8a", "x86_64", "armeabi-v7a"))
+                    FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
+                        val abiValue: String =
+                            FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                                ?: throw GradleException("Invalid platform: $platform")
+                        buildType.ndk.abiFilters.add(abiValue)
+                    })
                 }
             }
         }
