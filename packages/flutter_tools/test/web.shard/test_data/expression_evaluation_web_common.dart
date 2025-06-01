@@ -229,8 +229,6 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         return end != -1;
       });
     });
-
-    throw 'done'; // Always throw so we can retry test in CI.
   });
 }
 
