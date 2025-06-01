@@ -789,7 +789,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       final WebDevFS webDevFS = device!.devFS! as WebDevFS;
       final bool useDebugExtension =
           device!.device is WebServerDevice && debuggingOptions.startPaused;
+      _logger.printStatus('webdevfs.connect');
       _connectionResult = await webDevFS.connect(useDebugExtension);
+      _logger.printStatus('webdevfs.connected');
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event) {
@@ -814,6 +816,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           );
         }
       }
+      _logger.printStatus('set startpaused');
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
       _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
@@ -842,6 +845,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
+      _logger.printStatus('setting up vmservice 2');
       await setUpVmService(
         reloadSources: (String isolateId, {bool? force, bool? pause}) async {
           await restart(pause: pause);

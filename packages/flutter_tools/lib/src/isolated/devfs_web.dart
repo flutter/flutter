@@ -447,6 +447,7 @@ class WebAssetServer implements AssetReader {
       pipeline = pipeline.addMiddleware(middleware);
       pipeline = pipeline.addMiddleware(dwds.middleware);
     }
+    globals.printTrace('Added middleware');
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(
@@ -459,6 +460,7 @@ class WebAssetServer implements AssetReader {
     );
     server.dwds = dwds;
     server._dwdsInit = true;
+    globals.printTrace('Done starting webserver');
     return server;
   }
 
@@ -930,15 +932,20 @@ class WebDevFS implements DevFS {
     bool foundFirstConnection = false;
     _connectedApps = dwds.connectedApps.listen(
       (AppConnection appConnection) async {
+        globals.printTrace('listening to connectedApps');
         try {
           final DebugConnection debugConnection =
               useDebugExtension
                   ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
                   : await dwds.debugConnection(appConnection);
+          globals.printTrace('awaited debug connected, useDebugExtension: $useDebugExtension');
           if (foundFirstConnection) {
+            globals.printTrace('running main!');
             appConnection.runMain();
+            globals.printTrace('ran main!');
           } else {
             foundFirstConnection = true;
+            globals.printTrace('second connection');
             final vm_service.VmService vmService = await vmServiceFactory(
               Uri.parse(debugConnection.uri),
               logger: globals.logger,
