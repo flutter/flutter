@@ -129,12 +129,6 @@ FLUTTER_EXPORT
 FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd);
 
 FLUTTER_EXPORT
-int64_t FlutterGetWindowState(HWND hwnd);
-
-FLUTTER_EXPORT
-void FlutterSetWindowState(HWND hwnd, int64_t state);
-
-FLUTTER_EXPORT
 void FlutterSetWindowContentSize(HWND hwnd,
                                  const flutter::FlutterWindowSizing* size);
 }

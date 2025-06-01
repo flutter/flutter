@@ -119,36 +119,6 @@ TEST_F(FlutterHostWindowControllerTest, GetWindowSize) {
   EXPECT_EQ(size.height, creation_request()->content_size.height);
 }
 
-TEST_F(FlutterHostWindowControllerTest, GetWindowState) {
-  IsolateScope isolate_scope(isolate());
-
-  const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
-  const HWND window_handle = FlutterGetWindowHandle(engine_id(), view_id);
-  const int64_t window_state = FlutterGetWindowState(window_handle);
-  EXPECT_EQ(window_state, static_cast<int64_t>(WindowState::kRestored));
-}
-
-TEST_F(FlutterHostWindowControllerTest, SetWindowState) {
-  IsolateScope isolate_scope(isolate());
-
-  const int64_t view_id =
-      FlutterCreateRegularWindow(engine_id(), creation_request());
-  const HWND window_handle = FlutterGetWindowHandle(engine_id(), view_id);
-
-  const std::array kWindowStates = {
-      static_cast<int64_t>(WindowState::kRestored),
-      static_cast<int64_t>(WindowState::kMaximized),
-      static_cast<int64_t>(WindowState::kMinimized),
-  };
-
-  for (const auto requested_state : kWindowStates) {
-    FlutterSetWindowState(window_handle, requested_state);
-    const int64_t actual_state = FlutterGetWindowState(window_handle);
-    EXPECT_EQ(actual_state, requested_state);
-  }
-}
-
 TEST_F(FlutterHostWindowControllerTest, SetWindowSize) {
   IsolateScope isolate_scope(isolate());
 

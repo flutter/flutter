@@ -72,10 +72,28 @@ FLUTTER_DARWIN_EXPORT
 void FlutterSetWindowTitle(void* window, const char* title);
 
 FLUTTER_DARWIN_EXPORT
-int64_t FlutterGetWindowState(void* window);
+void FlutterWindowSetMaximized(void* window, bool maximized);
 
 FLUTTER_DARWIN_EXPORT
-void FlutterSetWindowState(void* window, int64_t state);
+bool FlutterWindowIsMaximized(void* window);
+
+FLUTTER_DARWIN_EXPORT
+void FlutterWindowMinimize(void* window);
+
+FLUTTER_DARWIN_EXPORT
+void FlutterWindowUnminimize(void* window);
+
+FLUTTER_DARWIN_EXPORT
+bool FlutterWindowIsMinimized(void* window);
+
+FLUTTER_DARWIN_EXPORT
+void FlutterWindowSetFullScreen(void* window, bool fullScreen);
+
+FLUTTER_DARWIN_EXPORT
+bool FlutterWindowIsFullScreen(void* window);
+
+FLUTTER_DARWIN_EXPORT
+void FlutterWindowActivate(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

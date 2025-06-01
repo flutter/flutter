@@ -159,30 +159,6 @@ FlutterWindowSize FlutterGetWindowContentSize(HWND hwnd) {
   };
 }
 
-int64_t FlutterGetWindowState(HWND hwnd) {
-  if (IsIconic(hwnd)) {
-    return static_cast<int64_t>(flutter::WindowState::kMinimized);
-  } else if (IsZoomed(hwnd)) {
-    return static_cast<int64_t>(flutter::WindowState::kMaximized);
-  } else {
-    return static_cast<int64_t>(flutter::WindowState::kRestored);
-  }
-}
-
-void FlutterSetWindowState(HWND hwnd, int64_t state) {
-  switch (static_cast<flutter::WindowState>(state)) {
-    case flutter::WindowState::kRestored:
-      ShowWindow(hwnd, SW_RESTORE);
-      break;
-    case flutter::WindowState::kMaximized:
-      ShowWindow(hwnd, SW_MAXIMIZE);
-      break;
-    case flutter::WindowState::kMinimized:
-      ShowWindow(hwnd, SW_MINIMIZE);
-      break;
-  }
-}
-
 void FlutterSetWindowContentSize(HWND hwnd,
                                  const flutter::FlutterWindowSizing* size) {
   flutter::FlutterHostWindow* window =
