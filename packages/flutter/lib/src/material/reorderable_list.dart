@@ -148,8 +148,8 @@ class ReorderableListView extends StatefulWidget {
   /// {@end-tool}
   /// See also:
   ///
-  ///   * [ReorderableListView], which allows one to build a reorderable
-  ///     list with all the items passed into the constructor.
+  ///   * [ReorderableListView], which builds a reorderable list with all the
+  ///     items passed into the constructor.
   const ReorderableListView.builder({
     super.key,
     required this.itemBuilder,
@@ -196,6 +196,10 @@ class ReorderableListView extends StatefulWidget {
   /// This constructor is appropriate for list views with a large number of
   /// item and separator children because the builders are called only for
   /// the children that are actually visible.
+  ///
+  /// When using this constructor, the list alternates between items and separators:
+  /// - Items are at even indices (0, 2, 4, ...)
+  /// - Separators are at odd indices (1, 3, 5, ...)
   ///
   /// The `itemBuilder` callback will be called with indices greater than
   /// or equal to zero and less than `itemCount` (the number of actual items).
@@ -268,14 +272,16 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
 
-  /// {@macro flutter.widgets.reorderable_list.itemCount}
   /// The number of data items in the list.
   ///
-  /// This is the number of data items in the list, not the number of children.
+  /// If this widget is a [ReorderableListView.separated], this is the number
+  /// of data items in the list, not the number of children.
   /// For example, if there is a list with 10 items and 9 separators, this will be 10.
+  ///
+  /// This value must be a non-negative integer. When zero, nothing is displayed and
+  /// the widget occupies no space.
   final int itemCount;
 
-  /// {@macro flutter.widgets.reorderable_list.childCount}
   /// When using the [ReorderableListView.separated] constructor, this is the total
   /// number of children in the list, including items and separators.
   /// When using [ReorderableListView] or the [ReorderableListView.builder] constructor, this is the number of items
@@ -377,15 +383,15 @@ class ReorderableListView extends StatefulWidget {
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.list_view.itemExtent}
-  /// This is not used by the [ReorderableListView.separated] constructor.
+  /// Null if this is a [ReorderableListView.separated].
   final double? itemExtent;
 
   /// {@macro flutter.widgets.list_view.itemExtentBuilder}
-  /// This is not used by the [ReorderableListView.separated] constructor.
+  /// Null if this is a [ReorderableListView.separated].
   final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
-  /// This is not used by the [ReorderableListView.separated] constructor.
+  /// Null if this is a [ReorderableListView.separated].
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
@@ -408,7 +414,7 @@ class ReorderableListView extends StatefulWidget {
   ///  hovering, and [SystemMouseCursors.grabbing] when dragging.
   final MouseCursor? mouseCursor;
 
-  /// The builder for separator widgets when using the [ReorderableListView.separated] constructor.
+  /// The builder for separator widgets if this is a [ReorderableListView.separated].
   ///
   /// This callback is used to build the separator widgets that appear between items.
   /// It is called with indices from 0 to [itemCount] - 2.
