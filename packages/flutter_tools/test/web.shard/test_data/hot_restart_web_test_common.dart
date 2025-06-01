@@ -84,6 +84,10 @@ Future<void> _testProject(
     tryToDelete(tempDir);
   });
 
+  tearDownAll(() {
+    throw 'done'; // Used to retry tests if the flake passes without uploading a new change.
+  });
+
   testWithoutContext('$testName: hot restart works without error', () async {
     flutter.stdout.listen(printOnFailure);
     await flutter.run(
