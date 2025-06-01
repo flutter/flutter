@@ -46,13 +46,13 @@ void main() {
     final List<File> apkFiles = apkOutputDir
         .listSync()
         .whereType<File>()
-        .where((File f) => f.path.endsWith('.apk'))
+        .where((File f) => RegExp(r'app-.*-debug\.apk$').hasMatch(f.uri.pathSegments.last))
         .toList();
 
     expect(apkFiles.length, 4,
         reason:
-            "Expected 4 ABI-specific debug APKs (armeabi-v7a, arm64-v8a, x86, x86_64); "
-            "found ${apkFiles.map((f) => f.path).join(', ')}");
+            'Expected 4 ABI-specific debug APKs (armeabi-v7a, arm64-v8a, x86, x86_64); '
+            'found ${apkFiles.map((File f) => f.path).join(", ")}');
 
     // ABI→index mapping (as in FlutterPluginConstants.ABI_VERSION):
     final Map<String, int> abiIndexMap = <String, int>{
