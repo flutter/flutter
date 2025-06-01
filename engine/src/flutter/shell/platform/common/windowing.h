@@ -14,17 +14,6 @@ enum class WindowArchetype {
   kRegular,
 };
 
-// Possible states a window can be in.
-// The values must match values from WindowState in the Dart code.
-enum class WindowState {
-  // Normal state, neither maximized, nor minimized.
-  kRestored,
-  // Maximized, occupying the full screen but still showing the system UI.
-  kMaximized,
-  // Minimized and not visible on the screen.
-  kMinimized,
-};
-
 }  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_COMMON_WINDOWING_H_
