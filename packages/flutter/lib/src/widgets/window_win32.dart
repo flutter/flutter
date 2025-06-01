@@ -127,19 +127,6 @@ class RegularWindowControllerWin32 extends RegularWindowController
   }
 
   @override
-  WindowState get state {
-    _ensureNotDestroyed();
-    final int state = _getWindowState(getWindowHandle());
-    return WindowState.values[state];
-  }
-
-  @override
-  void setState(WindowState state) {
-    _ensureNotDestroyed();
-    _setWindowState(getWindowHandle(), state.index);
-  }
-
-  @override
   void setTitle(String title) {
     _ensureNotDestroyed();
     final Pointer<ffi.Utf16> titlePointer = title.toNativeUtf16();
@@ -154,6 +141,52 @@ class RegularWindowControllerWin32 extends RegularWindowController
     ffiSizing.ref.set(sizing);
     _setWindowContentSize(getWindowHandle(), ffiSizing);
     ffi.calloc.free(ffiSizing);
+  }
+
+  @override
+  void activate() {
+    _ensureNotDestroyed();
+    _showWindow(getWindowHandle(), SW_RESTORE);
+  }
+
+  @override
+  bool isFullscreen() {
+    return false;
+  }
+
+  @override
+  void setFullscreen(bool fullscreen, {int? displayId}) {}
+
+  @override
+  bool isMaximized() {
+    _ensureNotDestroyed();
+    return _isZoomed(getWindowHandle()) != 0;
+  }
+
+  @override
+  bool isMinimized() {
+    _ensureNotDestroyed();
+    return _isIconic(getWindowHandle()) != 0;
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    _ensureNotDestroyed();
+    if (minimized) {
+      _showWindow(getWindowHandle(), SW_MINIMIZE);
+    } else {
+      _showWindow(getWindowHandle(), SW_RESTORE);
+    }
+  }
+
+  @override
+  void setMaximized(bool maximized) {
+    _ensureNotDestroyed();
+    if (maximized) {
+      _showWindow(getWindowHandle(), SW_MAXIMIZE);
+    } else {
+      _showWindow(getWindowHandle(), SW_RESTORE);
+    }
   }
 
   /// Returns HWND pointer to the top level window.
@@ -184,6 +217,10 @@ class RegularWindowControllerWin32 extends RegularWindowController
 
   static const int _WM_SIZE = 0x0005;
   static const int _WM_CLOSE = 0x0010;
+
+  static const int SW_RESTORE = 9;
+  static const int SW_MAXIMIZE = 3;
+  static const int SW_MINIMIZE = 6;
 
   @override
   int? handleWindowsMessage(
@@ -222,17 +259,20 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @Native<_Size Function(Pointer<Void>)>(symbol: 'FlutterGetWindowContentSize')
   external static _Size _getWindowContentSize(Pointer<Void> windowHandle);
 
-  @Native<Int64 Function(Pointer<Void>)>(symbol: 'FlutterGetWindowState')
-  external static int _getWindowState(Pointer<Void> windowHandle);
-
-  @Native<Void Function(Pointer<Void>, Int64)>(symbol: 'FlutterSetWindowState')
-  external static void _setWindowState(Pointer<Void> windowHandle, int state);
-
   @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf16>)>(symbol: 'SetWindowTextW')
   external static void _setWindowTitle(Pointer<Void> windowHandle, Pointer<ffi.Utf16> title);
 
   @Native<Void Function(Pointer<Void>, Pointer<_Sizing>)>(symbol: 'FlutterSetWindowContentSize')
   external static void _setWindowContentSize(Pointer<Void> windowHandle, Pointer<_Sizing> size);
+
+  @Native<Void Function(Pointer<Void>, Int32)>(symbol: 'ShowWindow')
+  external static void _showWindow(Pointer<Void> windowHandle, int command);
+
+  @Native<Int32 Function(Pointer<Void>)>(symbol: 'IsIconic')
+  external static int _isIconic(Pointer<Void> windowHandle);
+
+  @Native<Int32 Function(Pointer<Void>)>(symbol: 'IsZoomed')
+  external static int _isZoomed(Pointer<Void> windowHandle);
 }
 
 /// Request to initialize windowing system.

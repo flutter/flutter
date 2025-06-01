@@ -80,6 +80,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
   /// Returns window handle for the current window.
   /// The handle is a pointer to NSWindow instance.
   Pointer<Void> getWindowHandle() {
+    _ensureNotDestroyed();
     return WindowingOwnerMacOS.getWindowHandle(rootView);
   }
 
@@ -90,9 +91,10 @@ class RegularWindowControllerMacOS extends RegularWindowController {
     if (_destroyed) {
       return;
     }
+    final Pointer<Void> handle = getWindowHandle();
     _destroyed = true;
     _owner._activeControllers.remove(this);
-    _destroyWindow(PlatformDispatcher.instance.engineId!, getWindowHandle());
+    _destroyWindow(PlatformDispatcher.instance.engineId!, handle);
     _delegate.onWindowDestroyed();
     _onClose.close();
     _onResize.close();
@@ -108,6 +110,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
 
   @override
   void updateContentSize(WindowSizing sizing) {
+    _ensureNotDestroyed();
     final Pointer<_Sizing> ffiSizing = ffi.calloc<_Sizing>();
     ffiSizing.ref.set(sizing);
     _setWindowContentSize(getWindowHandle(), ffiSizing);
@@ -116,6 +119,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
 
   @override
   void setTitle(String title) {
+    _ensureNotDestroyed();
     final Pointer<ffi.Utf8> titlePointer = title.toNativeUtf8();
     _setWindowTitle(getWindowHandle(), titlePointer);
     ffi.calloc.free(titlePointer);
@@ -128,16 +132,61 @@ class RegularWindowControllerMacOS extends RegularWindowController {
 
   @override
   Size get contentSize {
+    _ensureNotDestroyed();
     final _Size size = _getWindowContentSize(getWindowHandle());
     return Size(size.width, size.height);
   }
 
   @override
-  WindowState get state => WindowState.values[_getWindowState(getWindowHandle())];
+  void activate() {
+    _ensureNotDestroyed();
+    _activate(getWindowHandle());
+  }
 
   @override
-  void setState(WindowState state) {
-    _setWindowState(getWindowHandle(), state.index);
+  void setMaximized(bool maximized) {
+    _ensureNotDestroyed();
+    _setMaximized(getWindowHandle(), maximized);
+  }
+
+  @override
+  bool isMaximized() {
+    _ensureNotDestroyed();
+    return _isMaximized(getWindowHandle());
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    _ensureNotDestroyed();
+    if (minimized) {
+      _minimize(getWindowHandle());
+    } else {
+      _unminimize(getWindowHandle());
+    }
+  }
+
+  @override
+  bool isMinimized() {
+    _ensureNotDestroyed();
+    return _isMinimized(getWindowHandle());
+  }
+
+  @override
+  void setFullscreen(bool fullscreen, {int? displayId}) {
+    _ensureNotDestroyed();
+    _setFullscreen(getWindowHandle(), fullscreen);
+  }
+
+  @override
+  bool isFullscreen() {
+    _ensureNotDestroyed();
+    return _isFullscreen(getWindowHandle());
+  }
+
+  void _ensureNotDestroyed() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
   }
 
   @Native<Int64 Function(Int64, Pointer<_WindowCreationRequest>)>(
@@ -157,11 +206,29 @@ class RegularWindowControllerMacOS extends RegularWindowController {
   @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf8>)>(symbol: 'FlutterSetWindowTitle')
   external static void _setWindowTitle(Pointer<Void> windowHandle, Pointer<ffi.Utf8> title);
 
-  @Native<Int64 Function(Pointer<Void>)>(symbol: 'FlutterGetWindowState')
-  external static int _getWindowState(Pointer<Void> windowHandle);
+  @Native<Void Function(Pointer<Void>, Bool)>(symbol: 'FlutterWindowSetMaximized')
+  external static void _setMaximized(Pointer<Void> windowHandle, bool maximized);
 
-  @Native<Void Function(Pointer<Void>, Int64)>(symbol: 'FlutterSetWindowState')
-  external static void _setWindowState(Pointer<Void> windowHandle, int state);
+  @Native<Bool Function(Pointer<Void>)>(symbol: 'FlutterWindowIsMaximized')
+  external static bool _isMaximized(Pointer<Void> windowHandle);
+
+  @Native<Void Function(Pointer<Void>)>(symbol: 'FlutterWindowMinimize')
+  external static void _minimize(Pointer<Void> windowHandle);
+
+  @Native<Void Function(Pointer<Void>)>(symbol: 'FlutterWindowUnminimize')
+  external static void _unminimize(Pointer<Void> windowHandle);
+
+  @Native<Bool Function(Pointer<Void>)>(symbol: 'FlutterWindowIsMinimized')
+  external static bool _isMinimized(Pointer<Void> windowHandle);
+
+  @Native<Void Function(Pointer<Void>, Bool)>(symbol: 'FlutterWindowSetFullScreen')
+  external static void _setFullscreen(Pointer<Void> windowHandle, bool fullscreen);
+
+  @Native<Bool Function(Pointer<Void>)>(symbol: 'FlutterWindowIsFullScreen')
+  external static bool _isFullscreen(Pointer<Void> windowHandle);
+
+  @Native<Void Function(Pointer<Void>)>(symbol: 'FlutterWindowActivate')
+  external static void _activate(Pointer<Void> windowHandle);
 }
 
 final class _Sizing extends Struct {

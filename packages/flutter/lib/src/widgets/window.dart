@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show AppExitType, FlutterView;
+import 'dart:ui' show AppExitType, FlutterView, Display;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -17,18 +17,6 @@ import 'view.dart';
 enum WindowArchetype {
   /// Defines a traditional window
   regular,
-}
-
-/// Defines the possible states that a window can be in.
-enum WindowState {
-  /// Window is in its normal state, neither maximized, nor minimized.
-  restored,
-
-  /// Window is maximized, occupying the full screen but still showing the system UI.
-  maximized,
-
-  /// Window is minimized and not visible on the screen.
-  minimized,
 }
 
 /// Defines sizing request for a window.
@@ -142,7 +130,6 @@ abstract class RegularWindowController extends WindowController {
   factory RegularWindowController({
     required WindowSizing contentSize,
     String? title,
-    WindowState? state,
     RegularWindowControllerDelegate? delegate,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -154,9 +141,6 @@ abstract class RegularWindowController extends WindowController {
     if (title != null) {
       controller.setTitle(title);
     }
-    if (state != null) {
-      controller.setState(state);
-    }
     return controller;
   }
 
@@ -166,9 +150,6 @@ abstract class RegularWindowController extends WindowController {
 
   @override
   WindowArchetype get type => WindowArchetype.regular;
-
-  /// The current state of the window.
-  WindowState get state;
 
   /// Request change for the window content size.
   ///
@@ -184,9 +165,34 @@ abstract class RegularWindowController extends WindowController {
   /// [title] new title of the window.
   void setTitle(String title);
 
-  /// Request change for the window state.
-  /// [state] new state of the window.
-  void setState(WindowState state);
+  /// Requests that the window be displayed in its current size and position.
+  /// If the window is minimized or maximized, the window returns to the size
+  /// and position that it had before that state was applied.
+  void activate();
+
+  /// Requests the window to be maximized. This has no effect
+  /// if the window is currently full screen or minimized, but may
+  /// affect the window size upon restoring it from minimized or
+  /// full screen state.
+  void setMaximized(bool maximized);
+
+  /// Returns whether window is currently maximized.
+  bool isMaximized();
+
+  /// Requests window to be minimized.
+  void setMinimized(bool minimized);
+
+  /// Returns whether window is currently minimized.
+  bool isMinimized();
+
+  /// Request change for the window to enter or exit fullscreen state.
+  /// [fullscreen] whether to enter or exit fullscreen state.
+  /// [displayId] optional [Display] identifier to use for fullscreen mode.
+  /// Specifying the [displayId] might not be supported on all platforms.
+  void setFullscreen(bool fullscreen, {int? displayId});
+
+  /// Returns whether window is currently in fullscreen mode.
+  bool isFullscreen();
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
