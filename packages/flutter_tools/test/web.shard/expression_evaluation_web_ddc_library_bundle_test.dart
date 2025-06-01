@@ -12,5 +12,4 @@ import 'test_data/expression_evaluation_web_common.dart';
 
 void main() async {
   await testAll(useDDCLibraryBundleFormat: true);
-  throw 'done'; // Always throw so we can retry test in CI.
 }
