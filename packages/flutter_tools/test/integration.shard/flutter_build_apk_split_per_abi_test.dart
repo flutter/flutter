@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -34,25 +36,51 @@ void main() {
             'stdout:\n${buildResult.stdout}\n'
             'stderr:\n${buildResult.stderr}');
 
-    final Directory apkOutputDir = fileSystem.directory(workingDirectory)
+    final File metadataFile = fileSystem.directory(workingDirectory)
         .childDirectory('build')
         .childDirectory('app')
         .childDirectory('outputs')
-        .childDirectory('flutter-apk');
-    expect(apkOutputDir, isDirectory,
+        .childDirectory('apk')
+        .childDirectory('debug')
+        .childFile('output-metadata.json');
+    expect(metadataFile, exists,
         reason:
-            'Expected build outputs directory to exist at ${apkOutputDir.path}');
+            'Expected output-metadata.json file to exist at ${metadataFile.path}');
 
-    final List<File> apkFiles = apkOutputDir
-        .listSync()
-        .whereType<File>()
-        .where((File f) => RegExp(r'app-.*-debug\.apk$').hasMatch(f.uri.pathSegments.last))
-        .toList();
+    final Map<String, dynamic> decodedJson =
+        jsonDecode(await metadataFile.readAsString())
+            as Map<String, dynamic>;
 
-    expect(apkFiles.length, 4,
-        reason:
-            'Expected 4 ABI-specific debug APKs (armeabi-v7a, arm64-v8a, x86, x86_64); '
-            'found ${apkFiles.map((File f) => f.path).join(", ")}');
+    final List<dynamic> elements = decodedJson['elements'] as List<dynamic>;
+
+    final Map<String, int> actualVersionCodes = <String, int>{};
+    for (final dynamic rawElement in elements) {
+      final Map<String, dynamic> element = rawElement as Map<String, dynamic>;
+
+      final List<dynamic>? filters = element['filters'] as List<dynamic>?;
+      expect(filters, isNotNull,
+          reason:
+              'Could not find filters in ${metadataFile.path} entry: $element');
+
+      String? abi;
+      for (final dynamic rawFilter in filters!) {
+        final Map<String, dynamic> filter = rawFilter as Map<String, dynamic>;
+        if (filter['filterType'] == 'ABI') {
+          abi = filter['value'] as String?;
+          break;
+        }
+      }
+      expect(abi, isNotNull,
+          reason:
+              'Could not find an ABI filter in ${metadataFile.path} entry: $element');
+
+      final int? versionCode = element['versionCode'] as int?;
+      expect(versionCode, isNotNull,
+          reason:
+              'Could not find versionCode in ${metadataFile.path} entry: $element');
+
+      actualVersionCodes[abi!] = versionCode!;
+    }
 
     // ABI→index mapping (as in FlutterPluginConstants.ABI_VERSION):
     final Map<String, int> abiIndexMap = <String, int>{
@@ -62,41 +90,19 @@ void main() {
       'x86_64': 4,
     };
 
-    // For each APK, run `aapt dump badging` and extract versionCode
-    for (final File apkFile in apkFiles) {
-      final String filename = apkFile.uri.pathSegments.last;
+    for (final MapEntry<String, int> kv in abiIndexMap.entries) {
+      final String abi = kv.key;
+      final int abiIndex = kv.value;
 
-      final RegExp nameRegex = RegExp(r'app-([^-]+(?:-[0-9a-z]+)*)-debug\.apk');
-      final RegExpMatch? nameMatch = nameRegex.firstMatch(filename);
-      expect(nameMatch, isNotNull,
-          reason: 'Unexpected APK filename format: $filename');
-
-      final String abi = nameMatch!.group(1)!;
-      expect(abiIndexMap, contains(abi),
-          reason: 'Found unexpected ABI suffix "$abi" in $filename');
-
-      final int expectedVersionCode = abiIndexMap[abi]! * 1000 + 1;
-
-      final ProcessResult aaptResult = processManager.runSync(<String>[
-        'aapt',
-        'dump',
-        'badging',
-        apkFile.path,
-      ]);
-      expect(aaptResult.exitCode, 0,
-          reason: 'Expected `aapt dump badging` to succeed on ${apkFile.path}');
-
-      final RegExp verCodeRegex = RegExp(r"versionCode='(\d+)'");
-      final String stdoutString = aaptResult.stdout as String;
-      final RegExpMatch? badgingMatch = verCodeRegex.firstMatch(stdoutString);
-      expect(badgingMatch, isNotNull,
+      expect(actualVersionCodes, contains(abi),
           reason:
-              'Could not find versionCode in `aapt dump badging` for ${apkFile.path}');
-      final int actualVersionCode = int.parse(badgingMatch!.group(1)!);
+              '${metadataFile.path} did not contain an entry for ABI="$abi"');
 
-      expect(actualVersionCode, expectedVersionCode,
+      final int actual = actualVersionCodes[abi]!;
+      final int expected = abiIndex * 1000 + 1;
+      expect(actual, expected,
           reason:
-              'For ABI "$abi", expected versionCode=$expectedVersionCode in $filename, got $actualVersionCode');
+              'For ABI="$abi", expected versionCode=$expected, but got $actual instead');
     }
   });
 }
