@@ -13,8 +13,8 @@ import 'regular_window_edit_dialog.dart';
 
 class MainWindow extends StatefulWidget {
   MainWindow({super.key, required WindowController mainController}) {
-    _windowManagerModel.add(
-        KeyedWindowController(isMainWindow: true, key: UniqueKey(), controller: mainController));
+    _windowManagerModel.add(KeyedWindowController(
+        isMainWindow: true, key: UniqueKey(), controller: mainController));
   }
 
   final WindowManagerModel _windowManagerModel = WindowManagerModel();
@@ -38,7 +38,8 @@ class _MainWindowState extends State<MainWindow> {
             flex: 60,
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: _ActiveWindowsTable(windowManagerModel: widget._windowManagerModel),
+              child: _ActiveWindowsTable(
+                  windowManagerModel: widget._windowManagerModel),
             ),
           ),
           Expanded(
@@ -66,15 +67,18 @@ class _MainWindowState extends State<MainWindow> {
             listenable: widget._windowManagerModel,
             builder: (BuildContext context, Widget? _) {
               final List<Widget> childViews = <Widget>[];
-              for (final KeyedWindowController controller in widget._windowManagerModel.windows) {
+              for (final KeyedWindowController controller
+                  in widget._windowManagerModel.windows) {
                 if (controller.parent == null && !controller.isMainWindow) {
                   childViews.add(WindowControllerRender(
                     controller: controller.controller,
                     key: controller.key,
                     windowSettings: widget._settings,
                     windowManagerModel: widget._windowManagerModel,
-                    onDestroyed: () => widget._windowManagerModel.remove(controller.key),
-                    onError: () => widget._windowManagerModel.remove(controller.key),
+                    onDestroyed: () =>
+                        widget._windowManagerModel.remove(controller.key),
+                    onError: () =>
+                        widget._windowManagerModel.remove(controller.key),
                   ));
                 }
               }
@@ -130,7 +134,8 @@ class _ActiveWindowsTable extends StatelessWidget {
                   ),
                   numeric: true),
             ],
-            rows: (windowManagerModel.windows).map<DataRow>((KeyedWindowController controller) {
+            rows: (windowManagerModel.windows)
+                .map<DataRow>((KeyedWindowController controller) {
               return DataRow(
                 key: controller.key,
                 color: WidgetStateColor.resolveWith((states) {
@@ -142,53 +147,30 @@ class _ActiveWindowsTable extends StatelessWidget {
                 selected: controller.controller == windowManagerModel.selected,
                 onSelectChanged: (selected) {
                   if (selected != null) {
-                    windowManagerModel
-                        .select(selected ? controller.controller.rootView.viewId : null);
+                    windowManagerModel.select(selected
+                        ? controller.controller.rootView.viewId
+                        : null);
                   }
                 },
                 cells: [
-                  DataCell(Text('$controller.controller.rootView.viewId')),
+                  DataCell(Text('${controller.controller.rootView.viewId}')),
                   DataCell(
                     ListenableBuilder(
                         listenable: controller.controller,
-                        builder: (BuildContext context, Widget? _) => Text(controller
-                            .controller.type
-                            .toString()
-                            .replaceFirst('WindowArchetype.', ''))),
+                        builder: (BuildContext context, Widget? _) => Text(
+                            controller.controller.type
+                                .toString()
+                                .replaceFirst('WindowArchetype.', ''))),
                   ),
                   DataCell(
                     ListenableBuilder(
                         listenable: controller.controller,
-                        builder: (BuildContext context, Widget? _) => Row(children: [
+                        builder: (BuildContext context, Widget? _) =>
+                            Row(children: [
                               IconButton(
-                                icon: const Icon(Icons.edit_outlined),
-                                onPressed: () {
-                                  if (controller.controller.type == WindowArchetype.regular) {
-                                    showRegularWindowEditDialog(context,
-                                        initialWidth: controller.controller.contentSize.width,
-                                        initialHeight: controller.controller.contentSize.height,
-                                        initialTitle: "",
-                                        initialState:
-                                            (controller.controller as RegularWindowController)
-                                                .state, onSave: (double? width, double? height,
-                                            String? title, WindowState? state) {
-                                      final regularController =
-                                          controller.controller as RegularWindowController;
-                                      if (width != null && height != null) {
-                                        regularController.updateContentSize(
-                                          WindowSizing(preferredSize: Size(width, height)),
-                                        );
-                                      }
-                                      if (title != null) {
-                                        regularController.setTitle(title);
-                                      }
-                                      if (state != null) {
-                                        regularController.setState(state);
-                                      }
-                                    });
-                                  }
-                                },
-                              ),
+                                  icon: const Icon(Icons.edit_outlined),
+                                  onPressed: () => _showWindowEditDialog(
+                                      controller, context)),
                               IconButton(
                                 icon: const Icon(Icons.delete_outlined),
                                 onPressed: () async {
@@ -202,6 +184,17 @@ class _ActiveWindowsTable extends StatelessWidget {
             }).toList(),
           );
         });
+  }
+
+  void _showWindowEditDialog(
+      KeyedWindowController controller, BuildContext context) {
+    if (controller.controller.type != WindowArchetype.regular) {
+      return;
+    }
+
+    showRegularWindowEditDialog(
+        context: context,
+        controller: controller.controller as RegularWindowController);
   }
 }
 
@@ -247,7 +240,8 @@ class _WindowCreatorCard extends StatelessWidget {
                             onDestroyed: () => windowManagerModel.remove(key),
                           ),
                           title: "Regular",
-                          contentSize: WindowSizing(preferredSize: windowSettings.regularSize),
+                          contentSize: WindowSizing(
+                              preferredSize: windowSettings.regularSize),
                         )));
                   },
                   child: const Text('Regular'),
