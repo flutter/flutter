@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -89,8 +90,10 @@ void main() {
     bool relaxSyntax = false,
     bool useNamedParameters = false,
     void Function(Directory)? setup,
+    FileSystem? fileSystem,
   }) {
-    final Directory l10nDirectory = fs.directory(defaultL10nPath)..createSync(recursive: true);
+    final Directory l10nDirectory = (fileSystem ?? fs).directory(defaultL10nPath)
+      ..createSync(recursive: true);
     for (final String locale in localeToArbFile.keys) {
       l10nDirectory.childFile('app_$locale.arb').writeAsStringSync(localeToArbFile[locale]!);
     }
@@ -98,7 +101,7 @@ void main() {
       setup(l10nDirectory);
     }
     return LocalizationsGenerator(
-        fileSystem: fs,
+        fileSystem: fileSystem ?? fs,
         inputPathString: l10nDirectory.path,
         outputPathString: outputPathString ?? l10nDirectory.path,
         templateArbFileName: defaultTemplateArbFileName,
@@ -611,6 +614,29 @@ void main() {
       outputList,
       contains(fs.path.absolute(defaultL10nPath, 'output-localization-file_es.dart')),
     );
+  });
+
+  testUsingContext('generates normalized input & output file paths', () {
+    final FileSystem fs = MemoryFileSystem.test(
+      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+    );
+    setupLocalizations(
+      <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
+      fileSystem: fs,
+      inputsAndOutputsListPath: defaultL10nPath,
+    );
+    final File inputsAndOutputsList = fs.file(
+      fs.path.join(defaultL10nPath, 'gen_l10n_inputs_and_outputs.json'),
+    );
+    expect(inputsAndOutputsList.existsSync(), isTrue);
+
+    final Map<String, dynamic> jsonResult =
+        json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
+    final String oppositeSeparator = globals.platform.isWindows ? '/' : r'\';
+    final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
+    expect(inputList, everyElement(isNot(contains(oppositeSeparator))));
+    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+    expect(outputList, everyElement(isNot(contains(oppositeSeparator))));
   });
 
   testWithoutContext('setting both a headerString and a headerFile should fail', () {

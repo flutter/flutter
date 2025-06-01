@@ -436,6 +436,10 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   File get appDelegateSwift =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
 
+  /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjc =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
+
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
@@ -755,7 +759,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        featureFlags: featureFlags,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -972,7 +975,6 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        featureFlags: featureFlags,
         useMacOSConfig: true,
       );
     }
