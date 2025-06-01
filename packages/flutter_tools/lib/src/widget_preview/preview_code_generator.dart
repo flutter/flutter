@@ -2,12 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:analyzer/dart/ast/ast.dart' as analyzer;
+import 'package:analyzer/dart/ast/visitor.dart' as analyzer;
+import 'package:analyzer/dart/element/element2.dart' as analyzer;
 import 'package:built_collection/built_collection.dart';
-import 'package:code_builder/code_builder.dart';
+import 'package:code_builder/code_builder.dart' as cb;
+import 'package:dart_style/dart_style.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import '../base/file_system.dart';
 import '../project.dart';
 import 'preview_detector.dart';
+
+typedef _PreviewMappingEntry = MapEntry<PreviewPath, List<PreviewDetails>>;
 
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
@@ -21,6 +28,14 @@ class PreviewCodeGenerator {
   final FlutterProject widgetPreviewScaffoldProject;
 
   static const String generatedPreviewFilePath = 'lib/src/generated_preview.dart';
+
+  static const String _kBuilderType = 'Builder';
+  static const String _kBuilderLibraryUri = 'package:flutter/widgets.dart';
+  static const String _kBuilderProperty = 'builder';
+  static const String _kListType = 'List';
+  static const String _kPreviewsFunctionName = 'previews';
+  static const String _kWidgetPreviewClass = 'WidgetPreview';
+  static const String _kWidgetPreviewLibraryUri = 'widget_preview.dart';
 
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
   /// [previews].
@@ -69,96 +84,317 @@ class PreviewCodeGenerator {
   /// ];
   /// ```
   void populatePreviewsInGeneratedPreviewScaffold(PreviewMapping previews) {
-    final TypeReference returnType =
-        (TypeReferenceBuilder()
-              ..symbol = 'List'
-              ..types = ListBuilder<Reference>(<Reference>[
-                refer('WidgetPreview', 'widget_preview.dart'),
-              ]))
-            .build();
-    final Library lib = Library(
-      (LibraryBuilder b) => b.body.addAll(<Spec>[
-        Method((MethodBuilder b) {
-          final List<Expression> previewExpressions = <Expression>[];
-          for (final MapEntry<PreviewPath, List<PreviewDetails>>(
-                key: (path: String _, :Uri uri),
-                value: List<PreviewDetails> previewMethods,
-              )
-              in previews.entries) {
-            for (final PreviewDetails preview in previewMethods) {
-              Expression previewWidget = refer(
-                preview.functionName,
-                uri.toString(),
-              ).call(<Expression>[]);
-
-              if (preview.isBuilder) {
-                previewWidget = refer(
-                  'Builder',
-                  'package:flutter/widgets.dart',
-                ).newInstance(<Expression>[], <String, Expression>{'builder': previewWidget});
-              }
-
-              if (preview.hasWrapper) {
-                previewWidget = refer(
-                  preview.wrapper!,
-                  preview.wrapperLibraryUri,
-                ).call(<Expression>[previewWidget]);
-              }
-              previewWidget =
-                  Method((MethodBuilder previewBuilder) {
-                    previewBuilder.body = previewWidget.code;
-                  }).closure;
-              previewExpressions.add(
-                refer(
-                  'WidgetPreview',
-                  'widget_preview.dart',
-                ).newInstance(<Expression>[], <String, Expression>{
-                  if (preview.name != null) PreviewDetails.kName: refer(preview.name!).expression,
-                  if (preview.size != null)
-                    PreviewDetails.kSize: refer(preview.size!, preview.sizeLibraryUri ?? 'dart:ui'),
-                  ...?_buildDoubleParameters(
-                    key: PreviewDetails.kTextScaleFactor,
-                    property: preview.textScaleFactor,
-                  ),
-                  if (preview.theme != null)
-                    PreviewDetails.kTheme: refer(
-                      preview.theme!,
-                      preview.themeLibraryUri,
-                    ).call(<Expression>[]),
-                  if (preview.brightness != null)
-                    PreviewDetails.kBrightness: refer(
-                      preview.brightness!,
-                      preview.brightnessLibraryUri ?? 'package:flutter/foundation.dart',
-                    ),
-                  'builder': previewWidget,
-                }),
-              );
-            }
-          }
-          b
-            ..body = literalList(previewExpressions).code
-            ..name = 'previews'
-            ..returns = returnType;
-        }),
+    final cb.DartEmitter emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
+    final cb.Library lib = cb.Library(
+      (cb.LibraryBuilder b) => b.body.addAll(<cb.Spec>[
+        cb.Method(
+          (cb.MethodBuilder b) => _buildGeneratedPreviewMethod(
+            allocator: emitter.allocator,
+            previews: previews,
+            builder: b,
+          ),
+        ),
       ]),
     );
-    final DartEmitter emitter = DartEmitter.scoped(useNullSafetySyntax: true);
     final File generatedPreviewFile = fs.file(
       widgetPreviewScaffoldProject.directory.uri.resolve(generatedPreviewFilePath),
     );
-    // TODO(bkonyi): do we want to bother with formatting this?
-    generatedPreviewFile.writeAsStringSync(lib.accept(emitter).toString());
+    generatedPreviewFile.writeAsStringSync(
+      // Format the generated file for readability, particularly during feature development.
+      // Note: we don't really care _how_ this is formatted, just that it's formatted, so we don't
+      // specify a language version.
+      DartFormatter(languageVersion: Version.none).format(lib.accept(emitter).toString()),
+    );
   }
 
-  Map<String, Expression>? _buildDoubleParameters({
-    required String key,
-    required String? property,
+  void _buildGeneratedPreviewMethod({
+    required cb.Allocator allocator,
+    required PreviewMapping previews,
+    required cb.MethodBuilder builder,
   }) {
-    if (property == null) {
+    final List<cb.Expression> previewExpressions = <cb.Expression>[];
+    // Sort the entries by URI so that the code generator assigns import prefixes in a
+    // deterministic manner, mainly for testing purposes. This also results in previews being
+    // displayed in the same order across platforms with differing path styles.
+    final List<_PreviewMappingEntry> sortedPreviews =
+        previews.entries.toList()..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
+          return a.key.uri.toString().compareTo(b.key.uri.toString());
+        });
+    for (final _PreviewMappingEntry(
+          key: (path: String _, :Uri uri),
+          value: List<PreviewDetails> previewMethods,
+        )
+        in sortedPreviews) {
+      for (final PreviewDetails preview in previewMethods) {
+        previewExpressions.add(
+          _buildPreviewWidget(allocator: allocator, preview: preview, uri: uri),
+        );
+      }
+    }
+    builder
+      ..body = cb.literalList(previewExpressions).code
+      ..name = _kPreviewsFunctionName
+      ..returns =
+          (cb.TypeReferenceBuilder()
+                ..symbol = _kListType
+                ..types = ListBuilder<cb.Reference>(<cb.Reference>[
+                  cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri),
+                ]))
+              .build();
+  }
+
+  cb.Expression _buildPreviewWidget({
+    required cb.Allocator allocator,
+    required PreviewDetails preview,
+    required Uri uri,
+  }) {
+    cb.Expression previewWidget = cb
+        .refer(preview.functionName, uri.toString())
+        .call(<cb.Expression>[]);
+
+    if (preview.isBuilder) {
+      previewWidget = cb.refer(_kBuilderType, _kBuilderLibraryUri).newInstance(
+        <cb.Expression>[],
+        <String, cb.Expression>{_kBuilderProperty: previewWidget},
+      );
+    }
+
+    if (preview.hasWrapper) {
+      previewWidget = _buildIdentifierReference(
+        preview.wrapper!,
+      ).call(<cb.Expression>[previewWidget]);
+    }
+    previewWidget =
+        cb.Method((cb.MethodBuilder previewBuilder) {
+          previewBuilder.body = previewWidget.code;
+        }).closure;
+
+    return cb
+        .refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri)
+        .newInstance(<cb.Expression>[], <String, cb.Expression>{
+          ...?_generateCodeFromAnalyzerExpression(
+            allocator: allocator,
+            key: PreviewDetails.kName,
+            expression: preview.name,
+          ),
+          ...?_generateCodeFromAnalyzerExpression(
+            allocator: allocator,
+            key: PreviewDetails.kSize,
+            expression: preview.size,
+          ),
+          ...?_generateCodeFromAnalyzerExpression(
+            allocator: allocator,
+            key: PreviewDetails.kTextScaleFactor,
+            expression: preview.textScaleFactor,
+          ),
+          ...?_generateCodeFromAnalyzerExpression(
+            allocator: allocator,
+            key: PreviewDetails.kTheme,
+            expression: preview.theme,
+            isCallback: true,
+          ),
+          ...?_generateCodeFromAnalyzerExpression(
+            allocator: allocator,
+            key: PreviewDetails.kBrightness,
+            expression: preview.brightness,
+          ),
+          _kBuilderProperty: previewWidget,
+        });
+  }
+
+  Map<String, cb.Expression>? _generateCodeFromAnalyzerExpression({
+    required cb.Allocator allocator,
+    required String key,
+    required analyzer.Expression? expression,
+    bool isCallback = false,
+  }) {
+    if (expression == null) {
       return null;
     }
-    return <String, Expression>{
-      key: CodeExpression(Code('${double.tryParse(property) ?? property}')),
+    cb.Expression generatedExpression =
+        expression.accept(AnalyzerAstToCodeBuilderVisitor(allocator: allocator))!;
+
+    if (isCallback) {
+      generatedExpression = generatedExpression.call(<cb.Expression>[]);
+    }
+
+    return <String, cb.Expression>{key: generatedExpression};
+  }
+}
+
+/// Returns the import URI for the [analyzer.LibraryElement2] containing [element].
+String _elementToLibraryIdentifier(analyzer.Element2 element) => element.library2!.identifier;
+
+cb.Reference _buildIdentifierReference(analyzer.Identifier identifier) {
+  return switch (identifier) {
+    analyzer.PrefixedIdentifier() => _buildSimpleIdentifierReference(identifier.identifier),
+    analyzer.SimpleIdentifier() => _buildSimpleIdentifierReference(identifier),
+    _ => throw StateError('Unexpected identifier type: ${identifier.runtimeType}'),
+  };
+}
+
+cb.Reference _buildSimpleIdentifierReference(analyzer.SimpleIdentifier identifier) {
+  return cb.refer(identifier.name, _elementToLibraryIdentifier(identifier.element!));
+}
+
+class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Expression> {
+  AnalyzerAstToCodeBuilderVisitor({required this.allocator});
+
+  final cb.Allocator allocator;
+
+  @override
+  cb.Expression visitSimpleStringLiteral(analyzer.SimpleStringLiteral node) {
+    return cb.literalString(node.value);
+  }
+
+  @override
+  cb.Expression visitStringInterpolation(analyzer.StringInterpolation node) {
+    // TODO(bkonyi): handle multiline
+    final StringBuffer buffer = StringBuffer();
+    for (final analyzer.InterpolationElement element in node.elements) {
+      if (element is analyzer.InterpolationString) {
+        buffer.write(element.value);
+      } else if (element is analyzer.InterpolationExpression) {
+        // The expressions associated with interpolated components of the string need to be
+        // referenced with library prefixes. We'll use the same allocator that's used by the
+        // DartEmitter to ensure the emitted expression uses the same prefix for the library
+        // as the rest of the generated code.
+        buffer.write(r'${');
+        buffer.write(allocator.allocate(element.expression.accept(this)! as cb.Reference));
+        buffer.write('}');
+      }
+    }
+    return cb.literalString(buffer.toString(), raw: node.isRaw);
+  }
+
+  @override
+  cb.Expression visitSimpleIdentifier(analyzer.SimpleIdentifier node) {
+    return _buildSimpleIdentifierReference(node);
+  }
+
+  @override
+  cb.Expression visitBooleanLiteral(analyzer.BooleanLiteral node) {
+    return cb.literalBool(node.value);
+  }
+
+  @override
+  cb.Expression visitDoubleLiteral(analyzer.DoubleLiteral node) {
+    return cb.literalNum(node.value);
+  }
+
+  @override
+  cb.Expression visitIntegerLiteral(analyzer.IntegerLiteral node) {
+    // TODO(bkonyi): handle the case of an invalid integer constant due to overflow.
+    return cb.literalNum(node.value!);
+  }
+
+  @override
+  cb.Expression visitRecordLiteral(analyzer.RecordLiteral node) {
+    // TODO(bkonyi): fully implement. Low priority as records aren't currently arguments
+    // to @Preview(...).
+    final List<Object?> positionalFieldValues = <Object?>[];
+    final Map<String, Object?> namedFieldValues = <String, Object?>{};
+    return node.isConst
+        ? cb.literalRecord(positionalFieldValues, namedFieldValues)
+        : cb.literalConstRecord(positionalFieldValues, namedFieldValues);
+  }
+
+  @override
+  cb.Expression visitNullLiteral(analyzer.NullLiteral node) {
+    return cb.literalNull;
+  }
+
+  @override
+  cb.Expression visitListLiteral(analyzer.ListLiteral node) {
+    final List<Object?> literals = <Object?>[
+      for (final analyzer.CollectionElement literal in node.elements) literal.accept(this),
+    ];
+    return node.isConst ? cb.literalConstList(literals) : cb.literalList(literals);
+  }
+
+  @override
+  cb.Expression visitSetOrMapLiteral(analyzer.SetOrMapLiteral node) {
+    if (node.isMap) {
+      final Map<Object?, Object?> values = <Object?, Object?>{
+        for (final analyzer.MapLiteralEntry entry in node.elements.cast<analyzer.MapLiteralEntry>())
+          entry.key.accept(this): entry.value.accept(this),
+      };
+      return node.isConst ? cb.literalConstMap(values) : cb.literalMap(values);
+    } else {
+      final Set<Object?> values = <Object?>{
+        for (final analyzer.CollectionElement entry in node.elements) entry.accept(this),
+      };
+      return node.isConst ? cb.literalConstSet(values) : cb.literalSet(values);
+    }
+  }
+
+  @override
+  cb.Expression visitNamedType(analyzer.NamedType node) {
+    return cb.refer(node.name2.lexeme, _elementToLibraryIdentifier(node.element2!));
+  }
+
+  @override
+  cb.Expression visitPrefixedIdentifier(analyzer.PrefixedIdentifier node) {
+    final String libraryUri = _elementToLibraryIdentifier(node.element!);
+
+    // If the prefix is an enum, don't strip the prefix from the emitted code.
+    if (node.prefix.element! is analyzer.EnumElement2) {
+      return cb.refer('${node.prefix.name}.${node.identifier.name}', libraryUri);
+    }
+    // Otherwise, new prefixes are generated automatically and the old one can
+    // be discarded.
+    return cb.refer(node.identifier.name, libraryUri);
+  }
+
+  @override
+  cb.Expression visitBinaryExpression(analyzer.BinaryExpression node) {
+    final String lhs = _expressionToString(node.leftOperand.accept(this)!);
+    final String operator = node.operator.lexeme;
+    final String rhs = _expressionToString(node.rightOperand.accept(this)!);
+    // There's unfortunately not a nice way to build a binary expression based on an operator
+    // string using package:code_builder without creating an exhaustive switch statement. It's less
+    // risky (and less cumbersome) to just build the expression manually.
+    return cb.CodeExpression(cb.Code('$lhs $operator $rhs'));
+  }
+
+  @override
+  cb.Expression visitInstanceCreationExpression(analyzer.InstanceCreationExpression node) {
+    final cb.Expression type = node.constructorName.type.accept(this)!;
+    final String? name = node.constructorName.name?.name;
+    final List<cb.Expression> positionalArguments =
+        node.argumentList.arguments
+            .where((analyzer.Expression e) => e is! analyzer.NamedExpression)
+            .map<cb.Expression>((analyzer.Expression e) => e.accept(this)!)
+            .toList();
+    final Map<String, cb.Expression> namedArguments = <String, cb.Expression>{
+      for (final analyzer.NamedExpression e
+          in node.argumentList.arguments.whereType<analyzer.NamedExpression>())
+        e.name.label.name: e.expression.accept(this)!,
     };
+    final List<cb.Reference> typeArguments = <cb.Reference>[
+      // TODO(bkonyi): consider handling type arguments
+    ];
+    return node.isConst
+        ? cb.InvokeExpression.constOf(
+          type,
+          positionalArguments,
+          namedArguments,
+          typeArguments,
+          name,
+        )
+        : cb.InvokeExpression.newOf(type, positionalArguments, namedArguments, typeArguments, name);
+  }
+
+  @override
+  cb.Expression visitPropertyAccess(analyzer.PropertyAccess node) {
+    // Needed to handle case where an enum is accessed via a prefixed import.
+    final String target = _expressionToString(node.realTarget.accept(this)!);
+    return cb.CodeExpression(cb.Code('$target.${node.propertyName.name}'));
+  }
+
+  /// Converts [expression] to a [String], using [allocator] to ensure library scope prefixes are
+  /// consistent.
+  String _expressionToString(cb.Expression expression) {
+    return cb.DartEmitter(allocator: allocator).visitSpec(expression).toString();
   }
 }

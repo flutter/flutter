@@ -40,7 +40,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -51,7 +51,7 @@ class FakePub extends Fake implements Pub {
 
 void main() {
   group('usageValues', () {
-    late Testbed testbed;
+    late TestBed testbed;
     late FakePub fakePub;
 
     setUpAll(() {
@@ -60,7 +60,7 @@ void main() {
     });
 
     setUp(() {
-      testbed = Testbed(
+      testbed = TestBed(
         setup: () {
           fakePub = FakePub();
           Cache.flutterRoot = 'flutter';
@@ -134,6 +134,10 @@ void main() {
           ];
           for (final String templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
+            globals.fs
+                .directory(templatePath)
+                .childFile('pubspec.yaml.tmpl')
+                .writeAsStringSync('name: my_app');
           }
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(
@@ -174,7 +178,6 @@ void main() {
         },
         overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         },
       );
     });
