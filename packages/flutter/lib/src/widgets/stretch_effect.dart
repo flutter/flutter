@@ -17,7 +17,7 @@ import 'image_filter.dart';
 ///
 /// Only supported when using the Impeller rendering engine.
 class StretchEffect extends StatefulWidget {
-  /// Creates a StretchOverscrollEffect widget that applies a stretch
+  /// Creates a StretchEffect widget that applies a stretch
   /// effect when the user overscrolls horizontally or vertically.
   const StretchEffect({
     super.key,
@@ -43,7 +43,7 @@ class StretchEffect extends StatefulWidget {
   /// This example shows how to set the horizontal stretch strength to pull right.
   ///
   /// ```dart
-  /// const StretchOverscrollEffect(
+  /// const StretchEffect(
   ///   stretchStrengthX: 0.5,
   ///   child: Text('Hello, World!'),
   /// );
@@ -61,7 +61,7 @@ class StretchEffect extends StatefulWidget {
   /// This example shows how to set the vertical stretch strength to pull bottom.
   ///
   /// ```dart
-  /// const StretchOverscrollEffect(
+  /// const StretchEffect(
   ///   stretchStrengthY: 0.5,
   ///   child: Text('Hello, World!'),
   /// );

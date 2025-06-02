@@ -237,8 +237,6 @@ class SemanticsNodeUpdate {
     this.tooltip,
     this.textDirection,
     required this.transform,
-    required this.elevation,
-    required this.thickness,
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
@@ -342,12 +340,6 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List additionalActions;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final double elevation;
-
-  /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final double thickness;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int headingLevel;
@@ -2485,6 +2477,7 @@ class EngineSemantics {
     final PlatformConfiguration newConfiguration = EnginePlatformDispatcher.instance.configuration
         .copyWith(accessibilityFeatures: original.copyWith(accessibleNavigation: value));
     EnginePlatformDispatcher.instance.configuration = newConfiguration;
+    EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
 
     _semanticsEnabled = value;
 
