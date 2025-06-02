@@ -134,7 +134,7 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   }
 }
 
-/// CustomPainter that draws nearly transparent pixels at the four corners.
+/// A [CustomPainter] that draws nearly transparent pixels at the four corners.
 ///
 /// This ensures the fragment shader covers the entire canvas by forcing
 /// painting operations on all edges, preventing shader optimization skips.
