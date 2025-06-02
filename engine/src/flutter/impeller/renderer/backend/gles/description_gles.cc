@@ -52,16 +52,20 @@ static std::optional<Version> DetermineVersion(std::string version) {
   // number><space><vendor-specific information>"
   //
   // The prefixes appear to be absent on Desktop GL.
+  std::optional<size_t> version_start;
+  for (size_t i = 0; i < version.size(); i++) {
+    if (std::isdigit(version[i])) {
+      version_start = i;
+      break;
+    }
+  }
 
-  version = StripPrefix(version, "OpenGL ES ");
-  version = StripPrefix(version, "GLSL ES ");
-
-  if (version.empty()) {
+  if (!version_start.has_value()) {
     return std::nullopt;
   }
 
   std::stringstream stream;
-  for (size_t i = 0; i < version.size(); i++) {
+  for (size_t i = version_start.value(); i < version.size(); i++) {
     const auto character = version[i];
     if (std::isdigit(character) || character == '.') {
       stream << character;
