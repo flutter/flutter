@@ -1570,10 +1570,41 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
   /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
   ReadingOrderTraversalPolicy({super.requestFocusCallback});
 
+  /// Sorts the input focus nodes into reading order.
+  static Iterable<FocusNode> sort(Iterable<FocusNode> nodes) {
+    if (nodes.length <= 1) {
+      return nodes;
+    }
+
+    final List<_ReadingOrderSortData> data = <_ReadingOrderSortData>[
+      for (final FocusNode node in nodes) _ReadingOrderSortData(node),
+    ];
+
+    final List<FocusNode> sortedList = <FocusNode>[];
+    final List<_ReadingOrderSortData> unplaced = data;
+
+    // Pick the initial widget as the one that is at the beginning of the band
+    // of the topmost, or the topmost, if there are no others in its band.
+    _ReadingOrderSortData current = _pickNext(unplaced);
+    sortedList.add(current.node);
+    unplaced.remove(current);
+
+    // Go through each node, picking the next one after eliminating the previous
+    // one, since removing the previously picked node will expose a new band in
+    // which to choose candidates.
+    while (unplaced.isNotEmpty) {
+      final _ReadingOrderSortData next = _pickNext(unplaced);
+      current = next;
+      sortedList.add(current.node);
+      unplaced.remove(current);
+    }
+    return sortedList;
+  }
+
   // Collects the given candidates into groups by directionality. The candidates
   // have already been sorted as if they all had the directionality of the
   // nearest Directionality ancestor.
-  List<_ReadingOrderDirectionalGroupData> _collectDirectionalityGroups(
+  static List<_ReadingOrderDirectionalGroupData> _collectDirectionalityGroups(
     Iterable<_ReadingOrderSortData> candidates,
   ) {
     TextDirection? currentDirection = candidates.first.directionality;
@@ -1602,7 +1633,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
     return result;
   }
 
-  _ReadingOrderSortData _pickNext(List<_ReadingOrderSortData> candidates) {
+  static _ReadingOrderSortData _pickNext(List<_ReadingOrderSortData> candidates) {
     // Find the topmost node by sorting on the top of the rectangles.
     mergeSort<_ReadingOrderSortData>(
       candidates,
@@ -1674,35 +1705,8 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy
   // Sorts the list of nodes based on their geometry into the desired reading
   // order based on the directionality of the context for each node.
   @override
-  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
-    if (descendants.length <= 1) {
-      return descendants;
-    }
-
-    final List<_ReadingOrderSortData> data = <_ReadingOrderSortData>[
-      for (final FocusNode node in descendants) _ReadingOrderSortData(node),
-    ];
-
-    final List<FocusNode> sortedList = <FocusNode>[];
-    final List<_ReadingOrderSortData> unplaced = data;
-
-    // Pick the initial widget as the one that is at the beginning of the band
-    // of the topmost, or the topmost, if there are no others in its band.
-    _ReadingOrderSortData current = _pickNext(unplaced);
-    sortedList.add(current.node);
-    unplaced.remove(current);
-
-    // Go through each node, picking the next one after eliminating the previous
-    // one, since removing the previously picked node will expose a new band in
-    // which to choose candidates.
-    while (unplaced.isNotEmpty) {
-      final _ReadingOrderSortData next = _pickNext(unplaced);
-      current = next;
-      sortedList.add(current.node);
-      unplaced.remove(current);
-    }
-    return sortedList;
-  }
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) =>
+      sort(descendants);
 }
 
 /// Base class for all sort orders for [OrderedTraversalPolicy] traversal.
