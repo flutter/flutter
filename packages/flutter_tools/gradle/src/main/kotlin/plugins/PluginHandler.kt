@@ -103,13 +103,6 @@ class PluginHandler(
          */
         private const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
 
-        @VisibleForTesting internal val legacyFlutterPluginsWarning =
-            """
-            Warning: This project is still reading the deprecated '.flutter-plugins. file.
-            In an upcoming stable release support for this file will be completely removed and your build will fail.
-            See https:/flutter.dev/to/flutter-plugins-configuration.
-            """.trimIndent()
-
         /**
          * Performs configuration related to the plugin's Gradle [Project], including
          * 1. Adding the plugin itself as a dependency to the main project.
