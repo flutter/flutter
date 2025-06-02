@@ -8,8 +8,6 @@ import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 
-import io.flutter.Log;
-
 /** Uses a {@link android.graphics.SurfaceTexture} to populate the texture registry. */
 final class SurfaceTextureSurfaceProducer
     implements TextureRegistry.SurfaceProducer, TextureRegistry.GLTextureConsumer {
@@ -101,12 +99,12 @@ final class SurfaceTextureSurfaceProducer
     return surface;
   }
 
-
-  // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously unretrieved Surface
+  // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously
+  // unretrieved Surface
   // by calling `SurfaceProducer.getSurface`.
   @Override
-    public void invalidateSurface() {
-      surface = null;
+  public void invalidateSurface() {
+    surface = null;
   }
 
   @Override

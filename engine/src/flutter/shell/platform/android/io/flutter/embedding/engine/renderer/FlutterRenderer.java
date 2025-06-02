@@ -829,7 +829,8 @@ public class FlutterRenderer implements TextureRegistry {
       return pir.reader.getSurface();
     }
 
-    // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously unretrieved Surface
+    // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously
+    // unretrieved Surface
     // by calling `SurfaceProducer.getSurface`.
     @Override
     public void invalidateSurface() {
@@ -877,8 +878,7 @@ public class FlutterRenderer implements TextureRegistry {
         // Create a new ImageReader and add it to the queue.
         ImageReader reader = createImageReader();
         if (VERBOSE_LOGS) {
-          Log.i(
-              TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+          Log.i(TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
         }
         return getOrCreatePerImageReader(reader);
       }
