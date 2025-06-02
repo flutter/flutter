@@ -492,48 +492,6 @@ environement:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('exits if iOS Podfile parses .flutter-plugins', () async {
-      final FlutterProject projectUnderTest = setupProjectUnderTest();
-      fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
-        ..createSync()
-        ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
-
-      await expectLater(
-        cocoaPodsUnderTest.processPods(
-          xcodeProject: projectUnderTest.ios,
-          buildMode: BuildMode.debug,
-        ),
-        throwsToolExit(message: 'Podfile is out of date'),
-      );
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
-
-    testUsingContext('prints warning if macOS Podfile parses .flutter-plugins', () async {
-      final FlutterProject projectUnderTest = setupProjectUnderTest();
-      pretendPodIsInstalled();
-      pretendPodVersionIs('100.0.0');
-      fakeProcessManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>['pod', 'install', '--verbose']),
-        FakeCommand(command: <String>['touch', 'project/macos/Podfile.lock']),
-      ]);
-
-      projectUnderTest.macos.podfile
-        ..createSync()
-        ..writeAsStringSync("plugin_pods = parse_KV_file('../.flutter-plugins')");
-      projectUnderTest.macos.podfileLock
-        ..createSync()
-        ..writeAsStringSync('Existing lock file.');
-
-      await cocoaPodsUnderTest.processPods(
-        xcodeProject: projectUnderTest.macos,
-        buildMode: BuildMode.debug,
-      );
-
-      expect(logger.warningText, contains('Warning: Podfile is out of date'));
-      expect(logger.warningText, contains('rm macos/Podfile'));
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
-
     testUsingContext('throws, if Podfile is missing.', () async {
       final FlutterProject projectUnderTest = setupProjectUnderTest();
       await expectLater(

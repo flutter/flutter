@@ -569,23 +569,5 @@ class CocoaPods {
         );
       }
     }
-    // Most of the pod and plugin parsing logic was moved from the Podfile
-    // into the tool's podhelper.rb script. If the Podfile still references
-    // the old parsed .flutter-plugins file, prompt the regeneration. Old line was:
-    // plugin_pods = parse_KV_file('../.flutter-plugins')
-    if (xcodeProject.podfile.existsSync() &&
-        xcodeProject.podfile.readAsStringSync().contains(".flutter-plugins'")) {
-      const String warning =
-          'Warning: Podfile is out of date\n'
-          '$outOfDatePluginsPodfileConsequence\n'
-          'To regenerate the Podfile, run:\n';
-      if (isIos) {
-        throwToolExit('$warning\n$podfileIosMigrationInstructions\n');
-      } else {
-        // The old macOS Podfile will work until `.flutter-plugins` is removed.
-        // Warn instead of exit.
-        _logger.printWarning('$warning\n$podfileMacOSMigrationInstructions\n', emphasis: true);
-      }
-    }
   }
 }
