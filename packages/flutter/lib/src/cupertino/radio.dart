@@ -289,7 +289,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
           fillColor: widget.fillColor,
           focusColor: widget.focusColor,
           useCheckmarkStyle: widget.useCheckmarkStyle,
-          isActive: widget.onChanged != null,
+          isActive: _enabled,
           toggleableState: state,
           focused: _effectiveFocusNode.hasFocus,
         );
