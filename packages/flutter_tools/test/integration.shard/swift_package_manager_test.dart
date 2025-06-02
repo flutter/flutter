@@ -101,6 +101,71 @@ void main() {
             flutterBin,
             workingDirectoryPath,
           );
+
+          // Create a SwiftPM plugin that depends on native code from another SwiftPM plugin
+          final SwiftPackageManagerPlugin createdSwiftPMPlugin =
+              await SwiftPackageManagerUtils.createPlugin(
+                flutterBin,
+                workingDirectoryPath,
+                platform: platformName,
+                iosLanguage: iosLanguage,
+                usesSwiftPackageManager: true,
+              );
+          final File swiftPMPluginPackageManifest = fileSystem
+              .directory(createdSwiftPMPlugin.pluginPath)
+              .childDirectory(platformName)
+              .childDirectory(createdSwiftPMPlugin.pluginName)
+              .childFile('Package.swift');
+          final String manifestContents = swiftPMPluginPackageManifest.readAsStringSync();
+          swiftPMPluginPackageManifest.writeAsStringSync(
+            manifestContents
+                .replaceFirst(
+                  'dependencies: []',
+                  'dependencies: [.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")]',
+                )
+                .replaceFirst(
+                  'dependencies: []',
+                  'dependencies: [.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")]',
+                ),
+          );
+          final File swiftPMPluginPodspec = fileSystem
+              .directory(createdSwiftPMPlugin.pluginPath)
+              .childDirectory(platformName)
+              .childFile('${createdSwiftPMPlugin.pluginName}.podspec');
+          final String podspecContents = swiftPMPluginPodspec.readAsStringSync();
+          swiftPMPluginPodspec.writeAsStringSync(
+            podspecContents.replaceFirst(
+              '\nend',
+              "\n  s.dependency '${integrationTestPlugin.pluginName}'\n\nend",
+            ),
+          );
+          final String pluginClassFileName =
+              iosLanguage == 'swift'
+                  ? '${createdSwiftPMPlugin.className}.swift'
+                  : '${createdSwiftPMPlugin.className}.m';
+          final String pluginClassFileImport =
+              iosLanguage == 'swift'
+                  ? 'import ${integrationTestPlugin.pluginName}'
+                  : '@import ${integrationTestPlugin.pluginName};';
+          final File pluginClassFile = fileSystem
+              .directory(createdSwiftPMPlugin.pluginPath)
+              .childDirectory(platformName)
+              .childDirectory(createdSwiftPMPlugin.pluginName)
+              .childDirectory('Sources')
+              .childDirectory(createdSwiftPMPlugin.pluginName)
+              .childFile(pluginClassFileName);
+          final String pluginClassFileContent = pluginClassFile.readAsStringSync();
+          pluginClassFile.writeAsStringSync('$pluginClassFileImport\n$pluginClassFileContent');
+          SwiftPackageManagerUtils.addDependency(
+            appDirectoryPath: createdSwiftPMPlugin.pluginPath,
+            plugin: integrationTestPlugin,
+          );
+
+          SwiftPackageManagerUtils.addDependency(
+            appDirectoryPath: appDirectoryPath,
+            plugin: createdSwiftPMPlugin,
+          );
+
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,
@@ -731,9 +796,9 @@ void main() {
     expect(generatedManifestFile, exists);
 
     String generatedManifest = generatedManifestFile.readAsStringSync();
-    final String generatedSwiftDependency = '''
+    const String generatedSwiftDependency = '''
     dependencies: [
-        .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
+        .package(name: "integration_test", path: "../.packages/integration_test")
     ],
 ''';
 
@@ -828,9 +893,9 @@ void main() {
 
     String xcodeProject = xcodeProjectFile.readAsStringSync();
     String generatedManifest = generatedManifestFile.readAsStringSync();
-    final String generatedSwiftDependency = '''
+    const String generatedSwiftDependency = '''
     dependencies: [
-        .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
+        .package(name: "integration_test", path: "../.packages/integration_test")
     ],
 ''';
 
