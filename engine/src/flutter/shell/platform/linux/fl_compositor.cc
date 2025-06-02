@@ -12,6 +12,17 @@ static void fl_compositor_class_init(FlCompositorClass* klass) {}
 
 static void fl_compositor_init(FlCompositor* self) {}
 
+FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* self) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR(self),
+                       static_cast<FlutterRendererType>(0));
+  return FL_COMPOSITOR_GET_CLASS(self)->get_renderer_type(self);
+}
+
+void fl_compositor_setup(FlCompositor* self) {
+  g_return_if_fail(FL_IS_COMPOSITOR(self));
+  FL_COMPOSITOR_GET_CLASS(self)->setup(self);
+}
+
 gboolean fl_compositor_create_backing_store(
     FlCompositor* self,
     const FlutterBackingStoreConfig* config,
