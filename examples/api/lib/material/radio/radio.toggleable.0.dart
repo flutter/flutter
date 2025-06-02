@@ -42,28 +42,30 @@ class _ToggleableExampleState extends State<ToggleableExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Radio<int>(
-                value: index,
-                groupValue: groupValue,
-                // TRY THIS: Try setting the toggleable value to false and
-                // see how that changes the behavior of the widget.
-                toggleable: true,
-                onChanged: (int? value) {
-                  setState(() {
-                    groupValue = value;
-                  });
-                },
-              ),
-              Text(selections[index]),
-            ],
-          );
+      body: RadioGroup<int>(
+        groupValue: groupValue,
+        onChanged: (int? value) {
+          setState(() {
+            groupValue = value;
+          });
         },
-        itemCount: selections.length,
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Radio<int>(
+                  value: index,
+                  // TRY THIS: Try setting the toggleable value to false and
+                  // see how that changes the behavior of the widget.
+                  toggleable: true,
+                ),
+                Text(selections[index]),
+              ],
+            );
+          },
+          itemCount: selections.length,
+        ),
       ),
     );
   }
