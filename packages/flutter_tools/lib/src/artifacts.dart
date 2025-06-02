@@ -334,8 +334,6 @@ abstract class Artifacts {
   /// all artifacts.
   ///
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
-  ///
-  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
   @visibleForTesting
   factory Artifacts.test({FileSystem? fileSystem}) {
     return _TestArtifacts(fileSystem ?? MemoryFileSystem.test());
@@ -490,7 +488,7 @@ class CachedArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
@@ -1167,7 +1165,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);

@@ -13,11 +13,12 @@ import 'package:flutter_tools/src/macos/cocoapod_utils.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 void main() {
   group('processPodsIfNeeded', () {
@@ -60,7 +61,7 @@ void main() {
 
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
 
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: flutterProject.directory,
         mainLibName: 'my_app',
         packages: <String, String>{
@@ -102,7 +103,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -125,7 +126,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -147,7 +148,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -168,7 +169,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -193,7 +194,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -248,7 +249,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
             Logger: () => logger,
           },
@@ -274,7 +275,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -297,7 +298,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -319,7 +320,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -340,7 +341,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -365,7 +366,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
           },
         );
@@ -422,7 +423,7 @@ void main() {
           overrides: <Type, Generator>{
             FileSystem: () => fs,
             ProcessManager: FakeProcessManager.empty,
-            Pub: FakePubWithPrimedDeps.new,
+            Pub: ThrowingPub.new,
             CocoaPods: () => cocoaPods,
             Logger: () => logger,
           },
@@ -434,7 +435,11 @@ void main() {
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  Set<String> get dependencies => <String>{};
+  late Set<String> dependencies = <String>{};
+  @override
+  String get appName => 'my_app';
+  @override
+  YamlMap toYaml() => YamlMap.wrap(<String, String>{});
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -501,12 +506,20 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       hostAppRoot.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
 
   @override
-  File get flutterPluginSwiftPackageManifest => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage')
-      .childFile('Package.swift');
+  Directory get flutterSwiftPackagesDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
+
+  @override
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  @override
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  @override
+  File get flutterPluginSwiftPackageManifest =>
+      flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
   bool usesSwiftPackageManager = false;
@@ -542,12 +555,20 @@ class FakeIosProject extends Fake implements IosProject {
       hostAppRoot.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
 
   @override
-  File get flutterPluginSwiftPackageManifest => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage')
-      .childFile('Package.swift');
+  Directory get flutterSwiftPackagesDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
+
+  @override
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  @override
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  @override
+  File get flutterPluginSwiftPackageManifest =>
+      flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
   bool usesSwiftPackageManager = false;

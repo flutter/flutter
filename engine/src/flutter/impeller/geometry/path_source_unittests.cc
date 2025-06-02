@@ -103,5 +103,60 @@ TEST(PathSourceTest, RoundRectSourceTest) {
   source.Dispatch(receiver);
 }
 
+TEST(PathSourceTest, DiffRoundRectSourceTest) {
+  Rect outer_rect = Rect::MakeLTRB(10, 15, 200, 300);
+  Rect inner_rect = Rect::MakeLTRB(50, 60, 100, 200);
+  ASSERT_TRUE(outer_rect.Contains(inner_rect));
+  RoundingRadii radii = {
+      .top_left = Size(1, 11),
+      .top_right = Size(2, 12),
+      .bottom_left = Size(4, 14),
+      .bottom_right = Size(3, 13),
+  };
+  RoundRect outer_rrect = RoundRect::MakeRectRadii(outer_rect, radii);
+  RoundRect inner_rrect = RoundRect::MakeRectRadii(inner_rect, radii);
+  DiffRoundRectPathSource source(outer_rrect, inner_rrect);
+
+  EXPECT_FALSE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kOdd);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 15, 200, 300));
+
+  ::testing::StrictMock<DlPathReceiverMock> receiver;
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(receiver, MoveTo(Point(11, 15), true));
+    EXPECT_CALL(receiver, LineTo(Point(198, 15)));
+    EXPECT_CALL(receiver, ConicTo(Point(200, 15), Point(200, 27), kSqrt2Over2));
+    EXPECT_CALL(receiver, LineTo(Point(200, 287)));
+    EXPECT_CALL(receiver,
+                ConicTo(Point(200, 300), Point(197, 300), kSqrt2Over2));
+    EXPECT_CALL(receiver, LineTo(Point(14, 300)));
+    EXPECT_CALL(receiver, ConicTo(Point(10, 300), Point(10, 286), kSqrt2Over2));
+    EXPECT_CALL(receiver, LineTo(Point(10, 26)));
+    EXPECT_CALL(receiver, ConicTo(Point(10, 15), Point(11, 15), kSqrt2Over2));
+    // RetiresOnSaturation keeps identical calls from matching each other
+    EXPECT_CALL(receiver, Close()).RetiresOnSaturation();
+
+    EXPECT_CALL(receiver, MoveTo(Point(51, 60), true));
+    EXPECT_CALL(receiver, LineTo(Point(98, 60)));
+    EXPECT_CALL(receiver, ConicTo(Point(100, 60), Point(100, 72), kSqrt2Over2));
+    EXPECT_CALL(receiver, LineTo(Point(100, 187)));
+    EXPECT_CALL(receiver,
+                ConicTo(Point(100, 200), Point(97, 200), kSqrt2Over2));
+    EXPECT_CALL(receiver, LineTo(Point(54, 200)));
+    EXPECT_CALL(receiver, ConicTo(Point(50, 200), Point(50, 186), kSqrt2Over2));
+    EXPECT_CALL(receiver, LineTo(Point(50, 71)));
+    EXPECT_CALL(receiver, ConicTo(Point(50, 60), Point(51, 60), kSqrt2Over2));
+    // RetiresOnSaturation keeps identical calls from matching each other
+    EXPECT_CALL(receiver, Close()).RetiresOnSaturation();
+
+    EXPECT_CALL(receiver, PathEnd());
+  }
+
+  source.Dispatch(receiver);
+}
+
 }  // namespace testing
 }  // namespace impeller

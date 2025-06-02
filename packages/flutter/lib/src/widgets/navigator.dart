@@ -5577,13 +5577,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.pageBased && widget.onPopPage != null) {
-      if (widget.onPopPage!(entry.route, result) &&
-          entry.currentState.index <= _RouteLifecycle.idle.index) {
-        // The entry may have been disposed if the pop finishes synchronously.
-        assert(entry.route._popCompleter.isCompleted);
-        entry.currentState = _RouteLifecycle.pop;
+      if (widget.onPopPage!(entry.route, result)) {
+        if (entry.currentState.index <= _RouteLifecycle.idle.index) {
+          // The entry may have been disposed if the pop finishes synchronously.
+          assert(entry.route._popCompleter.isCompleted);
+          entry.currentState = _RouteLifecycle.popping;
+        }
+        entry.route.onPopInvokedWithResult(true, result);
       }
-      entry.route.onPopInvokedWithResult(true, result);
     } else {
       entry.pop<T>(result);
       assert(entry.currentState == _RouteLifecycle.pop);

@@ -28,3 +28,6 @@ external bool skwasmIsMultiThreaded();
 
 @Native<Bool Function()>(symbol: 'skwasm_isHeavy', isLeaf: true)
 external bool skwasmIsHeavy();
+
+@Native<Void Function(Pointer<Uint32>)>(symbol: 'skwasm_getLiveObjectCounts', isLeaf: true)
+external void skwasmGetLiveObjectCounts(Pointer<Uint32> objectCounts);

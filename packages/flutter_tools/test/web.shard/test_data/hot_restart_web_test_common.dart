@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../integration.shard/test_data/hot_reload_project.dart';
 import '../../integration.shard/test_driver.dart';
@@ -68,11 +69,8 @@ Future<void> _testProject(
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
-  final List<String> additionalCommandArgs =
-      useDDCLibraryBundleFormat ? <String>['--web-experimental-hot-reload'] : <String>[];
   final String testName =
-      'Hot restart (index.html: $name)'
-      '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}';
+      'Hot restart (index.html: $name), DDC library bundle format: $useDDCLibraryBundleFormat';
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_restart_test.');
@@ -89,8 +87,14 @@ Future<void> _testProject(
   testWithoutContext('$testName: hot restart works without error', () async {
     flutter.stdout.listen(printOnFailure);
     await flutter.run(
-      chrome: true,
-      additionalCommandArgs: <String>['--verbose', ...additionalCommandArgs],
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: <String>[
+        '--verbose',
+        if (useDDCLibraryBundleFormat)
+          '--web-experimental-hot-reload'
+        else
+          '--no-web-experimental-hot-reload',
+      ],
     );
     await flutter.hotRestart();
   });
@@ -106,8 +110,14 @@ Future<void> _testProject(
         }
       });
       await flutter.run(
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose', ...additionalCommandArgs],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>[
+          '--verbose',
+          if (useDDCLibraryBundleFormat)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
+        ],
       );
       project.uncommentHotReloadPrint();
       try {

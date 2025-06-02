@@ -18,7 +18,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -109,7 +108,7 @@ void main() {
   testUsingContext(
     'pub get usage values are resilient to poorly formatted package config before "pub get"',
     () async {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
       fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
       fileSystem.currentDirectory.childFile('.dart_tool/package_config.json')
@@ -147,7 +146,7 @@ void main() {
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
       final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
-      targetDirectory.childFile('pubspec.yaml').createSync();
+      targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
 
       final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -180,7 +179,7 @@ void main() {
     "pub get doesn't treat unknown flag as directory",
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
@@ -197,7 +196,7 @@ void main() {
     "pub get doesn't treat -v as directory",
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
@@ -216,7 +215,7 @@ void main() {
     "pub add doesn't treat dependency syntax as directory",
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
       fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
@@ -245,7 +244,7 @@ void main() {
   testUsingContext(
     "pub get skips example directory if it doesn't contain a pubspec.yaml",
     () async {
-      fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
       fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
       fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
@@ -299,9 +298,10 @@ void main() {
     () async {
       final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('''
-      flutter:
-        generate: true
-      ''');
+name: my_app
+flutter:
+  generate: true
+''');
       fileSystem.currentDirectory.childFile('l10n.yaml')
         ..createSync()
         ..writeAsStringSync('''
@@ -356,16 +356,8 @@ class FakePub extends Fake implements Pub {
     bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    if (expectedArguments != null) {
-      expect(arguments, expectedArguments);
-    }
     if (project != null) {
-      writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     }
-  }
-
-  @override
-  Future<Map<String, Object?>> deps(FlutterProject project) {
-    return FakePubWithPrimedDeps().deps(project);
   }
 }

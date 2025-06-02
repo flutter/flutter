@@ -30,7 +30,7 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       device_type: none
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -163,6 +163,9 @@ targets:
   - name: Linux linux_fuchsia_tests
     recipe: engine_v2/engine_v2
     timeout: 90
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       config_name: linux_fuchsia_tests
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
@@ -281,6 +284,9 @@ targets:
   - name: Linux linux_android_aot_engine_ddm
     recipe: engine_v2/engine_v2
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       release_build: "true"
       config_name: linux_android_aot_engine_ddm
@@ -317,6 +323,9 @@ targets:
   - name: Linux linux_android_debug_engine_ddm
     recipe: engine_v2/engine_v2
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       release_build: "true"
       config_name: linux_android_debug_engine_ddm
@@ -440,7 +449,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-14
+      - os=Mac-14|Mac-15.5
 
   - name: Mac clangd
     recipe: engine_v2/builder
@@ -469,10 +478,31 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-14
+      - os=Mac-14|Mac-15.5
       - cpu=x86
 
-  - name: Windows windows_android_aot_engine
+  - name: Mac mac_ios_engine_ddm
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 240
+    enabled_branches:
+      # Don't run this on release branches
+      - master
+    backfill: false
+    properties:
+      add_recipes_cq: "true"
+      config_name: mac_ios_engine_ddm
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Mac-14|Mac-15.5
+      - cpu=x86
+
+  - name: Linux windows_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 120
     properties:
@@ -482,9 +512,9 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Windows
+      - os=Linux
 
-  - name: Windows windows_host_engine
+  - name: Linux windows_host_engine
     recipe: engine_v2/engine_v2
     timeout: 120
     properties:
@@ -494,7 +524,7 @@ targets:
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Windows
+      - os=Linux
 
   - name: Windows windows_host_engine_test
     recipe: engine_v2/engine_v2

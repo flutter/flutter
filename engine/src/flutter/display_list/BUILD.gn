@@ -20,6 +20,8 @@ source_set("dl_path") {
     "geometry/dl_geometry_types.h",
     "geometry/dl_path.cc",
     "geometry/dl_path.h",
+    "geometry/dl_path_builder.cc",
+    "geometry/dl_path_builder.h",
   ]
 
   public_deps = [
@@ -34,6 +36,8 @@ source_set("display_list") {
     "benchmarking/dl_complexity.h",
     "benchmarking/dl_complexity_gl.cc",
     "benchmarking/dl_complexity_gl.h",
+    "benchmarking/dl_complexity_helper.cc",
+    "benchmarking/dl_complexity_helper.h",
     "benchmarking/dl_complexity_metal.cc",
     "benchmarking/dl_complexity_metal.h",
     "display_list.cc",
@@ -172,6 +176,7 @@ if (enable_unittests) {
       "effects/dl_image_filter_unittests.cc",
       "effects/dl_mask_filter_unittests.cc",
       "geometry/dl_geometry_types_unittests.cc",
+      "geometry/dl_path_builder_unittests.cc",
       "geometry/dl_path_unittests.cc",
       "geometry/dl_region_unittests.cc",
       "geometry/dl_rtree_unittests.cc",

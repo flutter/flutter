@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'build_system/build_system.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'package:package_config/package_config_types.dart';
@@ -967,7 +970,7 @@ const String kBuildName = 'BuildName';
 const String kFlavor = 'Flavor';
 
 /// Environment variable of the flavor to be set in dartDefines to be accessed
-/// by the [appFlavor] service.
+/// by the `appFlavor` service.
 const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
 
 /// The Xcode configuration used to build the project.
@@ -995,9 +998,6 @@ const String kXcodeAction = 'Action';
 /// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
 /// to the BUILT_PRODUCTS_DIR prior to the build.
 const String kXcodePreAction = 'PreBuildAction';
-
-// Whether the last Flutter tool invocation enabled dev dependencies.
-const String kDevDependenciesEnabled = 'DevDependenciesEnabled';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

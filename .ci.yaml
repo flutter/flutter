@@ -142,7 +142,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -158,7 +158,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
@@ -177,7 +177,7 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
@@ -194,7 +194,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -212,7 +212,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -227,7 +227,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       cpu: x86
       device_type: "msm8952"
   mac_arm64_android:
@@ -237,7 +237,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       cpu: arm64
       device_type: "msm8952"
 
@@ -249,7 +249,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       cpu: x86
       device_type: "mokey"
   mac_arm64_mokey:
@@ -259,7 +259,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       cpu: arm64
       device_type: "mokey"
 
@@ -270,7 +270,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15.5
       cpu: x86
       device_type: "Pixel 7 Pro"
   mac_ios:
@@ -284,7 +284,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.1
+      os: Mac-14|Mac-15.1|Mac-15.5
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
@@ -301,7 +301,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.1
+      os: Mac-14|Mac-15.1|Mac-15.5
       cpu: x86
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -319,7 +319,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-14|Mac-15.1
+      os: Mac-14|Mac-15.1|Mac-15.5
       cpu: arm64
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -394,7 +394,7 @@ targets:
     bringup: true # https://github.com/flutter/flutter/issues/164591
     presubmit: false
     recipe: flutter/coverage
-    timeout: 120
+    timeout: 90
     enabled_branches:
       # Don't run this on release branches
       - master
@@ -580,19 +580,25 @@ targets:
       # tests are sharded.
       test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
+  # Despite the name, this really means "generate api_docs.zip", and "upload zip
+  # to GCS", and conditionally on the "master" channel will also deploy the docs
+  # to Firebase (https://main-api.flutter.dev/).
+  #
+  # See "Linux docs_deploy_stable" for how the docs are deployed to stable API.
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
     backfill: false
+    # This means "allow this to be scheduled by the release/release_builder"
+    # recipe. Normally we'd use "schedule: true", but that *also* means "do not
+    # run this in normal presubmit/postsubmit", and we do want it to run in
+    # postsubmit for the "master" channel. Sorry.
+    #
+    # See https://github.com/flutter/flutter/issues/168709 for details.
+    schedule_during_release_override: true
     timeout: 60
     dimensions:
       os: "Linux"
-    enabled_branches:
-      # Produces docs for main-api.flutter.dev
-      # stable and beta are managed by the targets:
-      #   - Linux docs_deploy_beta
-      #   - Linux docs_deploy_stable
-      - master
     properties:
       cores: "32"
       dependencies: >-
@@ -611,7 +617,7 @@ targets:
 
   - name: Linux docs_test
     recipe: flutter/flutter_drone
-    timeout: 90 # https://github.com/flutter/flutter/issues/120901
+    timeout: 30
     properties:
       cores: "32"
       dependencies: >-
@@ -2240,7 +2246,8 @@ targets:
 
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
-    timeout: 60
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/169574
+    timeout: 90 # https://github.com/flutter/flutter/issues/169634
     properties:
       dependencies: >-
         [
@@ -2255,7 +2262,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
       presubmit_max_attempts: "2"
-      test_timeout_secs: "3600" # https://github.com/flutter/flutter/issues/162714
+      test_timeout_secs: "5400" # https://github.com/flutter/flutter/issues/162714
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4696,7 +4703,7 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4804,7 +4811,6 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_debug_test_android
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/161655
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -5384,7 +5390,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      os: Mac-15
+      os: Mac-15.3
       device_os: iOS-18.4
       $flutter/osx_sdk : >-
         {
@@ -5453,7 +5459,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-17|iOS-18","os=Mac-14", "cpu=x86"]
+        ["device_os=iOS-17|iOS-18","os=Mac-14|Mac-15.5", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -6560,7 +6566,7 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6937,7 +6943,6 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: true # https://github.com/flutter/flutter/issues/126286
     enabled_branches:
       - beta
       - stable
@@ -6994,30 +6999,10 @@ targets:
     drone_dimensions:
       - os=Windows
 
-
-  - name: Linux docs_deploy_beta
-    recipe: flutter/docs
-    scheduler: release
-    bringup: true
-    enabled_branches:
-      - beta
-    presubmit: false
-    timeout: 60
-    properties:
-      cores: "32"
-      dependencies: >-
-        [
-          {"dependency": "dashing", "version": "0.4.0"},
-          {"dependency": "firebase", "version": "v11.0.1"}
-        ]
-      tags: >
-        ["framework", "hostonly", "linux"]
-      validation: docs_deploy
-      validation_name: Docs_deploy
-      firebase_project: master-docs-flutter-dev
-    drone_dimensions:
-      - os=Linux
-
+  # This step runs on the release channel "stable", after the same commit SHA
+  # has been run and built by Linux flutter_release_builder as part of a release
+  # candidate branch (i.e. /flutter-\d+\.\d+-candidate\.\d+/) in the previous
+  # target, "Linux docs_publish".
   - name: Linux docs_deploy_stable
     recipe: flutter/docs
     scheduler: release

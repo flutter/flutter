@@ -168,6 +168,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleRelease)                             \
   PROC(ImpellerParagraphStyleRetain)                              \
   PROC(ImpellerParagraphStyleSetBackground)                       \
+  PROC(ImpellerParagraphStyleSetEllipsis)                         \
   PROC(ImpellerParagraphStyleSetFontFamily)                       \
   PROC(ImpellerParagraphStyleSetFontSize)                         \
   PROC(ImpellerParagraphStyleSetFontStyle)                        \
@@ -178,6 +179,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleSetMaxLines)                         \
   PROC(ImpellerParagraphStyleSetTextAlignment)                    \
   PROC(ImpellerParagraphStyleSetTextDirection)                    \
+  PROC(ImpellerParagraphStyleSetTextDecoration)                   \
   PROC(ImpellerPathBuilderAddArc)                                 \
   PROC(ImpellerPathBuilderAddOval)                                \
   PROC(ImpellerPathBuilderAddRect)                                \
@@ -1088,6 +1090,14 @@ class ParagraphStyle
   }
 
   //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetEllipsis
+  ///
+  ParagraphStyle& SetEllipsis(const char* ellipsis) {
+    gGlobalProcTable.ImpellerParagraphStyleSetEllipsis(Get(), ellipsis);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
   /// @see      ImpellerParagraphStyleSetMaxLines
   ///
   ParagraphStyle& SetMaxLines(uint32_t max_lines) {
@@ -1108,6 +1118,15 @@ class ParagraphStyle
   ///
   ParagraphStyle& SetTextDirection(ImpellerTextDirection direction) {
     gGlobalProcTable.ImpellerParagraphStyleSetTextDirection(Get(), direction);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetTextDecoration
+  ///
+  ParagraphStyle& SetTextDecoration(const ImpellerTextDecoration& decoration) {
+    gGlobalProcTable.ImpellerParagraphStyleSetTextDecoration(Get(),
+                                                             &decoration);
     return *this;
   }
 };

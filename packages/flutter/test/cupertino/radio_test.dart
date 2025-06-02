@@ -54,16 +54,35 @@ void main() {
     expect(log, isEmpty);
 
     await tester.pumpWidget(
+      CupertinoApp(home: Center(child: CupertinoRadio<int>(key: key, value: 1, groupValue: 2))),
+    );
+
+    await tester.tap(find.byKey(key));
+
+    expect(log, isEmpty);
+  });
+
+  testWidgets('Radio disabled', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final List<int?> log = <int?>[];
+
+    await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(key: key, value: 1, groupValue: 2, onChanged: null),
+          child: CupertinoRadio<int>(
+            key: key,
+            value: 1,
+            groupValue: 2,
+            enabled: false,
+            onChanged: log.add,
+          ),
         ),
       ),
     );
 
     await tester.tap(find.byKey(key));
 
-    expect(log, isEmpty);
+    expect(log, equals(<int>[]));
   });
 
   testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
@@ -111,13 +130,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(
-            key: key,
-            value: 1,
-            groupValue: null,
-            onChanged: log.add,
-            toggleable: true,
-          ),
+          child: CupertinoRadio<int>(key: key, value: 1, onChanged: log.add, toggleable: true),
         ),
       ),
     );
@@ -204,9 +217,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 2, onChanged: null)),
-      ),
+      const CupertinoApp(home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 2))),
     );
 
     expect(
@@ -233,9 +244,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 2, onChanged: null)),
-      ),
+      const CupertinoApp(home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 2))),
     );
 
     expect(
@@ -531,7 +540,7 @@ void main() {
         return CupertinoApp(
           home: Center(
             child: RepaintBoundary(
-              child: CupertinoRadio<int>(value: value, groupValue: groupValue, onChanged: null),
+              child: CupertinoRadio<int>(value: value, groupValue: groupValue),
             ),
           ),
         );
@@ -558,7 +567,7 @@ void main() {
           theme: const CupertinoThemeData(brightness: Brightness.dark),
           home: Center(
             child: RepaintBoundary(
-              child: CupertinoRadio<int>(value: value, groupValue: groupValue, onChanged: null),
+              child: CupertinoRadio<int>(value: value, groupValue: groupValue),
             ),
           ),
         );
@@ -892,12 +901,7 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
-          child: CupertinoRadio<int>(
-            value: 1,
-            groupValue: 1,
-            onChanged: null,
-            mouseCursor: _RadioMouseCursor(),
-          ),
+          child: CupertinoRadio<int>(value: 1, groupValue: 1, mouseCursor: _RadioMouseCursor()),
         ),
       ),
     );

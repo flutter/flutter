@@ -3334,6 +3334,272 @@ void main() {
     ),
   );
 
+  testWidgets(
+    'assertion error is not thrown when attempting to drag both selection handles',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/168578.
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        overlay(
+          child: Center(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              style: const TextStyle(fontSize: 10.0),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on 'e' to select 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Drag the end handle to 'g'.
+      final Offset endHandlePos = endpoints[1].point + const Offset(1.0, 1.0);
+      Offset newHandlePos = textOffsetToPosition(tester, 9); // Position of 'g'.
+      final TestGesture endHandleGesture = await tester.startGesture(endHandlePos, pointer: 7);
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 9);
+
+      // Attempt to drag the start handle to the start of the text.
+      final Offset startHandlePos = endpoints[0].point + const Offset(1.0, 1.0);
+      newHandlePos = textOffsetToPosition(tester, 0);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos, pointer: 8);
+      await tester.pump();
+      await startHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await startHandleGesture.up();
+      await tester.pump();
+
+      // Drag the end handle to the end of the text after releasing the start handle.
+      newHandlePos = textOffsetToPosition(tester, 11); // Position of 'i'.
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await endHandleGesture.up();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'Can only drag one selection handle at a time on iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        overlay(
+          child: Center(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              style: const TextStyle(fontSize: 10.0),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on 'e' to select 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 7);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Drag the end handle to the end of the text.
+      final Offset endHandlePos = endpoints[1].point;
+      Offset newHandlePos = textOffsetToPosition(tester, 11); // Position of 'i'.
+      final TestGesture endHandleGesture = await tester.startGesture(endHandlePos, pointer: 7);
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+
+      // Attempt to drag the start handle to the start of the text.
+      final Offset startHandlePos = endpoints[0].point;
+      newHandlePos = textOffsetToPosition(tester, 0);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos, pointer: 8);
+      await tester.pump();
+      await startHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await startHandleGesture.up();
+      await endHandleGesture.up();
+      await tester.pump();
+
+      // The start handle does not cause the selection to change.
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'Can only drag one selection handle at a time on Android web',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        overlay(
+          child: Center(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              style: const TextStyle(fontSize: 10.0),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on 'e' to select 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Drag the end handle to the end of the text.
+      final Offset endHandlePos = endpoints[1].point + const Offset(1.0, 1.0);
+      Offset newHandlePos = textOffsetToPosition(tester, 11); // Position of 'i'.
+      final TestGesture endHandleGesture = await tester.startGesture(endHandlePos, pointer: 7);
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+
+      // Attempt to drag the start handle to the start of the text.
+      final Offset startHandlePos = endpoints[0].point + const Offset(1.0, 1.0);
+      newHandlePos = textOffsetToPosition(tester, 0);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos, pointer: 8);
+      await tester.pump();
+      await startHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await startHandleGesture.up();
+      await endHandleGesture.up();
+      await tester.pump();
+
+      // Moving the start handle does not change the selection.
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+    },
+    skip: !kIsWeb, // [intended] on web only one selection handle can be dragged at a time.
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'Can drag both selection handles at a time on Android',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        overlay(
+          child: Center(
+            child: TextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              style: const TextStyle(fontSize: 10.0),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on 'e' to select 'def'.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 5);
+      await tester.tapAt(ePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 7);
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Drag the end handle to the end of the text.
+      final Offset endHandlePos = endpoints[1].point + const Offset(1.0, 1.0);
+      Offset newHandlePos = textOffsetToPosition(tester, 11); // Position of 'i'.
+      final TestGesture endHandleGesture = await tester.startGesture(endHandlePos, pointer: 7);
+      await tester.pump();
+      await endHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 11);
+
+      // Attempt to drag the start handle to the start of the text.
+      final Offset startHandlePos = endpoints[0].point + const Offset(1.0, 1.0);
+      newHandlePos = textOffsetToPosition(tester, 0);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos, pointer: 8);
+      await tester.pump();
+      await startHandleGesture.moveTo(newHandlePos);
+      await tester.pump();
+      await startHandleGesture.up();
+      await endHandleGesture.up();
+      await tester.pump();
+
+      // Moving the start handle changes the selection.
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+    },
+    skip: kIsWeb, // [intended] on web only one selection handle can be dragged at a time.
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
   testWidgets('Can drag the left handle while the right handle remains off-screen', (
     WidgetTester tester,
   ) async {
@@ -15917,6 +16183,106 @@ void main() {
     skip: isContextMenuProvidedByPlatform,
   );
 
+  testWidgets(
+    'Selection handles should not show when using a mouse on non-Apple platforms',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
+      await tester.pumpWidget(
+        MaterialApp(home: Material(child: TextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoMaterialToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset secondBlah = textOffsetToPosition(tester, 8);
+
+      // Right click the second word using a mouse.
+      final TestGesture gesture = await tester.startGesture(
+        secondBlah,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+          expect(find.text('Cut'), findsNothing);
+          expect(find.text('Copy'), findsNothing);
+          expect(find.text('Paste'), findsOneWidget);
+          expect(find.text('Select all'), findsOneWidget);
+      }
+
+      // Press select all.
+      await tester.tap(find.text('Select all'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
+  testWidgets(
+    'Selection handles should not show when using a mouse on Apple platforms using Flutter context menu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/pull/168252.
+      final TextEditingController controller = _textEditingController(text: 'blah1 blah2');
+      await tester.pumpWidget(
+        MaterialApp(home: Material(child: TextField(controller: controller))),
+      );
+
+      // Initially, the menu is not shown and there is no selection.
+      expectNoCupertinoToolbar();
+      expect(controller.selection, const TextSelection(baseOffset: -1, extentOffset: -1));
+
+      final Offset firstBlah = textOffsetToPosition(tester, 5);
+
+      // Click at the end of blah1.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+
+      // Right click the same position to reveal the context menu.
+      await tester.tapAt(firstBlah, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection.collapsed(offset: 5));
+      expectCupertinoToolbarForCollapsedSelection();
+
+      // Press select all.
+      await tester.tap(find.text('Select All'), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Selection handles are hidden.
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.selectionOverlay, isNotNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
+  );
+
   testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
 
@@ -16241,6 +16607,74 @@ void main() {
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
+
+    testWidgets(
+      'iOS system context menu does not hide selection handles on onSystemHide',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(
+                child: TextField(controller: _textEditingController(text: 'one two three')),
+              ),
+            ),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+
+        // Simulate system hiding the menu.
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'ContextMenu.onDismissSystemContextMenu',
+        });
+        Object? error;
+        try {
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            'flutter/platform',
+            messageBytes,
+            (ByteData? data) {},
+          );
+        } catch (e) {
+          error = e;
+        }
+        await tester.pumpAndSettle();
+
+        expect(error, isNull);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Selection handles are not hidden.
+        final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
+            matching: find.byType(CustomPaint),
+          ),
+        );
+        expect(boxes.length, 2);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   group('magnifier builder', () {
@@ -16329,7 +16763,7 @@ void main() {
       );
 
       testWidgets(
-        'should build nothing on Android and iOS',
+        'should build nothing on all platforms but iOS and Android',
         (WidgetTester tester) async {
           await tester.pumpWidget(const MaterialApp(home: Scaffold(body: TextField())));
 
@@ -16596,6 +17030,158 @@ void main() {
         // End the long press to hide the magnifier.
         await gesture.up();
         await tester.pumpAndSettle();
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+      }),
+    );
+
+    testWidgets(
+      'Can double tap and drag to show, unshow, and update magnifier',
+      (WidgetTester tester) async {
+        final TextEditingController controller = _textEditingController();
+        MagnifierController? magnifierController;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: TextField(
+                  dragStartBehavior: DragStartBehavior.down,
+                  controller: controller,
+                  magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder: (
+                      BuildContext context,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                    ) {
+                      magnifierController = controller;
+                      return TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+                        context,
+                        controller,
+                        localMagnifierInfo,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        const String testValue = 'one two three four five six seven';
+        await tester.enterText(find.byType(TextField), testValue);
+        await skipPastScrollingAnimation(tester);
+
+        // Tap at 'e' to set the selection to the closest word edge, which is position 3 on iOS.
+        final Offset initialPosition = textOffsetToPosition(tester, testValue.indexOf('e'));
+        await tester.tapAt(initialPosition);
+        await tester.pumpAndSettle(const Duration(milliseconds: 300));
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, 3);
+        expect(magnifierController, isNull);
+
+        // Double tap the 'e' to select 'one'.
+        final TestGesture gesture = await tester.startGesture(initialPosition);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await gesture.down(initialPosition);
+        await tester.pumpAndSettle();
+        expect(controller.selection.isCollapsed, false);
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 3);
+        expect(magnifierController, isNull);
+
+        // Drag immediately after the double tap to select 'one two three four' and show the magnifier.
+        await gesture.moveTo(textOffsetToPosition(tester, 16));
+        await tester.pumpAndSettle();
+
+        expect(controller.selection.isCollapsed, false);
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 18);
+        expect(magnifierController, isNotNull);
+        expect(magnifierController!.shown, true);
+
+        // Dragging down at the same position should hide the cupertino magnifier when it
+        // exceeds its `hideBelowThreshold`.
+        await gesture.moveTo(textOffsetToPosition(tester, 16) + const Offset(0.0, 50.0));
+        await tester.pumpAndSettle();
+        expect(controller.selection.isCollapsed, false);
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 18);
+        expect(magnifierController, isNotNull);
+        expect(magnifierController!.shown, false);
+
+        // Keep draging to select 'one two three four five' while the position continues to
+        // exceed the `hideBelowThreshold` keeping the magnifier hidden.
+        await gesture.moveTo(textOffsetToPosition(tester, 20) + const Offset(0.0, 50.0));
+        await tester.pumpAndSettle();
+        expect(controller.selection.isCollapsed, false);
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 23);
+        expect(magnifierController, isNotNull);
+        expect(magnifierController!.shown, false);
+
+        // Remove offset that is used to exceed threshold, this should reveal the magnifier.
+        await gesture.moveTo(textOffsetToPosition(tester, 20));
+        await tester.pumpAndSettle();
+        expect(controller.selection.isCollapsed, false);
+        expect(controller.selection.baseOffset, 0);
+        expect(controller.selection.extentOffset, 23);
+        expect(magnifierController, isNotNull);
+        expect(magnifierController!.shown, true);
+
+        // End the drag to hide the magnifier.
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(magnifierController, isNotNull);
+        expect(magnifierController!.shown, false);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets(
+      'cancelling long press hides magnifier',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/167879
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: TextField(
+                  dragStartBehavior: DragStartBehavior.down,
+                  magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder: (
+                      BuildContext context,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byType(TextField)),
+        );
+
+        await tester.pumpAndSettle(kLongPressTimeout);
+
+        expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+        // Cancel the long press to hide the magnifier.
+        await gesture.cancel();
+        await tester.pumpAndSettle();
+
         expect(find.byKey(fakeMagnifier.key!), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
