@@ -12,7 +12,6 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
