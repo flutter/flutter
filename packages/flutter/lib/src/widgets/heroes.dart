@@ -925,12 +925,12 @@ class HeroController extends NavigatorObserver {
     // immediately because their page's layout is still valid. Unless due to directly
     // adding routes to the pages stack causing the route to never get laid out.
     final RenderBox? fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
-    final bool hasLayout =
+    final bool hasValidSize =
         (fromRouteRenderBox?.hasSize ?? false) && fromRouteRenderBox!.size.isFinite;
     if (isUserGestureTransition &&
         flightType == HeroFlightDirection.pop &&
         toRoute.maintainState &&
-        hasLayout) {
+        hasValidSize) {
       _startHeroTransition(fromRoute, toRoute, flightType, isUserGestureTransition);
     } else {
       // Otherwise, delay measuring until the end of the next frame to allow
