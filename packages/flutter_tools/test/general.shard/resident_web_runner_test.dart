@@ -843,9 +843,9 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
             webEnableHotReload: true,
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
       );
@@ -929,9 +929,9 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
             webEnableHotReload: true,
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
           webUseWasm: true,
         ),
@@ -1432,9 +1432,9 @@ name: my_app
             trackWidgetCreation: true,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
-            // Hot reload only supported with these flags for now.
-            extraFrontEndOptions: kDdcLibraryBundleFlags,
+            // TODO(nshahan): Remove when hot reload can no longer be disabled.
             webEnableHotReload: true,
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
         ),
       );
