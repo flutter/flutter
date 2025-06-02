@@ -175,7 +175,8 @@ class TextLayout {
           ExtendedTextCluster(
             cluster,
             styledBlock.textStyle,
-            blockTextMetrics,
+            blockTextMetrics.fontBoundingBoxAscent,
+            blockTextMetrics.fontBoundingBoxDescent,
             TextRange(
               start: cluster.begin + styledBlock.textRange.start,
               end: cluster.end + styledBlock.textRange.start,
@@ -465,16 +466,13 @@ class TextLayout {
     line.fontBoundingBoxDescent = 0.0;
     for (int i = line.textRange.start; i < line.textRange.end; i += 1) {
       final ExtendedTextCluster cluster = textClusters[i];
-      if (cluster.textMetrics == null) {
-        continue;
-      }
       line.fontBoundingBoxAscent = math.max(
         line.fontBoundingBoxAscent,
-        cluster.textMetrics!.fontBoundingBoxAscent,
+        cluster.fontBoundingBoxAscent,
       );
       line.fontBoundingBoxDescent = math.max(
         line.fontBoundingBoxDescent,
-        cluster.textMetrics!.fontBoundingBoxDescent,
+        cluster.fontBoundingBoxDescent,
       );
     }
 
@@ -525,7 +523,8 @@ class ExtendedTextCluster {
   ExtendedTextCluster(
     this.cluster,
     this.textStyle,
-    this.textMetrics,
+    this.fontBoundingBoxAscent,
+    this.fontBoundingBoxDescent,
     this.textRange, // Global indexes
     this.bounds,
     this.advance,
@@ -535,7 +534,8 @@ class ExtendedTextCluster {
   ExtendedTextCluster.fromLast(ExtendedTextCluster lastCluster)
     : cluster = null,
       textStyle = lastCluster.textStyle,
-      textMetrics = lastCluster.textMetrics,
+      fontBoundingBoxAscent = lastCluster.fontBoundingBoxAscent,
+      fontBoundingBoxDescent = lastCluster.fontBoundingBoxDescent,
       textRange = TextRange(start: lastCluster.textRange.end, end: lastCluster.textRange.end),
       bounds = ui.Rect.fromLTWH(
         lastCluster.bounds.right,
@@ -553,6 +553,8 @@ class ExtendedTextCluster {
 
   ExtendedTextCluster.empty()
     : shift = 0.0,
+      fontBoundingBoxAscent = 0.0,
+      fontBoundingBoxDescent = 0.0,
       bounds = ui.Rect.zero,
       advance = ui.Rect.zero,
       textRange = TextRange(start: 0, end: 0);
@@ -563,7 +565,8 @@ class ExtendedTextCluster {
 
   WebTextCluster? cluster;
   WebTextStyle? textStyle;
-  DomTextMetrics? textMetrics;
+  double fontBoundingBoxAscent;
+  double fontBoundingBoxDescent;
   TextRange textRange;
   ui.Rect bounds;
   ui.Rect advance;
@@ -602,7 +605,7 @@ class LineBlock {
     this.clusterShiftInLine,
     this.textMetricsZero,
   );
-  final DomTextMetrics? textMetrics;
+  final DomTextMetrics? textMetrics; // This is just a reference to a parent styled text block
   final int bidiLevel;
   final WebTextStyle textStyle;
   final ClusterRange clusterRange;

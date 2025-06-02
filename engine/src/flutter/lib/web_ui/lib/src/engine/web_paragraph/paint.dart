@@ -168,11 +168,6 @@ class TextPaint {
       return;
     }
 
-    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
-      webTextCluster.cluster!.begin,
-      webTextCluster.cluster!.end,
-    );
-
     // Define the text cluster bounds
     WebParagraphDebug.log(
       'pos = ${webTextCluster.bounds.left - webTextCluster.advance.left} = ${webTextCluster.bounds.left} - ${webTextCluster.advance.left} ',
@@ -182,7 +177,7 @@ class TextPaint {
       pos,
       0,
       webTextCluster.bounds.width,
-      rects.first.height,
+      webTextCluster.advance.height,
     );
     final ui.Rect sourceRect = zeroRect;
 
@@ -203,8 +198,8 @@ class TextPaint {
       final ui.Rect backgroundRect = ui.Rect.fromLTWH(
             0,
             0,
-            rects.first.width.ceilToDouble(),
-            rects.first.height,
+            webTextCluster.advance.width.ceilToDouble(),
+            webTextCluster.advance.height,
           )
           .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
           .translate(lineOffset.dx, lineOffset.dy)
@@ -244,18 +239,13 @@ class TextPaint {
       return;
     }
 
-    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
-      webTextCluster.cluster!.begin,
-      webTextCluster.cluster!.end,
-    );
-
     // Define the text cluster bounds
     final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
       pos,
       0,
       webTextCluster.bounds.width,
-      rects.first.height,
+      webTextCluster.advance.height,
     );
     final ui.Rect sourceRect = zeroRect;
 
@@ -295,20 +285,17 @@ class TextPaint {
       paintContext.fillTextCluster(
         webTextCluster.cluster!,
         /*left:*/ 0,
-        /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
+        /*top:*/ webTextCluster.fontBoundingBoxAscent,
         /*ignore the text cluster shift from the text run*/ {
           'x': (paragraph.getLayout().isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
           'y': 100,
         },
       );
     }
-    WebParagraphDebug.log('paintClusterShadows1: $shadowSourceRect $shadowTargetRect');
     // TODO(jlavrova): calculate the shadow bounds properly
     shadowSourceRect = shadowSourceRect.inflate(100);
     shadowSourceRect = shadowSourceRect.translate(100, 100);
     shadowTargetRect = shadowTargetRect.inflate(100);
-    //shadowTargetRect = shadowTargetRect.translate(-100, -100);
-    WebParagraphDebug.log('paintClusterShadows2: $shadowSourceRect $shadowTargetRect');
 
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
@@ -340,18 +327,13 @@ class TextPaint {
   ) {
     final WebTextStyle textStyle = webTextCluster.textStyle!;
 
-    final List<DomRectReadOnly> rects = webTextCluster.textMetrics!.getSelectionRects(
-      webTextCluster.cluster!.begin,
-      webTextCluster.cluster!.end,
-    );
-
     // Define the text cluster bounds
     final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
       pos,
       0,
       webTextCluster.bounds.width,
-      rects.first.height,
+      webTextCluster.advance.height,
     );
     final ui.Rect sourceRect = zeroRect;
 
@@ -381,7 +363,7 @@ class TextPaint {
     paintContext.fillTextCluster(
       webTextCluster.cluster!,
       /*left:*/ 0,
-      /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
+      /*top:*/ webTextCluster.fontBoundingBoxAscent,
       /*ignore the text cluster shift from the text run*/ {
         'x': (paragraph.getLayout().isDefaultLtr ? 0 : webTextCluster.advance.width),
         'y': 0,
