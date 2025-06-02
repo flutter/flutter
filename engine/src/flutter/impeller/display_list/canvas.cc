@@ -36,6 +36,7 @@
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
+#include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -650,43 +651,63 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
 }
 
 void Canvas::DrawArc(const Rect& oval_bounds,
-                     Scalar start_degrees,
-                     Scalar sweep_degrees,
+                     Degrees start,
+                     Degrees sweep,
                      bool use_center,
                      const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (paint.style == Paint::Style::kStroke &&
-      paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
+  if (paint.style == Paint::Style::kFill) {
+    ArcGeometry geom(oval_bounds, start, sweep, use_center);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
+  }
+
+  if (paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
     // This is a special case for rendering arcs whose stroke width is so large
     // you are effectively drawing a sector of a circle.
     // https://github.com/flutter/flutter/issues/158567
     Rect expanded_rect = oval_bounds.Expand(Size(paint.stroke.width * 0.5f));
 
-    flutter::DlPathBuilder builder;
-    builder.AddArc(expanded_rect, Degrees(start_degrees),
-                   Degrees(sweep_degrees), /*use_center=*/true);
-
-    Paint fill_paint = paint;
-    fill_paint.style = Paint::Style::kFill;
-
-    ArcFillPathGeometry geom(builder.TakePath(), expanded_rect);
+    ArcGeometry geom(expanded_rect, start, sweep, /*include_center=*/true);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-  } else {
-    flutter::DlPathBuilder builder;
-    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                   use_center);
+    return;
+  }
 
-    if (paint.style == Paint::Style::kFill) {
-      ArcFillPathGeometry geom(builder.TakePath(), oval_bounds);
+  // Use_center incurs lots of extra work for stroking an arc, including:
+  // - It introduces segments to/from the center point (not too hard).
+  // - It introduces joins on those segments (a bit more complicated).
+  // - Even if the sweep is >=360 degrees, we still draw the segment to
+  //   the center and it basically looks like a pie cut into the complete
+  //   boundary circle, as if the slice were cut, but not extracted
+  //   (hard to express as a continuous kTriangleStrip).
+  if (!use_center) {
+    if (std::abs(sweep.degrees) >= 360.0f) {
+      return DrawOval(oval_bounds, paint);
+    }
+
+    // Our fast stroking code only works for circular bounds as it assumes
+    // that the inner and outer radii can be scaled along each angular step
+    // of the arc - which is not true for elliptical arcs where the inner
+    // and outer samples are perpendicular to the traveling direction of the
+    // elliptical curve which may not line up with the center of the bounds.
+    //
+    // TODO(flar): It also only supports Butt and Square caps for now.
+    // See https://github.com/flutter/flutter/issues/169400
+    if (oval_bounds.IsSquare() && paint.stroke.cap != Cap::kRound) {
+      ArcGeometry geom(oval_bounds, start, sweep, paint.stroke);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-    } else {
-      ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
-      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+      return;
     }
   }
+
+  flutter::DlPathBuilder builder;
+  builder.AddArc(oval_bounds, start, sweep, use_center);
+
+  ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
+  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 
 void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
