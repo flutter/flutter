@@ -285,8 +285,8 @@ Material _getMaterial(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Ink>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
+          .firstWidget<Container>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;

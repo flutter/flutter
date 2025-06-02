@@ -16,7 +16,6 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'elevation_overlay.dart';
-import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -869,7 +868,7 @@ class NavigationIndicator extends StatelessWidget {
             builder: (BuildContext context, Animation<double> fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
-                child: Ink(
+                child: Container(
                   width: width,
                   height: height,
                   decoration: ShapeDecoration(
