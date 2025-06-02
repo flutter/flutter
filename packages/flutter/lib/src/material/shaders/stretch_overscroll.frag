@@ -3,18 +3,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This shader was created based on or with reference to the implementation found at:
+// https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/libs/hwui/effects/StretchEffect.cpp
+
 #include <flutter/runtime_effect.glsl>
 
 uniform vec2 u_size;
 uniform sampler2D u_texture;
 
-// multiplier to apply to scale effect.
+// Multiplier to apply to scale effect.
 uniform float u_max_stretch_intensity;
 
-// Normalized overscroll amount in the horizontal direction
+// Normalized overscroll amount in the horizontal direction.
 uniform float u_overscroll_x;
 
-// Normalized overscroll amount in the vertical direction
+// Normalized overscroll amount in the vertical direction.
 uniform float u_overscroll_y;
 
 // u_interpolation_strength is the intensity of the interpolation.
@@ -113,42 +116,41 @@ void main() {
   float out_u_norm;
   float out_v_norm;
 
-  float norm_stretch_affected_dist_x = 1.0;
-  float norm_stretch_affected_dist_y = 1.0;
+  bool isVertical = u_overscroll_y != 0;
+  float overscroll = isVertical ? u_overscroll_y : u_overscroll_x;
 
-  float norm_inverse_stretch_affected_dist_x = 1.0;
-  float norm_inverse_stretch_affected_dist_y = 1.0;
+  float norm_distance_stretched = 1.0 / (1.0 + abs(overscroll));
+  float norm_dist_diff = norm_distance_stretched - 1.0;
 
-  float norm_distance_stretched_x = 1.0 / (1.0 + abs(u_overscroll_x));
-  float norm_distance_stretched_y = 1.0 / (1.0 + abs(u_overscroll_y));
+  const float norm_viewport = 1.0;
+  const float norm_stretch_affected_dist = 1.0;
+  const float norm_inverse_stretch_affected_dist = 1.0;
 
-  float norm_dist_diff_x = norm_distance_stretched_x - 1.0;
-  float norm_dist_diff_y = norm_distance_stretched_y - 1.0;
-
-  float norm_viewport_width = 1.0;
-  float norm_viewport_height = 1.0;
-
-  out_u_norm = compute_streched_effect(
-    in_u_norm,
-    u_overscroll_x,
-    norm_stretch_affected_dist_x,
-    norm_inverse_stretch_affected_dist_x,
-    norm_distance_stretched_x,
-    norm_dist_diff_x,
-    u_interpolation_strength,
-    norm_viewport_width
-  );
-
-  out_v_norm = compute_streched_effect(
-    in_v_norm,
-    u_overscroll_y,
-    norm_stretch_affected_dist_y,
-    norm_inverse_stretch_affected_dist_y,
-    norm_distance_stretched_y,
-    norm_dist_diff_y,
-    u_interpolation_strength,
-    norm_viewport_height
-  );
+  if (isVertical) {
+    out_u_norm = in_u_norm;
+    out_v_norm = compute_streched_effect(
+      in_v_norm,
+      overscroll,
+      norm_stretch_affected_dist,
+      norm_inverse_stretch_affected_dist,
+      norm_distance_stretched,
+      norm_dist_diff,
+      u_interpolation_strength,
+      norm_viewport
+    );
+  } else {
+    out_v_norm = in_v_norm;
+    out_u_norm = compute_streched_effect(
+      in_u_norm,
+      overscroll,
+      norm_stretch_affected_dist,
+      norm_inverse_stretch_affected_dist,
+      norm_distance_stretched,
+      norm_dist_diff,
+      u_interpolation_strength,
+      norm_viewport
+    );
+  }
 
   uv.x = out_u_norm;
   #ifdef IMPELLER_TARGET_OPENGLES
