@@ -121,6 +121,11 @@ class _MenuAnchorScope extends InheritedWidget {
 /// [MenuBar], used in situations where a [MenuBar] isn't appropriate, or to
 /// construct widgets or screen regions that have submenus.
 ///
+/// To programmatically control a [MenuAnchor], like opening or closing it, or checking its state,
+/// you can get its associated [MenuController]. Use `MenuController.maybeOf(BuildContext context)`
+/// to retrieve the controller for the closest [MenuAnchor] ancestor of a given [BuildContext].
+/// More detailed usage of [MenuController] is available in its class documentation.
+///
 /// {@tool dartpad}
 /// This example shows how to use a [MenuAnchor] to wrap a button and open a
 /// cascading menu from the button.
