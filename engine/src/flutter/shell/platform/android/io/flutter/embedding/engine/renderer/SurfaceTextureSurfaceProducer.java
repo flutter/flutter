@@ -94,14 +94,16 @@ final class SurfaceTextureSurfaceProducer
 
   @Override
   public Surface getSurface() {
+    // POTENTIAL FIX #2 (does not fix camera issue): We should never return an invalid Surface.
     if (surface == null || !surface.isValid()) {
-      Log.e("CAMILLE", "1: getting new surface!");
       surface = new Surface(texture.surfaceTexture());
     }
-    Log.e("CAMILLE", "2: potentially returning old surface!");
     return surface;
   }
 
+
+  // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously unretrieved Surface
+  // by calling `SurfaceProducer.getSurface`.
   @Override
     public void invalidateSurface() {
       surface = null;

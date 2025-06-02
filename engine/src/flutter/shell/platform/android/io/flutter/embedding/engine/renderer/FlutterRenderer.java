@@ -577,8 +577,6 @@ public class FlutterRenderer implements TextureRegistry {
           // No more ImageReaders can be pruned this round.
           break;
         }
-        Log.e("CAMILLE", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Image reader queue getting pruned!");
-        Log.e("CAMILLE prune hashcode:", Integer.toString(r.reader.getSurface().hashCode()));
         imageReaderQueue.removeFirst();
         perImageReaders.remove(r.reader);
         r.close();
@@ -831,6 +829,8 @@ public class FlutterRenderer implements TextureRegistry {
       return pir.reader.getSurface();
     }
 
+    // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously unretrieved Surface
+    // by calling `SurfaceProducer.getSurface`.
     @Override
     public void invalidateSurface() {
       createNewReader = true;
@@ -862,13 +862,13 @@ public class FlutterRenderer implements TextureRegistry {
 
     private PerImageReader getActiveReader() {
       synchronized (lock) {
+        // POTENTIAL FIX #2 (does not fix camera issue): We should never return an invalid Surface.
         if (!createNewReader) {
           // Verify we don't need a new ImageReader anyway because its Surface has been invalidated.
           PerImageReader lastPerImageReader = imageReaderQueue.peekLast();
           Surface lastImageReaderSurface = lastPerImageReader.reader.getSurface();
-          boolean lastImageReaderHasValidSurface = true; //lastImageReaderSurface.isValid();
+          boolean lastImageReaderHasValidSurface = lastImageReaderSurface.isValid();
           if (lastImageReaderHasValidSurface) {
-            Log.e("CAMILLE", "1: last image reader has valid surface!");
             return lastPerImageReader;
           }
         }
@@ -880,7 +880,6 @@ public class FlutterRenderer implements TextureRegistry {
           Log.i(
               TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
         }
-        Log.e("CAMILLE", "2: created new image reader!");
         return getOrCreatePerImageReader(reader);
       }
     }
