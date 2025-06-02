@@ -42,11 +42,8 @@ void testAll({
           additionalCommandArgs: additionalCommandArgs,
         );
 
-        project.removeField1FromConstClass();
-        await flutter.hotRestart();
-
-        project.removeField2FromConstClass();
-        expect(
+        project.removeFieldFromConstClass();
+        await expectLater(
           flutter.hotReload(),
           throwsA(
             isA<Exception>().having(
@@ -56,6 +53,8 @@ void testAll({
             ),
           ),
         );
+
+        await expectLater(flutter.hotRestart(), completes);
       },
     );
   });

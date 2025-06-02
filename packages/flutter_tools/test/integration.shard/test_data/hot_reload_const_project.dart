@@ -34,8 +34,7 @@ class HotReloadConstProject extends Project {
   class MyApp extends StatelessWidget {
     const MyApp();
 
-    final int field1 = 2;
-    final int field2 = 3;
+    final int field = 2;
 
     @override
     Widget build(BuildContext context) {
@@ -47,22 +46,10 @@ class HotReloadConstProject extends Project {
   }
   ''';
 
-  void removeField1FromConstClass() {
+  void removeFieldFromConstClass() {
     final String newMainContents = main.replaceAll(
-      'final int field1 = 2;',
-      '// final int field1 = 2;',
-    );
-    writeFile(
-      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
-      newMainContents,
-      writeFutureModifiedDate: true,
-    );
-  }
-
-  void removeField2FromConstClass() {
-    final String newMainContents = main.replaceAll(
-      'final int field2 = 3;',
-      '// final int field2 = 3;',
+      'final int field = 2;',
+      '// final int field = 2;',
     );
     writeFile(
       fileSystem.path.join(dir.path, 'lib', 'main.dart'),
