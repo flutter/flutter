@@ -12,11 +12,8 @@ import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
-import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -494,31 +491,6 @@ mixin CreateBase on FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    if (shouldCallPubGet) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: globals.analytics,
-        projectDir: project.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-
-      // Generate the l10n synthetic package that will be injected into the
-      // package_config in the call to pub.get() below.
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
-      );
-    }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[
       SupportedPlatform.root,
     ];
