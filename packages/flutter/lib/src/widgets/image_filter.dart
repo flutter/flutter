@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// A no-op [ImageFilter] that uses the identity matrix.
+///
 /// Useful as a default filter with no visual effect.
 ///
 /// {@tool snippet}
