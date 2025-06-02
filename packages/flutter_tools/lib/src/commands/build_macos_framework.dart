@@ -15,6 +15,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -191,12 +192,11 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode =
-          mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
+      final String artifactsMode = DarwinPlatform.macos.artifactName(mode);
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
-  s.name                  = 'FlutterMacOS'
+  s.name                  = '${DarwinPlatform.macos.frameworkName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
@@ -325,7 +325,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'macosx',
+        DarwinSDK.macos.name,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${buildOutput.path}',

@@ -13,6 +13,7 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
@@ -742,9 +743,9 @@ Future<void> _createStubAppFramework(
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=13.0'
+        '-miphoneos-version-min=${DarwinPlatform.ios.deploymentTarget()}'
       else
-        '-miphonesimulator-version-min=13.0',
+        '-miphonesimulator-version-min=${DarwinPlatform.ios.deploymentTarget()}',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

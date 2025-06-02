@@ -18,6 +18,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../ios/xcodeproj.dart';
 
 Version get xcodeRequiredVersion => Version(14, null, null);
@@ -38,7 +39,7 @@ Version get xcodeRecommendedVersion => Version(15, null, null);
 /// --sdk <sdk name>            find the tool for the given SDK name.
 /// ```
 String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
-  return (environmentType == EnvironmentType.simulator) ? 'iphonesimulator' : 'iphoneos';
+  return (environmentType == EnvironmentType.simulator) ? DarwinSDK.iphonesimulator.name : DarwinSDK.iphoneos.name;
 }
 
 /// A utility class for interacting with Xcode command line tools.

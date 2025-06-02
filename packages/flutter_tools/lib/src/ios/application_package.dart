@@ -6,6 +6,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../globals.dart' as globals;
 import '../template.dart';
 import '../xcode_project.dart';
@@ -130,10 +131,10 @@ class BuildableIOSApp extends IOSApp {
   String? get name => _appProductName;
 
   @override
-  String get simulatorBundlePath => _buildAppPath('iphonesimulator');
+  String get simulatorBundlePath => _buildAppPath(DarwinSDK.iphonesimulator.name);
 
   @override
-  String get deviceBundlePath => _buildAppPath('iphoneos');
+  String get deviceBundlePath => _buildAppPath(DarwinSDK.iphoneos.name);
 
   @override
   Directory get appDeltaDirectory =>

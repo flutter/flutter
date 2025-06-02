@@ -16,6 +16,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
 
 /// Whether icon font subsetting is enabled by default.
@@ -815,12 +816,12 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'ios');
+  return globals.fs.path.join(getBuildDirectory(), DarwinPlatform.ios.name);
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'macos');
+  return globals.fs.path.join(getBuildDirectory(), DarwinPlatform.macos.name);
 }
 
 /// Returns the web build output directory.

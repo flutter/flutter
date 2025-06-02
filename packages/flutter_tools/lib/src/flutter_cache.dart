@@ -15,9 +15,11 @@ import 'base/logger.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
+import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -464,7 +466,11 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
   @override
   List<String> getLicenseDirs() {
     if (_platform.isMacOS || ignorePlatformFiltering) {
-      return const <String>['ios', 'ios-profile', 'ios-release'];
+      return <String>[
+        DarwinPlatform.ios.artifactName(BuildMode.debug),
+        DarwinPlatform.ios.artifactName(BuildMode.profile),
+        DarwinPlatform.ios.artifactName(BuildMode.release),
+      ];
     }
     return const <String>[];
   }
@@ -848,10 +854,19 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-x64-release/windows-x64', 'android-x64-release/windows-x64.zip'],
 ];
 
-const List<List<String>> _iosBinaryDirs = <List<String>>[
-  <String>['ios', 'ios/artifacts.zip'],
-  <String>['ios-profile', 'ios-profile/artifacts.zip'],
-  <String>['ios-release', 'ios-release/artifacts.zip'],
+List<List<String>> _iosBinaryDirs = <List<String>>[
+  <String>[
+    DarwinPlatform.ios.artifactName(BuildMode.debug),
+    '${DarwinPlatform.ios.artifactName(BuildMode.debug)}/${DarwinPlatform.ios.artifactZip}',
+  ],
+  <String>[
+    DarwinPlatform.ios.artifactName(BuildMode.profile),
+    '${DarwinPlatform.ios.artifactName(BuildMode.profile)}/${DarwinPlatform.ios.artifactZip}',
+  ],
+  <String>[
+    DarwinPlatform.ios.artifactName(BuildMode.release),
+    '${DarwinPlatform.ios.artifactName(BuildMode.release)}/${DarwinPlatform.ios.artifactZip}',
+  ],
 ];
 
 const List<List<String>> _androidBinaryDirs = <List<String>>[

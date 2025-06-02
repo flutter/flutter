@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -288,8 +289,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       }
 
       // Build aot, create module.framework and copy.
-      final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
-      final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
+      final Directory iPhoneBuildOutput = modeDirectory.childDirectory(DarwinSDK.iphoneos.name);
+      final Directory simulatorBuildOutput = modeDirectory.childDirectory(DarwinSDK.iphonesimulator.name);
       await _produceAppFramework(buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
 
       // Build and copy plugins.
@@ -441,7 +442,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.platform              = :ios, '13.0'
+  s.platform              = :ios, '${DarwinPlatform.ios.deploymentTarget()}'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -563,7 +564,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'iphoneos',
+        DarwinSDK.iphoneos.name,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
@@ -588,7 +589,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        'iphonesimulator',
+        DarwinSDK.iphonesimulator.name,
         '-configuration',
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',

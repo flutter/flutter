@@ -18,6 +18,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../darwin/darwin.dart';
 import '../reporting/reporting.dart';
 
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -201,7 +202,7 @@ class XcodeProjectInterpreter {
       if (scheme != null) ...<String>['-scheme', scheme],
       if (configuration != null) ...<String>['-configuration', configuration],
       if (target != null) ...<String>['-target', target],
-      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>['-sdk', 'iphonesimulator'],
+      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>['-sdk', DarwinSDK.iphonesimulator.name],
       '-destination',
       if (deviceId != null)
         'id=$deviceId'
@@ -270,7 +271,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-alltargets',
       '-sdk',
-      'iphonesimulator',
+      DarwinSDK.iphonesimulator.name,
       '-project',
       podXcodeProject.path,
       '-showBuildSettings',
