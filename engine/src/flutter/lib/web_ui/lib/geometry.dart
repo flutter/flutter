@@ -419,6 +419,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii,
   });
 
   double get left;
@@ -438,6 +439,19 @@ mixin _RRectLike<T extends _RRectLike<T>> {
   double get blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
+  /// Whether the radii of the four corners are guaranteed to be the same.
+  ///
+  /// This is a Web-only flag for optimization.
+  ///
+  /// Returns `true` only if the object was constructed in a way that guarantees
+  /// all radii are equal (e.g., from `.fromRectAndRadius`), saving the cost of
+  /// checking the corner radii fields individually.
+  ///
+  /// A `false` return value does not mean the radii are necessarily different.
+  /// It simply means there's no guarantee, and they must be compared manually
+  /// if uniformity needs to be determined.
+  bool get uniformRadii => false;
+
   T shift(Offset offset) {
     return _create(
       left: left + offset.dx,
@@ -452,6 +466,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
       blRadiusY: blRadiusY,
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
+      uniformRadii: uniformRadii,
     );
   }
 
@@ -469,6 +484,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
       blRadiusY: math.max(0, blRadiusY + delta),
       brRadiusX: math.max(0, brRadiusX + delta),
       brRadiusY: math.max(0, brRadiusY + delta),
+      uniformRadii: uniformRadii,
     );
   }
 
@@ -592,6 +608,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
         blRadiusY: blRadiusY * scale,
         brRadiusX: brRadiusX * scale,
         brRadiusY: brRadiusY * scale,
+        uniformRadii: uniformRadii,
       );
     }
 
@@ -608,6 +625,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
       blRadiusY: blRadiusY,
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
+      uniformRadii: uniformRadii,
     );
   }
 
@@ -629,6 +647,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
         brRadiusY: math.max(0, brRadiusY * k),
         blRadiusX: math.max(0, blRadiusX * k),
         blRadiusY: math.max(0, blRadiusY * k),
+        uniformRadii: uniformRadii,
       );
     } else {
       return _create(
@@ -644,6 +663,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
         brRadiusY: math.max(0, _lerpDouble(brRadiusY, b.brRadiusY, t)),
         blRadiusX: math.max(0, _lerpDouble(blRadiusX, b.blRadiusX, t)),
         blRadiusY: math.max(0, _lerpDouble(blRadiusY, b.blRadiusY, t)),
+        uniformRadii: uniformRadii,
       );
     }
   }
@@ -693,7 +713,7 @@ mixin _RRectLike<T extends _RRectLike<T>> {
         '${top.toStringAsFixed(1)}, '
         '${right.toStringAsFixed(1)}, '
         '${bottom.toStringAsFixed(1)}';
-    if (tlRadius == trRadius && trRadius == brRadius && brRadius == blRadius) {
+    if (uniformRadii || (tlRadius == trRadius && trRadius == brRadius && brRadius == blRadius)) {
       if (tlRadius.x == tlRadius.y) {
         return '$className.fromLTRBR($rect, ${tlRadius.x.toStringAsFixed(1)})';
       }
@@ -880,6 +900,7 @@ class RRect with _RRectLike<RRect> {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii,
   }) => RRect._raw(
     top: top,
     left: left,
@@ -1142,6 +1163,7 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii,
   }) => RSuperellipse._raw(
     top: top,
     left: left,
@@ -1155,7 +1177,7 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
     blRadiusY: blRadiusY,
     brRadiusX: brRadiusX,
     brRadiusY: brRadiusY,
-    uniformRadii: false,
+    uniformRadii: uniformRadii,
   );
 
   _RSuperellipseCache? _getCache() {
@@ -1280,6 +1302,7 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii,
   }) => RSuperellipse._raw(
     top: top,
     left: left,
@@ -1293,6 +1316,7 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
     blRadiusY: blRadiusY,
     brRadiusX: brRadiusX,
     brRadiusY: brRadiusY,
+    uniformRadii: uniformRadii,
   );
 
   void _ensureCacheInitialized() {
