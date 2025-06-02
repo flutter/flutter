@@ -42,6 +42,8 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     super.fullscreenDialog,
     super.allowSnapshotting = true,
     super.barrierDismissible = false,
+    super.traversalEdgeBehavior,
+    super.directionalTraversalEdgeBehavior,
   }) {
     assert(opaque);
   }
@@ -98,7 +100,14 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   PageTransitionsBuilder? _getPageTransitionBuilder(BuildContext context) {
     final TargetPlatform platform = Theme.of(context).platform;
     final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
-    return pageTransitionsTheme.builders[platform];
+    return pageTransitionsTheme.builders[platform] ??
+        switch (platform) {
+          TargetPlatform.iOS || TargetPlatform.macOS => const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.android ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.windows ||
+          TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+        };
   }
 
   // The transitionDuration is used to create the AnimationController which is only

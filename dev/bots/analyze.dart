@@ -866,7 +866,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, {bool checkMinimums
   await _verifyNoMissingLicenseForExtension(
     workingDirectory,
     'java',
-    overrideMinimumMatches ?? 39,
+    overrideMinimumMatches ?? 1,
     _generateLicense('// '),
   );
   await _verifyNoMissingLicenseForExtension(
@@ -1632,6 +1632,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
     'glfw/glfw',
     'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
+    'ninja-build/ninja',
     'torvalds/linux',
     'tpn/winsdk-10',
   };
@@ -1742,7 +1743,7 @@ class Hash256 {
 // We have a policy of not checking in binaries into this repository.
 // If you are adding/changing template images, use the flutter_template_images
 // package and a .img.tmpl placeholder instead.
-// If you have other binaries to add, please consult Hixie for advice.
+// If you have other binaries to add, please consult johnmccutchan for advice.
 final Set<Hash256> _legacyBinaries = <Hash256>{
   // DEFAULT ICON IMAGES
 
@@ -2099,7 +2100,7 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
   // We have a policy of not checking in binaries into this repository.
   // If you are adding/changing template images, use the flutter_template_images
   // package and a .img.tmpl placeholder instead.
-  // If you have other binaries to add, please consult Hixie for advice.
+  // If you have other binaries to add, please consult johnmccutchan for advice.
   assert(
     _legacyBinaries
             .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])

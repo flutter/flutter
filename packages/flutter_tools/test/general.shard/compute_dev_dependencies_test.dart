@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -10,7 +12,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compute_dev_dependencies.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
@@ -46,7 +47,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
@@ -358,6 +358,17 @@ void main() {
     );
   });
 
+  test('a pub error is treated as no data available instead of terminal', () async {
+    final ProcessManager processes = _dartPubDepsCrashes(project: project);
+    final Set<String> dependencies = await computeExclusiveDevDependencies(
+      pub(processes),
+      project: project,
+      logger: logger,
+    );
+
+    expect(dependencies, isEmpty, reason: 'pub deps crashed, but was not terminal');
+  });
+
   test('throws and logs on invalid JSON', () async {
     final ProcessManager processes = _dartPubDepsReturns('''
     {
@@ -419,6 +430,21 @@ ProcessManager _dartPubDepsReturns(String dartPubDepsOutput, {required FlutterPr
       command: const <String>[_dartBin, 'pub', '--suppress-analytics', 'deps', '--json'],
       stdout: dartPubDepsOutput,
       workingDirectory: project.directory.path,
+    ),
+  ]);
+}
+
+ProcessManager _dartPubDepsCrashes({required FlutterProject project}) {
+  return FakeProcessManager.list(<FakeCommand>[
+    FakeCommand(
+      command: const <String>[_dartBin, 'pub', '--suppress-analytics', 'deps', '--json'],
+      workingDirectory: project.directory.path,
+      exception: const io.ProcessException('pub', <String>[
+        'pub',
+        '--suppress-analytics',
+        'deps',
+        '--json',
+      ]),
     ),
   ]);
 }

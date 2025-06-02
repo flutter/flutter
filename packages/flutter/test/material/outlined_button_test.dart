@@ -343,7 +343,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1323,7 +1323,7 @@ void main() {
 
     expect(tester.getSize(find.byType(OutlinedButton)), const Size(134.0, 48.0));
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/122066
+  });
 
   testWidgets('OutlinedButton onPressed and onLongPress callbacks are distinctly recognized', (
     WidgetTester tester,
@@ -1683,7 +1683,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: OutlinedButton(key: key, onPressed: () {}, child: const Text('OutlinedButton')),
@@ -1702,7 +1702,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: OutlinedButton.icon(
@@ -1798,7 +1798,7 @@ void main() {
   testWidgets(
     'OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         MaterialApp(

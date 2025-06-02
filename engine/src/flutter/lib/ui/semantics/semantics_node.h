@@ -46,16 +46,21 @@ enum class SemanticsAction : int32_t {
   kScrollToOffset = 1 << 23,
 };
 
-const int kVerticalScrollSemanticsActions =
+constexpr int kVerticalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollUp) |
     static_cast<int32_t>(SemanticsAction::kScrollDown);
 
-const int kHorizontalScrollSemanticsActions =
+constexpr int kHorizontalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollLeft) |
     static_cast<int32_t>(SemanticsAction::kScrollRight);
 
-const int kScrollableSemanticsActions =
+constexpr int kScrollableSemanticsActions =
     kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
+
+/// The following actions are not user-initiated.
+constexpr int kSystemActions =
+    static_cast<int32_t>(SemanticsAction::kDidGainAccessibilityFocus) |
+    static_cast<int32_t>(SemanticsAction::kDidLoseAccessibilityFocus);
 
 /// C/C++ representation of `SemanticsRole` defined in
 /// `lib/ui/semantics.dart`.
@@ -68,6 +73,43 @@ enum class SemanticsRole : int32_t {
   kTab = 1,
   kTabBar = 2,
   kTabPanel = 3,
+  kDialog = 4,
+  kAlertDialog = 5,
+  kTable = 6,
+  kCell = 7,
+  kRow = 8,
+  kColumnHeader = 9,
+  kSearchBox = 10,
+  kDragHandle = 11,
+  kSpinButton = 12,
+  kComboBox = 13,
+  kMenuBar = 14,
+  kMenu = 15,
+  kMenuItem = 16,
+  kMenuItemCheckbox = 17,
+  kMenuItemRadio = 18,
+  kList = 19,
+  kListItem = 20,
+  kForm = 21,
+  kTooltip = 22,
+  kLoadingSpinner = 23,
+  kProgressBar = 24,
+  kHotKey = 25,
+  kRadioGroup = 26,
+  kStatus = 27,
+  kAlert = 28,
+};
+
+/// C/C++ representation of `SemanticsValidationResult` defined in
+/// `lib/ui/semantics.dart`.
+///\warning This must match the `SemanticsValidationResult` enum in
+///         `lib/ui/semantics.dart`.
+/// See also:
+///   - file://./../../../lib/ui/semantics.dart
+enum class SemanticsValidationResult : int32_t {
+  kNone = 0,
+  kValid = 1,
+  kInvalid = 2,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in
@@ -106,6 +148,8 @@ enum class SemanticsFlags : int32_t {
   kHasExpandedState = 1 << 26,
   kIsExpanded = 1 << 27,
   kHasSelectedState = 1 << 28,
+  kHasRequiredState = 1 << 29,
+  kIsRequired = 1 << 30,
 };
 
 const int kScrollableSemanticsFlags =
@@ -162,6 +206,7 @@ struct SemanticsNode {
 
   std::string linkUrl;
   SemanticsRole role;
+  SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
 };
 
 // Contains semantic nodes that need to be updated.

@@ -30,6 +30,7 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/10,
                                /*respect_ctm=*/true);
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
+<<<<<<< HEAD
                                        "Roboto-Regular.ttf", DlPoint(101, 101),
                                        options));
     options.mask_filter = nullptr;
@@ -37,6 +38,15 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
                                        "Roboto-Regular.ttf", DlPoint(100, 100),
                                        options));
+=======
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(101, 101), options));
+    options.mask_filter = nullptr;
+    options.color = DlColor::kRed();
+    ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(100, 100), options));
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
   };
 
   DisplayListBuilder builder;
@@ -57,6 +67,7 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/10,
                                /*respect_ctm=*/false);
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
+<<<<<<< HEAD
                                        "Roboto-Regular.ttf", DlPoint(101, 101),
                                        options));
     options.mask_filter = nullptr;
@@ -64,6 +75,15 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
     ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
                                        "Roboto-Regular.ttf", DlPoint(100, 100),
                                        options));
+=======
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(101, 101), options));
+    options.mask_filter = nullptr;
+    options.color = DlColor::kRed();
+    ASSERT_TRUE(RenderTextInCanvasSkia(canvas, "hello world",
+                                       "Roboto-Regular.ttf",  //
+                                       DlPoint(100, 100), options));
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
   };
 
   DisplayListBuilder builder;
@@ -86,13 +106,13 @@ TEST_P(DlGoldenTest, ShimmerTest) {
     canvas->Scale(content_scale.x, content_scale.y);
 
     DlPaint paint;
-    canvas->DrawImage(images[0], SkPoint::Make(10.135, 10.36334),
+    canvas->DrawImage(images[0], DlPoint(10.135, 10.36334),
                       DlImageSampling::kLinear, &paint);
 
-    SkRect save_layer_bounds = SkRect::MakeLTRB(0, 0, 1024, 768);
+    DlRect save_layer_bounds = DlRect::MakeLTRB(0, 0, 1024, 768);
     auto blur = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kDecal);
-    canvas->ClipRect(SkRect::MakeLTRB(11.125, 10.3737, 911.25, 755.3333));
-    canvas->SaveLayer(&save_layer_bounds, /*paint=*/nullptr, blur.get());
+    canvas->ClipRect(DlRect::MakeLTRB(11.125, 10.3737, 911.25, 755.3333));
+    canvas->SaveLayer(save_layer_bounds, /*paint=*/nullptr, blur.get());
     canvas->Restore();
   };
 
@@ -154,7 +174,6 @@ TEST_P(DlGoldenTest, ShimmerTest) {
 
 TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
   impeller::Point content_scale = GetContentScale();
-
   DlRect rect = DlRect::MakeXYWH(50, 50, 100, 100);
   DlRoundRect rrect = DlRoundRect::MakeRectRadius(rect, 10.0f);
   DlPaint fill = DlPaint().setColor(DlColor::kBlue());
@@ -172,6 +191,38 @@ TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
   builder.DrawRoundRect(rrect.Shift(150, 0), stroke);
   builder.DrawRoundRect(rrect.Shift(0, 150), blur);
   builder.DrawRoundRect(rrect.Shift(150, 150), blur_stroke);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Top left and bottom right circles are expected to be comparable (not exactly
+// equal).
+// See also: https://github.com/flutter/flutter/issues/152778
+TEST_P(DlGoldenTest, LargeDownscaleRrect) {
+  impeller::Point content_scale = GetContentScale();
+  auto draw = [&](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
+    canvas->DrawColor(DlColor(0xff111111));
+    {
+      canvas->Save();
+      canvas->Scale(0.25, 0.25);
+      DlPaint paint;
+      paint.setColor(DlColor::kYellow());
+      paint.setMaskFilter(
+          DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/1000));
+      canvas->DrawCircle(DlPoint(0, 0), 1200, paint);
+      canvas->Restore();
+    }
+
+    DlPaint paint;
+    paint.setColor(DlColor::kYellow());
+    paint.setMaskFilter(
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, /*sigma=*/250));
+    canvas->DrawCircle(DlPoint(1024, 768), 300, paint);
+  };
+
+  DisplayListBuilder builder;
+  draw(&builder, /*images=*/{});
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

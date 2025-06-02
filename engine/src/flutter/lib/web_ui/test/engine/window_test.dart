@@ -13,28 +13,20 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/matchers.dart';
+import '../common/test_initialization.dart';
 
 const int kPhysicalKeyA = 0x00070004;
 const int kLogicalKeyA = 0x00000000061;
+
+EnginePlatformDispatcher get dispatcher => EnginePlatformDispatcher.instance;
+EngineFlutterWindow get myWindow => dispatcher.implicitView!;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  late EngineFlutterWindow myWindow;
-  final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
-
-  setUp(() {
-    myWindow = EngineFlutterView.implicit(dispatcher, createDomHTMLDivElement());
-    dispatcher.viewManager.registerView(myWindow);
-  });
-
-  tearDown(() async {
-    dispatcher.viewManager.unregisterView(myWindow.viewId);
-    await myWindow.resetHistory();
-    myWindow.dispose();
-  });
+  setUpImplicitView();
 
   test('onTextScaleFactorChanged preserves the zone', () {
     final Zone innerZone = Zone.current.fork();
@@ -256,6 +248,73 @@ Future<void> testMain() async {
       ui.SemanticsAction.tap,
       null,
     );
+  });
+
+  test('onSemanticsActionEvent delays action until after frame', () async {
+    final eventLog = <ui.SemanticsAction>[];
+
+    void callback(ui.SemanticsActionEvent event) {
+      eventLog.add(event.type);
+    }
+
+    ui.PlatformDispatcher.instance.onSemanticsActionEvent = callback;
+
+    // Outside frame: action must be sent immediately
+    EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+      myWindow.viewId,
+      0,
+      ui.SemanticsAction.focus,
+      null,
+    );
+
+    expect(eventLog, [ui.SemanticsAction.focus]);
+    eventLog.clear();
+
+    bool tapCalled = false;
+    EnginePlatformDispatcher.instance.onBeginFrame = (_) {
+      // Inside onBeginFrame: should be delayed
+      EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+        myWindow.viewId,
+        0,
+        ui.SemanticsAction.tap,
+        null,
+      );
+      tapCalled = true;
+    };
+
+    bool increaseCalled = false;
+    EnginePlatformDispatcher.instance.onDrawFrame = () {
+      // Inside onDrawFrame: should be delayed
+      EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+        myWindow.viewId,
+        0,
+        ui.SemanticsAction.increase,
+        null,
+      );
+      increaseCalled = true;
+    };
+
+    final frameCompleter = Completer<void>();
+    FrameService.instance.onFinishedRenderingFrame = () {
+      frameCompleter.complete();
+    };
+
+    FrameService.instance.scheduleFrame();
+    await frameCompleter.future;
+
+    // Even though invokeOnSemanticsAction was called for tap and increase
+    // actions the actions have not yet been delivered to the framework, because
+    // the actions happened inside onBeginFrame and onDrawFrame. The events are
+    // queues in zero-length timers.
+    expect(tapCalled, isTrue);
+    expect(increaseCalled, isTrue);
+    expect(eventLog, isEmpty);
+
+    // Flush the timers after the frame.
+    await Future<void>.delayed(Duration.zero);
+
+    // Now the events should be delivered.
+    expect(eventLog, [ui.SemanticsAction.tap, ui.SemanticsAction.increase]);
   });
 
   test('onAccessibilityFeaturesChanged preserves the zone', () {
@@ -492,7 +551,7 @@ Future<void> testMain() async {
     final DomElement host = createDomHTMLDivElement();
     final EngineFlutterView view = EngineFlutterView(dispatcher, host);
 
-    expect(host.getAttribute('flt-renderer'), 'canvaskit (requested explicitly)');
+    expect(host.getAttribute('flt-renderer'), 'canvaskit');
     expect(host.getAttribute('flt-build-mode'), 'debug');
 
     view.dispose();

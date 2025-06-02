@@ -35,6 +35,12 @@ namespace flutter::testing {
     const sk_sp<const DisplayList>& b) {
   return DisplayListsNE_Verbose(a.get(), b.get());
 }
+class DlVerbosePath {
+ public:
+  explicit DlVerbosePath(const DlPath& path) : path(path) {}
+
+  const DlPath& path;
+};
 
 }  // namespace flutter::testing
 
@@ -44,14 +50,11 @@ extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayList& display_list);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlPaint& paint);
+extern std::ostream& operator<<(std::ostream& os, const flutter::DlClipOp& op);
 extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlBlendMode& mode);
+                                const flutter::DlPointMode& op);
 extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlCanvas::ClipOp& op);
-extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlCanvas::PointMode& op);
-extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlCanvas::SrcRectConstraint& op);
+                                const flutter::DlSrcRectConstraint& op);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlStrokeCap& cap);
 extern std::ostream& operator<<(std::ostream& os,
@@ -79,6 +82,10 @@ extern std::ostream& operator<<(std::ostream& os,
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayListOpCategory& category);
 extern std::ostream& operator<<(std::ostream& os, const flutter::DlPath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::testing::DlVerbosePath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::DlPathFillType& type);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlImageFilter& type);
 extern std::ostream& operator<<(std::ostream& os,
@@ -131,12 +138,15 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   // clang-format on
   void transformReset() override;
 
-  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
-  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
+  void clipRect(const DlRect& rect, DlClipOp clip_op, bool is_aa) override;
+  void clipOval(const DlRect& bounds, DlClipOp clip_op, bool is_aa) override;
   void clipRoundRect(const DlRoundRect& rrect,
-                     ClipOp clip_op,
+                     DlClipOp clip_op,
                      bool is_aa) override;
-  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             DlClipOp clip_op,
+                             bool is_aa) override;
+  void clipPath(const DlPath& path, DlClipOp clip_op, bool is_aa) override;
 
   void drawColor(DlColor color, DlBlendMode mode) override;
   void drawPaint() override;
@@ -151,12 +161,13 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void drawRoundRect(const DlRoundRect& rrect) override;
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override;
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
   void drawPath(const DlPath& path) override;
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
                DlScalar sweep_degrees,
                bool use_center) override;
-  void drawPoints(PointMode mode,
+  void drawPoints(DlPointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override;
   void drawVertices(const std::shared_ptr<DlVertices>& vertices,
@@ -170,7 +181,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                      const DlRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
-                     SrcRectConstraint constraint) override;
+                     DlSrcRectConstraint constraint) override;
   void drawImageNine(const sk_sp<DlImage> image,
                      const DlIRect& center,
                      const DlRect& dst,
@@ -203,6 +214,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void out(const DlColorFilter* filter);
   void out(const DlImageFilter& filter);
   void out(const DlImageFilter* filter);
+  void out(const DlVerbosePath& path);
 
  private:
   std::ostream& os_;
@@ -218,6 +230,29 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   std::ostream& out_array(std::string name, int count, const T array[]);
 
   std::ostream& startl();
+
+  class DlPathStreamer : public DlPathReceiver {
+   public:
+    ~DlPathStreamer();
+
+    explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
+        : dispatcher_(dispatcher) {}
+
+    void RecommendSizes(size_t verb_count, size_t point_count);
+    void RecommendBounds(const DlRect& bounds);
+    void SetPathInfo(DlPathFillType fill_type, bool is_convex);
+    void MoveTo(const DlPoint& p2);
+    void LineTo(const DlPoint& p2);
+    void QuadTo(const DlPoint& cp, const DlPoint& p2);
+    bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight);
+    void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2);
+    void Close();
+
+   private:
+    DisplayListStreamDispatcher& dispatcher_;
+    bool done_with_info_ = false;
+  };
+  friend class DlPathStreamer;
 };
 
 class DisplayListGeneralReceiver : public DlOpReceiver {
@@ -351,50 +386,56 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     RecordByType(DisplayListOpType::kTransformReset);
   }
 
-  void clipRect(const DlRect& rect,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipRect(const DlRect& rect, DlClipOp clip_op, bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case DlClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectRect);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case DlClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceRect);
         break;
     }
   }
-  void clipOval(const DlRect& bounds,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipOval(const DlRect& bounds, DlClipOp clip_op, bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case DlClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectOval);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case DlClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceOval);
         break;
     }
   }
   void clipRoundRect(const DlRoundRect& rrect,
-                     DlCanvas::ClipOp clip_op,
+                     DlClipOp clip_op,
                      bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case DlClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectRoundRect);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case DlClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceRoundRect);
         break;
     }
   }
-  void clipPath(const DlPath& path,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             DlClipOp clip_op,
+                             bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case DlClipOp::kIntersect:
+        RecordByType(DisplayListOpType::kClipIntersectRoundSuperellipse);
+        break;
+      case DlClipOp::kDifference:
+        RecordByType(DisplayListOpType::kClipDifferenceRoundSuperellipse);
+        break;
+    }
+  }
+  void clipPath(const DlPath& path, DlClipOp clip_op, bool is_aa) override {
+    switch (clip_op) {
+      case DlClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectPath);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case DlClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferencePath);
         break;
     }
@@ -442,6 +483,9 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                          const DlRoundRect& inner) override {
     RecordByType(DisplayListOpType::kDrawDiffRoundRect);
   }
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override {
+    RecordByType(DisplayListOpType::kDrawRoundSuperellipse);
+  }
   void drawPath(const DlPath& path) override {
     RecordByType(DisplayListOpType::kDrawPath);
   }
@@ -451,17 +495,17 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                bool use_center) override {
     RecordByType(DisplayListOpType::kDrawArc);
   }
-  void drawPoints(DlCanvas::PointMode mode,
+  void drawPoints(DlPointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override {
     switch (mode) {
-      case DlCanvas::PointMode::kPoints:
+      case DlPointMode::kPoints:
         RecordByType(DisplayListOpType::kDrawPoints);
         break;
-      case DlCanvas::PointMode::kLines:
+      case DlPointMode::kLines:
         RecordByType(DisplayListOpType::kDrawLines);
         break;
-      case DlCanvas::PointMode::kPolygon:
+      case DlPointMode::kPolygon:
         RecordByType(DisplayListOpType::kDrawPolygon);
         break;
     }
@@ -485,7 +529,7 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                      const DlRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
-                     SrcRectConstraint constraint) override {
+                     DlSrcRectConstraint constraint) override {
     RecordByType(DisplayListOpType::kDrawImageRect);
   }
   void drawImageNine(const sk_sp<DlImage> image,

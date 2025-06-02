@@ -121,6 +121,12 @@ class PlatformView {
     virtual void OnPlatformViewRemoveView(int64_t view_id,
                                           RemoveViewCallback callback) = 0;
 
+    /// @brief Notify the delegate that platform view focus state has changed.
+    ///
+    /// @param[in]  event  The focus event describing the change.
+    virtual void OnPlatformViewSendViewFocusEvent(
+        const ViewFocusEvent& event) = 0;
+
     //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the specified callback needs to
     ///             be invoked after the rasterizer is done rendering the next
@@ -182,6 +188,7 @@ class PlatformView {
     ///             event must be forwarded to the running root isolate hosted
     ///             by the engine on the UI thread.
     ///
+    /// @param[in]  view_id The identifier of the view that contains this node.
     /// @param[in]  node_id The identifier of the accessibility node.
     /// @param[in]  action  The accessibility related action performed on the
     ///                     node of the specified ID.
@@ -189,6 +196,7 @@ class PlatformView {
     ///                     specified action.
     ///
     virtual void OnPlatformViewDispatchSemanticsAction(
+        int64_t view_id,
         int32_t node_id,
         SemanticsAction action,
         fml::MallocMapping args) = 0;
@@ -444,12 +452,14 @@ class PlatformView {
   /// @brief      Used by embedders to dispatch an accessibility action to a
   ///             running isolate hosted by the engine.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node on which to
   ///                     perform the action.
   /// @param[in]  action  The action
   /// @param[in]  args    The arguments
   ///
-  void DispatchSemanticsAction(int32_t node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -494,12 +504,14 @@ class PlatformView {
   /// @see        SemanticsNode, SemticsNodeUpdates,
   ///             CustomAccessibilityActionUpdates
   ///
+  /// @param[in]  view_id  The ID of the view that this update is for
   /// @param[in]  updates  A map with the stable semantics node identifier as
   ///                      key and the node properties as the value.
   /// @param[in]  actions  A map with the stable semantics node identifier as
   ///                      key and the custom node action as the value.
   ///
-  virtual void UpdateSemantics(SemanticsNodeUpdates updates,
+  virtual void UpdateSemantics(int64_t view_id,
+                               SemanticsNodeUpdates updates,
                                CustomAccessibilityActionUpdates actions);
 
   //----------------------------------------------------------------------------
@@ -604,6 +616,8 @@ class PlatformView {
   ///                         attempted to remove the view.
   ///
   void RemoveView(int64_t view_id, RemoveViewCallback callback);
+
+  void SendViewFocusEvent(const ViewFocusEvent& event);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by the shell to obtain a Skia GPU context that is capable
@@ -953,6 +967,15 @@ class PlatformView {
   ///
   virtual double GetScaledFontSize(double unscaled_font_size,
                                    int configuration_id) const;
+
+  //--------------------------------------------------------------------------
+  /// @brief      Notifies the client that the Flutter view focus state has
+  ///             changed and the platform view should be updated.
+  ///
+  ///             Called on platform thread.
+  ///
+  /// @param[in]  request  The request to change the focus state of the view.
+  virtual void RequestViewFocusChange(const ViewFocusChangeRequest& request);
 
  protected:
   // This is the only method called on the raster task runner.

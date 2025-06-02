@@ -70,6 +70,10 @@ class EngineScene implements ui.Scene {
     }
     return recorder.endRecording().toImageSync(width, height);
   }
+
+  Map<String, Object> get debugJsonDescription {
+    return {'rootLayer': rootLayer.debugJsonDescription};
+  }
 }
 
 sealed class OcclusionMapNode {
@@ -264,7 +268,6 @@ class EngineSceneBuilder implements ui.SceneBuilder {
       }
       sliceIndex--;
     }
-    sliceIndex = 0;
     final SceneSlice slice = sceneSlices[sliceIndex];
     slice.platformViewOcclusionMap.addRect(globalPlatformViewRect);
     return sliceIndex;
@@ -384,6 +387,17 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     required ui.Clip clipBehavior,
     ui.ClipRRectEngineLayer? oldLayer,
   }) => pushLayer<ClipRRectLayer>(ClipRRectLayer(ClipRRectOperation(rrect, clipBehavior)));
+
+  @override
+  ui.ClipRSuperellipseEngineLayer pushClipRSuperellipse(
+    ui.RSuperellipse rsuperellipse, {
+    required ui.Clip clipBehavior,
+    ui.ClipRSuperellipseEngineLayer? oldLayer,
+  }) {
+    return pushLayer<ClipRSuperellipseLayer>(
+      ClipRSuperellipseLayer(ClipRSuperellipseOperation(rsuperellipse, clipBehavior)),
+    );
+  }
 
   @override
   ui.ClipRectEngineLayer pushClipRect(

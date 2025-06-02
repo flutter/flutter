@@ -11,7 +11,6 @@
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
-#include "third_party/skia/include/core/SkPoint.h"
 
 namespace impeller {
 
@@ -35,7 +34,7 @@ DlAtlasGeometry::DlAtlasGeometry(const std::shared_ptr<Texture>& atlas,
 DlAtlasGeometry::~DlAtlasGeometry() = default;
 
 bool DlAtlasGeometry::ShouldUseBlend() const {
-  return colors_ != nullptr && mode_ != BlendMode::kSource;
+  return colors_ != nullptr && mode_ != BlendMode::kSrc;
 }
 
 bool DlAtlasGeometry::ShouldSkip() const {
@@ -55,7 +54,7 @@ Rect DlAtlasGeometry::ComputeBoundingBox() const {
   return bounding_box;
 }
 
-std::shared_ptr<Texture> DlAtlasGeometry::GetAtlas() const {
+const std::shared_ptr<Texture>& DlAtlasGeometry::GetAtlas() const {
   return atlas_;
 }
 
@@ -70,16 +69,15 @@ BlendMode DlAtlasGeometry::GetBlendMode() const {
 VertexBuffer DlAtlasGeometry::CreateSimpleVertexBuffer(
     HostBuffer& host_buffer) const {
   using VS = TextureFillVertexShader;
-
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
 
-  auto buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = host_buffer.Emplace(
       sizeof(VS::PerVertexData) * count_ * 6, alignof(VS::PerVertexData),
       [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
             reinterpret_cast<VS::PerVertexData*>(raw_data);
         int offset = 0;
-        auto texture_size = atlas_->GetSize();
+        ISize texture_size = atlas_->GetSize();
         for (auto i = 0u; i < count_; i++) {
           flutter::DlRect sample_rect = tex_[i];
           auto points = sample_rect.GetPoints();
@@ -103,16 +101,15 @@ VertexBuffer DlAtlasGeometry::CreateSimpleVertexBuffer(
 VertexBuffer DlAtlasGeometry::CreateBlendVertexBuffer(
     HostBuffer& host_buffer) const {
   using VS = PorterDuffBlendVertexShader;
-
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
 
-  auto buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = host_buffer.Emplace(
       sizeof(VS::PerVertexData) * count_ * 6, alignof(VS::PerVertexData),
       [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
             reinterpret_cast<VS::PerVertexData*>(raw_data);
         int offset = 0;
-        auto texture_size = atlas_->GetSize();
+        ISize texture_size = atlas_->GetSize();
         for (auto i = 0u; i < count_; i++) {
           flutter::DlRect sample_rect = tex_[i];
           auto points = sample_rect.GetPoints();

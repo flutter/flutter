@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -33,7 +32,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
@@ -45,7 +43,7 @@ void main() {
     );
   });
 
-  testWithoutContext('fails on non-zero exit code', () async {
+  testWithoutContext('returns null on non-zero exit code', () async {
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final ProcessManager processManager = _dartPubDepsFails(
@@ -58,21 +56,14 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
     await expectLater(
-      () => pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
-      throwsA(
-        isA<StateError>().having(
-          (StateError e) => e.message,
-          'message',
-          contains('dart pub --suppress-analytics deps --json failed'),
-        ),
-      ),
+      pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
+      completion(isNull),
     );
   });
 
@@ -88,7 +79,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
@@ -118,7 +108,6 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      usage: TestUsage(),
       platform: FakePlatform(),
       botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),

@@ -23,6 +23,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -174,7 +175,7 @@ typedef struct MouseState {
 - (instancetype)initWithEngine:(FlutterEngine*)engine
                        nibName:(nullable NSString*)nibName
                         bundle:(nullable NSBundle*)nibBundle {
-  NSAssert(engine != nil, @"Engine is required");
+  FML_CHECK(engine) << "initWithEngine:nibName:bundle: must be called with non-nil engine";
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
     _viewOpaque = YES;
@@ -256,7 +257,6 @@ typedef struct MouseState {
   if (!project) {
     project = [[FlutterDartProject alloc] init];
   }
-  FlutterView.forceSoftwareRendering = project.settings.enable_software_rendering;
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
                                                       project:project
                                        allowHeadlessExecution:self.engineAllowHeadlessExecution
@@ -320,15 +320,15 @@ typedef struct MouseState {
                  name:@(flutter::kOverlayStyleUpdateNotificationName)
                object:nil];
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    [self setUpSceneLifecycleNotifications:center];
-  } else {
+  if (FlutterSharedApplication.isAvailable) {
     [self setUpApplicationLifecycleNotifications:center];
+  } else {
+    if (@available(iOS 13.0, *)) {
+      [self setUpSceneLifecycleNotifications:center];
+    } else {
+      [self setUpApplicationLifecycleNotifications:center];
+    }
   }
-#else
-  [self setUpApplicationLifecycleNotifications:center];
-#endif
 
   [center addObserver:self
              selector:@selector(keyboardWillChangeFrame:)
@@ -723,6 +723,58 @@ static void SendFakeTouchEvent(UIScreen* screen,
   _flutterViewRenderedCallback = callback;
 }
 
+- (UISceneActivationState)activationState {
+  return self.flutterWindowSceneIfViewLoaded.activationState;
+}
+
+- (BOOL)stateIsActive {
+  BOOL isActive = YES;
+
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  if (flutterApplication) {
+    isActive = [self isApplicationStateMatching:UIApplicationStateActive
+                                withApplication:flutterApplication];
+  } else if (@available(iOS 13.0, *)) {
+    isActive = [self isSceneStateMatching:UISceneActivationStateForegroundActive];
+  }
+  return isActive;
+}
+
+- (BOOL)stateIsBackground {
+  // [UIApplication sharedApplication API is not available for app extension.
+  // Assume the app is not in the background if we're unable to get the state.
+  BOOL isBackground = NO;
+
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  if (flutterApplication) {
+    isBackground = [self isApplicationStateMatching:UIApplicationStateBackground
+                                    withApplication:flutterApplication];
+  } else if (@available(iOS 13.0, *)) {
+    isBackground = [self isSceneStateMatching:UISceneActivationStateBackground];
+  }
+  return isBackground;
+}
+
+- (BOOL)isApplicationStateMatching:(UIApplicationState)match
+                   withApplication:(UIApplication*)application {
+  switch (application.applicationState) {
+    case UIApplicationStateActive:
+    case UIApplicationStateInactive:
+    case UIApplicationStateBackground:
+      return application.applicationState == match;
+  }
+}
+
+- (BOOL)isSceneStateMatching:(UISceneActivationState)match API_AVAILABLE(ios(13.0)) {
+  switch (self.activationState) {
+    case UISceneActivationStateForegroundActive:
+    case UISceneActivationStateUnattached:
+    case UISceneActivationStateForegroundInactive:
+    case UISceneActivationStateBackground:
+      return self.activationState == match;
+  }
+}
+
 #pragma mark - Surface creation and teardown updates
 
 - (void)surfaceUpdated:(BOOL)appeared {
@@ -849,16 +901,8 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if (self.engine.viewController == self) {
     [self onUserSettingsChanged:nil];
     [self onAccessibilityStatusChanged:nil];
-    BOOL stateIsActive = YES;
-#if APPLICATION_EXTENSION_API_ONLY
-    if (@available(iOS 13.0, *)) {
-      stateIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
-                      UISceneActivationStateForegroundActive;
-    }
-#else
-    stateIsActive = UIApplication.sharedApplication.applicationState == UIApplicationStateActive;
-#endif
-    if (stateIsActive) {
+
+    if (self.stateIsActive) {
       [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
     }
   }
@@ -1386,20 +1430,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // There is no guarantee that UIKit will layout subviews when the application/scene is active.
   // Creating the surface when inactive will cause GPU accesses from the background. Only wait for
   // the first frame to render when the application/scene is actually active.
-  bool applicationOrSceneIsActive = YES;
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    applicationOrSceneIsActive = self.flutterWindowSceneIfViewLoaded.activationState ==
-                                 UISceneActivationStateForegroundActive;
-  }
-#else
-  applicationOrSceneIsActive =
-      [UIApplication sharedApplication].applicationState == UIApplicationStateActive;
-#endif
-
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate && applicationOrSceneIsActive && self.engine) {
+  if (firstViewBoundsUpdate && self.stateIsActive && self.engine) {
     [self surfaceUpdated:YES];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
     NSTimeInterval timeout = 0.2;
@@ -1490,6 +1523,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
   FlutterKeyboardMode keyboardMode = [self calculateKeyboardAttachMode:notification];
   CGFloat calculatedInset = [self calculateKeyboardInset:keyboardFrame keyboardMode:keyboardMode];
+  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+
+  // If the software keyboard is displayed before displaying the PasswordManager prompt,
+  // UIKeyboardWillHideNotification will occur immediately after UIKeyboardWillShowNotification.
+  // The duration of the animation will be 0.0, and the calculated inset will be 0.0.
+  // In this case, it is necessary to cancel the animation and hide the keyboard immediately.
+  // https://github.com/flutter/flutter/pull/164884
+  if (keyboardMode == FlutterKeyboardModeHidden && calculatedInset == 0.0 && duration == 0.0) {
+    [self hideKeyboardImmediately];
+    return;
+  }
 
   // Avoid double triggering startKeyBoardAnimation.
   if (self.targetViewInsetBottom == calculatedInset) {
@@ -1497,7 +1541,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   self.targetViewInsetBottom = calculatedInset;
-  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 
   // Flag for simultaneous compounding animation calls.
   // This captures animation calls made while the keyboard animation is currently animating. If the
@@ -1738,6 +1781,21 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
           [strongSelf ensureViewportMetricsIsCorrect];
         }
       }];
+}
+
+- (void)hideKeyboardImmediately {
+  [self invalidateKeyboardAnimationVSyncClient];
+  if (self.keyboardAnimationView) {
+    [self.keyboardAnimationView.layer removeAllAnimations];
+    [self removeKeyboardAnimationView];
+    self.keyboardAnimationView = nil;
+  }
+  if (self.keyboardSpringAnimation) {
+    self.keyboardSpringAnimation = nil;
+  }
+  // Reset targetViewInsetBottom to 0.0.
+  self.targetViewInsetBottom = 0.0;
+  [self ensureViewportMetricsIsCorrect];
 }
 
 - (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation {
@@ -2004,18 +2062,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     self.orientationPreferences = new_preferences;
 
     if (@available(iOS 16.0, *)) {
-      NSSet<UIScene*>* scenes =
-#if APPLICATION_EXTENSION_API_ONLY
-          self.flutterWindowSceneIfViewLoaded
-              ? [NSSet setWithObject:self.flutterWindowSceneIfViewLoaded]
-              : [NSSet set];
-#else
-          [UIApplication.sharedApplication.connectedScenes
-              filteredSetUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(
-                                                         id scene, NSDictionary* bindings) {
-                return [scene isKindOfClass:[UIWindowScene class]];
-              }]];
-#endif
+      UIApplication* flutterApplication = FlutterSharedApplication.application;
+      NSSet<UIScene*>* scenes = [NSSet set];
+      if (flutterApplication) {
+        scenes = [flutterApplication.connectedScenes
+            filteredSetUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(
+                                                       id scene, NSDictionary* bindings) {
+              return [scene isKindOfClass:[UIWindowScene class]];
+            }]];
+      } else if (self.flutterWindowSceneIfViewLoaded) {
+        scenes = [NSSet setWithObject:self.flutterWindowSceneIfViewLoaded];
+      }
       [self requestGeometryUpdateForWindowScenes:scenes];
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation = 0;
@@ -2028,13 +2085,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         }
         currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
       } else {
-#if APPLICATION_EXTENSION_API_ONLY
-        FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
-                          "app extension. Orientation: "
-                       << currentInterfaceOrientation;
-#else
-        currentInterfaceOrientation = 1 << [[UIApplication sharedApplication] statusBarOrientation];
-#endif
+        UIApplication* flutterApplication = FlutterSharedApplication.application;
+        if (flutterApplication) {
+          currentInterfaceOrientation = 1 << [flutterApplication statusBarOrientation];
+        } else {
+          FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
+                            "app extension. Orientation: "
+                         << currentInterfaceOrientation;
+        }
       }
       if (!(self.orientationPreferences & currentInterfaceOrientation)) {
         [UIViewController attemptRotationToDeviceOrientation];
@@ -2168,11 +2226,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (CGFloat)textScaleFactor {
-#if APPLICATION_EXTENSION_API_ONLY
-  FML_LOG(WARNING) << "Dynamic content size update is not supported in app extension.";
-  return 1.0;
-#else
-  UIContentSizeCategory category = [UIApplication sharedApplication].preferredContentSizeCategory;
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  if (flutterApplication == nil) {
+    FML_LOG(WARNING) << "Dynamic content size update is not supported in app extension.";
+    return 1.0;
+  }
+
+  UIContentSizeCategory category = flutterApplication.preferredContentSizeCategory;
   // The delta is computed by approximating Apple's typography guidelines:
   // https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
   //
@@ -2222,7 +2282,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   } else {
     return 1.0;
   }
-#endif
 }
 
 - (BOOL)supportsShowingSystemContextMenu {

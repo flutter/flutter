@@ -13,6 +13,7 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -120,7 +121,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[InstallCodeAssets()];
 }
 
 /// Generate a snapshot of the dart code used in the program.
@@ -251,6 +252,9 @@ class KernelSnapshot extends Target {
 
     final String dillPath = environment.buildDir.childFile(dillName).path;
 
+    final List<String> dartDefines = decodeDartDefines(environment.defines, kDartDefines);
+    await _addFlavorToDartDefines(dartDefines, environment, targetPlatform);
+
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
@@ -271,7 +275,7 @@ class KernelSnapshot extends Target {
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
-      dartDefines: decodeDartDefines(environment.defines, kDartDefines),
+      dartDefines: dartDefines,
       packageConfig: packageConfig,
       buildDir: environment.buildDir,
       targetOS: targetOS,
@@ -280,6 +284,42 @@ class KernelSnapshot extends Target {
     if (output == null || output.errorCount != 0) {
       throw Exception();
     }
+  }
+
+  Future<void> _addFlavorToDartDefines(
+    List<String> dartDefines,
+    Environment environment,
+    TargetPlatform targetPlatform,
+  ) async {
+    final String? flavor;
+
+    // For iOS and macOS projects, parse the flavor from the configuration, do
+    // not get from the FLAVOR environment variable. This is because when built
+    // from Xcode, the scheme/flavor can be changed through the UI and is not
+    // reflected in the environment variable.
+    if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final XcodeBasedProject xcodeProject =
+          targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
+      flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
+    } else {
+      flavor = environment.defines[kFlavor];
+    }
+    if (flavor == null) {
+      return;
+    }
+
+    // It is possible there is a flavor already in dartDefines, from another
+    // part of the build process, but this should take precedence as it happens
+    // last (xcodebuild execution).
+    //
+    // See https://github.com/flutter/flutter/issues/169598.
+
+    // If the flavor is already in the dart defines, remove it.
+    dartDefines.removeWhere((String define) => define.startsWith(kAppFlavor));
+
+    // Then, add it to the end.
+    dartDefines.add('$kAppFlavor=$flavor');
   }
 }
 

@@ -39,8 +39,8 @@ void main() {
     // Middle, large title, and search field are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 139.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 132.0);
 
     await tester.fling(find.text('Drag me up'), bottomDragUp, 50.0);
     await tester.pumpAndSettle();
@@ -48,8 +48,8 @@ void main() {
     // Search field is hidden, but large title and middle title are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
 
     await tester.fling(find.text('Drag me up'), titleDragUp, 50.0);
     await tester.pumpAndSettle();
@@ -60,7 +60,7 @@ void main() {
       tester.getBottomLeft(find.text('Family').first).dy,
       36.0 + 8.0,
     ); // Static part + _kNavBarBottomPadding.
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 52.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 44.0);
   });
 
   testWidgets('Search field is always shown in bottom always mode', (WidgetTester tester) async {
@@ -75,8 +75,8 @@ void main() {
     // Middle, large title, and search field are visible.
     expect(tester.getBottomLeft(find.text('Contacts Group').first).dy, 30.5);
     expect(tester.getBottomLeft(find.text('Family').first).dy, 88.0);
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 104.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 139.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 96.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 132.0);
 
     await tester.fling(find.text('Drag me up'), titleDragUp, 50.0);
     await tester.pumpAndSettle();
@@ -87,8 +87,45 @@ void main() {
       tester.getBottomLeft(find.text('Family').first).dy,
       36.0 + 8.0,
     ); // Static part + _kNavBarBottomPadding.
-    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 52.0);
-    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 87.0);
+    expect(tester.getTopLeft(find.byType(CupertinoSearchTextField)).dy, 44.0);
+    expect(tester.getBottomLeft(find.byType(CupertinoSearchTextField)).dy, 80.0);
+  });
+
+  testWidgets('Opens the search view when the search field is tapped', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.SliverNavBarApp());
+
+    // Navigate to a page with a search field.
+    final Finder nextButton = find.text('Bottom Automatic mode');
+    expect(nextButton, findsOneWidget);
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
+    expect(find.text('Tap on the search field to open the search view'), findsOneWidget);
+    // A decoy 'Cancel' button used in the animation.
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+
+    // Tap on the search field to open the search view.
+    await tester.tap(find.byType(CupertinoSearchTextField), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Enter search text'), findsOneWidget);
+    expect(find.text('Tap on the search field to open the search view'), findsNothing);
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+
+    await tester.enterText(find.byType(CupertinoSearchTextField), 'a');
+    await tester.pumpAndSettle();
+
+    expect(find.text('The text has changed to: a'), findsOneWidget);
+
+    // Tap on the 'Cancel' button to close the search view.
+    await tester.tap(find.widgetWithText(CupertinoButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
+    expect(find.text('Tap on the search field to open the search view'), findsOneWidget);
+    // A decoy 'Cancel' button used in the animation.
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
   });
 
   testWidgets('Opens the search view when the search field is tapped', (WidgetTester tester) async {

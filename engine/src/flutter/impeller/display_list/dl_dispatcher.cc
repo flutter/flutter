@@ -13,6 +13,7 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
+#include "fml/closure.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
@@ -29,6 +30,7 @@
 #include "impeller/entity/geometry/fill_path_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -134,6 +136,13 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
       break;
   }
   return desc;
+}
+
+static std::optional<const Rect> ToOptRect(const flutter::DlRect* rect) {
+  if (rect == nullptr) {
+    return std::nullopt;
+  }
+  return *rect;
 }
 
 // |flutter::DlOpReceiver|
@@ -243,7 +252,7 @@ void DlDispatcherBase::setInvertColors(bool invert) {
 void DlDispatcherBase::setBlendMode(flutter::DlBlendMode dl_mode) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.blend_mode = skia_conversions::ToBlendMode(dl_mode);
+  paint_.blend_mode = dl_mode;
 }
 
 static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
@@ -417,19 +426,18 @@ void DlDispatcherBase::transformReset() {
   GetCanvas().Transform(initial_matrix_);
 }
 
-static Entity::ClipOperation ToClipOperation(
-    flutter::DlCanvas::ClipOp clip_op) {
+static Entity::ClipOperation ToClipOperation(flutter::DlClipOp clip_op) {
   switch (clip_op) {
-    case flutter::DlCanvas::ClipOp::kDifference:
+    case flutter::DlClipOp::kDifference:
       return Entity::ClipOperation::kDifference;
-    case flutter::DlCanvas::ClipOp::kIntersect:
+    case flutter::DlClipOp::kIntersect:
       return Entity::ClipOperation::kIntersect;
   }
 }
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::clipRect(const DlRect& rect,
-                                ClipOp clip_op,
+                                flutter::DlClipOp clip_op,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
@@ -439,7 +447,7 @@ void DlDispatcherBase::clipRect(const DlRect& rect,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::clipOval(const DlRect& bounds,
-                                ClipOp clip_op,
+                                flutter::DlClipOp clip_op,
                                 bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
@@ -449,7 +457,7 @@ void DlDispatcherBase::clipOval(const DlRect& bounds,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
-                                     ClipOp sk_op,
+                                     flutter::DlClipOp sk_op,
                                      bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
@@ -470,7 +478,28 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::clipPath(const DlPath& path, ClipOp sk_op, bool is_aa) {
+void DlDispatcherBase::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                             flutter::DlClipOp sk_op,
+                                             bool is_aa) {
+  AUTO_DEPTH_WATCHER(0u);
+
+  auto clip_op = ToClipOperation(sk_op);
+  if (rse.IsRect()) {
+    RectGeometry geom(rse.GetBounds());
+    GetCanvas().ClipGeometry(geom, clip_op, /*is_aa=*/is_aa);
+  } else if (rse.IsOval()) {
+    EllipseGeometry geom(rse.GetBounds());
+    GetCanvas().ClipGeometry(geom, clip_op);
+  } else {
+    RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetRadii());
+    GetCanvas().ClipGeometry(geom, clip_op);
+  }
+}
+
+// |flutter::DlOpReceiver|
+void DlDispatcherBase::clipPath(const DlPath& path,
+                                flutter::DlClipOp sk_op,
+                                bool is_aa) {
   AUTO_DEPTH_WATCHER(0u);
 
   auto clip_op = ToClipOperation(sk_op);
@@ -485,8 +514,8 @@ void DlDispatcherBase::clipPath(const DlPath& path, ClipOp sk_op, bool is_aa) {
   } else {
     SkRRect rrect;
     if (path.IsSkRRect(&rrect) && rrect.isSimple()) {
-      RoundRectGeometry geom(skia_conversions::ToRect(rrect.rect()),
-                             skia_conversions::ToSize(rrect.getSimpleRadii()));
+      RoundRectGeometry geom(flutter::ToDlRect(rrect.rect()),
+                             flutter::ToDlSize(rrect.getSimpleRadii()));
       GetCanvas().ClipGeometry(geom, clip_op);
     } else {
       FillPathGeometry geom(path.GetPath());
@@ -502,7 +531,7 @@ void DlDispatcherBase::drawColor(flutter::DlColor color,
 
   Paint paint;
   paint.color = skia_conversions::ToColor(color);
-  paint.blend_mode = skia_conversions::ToBlendMode(dl_mode);
+  paint.blend_mode = dl_mode;
   GetCanvas().DrawPaint(paint);
 }
 
@@ -603,6 +632,13 @@ void DlDispatcherBase::drawDiffRoundRect(const DlRoundRect& outer,
 }
 
 // |flutter::DlOpReceiver|
+void DlDispatcherBase::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
+  AUTO_DEPTH_WATCHER(1u);
+
+  GetCanvas().DrawRoundSuperellipse(rse, paint_);
+}
+
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawPath(const DlPath& path) {
   AUTO_DEPTH_WATCHER(1u);
 
@@ -629,6 +665,13 @@ void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
 
   if (path.IsOval(&rect)) {
     canvas.DrawOval(rect, paint);
+    return;
+  }
+
+  DlPoint start;
+  DlPoint end;
+  if (path.IsLine(&start, &end)) {
+    canvas.DrawLine(start, end, paint);
     return;
   }
 
@@ -665,7 +708,7 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawPoints(PointMode mode,
+void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
                                   uint32_t count,
                                   const DlPoint points[]) {
   AUTO_DEPTH_WATCHER(1u);
@@ -673,7 +716,7 @@ void DlDispatcherBase::drawPoints(PointMode mode,
   Paint paint = paint_;
   paint.style = Paint::Style::kStroke;
   switch (mode) {
-    case flutter::DlCanvas::PointMode::kPoints: {
+    case flutter::DlPointMode::kPoints: {
       // Cap::kButt is also treated as a square.
       PointStyle point_style = paint.stroke_cap == Cap::kRound
                                    ? PointStyle::kRound
@@ -684,14 +727,14 @@ void DlDispatcherBase::drawPoints(PointMode mode,
       }
       GetCanvas().DrawPoints(points, count, radius, paint, point_style);
     } break;
-    case flutter::DlCanvas::PointMode::kLines:
+    case flutter::DlPointMode::kLines:
       for (uint32_t i = 1; i < count; i += 2) {
         Point p0 = points[i - 1];
         Point p1 = points[i];
         GetCanvas().DrawLine(p0, p1, paint, /*reuse_depth=*/i > 1);
       }
       break;
-    case flutter::DlCanvas::PointMode::kPolygon:
+    case flutter::DlPointMode::kPolygon:
       if (count > 1) {
         Point p0 = points[0];
         for (uint32_t i = 1; i < count; i++) {
@@ -728,23 +771,23 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
   const auto src = DlRect::MakeWH(size.width, size.height);
   const auto dest = DlRect::MakeXYWH(point.x, point.y, size.width, size.height);
 
-  drawImageRect(image,                      // image
-                src,                        // source rect
-                dest,                       // destination rect
-                sampling,                   // sampling options
-                render_with_attributes,     // render with attributes
-                SrcRectConstraint::kStrict  // constraint
+  drawImageRect(image,                                 // image
+                src,                                   // source rect
+                dest,                                  // destination rect
+                sampling,                              // sampling options
+                render_with_attributes,                // render with attributes
+                flutter::DlSrcRectConstraint::kStrict  // constraint
   );
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawImageRect(
-    const sk_sp<flutter::DlImage> image,
-    const DlRect& src,
-    const DlRect& dst,
-    flutter::DlImageSampling sampling,
-    bool render_with_attributes,
-    SrcRectConstraint constraint = SrcRectConstraint::kFast) {
+void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
+                                     const DlRect& src,
+                                     const DlRect& dst,
+                                     flutter::DlImageSampling sampling,
+                                     bool render_with_attributes,
+                                     flutter::DlSrcRectConstraint constraint =
+                                         flutter::DlSrcRectConstraint::kFast) {
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
@@ -790,9 +833,9 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                       tex,                                              //
                       colors,                                           //
                       static_cast<size_t>(count),                       //
-                      skia_conversions::ToBlendMode(mode),              //
+                      mode,                                             //
                       skia_conversions::ToSamplerDescriptor(sampling),  //
-                      skia_conversions::ToRect(cull_rect)               //
+                      ToOptRect(cull_rect)                              //
       );
   auto atlas_contents = std::make_shared<AtlasContents>();
   atlas_contents->SetGeometry(&geometry);
@@ -826,10 +869,10 @@ void DlDispatcherBase::drawDisplayList(
   if (opacity < SK_Scalar1) {
     Paint save_paint;
     save_paint.color = Color(0, 0, 0, opacity);
-    GetCanvas().SaveLayer(
-        save_paint, skia_conversions::ToRect(display_list->bounds()), nullptr,
-        ContentBoundsPromise::kContainsContents, display_list->total_depth(),
-        display_list->can_apply_group_opacity());
+    GetCanvas().SaveLayer(save_paint, display_list->GetBounds(), nullptr,
+                          ContentBoundsPromise::kContainsContents,
+                          display_list->total_depth(),
+                          display_list->can_apply_group_opacity());
   } else {
     // The display list may alter the clip, which must be restored to the
     // current clip at the end of playback.
@@ -957,8 +1000,7 @@ static bool RequiresReadbackForBlends(
     const ContentContext& renderer,
     flutter::DlBlendMode max_root_blend_mode) {
   return !renderer.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-         skia_conversions::ToBlendMode(max_root_blend_mode) >
-             Entity::kLastPipelineBlendMode;
+         max_root_blend_mode > Entity::kLastPipelineBlendMode;
 }
 
 CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
@@ -985,8 +1027,8 @@ void CanvasDlDispatcher::drawVertices(
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawVertices(
-      std::make_shared<DlVerticesGeometry>(vertices, renderer_),
-      skia_conversions::ToBlendMode(dl_mode), paint_);
+      std::make_shared<DlVerticesGeometry>(vertices, renderer_), dl_mode,
+      paint_);
 }
 
 void CanvasDlDispatcher::SetBackdropData(
@@ -1299,14 +1341,18 @@ std::shared_ptr<Texture> DisplayListToTexture(
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
+  context.GetContentContext().GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure cleanup([&] {
+    if (reset_host_buffer) {
+      context.GetContentContext().GetTransientsBuffer().Reset();
+    }
+    context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
+    context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+    context.GetContext()->DisposeThreadLocalCachedResources();
+  });
+
   display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
   impeller_dispatcher.FinishRecording();
-
-  if (reset_host_buffer) {
-    context.GetContentContext().GetTransientsBuffer().Reset();
-  }
-  context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-  context.GetContext()->DisposeThreadLocalCachedResources();
 
   return target.GetRenderTargetTexture();
 }
@@ -1332,11 +1378,16 @@ bool RenderToTarget(ContentContext& context,
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
+  context.GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure cleanup([&] {
+    if (reset_host_buffer) {
+      context.GetTransientsBuffer().Reset();
+    }
+    context.GetTextShadowCache().MarkFrameEnd();
+  });
+
   display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
-  if (reset_host_buffer) {
-    context.GetTransientsBuffer().Reset();
-  }
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
   return true;

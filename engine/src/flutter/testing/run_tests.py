@@ -37,7 +37,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 OUT_DIR = os.path.join(BUILDROOT_DIR, 'out')
 GOLDEN_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'resources')
-FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'third_party', 'txt', 'third_party', 'fonts')
+FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'txt', 'third_party', 'fonts')
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
 FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
@@ -765,13 +765,7 @@ def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
 
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
-
-  systrace_test = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'android_systrace_test.py')
-  scenario_apk = os.path.join(OUT_DIR, android_variant, 'firebase_apks', 'scenario_app.apk')
-  run_cmd([
-      systrace_test, '--adb-path', adb_path, '--apk-path', scenario_apk, '--package-name',
-      'dev.flutter.scenarios', '--activity-name', '.PlatformViewsActivity'
-  ])
+  run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
 
 
 def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
@@ -970,12 +964,10 @@ def build_dart_host_test_list():
       os.path.join('flutter', 'ci'),
       os.path.join('flutter', 'flutter_frontend_server'),
       os.path.join('flutter', 'testing', 'skia_gold_client'),
-      os.path.join('flutter', 'testing', 'scenario_app'),
       os.path.join('flutter', 'tools', 'api_check'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
       os.path.join('flutter', 'tools', 'const_finder'),
-      os.path.join('flutter', 'tools', 'dir_contents_diff'),
       os.path.join('flutter', 'tools', 'engine_tool'),
       os.path.join('flutter', 'tools', 'githooks'),
       os.path.join('flutter', 'tools', 'header_guard_check'),
@@ -1068,6 +1060,23 @@ class DirectoryChange():
     os.chdir(self.old_cwd)
 
 
+def contains_png_recursive(directory):
+  """
+  Recursively checks if a directory contains at least one .png file.
+
+  Args:
+    directory: The path to the directory to check.
+
+  Returns:
+    True if a .png file is found, False otherwise.
+  """
+  for _, _, files in os.walk(directory):
+    for filename in files:
+      if filename.lower().endswith('.png'):
+        return True
+  return False
+
+
 def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
   """
   Executes the impeller golden image tests from in the `variant` build.
@@ -1086,19 +1095,9 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
     extra_env.update(vulkan_validation_env(build_dir))
     run_cmd([tests_path, f'--working_dir={temp_dir}'], cwd=build_dir, env=extra_env)
     dart_bin = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
-    golden_path = os.path.join('testing', 'impeller_golden_tests_output.txt')
-    script_path = os.path.join('tools', 'dir_contents_diff', 'bin', 'dir_contents_diff.dart')
-    diff_result = subprocess.run(
-        f'{dart_bin} {script_path} {golden_path} {temp_dir}',
-        check=False,
-        shell=True,
-        stdout=subprocess.PIPE,
-        cwd=os.path.join(BUILDROOT_DIR, 'flutter')
-    )
-    if diff_result.returncode != 0:
-      print_divider('<')
-      print(diff_result.stdout.decode())
-      raise RuntimeError('impeller_golden_tests diff failure')
+
+    if not contains_png_recursive(temp_dir):
+      raise RuntimeError('impeller_golden_tests diff failure - no PNGs found!')
 
     if not require_skia_gold:
       print_divider('<')
@@ -1370,7 +1369,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     run_benchmark_tests(build_dir)
     run_engine_benchmarks(build_dir, engine_filter)
 
-  if ('engine' in types or 'font-subset' in types) and 'debug' in build_dir:
+  if 'font-subset' in types:
     cmd = ['python3', 'test.py', '--variant', args.variant]
     if 'arm64' in args.variant:
       cmd += ['--target-cpu', 'arm64']

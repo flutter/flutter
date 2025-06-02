@@ -22,14 +22,14 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           expect(
             theme.builders[platform],
             isNotNull,
             reason: 'theme builder for $platform is null',
           );
         case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
           expect(
             theme.builders[platform],
             isNull,
@@ -229,6 +229,98 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
+  group('FadeForwardsPageTransitionsBuilder transitions', () {
+    testWidgets(
+      'opacity fades out during forward secondary animation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 1, end: 0).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity =
+            tester
+                .element(find.byType(SizedBox))
+                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is forward, transition will be reverse between duration 0 to 0.25.
+        controller.value = 0.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+
+        controller.value = 0.25;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'opacity fades in during reverse secondary animaation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 0, end: 1).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 1,
+          end: 0,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity =
+            tester
+                .element(find.byType(SizedBox))
+                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is reverse, transition will be forward between duration 0.75 to 1.0.
+        controller.value = 0.75;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+
+        controller.value = 1.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  });
+
   testWidgets(
     'FadeForwardsPageTransitionBuilder default duration is 800ms',
     (WidgetTester tester) async {
@@ -284,6 +376,48 @@ void main() {
       expect(coloredBox.color, Colors.transparent); // Color is transparent during animation.
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'CupertinoPageTransitionsBuilder default duration is 500ms',
+    (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/b');
+                },
+              ),
+            ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      expect(find.byType(CupertinoPageTransition), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 499));
+      expect(tester.hasRunningAnimations, isTrue);
+
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(tester.hasRunningAnimations, isFalse);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
@@ -593,7 +727,6 @@ void main() {
   }) {
     return MaterialApp(
       theme: ThemeData(
-        useMaterial3: true,
         pageTransitionsTheme: PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
             TargetPlatform.android: ZoomPageTransitionsBuilder(

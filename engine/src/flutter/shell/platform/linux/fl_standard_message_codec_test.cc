@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
+
+#include <cmath>
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "gtest/gtest.h"
 

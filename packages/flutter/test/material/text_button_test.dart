@@ -443,7 +443,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -827,7 +827,7 @@ void main() {
 
     expect(tester.getSize(find.byType(TextButton)), const Size(134.0, 48.0));
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/61016
+  });
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (
     WidgetTester tester,
@@ -1458,7 +1458,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: TextButton(key: key, onPressed: () {}, child: const Text('TextButton')),
@@ -1477,7 +1477,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: TextButton.icon(
@@ -1571,7 +1571,7 @@ void main() {
   testWidgets(
     'TextButton uses InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2465,7 +2465,7 @@ void main() {
   testWidgets('treats a hovering stylus like a mouse', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     bool hasBeenHovered = false;
 
     await tester.pumpWidget(

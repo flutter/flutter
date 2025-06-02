@@ -29,7 +29,10 @@
             "ninja": {
                 "config": "ci/host_debug_test",
                 "targets": [
-                    "flutter:unittests"
+                    "flutter:unittests",
+                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/shell/testing",
+                    "flutter/tools/path_ops"
                 ]
             },
             "tests": [
@@ -73,9 +76,26 @@
             "ninja": {
                 "config": "ci/host_profile_test",
                 "targets": [
-                    "flutter:unittests"
+                    "flutter:unittests",
+                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/shell/testing",
+                    "flutter/tools/path_ops"
                 ]
-            }
+            },
+             "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_profile",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_profile_test",
+                        "--type",
+                        "dart,dart-host,engine",
+                        "--engine-capture-core-dump"
+                    ]
+                }
+            ]
         },
         {
             "drone_dimensions": [
@@ -109,7 +129,7 @@
                 "config": "ci/host_release_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/archives:flutter_patched_sdk",
+                    "flutter/build/dart:copy_dart_sdk",
                     "flutter/display_list:display_list_benchmarks",
                     "flutter/display_list:display_list_builder_benchmarks",
                     "flutter/display_list:display_list_region_benchmarks",
@@ -118,7 +138,9 @@
                     "flutter/impeller/geometry:geometry_benchmarks",
                     "flutter/lib/ui:ui_benchmarks",
                     "flutter/shell/common:shell_benchmarks",
-                    "flutter/third_party/txt:txt_benchmarks"
+                    "flutter/shell/testing",
+                    "flutter/tools/path_ops",
+                    "flutter/txt:txt_benchmarks"
                 ]
             },
             "tests": [

@@ -37,5 +37,7 @@
   "lookUpButtonLabel": "חיפוש",
   "searchWebButtonLabel": "חיפוש באינטרנט",
   "shareButtonLabel": "שיתוף…",
-  "clearButtonLabel": "ניקוי"
+  "clearButtonLabel": "ניקוי",
+  "cancelButtonLabel": "ביטול",
+  "backButtonLabel": "למסך הקודם"
 }

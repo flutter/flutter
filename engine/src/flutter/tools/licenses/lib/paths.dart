@@ -69,6 +69,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/dart/sdk/lib/html/dart2js', // generated from other sources
   r'flutter/third_party/dart/sdk/lib/html/doc',
   r'flutter/third_party/dart/sdk/lib/svg/dart2js', // generated from other sources
+  r'flutter/third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart', // generated from other sources
   r'flutter/third_party/dart/third_party/binary_size', // not linked in
   r'flutter/third_party/dart/third_party/binaryen', // not linked in
   r'flutter/third_party/dart/third_party/d3', // Siva says "that is the charting library used by the binary size tool"
@@ -101,6 +102,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'flutter/third_party/gradle',
   r'flutter/third_party/harfbuzz/docs',
+  r'flutter/third_party/harfbuzz/perf',
+  r'flutter/third_party/harfbuzz/src/hb-bit-vector.hh',
+  r'flutter/third_party/harfbuzz/src/hb-directwrite.hh',
+  r'flutter/third_party/harfbuzz/src/hb-directwrite-shape.cc',
+  r'flutter/third_party/harfbuzz/src/hb-fontations.h',
   r'flutter/third_party/harfbuzz/util', // utils are command line tools that do not end up in the binary
   r'flutter/third_party/icu/filters',
   r'flutter/third_party/icu/fuzzers',
@@ -137,6 +143,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/libwebp/gradle', // not included in our build
   r'flutter/third_party/libwebp/swig', // not included in our build
   r'flutter/third_party/libwebp/webp_js',
+  r'flutter/third_party/llvm_libc/AOR_v20.02',
+  r'flutter/third_party/llvm_libc/benchmarks',
+  r'flutter/third_party/llvm_libc/examples',
+  r'flutter/third_party/llvm_libc/fuzzing',
+  r'flutter/third_party/llvm_libc/test',
   r'flutter/third_party/ninja', // build system
   r'flutter/third_party/ocmock', // only used for tests
   r'flutter/third_party/perfetto/debian', // contains nothing that ends up in the binary executable
@@ -185,11 +196,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/stb',
   r'flutter/third_party/swiftshader/third_party', // See: https://github.com/flutter/flutter/issues/145726
   r'flutter/third_party/test_shaders', // for tests only
-  r'flutter/third_party/txt/third_party/fonts',
   r'flutter/third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license
   r'flutter/third_party/vulkan-deps/glslang/src/LICENSE.txt', // redundant with licenses inside files
   r'flutter/third_party/vulkan-deps/glslang/src/glslang/OSDependent/Web', // we only use glslang in impellerc, not in web apps
   r'flutter/third_party/vulkan-deps/glslang/src/kokoro', // only build files
+  r'flutter/third_party/vulkan-deps/lunarg-vulkantools/src/vkconfig_gui',
   r'flutter/third_party/vulkan-deps/spirv-cross/src/LICENSES', // directory with license templates
   r'flutter/third_party/vulkan-deps/spirv-cross/src/shaders', // used by regression tests
   r'flutter/third_party/vulkan-deps/spirv-cross/src/shaders-hlsl', // used by regression tests
@@ -220,6 +231,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/zlib/contrib/minizip/miniunz.c', // sample file
   r'flutter/third_party/zlib/contrib/minizip/minizip.c', // sample file
   r'flutter/tools',
+  r'flutter/txt/third_party/fonts', // only used on hosts for tests
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
   r'fuchsia/sdk/linux/docs',
   r'fuchsia/sdk/linux/meta',

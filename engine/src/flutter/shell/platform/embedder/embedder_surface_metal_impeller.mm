@@ -41,6 +41,7 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
                                              impeller_framebuffer_blend_shaders_length),
   };
   context_ = impeller::ContextMTL::Create(
+      impeller::Flags{},
       (__bridge id<MTLDevice>)device,               // device
       (__bridge id<MTLCommandQueue>)command_queue,  // command_queue
       shader_mappings,                              // shader_libraries_data

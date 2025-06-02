@@ -9,7 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show ImageFilter, SemanticsRole, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -372,7 +372,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 
   Widget _buildBody(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kDialogColor, context);
-    const Color dividerColor = CupertinoColors.separator;
+    final Color dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
     // Remove view padding here because the `Scrollbar` widget uses the view
     // padding as padding, which is unwanted.
     // https://github.com/flutter/flutter/issues/150544
@@ -407,7 +407,14 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
             top: contentSection,
             bottom: Column(
               children: <Widget>[
-                _Divider(dividerColor: dividerColor, hiddenColor: backgroundColor, hidden: false),
+                SizedBox(
+                  width: double.infinity,
+                  child: _Divider(
+                    dividerColor: dividerColor,
+                    hiddenColor: backgroundColor,
+                    hidden: false,
+                  ),
+                ),
                 Flexible(child: scrolledActionsSection),
               ],
             ),
@@ -456,6 +463,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                           child: CupertinoPopupSurface(
                             isSurfacePainted: false,
                             child: Semantics(
+                              role: SemanticsRole.alertDialog,
                               namesRoute: true,
                               scopesRoute: true,
                               explicitChildNodes: true,
@@ -562,7 +570,7 @@ class CupertinoPopupSurface extends StatelessWidget {
   static const double defaultBlurSigma = 30.0;
 
   /// The default corner radius of a [CupertinoPopupSurface].
-  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(14));
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(13));
 
   // The [ColorFilter] matrix used to saturate widgets underlying a
   // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
@@ -676,7 +684,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       isVibrancePainted = debugIsVibrancePainted;
       return true;
     }());
-    if ((kIsWeb && !isSkiaWeb) || !isVibrancePainted) {
+    if (!isVibrancePainted) {
       if (blurSigma == 0) {
         return null;
       }
@@ -711,13 +719,13 @@ class CupertinoPopupSurface extends StatelessWidget {
     }
 
     if (filter != null) {
-      return ClipRRect(
+      return ClipRSuperellipse(
         borderRadius: _clipper,
         child: BackdropFilter(filter: filter, child: contents),
       );
     }
 
-    return ClipRRect(borderRadius: _clipper, child: contents);
+    return ClipRSuperellipse(borderRadius: _clipper, child: contents);
   }
 }
 
@@ -1291,7 +1299,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     final List<Widget> children = <Widget>[
       Flexible(
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(
@@ -1325,6 +1333,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           namesRoute: true,
           scopesRoute: true,
           explicitChildNodes: true,
+          role: SemanticsRole.dialog,
           label: 'Alert',
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
@@ -1584,24 +1593,30 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   @override
   Widget build(BuildContext context) {
-    late final Color backgroundColor;
-    BorderRadius? borderRadius;
+    late final Widget child;
     if (!widget.isCancel) {
-      backgroundColor = widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor;
-    } else {
-      backgroundColor = widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor;
-      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
-    }
-    return MetaData(
-      metaData: this,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: borderRadius,
+      child = ColoredBox(
+        color: CupertinoDynamicColor.resolve(
+          widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor,
+          context,
         ),
         child: widget.child,
-      ),
-    );
+      );
+    } else {
+      child = DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+          ),
+          color: CupertinoDynamicColor.resolve(
+            widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
+            context,
+          ),
+        ),
+        child: widget.child,
+      );
+    }
+    return MetaData(metaData: this, child: child);
   }
 }
 

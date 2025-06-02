@@ -35,12 +35,10 @@ class BuildInfo {
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
     List<String>? dartDefines,
-    this.bundleSkSLPath,
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     required this.packageConfigPath,
-    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.androidSkipBuildDependencyValidation = false,
@@ -56,11 +54,6 @@ class BuildInfo {
        dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
-
-  /// The null safety mode the application should be run in.
-  ///
-  /// If not provided, defaults to [NullSafetyMode.autodetect].
-  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
@@ -117,11 +110,6 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
-
-  /// An optional path to a JSON containing object SkSL shaders.
-  ///
-  /// Currently this is only supported for Android builds.
-  final String? bundleSkSLPath;
 
   /// Additional constant values to be made available in the Dart program.
   ///
@@ -294,7 +282,6 @@ class BuildInfo {
       if (splitDebugInfoPath != null) kSplitDebugInfo: splitDebugInfoPath!,
       kTrackWidgetCreation: trackWidgetCreation.toString(),
       kIconTreeShakerFlag: treeShakeIcons.toString(),
-      if (bundleSkSLPath != null) kBundleSkSLPath: bundleSkSLPath!,
       if (codeSizeDirectory != null) kCodeSizeDirectory: codeSizeDirectory!,
       if (fileSystemRoots.isNotEmpty) kFileSystemRoots: fileSystemRoots.join(','),
       if (fileSystemScheme != null) kFileSystemScheme: fileSystemScheme!,
@@ -323,7 +310,6 @@ class BuildInfo {
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
-      if (bundleSkSLPath != null) 'BUNDLE_SKSL_PATH': bundleSkSLPath!,
       'PACKAGE_CONFIG': packageConfigPath,
       if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
       if (flavor != null) 'FLAVOR': flavor!,
@@ -348,7 +334,6 @@ class BuildInfo {
       '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (bundleSkSLPath != null) '-Pbundle-sksl-path=$bundleSkSLPath',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
     ];
@@ -932,7 +917,7 @@ const String kAndroidArchs = 'AndroidArchs';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
-/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
 ///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
@@ -975,14 +960,27 @@ const String kIconTreeShakerFlag = 'TreeShakeIcons';
 /// Controls whether a web build should use local canvaskit or the CDN
 const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
 
-/// The input key for an SkSL bundle path.
-const String kBundleSkSLPath = 'BundleSkSLPath';
-
 /// The define to pass build name
 const String kBuildName = 'BuildName';
 
 /// The app flavor to build.
 const String kFlavor = 'Flavor';
+
+/// Environment variable of the flavor to be set in dartDefines to be accessed
+/// by the [appFlavor] service.
+const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// The Xcode configuration used to build the project.
+const String kXcodeConfiguration = 'Configuration';
+
+/// The Xcode build setting SRCROOT. Identifies the directory containing the
+/// Xcode target's source files.
+const String kSrcRoot = 'SrcRoot';
+
+/// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
+/// target device. Only available if a specific device is being targeted during
+/// the build.
+const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
@@ -1033,15 +1031,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
       .map<Object>(_defineDecoder.convert)
       .cast<String>()
       .toList();
-}
-
-/// The null safety runtime mode the app should be built in.
-enum NullSafetyMode {
-  sound,
-  unsound,
-
-  /// The null safety mode was not detected. Only supported for 'flutter test'.
-  autodetect,
 }
 
 /// Indicates the module system DDC is targeting.

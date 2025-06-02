@@ -62,7 +62,7 @@ static sk_sp<DlImage> CreateDeferredImage(
     uint32_t height,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
-    fml::RefPtr<SkiaUnrefQueue> unref_queue) {
+    const fml::RefPtr<SkiaUnrefQueue>& unref_queue) {
 #if IMPELLER_SUPPORTS_RENDERING
   if (impeller) {
     return DlDeferredImageGPUImpeller::Make(
@@ -77,9 +77,9 @@ static sk_sp<DlImage> CreateDeferredImage(
 #else   // SLIMPELLER
   const SkImageInfo image_info = SkImageInfo::Make(
       width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
-  return DlDeferredImageGPUSkia::Make(
-      image_info, std::move(display_list), std::move(snapshot_delegate),
-      raster_task_runner, std::move(unref_queue));
+  return DlDeferredImageGPUSkia::Make(image_info, std::move(display_list),
+                                      std::move(snapshot_delegate),
+                                      raster_task_runner, unref_queue);
 #endif  //  !SLIMPELLER
 }
 
@@ -99,8 +99,7 @@ void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
   auto image = CanvasImage::Create();
   auto dl_image = CreateDeferredImage(
       dart_state->IsImpellerEnabled(), std::move(display_list), width, height,
-      std::move(snapshot_delegate), std::move(raster_task_runner),
-      std::move(unref_queue));
+      std::move(snapshot_delegate), std::move(raster_task_runner), unref_queue);
   image->set_image(dl_image);
   image->AssociateWithDartWrapper(raw_image_handle);
 }
@@ -198,6 +197,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
         // image_callback is associated with the Dart isolate and must be
         // deleted on the UI thread.
         image_callback.reset();
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       });
 
   // Kick things off on the raster rask runner.
@@ -224,6 +224,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
       }));
 
   return Dart_Null();
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 }  // namespace flutter

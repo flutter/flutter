@@ -11,10 +11,12 @@
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/impeller/geometry/path_component.h"
+#include "flutter/third_party/skia/include/core/SkColorSpace.h"
+#include "flutter/third_party/skia/include/core/SkSamplingOptions.h"
+#include "flutter/third_party/skia/include/core/SkTileMode.h"
+
 #include "gtest/gtest.h"
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkSamplingOptions.h"
-#include "third_party/skia/include/core/SkTileMode.h"
 
 namespace flutter {
 namespace testing {
@@ -92,9 +94,9 @@ TEST(DisplayListSkConversions, ToSkFilterMode) {
 }
 
 TEST(DisplayListSkConversions, ToSkSrcRectConstraint) {
-  ASSERT_EQ(ToSk(DlCanvas::SrcRectConstraint::kFast),
+  ASSERT_EQ(ToSk(DlSrcRectConstraint::kFast),
             SkCanvas::SrcRectConstraint::kFast_SrcRectConstraint);
-  ASSERT_EQ(ToSk(DlCanvas::SrcRectConstraint::kStrict),
+  ASSERT_EQ(ToSk(DlSrcRectConstraint::kStrict),
             SkCanvas::SrcRectConstraint::kStrict_SrcRectConstraint);
 }
 
@@ -140,8 +142,6 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kSaturation)                    \
   FUNC(kColor)                         \
   FUNC(kLuminosity)                    \
-  FUNC(kLastCoeffMode)                 \
-  FUNC(kLastSeparableMode)             \
   FUNC(kLastMode)
 
 TEST(DisplayListSkConversions, ToSkBlendMode){
@@ -369,6 +369,72 @@ TEST(DisplayListSkConversions, ToSkRSTransform) {
     EXPECT_FLOAT_EQ(sk_quad[2].fY, dl_quad[3].y) << i;
     EXPECT_FLOAT_EQ(sk_quad[3].fX, dl_quad[2].x) << i;
     EXPECT_FLOAT_EQ(sk_quad[3].fY, dl_quad[2].y) << i;
+  }
+}
+
+// This tests the new conic subdivision code in the Impeller conic path
+// component object vs the code we used to rely on inside Skia
+TEST(DisplayListSkConversions, ConicToQuads) {
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f,
+  };
+
+  for (SkScalar weight : weights) {
+    SkPoint sk_points[5];
+    int ncurves = SkPath::ConvertConicToQuads(
+        SkPoint::Make(10, 10), SkPoint::Make(20, 10), SkPoint::Make(20, 20),
+        weight, sk_points, 1);
+    ASSERT_EQ(ncurves, 2) << "weight: " << weight;
+
+    std::array<DlPoint, 5> i_points;
+    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
+                                         DlPoint(20, 20), weight);
+    i_conic.SubdivideToQuadraticPoints(i_points);
+
+    for (int i = 0; i < 5; i++) {
+      EXPECT_FLOAT_EQ(sk_points[i].fX, i_points[i].x)
+          << "weight: " << weight << "point[" << i << "].x";
+      EXPECT_FLOAT_EQ(sk_points[i].fY, i_points[i].y)
+          << "weight: " << weight << "point[" << i << "].y";
+    }
+  }
+}
+
+TEST(DisplayListSkConversions, ConicPathToImpeller) {
+  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
+  // it into a quadTo, so we avoid that by using 0.999
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
+
+  for (SkScalar weight : weights) {
+    SkPath sk_path;
+    sk_path.moveTo(10, 10);
+    sk_path.conicTo(20, 10, 20, 20, weight);
+
+    DlPath dl_path(sk_path);
+    const impeller::Path& i_path = dl_path.GetPath();
+
+    auto it = i_path.begin();
+    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kContour);
+    ++it;
+
+    ASSERT_EQ(it.type(), impeller::Path::ComponentType::kConic);
+    auto conic = it.conic();
+    ASSERT_NE(conic, nullptr);
+    ++it;
+
+    EXPECT_EQ(conic->p1, DlPoint(10, 10)) << "weight: " << weight;
+    EXPECT_EQ(conic->cp, DlPoint(20, 10)) << "weight: " << weight;
+    EXPECT_EQ(conic->p2, DlPoint(20, 20)) << "weight: " << weight;
+    EXPECT_EQ(conic->weight.x, weight) << "weight: " << weight;
+    EXPECT_EQ(conic->weight.y, weight) << "weight: " << weight;
   }
 }
 

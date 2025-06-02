@@ -1563,6 +1563,10 @@ class EditableText extends StatefulWidget {
   /// Called for each tap up that occurs outside of the [TextFieldTapRegion]
   /// group when the text field is focused.
   ///
+  /// If this is null, [EditableTextTapUpOutsideIntent] will be invoked. In the
+  /// default implementation, this is a no-op. To change this behavior, set a
+  /// callback here or override [EditableTextTapUpOutsideIntent].
+  ///
   /// The [PointerUpEvent] passed to the function is the event that caused the
   /// notification. It is possible that the event may occur outside of the
   /// immediate bounding box defined by the text field, although it will be
@@ -1573,6 +1577,8 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [TapRegion] for how the region group is determined.
   ///  * [onTapOutside], which is called for each tap down.
+  ///  * [EditableTextTapOutsideIntent], the intent that is invoked if
+  ///  this is null.
   final TapRegionUpCallback? onTapUpOutside;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
@@ -2463,14 +2469,19 @@ class EditableTextState extends State<EditableText>
   /// Read-only input fields do not need a connection with the platform since
   /// there's no need for text editing capabilities (e.g. virtual keyboard).
   ///
+  /// On macOS, most of the selection and focus related shortcuts require a
+  /// connection with the platform because appropriate platform selectors are
+  /// sent from the engine and translated into intents. For read-only fields
+  /// those shortcuts should be available (for instance to allow tab traversal).
+  ///
   /// On the web, we always need a connection because we want some browser
   /// functionalities to continue to work on read-only input fields like:
-  ///
   /// - Relevant context menu.
   /// - cmd/ctrl+c shortcut to copy.
   /// - cmd/ctrl+a to select all.
   /// - Changing the selection using a physical keyboard.
-  bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
+  bool get _shouldCreateInputConnection =>
+      kIsWeb || defaultTargetPlatform == TargetPlatform.macOS || !widget.readOnly;
 
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
@@ -3025,6 +3036,8 @@ class EditableTextState extends State<EditableText>
   ///
   /// * [EditableText.getEditableButtonItems], which performs a similar role,
   ///   but for any editable field, not just specifically EditableText.
+  /// * [SystemContextMenu.getDefaultItems], which performs a similar role, but
+  ///   for the system-rendered context menu.
   /// * [SelectableRegionState.contextMenuButtonItems], which performs a similar
   ///   role but for content that is selectable but not editable.
   /// * [contextMenuAnchors], which provides the anchor points for the default
@@ -3258,7 +3271,8 @@ class EditableTextState extends State<EditableText>
     }
 
     if (_hasInputConnection) {
-      if (oldWidget.obscureText != widget.obscureText) {
+      if (oldWidget.obscureText != widget.obscureText ||
+          oldWidget.keyboardType != widget.keyboardType) {
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
@@ -3383,7 +3397,7 @@ class EditableTextState extends State<EditableText>
       // `selection` is the only change.
       SelectionChangedCause cause;
       if (_textInputConnection?.scribbleInProgress ?? false) {
-        cause = SelectionChangedCause.scribble;
+        cause = SelectionChangedCause.stylusHandwriting;
       } else if (_pointOffsetOrigin != null) {
         // For floating cursor selection when force pressing the space bar.
         cause = SelectionChangedCause.forcePress;
@@ -3728,6 +3742,14 @@ class EditableTextState extends State<EditableText>
 
   bool get _hasFocus => widget.focusNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
+
+  /// Flag to track whether this [EditableText] was in focus when [onTapOutside]
+  /// was called.
+  ///
+  /// This is used to determine whether [onTapUpOutside] should be called.
+  /// The reason [_hasFocus] can't be used directly is because [onTapOutside]
+  /// might unfocus this [EditableText] and block the [onTapUpOutside] call.
+  bool _hadFocusOnTapDown = false;
 
   // Finds the closest scroll offset to the current scroll offset that fully
   // reveals the given caret rect. If the given rect's main axis extent is too
@@ -4178,7 +4200,7 @@ class EditableTextState extends State<EditableText>
       case SelectionChangedCause.drag:
       case SelectionChangedCause.forcePress:
       case SelectionChangedCause.longPress:
-      case SelectionChangedCause.scribble:
+      case SelectionChangedCause.stylusHandwriting:
       case SelectionChangedCause.tap:
       case SelectionChangedCause.toolbar:
         requestKeyboard();
@@ -5360,6 +5382,31 @@ class EditableTextState extends State<EditableText>
     return Actions.invoke(context, intent);
   }
 
+  void _onTapOutside(BuildContext context, PointerDownEvent event) {
+    _hadFocusOnTapDown = true;
+
+    if (widget.onTapOutside != null) {
+      widget.onTapOutside!(event);
+    } else {
+      _defaultOnTapOutside(context, event);
+    }
+  }
+
+  void _onTapUpOutside(BuildContext context, PointerUpEvent event) {
+    if (!_hadFocusOnTapDown) {
+      return;
+    }
+
+    // Reset to false so that subsequent events doesn't trigger the callback based on old information.
+    _hadFocusOnTapDown = false;
+
+    if (widget.onTapUpOutside != null) {
+      widget.onTapUpOutside!(event);
+    } else {
+      _defaultOnTapUpOutside(context, event);
+    }
+  }
+
   /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
@@ -5367,6 +5414,16 @@ class EditableTextState extends State<EditableText>
     Actions.invoke(
       context,
       EditableTextTapOutsideIntent(focusNode: widget.focusNode, pointerDownEvent: event),
+    );
+  }
+
+  /// The default behavior used if [EditableText.onTapUpOutside] is null.
+  ///
+  /// The `event` argument is the [PointerUpEvent] that caused the notification.
+  void _defaultOnTapUpOutside(BuildContext context, PointerUpEvent event) {
+    Actions.invoke(
+      context,
+      EditableTextTapUpOutsideIntent(focusNode: widget.focusNode, pointerUpEvent: event),
     );
   }
 
@@ -5491,6 +5548,7 @@ class EditableTextState extends State<EditableText>
 
     TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
     EditableTextTapOutsideIntent: _makeOverridable(_EditableTextTapOutsideAction()),
+    EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
   @protected
@@ -5505,6 +5563,17 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
+    final ui.SemanticsInputType inputType;
+    switch (widget.keyboardType) {
+      case TextInputType.phone:
+        inputType = ui.SemanticsInputType.phone;
+      case TextInputType.url:
+        inputType = ui.SemanticsInputType.url;
+      case TextInputType.emailAddress:
+        inputType = ui.SemanticsInputType.email;
+      default:
+        inputType = ui.SemanticsInputType.text;
+    }
 
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
@@ -5516,11 +5585,8 @@ class EditableTextState extends State<EditableText>
             return TextFieldTapRegion(
               groupId: widget.groupId,
               onTapOutside:
-                  _hasFocus
-                      ? widget.onTapOutside ??
-                          (PointerDownEvent event) => _defaultOnTapOutside(context, event)
-                      : null,
-              onTapUpOutside: widget.onTapUpOutside,
+                  _hasFocus ? (PointerDownEvent event) => _onTapOutside(context, event) : null,
+              onTapUpOutside: (PointerUpEvent event) => _onTapUpOutside(context, event),
               debugLabel: kReleaseMode ? null : 'EditableText',
               child: MouseRegion(
                 cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -5599,6 +5665,7 @@ class EditableTextState extends State<EditableText>
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
                             child: Semantics(
+                              inputType: inputType,
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),
@@ -6025,7 +6092,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
   @override
   void onScribbleFocus(Offset offset) {
     widget.focusNode.requestFocus();
-    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.scribble);
+    renderEditable?.selectPositionAt(from: offset, cause: SelectionChangedCause.stylusHandwriting);
     widget.updateSelectionRects();
   }
 
@@ -6501,5 +6568,14 @@ class _EditableTextTapOutsideAction extends ContextAction<EditableTextTapOutside
       case TargetPlatform.windows:
         intent.focusNode.unfocus();
     }
+  }
+}
+
+class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOutsideIntent> {
+  _EditableTextTapUpOutsideAction();
+
+  @override
+  void invoke(EditableTextTapUpOutsideIntent intent, [BuildContext? context]) {
+    // The default action is a no-op.
   }
 }

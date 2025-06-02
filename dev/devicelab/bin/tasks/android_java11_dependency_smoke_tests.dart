@@ -40,11 +40,14 @@ List<VersionTuple> versionTuples = <VersionTuple>[
     kotlinVersion: '1.7.10',
     compileSdkVersion: '34',
   ),
+  // minSdk bump required due to a bug in the default version of r8 used by AGP
+  // 7.4.0. See http://issuetracker.google.com/issues/357553178.
   VersionTuple(
     agpVersion: '7.4.0',
     gradleVersion: '7.5',
     kotlinVersion: '1.8.10',
     compileSdkVersion: '34',
+    minSdkVersion: '24',
   ),
 ];
 

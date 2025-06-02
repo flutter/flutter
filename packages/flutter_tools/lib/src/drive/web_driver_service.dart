@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -32,15 +33,21 @@ class WebDriverService extends DriverService {
     required String dartSdkPath,
     required Platform platform,
     required Logger logger,
+    required Terminal terminal,
+    required OutputPreferences outputPreferences,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _platform = platform,
-       _logger = logger;
+       _logger = logger,
+       _terminal = terminal,
+       _outputPreferences = outputPreferences;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final Platform _platform;
   final Logger _logger;
+  final Terminal _terminal;
+  final OutputPreferences _outputPreferences;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -97,9 +104,11 @@ class WebDriverService extends DriverService {
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
       logger: _logger,
+      terminal: _terminal,
+      platform: _platform,
+      outputPreferences: _outputPreferences,
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
@@ -208,7 +217,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
+  Future<void> stop({String? userIdentifier}) async {
     final bool appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();

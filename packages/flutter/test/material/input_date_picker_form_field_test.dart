@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -306,6 +307,7 @@ void main() {
           hasPasteAction: true,
           hasMoveCursorBackwardByCharacterAction: true,
           hasMoveCursorBackwardByWordAction: true,
+          validationResult: SemanticsValidationResult.valid,
         ),
       );
       semantics.dispose();
@@ -413,4 +415,124 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isFalse);
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: InputDatePickerFormField(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2026, DateTime.may),
+            ),
+          ),
+        ),
+      );
+
+      final InputDatePickerFormField inputDatePickerField = tester.widget(
+        find.byType(InputDatePickerFormField),
+      );
+      expect(inputDatePickerField.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: InputDatePickerFormField(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2026, DateTime.may),
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final InputDatePickerFormField inputDatePickerField = tester.widget(
+        find.byType(InputDatePickerFormField),
+      );
+      expect(inputDatePickerField.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
+      DateTime? selectedDate;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: InputDatePickerFormField(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2026, DateTime.may),
+              onDateSubmitted: (DateTime value) {
+                selectedDate = value;
+              },
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final Finder dateInput1 = find.descendant(
+        of: find.byType(TextField),
+        matching: find.text('2025..2..26'),
+      );
+      expect(dateInput1, findsOneWidget);
+
+      await tester.tap(dateInput1);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(dateInput1, '2025..3..10');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(selectedDate, DateTime(2025, DateTime.march, 10));
+
+      final Finder dateInput2 = find.descendant(
+        of: find.byType(TextField),
+        matching: find.text('2025..3..10'),
+      );
+      expect(dateInput2, findsOneWidget);
+
+      await tester.tap(dateInput2);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(dateInput2, '2025..4..21');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(selectedDate, DateTime(2025, DateTime.april, 21));
+    });
+  });
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  String formatCompactDate(DateTime date, MaterialLocalizations localizations) {
+    return '${date.year}..${date.month}..${date.day}';
+  }
+
+  @override
+  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
+    final List<String> parts = inputString!.split('..');
+    if (parts.length != 3) {
+      return null;
+    }
+    final int year = int.tryParse(parts[0]) ?? 0;
+    final int month = int.tryParse(parts[1]) ?? 0;
+    final int day = int.tryParse(parts[2]) ?? 0;
+    return DateTime(year, month, day);
+  }
+
+  @override
+  String dateHelpText(MaterialLocalizations localizations) {
+    return 'yyyy..mm..dd';
+  }
 }

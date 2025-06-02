@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
@@ -205,6 +204,7 @@ void main() {
     );
   });
 
+<<<<<<< HEAD
   group('doctor usage params', () {
     late TestUsage testUsage;
 
@@ -284,6 +284,8 @@ void main() {
     }, overrides: <Type, Generator>{Usage: () => testUsage});
   });
 
+=======
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
   group('doctor with fake validators', () {
     testUsingContext(
       'validate non-verbose output format for run without issues',
@@ -516,18 +518,24 @@ void main() {
   });
 
   group('doctor diagnosis wrapper', () {
-    late TestUsage testUsage;
+    late FakeAnalytics analytics;
     late BufferLogger logger;
 
     setUp(() {
-      testUsage = TestUsage();
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       logger = BufferLogger.test();
     });
 
     testUsingContext(
       'PII separated, events only sent once',
       () async {
-        final Doctor fakeDoctor = FakePiiDoctor(logger);
+        final DateTime fakeDate = DateTime(1995, 3, 3);
+        final SystemClock systemClock = SystemClock.fixed(fakeDate);
+
+        final Doctor fakeDoctor = FakePiiDoctor(logger, clock: systemClock);
         final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
         const String expectedPiiText =
             '[✓] PII Validator [0ms]\n'
@@ -549,24 +557,33 @@ void main() {
         expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
 
         // Only one event sent.
+<<<<<<< HEAD
         expect(testUsage.events, <TestUsageEvent>[
           const TestUsageEvent('doctor-result', 'PiiValidator', label: 'installed'),
         ]);
       },
       overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal(), Usage: () => testUsage},
+=======
+        expect(analytics.sentEvents, <Event>[
+          Event.doctorValidatorResult(
+            validatorName: 'PII Validator',
+            result: 'installed',
+            partOfGroupedValidator: false,
+            doctorInvocationId: systemClock.now().millisecondsSinceEpoch,
+          ),
+        ]);
+      },
+      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal(), Analytics: () => analytics},
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
     );
 
-    testUsingContext(
-      'without PII has same text and PII-stripped text',
-      () async {
-        final Doctor fakeDoctor = FakePassingDoctor(logger);
-        final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
-        final String piiText = await doctorText.text;
-        expect(piiText, isNotEmpty);
-        expect(piiText, await doctorText.piiStrippedText);
-      },
-      overrides: <Type, Generator>{Usage: () => testUsage},
-    );
+    testUsingContext('without PII has same text and PII-stripped text', () async {
+      final Doctor fakeDoctor = FakePassingDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final String piiText = await doctorText.text;
+      expect(piiText, isNotEmpty);
+      expect(piiText, await doctorText.piiStrippedText);
+    });
   });
 
   testUsingContext(
