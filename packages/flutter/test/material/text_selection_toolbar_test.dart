@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
 const double _kToolbarContentDistance = 8.0;
@@ -351,5 +352,102 @@ void main() {
     expect(tester.getRect(find.text(long)).width, overflowMenuWidth);
     expect(tester.getRect(find.text(medium)).width, overflowMenuWidth);
     expect(tester.getRect(find.text(short)).width, overflowMenuWidth);
+  });
+
+  testWidgets('items are ordered right-to-left in RTL', (WidgetTester tester) async {
+    final List<Widget> children = List<Widget>.generate(
+      3,
+      (int i) => TestBox(key: ValueKey<String>('item_$i')),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.rtl,
+            child: TextSelectionToolbar(
+              anchorAbove: const Offset(50.0, 100.0),
+              anchorBelow: const Offset(50.0, 200.0),
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Verify all items are visible
+    expect(find.byType(TestBox), findsNWidgets(children.length));
+
+    // Get positions of items
+    final List<Rect> itemRects =
+        find
+            .byType(TestBox)
+            .evaluate()
+            .map(
+              (Element e) =>
+                  tester.getRect(find.byElementPredicate((Element element) => element == e)),
+            )
+            .toList();
+
+    // In RTL, items should be ordered right-to-left
+    for (int i = 0; i < itemRects.length - 1; i++) {
+      expect(
+        itemRects[i].left,
+        equals(itemRects[i + 1].right),
+        reason:
+            "Item $i (left: ${itemRects[i].left}) should be exactly to the left of item ${i + 1} (right: ${itemRects[i + 1].right}) in RTL. (Item $i's left should be equal to item ${i + 1}'s right)",
+      );
+    }
+  });
+
+  testWidgets('puts children in an overflow menu if they overflow in RTL', (
+    WidgetTester tester,
+  ) async {
+    late StateSetter setState;
+    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.rtl, // this makes the difference
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return TextSelectionToolbar(
+                  anchorAbove: const Offset(50.0, 100.0),
+                  anchorBelow: const Offset(50.0, 200.0),
+                  children: children,
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // All children fit on the screen, so they are all rendered.
+    expect(find.byType(TestBox), findsNWidgets(children.length));
+    expect(findOverflowButton(), findsNothing);
+
+    // Adding one more child makes the children overflow.
+    setState(() {
+      children.add(const TestBox());
+    });
+    await tester.pumpAndSettle();
+    expect(find.byType(TestBox), findsNWidgets(children.length - 1));
+    expect(findOverflowButton(), findsOneWidget);
+
+    // Tap the overflow button to show the overflow menu.
+    await tester.tap(findOverflowButton());
+    await tester.pumpAndSettle();
+    expect(find.byType(TestBox), findsOneWidget); // Only one item in the overflow menu
+    expect(findOverflowButton(), findsOneWidget);
+
+    // Tap the overflow button again to hide the overflow menu.
+    await tester.tap(findOverflowButton());
+    await tester.pumpAndSettle();
+    expect(find.byType(TestBox), findsNWidgets(children.length - 1));
+    expect(findOverflowButton(), findsOneWidget);
   });
 }
