@@ -3738,6 +3738,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   String? _tooltipMessage;
 
   /// Indicates whether the button is using the default alignment based on text direction.
+  ///
   /// For LTR, the default alignment is on the left.
   /// For RTL, the default alignment is on the right.
   bool _usesDefaultAlignment = true;
