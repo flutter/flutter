@@ -74,8 +74,6 @@ void SemanticsUpdateBuilder::updateNode(
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     std::string identifier,
     std::string label,
     const std::vector<NativeStringAttribute*>& labelAttributes,
@@ -118,8 +116,6 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollExtentMin = scrollExtentMin;
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
-  node.elevation = elevation;
-  node.thickness = thickness;
   node.identifier = std::move(identifier);
   node.label = std::move(label);
   pushStringAttributes(node.labelAttributes, labelAttributes);
