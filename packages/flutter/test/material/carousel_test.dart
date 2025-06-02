@@ -1897,7 +1897,7 @@ void main() {
             body: CarouselView.weighted(
               flexWeights: const <int>[1, 2, 3],
               controller: controller,
-              onItemChanged: (int index) {
+              onIndexChanged: (int index) {
                 currentIndex = index;
               },
               itemSnapping: true,
@@ -1938,7 +1938,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: CarouselView.weighted(
-              flexWeights: const <int>[2, 3, 1],
+              flexWeights: const <int>[5, 2, 5],
               controller: controller,
               itemSnapping: true,
               children: List<Widget>.generate(numberOfChildren, (int index) {

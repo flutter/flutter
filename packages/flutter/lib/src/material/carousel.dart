@@ -144,7 +144,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required double this.itemExtent,
     required this.children,
-    this.onItemChanged,
+    this.onIndexChanged,
   }) : consumeMaxWeight = true,
        flexWeights = null;
 
@@ -206,7 +206,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
-    this.onItemChanged,
+    this.onIndexChanged,
   }) : itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
@@ -348,7 +348,7 @@ class CarouselView extends StatefulWidget {
   /// ```dart
   ///
   /// CarouselView(
-  ///   onItemChanged: (index) {
+  ///   onIndexChanged: (index) {
   ///     print('Current index: $index');
   ///   },
   ///   children: [
@@ -361,7 +361,7 @@ class CarouselView extends StatefulWidget {
   ///
   /// See also:
   ///  * [CarouselController.currentIndex], which holds the current index.
-  final ValueChanged<int>? onItemChanged;
+  final ValueChanged<int>? onIndexChanged;
 
   @override
   State<CarouselView> createState() => _CarouselViewState();
@@ -1403,7 +1403,7 @@ class _CarouselMetrics extends FixedScrollMetrics {
 
 class _CarouselPosition extends ScrollPositionWithSingleContext implements _CarouselMetrics {
   _CarouselPosition({
-    required this.onItemChanged,
+    required this.onIndexChanged,
     required super.physics,
     required super.context,
     this.initialItem = 0,
@@ -1425,7 +1425,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // for use when resizing the viewport to non-zero next time.
   double? _cachedItem;
 
-  final ValueChanged<int> onItemChanged;
+  final ValueChanged<int> onIndexChanged;
 
   @override
   bool get consumeMaxWeight => _consumeMaxWeight;
@@ -1485,7 +1485,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     final int newIndex = item.round();
 
     if (newIndex != _cachedItem?.round()) {
-      onItemChanged.call(newIndex);
+      onIndexChanged.call(newIndex);
       _cachedItem = item;
     }
   }
@@ -1626,10 +1626,9 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  int _currentIndex;
-
-  /// The current index of the carousel.
+  /// The current index of the [CarouselView].
   int get currentIndex => _currentIndex;
+  int _currentIndex;
 
   _CarouselViewState? _carouselState;
 
@@ -1709,9 +1708,9 @@ class CarouselController extends ScrollController {
   ) {
     assert(_carouselState != null);
     return _CarouselPosition(
-      onItemChanged: (int index) {
+      onIndexChanged: (int index) {
         _currentIndex = index;
-        _carouselState!.widget.onItemChanged?.call(index);
+        _carouselState!.widget.onIndexChanged?.call(index);
       },
       physics: physics,
       context: context,
