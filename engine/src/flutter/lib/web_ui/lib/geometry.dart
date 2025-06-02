@@ -959,43 +959,11 @@ class RRect with _RRectLike<RRect> {
   }
 }
 
-class _RRectLikeShape {
-  const _RRectLikeShape({
-    required this.width,
-    required this.height,
-    required this.tlRadiusX,
-    required this.tlRadiusY,
-    required this.trRadiusX,
-    required this.trRadiusY,
-    required this.brRadiusX,
-    required this.brRadiusY,
-    required this.blRadiusX,
-    required this.blRadiusY,
-    required this.uniformRadii,
-  });
-
-  final double width;
-  final double height;
-  final double tlRadiusX;
-  final double tlRadiusY;
-  Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
-  final double trRadiusX;
-  final double trRadiusY;
-  Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
-  final double brRadiusX;
-  final double brRadiusY;
-  Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
-  final double blRadiusX;
-  final double blRadiusY;
-  Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
-  final bool uniformRadii;
-}
-
 class _RSuperellipseCache {
   Path? normalizedPath;
 }
 
-class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
+class RSuperellipse with _RRectLike<RSuperellipse> {
   const RSuperellipse.fromLTRBXY(
     double left,
     double top,
@@ -1194,8 +1162,8 @@ class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
     return null;
   }
 
-  RSuperellipse computed({RSuperellipse? reference}) {
-    return _NativeRSuperellipse(top: top, left: left, shape: this, reference: reference);
+  RSuperellipse computed({RSuperellipse? cacheReference}) {
+    return _NativeRSuperellipse(this, cacheReference: cacheReference);
   }
 
   bool contains(Offset point) {
@@ -1253,15 +1221,21 @@ class RSuperellipse with _RRectLike<RSuperellipse> implements _RRectLikeShape {
 }
 
 class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellipse {
-  _NativeRSuperellipse({
-    required this.top,
-    required this.left,
-    required _RRectLikeShape shape,
-    required RSuperellipse? reference,
-  }) : _shape = shape,
-       _cache = _takeCache(reference, shape);
-
-  _RRectLikeShape _shape;
+  _NativeRSuperellipse(RSuperellipse rsuperellipse, {required RSuperellipse? cacheReference})
+    : top = rsuperellipse.top,
+      left = rsuperellipse.left,
+      right = rsuperellipse.right,
+      bottom = rsuperellipse.bottom,
+      tlRadiusX = rsuperellipse.tlRadiusX,
+      tlRadiusY = rsuperellipse.tlRadiusY,
+      trRadiusX = rsuperellipse.trRadiusX,
+      trRadiusY = rsuperellipse.trRadiusY,
+      blRadiusX = rsuperellipse.blRadiusX,
+      blRadiusY = rsuperellipse.blRadiusY,
+      brRadiusX = rsuperellipse.brRadiusX,
+      brRadiusY = rsuperellipse.brRadiusY,
+      uniformRadii = rsuperellipse.uniformRadii,
+      _cache = _takeCache(rsuperellipse, cacheReference);
 
   _RSuperellipseCache _cache;
 
@@ -1270,27 +1244,27 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
   @override
   final double top;
   @override
-  double get right => left + _shape.width;
+  final double right;
   @override
-  double get bottom => top + _shape.height;
+  final double bottom;
   @override
-  double get tlRadiusX => _shape.tlRadiusX;
+  final double tlRadiusX;
   @override
-  double get tlRadiusY => _shape.tlRadiusY;
+  final double tlRadiusY;
   @override
-  double get trRadiusX => _shape.trRadiusX;
+  final double trRadiusX;
   @override
-  double get trRadiusY => _shape.trRadiusY;
+  final double trRadiusY;
   @override
-  double get brRadiusX => _shape.brRadiusX;
+  final double brRadiusX;
   @override
-  double get brRadiusY => _shape.brRadiusY;
+  final double brRadiusY;
   @override
-  double get blRadiusX => _shape.blRadiusX;
+  final double blRadiusX;
   @override
-  double get blRadiusY => _shape.blRadiusY;
+  final double blRadiusY;
   @override
-  bool get uniformRadii => _shape.uniformRadii;
+  final bool uniformRadii;
 
   @override
   RSuperellipse _create({
@@ -1331,8 +1305,8 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
   }
 
   @override
-  RSuperellipse computed({RSuperellipse? reference}) {
-    return _NativeRSuperellipse(top: top, left: left, shape: _shape, reference: reference);
+  RSuperellipse computed({RSuperellipse? cacheReference}) {
+    return _NativeRSuperellipse(this, cacheReference: cacheReference);
   }
 
   @override
@@ -1352,12 +1326,12 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
     return _toString(className: '_NativeRSuperellipse');
   }
 
-  static _RSuperellipseCache _takeCache(RSuperellipse? reference, _RRectLikeShape targetShape) {
-    final _RSuperellipseCache? refCache = reference?._getCache();
+  static _RSuperellipseCache _takeCache(RSuperellipse target, RSuperellipse? cacheReference) {
+    final _RSuperellipseCache? refCache = cacheReference?._getCache();
     if (refCache == null) {
       return _RSuperellipseCache();
     }
-    if (_shapeNearlyEqualTo(reference!, targetShape)) {
+    if (_shapeNearlyEqualTo(cacheReference!, target)) {
       return refCache!;
     }
     return _RSuperellipseCache();
