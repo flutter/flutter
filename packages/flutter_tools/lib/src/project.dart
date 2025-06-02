@@ -222,11 +222,9 @@ class FlutterProject {
   /// The `.metadata` file of this project.
   File get metadataFile => directory.childFile('.metadata');
 
-  /// The `.flutter-plugins` file of this project.
-  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
-
-  /// The `.flutter-plugins-dependencies` file of this project,
-  /// which contains the dependencies each plugin depends on.
+  /// The `.flutter-plugins-dependencies` file of this project.
+  ///
+  /// Contains the dependencies each plugin depends on.
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   /// The `.gitignore` file of this project.

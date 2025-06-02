@@ -107,7 +107,6 @@ void main() {
       flutterProject
         ..manifest = flutterManifest
         ..directory = fileSystem.systemTempDirectory.childDirectory('app')
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         );
@@ -431,7 +430,7 @@ dependencies:
       testUsingContext(
         'Refreshing the plugin list deletes the plugin file when there were plugins but no longer are',
         () async {
-          flutterProject.flutterPluginsFile.createSync();
+          flutterProject.flutterPluginsDependenciesFile.createSync();
 
           await refreshPluginsList(flutterProject);
 
@@ -458,7 +457,6 @@ dependencies:
 
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsFile, isNot(exists), reason: 'No longer emitted');
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
 
           final String pluginsFileContents =
@@ -479,28 +477,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        'Opting in to explicit-package-dependencies omits .flutter-plugins',
-        () async {
-          createFakePlugins(fs, <String>[
-            'plugin_d',
-            'plugin_a',
-            '/local_plugins/plugin_c',
-            '/local_plugins/plugin_b',
-          ]);
-
-          await refreshPluginsList(flutterProject);
-
-          expect(flutterProject.flutterPluginsFile, isNot(exists));
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: FakeProcessManager.empty,
           Pub: ThrowingPub.new,
         },
       );
@@ -2752,7 +2728,6 @@ flutter:
 
       flutterProject
         ..manifest = flutterManifest
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         )
@@ -2829,9 +2804,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late Directory directory;
-
-  @override
-  late File flutterPluginsFile;
 
   @override
   late File flutterPluginsDependenciesFile;
