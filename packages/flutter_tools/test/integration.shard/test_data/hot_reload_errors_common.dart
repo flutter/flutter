@@ -14,7 +14,6 @@ import 'hot_reload_const_project.dart';
 void testAll({
   bool chrome = false,
   List<String> additionalCommandArgs = const <String>[],
-  String constClassFieldRemovalErrorMessage = 'Try performing a hot restart instead.',
   Object? skip = false,
 }) {
   group('chrome: $chrome'
@@ -35,35 +34,29 @@ void testAll({
     });
 
     testWithoutContext(
-      'hot reload displays a formatted error message when removing a field from a const class',
+      'hot reload displays a formatted error message when removing a field from a const class, and hot restart succeeds',
       () async {
         await flutter.run(
           device:
               chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
           additionalCommandArgs: additionalCommandArgs,
         );
-        project.removeFieldFromConstClass();
 
+        project.removeField1FromConstClass();
+        await flutter.hotRestart();
+
+        project.removeField2FromConstClass();
         expect(
           flutter.hotReload(),
           throwsA(
             isA<Exception>().having(
               (Exception e) => e.toString(),
               'message',
-              contains(constClassFieldRemovalErrorMessage),
+              contains('Try performing a hot restart instead.'),
             ),
           ),
         );
       },
     );
-
-    testWithoutContext('hot restart succeeds when removing a field from a const class', () async {
-      await flutter.run(
-        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
-        additionalCommandArgs: additionalCommandArgs,
-      );
-      project.removeFieldFromConstClass();
-      await flutter.hotRestart();
-    });
   });
 }
