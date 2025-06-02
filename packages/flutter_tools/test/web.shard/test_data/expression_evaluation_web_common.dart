@@ -70,7 +70,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       await failToEvaluateExpression(flutter);
     });
 
-    testWithoutContext('can evaluate expressions in top level function', () async {
+    testWithoutContext('can evaluate expressions in library, top level and build method', () async {
       await start(expressionEvaluation: true);
 
       await evaluateTrivialExpressionsInLibrary(flutter);
@@ -80,10 +80,6 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       await breakInTopLevelFunction(flutter);
       await checkStaticScope(flutter);
       await evaluateErrorExpressions(flutter);
-      await evaluateTrivialExpressions(flutter);
-      await evaluateComplexExpressions(flutter);
-
-      await breakInBuildMethod(flutter);
       await evaluateTrivialExpressions(flutter);
       await evaluateComplexExpressions(flutter);
 
@@ -103,6 +99,10 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         end = stackTrace.indexOf('package:test/main.dart 15:7', end);
         return end != -1;
       });
+
+      await breakInBuildMethod(flutter);
+      await evaluateTrivialExpressions(flutter);
+      await evaluateComplexExpressions(flutter);
     });
   });
 
