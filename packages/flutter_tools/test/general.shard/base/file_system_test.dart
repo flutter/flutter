@@ -316,6 +316,9 @@ void main() {
       expect(fsUtils.escapePath(r'C:\foo\bar\cool.dart'), r'C:\\foo\\bar\\cool.dart');
       expect(fsUtils.escapePath(r'foo\bar\cool.dart'), r'foo\\bar\\cool.dart');
       expect(fsUtils.escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath('c:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath('x:/foo/bar/cool.dart'), 'X:/foo/bar/cool.dart');
+      expect(fsUtils.escapePath(r'a:\foo\bar\cool.dart'), r'A:\\foo\\bar\\cool.dart');
     });
 
     testWithoutContext('on Linux', () {
