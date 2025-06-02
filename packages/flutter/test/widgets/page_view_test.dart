@@ -15,7 +15,7 @@ import 'semantics_tester.dart';
 import 'states.dart';
 
 void main() {
-  final bool isImpeller = ui.ImageFilter.isShaderFilterSupported;
+  final bool isFragmentShader = ui.ImageFilter.isShaderFilterSupported;
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
@@ -1273,7 +1273,7 @@ void main() {
     controller.animateToPage(2, duration: const Duration(milliseconds: 300), curve: Curves.ease);
     await tester.pumpAndSettle();
 
-    if (isImpeller) {
+    if (isFragmentShader) {
       final Finder effectFinder = find.descendant(
         of: find.byType(PageView),
         matching: find.byType(StretchEffect),
