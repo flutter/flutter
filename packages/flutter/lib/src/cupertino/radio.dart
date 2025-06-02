@@ -57,9 +57,7 @@ const double _kBorderOutlineStrokeWidth = 0.3;
 const List<double> _kDarkGradientOpacities = <double>[0.14, 0.29];
 const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 
-/// A macOS-style radio button.
-///
-/// This widget builds a [RawRadio] with a macOS-style UI.
+/// A widget that builds a [RawRadio] with a macOS-style UI.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group are
@@ -237,7 +235,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
           widget.groupRegistry != null ||
           RadioGroup.maybeOf<T>(context) != null);
 
-  _InternalRadioRegistry<T>? _internalRadioRegistry;
+  _RadioRegistry<T>? _internalRadioRegistry;
   RadioGroupRegistry<T> get _effectiveRegistry {
     if (widget.groupRegistry != null) {
       return widget.groupRegistry!;
@@ -248,8 +246,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
       return inheritedRegistry;
     }
 
-    // Handles deprecated API
-    return _internalRadioRegistry ??= _InternalRadioRegistry<T>(this);
+    // Handles deprecated API.
+    return _internalRadioRegistry ??= _RadioRegistry<T>(this);
   }
 
   @override
@@ -301,9 +299,9 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
 }
 
 /// A registry for deprecated API.
-// Remove this once deprecated API is removed.
-class _InternalRadioRegistry<T> extends RadioGroupRegistry<T> {
-  _InternalRadioRegistry(this.state);
+// TODO(chunhtai): Remove this once deprecated API is removed.
+class _RadioRegistry<T> extends RadioGroupRegistry<T> {
+  _RadioRegistry(this.state);
   final _CupertinoRadioState<T> state;
   @override
   T? get groupValue => state.widget.groupValue;

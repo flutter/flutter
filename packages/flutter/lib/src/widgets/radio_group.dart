@@ -277,8 +277,9 @@ mixin RadioClient<T> {
 /// If none of the radio is selected, this defaults to
 /// [ReadingOrderTraversalPolicy] for all nodes.
 ///
-/// This policy is to ensure when tab into a radio group, it will only focus
-/// the current selected radio button and prevent focus to reach unselected one
+/// This policy is to ensure when tabbing into a radio group, it will only focus
+/// the current selected radio button and prevent focus from reaching unselected
+/// ones.
 class _SkipUnselectedRadioPolicy<T> extends ReadingOrderTraversalPolicy {
   _SkipUnselectedRadioPolicy(this.radios, this.groupValue);
   final Set<RadioClient<T>> radios;

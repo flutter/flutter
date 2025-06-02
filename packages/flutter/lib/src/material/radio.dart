@@ -384,12 +384,12 @@ class Radio<T> extends StatefulWidget {
   final _RadioType _radioType;
 
   /// {@template flutter.material.Radio.enabled}
-  /// Whether this widget is interactable.
+  /// Whether this widget is interactive.
   ///
   /// If not provided, this widget will be interactable if one of the following
   /// is true:
   ///
-  /// * a [onChanged] is provided.
+  /// * A [onChanged] is provided.
   /// * Having a [RadioGroup] with the same type T above this widget.
   /// * A [groupRegistry] is provided.
   ///
@@ -412,7 +412,7 @@ class _RadioState<T> extends State<Radio<T>> {
           widget.groupRegistry != null ||
           RadioGroup.maybeOf<T>(context) != null);
 
-  _InternalRadioRegistry<T>? _internalRadioRegistry;
+  _RadioRegistry<T>? _internalRadioRegistry;
   RadioGroupRegistry<T> get _effectiveRegistry {
     if (widget.groupRegistry != null) {
       return widget.groupRegistry!;
@@ -423,8 +423,8 @@ class _RadioState<T> extends State<Radio<T>> {
       return inheritedRegistry;
     }
 
-    // Handles deprecated API
-    return _internalRadioRegistry ??= _InternalRadioRegistry<T>(this);
+    // Handles deprecated API.
+    return _internalRadioRegistry ??= _RadioRegistry<T>(this);
   }
 
   @override
@@ -510,9 +510,9 @@ class _RadioState<T> extends State<Radio<T>> {
 }
 
 /// A registry for deprecated API.
-// Remove this once deprecated API is removed.
-class _InternalRadioRegistry<T> extends RadioGroupRegistry<T> {
-  _InternalRadioRegistry(this.state);
+// TODO(chunhtai): Remove this once deprecated API is removed.
+class _RadioRegistry<T> extends RadioGroupRegistry<T> {
+  _RadioRegistry(this.state);
   final _RadioState<T> state;
   @override
   T? get groupValue => state.widget.groupValue;

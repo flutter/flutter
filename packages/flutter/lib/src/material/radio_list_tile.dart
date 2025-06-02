@@ -508,7 +508,7 @@ class RadioListTile<T> extends StatefulWidget {
   /// If not provided, this widget will be interactable if one of the following
   /// is true:
   ///
-  /// * a [onChanged] is provided.
+  /// * A [onChanged] is provided.
   /// * Having a [RadioGroup] with the same type T above this widget.
   ///
   /// If this is set to true, one of the above condition must also be true.
@@ -541,7 +541,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
 
   bool get checked => radioValue == effectiveGroupValue;
 
-  late final _InternalRadioRegistry<T> _radioRegistry = _InternalRadioRegistry<T>(this);
+  late final _RadioRegistry<T> _radioRegistry = _RadioRegistry<T>(this);
 
   T? get effectiveGroupValue => registry?.groupValue ?? widget.groupValue;
 
@@ -686,8 +686,8 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
 /// [RadioListTile] implements the [RadioClient] directly to register to
 /// [RadioGroup] ancestor. Therefore, it has to hide the internal [Radio] from
 /// participate in the [RadioGroup] ancestor.
-class _InternalRadioRegistry<T> extends RadioGroupRegistry<T> {
-  _InternalRadioRegistry(this.state);
+class _RadioRegistry<T> extends RadioGroupRegistry<T> {
+  _RadioRegistry(this.state);
 
   final _RadioListTileState<T> state;
 
