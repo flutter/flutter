@@ -59,6 +59,7 @@ dependencies:
   hooks_runner: 0.20.0
   hooks: 0.19.1
   code_assets: 0.19.0
+  data_assets: 0.19.1
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
