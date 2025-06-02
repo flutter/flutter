@@ -305,7 +305,7 @@ flutter:
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
-      final List<String> testShaders = <String>['ink_sparkle.frag', 'stretch_overscroll.frag'];
+      final List<String> testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
 
       testWithoutContext('bundles material shaders on non-web platforms', () async {
         for (final String shader in testShaders) {

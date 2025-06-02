@@ -1053,7 +1053,7 @@ flutter:
           materialDir.childFile(shader).createSync(recursive: true);
         }
 
-        final List<String> testShaders = <String>['ink_sparkle.frag', 'stretch_overscroll.frag'];
+        final List<String> testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
 
         for (final String shader in testShaders) {
           (globals.processManager as FakeProcessManager).addCommand(

@@ -16,10 +16,10 @@ import 'image_filter.dart';
 /// a stretch visual feedback when the user overscrolls at the edges.
 ///
 /// Only supported when using the Impeller rendering engine.
-class StretchOverscrollEffect extends StatefulWidget {
+class StretchEffect extends StatefulWidget {
   /// Creates a StretchOverscrollEffect widget that applies a stretch
   /// effect when the user overscrolls horizontally or vertically.
-  const StretchOverscrollEffect({
+  const StretchEffect({
     super.key,
     this.stretchStrengthX = 0.0,
     this.stretchStrengthY = 0.0,
@@ -69,14 +69,14 @@ class StretchOverscrollEffect extends StatefulWidget {
   /// {@end-tool}
   final double stretchStrengthY;
 
-  /// The child widget that receives the stretching overscroll effect.
+  /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
 
   @override
-  State<StretchOverscrollEffect> createState() => _StretchOverscrollEffectState();
+  State<StretchEffect> createState() => _StretchOverscrollEffectState();
 }
 
-class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
+class _StretchOverscrollEffectState extends State<StretchEffect> {
   ui.FragmentShader? _fragmentShader;
 
   /// The maximum scale multiplier applied during a stretch effect.
@@ -94,7 +94,7 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
   @override
   void initState() {
     super.initState();
-    _StretchOverscrollEffectShader.initializeShader();
+    _StretchEffectShader.initializeShader();
   }
 
   @override
@@ -105,9 +105,9 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
 
     final ui.ImageFilter imageFilter;
 
-    if (_StretchOverscrollEffectShader._initialized) {
+    if (_StretchEffectShader._initialized) {
       _fragmentShader?.dispose();
-      _fragmentShader = _StretchOverscrollEffectShader._program!.fragmentShader();
+      _fragmentShader = _StretchEffectShader._program!.fragmentShader();
       _fragmentShader!.setFloat(2, maxStretchIntensity);
       _fragmentShader!.setFloat(3, widget.stretchStrengthX);
       _fragmentShader!.setFloat(4, widget.stretchStrengthY);
@@ -127,7 +127,7 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
       // A nearly-transparent pixels is used to ensure the shader gets applied,
       // even when the child is visually transparent or has no paint operations.
       child: CustomPaint(
-        painter: isShaderNeeded ? _StretchOverscrollEffectPainter() : null,
+        painter: isShaderNeeded ? _StretchEffectPainter() : null,
         child: widget.child,
       ),
     );
@@ -138,7 +138,7 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
 ///
 /// This ensures the fragment shader covers the entire canvas by forcing
 /// painting operations on all edges, preventing shader optimization skips.
-class _StretchOverscrollEffectPainter extends CustomPainter {
+class _StretchEffectPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint =
@@ -158,14 +158,14 @@ class _StretchOverscrollEffectPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _StretchOverscrollEffectShader {
+class _StretchEffectShader {
   static bool _initCalled = false;
   static bool _initialized = false;
   static ui.FragmentProgram? _program;
 
   static void initializeShader() {
     if (!_initCalled) {
-      ui.FragmentProgram.fromAsset('shaders/stretch_overscroll.frag').then((
+      ui.FragmentProgram.fromAsset('shaders/stretch_effect.frag').then((
         ui.FragmentProgram program,
       ) {
         _program = program;

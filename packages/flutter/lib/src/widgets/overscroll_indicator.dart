@@ -24,7 +24,7 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
-import 'stretch_overscroll_effect.dart';
+import 'stretch_effect.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -829,7 +829,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               overscrollY = -overscrollY;
             }
 
-            transform = StretchOverscrollEffect(
+            transform = StretchEffect(
               stretchStrengthX: overscrollX,
               stretchStrengthY: overscrollY,
               child: widget.child!,

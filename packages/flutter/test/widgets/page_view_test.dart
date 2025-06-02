@@ -1276,13 +1276,13 @@ void main() {
     if (isImpeller) {
       final Finder effectFinder = find.descendant(
         of: find.byType(PageView),
-        matching: find.byType(StretchOverscrollEffect),
+        matching: find.byType(StretchEffect),
       );
       expect(effectFinder, findsOneWidget);
 
       // Get the Transform widget that stretches the PageView.
-      final StretchOverscrollEffect effect = tester.firstWidget<StretchOverscrollEffect>(
-        find.descendant(of: find.byType(PageView), matching: find.byType(StretchOverscrollEffect)),
+      final StretchEffect effect = tester.firstWidget<StretchEffect>(
+        find.descendant(of: find.byType(PageView), matching: find.byType(StretchEffect)),
       );
 
       expect(effect.stretchStrengthX, 0.0);
