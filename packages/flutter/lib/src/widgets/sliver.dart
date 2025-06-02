@@ -1444,26 +1444,24 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
-/// This widget is for use in a [RenderAbstractViewport]s, such as
-/// [Viewport] or [TwoDimensionalViewport].
+/// This widget is used in [RenderAbstractViewport]s, such as [Viewport] or
+/// [TwoDimensionalViewport], to manage the lifecycle of widgets that need to
+/// remain alive even when scrolled out of view.
 ///
-/// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
-/// [SliverChildListDelegate] delegates, used with [SliverList] and
-/// [SliverGrid], as well as the scroll view counterparts [ListView] and
-/// [GridView], have an `addAutomaticKeepAlives` feature, which is enabled by
-/// default, and which causes [AutomaticKeepAlive] widgets to be inserted around
-/// each child, causing [KeepAlive] widgets to be automatically added and
-/// configured in response to [KeepAliveNotification]s.
+/// The [SliverChildBuilderDelegate] and [SliverChildListDelegate] delegates,
+/// used with [SliverList] and [SliverGrid], as well as the scroll view
+/// counterparts [ListView] and [GridView], have an `addAutomaticKeepAlives`
+/// feature, which is enabled by default. This feature inserts
+/// [AutomaticKeepAlive] widgets around each child, which in turn configure
+/// [KeepAlive] widgets in response to [KeepAliveNotification]s.
 ///
-/// The same `addAutomaticKeepAlives` feature is supported by the
+/// The same `addAutomaticKeepAlives` feature is supported by
 /// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
 ///
-/// Therefore, to keep a widget alive, it is more common to use those
-/// notifications than to directly deal with [KeepAlive] widgets.
-///
-/// In practice, the simplest way to deal with these notifications is to mix
-/// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
-/// for that mixin class for details.
+/// Keep-alive behavior can be managed by using [KeepAlive] directly or by
+/// relying on notifications. For convenience, [AutomaticKeepAliveClientMixin]
+/// may be mixed into a [State] subclass. Further details are available in the
+/// documentation for [AutomaticKeepAliveClientMixin].
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to use the [KeepAlive] widget
@@ -1488,6 +1486,13 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
 /// {@end-tool}
 ///
+/// See also:
+///
+///  * [AutomaticKeepAlive], which allows subtrees to request to be kept alive
+///    in lazy lists.
+///  * [AutomaticKeepAliveClientMixin], which is a mixin with convenience
+///    methods for clients of [AutomaticKeepAlive]. Used with [State]
+///    subclasses.
 class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   const KeepAlive({super.key, required this.keepAlive, required super.child});
