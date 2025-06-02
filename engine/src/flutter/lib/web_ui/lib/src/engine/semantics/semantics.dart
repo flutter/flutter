@@ -157,6 +157,7 @@ class EngineAccessibilityFeaturesBuilder {
   bool get highContrast => EngineAccessibilityFeatures._kHighContrastIndex & _index != 0;
   bool get onOffSwitchLabels => EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex & _index != 0;
   // This index check is inverted (== 0 vs != 0); far more platforms support
+  // "announce" than discourage it.
   bool get announce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
 
   set accessibleNavigation(bool value) {
