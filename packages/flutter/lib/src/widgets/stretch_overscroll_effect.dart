@@ -12,7 +12,7 @@ import 'image_filter.dart';
 
 /// A widget that replicates the native Android stretch overscroll effect.
 ///
-/// This widget is intended for use in scrollable widgets and creates
+/// This widget is used in the [StretchingOverscrollIndicator] widget and creates
 /// a stretch visual feedback when the user overscrolls at the edges.
 ///
 /// Only supported when using the Impeller rendering engine.
