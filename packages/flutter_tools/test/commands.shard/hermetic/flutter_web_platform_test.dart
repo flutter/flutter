@@ -133,6 +133,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
           extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
+          webEnableHotReload: true,
         ),
         webMemoryFS: WebMemoryFS(),
         fileSystem: fileSystem,

@@ -375,7 +375,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
           // connection.
           dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
-          extraFrontEndOptions: <String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
           packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
           packageConfig: PackageConfig.parseBytes(
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),

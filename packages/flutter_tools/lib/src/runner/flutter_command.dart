@@ -369,6 +369,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
       help: 'Enables new module format that supports hot reload.',
+      defaultsTo: true,
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -1325,10 +1326,9 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
-    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
-      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
-    }
+    final bool webEnableHotReload =
+        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload);
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1457,6 +1457,7 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
+      webEnableHotReload: webEnableHotReload,
     );
   }
 
