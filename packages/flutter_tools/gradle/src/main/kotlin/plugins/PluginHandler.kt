@@ -4,7 +4,6 @@
 
 package com.flutter.gradle.plugins
 
-import androidx.annotation.VisibleForTesting
 import com.android.builder.model.BuildType
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
