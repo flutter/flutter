@@ -1308,5 +1308,39 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
   EXPECT_GT(points_round.size(), points_reference.size());
 }
 
+TEST(EntityGeometryTest, RotatedFilledCircleGeometryCoverage) {
+  Point center = Point(50, 50);
+  auto geometry = Geometry::MakeCircle(center, 50);
+  Rect circle_bounds = Rect::MakeLTRB(0, 0, 100, 100);
+  ASSERT_EQ(geometry->GetCoverage({}).value_or(Rect()), circle_bounds);
+
+  Matrix transform45 = Matrix::MakeTranslation(center) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-center);
+
+  EXPECT_TRUE(geometry->GetCoverage(transform45).has_value());
+  Rect bounds = geometry->GetCoverage(transform45).value_or(Rect());
+  EXPECT_TRUE(bounds.Contains(circle_bounds))
+      << "geometry bounds: " << bounds << std::endl
+      << "  circle bounds: " << circle_bounds;
+}
+
+TEST(EntityGeometryTest, RotatedStrokedCircleGeometryCoverage) {
+  Point center = Point(50, 50);
+  auto geometry = Geometry::MakeStrokedCircle(center, 50, 10);
+  Rect circle_bounds = Rect::MakeLTRB(0, 0, 100, 100).Expand(5);
+  ASSERT_EQ(geometry->GetCoverage({}).value_or(Rect()), circle_bounds);
+
+  Matrix transform45 = Matrix::MakeTranslation(center) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-center);
+
+  EXPECT_TRUE(geometry->GetCoverage(transform45).has_value());
+  Rect bounds = geometry->GetCoverage(transform45).value_or(Rect());
+  EXPECT_TRUE(bounds.Contains(circle_bounds))
+      << "geometry bounds: " << bounds << std::endl
+      << "  circle bounds: " << circle_bounds;
+}
+
 }  // namespace testing
 }  // namespace impeller
