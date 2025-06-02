@@ -222,7 +222,50 @@ void expect(Object? actual, Object? expected) {
   }
   final StringDescription mismatchDescription = StringDescription();
   matcher.describeMismatch(actual, mismatchDescription, matchState, true);
-  throw TestFailure(mismatchDescription.toString());
+
+  //
+  // COPIED FROM pkg:matcher - formatFailure() - 2025-05-21
+  //
+  final String which = mismatchDescription.toString();
+  final StringBuffer buffer = StringBuffer();
+  buffer.writeln(_indent(_prettyPrint(expected), first: 'Expected: '));
+  buffer.writeln(_indent(_prettyPrint(actual), first: '  Actual: '));
+  if (which.isNotEmpty) {
+    buffer.writeln(_indent(which, first: '   Which: '));
+  }
+  //
+  // ENDE pkg:matcher copy
+  //
+
+  foundError(<String>[buffer.toString(), StackTrace.current.toString()]);
+}
+
+/// Returns a pretty-printed representation of [value].
+///
+/// The matcher package doesn't expose its pretty-print function directly, but
+/// we can use it through StringDescription.
+// COPIED FROM pkg:matcher - 2025-05-21
+String _prettyPrint(Object? value) => StringDescription().addDescriptionOf(value).toString();
+
+/// Indent each line in [text] by [first] spaces.
+///
+/// [first] is used in place of the first line's indentation.
+// COPIED FROM pkg:matcher - 2025-05-21
+String _indent(String text, {required String first}) {
+  final String prefix = ' ' * first.length;
+  final List<String> lines = text.split('\n');
+  if (lines.length == 1) {
+    return '$first$text';
+  }
+
+  final StringBuffer buffer = StringBuffer('$first${lines.first}\n');
+
+  // Write out all but the first and last lines with [prefix].
+  for (final String line in lines.skip(1).take(lines.length - 2)) {
+    buffer.writeln('$prefix$line');
+  }
+  buffer.write('$prefix${lines.last}');
+  return buffer.toString();
 }
 
 Future<void> runWebServiceWorkerTest({

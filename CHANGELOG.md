@@ -29,6 +29,23 @@ Our goal is to make the list easy for them to scan.
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
+## Flutter 3.32 Changes
+
+### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
+
+- [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fixes flaky crash when targeting web applications via IDEs using the DAP.
+- [flutter/168849](https://github.com/flutter/flutter/issues/168849) - Fixes an issue rendering wide gamut images.
+- [flutter/168846](https://github.com/flutter/flutter/issues/168846) - Fixes an issue displaying the wrong icons in the widget inspector for some apps.
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) - Fixes Flutter Android builds for apps which use plugins with old Android Gradle Plugin versions.
+- [flutter/169101](https://github.com/flutter/flutter/issues/169101) - Reduces the cost of running the (sometimes flaky) Linux fuchsia_test on release branches.
+- [flutter/169318](https://github.com/flutter/flutter/issues/169318) - Fixed a bug where the flutter tool crash reporting did not include what plugins were being used by the current project.
+- [flutter/169160](https://github.com/flutter/flutter/issues/169160) Fixed a bug where `appFlavor` is null after hot restarts or during `flutter test`.
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) [Android] Fix regression in NDK version checking for projects with old AGP versions.
+- [flutter/168847](https://github.com/flutter/flutter/pull/168847) [Widget Inspector] Fix missing cupertino icon in on-device inspector.
+
+### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
+Initial stable release.
+
 ## Flutter 3.29 Changes
 
 ### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)

@@ -27,8 +27,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
     // irrelevant when searching with [find.byType].
-    final Type radioListTileType =
-        const RadioListTile<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioListTileType = const RadioListTile<int>(value: 0, groupValue: 0).runtimeType;
 
     List<RadioListTile<int>> generatedRadioListTiles;
     List<RadioListTile<int>> findTiles() =>
@@ -126,7 +125,6 @@ void main() {
           key: key,
           value: 1,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title', key: titleKey),
         ),
       ),
@@ -158,7 +156,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
-    final Type radioType = const Radio<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioType = const Radio<int>(value: 0, groupValue: 0).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
     Widget buildFrame() {
@@ -223,7 +221,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
-    final Type radioType = const Radio<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioType = const Radio<int>(value: 0, groupValue: 0).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
     Widget buildFrame() {
@@ -273,7 +271,7 @@ void main() {
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
-    final Type radioType = const Radio<int>(value: 0, groupValue: 0, onChanged: null).runtimeType;
+    final Type radioType = const Radio<int>(value: 0, groupValue: 0).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
     Widget buildFrame() {
@@ -362,15 +360,7 @@ void main() {
 
     await tester.pumpWidget(
       Material(
-        child: Center(
-          child: Radio<int>(
-            key: key,
-            value: 1,
-            groupValue: null,
-            onChanged: log.add,
-            toggleable: true,
-          ),
-        ),
+        child: Center(child: Radio<int>(key: key, value: 1, onChanged: log.add, toggleable: true)),
       ),
     );
 
@@ -466,7 +456,6 @@ void main() {
         child: const RadioListTile<int>(
           value: 1,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title'),
           internalAddSemanticForOnTap: true,
         ),
@@ -504,7 +493,6 @@ void main() {
         child: const RadioListTile<int>(
           value: 2,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title'),
           internalAddSemanticForOnTap: true,
         ),
@@ -607,7 +595,6 @@ void main() {
         child: RadioListTile<int>(
           value: 1,
           groupValue: 2,
-          onChanged: null,
           title: Text('Title', key: childKey),
           autofocus: true,
         ),
@@ -619,8 +606,7 @@ void main() {
   });
 
   testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
-    final Type radioType =
-        const Radio<bool>(groupValue: true, value: true, onChanged: null).runtimeType;
+    final Type radioType = const Radio<bool>(groupValue: true, value: true).runtimeType;
 
     await tester.pumpWidget(
       wrap(
@@ -666,7 +652,6 @@ void main() {
           child: RadioListTile<bool>(
             value: true,
             groupValue: true,
-            onChanged: null,
             title: Text('Title'),
             shape: shapeBorder,
           ),
@@ -686,7 +671,6 @@ void main() {
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
-            onChanged: null,
             title: const Text('Title'),
             tileColor: tileColor,
           ),
@@ -706,7 +690,6 @@ void main() {
           child: RadioListTile<bool>(
             value: false,
             groupValue: true,
-            onChanged: null,
             title: const Text('Title'),
             selected: true,
             selectedTileColor: selectedTileColor,
@@ -887,7 +870,7 @@ void main() {
       wrap(
         child: const MouseRegion(
           cursor: SystemMouseCursors.forbidden,
-          child: RadioListTile<int>(value: 1, onChanged: null, groupValue: 2),
+          child: RadioListTile<int>(value: 1, groupValue: 2),
         ),
       ),
     );
@@ -1610,9 +1593,7 @@ void main() {
   testWidgets('RadioListTile renders with default scale', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: RadioListTile<bool>(value: false, groupValue: false, onChanged: null),
-        ),
+        home: Material(child: RadioListTile<bool>(value: false, groupValue: false)),
       ),
     );
 
@@ -1629,12 +1610,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
-          child: RadioListTile<bool>(
-            value: false,
-            groupValue: false,
-            onChanged: null,
-            radioScaleFactor: scale,
-          ),
+          child: RadioListTile<bool>(value: false, groupValue: false, radioScaleFactor: scale),
         ),
       ),
     );
@@ -1668,7 +1644,6 @@ void main() {
                   title: const Text('A'),
                   subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
                   value: 0,
-                  onChanged: null,
                   groupValue: 1,
                 ),
                 RadioListTile<int>(
@@ -1676,7 +1651,6 @@ void main() {
                   title: const Text('A'),
                   subtitle: const Text('A'),
                   value: 0,
-                  onChanged: null,
                   groupValue: 2,
                 ),
               ],
@@ -1787,7 +1761,6 @@ void main() {
                   title: const Text('A'),
                   subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
                   value: 0,
-                  onChanged: null,
                   groupValue: 1,
                 ),
                 RadioListTile<int>.adaptive(
@@ -1795,7 +1768,6 @@ void main() {
                   title: const Text('A'),
                   subtitle: const Text('A'),
                   value: 0,
-                  onChanged: null,
                   groupValue: 2,
                 ),
               ],

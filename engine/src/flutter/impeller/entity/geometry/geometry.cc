@@ -9,6 +9,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -102,6 +103,22 @@ std::unique_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
                                                       Scalar radius,
                                                       Scalar stroke_width) {
   return std::make_unique<CircleGeometry>(center, radius, stroke_width);
+}
+
+std::unique_ptr<Geometry> Geometry::MakeFilledArc(const Rect& oval_bounds,
+                                                  Degrees start,
+                                                  Degrees sweep,
+                                                  bool include_center) {
+  return std::make_unique<ArcGeometry>(oval_bounds, start, sweep,
+                                       include_center);
+}
+
+std::unique_ptr<Geometry> Geometry::MakeStrokedArc(
+    const Rect& oval_bounds,
+    Degrees start,
+    Degrees sweep,
+    const StrokeParameters& stroke) {
+  return std::make_unique<ArcGeometry>(oval_bounds, start, sweep, stroke);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeRoundRect(const Rect& rect,
