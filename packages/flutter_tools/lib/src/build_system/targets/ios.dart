@@ -10,6 +10,7 @@ import '../../base/build.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart' show Logger;
 import '../../base/process.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
@@ -365,6 +366,126 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+// TODO(gaaclarke): Remove this after a reasonable amount of time where the
+// UISceneDelegate migration being on stable. This incurs a minor build time
+// cost.
+Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
+  Logger logger,
+  File file,
+  Pattern usage,
+  Pattern terminator,
+) async {
+  final List<String> lines = file.readAsLinesSync();
+
+  bool inDidFinishLaunchingWithOptions = false;
+  int lineNumber = 0;
+  for (final String line in lines) {
+    lineNumber += 1;
+    if (!inDidFinishLaunchingWithOptions) {
+      if (line.contains('didFinishLaunchingWithOptions')) {
+        inDidFinishLaunchingWithOptions = true;
+      }
+    } else {
+      if (line.startsWith(terminator)) {
+        inDidFinishLaunchingWithOptions = false;
+      } else if (line.contains(usage)) {
+        _printWarning(
+          logger,
+          file.path,
+          lineNumber,
+          // TODO(gaaclarke): Add a link to the migration guide when it's written.
+          'Flutter deprecation: Accessing rootViewController in `application:didFinishLaunchingWithOptions:` [flutter-launch-rootvc].\n'
+          '\tnote: \n' // The space after `note:` is meaningful, it is required associate the note with the warning in Xcode.
+          '\tAfter the UISceneDelegate migration the `UIApplicationDelegate.window` and '
+          '`UIWindow.rootViewController` properties will not be set in '
+          '`application:didFinishLaunchingWithOptions:`. If you are relying on that '
+          'in order to register platform channels at application launch use the '
+          '`FlutterPluginRegistry` API instead. Other setup can be moved to a '
+          'FlutterViewController subclass (ex: `awakeFromNib`).',
+        );
+      }
+    }
+  }
+}
+
+/// Checks [file] representing objc code for deprecated usage of the
+/// rootViewController and writes it to [logger].
+@visibleForTesting
+Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(Logger logger, File file) async {
+  try {
+    await _checkForLaunchRootViewControllerAccessDeprecation(
+      logger,
+      file,
+      RegExp('self.*?window.*?rootViewController'),
+      RegExp('^}'),
+    );
+    // ignore: avoid_catches_without_on_clauses
+  } catch (_) {}
+}
+
+/// Checks [file] representing swift code for deprecated usage of the
+/// rootViewController and writes it to [logger].
+@visibleForTesting
+Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
+  Logger logger,
+  File file,
+) async {
+  try {
+    await _checkForLaunchRootViewControllerAccessDeprecation(
+      logger,
+      file,
+      'window?.rootViewController',
+      RegExp(r'^.*?func\s*?\S*?\('),
+    );
+    // ignore: avoid_catches_without_on_clauses
+  } catch (_) {}
+}
+
+void _printWarning(Logger logger, String path, int line, String warning) {
+  logger.printWarning('$path:$line: warning: $warning');
+}
+
+class _IssueLaunchRootViewControllerAccess extends Target {
+  const _IssueLaunchRootViewControllerAccess();
+
+  @override
+  Future<void> build(Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    if (flutterProject.ios.appDelegateSwift.existsSync()) {
+      await checkForLaunchRootViewControllerAccessDeprecationSwift(
+        environment.logger,
+        flutterProject.ios.appDelegateSwift,
+      );
+    }
+    if (flutterProject.ios.appDelegateObjc.existsSync()) {
+      await checkForLaunchRootViewControllerAccessDeprecationObjc(
+        environment.logger,
+        flutterProject.ios.appDelegateObjc,
+      );
+    }
+  }
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+      ),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc, optional: true),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
+    ];
+  }
+
+  @override
+  String get name => 'IssueLaunchRootViewControllerAccess';
+
+  @override
+  List<Source> get outputs => <Source>[];
+}
+
 abstract class IosLLDBInit extends Target {
   const IosLLDBInit();
 
@@ -495,7 +616,11 @@ abstract class IosAssetBundle extends Target {
   const IosAssetBundle();
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+    InstallCodeAssets(),
+    _IssueLaunchRootViewControllerAccess(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
