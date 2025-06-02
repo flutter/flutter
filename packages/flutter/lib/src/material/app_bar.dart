@@ -791,10 +791,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
       }
     }
 
-    return centerTitle ??
-        appbarTheme.centerTitle ??
-        theme.appBarTheme.centerTitle ??
-        platformCenter();
+    return centerTitle ?? appbarTheme.centerTitle ?? platformCenter();
   }
 
   @override

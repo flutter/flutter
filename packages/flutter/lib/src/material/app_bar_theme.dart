@@ -80,7 +80,7 @@ class AppBarTheme extends InheritedTheme with Diagnosticable {
                      actionsPadding) ==
                  null,
        ),
-       _backgroundColor = backgroundColor,
+       _backgroundColor = backgroundColor ?? color,
        _foregroundColor = foregroundColor,
        _elevation = elevation,
        _scrolledUnderElevation = scrolledUnderElevation,
@@ -370,6 +370,7 @@ class AppBarThemeData with Diagnosticable {
   const AppBarThemeData({
     this.backgroundColor,
     this.foregroundColor,
+    Color? color,
     this.elevation,
     this.scrolledUnderElevation,
     this.shadowColor,
@@ -385,7 +386,10 @@ class AppBarThemeData with Diagnosticable {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.actionsPadding,
-  });
+  }) : assert(
+         color == null || backgroundColor == null,
+         'The color and backgroundColor parameters mean the same thing. Only specify one.',
+       );
 
   /// Overrides the default value of [AppBar.backgroundColor].
   final Color? backgroundColor;
@@ -443,6 +447,7 @@ class AppBarThemeData with Diagnosticable {
   AppBarThemeData copyWith({
     Color? backgroundColor,
     Color? foregroundColor,
+    Color? color,
     double? elevation,
     double? scrolledUnderElevation,
     Color? shadowColor,
@@ -462,6 +467,7 @@ class AppBarThemeData with Diagnosticable {
     return AppBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
+      color: color,
       elevation: elevation ?? this.elevation,
       scrolledUnderElevation: scrolledUnderElevation ?? this.scrolledUnderElevation,
       shadowColor: shadowColor ?? this.shadowColor,
