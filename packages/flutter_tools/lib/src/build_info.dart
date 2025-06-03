@@ -32,6 +32,7 @@ class BuildInfo {
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
     this.androidProjectArgs = const <String>[],
+    this.androidProjectGradleCliArgs = const <String>[],
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -155,6 +156,9 @@ class BuildInfo {
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
   final List<String> androidProjectArgs;
+
+  /// Additional key value pairs that are passed directly to the Gradle cli invocation.
+  final List<String> androidProjectGradleCliArgs;
 
   /// The package configuration for the loaded application.
   ///
@@ -339,6 +343,7 @@ class BuildInfo {
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
+      for (final String projectGradleCliArg in androidProjectGradleCliArgs) '--$projectGradleCliArg',
     ];
   }
 }

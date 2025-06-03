@@ -140,6 +140,7 @@ abstract final class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kAndroidProjectGradleCliArgs = 'android-project-gradle-cli-arg';
   static const String kAndroidSkipBuildDependencyValidation =
       'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
@@ -1069,6 +1070,14 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
       abbr: 'P',
     );
+    argParser.addMultiOption(
+      FlutterOptions.kAndroidProjectGradleCliArgs,
+      help:
+      'Additional arguments specified as key=value that are passed directly to the gradle '
+          'invocation.',
+      splitCommas: false,
+    );
+    //kAndroidProjectGradleCliArgs = 'android-project-gradle-cli-arg';
   }
 
   void addNativeNullAssertions({bool hide = false}) {
@@ -1369,6 +1378,11 @@ abstract class FlutterCommand extends Command<void> {
             ? stringsArg(FlutterOptions.kAndroidProjectArgs)
             : <String>[];
 
+    final List<String> androidProjectGradleCliArgs =
+    argParser.options.containsKey(FlutterOptions.kAndroidProjectGradleCliArgs)
+        ? stringsArg(FlutterOptions.kAndroidProjectGradleCliArgs)
+        : <String>[];
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1439,6 +1453,7 @@ abstract class FlutterCommand extends Command<void> {
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      androidProjectGradleCliArgs: androidProjectGradleCliArgs,
       initializeFromDill:
           argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
               ? stringArg(FlutterOptions.kInitializeFromDill)
