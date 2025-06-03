@@ -1765,6 +1765,12 @@ class RenderClipRSuperellipse extends _RenderCustomClip<RSuperellipse> {
   }
 
   @override
+  void _updateClip() {
+    super._updateClip();
+    _clip = _clip?.cacheable();
+  }
+
+  @override
   RSuperellipse get _defaultClip =>
       _borderRadius.resolve(textDirection).toRSuperellipse(Offset.zero & size);
 

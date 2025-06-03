@@ -214,7 +214,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
   ///
   /// If `borderRadius` is not specified or null, it defaults to
   /// [BorderRadius.zero].
-  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
+  RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
     : borderRadius = borderRadius ?? BorderRadius.zero;
 
   /// The radii for each corner.
@@ -274,14 +274,32 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     );
   }
 
+  RSuperellipse? _cachedOuter;
+  RSuperellipse _getOuterShape(Rect rect, TextDirection? textDirection) {
+    final RSuperellipse outer = borderRadius.resolve(textDirection).toRSuperellipse(rect);
+    return _cachedOuter = outer.cacheable(cacheReference: _cachedOuter);
+  }
+
+  RSuperellipse? _cachedInner;
+  RSuperellipse _getInnerShape(Rect rect, TextDirection? textDirection, double inset) {
+    final RSuperellipse outer = borderRadius.resolve(textDirection).toRSuperellipse(rect);
+    final RSuperellipse inner = outer.deflate(inset);
+    return _cachedInner = inner.cacheable(cacheReference: _cachedInner);
+  }
+
+  RSuperellipse? _cachedStroke;
+  RSuperellipse _getStrokeShape(Rect rect, TextDirection? textDirection, double strokeOffset) {
+    final RSuperellipse outer = borderRadius.resolve(textDirection).toRSuperellipse(rect);
+    final RSuperellipse adjusted = outer.inflate(strokeOffset);
+    return _cachedStroke = adjusted.cacheable(cacheReference: _cachedStroke);
+  }
+
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     if (borderRadius == BorderRadius.zero) {
       return Path()..addRect(rect.deflate(side.strokeInset));
     } else {
-      final RSuperellipse borderRect = borderRadius.resolve(textDirection).toRSuperellipse(rect);
-      final RSuperellipse adjustedRect = borderRect.deflate(side.strokeInset);
-      return Path()..addRSuperellipse(adjustedRect);
+      return Path()..addRSuperellipse(_getInnerShape(rect, textDirection, side.strokeInset));
     }
   }
 
@@ -290,7 +308,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (borderRadius == BorderRadius.zero) {
       return Path()..addRect(rect);
     } else {
-      return Path()..addRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect));
+      return Path()..addRSuperellipse(_getOuterShape(rect, textDirection));
     }
   }
 
@@ -299,7 +317,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (borderRadius == BorderRadius.zero) {
       canvas.drawRect(rect, paint);
     } else {
-      canvas.drawRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect), paint);
+      canvas.drawRSuperellipse(_getOuterShape(rect, textDirection), paint);
     }
   }
 
@@ -314,14 +332,13 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
       case BorderStyle.solid:
         final double strokeOffset = (side.strokeOutset - side.strokeInset) / 2;
         if (borderRadius == BorderRadius.zero) {
-          final Rect base = rect.inflate(strokeOffset);
-          canvas.drawRect(base, side.toPaint());
+          final Rect rect = rect.inflate(strokeOffset);
+          canvas.drawRect(rect, side.toPaint());
         } else {
-          final RSuperellipse base = borderRadius
-              .resolve(textDirection)
-              .toRSuperellipse(rect)
-              .inflate(strokeOffset);
-          canvas.drawRSuperellipse(base, side.toPaint());
+          canvas.drawRSuperellipse(
+            _getStrokeShape(rect, textDirection, strokeOffset),
+            side.toPaint(),
+          );
         }
     }
   }
