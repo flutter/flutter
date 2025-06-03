@@ -43,7 +43,6 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
-synthetic-package: false
 required-resource-attributes: false
 nullable-getter: false
 ''');

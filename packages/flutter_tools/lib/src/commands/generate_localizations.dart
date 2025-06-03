@@ -35,11 +35,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     argParser.addOption(
       'output-dir',
       help:
-          'The directory where the generated localization classes will be written '
-          'if the synthetic-package flag is set to false.\n'
-          '\n'
-          'If output-dir is specified and the synthetic-package flag is enabled, '
-          'this option will be ignored by the tool.\n'
+          'The directory where the generated localization classes will be written.'
           '\n'
           'The app must import the file specified in the "--output-localization-file" '
           'option from this directory. If unspecified, this defaults to the same '

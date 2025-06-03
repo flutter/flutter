@@ -70,41 +70,6 @@ void main() {
   );
 
   testUsingContext(
-    'not using synthetic packages (explicitly)',
-    () async {
-      final Directory l10nDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
-      final File arbFile = l10nDirectory.childFile('app_en.arb')..createSync(recursive: true);
-
-      arbFile.writeAsStringSync('''
-{
-  "helloWorld": "Hello, World!",
-  "@helloWorld": {
-    "description": "Sample description"
-  }
-}''');
-      fileSystem.file('pubspec.yaml').writeAsStringSync('''
-flutter:
-  generate: true''');
-
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-      await createTestCommandRunner(command).run(<String>['gen-l10n', '--no-synthetic-package']);
-
-      expect(l10nDirectory.existsSync(), true);
-      expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
     'throws error when arguments are invalid',
     () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
@@ -555,7 +520,7 @@ format: false
   );
 
   testUsingContext(
-    'throw when generate: false and uses synthetic package when run with l10n.yaml',
+    'throw when generate: false when run with l10n.yaml',
     () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
@@ -601,7 +566,7 @@ format: false
   );
 
   testUsingContext(
-    'throw when generate: false and uses synthetic package when run via commandline options',
+    'throw when generate: false when run via commandline options',
     () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
@@ -633,7 +598,7 @@ format: false
       );
       expect(
         () async =>
-            createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package']),
+            createTestCommandRunner(command).run(<String>['gen-l10n']),
         throwsToolExit(
           message:
               'Attempted to generate localizations code without having the flutter: generate flag turned on.',
@@ -656,7 +621,7 @@ format: false
     expect(
       () async => createTestCommandRunner(
         command,
-      ).run(<String>['gen-l10n', '--synthetic-package', 'false']),
+      ).run(<String>['gen-l10n']),
       throwsToolExit(message: 'Unexpected positional argument "false".'),
     );
   });
