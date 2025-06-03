@@ -12,6 +12,7 @@ import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
+import 'painter.dart';
 
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
@@ -97,6 +98,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     }
   }
 }
+
+enum StyleElements { background, shadows, decorations, text }
 
 @immutable
 class WebTextStyle implements ui.TextStyle {
@@ -280,6 +283,19 @@ class WebTextStyle implements ui.TextStyle {
     final String cssFontFamily = engine.canonicalizeFontFamily(originalFontFamily)!;
 
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
+  }
+
+  bool hasElement(StyleElements element) {
+    switch (element) {
+      case StyleElements.background:
+        return background != null;
+      case StyleElements.shadows:
+        return shadows != null && shadows!.isNotEmpty;
+      case StyleElements.decorations:
+        return decoration != null;
+      case StyleElements.text:
+        return true;
+    }
   }
 }
 
@@ -549,7 +565,10 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(this);
+  late final TextPaint _paint = TextPaint(
+    this,
+    Canvas2DPainter(),
+  ); // TODO(jlavrova): get the painter from somewhere else
 }
 
 class WebLineMetrics implements ui.LineMetrics {

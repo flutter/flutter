@@ -605,6 +605,7 @@ class LineBlock {
     this.clusterShiftInLine,
     this.textMetricsZero,
   );
+  // TODO(jlavrova): we probably do not need that reference
   final DomTextMetrics? textMetrics; // This is just a reference to a parent styled text block
   final int bidiLevel;
   final WebTextStyle textStyle;

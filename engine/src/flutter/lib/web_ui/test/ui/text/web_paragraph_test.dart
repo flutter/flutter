@@ -534,4 +534,91 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multidecorated.png', region: region);
   });
+
+  test('Draw WebParagraph multiple fonts text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final Paint greenPaint = Paint()..color = const Color(0xFF00FF00);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+
+    final WebTextStyle roboto10 = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 10,
+      foreground: redPaint,
+    );
+
+    final WebTextStyle arial10 = WebTextStyle(
+      fontFamily: 'Arial',
+      fontSize: 10,
+      foreground: bluePaint,
+    );
+
+    final WebTextStyle roboto20 = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: greenPaint,
+    );
+
+    final WebTextStyle arial20 = WebTextStyle(
+      fontFamily: 'Arial',
+      fontSize: 20,
+      foreground: bluePaint,
+    );
+
+    final WebTextStyle roboto40 = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      foreground: redPaint,
+    );
+
+    final WebTextStyle arial40 = WebTextStyle(
+      fontFamily: 'Arial',
+      fontSize: 40,
+      foreground: bluePaint,
+    );
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+    builder.pushStyle(roboto10);
+    builder.addText('Roboto 10 red.');
+    builder.pop();
+
+    builder.pushStyle(arial40);
+    builder.addText('Arial 40 blue.');
+    builder.pop();
+
+    builder.pushStyle(roboto20);
+    builder.addText('Roboto 20 green.');
+    builder.pop();
+
+    builder.pushStyle(arial20);
+    builder.addText('Arial 20 blue');
+    builder.pop();
+
+    builder.pushStyle(roboto40);
+    builder.addText('Roboto 40 red.');
+    builder.pop();
+
+    builder.pushStyle(arial10);
+    builder.addText('Arial 10 blue.');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multiplefont.png', region: region);
+  });
 }
