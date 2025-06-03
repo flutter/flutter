@@ -382,7 +382,6 @@ class _FakePub extends Fake implements Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     if (project == null) {
@@ -406,8 +405,6 @@ class _FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,

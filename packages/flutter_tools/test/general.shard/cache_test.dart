@@ -1414,7 +1414,6 @@ class FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,

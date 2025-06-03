@@ -66,7 +66,6 @@ Future<LocalizationsGenerator> generateLocalizations({
             headerString: options.header,
             headerFile: options.headerFile,
             useDeferredLoading: options.useDeferredLoading,
-            useSyntheticPackage: options.syntheticPackage,
             areResourceAttributesRequired: options.requiredResourceAttributes,
             untranslatedMessagesFile: options.untranslatedMessagesFile,
             usesNullableGetter: options.nullableGetter,
@@ -104,18 +103,6 @@ stderr:\n${result.stderr}''', result.exitCode);
 
   return generator;
 }
-
-/// The path for the synthetic package.
-String _defaultSyntheticPackagePath(FileSystem fileSystem) =>
-    fileSystem.path.join('.dart_tool', 'flutter_gen');
-
-/// The default path used when the `_useSyntheticPackage` setting is set to true
-/// in [LocalizationsGenerator].
-///
-/// See [LocalizationsGenerator.new] for where and how it is used by the
-/// localizations tool.
-String _syntheticL10nPackagePath(FileSystem fileSystem) =>
-    fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
 
 // Generate method parameters and also infer the correct types from the usage of the placeholders
 // For example, if placeholders are used for plurals and no type was specified, then the type will
@@ -545,7 +532,6 @@ class LocalizationsGenerator {
     String? headerFile,
     bool useDeferredLoading = false,
     String? inputsAndOutputsListPath,
-    bool useSyntheticPackage = false,
     String? projectPathString,
     bool areResourceAttributesRequired = false,
     String? untranslatedMessagesFile,
@@ -562,15 +548,13 @@ class LocalizationsGenerator {
       inputPathString,
       projectDirectory,
     );
-    final Directory outputDirectory = outputDirectoryFromPath(
+    final Directory outputDirectory = _outputDirectoryFromPath(
       fileSystem,
       outputPathString ?? inputPathString,
-      useSyntheticPackage,
       projectDirectory,
     );
     return LocalizationsGenerator._(
       fileSystem,
-      useSyntheticPackage: useSyntheticPackage,
       usesNullableGetter: usesNullableGetter,
       className: classNameFromString(classNameString),
       projectDirectory: projectDirectory,
@@ -612,7 +596,6 @@ class LocalizationsGenerator {
     this.header = '',
     this.useDeferredLoading = false,
     required this.inputsAndOutputsListFile,
-    this.useSyntheticPackage = true,
     this.projectDirectory,
     this.areResourceAttributesRequired = false,
     this.untranslatedMessagesFile,
@@ -635,9 +618,6 @@ class LocalizationsGenerator {
     ),
   );
   late final LocaleInfo _templateArbLocale = _templateBundle.locale;
-
-  @visibleForTesting
-  final bool useSyntheticPackage;
 
   // Used to decide if the generated code is nullable or not
   // (whether AppLocalizations? or AppLocalizations is returned from
@@ -835,28 +815,16 @@ class LocalizationsGenerator {
   }
 
   /// Sets the reference [Directory] for [outputDirectory].
-  @visibleForTesting
-  static Directory outputDirectoryFromPath(
+  static Directory _outputDirectoryFromPath(
     FileSystem fileSystem,
     String outputPathString,
-    bool useSyntheticPackage,
     Directory? projectDirectory,
   ) {
-    Directory outputDirectory;
-    if (useSyntheticPackage) {
-      outputDirectory = fileSystem.directory(
-        projectDirectory != null
-            ? _getAbsoluteProjectPath(_syntheticL10nPackagePath(fileSystem), projectDirectory)
-            : _syntheticL10nPackagePath(fileSystem),
-      );
-    } else {
-      outputDirectory = fileSystem.directory(
-        projectDirectory != null
-            ? _getAbsoluteProjectPath(outputPathString, projectDirectory)
-            : outputPathString,
-      );
-    }
-    return outputDirectory;
+    return fileSystem.directory(
+      projectDirectory != null
+          ? _getAbsoluteProjectPath(outputPathString, projectDirectory)
+          : outputPathString,
+    );
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -1467,22 +1435,6 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     // If there were any syntax errors, don't write to files.
     if (hadErrors) {
       throw L10nException('Found syntax errors.');
-    }
-
-    // A pubspec.yaml file is required when using a synthetic package. If it does not
-    // exist, create a blank one.
-    if (useSyntheticPackage) {
-      final Directory syntheticPackageDirectory =
-          projectDirectory != null
-              ? projectDirectory!.childDirectory(_defaultSyntheticPackagePath(_fs))
-              : _fs.directory(_defaultSyntheticPackagePath(_fs));
-      syntheticPackageDirectory.createSync(recursive: true);
-      final File flutterGenPubspec = syntheticPackageDirectory.childFile('pubspec.yaml');
-      if (!flutterGenPubspec.existsSync()) {
-        flutterGenPubspec.writeAsStringSync(
-          useCRLF ? emptyPubspecTemplate.replaceAll('\n', '\r\n') : emptyPubspecTemplate,
-        );
-      }
     }
 
     // Since all validity checks have passed up to this point,

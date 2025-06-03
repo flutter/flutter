@@ -11,14 +11,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
-import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -37,15 +34,6 @@ void main() {
   late FileSystem fileSystem;
   late FakePub pub;
   late BufferLogger logger;
-
-  // TODO(matanlurey): Remove after `flutter_gen` is removed.
-  // See https://github.com/flutter/flutter/issues/102983 for details.
-  FeatureFlags disableExplicitPackageDependencies() {
-    return TestFeatureFlags(
-      // ignore: avoid_redundant_argument_values
-      isExplicitPackageDependenciesEnabled: false,
-    );
-  }
 
   setUp(() {
     Cache.disableLocking();
@@ -292,53 +280,6 @@ void main() {
       FileSystem: () => fileSystem,
     },
   );
-
-  testUsingContext(
-    'pub get triggers localizations generation when generate: true',
-    () async {
-      final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')..createSync();
-      pubspecFile.writeAsStringSync('''
-name: my_app
-flutter:
-  generate: true
-''');
-      fileSystem.currentDirectory.childFile('l10n.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
-        arb-dir: lib/l10n
-        ''');
-      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-        ..createSync(recursive: true);
-      arbFile.writeAsStringSync('''
-      {
-        "helloWorld": "Hello, World!",
-        "@helloWorld": {
-          "description": "Sample description"
-        }
-      }
-      ''');
-
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-
-      await commandRunner.run(<String>['get']);
-      final FlutterCommandResult result = await command.runCommand();
-
-      expect(result.exitStatus, ExitStatus.success);
-      final Directory outputDirectory = fileSystem.directory(
-        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'),
-      );
-      expect(outputDirectory.existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-    },
-    overrides: <Type, Generator>{
-      Pub: () => pub,
-      ProcessManager: () => FakeProcessManager.any(),
-      FileSystem: () => fileSystem,
-      FeatureFlags: disableExplicitPackageDependencies,
-    },
-  );
 }
 
 class FakePub extends Fake implements Pub {
@@ -353,7 +294,6 @@ class FakePub extends Fake implements Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     if (project != null) {
