@@ -141,9 +141,6 @@ typedef RawMenuAnchorOpenRequestedCallback =
 /// Signature for the callback used by [RawMenuAnchor.onCloseRequested] to
 /// intercept requests to close a menu.
 ///
-/// The `hideOverlay` callback will remove the menu overlay from the widget
-/// tree, and should be called when the menu is ready to be hidden.
-///
 /// See [RawMenuAnchor.onCloseRequested] for more information.
 typedef RawMenuAnchorCloseRequestedCallback =
     void Function(RawMenuAnchorHideOverlayCallback hideOverlay);
@@ -251,41 +248,58 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when the menu overlay is shown.
   ///
-  /// This callback is triggered when the menu overlay is inserted into the
-  /// widget tree, typically before any opening animations begin. A typical
-  /// usage is to respond when the menu first becomes interactive, such as by
-  /// setting focus to a menu item.
+  /// When [MenuController.open] is called, [onOpenRequested] is invoked with a
+  /// `showOverlay` callback that, when called, shows the menu overlay and
+  /// triggers [onOpen].
   ///
-  /// This callback is called regardless of whether the menu is already open or
-  /// the menu's position has changed.
+  /// The default implementation of [onOpenRequested] calls `showOverlay`
+  /// synchronously, thereby calling [onOpen] synchronously. In this case, the
+  /// [onOpen] is called regardless of whether the menu overlay is already
+  /// showing.
+  ///
+  /// Custom implementations of [onOpenRequested] can delay the call to
+  /// `showOverlay` or not call it at all, in which case [onOpen] will not be
+  /// called.
+  ///
+  /// A typical usage is to respond when the menu first becomes interactive,
+  /// such as by setting focus to a menu item.
   final VoidCallback? onOpen;
 
   /// Called when the menu overlay is hidden.
   ///
-  /// This callback is triggered when the menu overlay is removed from the
-  /// widget tree, typically after any closing animations have completed.
+  /// When [MenuController.close] is called, [onCloseRequested] is invoked with a
+  /// `hideOverlay` callback that, when called, hides the menu overlay and
+  /// triggers [onClose].
   ///
-  /// If a callback is provided for [onCloseRequested], [onClose] will not be
-  /// called until after `hideOverlay` is called.
+  /// The default implementation of [onCloseRequested] calls `hideOverlay`
+  /// synchronously, thereby calling [onClose] synchronously. In this case, the
+  /// [onClose] is called regardless of whether the menu overlay is already
+  /// hidden.
+  ///
+  /// Custom implementations of [onCloseRequested] can delay the call to
+  /// `hideOverlay` or not call it at all, in which case [onClose] will not be
+  /// called.
   final VoidCallback? onClose;
 
   /// Called when a request is made to open the menu.
   ///
-  /// This callback is used by themed menu widgets to intercept open requests,
-  /// typically with the intent of adding a delay or an animation.
+  /// This callback is triggered every time [MenuController.open] is called,
+  /// regardless of whether the overlay is already showing. As a result,
+  /// handlers will be called when the menu is repositioned, and when the menu
+  /// closing animation is interrupted by a new open request.
   ///
   /// After an open request is intercepted, the handler is responsible for
   /// eventually calling `showOverlay`. If needed, the call can be made after a
-  /// delay, or not at all. The `showOverlay` call sets [MenuController.isOpen]
-  /// to true, builds (or rebuilds) the [RawMenuAnchor] its overlay (the widget
+  /// delay, or not at all. Calling `showOverlay` sets [MenuController.isOpen]
+  /// to true, builds (or rebuilds) the [RawMenuAnchor]'s overlay (the widget
   /// built by [overlayBuilder]), and ensures that the menu overlay is showing.
   /// If a [RawMenuAnchor] is used in a themed menu that plays an opening
-  /// animation, `showOverlay` should come before the opening animation, since
-  /// the animation plays on the overlay itself.
+  /// animation, the themed menu should ensure the overlay is showing before
+  /// starting the opening animation, since the animation plays on the overlay
+  /// itself.
   ///
   /// The `position` argument is the `position` that [MenuController.open] was
-  /// called with. When a menu is repositioned, [onOpenRequested] may be called
-  /// with a new `position` value while the menu is still open.
+  /// called with.
   ///
   /// A typical [onOpenRequested] consists of the following steps:
   ///
@@ -298,9 +312,10 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when a request is made to close the menu.
   ///
-  /// This callback is used by themed menu widgets to intercept close requests,
-  /// typically with the intent of adding a delay or an animation before the
-  /// menu is hidden.
+  /// This callback is triggered every time [MenuController.close] is called,
+  /// regardless of whether the overlay is already hidden. As a result, this
+  /// callback is typically used to add a delay or an animation before the menu
+  /// is hidden.
   ///
   /// After a close request is intercepted, handlers are responsible for
   /// eventually calling `hideOverlay`. If needed, the call can be made after a
@@ -309,12 +324,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// hidden. If the [RawMenuAnchor] is used in a themed menu that plays a
   /// closing animation, `hideOverlay` should be called after the closing
   /// animation has ended, since the animation plays on the overlay itself. This
-  /// means that [MenuController.isOpen] will true while closing animations are
+  /// means that [MenuController.isOpen] will stay true while closing animations are
   /// running.
-  ///
-  /// [MenuController.isOpen] will be set to false after `hideOverlay` is
-  /// called, meaning [MenuController.isOpen] will typically be true while
-  /// closing animations are running.
   ///
   /// Typically, [onCloseRequested] consists of the following steps:
   ///
