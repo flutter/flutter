@@ -883,19 +883,15 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// It should be placed at top of the screen and automatically accounts for
 /// the iOS status bar.
 ///
+/// This navigation bar is expanded only in portrait orientation. In landscape
+/// mode, the navigation bar remains permanently collapsed. The navigation bar
+/// also collapses when scrolling in portrait mode.
+///
 /// Minimally, a [largeTitle] widget will appear in the middle of the app bar
 /// when the sliver is collapsed and transfer to the area below in larger font
-/// when the sliver is expanded.
-///
-/// For advanced uses, an optional [middle] widget can be supplied to show a
-/// different widget in the middle of the navigation bar when the sliver is collapsed.
-///
-/// This navigation bar is expanded only in portrait orientation. In landscape
-/// mode, the navigation bar remains collapsed. When collapsed (either by
-/// scrolling in portrait or by being in landscape), the [middle] widget is
-/// displayed. However, if no [middle] widget is provided, the [largeTitle]
-/// widget itself will be used in the [middle]'s position, rendered in its
-/// smaller, collapsed style.
+/// when the sliver is expanded. For advanced uses, an optional [middle] widget
+/// can be supplied to show a different widget in the middle of the navigation
+/// bar when the sliver is collapsed.
 ///
 /// Like [CupertinoNavigationBar], it also supports a [leading] and [trailing]
 /// widget on the static section on top that remains while scrolling.
