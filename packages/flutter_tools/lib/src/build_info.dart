@@ -17,6 +17,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -51,6 +52,7 @@ class BuildInfo {
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
+    this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -181,6 +183,9 @@ class BuildInfo {
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
 
+  /// If set, web builds with DDC will run with support for hot reload.
+  final bool webEnableHotReload;
+
   /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(
     BuildMode.debug,
@@ -263,13 +268,36 @@ class BuildInfo {
   /// The module system DDC is targeting, or null if not using DDC or the
   /// associated flag isn't present.
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat? get ddcModuleFormat =>
-      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+  DdcModuleFormat get ddcModuleFormat {
+    final DdcModuleFormat moduleFormat =
+        webEnableHotReload ? DdcModuleFormat.ddc : DdcModuleFormat.amd;
+    final DdcModuleFormat? parsedFormat =
+        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+    if (parsedFormat != null && moduleFormat != parsedFormat) {
+      throw Exception(
+        'Unsupported option combination:\n'
+        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
+        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-module-format=${parsedFormat.name}',
+      );
+    }
+    return moduleFormat;
+  }
 
   /// Whether to enable canary features when using DDC, or null if not using
   /// DDC or the associated flag isn't present.
-  bool? get canaryFeatures =>
-      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+  bool get canaryFeatures {
+    final bool canaryEnabled = webEnableHotReload;
+    final bool? parsedCanary =
+        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+    if (parsedCanary != null && canaryEnabled != parsedCanary) {
+      throw Exception(
+        'Unsupported option combination:\n'
+        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
+        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-canary=$parsedCanary',
+      );
+    }
+    return canaryEnabled;
+  }
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -1003,9 +1031,6 @@ const String kXcodeAction = 'Action';
 /// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
 /// to the BUILT_PRODUCTS_DIR prior to the build.
 const String kXcodePreAction = 'PreBuildAction';
-
-// Whether the last Flutter tool invocation enabled dev dependencies.
-const String kDevDependenciesEnabled = 'DevDependenciesEnabled';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
