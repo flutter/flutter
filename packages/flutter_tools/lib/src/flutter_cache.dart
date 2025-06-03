@@ -740,9 +740,10 @@ class IosUsbArtifacts extends CachedArtifact {
 
   static const List<String> artifactNames = <String>[
     'libimobiledevice',
-    'usbmuxd',
+    'libusbmuxd',
     'libplist',
     'openssl',
+    'libimobiledeviceglue',
     'ios-deploy',
   ];
 
@@ -752,7 +753,7 @@ class IosUsbArtifacts extends CachedArtifact {
   // missing.
   static const Map<String, List<String>> _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>['idevicescreenshot', 'idevicesyslog'],
-    'usbmuxd': <String>['iproxy'],
+    'libusbmuxd': <String>['iproxy'],
   };
 
   @override
