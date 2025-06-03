@@ -3850,24 +3850,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
 
       int count = 0;
-      for (RenderObject? node = this; node != null; node = node.parent) {
-        final bool? isRelayoutBoundary = node._isRelayoutBoundary;
-        if (isRelayoutBoundary == null || isRelayoutBoundary) {
-          count = isRelayoutBoundary == null ? -1 : count;
-          break;
-        }
+      for (
+        RenderObject? node = this;
+        node != null && !(node._isRelayoutBoundary ?? true);
+        node = node.parent
+      ) {
         count += 1;
       }
       if (count > 0) {
         header += ' relayoutBoundary=up$count';
-      }
-
-      if (_isRelayoutBoundary ?? false) {
-        RenderObject? target = parent;
-        while (target != null && (target._isRelayoutBoundary ?? false)) {
-          target = target.parent;
-          count += 1;
-        }
       }
       if (_needsLayout) {
         header += ' NEEDS-LAYOUT';

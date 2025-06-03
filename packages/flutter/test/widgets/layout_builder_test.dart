@@ -985,7 +985,6 @@ void main() {
     expect(rebuilt, isTrue);
   });
 
-
   testWidgets('LayoutBuilder does not crash when it becomes kept-alive', (
     WidgetTester tester,
   ) async {
