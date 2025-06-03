@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -228,9 +229,35 @@ class ChromiumLauncher {
         '--no-sandbox',
         '--window-size=2400,1800',
       ],
+      '--enable-logging',
+      '--v=stderr',
       ...webBrowserFlags,
       url,
     ];
+
+    // Periodically print updated contents. For some reason, the console logs
+    // don't get printed to stderr or stdout no matter the combination of
+    // --enable-logging and --v flags we provide. We also can't seem to use
+    // RandomAccessFiles as the next byte seems to always report EOF.
+    final String chromeDebugLog = '${userDataDir.path}/chrome_debug.log';
+    final io.File chromeDebugLogFile = io.File(chromeDebugLog);
+    final Completer<void> openCompleter = Completer<void>();
+    chromeDebugLogFile.watch().listen((io.FileSystemEvent event) {
+      if (event.type == io.FileSystemEvent.create) {
+        openCompleter.complete();
+      }
+    });
+    String previousString = '';
+    // ignore: unawaited_futures
+    openCompleter.future.then((_) {
+      Timer.periodic(const Duration(seconds: 10), (_) {
+        final String newString = chromeDebugLogFile.readAsStringSync();
+        if (newString != previousString) {
+          _logger.printTrace(newString.substring(previousString.length));
+        }
+        previousString = newString;
+      });
+    });
 
     final Process process = await _spawnChromiumProcess(args, chromeExecutable);
 
