@@ -67,7 +67,7 @@ def launch_package(package_name, activity_name, adb_path='adb'):
                           stderr=subprocess.STDOUT)
   for line in logcat.stdout:
     print('>>>>>>>> ' + line.strip())
-    if ('Observatory listening' in line) or ('Dart VM service is listening' in line):
+    if 'Dart VM service is listening' in line:
       logcat.kill()
       break
 

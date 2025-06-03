@@ -167,12 +167,13 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   bool get reloadIsRestart =>
+      debuggingOptions.webUseWasm ||
       // Web behavior when not using the DDC library bundle format is to restart
       // when a reload is issued. We can't use `canHotReload` to signal this
       // since we still want a reload command to succeed, but to do a hot
       // restart.
       debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-      debuggingOptions.buildInfo.canaryFeatures != true;
+      !debuggingOptions.buildInfo.canaryFeatures;
 
   @override
   bool get supportsDetach => stopAppDuringCleanup;
@@ -321,7 +322,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
-          canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
+          canaryFeatures: debuggingOptions.buildInfo.canaryFeatures,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
@@ -420,7 +421,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     final DateTime start = _systemClock.now();
     final Status status;
     if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-        debuggingOptions.buildInfo.canaryFeatures == false) {
+        !debuggingOptions.buildInfo.canaryFeatures) {
       // Triggering hot reload performed hot restart for the old module formats
       // historically. Keep that behavior and only perform hot reload when the
       // new module format is used.
@@ -506,10 +507,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
               _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
           await _vmService.service.callMethod(hotRestartMethod);
         } else {
-          // Isolates don't work on web. For lack of a better value, pass an
-          // empty string for the isolate id.
           final DateTime reloadStart = _systemClock.now();
-          final vmservice.ReloadReport report = await _vmService.service.reloadSources('');
+          final vmservice.VM vm = await _vmService.service.getVM();
+          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
+            vm.isolates!.first.id!,
+          );
           reloadDuration = _systemClock.now().difference(reloadStart);
           final ReloadReportContents contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
@@ -786,6 +788,24 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       void onLogEvent(vmservice.Event event) {
         final String message = processVmServiceMessage(event);
         _logger.printStatus(message);
+      }
+
+      // This flag is needed to manage breakpoints properly.
+      if (debuggingOptions.startPaused && debuggingOptions.debuggingEnabled) {
+        try {
+          final vmservice.Response result = await _vmService.service.setFlag(
+            'pause_isolates_on_start',
+            'true',
+          );
+          if (result is! vmservice.Success) {
+            _logger.printError('setFlag failure: $result');
+          }
+        } on Exception catch (e) {
+          _logger.printError(
+            'Failed to set pause_isolates_on_start=true, proceeding. '
+            'Error: $e',
+          );
+        }
       }
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);

@@ -4242,6 +4242,10 @@ abstract class ImageFilter {
   /// also be at least one sampler2D uniform, the first of which will be set by
   /// the engine to contain the filter input.
   ///
+  /// When Impeller uses the OpenGL(ES) backend, the y-axis direction is
+  /// reversed. Custom fragment shaders must invert the y-axis on
+  /// GLES or they will render upside-down.
+  ///
   /// For example, the following is a valid fragment shader that can be used
   /// with this API. Note that the uniform names are not required to have any
   /// particular value.
@@ -4257,7 +4261,12 @@ abstract class ImageFilter {
   /// out vec4 frag_color;
   ///
   /// void main() {
-  ///   frag_color = texture(u_texture_input, FlutterFragCoord().xy / u_size) * u_time;
+  ///   vec2 uv = FlutterFragCoord().xy / u_size;
+  /// // Reverse y axis for OpenGL backend.
+  /// #ifdef IMPELLER_TARGET_OPENGLES
+  ///   uv.y = 1.0 - uv.y
+  /// #endif
+  ///   frag_color = texture(u_texture_input, uv) * u_time;
   ///
   /// }
   ///

@@ -41,6 +41,15 @@ abstract class DartBuild extends Target {
       final Uri projectUri = environment.projectDir.uri;
       final String? runPackageName =
           packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      if (runPackageName == null) {
+        throw StateError(
+          'Could not determine run package name. '
+          'Project path "${projectUri.toFilePath()}" did not occur as package '
+          'root in package config "${environment.packageConfigPath}". '
+          'Please report a reproduction on '
+          'https://github.com/flutter/flutter/issues/169475.',
+        );
+      }
       final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
@@ -49,7 +58,7 @@ abstract class DartBuild extends Target {
             packageConfig,
             fileSystem,
             environment.logger,
-            runPackageName!,
+            runPackageName,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
@@ -77,7 +86,7 @@ abstract class DartBuild extends Target {
     }
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!await outputDepfile.exists()) {
-      throwToolExit("${outputDepfile.path} doesn't exist.");
+      throw StateError("${outputDepfile.path} doesn't exist.");
     }
   }
 

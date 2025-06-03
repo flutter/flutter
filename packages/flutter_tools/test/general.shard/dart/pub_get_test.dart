@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
@@ -988,32 +987,30 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-    'cannot use `generate: true` with a workspace without --explicit-package-dependencies',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Pub pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-        platform: FakePlatform(
-          environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-        ),
-      );
+  testUsingContext('can use generate: true within a workspace', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Pub pub = Pub.test(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+      platform: FakePlatform(
+        environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
+      ),
+    );
 
-      final Directory pkg = fileSystem.directory('workspace_pkg')..createSync(recursive: true);
-      fileSystem.file('version').createSync();
-      pkg.childFile('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+    final Directory pkg = fileSystem.directory('workspace_pkg')..createSync(recursive: true);
+    fileSystem.file('version').createSync();
+    pkg.childFile('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
       flutter:
         generate: true
       ''');
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
       {"configVersion": 2,"packages": [
         {
           "name": "flutter_tools",
@@ -1024,63 +1021,11 @@ exit code: 66
       ],"generated":"some-time"}
 ''');
 
-      await expectLater(
-        pub.get(project: FlutterProject.fromDirectoryTest(pkg), context: PubContext.flutterTests),
-        throwsToolExit(message: '`generate: true` is not supported within workspaces unless'),
-      );
-    },
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: false),
-    },
-  );
-
-  testUsingContext(
-    'can use `generate: true` with a workspace with --explicit-package-dependencies',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Pub pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-        platform: FakePlatform(
-          environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-        ),
-      );
-
-      final Directory pkg = fileSystem.directory('workspace_pkg')..createSync(recursive: true);
-      fileSystem.file('version').createSync();
-      pkg.childFile('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
-      flutter:
-        generate: true
-      ''');
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-      {"configVersion": 2,"packages": [
-        {
-          "name": "flutter_tools",
-          "rootUri": "../",
-          "packageUri": "lib/",
-          "languageVersion": "2.7"
-        }
-      ],"generated":"some-time"}
-''');
-
-      await expectLater(
-        pub.get(project: FlutterProject.fromDirectoryTest(pkg), context: PubContext.flutterTests),
-        completes,
-      );
-    },
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isExplicitPackageDependenciesEnabled: true),
-    },
-  );
+    await expectLater(
+      pub.get(project: FlutterProject.fromDirectoryTest(pkg), context: PubContext.flutterTests),
+      completes,
+    );
+  });
 
   testWithoutContext('Pub error handling', () async {
     final BufferLogger logger = BufferLogger.test();
