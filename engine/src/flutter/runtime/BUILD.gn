@@ -118,12 +118,6 @@ source_set("runtime") {
     "//flutter/third_party/tonic",
     "//flutter/txt",
   ]
-
-  if (flutter_runtime_mode != "release" && !is_fuchsia) {
-    # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
-    # instead puts Observatory into the runner's package.
-    deps += [ "$dart_src/runtime/observatory:embedded_observatory_archive" ]
-  }
 }
 
 if (enable_unittests) {
