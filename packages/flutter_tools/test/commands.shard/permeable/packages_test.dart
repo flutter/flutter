@@ -403,6 +403,7 @@ flutter:
   generate: true
 ''');
         projectDir.childFile('pubspec.yaml').writeAsStringSync(pubspecFileContent);
+        projectDir.childFile('l10n.yaml').createSync();
         await runCommandIn(projectPath, 'get');
         expect(
           projectDir

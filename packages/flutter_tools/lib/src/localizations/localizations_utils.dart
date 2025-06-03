@@ -8,7 +8,7 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -549,7 +549,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
         'See $kFlutterGenNotice.',
       );
     } else {
-      logger.printWarning(
+      globals.logger.printWarning(
         'The argument "$kSyntheticPackage" no longer has any effect and should '
         'be removed. See $kFlutterGenNotice',
       );
