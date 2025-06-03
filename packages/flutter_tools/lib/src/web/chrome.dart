@@ -241,22 +241,18 @@ class ChromiumLauncher {
     // RandomAccessFiles as the next byte seems to always report EOF.
     final String chromeDebugLog = '${userDataDir.path}/chrome_debug.log';
     final io.File chromeDebugLogFile = io.File(chromeDebugLog);
-    final Completer<void> openCompleter = Completer<void>();
-    chromeDebugLogFile.watch().listen((io.FileSystemEvent event) {
-      if (event.type == io.FileSystemEvent.create) {
-        openCompleter.complete();
-      }
-    });
     String previousString = '';
-    // ignore: unawaited_futures
-    openCompleter.future.then((_) {
-      Timer.periodic(const Duration(seconds: 10), (_) {
+    Timer.periodic(const Duration(seconds: 10), (_) {
+      if (chromeDebugLogFile.existsSync()) {
+        _logger.printTrace('Found $chromeDebugLog');
         final String newString = chromeDebugLogFile.readAsStringSync();
         if (newString != previousString) {
           _logger.printTrace(newString.substring(previousString.length));
         }
         previousString = newString;
-      });
+      } else {
+        _logger.printTrace('Could not find $chromeDebugLog');
+      }
     });
 
     final Process process = await _spawnChromiumProcess(args, chromeExecutable);
