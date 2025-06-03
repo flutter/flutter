@@ -718,17 +718,6 @@ final List<LicenseReferencePattern> csReferencesByIdentifyingReference = <Licens
     ),
   ),
 
-  // Observatory (polymer)
-  LicenseReferencePattern(
-    checkLocalFirst: false,
-    pattern: RegExp(
-      kIndent +
-          r'This code may only be used under the BSD style license found at (http://polymer.github.io/LICENSE.txt)$',
-      multiLine: true,
-      caseSensitive: false,
-    ),
-  ),
-
   // LLVM (Apache License v2.0 with LLVM Exceptions)
   LicenseReferencePattern(
     checkLocalFirst: false,
