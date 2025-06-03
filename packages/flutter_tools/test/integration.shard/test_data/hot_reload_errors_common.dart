@@ -57,7 +57,6 @@ void testAll({
           ),
         );
 
-        project.removeFieldFromConstClass();
         await expectLater(flutter.hotRestart(), completes);
       },
     );
