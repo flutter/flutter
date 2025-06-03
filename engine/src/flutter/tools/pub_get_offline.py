@@ -165,9 +165,9 @@ def main():
 
   pub_count = 0
   for package in ALL_PACKAGES:
-    if fetch_package(pubcmd, package) != 0:
-      return 1
     if not package_uses_workspace_resolution(package):
+      if fetch_package(pubcmd, package) != 0:
+        return 1
       pub_count = pub_count + check_package_config(package)
 
   if pub_count > 0:
