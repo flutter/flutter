@@ -47,13 +47,17 @@ void testAll({
           flutter.hotReload(),
           throwsA(
             isA<Exception>().having(
-              (Exception e) => e.toString(),
+              (Exception e) {
+                print("<<<${'?' * 80}\n${e.toString()}\n${'?' * 80}>>>");
+                return e.toString();
+              },
               'message',
               contains('Try performing a hot restart instead.'),
             ),
           ),
         );
 
+        project.removeFieldFromConstClass();
         await expectLater(flutter.hotRestart(), completes);
       },
     );
