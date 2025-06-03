@@ -80,10 +80,7 @@ const String samplesIndexJson = '''
 ]''';
 
 /// These files are generated for all project types.
-const List<String> flutterPluginsIgnores = <String>[
-  '.flutter-plugins',
-  '.flutter-plugins-dependencies',
-];
+const List<String> flutterPluginsIgnores = <String>['.flutter-plugins-dependencies'];
 
 void main() {
   late Directory tempDir;
