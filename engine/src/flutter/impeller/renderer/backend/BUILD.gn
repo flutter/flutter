@@ -13,12 +13,12 @@ group("backend") {
   }
 
   if (impeller_enable_opengles) {
-    assert(is_mac || is_linux || is_win || is_android)
+    assert(is_mac || is_linux || is_win || is_android || is_qnx)
     public_deps += [ "gles" ]
   }
 
   if (impeller_enable_vulkan) {
-    assert(is_mac || is_linux || is_win || is_android)
+    assert(is_mac || is_linux || is_win || is_android || is_qnx)
     public_deps += [ "vulkan" ]
   }
 }

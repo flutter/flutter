@@ -61,7 +61,7 @@ struct DlColor {
     return DlColor(a, r, g, b, DlColorSpace::kSRGB);
   }
 
-  static constexpr uint8_t toAlpha(DlScalar opacity) { return toC(opacity); }
+  static inline uint8_t toAlpha(DlScalar opacity) { return toC(opacity); }
   static constexpr DlScalar toOpacity(uint8_t alpha) { return toF(alpha); }
 
   // clang-format off
@@ -99,16 +99,16 @@ struct DlColor {
 
   ///\deprecated Use floating point accessors to avoid data loss when using wide
   /// gamut colors.
-  constexpr int getAlpha() const { return toC(alpha_); }
+  inline int getAlpha() const { return toC(alpha_); }
   ///\deprecated Use floating point accessors to avoid data loss when using wide
   /// gamut colors.
-  constexpr int getRed() const { return toC(red_); }
+  inline int getRed() const { return toC(red_); }
   ///\deprecated Use floating point accessors to avoid data loss when using wide
   /// gamut colors.
-  constexpr int getGreen() const { return toC(green_); }
+  inline int getGreen() const { return toC(green_); }
   ///\deprecated Use floating point accessors to avoid data loss when using wide
   /// gamut colors.
-  constexpr int getBlue() const { return toC(blue_); }
+  inline int getBlue() const { return toC(blue_); }
 
   constexpr DlScalar getAlphaF() const { return alpha_; }
   constexpr DlScalar getRedF() const { return red_; }
@@ -117,16 +117,16 @@ struct DlColor {
 
   constexpr DlColorSpace getColorSpace() const { return color_space_; }
 
-  constexpr DlColor withAlpha(uint8_t alpha) const {  //
+  inline DlColor withAlpha(uint8_t alpha) const {  //
     return DlColor((argb() & 0x00FFFFFF) | (alpha << 24));
   }
-  constexpr DlColor withRed(uint8_t red) const {  //
+  inline DlColor withRed(uint8_t red) const {  //
     return DlColor((argb() & 0xFF00FFFF) | (red << 16));
   }
-  constexpr DlColor withGreen(uint8_t green) const {  //
+  inline DlColor withGreen(uint8_t green) const {  //
     return DlColor((argb() & 0xFFFF00FF) | (green << 8));
   }
-  constexpr DlColor withBlue(uint8_t blue) const {  //
+  inline DlColor withBlue(uint8_t blue) const {  //
     return DlColor((argb() & 0xFFFFFF00) | (blue << 0));
   }
   constexpr DlColor withAlphaF(float alpha) const {  //
@@ -155,7 +155,7 @@ struct DlColor {
 
   ///\deprecated Use floating point accessors to avoid data loss when using wide
   /// gamut colors.
-  constexpr uint32_t argb() const {
+  inline uint32_t argb() const {
     return toC(alpha_) << 24 |  //
            toC(red_) << 16 |    //
            toC(green_) << 8 |   //
@@ -190,7 +190,7 @@ struct DlColor {
   DlColorSpace color_space_;
 
   static constexpr DlScalar toF(uint8_t comp) { return comp * (1.0f / 255); }
-  static constexpr uint8_t toC(DlScalar fComp) { return round(fComp * 255); }
+  static inline uint8_t toC(DlScalar fComp) { return std::round(fComp * 255); }
 };
 
 }  // namespace flutter

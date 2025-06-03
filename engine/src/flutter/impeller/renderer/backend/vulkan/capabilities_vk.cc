@@ -269,8 +269,9 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
     }
     exts = maybe_exts.value();
   } else {
-    exts = std::set(embedder_device_extensions_.begin(),
-                    embedder_device_extensions_.end());
+    for (const auto& ext : embedder_device_extensions_) {
+      exts.insert(ext);
+    }
   }
 
   std::vector<std::string> enabled;
@@ -580,8 +581,9 @@ bool CapabilitiesVK::SetPhysicalDevice(
       }
       exts = maybe_exts.value();
     } else {
-      exts = std::set(embedder_device_extensions_.begin(),
-                      embedder_device_extensions_.end());
+      for (const auto& ext : embedder_device_extensions_) {
+        exts.insert(ext);
+      }
     }
 
     IterateExtensions<RequiredCommonDeviceExtensionVK>([&](auto ext) -> bool {

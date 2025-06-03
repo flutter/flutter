@@ -8,6 +8,7 @@
 #include "flutter/display_list/benchmarking/dl_complexity.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 
 namespace flutter {

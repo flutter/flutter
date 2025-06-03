@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_records.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
