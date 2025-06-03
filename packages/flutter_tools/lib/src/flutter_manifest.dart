@@ -965,10 +965,10 @@ final class AssetTransformerEntry {
     : args = args ?? const <String>[];
 
   final String package;
-  final List<String>? args;
+  final List<String> args;
 
   Map<String, Object?> get descriptor {
-    return <String, Object?>{_kPackage: package, if (args != null) _kArgs: args};
+    return <String, Object?>{_kPackage: package, _kArgs: args};
   }
 
   static const String _kPackage = 'package';
@@ -1018,30 +1018,22 @@ final class AssetTransformerEntry {
     if (other is! AssetTransformerEntry) {
       return false;
     }
-
-    final bool argsAreEqual =
-        (() {
-          if (args == null && other.args == null) {
-            return true;
-          }
-          if (args?.length != other.args?.length) {
-            return false;
-          }
-
-          for (int index = 0; index < args!.length; index += 1) {
-            if (args![index] != other.args![index]) {
-              return false;
-            }
-          }
-          return true;
-        })();
-
-    return package == other.package && argsAreEqual;
+    if (package != other.package) {
+      return false;
+    }
+    if (args.length != other.args.length) {
+      return false;
+    }
+    for (int index = 0; index < args.length; index += 1) {
+      if (args[index] != other.args[index]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll(<Object?>[package.hashCode, args?.map((String e) => e.hashCode)]);
+  int get hashCode => Object.hash(package, Object.hashAll(args));
 
   @override
   String toString() {

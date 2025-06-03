@@ -16,7 +16,7 @@ dependencies:
   collection: 1.19.1
   material_color_utilities: 0.11.1
   meta: 1.16.0
-  vector_math: 2.1.4
+  vector_math: 2.2.0
   sky_engine:
     sdk: flutter
 
@@ -40,4 +40,4 @@ dev_dependencies:
   path: any
   platform: any
 
-# PUBSPEC CHECKSUM: 3vvejp
+# PUBSPEC CHECKSUM: i8s8fi

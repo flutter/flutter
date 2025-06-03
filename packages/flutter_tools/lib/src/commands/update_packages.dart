@@ -221,9 +221,12 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkWithFlutterTools(rootDirectory);
     _checkPins(rootDirectory);
 
-    await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty);
-    await _pubGet(toolProject, !forceUpgrade && cherryPicks.isEmpty);
-    await _pubGet(widgetPreviewScaffoldProject, !forceUpgrade && cherryPicks.isEmpty);
+    await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
+    await _pubGet(toolProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
+    await _pubGet(
+      widgetPreviewScaffoldProject,
+      !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
+    );
 
     await _downloadCoverageData();
 

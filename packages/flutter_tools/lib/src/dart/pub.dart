@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -663,9 +662,6 @@ class _DefaultPub implements Pub {
   /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
   ///
-  /// Calls [_updatePackageConfig] for [project] and [FlutterProject.example]
-  /// (if it exists).
-  ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
   Future<void> _updateVersionAndPackageConfig(FlutterProject project) async {
@@ -683,7 +679,6 @@ class _DefaultPub implements Pub {
     );
     lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
 
-    await _updatePackageConfig(project, packageConfig);
     if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       final File? examplePackageConfig = findPackageConfigFile(project.example.directory);
       if (examplePackageConfig == null) {
@@ -691,36 +686,6 @@ class _DefaultPub implements Pub {
           '${project.directory}: pub did not create example/.dart_tools/package_config.json file.',
         );
       }
-      await _updatePackageConfig(project.example, examplePackageConfig);
     }
-  }
-
-  /// Update the package configuration file in [project].
-  ///
-  /// Creates a corresponding `package_config_subset` file that is used by the
-  /// build system to avoid rebuilds caused by an updated pub timestamp.
-  Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: _logger,
-    );
-
-    packageConfigFile.parent
-        .childFile('package_config_subset')
-        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
-  }
-
-  // Subset the package config file to only the parts that are relevant for
-  // rerunning the dart compiler.
-  String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
-    final StringBuffer buffer = StringBuffer();
-    for (final Package package in packageConfig.packages) {
-      buffer.writeln(package.name);
-      buffer.writeln(package.languageVersion);
-      buffer.writeln(package.root);
-      buffer.writeln(package.packageUriRoot);
-    }
-    buffer.writeln(packageConfig.version);
-    return buffer.toString();
   }
 }

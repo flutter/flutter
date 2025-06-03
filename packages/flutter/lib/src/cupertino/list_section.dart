@@ -464,12 +464,12 @@ class CupertinoListSection extends StatelessWidget {
       decoratedChildrenGroup = DecoratedBox(
         decoration:
             decoration ??
-            BoxDecoration(
+            ShapeDecoration(
               color: CupertinoDynamicColor.resolve(
                 decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
                 context,
               ),
-              borderRadius: childrenGroupBorderRadius,
+              shape: RoundedSuperellipseBorder(borderRadius: childrenGroupBorderRadius),
             ),
         child: Column(children: childrenWithDividers),
       );
@@ -479,7 +479,7 @@ class CupertinoListSection extends StatelessWidget {
         child:
             clipBehavior == Clip.none
                 ? decoratedChildrenGroup
-                : ClipRRect(
+                : ClipRSuperellipse(
                   borderRadius: childrenGroupBorderRadius,
                   clipBehavior: clipBehavior,
                   child: decoratedChildrenGroup,

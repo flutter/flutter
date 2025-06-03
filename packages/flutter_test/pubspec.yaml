@@ -33,7 +33,7 @@ dependencies:
   stack_trace: 1.12.1
 
   # Used by globalToLocal et al.
-  vector_math: 2.1.4
+  vector_math: 2.2.0
 
   # Used to detect memory leaks with `testWidgets`.
   leak_tracker_flutter_testing: 3.0.10
@@ -47,4 +47,4 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 
-# PUBSPEC CHECKSUM: pf5n1q
+# PUBSPEC CHECKSUM: 9ghr
