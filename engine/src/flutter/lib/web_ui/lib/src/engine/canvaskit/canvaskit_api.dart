@@ -1812,15 +1812,13 @@ extension type BidiNamespace(JSObject _) implements JSObject {
 }
 
 extension type CodeUnitInfo(JSObject _) implements JSObject {
-  @JS('flags')
-  external JSNumber get _flags;
-  int get flags => _flags.toDartInt;
+  external int get flags;
 }
 
 extension type CodeUnitsNamespace(JSObject _) implements JSObject {
   @JS('compute')
-  external JSArray<JSAny?> _compute(JSString text);
-  List<CodeUnitInfo> compute(String text) => _compute(text.toJS).toDart.cast<CodeUnitInfo>();
+  external JSArray<JSAny?> _compute(String text);
+  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
 }
 
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
