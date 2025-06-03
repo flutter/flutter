@@ -2004,7 +2004,21 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
-  RSuperellipse computed() {
+  /// Returns a new object of this shape that is geometrically identical to this
+  /// one but supports implicit caching of internal computations.
+  ///
+  /// The returned object shares the same position, dimensions, and corner radii
+  /// as this one, but it may cache intermediate results to improve performance
+  /// in repeated usage.
+  ///
+  /// An optional [cacheReference] can be provided to enable potential cache
+  /// reuse. If the given [cacheReference] is itself a cacheable object and
+  /// matches this one in geometry, the two objects may share internal cache
+  /// data to avoid redundant calculations.
+  ///
+  /// This is useful in scenarios where many identical or similar shapes are
+  /// used repeatedly, such as across frames or within the same frame.
+  RSuperellipse cacheable({RSuperellipse? cacheReference}) {
     return this;
   }
 

@@ -869,7 +869,6 @@ class RRect with _RRectLike<RRect> {
   @override
   final double bottom;
   @override
-  @override
   final double tlRadiusX;
   @override
   final double tlRadiusY;
@@ -1184,7 +1183,7 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
     return null;
   }
 
-  RSuperellipse computed({RSuperellipse? cacheReference}) {
+  RSuperellipse cacheable({RSuperellipse? cacheReference}) {
     return _NativeRSuperellipse(this, cacheReference: cacheReference);
   }
 
@@ -1242,6 +1241,10 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
   }
 }
 
+/// A version of [RSuperellipse] that allows caching.
+///
+/// This is needed because [RSuperellipse] is const and therefore doesn't allow
+/// any mutable properties.
 class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellipse {
   _NativeRSuperellipse(RSuperellipse rsuperellipse, {required RSuperellipse? cacheReference})
     : top = rsuperellipse.top,
@@ -1329,7 +1332,7 @@ class _NativeRSuperellipse with _RRectLike<RSuperellipse> implements RSuperellip
   }
 
   @override
-  RSuperellipse computed({RSuperellipse? cacheReference}) {
+  RSuperellipse cacheable({RSuperellipse? cacheReference}) {
     return _NativeRSuperellipse(this, cacheReference: cacheReference);
   }
 
