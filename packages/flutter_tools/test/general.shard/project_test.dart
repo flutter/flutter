@@ -35,11 +35,6 @@ import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 
 void main() {
-  FeatureFlags disableExplicitPackageDependencies() {
-    // ignore: avoid_redundant_argument_values
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: false);
-  }
-
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
   final BufferLogger logger = BufferLogger.test();
@@ -296,7 +291,6 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          FeatureFlags: disableExplicitPackageDependencies,
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: () => const ThrowingPub(),

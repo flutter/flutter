@@ -1889,7 +1889,7 @@ abstract class FlutterCommand extends Command<void> {
       return;
     }
     await project.regeneratePlatformSpecificTooling(
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
+      releaseMode: releaseMode,
     );
   }
 
