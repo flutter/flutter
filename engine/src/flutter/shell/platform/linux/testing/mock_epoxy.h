@@ -18,8 +18,12 @@ class MockEpoxy {
   MockEpoxy();
   ~MockEpoxy();
 
+  MOCK_METHOD(bool,
+              epoxy_has_egl_extension,
+              (EGLDisplay display, const char* extension));
   MOCK_METHOD(bool, epoxy_has_gl_extension, (const char* extension));
   MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
+  MOCK_METHOD(int, epoxy_egl_version, (EGLDisplay display));
   MOCK_METHOD(int, epoxy_gl_version, ());
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
@@ -44,6 +48,9 @@ class MockEpoxy {
   MOCK_METHOD(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers));
   MOCK_METHOD(void, glGenRenderbuffers, (GLsizei n, GLuint* renderbuffers));
   MOCK_METHOD(void, glGenTextures, (GLsizei n, GLuint* textures));
+  MOCK_METHOD(void,
+              glEGLImageTargetTexture2DOES,
+              (GLenum target, EGLImage image));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
 };
 

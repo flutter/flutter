@@ -4,6 +4,7 @@
 
 #include "fl_framebuffer.h"
 
+#include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
 struct _FlFramebuffer {
@@ -23,6 +24,9 @@ struct _FlFramebuffer {
 
   // Stencil buffer associated with this framebuffer.
   GLuint depth_stencil;
+
+  // EGL image for this texture.
+  EGLImage image;
 };
 
 G_DEFINE_TYPE(FlFramebuffer, fl_framebuffer, G_TYPE_OBJECT)
@@ -44,18 +48,18 @@ static void fl_framebuffer_class_init(FlFramebufferClass* klass) {
 static void fl_framebuffer_init(FlFramebuffer* self) {}
 
 FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
-  FlFramebuffer* provider =
+  FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
 
-  provider->width = width;
-  provider->height = height;
+  self->width = width;
+  self->height = height;
 
-  glGenTextures(1, &provider->texture_id);
-  glGenFramebuffers(1, &provider->framebuffer_id);
+  glGenTextures(1, &self->texture_id);
+  glGenFramebuffers(1, &self->framebuffer_id);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, provider->framebuffer_id);
+  glBindFramebuffer(GL_FRAMEBUFFER, self->framebuffer_id);
 
-  glBindTexture(GL_TEXTURE_2D, provider->texture_id);
+  glBindTexture(GL_TEXTURE_2D, self->texture_id);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -64,22 +68,51 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
                GL_UNSIGNED_BYTE, NULL);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                         provider->texture_id, 0);
+  // Make image from texture so can be used in other contexts.
+  EGLDisplay egl_display = eglGetCurrentDisplay();
+  EGLContext egl_context = eglGetCurrentContext();
+  self->image =
+      eglCreateImage(egl_display, egl_context, EGL_GL_TEXTURE_2D,
+                     (EGLClientBuffer)(intptr_t)self->texture_id, nullptr);
 
-  glGenRenderbuffers(1, &provider->depth_stencil);
-  glBindRenderbuffer(GL_RENDERBUFFER, provider->depth_stencil);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         self->texture_id, 0);
+
+  glGenRenderbuffers(1, &self->depth_stencil);
+  glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
   glRenderbufferStorage(GL_RENDERBUFFER,      // target
                         GL_DEPTH24_STENCIL8,  // internal format
                         width,                // width
                         height                // height
   );
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                            GL_RENDERBUFFER, provider->depth_stencil);
+                            GL_RENDERBUFFER, self->depth_stencil);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                            GL_RENDERBUFFER, provider->depth_stencil);
+                            GL_RENDERBUFFER, self->depth_stencil);
 
-  return provider;
+  return self;
+}
+
+FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* self) {
+  FlFramebuffer* sibling =
+      FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
+
+  sibling->width = self->width;
+  sibling->height = self->height;
+  sibling->image = self->image;
+
+  // Make texture from existing image.
+  glGenTextures(1, &sibling->texture_id);
+  glBindTexture(GL_TEXTURE_2D, sibling->texture_id);
+  glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, self->image);
+
+  // Make framebuffer that uses this texture.
+  glGenFramebuffers(1, &sibling->framebuffer_id);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sibling->framebuffer_id);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         sibling->texture_id, 0);
+
+  return sibling;
 }
 
 GLuint fl_framebuffer_get_id(FlFramebuffer* self) {
