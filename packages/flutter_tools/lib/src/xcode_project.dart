@@ -139,13 +139,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  /// The Flutter generated directory for the Swift Package handling plugin
-  /// dependencies.
-  Directory get flutterPluginSwiftPackageDirectory => ephemeralDirectory
-      .childDirectory('Packages')
-      .childDirectory(kFlutterGeneratedPluginSwiftPackageName);
+  /// The Flutter generated directory for generated Swift packages.
+  Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
-  /// The Flutter generated Swift Package manifest (Package.swift) for plugin
+  /// Flutter plugins that support SwiftPM will be symlinked in this directory to keep all
+  /// Swift packages relative to each other.
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  /// The Flutter generated directory for the Swift package handling plugin
+  /// dependencies.
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory(kFlutterGeneratedPluginSwiftPackageName);
+
+  /// The Flutter generated Swift package manifest (Package.swift) for plugin
   /// dependencies.
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
@@ -435,6 +442,10 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// The 'AppDelegate.swift' file of the host app. This file might not exist if the app project uses Objective-C.
   File get appDelegateSwift =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
+
+  /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjc =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 

@@ -76,7 +76,6 @@ void main() {
           expect(projectUnderTest.macos.flutterPluginSwiftPackageDirectory, isNot(exists));
           expect(projectUnderTest.windows.ephemeralDirectory, isNot(exists));
 
-          expect(projectUnderTest.flutterPluginsFile, isNot(exists));
           expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
           expect(
             projectUnderTest.directory
@@ -291,7 +290,6 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
   projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
   projectUnderTest.macos.flutterPluginSwiftPackageDirectory.createSync(recursive: true);
   projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
-  projectUnderTest.flutterPluginsFile.createSync(recursive: true);
   projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
 
   return projectUnderTest;

@@ -35,7 +35,6 @@ void main() {
       flutterProject
         ..manifest = FakeFlutterManifest()
         ..directory = fileSystem.systemTempDirectory.childDirectory('app')
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         )
@@ -453,9 +452,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late Directory directory;
 
   @override
-  late File flutterPluginsFile;
-
-  @override
   late File flutterPluginsDependenciesFile;
 
   @override
@@ -506,12 +502,20 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       hostAppRoot.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
 
   @override
-  File get flutterPluginSwiftPackageManifest => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage')
-      .childFile('Package.swift');
+  Directory get flutterSwiftPackagesDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
+
+  @override
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  @override
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  @override
+  File get flutterPluginSwiftPackageManifest =>
+      flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
   bool usesSwiftPackageManager = false;
@@ -547,12 +551,20 @@ class FakeIosProject extends Fake implements IosProject {
       hostAppRoot.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
 
   @override
-  File get flutterPluginSwiftPackageManifest => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage')
-      .childFile('Package.swift');
+  Directory get flutterSwiftPackagesDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
+
+  @override
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  @override
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  @override
+  File get flutterPluginSwiftPackageManifest =>
+      flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
   bool usesSwiftPackageManager = false;
