@@ -125,8 +125,14 @@ config("framework_relative_headers") {
 }
 
 source_set("InternalFlutterSwiftCommon") {
+  # Targets should only ever depend on the framework target.
+  # This allows code in this target to use types declared in the bridging
+  # header, but defined in the framework, while avoiding linking errors.
+  visibility = [ ":framework_common" ]
   configs += [ ":config" ]
+  bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
   sources = [ "framework/Source/Logger.swift" ]
+  public = framework_common_headers
 }
 
 # Framework code shared between iOS and macOS.
@@ -157,10 +163,8 @@ source_set("framework_common") {
     ":framework_relative_headers",
   ]
 
-  deps = [
-    ":InternalFlutterSwiftCommon",
-    "//flutter/fml",
-  ]
+  deps = [ "//flutter/fml" ]
+  public_deps = [ ":InternalFlutterSwiftCommon" ]
 }
 
 test_fixtures("framework_common_fixtures") {
@@ -175,7 +179,7 @@ source_set("test_utils_swift") {
     ":test_config",
   ]
   sources = [ "framework/Source/LoggerTestUtils.swift" ]
-  deps = [ ":InternalFlutterSwiftCommon" ]
+  deps = [ ":framework_common" ]
 }
 
 # Implements a main entry point for Swift Testing tests.
@@ -202,7 +206,7 @@ executable("framework_common_swift_unittests") {
   ]
   sources = [ "framework/Source/LoggerTest.swift" ]
   deps = [
-    ":InternalFlutterSwiftCommon",
+    ":framework_common",
     ":swift_testing_main",
     ":test_utils_swift",
   ]

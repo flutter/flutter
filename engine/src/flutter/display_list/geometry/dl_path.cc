@@ -6,8 +6,7 @@
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
-#include "flutter/impeller/geometry/path.h"
-#include "flutter/impeller/geometry/path_builder.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 
 namespace {
 inline constexpr flutter::DlPathFillType ToDlFillType(SkPathFillType sk_type) {
@@ -34,11 +33,8 @@ inline constexpr SkPathFillType ToSkFillType(flutter::DlPathFillType dl_type) {
 
 namespace flutter {
 
-using Path = impeller::Path;
-using PathBuilder = impeller::PathBuilder;
 using FillType = impeller::FillType;
 using Convexity = impeller::Convexity;
-using ComponentType = impeller::Path::ComponentType;
 
 DlPath DlPath::MakeRect(const DlRect& rect) {
   return DlPath(SkPath::Rect(ToSkRect(rect)));
@@ -69,7 +65,7 @@ DlPath DlPath::MakeOvalLTRB(DlScalar left,
   return DlPath(SkPath::Oval(SkRect::MakeLTRB(left, top, right, bottom)));
 }
 
-DlPath DlPath::MakeCircle(const DlPoint& center, DlScalar radius) {
+DlPath DlPath::MakeCircle(const DlPoint center, DlScalar radius) {
   return DlPath(SkPath::Circle(center.x, center.y, radius));
 }
 
@@ -86,7 +82,11 @@ DlPath DlPath::MakeRoundRectXY(const DlRect& rect,
       counter_clock_wise ? SkPathDirection::kCCW : SkPathDirection::kCW));
 }
 
-DlPath DlPath::MakeLine(const DlPoint& a, const DlPoint& b) {
+DlPath DlPath::MakeRoundSuperellipse(const DlRoundSuperellipse& rse) {
+  return DlPathBuilder{}.AddRoundSuperellipse(rse).TakePath();
+}
+
+DlPath DlPath::MakeLine(const DlPoint a, const DlPoint b) {
   return DlPath(SkPath::Line(ToSkPoint(a), ToSkPoint(b)));
 }
 
@@ -100,13 +100,13 @@ DlPath DlPath::MakePoly(const DlPoint pts[],
 
 DlPath DlPath::MakeArc(const DlRect& bounds,
                        DlDegrees start,
-                       DlDegrees end,
+                       DlDegrees sweep,
                        bool use_center) {
   SkPath path;
   if (use_center) {
     path.moveTo(ToSkPoint(bounds.GetCenter()));
   }
-  path.arcTo(ToSkRect(bounds), start.degrees, end.degrees, !use_center);
+  path.arcTo(ToSkRect(bounds), start.degrees, sweep.degrees, !use_center);
   if (use_center) {
     path.close();
   }
@@ -114,375 +114,13 @@ DlPath DlPath::MakeArc(const DlRect& bounds,
 }
 
 const SkPath& DlPath::GetSkPath() const {
-  auto& sk_path = data_->sk_path;
-  auto& path = data_->path;
-  if (sk_path.has_value()) {
-    return sk_path.value();
-  }
-  if (path.has_value()) {
-    sk_path.emplace(ConvertToSkiaPath(path.value()));
-    if (data_->render_count >= kMaxVolatileUses) {
-      sk_path.value().setIsVolatile(false);
-    }
-    return sk_path.value();
-  }
-  sk_path.emplace();
-  return sk_path.value();
-}
-
-const Path& DlPath::GetPath() const {
-  auto& sk_path = data_->sk_path;
-  auto& path = data_->path;
-  if (path.has_value()) {
-    return path.value();
-  }
-  if (sk_path.has_value()) {
-    path.emplace(ConvertToImpellerPath(sk_path.value()));
-    return path.value();
-  }
-  path.emplace();
-  return path.value();
+  return data_->sk_path;
 }
 
 void DlPath::Dispatch(DlPathReceiver& receiver) const {
-  if (data_->sk_path_original) {
-    auto& sk_path = data_->sk_path;
-    FML_DCHECK(sk_path.has_value());
-    if (sk_path.has_value()) {
-      DispatchFromSkiaPath(sk_path.value(), receiver);
-    }
-  } else {
-    auto& path = data_->path;
-    FML_DCHECK(path.has_value());
-    if (path.has_value()) {
-      DispatchFromImpellerPath(path.value(), receiver);
-    }
-  }
-}
-
-void DlPath::WillRenderSkPath() const {
-  if (data_->render_count >= kMaxVolatileUses) {
-    auto& sk_path = data_->sk_path;
-    if (sk_path.has_value()) {
-      sk_path.value().setIsVolatile(false);
-    }
-  } else {
-    data_->render_count++;
-  }
-}
-
-[[nodiscard]] DlPath DlPath::WithOffset(const DlPoint& offset) const {
-  if (offset.IsZero()) {
-    return *this;
-  }
-  if (!offset.IsFinite()) {
-    return DlPath();
-  }
-  auto& path = data_->path;
-  if (path.has_value()) {
-    PathBuilder builder;
-    builder.AddPath(path.value());
-    builder.Shift(offset);
-    return DlPath(builder.TakePath());
-  }
-  auto& sk_path = data_->sk_path;
-  if (sk_path.has_value()) {
-    SkPath path = sk_path.value();
-    path = path.offset(offset.x, offset.y);
-    return DlPath(path);
-  }
-  return *this;
-}
-
-[[nodiscard]] DlPath DlPath::WithFillType(DlPathFillType type) const {
-  auto& path = data_->path;
-  if (path.has_value()) {
-    if (path.value().GetFillType() == type) {
-      return *this;
-    }
-    PathBuilder builder;
-    builder.AddPath(path.value());
-    return DlPath(builder.TakePath(type));
-  }
-  auto& sk_path = data_->sk_path;
-  if (sk_path.has_value()) {
-    SkPathFillType sk_type = ToSkFillType(type);
-    if (sk_path.value().getFillType() == sk_type) {
-      return *this;
-    }
-    SkPath path = sk_path.value();
-    path.setFillType(sk_type);
-    return DlPath(path);
-  }
-  return *this;
-}
-
-bool DlPath::IsRect(DlRect* rect, bool* is_closed) const {
-  return GetSkPath().isRect(ToSkRect(rect), is_closed);
-}
-
-bool DlPath::IsOval(DlRect* bounds) const {
-  return GetSkPath().isOval(ToSkRect(bounds));
-}
-
-bool DlPath::IsLine(DlPoint* start, DlPoint* end) const {
-  SkPoint sk_points[2];
-  if (GetSkPath().isLine(sk_points)) {
-    *start = ToDlPoint(sk_points[0]);
-    *end = ToDlPoint(sk_points[1]);
-    return true;
-  }
-  return false;
-}
-
-bool DlPath::IsRoundRect(DlRoundRect* rrect) const {
-  SkRRect sk_rrect;
-  bool ret = GetSkPath().isRRect(rrect ? &sk_rrect : nullptr);
-  if (rrect) {
-    *rrect = ToDlRoundRect(sk_rrect);
-  }
-  return ret;
-}
-
-bool DlPath::Contains(const DlPoint& point) const {
-  return GetSkPath().contains(point.x, point.y);
-}
-
-DlPathFillType DlPath::GetFillType() const {
-  auto& path = data_->path;
-  if (path.has_value()) {
-    return path.value().GetFillType();
-  }
-  return ToDlFillType(GetSkPath().getFillType());
-}
-
-DlRect DlPath::GetBounds() const {
-  auto& path = data_->path;
-  if (path.has_value()) {
-    return path.value().GetBoundingBox().value_or(DlRect());
-  }
-  return ToDlRect(GetSkPath().getBounds());
-}
-
-bool DlPath::operator==(const DlPath& other) const {
-  return GetSkPath() == other.GetSkPath();
-}
-
-bool DlPath::IsConverted() const {
-  return data_->path.has_value() && data_->sk_path.has_value();
-}
-
-bool DlPath::IsVolatile() const {
-  return GetSkPath().isVolatile();
-}
-
-bool DlPath::IsConvex() const {
-  if (data_->sk_path_original) {
-    auto& sk_path = data_->sk_path;
-    FML_DCHECK(sk_path.has_value());
-    return sk_path.has_value() && sk_path->isConvex();
-  } else {
-    auto& path = data_->path;
-    FML_DCHECK(path.has_value());
-    return path.has_value() && path->IsConvex();
-  }
-}
-
-DlPath DlPath::operator+(const DlPath& other) const {
-  SkPath path = GetSkPath();
-  path.addPath(other.GetSkPath());
-  return DlPath(path);
-}
-
-static void ReduceConic(DlPathReceiver& receiver,
-                        const DlPoint& p1,
-                        const DlPoint& cp,
-                        const DlPoint& p2,
-                        DlScalar weight) {
-  // We might eventually have conic conversion math that deals with
-  // degenerate conics gracefully (or have all receivers just handle
-  // them directly). But, until then, we will just convert them to a
-  // pair of quads and accept the results as "close enough".
-  if (p1 != cp) {
-    if (cp != p2) {
-      std::array<DlPoint, 5> points;
-      impeller::ConicPathComponent conic(p1, cp, p2, weight);
-      conic.SubdivideToQuadraticPoints(points);
-      receiver.QuadTo(points[1], points[2]);
-      receiver.QuadTo(points[3], points[4]);
-    } else {
-      receiver.LineTo(cp);
-    }
-  } else if (cp != p2) {
-    receiver.LineTo(p2);
-  }
-}
-
-namespace {
-class SkiaPathReceiver final : public DlPathReceiver {
- public:
-  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
-    sk_path_.moveTo(ToSkPoint(p2));
-  }
-  void LineTo(const DlPoint& p2) override { sk_path_.lineTo(ToSkPoint(p2)); }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
-    sk_path_.quadTo(ToSkPoint(cp), ToSkPoint(p2));
-  }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
-    sk_path_.conicTo(ToSkPoint(cp), ToSkPoint(p2), weight);
-    return true;
-  }
-  void CubicTo(const DlPoint& cp1,
-               const DlPoint& cp2,
-               const DlPoint& p2) override {
-    sk_path_.cubicTo(ToSkPoint(cp1), ToSkPoint(cp2), ToSkPoint(p2));
-  }
-  void Close() override { sk_path_.close(); }
-
-  void SetFillType(DlPathFillType fill_type) {
-    sk_path_.setFillType(ToSkFillType(fill_type));
-  }
-
-  SkPath TakePath() { return sk_path_; }
-
- private:
-  SkPath sk_path_;
-};
-}  // namespace
-
-SkPath DlPath::ConvertToSkiaPath(const Path& path) {
-  SkiaPathReceiver receiver;
-
-  DispatchFromImpellerPath(path, receiver);
-
-  receiver.SetFillType(path.GetFillType());
-  return receiver.TakePath();
-}
-
-void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
-                                      DlPathReceiver& receiver) {
-  bool subpath_needs_close = false;
-  std::optional<DlPoint> pending_moveto;
-
-  auto resolve_moveto = [&receiver, &pending_moveto, &subpath_needs_close]() {
-    if (pending_moveto.has_value()) {
-      receiver.MoveTo(pending_moveto.value(), subpath_needs_close);
-      pending_moveto.reset();
-    }
-  };
-
-  for (auto it = path.begin(), end = path.end(); it != end; ++it) {
-    switch (it.type()) {
-      case ComponentType::kContour: {
-        const impeller::ContourComponent* contour = it.contour();
-        FML_DCHECK(contour != nullptr);
-        if (subpath_needs_close) {
-          receiver.Close();
-        }
-        pending_moveto = contour->destination;
-        subpath_needs_close = contour->IsClosed();
-        break;
-      }
-      case ComponentType::kLinear: {
-        const impeller::LinearPathComponent* linear = it.linear();
-        FML_DCHECK(linear != nullptr);
-        resolve_moveto();
-        receiver.LineTo(linear->p2);
-        break;
-      }
-      case ComponentType::kQuadratic: {
-        const impeller::QuadraticPathComponent* quadratic = it.quadratic();
-        FML_DCHECK(quadratic != nullptr);
-        resolve_moveto();
-        receiver.QuadTo(quadratic->cp, quadratic->p2);
-        break;
-      }
-      case ComponentType::kConic: {
-        const impeller::ConicPathComponent* conic = it.conic();
-        FML_DCHECK(conic != nullptr);
-        resolve_moveto();
-        if (!receiver.ConicTo(conic->cp, conic->p2, conic->weight.x)) {
-          ReduceConic(receiver, conic->p1, conic->cp, conic->p2,
-                      conic->weight.x);
-        }
-        break;
-      }
-      case ComponentType::kCubic: {
-        const impeller::CubicPathComponent* cubic = it.cubic();
-        FML_DCHECK(cubic != nullptr);
-        resolve_moveto();
-        receiver.CubicTo(cubic->cp1, cubic->cp2, cubic->p2);
-        break;
-      }
-    }
-  }
-  if (subpath_needs_close) {
-    receiver.Close();
-  }
-  receiver.PathEnd();
-}
-
-namespace {
-class ImpellerPathReceiver final : public DlPathReceiver {
- public:
-  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
-    builder_.MoveTo(p2);
-  }
-  void LineTo(const DlPoint& p2) override { builder_.LineTo(p2); }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
-    builder_.QuadraticCurveTo(cp, p2);
-  }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
-    builder_.ConicCurveTo(cp, p2, weight);
-    return true;
-  }
-  void CubicTo(const DlPoint& cp1,
-               const DlPoint& cp2,
-               const DlPoint& p2) override {
-    builder_.CubicCurveTo(cp1, cp2, p2);
-  }
-  void Close() override { builder_.Close(); }
-
-  void SetBounds(DlRect bounds) { builder_.SetBounds(bounds); }
-
-  void Reserve(size_t verb_count, size_t point_count) {
-    // Impeller uses an additional point per verb so use the sum for
-    // the number of points to reserve.
-    // And add 8 to the counts for good measure
-    builder_.Reserve(point_count + verb_count + 8, verb_count + 8);
-  }
-
-  void SetConvexity(bool is_convex) {
-    builder_.SetConvexity(is_convex ? Convexity::kConvex : Convexity::kUnknown);
-  }
-
-  impeller::Path TakePath(DlPathFillType fill_type) {
-    return builder_.TakePath(fill_type);
-  }
-
- private:
-  PathBuilder builder_;
-};
-}  // namespace
-
-Path DlPath::ConvertToImpellerPath(const SkPath& path) {
+  const SkPath& path = data_->sk_path;
   if (path.isEmpty()) {
-    return Path{};
-  }
-
-  ImpellerPathReceiver receiver;
-  receiver.Reserve(path.countVerbs(), path.countPoints());
-
-  DispatchFromSkiaPath(path, receiver);
-
-  receiver.SetConvexity(path.isConvex());
-  receiver.SetBounds(ToDlRect(path.getBounds()));
-  return receiver.TakePath(ToDlFillType(path.getFillType()));
-}
-
-void DlPath::DispatchFromSkiaPath(const SkPath& path,
-                                  DlPathReceiver& receiver) {
-  if (path.isEmpty()) {
+    receiver.PathEnd();
     return;
   }
 
@@ -533,6 +171,152 @@ void DlPath::DispatchFromSkiaPath(const SkPath& path,
     }
   } while (verb != SkPath::Verb::kDone_Verb);
   receiver.PathEnd();
+}
+
+void DlPath::WillRenderSkPath() const {
+  uint32_t count = data_->render_count;
+  if (count <= kMaxVolatileUses) {
+    if (count == kMaxVolatileUses) {
+      data_->sk_path.setIsVolatile(false);
+    }
+    data_->render_count = ++count;
+  }
+}
+
+[[nodiscard]] DlPath DlPath::WithOffset(const DlPoint offset) const {
+  if (offset.IsZero()) {
+    return *this;
+  }
+  if (!offset.IsFinite()) {
+    return DlPath();
+  }
+  SkPath path = data_->sk_path;
+  path = path.offset(offset.x, offset.y);
+  return DlPath(path);
+}
+
+[[nodiscard]] DlPath DlPath::WithFillType(DlPathFillType type) const {
+  SkPathFillType sk_type = ToSkFillType(type);
+  if (data_->sk_path.getFillType() == sk_type) {
+    return *this;
+  }
+  SkPath path = data_->sk_path;
+  path.setFillType(sk_type);
+  return DlPath(path);
+}
+
+bool DlPath::IsEmpty() const {
+  return GetSkPath().isEmpty();
+}
+
+bool DlPath::IsRect(DlRect* rect, bool* is_closed) const {
+  return GetSkPath().isRect(ToSkRect(rect), is_closed);
+}
+
+bool DlPath::IsOval(DlRect* bounds) const {
+  return GetSkPath().isOval(ToSkRect(bounds));
+}
+
+bool DlPath::IsLine(DlPoint* start, DlPoint* end) const {
+  SkPoint sk_points[2];
+  if (GetSkPath().isLine(sk_points)) {
+    *start = ToDlPoint(sk_points[0]);
+    *end = ToDlPoint(sk_points[1]);
+    return true;
+  }
+  return false;
+}
+
+bool DlPath::IsRoundRect(DlRoundRect* rrect) const {
+  SkRRect sk_rrect;
+  bool ret = GetSkPath().isRRect(rrect ? &sk_rrect : nullptr);
+  if (rrect) {
+    *rrect = ToDlRoundRect(sk_rrect);
+  }
+  return ret;
+}
+
+bool DlPath::Contains(const DlPoint point) const {
+  return GetSkPath().contains(point.x, point.y);
+}
+
+DlPathFillType DlPath::GetFillType() const {
+  return ToDlFillType(GetSkPath().getFillType());
+}
+
+DlRect DlPath::GetBounds() const {
+  return ToDlRect(GetSkPath().getBounds());
+}
+
+bool DlPath::operator==(const DlPath& other) const {
+  return GetSkPath() == other.GetSkPath();
+}
+
+bool DlPath::IsVolatile() const {
+  return GetSkPath().isVolatile();
+}
+
+bool DlPath::IsConvex() const {
+  return data_->sk_path.isConvex();
+}
+
+DlPath DlPath::operator+(const DlPath& other) const {
+  SkPath path = GetSkPath();
+  path.addPath(other.GetSkPath());
+  return DlPath(path);
+}
+
+void DlPath::ReduceConic(DlPathReceiver& receiver,
+                         const DlPoint& p1,
+                         const DlPoint& cp,
+                         const DlPoint& p2,
+                         DlScalar weight) {
+  // We might eventually have conic conversion math that deals with
+  // degenerate conics gracefully (or have all receivers just handle
+  // them directly). But, until then, we will just convert them to a
+  // pair of quads and accept the results as "close enough".
+  if (p1 != cp) {
+    if (cp != p2) {
+      FML_DCHECK(std::isfinite(weight) && weight > 0);
+
+      // Observe that scale will always be smaller than 1 because weight > 0.
+      const DlScalar scale = 1.0f / (1.0f + weight);
+
+      // The subdivided control points below are the sums of the following
+      // three terms. Because the terms are multiplied by something <1, and
+      // the resulting control points lie within the control points of the
+      // original then the terms and the sums below will not overflow.
+      // Note that weight * scale approaches 1 as weight becomes very large.
+      DlPoint tp1 = p1 * scale;
+      DlPoint tcp = cp * (weight * scale);
+      DlPoint tp2 = p2 * scale;
+
+      // Calculate the subdivided control points
+      DlPoint sub_cp1 = tp1 + tcp;
+      DlPoint sub_cp2 = tcp + tp2;
+
+      // The middle point shared by the 2 sub-divisions, the interpolation of
+      // the original curve at its halfway point.
+      DlPoint sub_mid = (tp1 + tcp + tcp + tp2) * 0.5f;
+
+      FML_DCHECK(sub_cp1.IsFinite() &&  //
+                 sub_mid.IsFinite() &&  //
+                 sub_cp2.IsFinite());
+
+      receiver.QuadTo(sub_cp1, sub_mid);
+      receiver.QuadTo(sub_cp2, p2);
+
+      // Update w.
+      // Currently this method only subdivides a single time directly to 2
+      // quadratics, but if we eventually want to keep the weights for further
+      // subdivision, this was the code that did it in Skia:
+      // sub_w1 = sub_w2 = SkScalarSqrt(SK_ScalarHalf + w * SK_ScalarHalf)
+    } else {
+      receiver.LineTo(cp);
+    }
+  } else if (cp != p2) {
+    receiver.LineTo(p2);
+  }
 }
 
 }  // namespace flutter
