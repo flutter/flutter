@@ -41,6 +41,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           'option from this directory. If unspecified, this defaults to the same '
           'directory as the input directory specified in "--arb-dir".',
     );
+    argParser.addFlag(
+      'synthetic-package',
+      help: 'DEPRECATED. This flag cannot be enabled and should be removed.',
+    );
     argParser.addOption(
       'template-arb-file',
       help:

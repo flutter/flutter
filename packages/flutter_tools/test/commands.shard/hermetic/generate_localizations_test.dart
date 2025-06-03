@@ -597,8 +597,7 @@ format: false
         processManager: processManager,
       );
       expect(
-        () async =>
-            createTestCommandRunner(command).run(<String>['gen-l10n']),
+        () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
         throwsToolExit(
           message:
               'Attempted to generate localizations code without having the flutter: generate flag turned on.',
@@ -619,12 +618,43 @@ format: false
       processManager: processManager,
     );
     expect(
-      () async => createTestCommandRunner(
-        command,
-      ).run(<String>['gen-l10n']),
+      () async => createTestCommandRunner(command).run(<String>['gen-l10n', 'false']),
       throwsToolExit(message: 'Unexpected positional argument "false".'),
     );
   });
+
+  testUsingContext('throws error when synthetic-package is provided', () async {
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    await expectLater(
+      () async => createTestCommandRunner(command).run(<String>['gen-l10n', '--synthetic-package']),
+      throwsToolExit(message: 'synthetic-package'),
+    );
+  });
+
+  testUsingContext(
+    'prints warning when --no-synthetic-package is provided',
+    () async {
+      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+      fileSystem
+          .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+          .createSync(recursive: true);
+      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+      await createTestCommandRunner(command).run(<String>['gen-l10n', '--no-synthetic-package']);
+      expect(logger.warningText, contains('synthetic-package'));
+    },
+    overrides: <Type, Generator>{Logger: () => logger},
+  );
 
   group(AppResourceBundle, () {
     testWithoutContext("can be parsed without FormatException when it's content is empty", () {
