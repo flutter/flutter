@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -157,14 +158,12 @@ class ChromiumLauncher {
   /// persistent configurations.
   Directory _createUserDataDirectory(List<String> webBrowserFlags) {
     if (webBrowserFlags.isNotEmpty) {
-      final String userDataDirFlag = webBrowserFlags.firstWhere(
+      final String? userDataDirFlag = webBrowserFlags.firstWhereOrNull(
         (String flag) => flag.startsWith('--user-data-dir='),
-        orElse: () => '',
       );
 
-      if (userDataDirFlag != '') {
-        final String userDataDirPath = userDataDirFlag.split('=')[1];
-        final Directory userDataDir = _fileSystem.directory(userDataDirPath);
+      if (userDataDirFlag != null) {
+        final Directory userDataDir = _fileSystem.directory(userDataDirFlag.split('=')[1]);
         webBrowserFlags.remove(userDataDirFlag);
         return userDataDir;
       }
