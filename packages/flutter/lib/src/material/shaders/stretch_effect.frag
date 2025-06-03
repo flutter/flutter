@@ -4,7 +4,7 @@
 // found in the LICENSE file.
 
 // This shader was created based on or with reference to the implementation found at:
-// https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/libs/hwui/effects/StretchEffect.cpp
+// https://cs.android.com/android/platform/superproject/main/+/512046e84bcc51cc241bc6599f83ab345e93ab12:frameworks/base/libs/hwui/effects/StretchEffect.cpp
 
 #include <flutter/runtime_effect.glsl>
 
