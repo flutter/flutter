@@ -152,6 +152,7 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   });
 
@@ -243,6 +244,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     final String directory = project.directory.path;
@@ -332,6 +334,7 @@ class _DefaultPub implements Pub {
       ...<String>[command],
       if (offline) '--offline',
       '--example',
+      if (enforceLockfile) '--enforce-lockfile',
     ];
     await _runWithStdioInherited(
       args,
