@@ -1027,11 +1027,10 @@ class RenderListWheelViewport extends RenderBox
   /// Return the Matrix4 transformation that would zoom in content in the
   /// magnified area.
   Matrix4 _magnifyTransform() {
-    final Matrix4 magnify = Matrix4.identity();
-    magnify.translateByDouble(size.width * (-_offAxisFraction + 0.5), size.height / 2, 0, 1);
-    magnify.scaledByDouble(_magnification, _magnification, _magnification, 1.0);
-    magnify.translateByDouble(-size.width * (-_offAxisFraction + 0.5), -size.height / 2, 0, 1);
-    return magnify;
+    return Matrix4.identity()
+      ..translateByDouble(size.width * (-_offAxisFraction + 0.5), size.height / 2, 0, 1)
+      ..scaleByDouble(_magnification, _magnification, _magnification, 1.0)
+      ..translateByDouble(-size.width * (-_offAxisFraction + 0.5), -size.height / 2, 0, 1);
   }
 
   /// Apply incoming transformation with the transformation's origin at the
