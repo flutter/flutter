@@ -527,14 +527,14 @@ void main() {
     },
   );
 
-  testWithoutContext('IosUsbArtifacts verifies iproxy for usbmuxd in isUpToDateInner', () async {
+  testWithoutContext('IosUsbArtifacts verifies iproxy for libusbmuxd in isUpToDateInner', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Cache cache = Cache.test(
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
     );
     final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts(
-      'usbmuxd',
+      'libusbmuxd',
       cache,
       platform: FakePlatform(operatingSystem: 'macos'),
     );
@@ -1419,6 +1419,7 @@ class FakePub extends Fake implements Pub {
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
     bool printProgress = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     invocations.add(FakePubInvocation(outputMode: outputMode));
