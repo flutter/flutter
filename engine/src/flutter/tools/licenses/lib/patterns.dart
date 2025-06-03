@@ -728,7 +728,7 @@ final List<LicenseReferencePattern> csReferencesByIdentifyingReference = <Licens
       caseSensitive: false,
     ),
   ),
-  
+
   // LLVM (Apache License v2.0 with LLVM Exceptions)
   LicenseReferencePattern(
     checkLocalFirst: false,
