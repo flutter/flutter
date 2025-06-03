@@ -87,16 +87,26 @@ G_DEFINE_TYPE(FlCompositorOpenGL,
               fl_compositor_opengl,
               fl_compositor_get_type())
 
-// Check if running on an NVIDIA driver.
-static gboolean is_nvidia() {
+// Check if running on driver supporting blit.
+static gboolean driver_supports_blit() {
   const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
-  return strstr(vendor, "NVIDIA") != nullptr;
-}
 
-// Check if running on an Vivante Corporation driver.
-static gboolean is_vivante() {
-  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
-  return strstr(vendor, "Vivante Corporation") != nullptr;
+  // Note: List of unsupported vendors due to issue
+  // https://github.com/flutter/flutter/issues/152099
+  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
+
+  for (const char* unsupported : unsupported_vendors_fuzzy) {
+    if (strstr(vendor, unsupported) != nullptr) {
+      return FALSE;
+    }
+  }
+  for (const char* unsupported : unsupported_vendors_exact) {
+    if (strcmp(vendor, unsupported) == 0) {
+      return FALSE;
+    }
+  }
+  return TRUE;
 }
 
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
@@ -445,10 +455,8 @@ static void fl_compositor_opengl_setup(FlCompositor* compositor) {
 
   fl_opengl_manager_make_current(self->opengl_manager);
 
-  // Note: NVIDIA and Vivante are temporarily disabled due to
-  // https://github.com/flutter/flutter/issues/152099
   self->has_gl_framebuffer_blit =
-      !is_nvidia() && !is_vivante() &&
+      driver_supports_blit() &&
       (epoxy_gl_version() >= 30 ||
        epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 
