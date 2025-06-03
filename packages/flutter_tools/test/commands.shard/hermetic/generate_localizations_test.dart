@@ -105,41 +105,6 @@ flutter:
   );
 
   testUsingContext(
-    'not using synthetic packages (due to --explicit-package-dependencies)',
-    () async {
-      final Directory l10nDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
-      final File arbFile = l10nDirectory.childFile('app_en.arb')..createSync(recursive: true);
-
-      arbFile.writeAsStringSync('''
-{
-  "helloWorld": "Hello, World!",
-  "@helloWorld": {
-    "description": "Sample description"
-  }
-}''');
-      fileSystem.file('pubspec.yaml').writeAsStringSync('''
-flutter:
-  generate: true''');
-
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-      await createTestCommandRunner(command).run(<String>['gen-l10n']);
-
-      expect(l10nDirectory.existsSync(), true);
-      expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
     'throws error when arguments are invalid',
     () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
