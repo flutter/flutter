@@ -951,12 +951,12 @@ class _MaterialAppState extends State<MaterialApp> {
     BuildContext context, {
     required VoidCallback onPressed,
     required String semanticsLabel,
-    bool isLeftAligned = true,
+    bool usesDefaultAlignment = true,
   }) {
     return _MaterialInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+      icon: usesDefaultAlignment ? Icons.arrow_right : Icons.arrow_left,
       isDarkTheme: _isDarkTheme(context),
     );
   }
