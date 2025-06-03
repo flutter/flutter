@@ -1742,7 +1742,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
     super.applyPaintTransform(child, transform);
 
-    transform.scaledByDouble(_scale, _scale, _scale, 1);
+    transform.scaleByDouble(_scale, _scale, _scale, 1);
   }
 
   @override

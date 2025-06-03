@@ -2613,7 +2613,7 @@ class RenderTransform extends RenderProxyBox {
 
   /// Concatenates a scale into the transform.
   void scale(double x, [double? y, double? z]) {
-    _transform!.scaledByDouble(x, y ?? x, z ?? x, 1);
+    _transform!.scaleByDouble(x, y ?? x, z ?? x, 1);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
