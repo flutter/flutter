@@ -60,6 +60,9 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!supported) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
+    if (!shouldCodesign) {
+      globals.printStatus('Warning: Building with codesigning disabled.');
+    }
     await buildMacOS(
       flutterProject: project,
       buildInfo: buildInfo,
