@@ -2070,8 +2070,7 @@ class EditableText extends StatefulWidget {
   /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms running
   /// Safari (webkit) based browsers and [ui.BoxWidthStyle.tight] for all others.
   ///
-  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max] for all
-  /// platforms.
+  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max].
   static ui.BoxWidthStyle get defaultSelectionWidthStyle {
     if (kIsWeb) {
       if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
