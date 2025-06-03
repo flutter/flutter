@@ -55,7 +55,7 @@ typedef ExpansibleBuilder =
 /// state.
 ///
 /// The controller's [expand] and [collapse] methods cause the
-/// the [Expansible] to rebuild, so they may not be called from
+/// [Expansible] to rebuild, so they may not be called from
 /// a build method.
 ///
 /// Remember to [dispose] of the [ExpansibleController] when it is no longer
