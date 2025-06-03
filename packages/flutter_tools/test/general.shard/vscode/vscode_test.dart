@@ -56,7 +56,12 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{');
 
-    final VsCode vsCode = VsCode.fromDirectory('', '', fileSystem: fileSystem, platform: const LocalPlatform());
+    final VsCode vsCode = VsCode.fromDirectory(
+      '',
+      '',
+      fileSystem: fileSystem,
+      platform: const LocalPlatform(),
+    );
 
     expect(vsCode.version, null);
   });
@@ -70,7 +75,12 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('{"version":"1.2.3"}');
 
-    final VsCode vsCode = VsCode.fromDirectory('', '', fileSystem: fileSystem, platform: FakePlatform());
+    final VsCode vsCode = VsCode.fromDirectory(
+      '',
+      '',
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+    );
 
     expect(vsCode.version, Version(1, 2, 3));
   });
