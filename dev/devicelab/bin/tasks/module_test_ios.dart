@@ -257,7 +257,7 @@ dependencies:
       });
 
       await inDirectory(projectDir, () async {
-        await flutter('pub', options: <String>['get']);
+        await flutter('build', options: <String>['ios', '--config-only']);
       });
 
       section('Add to existing iOS Objective-C app');
@@ -275,7 +275,13 @@ dependencies:
         section('Validate iOS Objective-C host app Podfile');
 
         final File podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
-        String podfileContent = await podfile.readAsString();
+        final String correctPodfileContents = await podfile.readAsString();
+        final File podfileMissingPostInstall = File(
+          path.join(objectiveCHostApp.path, 'PodfileMissingPostInstall'),
+        );
+
+        podfile.writeAsStringSync(podfileMissingPostInstall.readAsStringSync());
+
         final String podFailure = await eval(
           'pod',
           <String>['install'],
@@ -289,18 +295,12 @@ dependencies:
             !podFailure.contains(
               'Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins',
             )) {
-          print(podfileContent);
+          print(podfile.readAsStringSync());
           throw TaskResult.failure(
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );
         }
-        podfileContent = '''
-$podfileContent
-
-post_install do |installer|
-  flutter_post_install(installer)
-end
-          ''';
+        String podfileContent = correctPodfileContents;
         await podfile.writeAsString(podfileContent, flush: true);
 
         await exec(

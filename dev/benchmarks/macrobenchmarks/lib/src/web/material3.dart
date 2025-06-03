@@ -870,7 +870,6 @@ class _RadiosState extends State<Radios> {
             title: const Text('Option 3'),
             value: Options.option3,
             groupValue: _selectedOption,
-            onChanged: null,
           ),
         ],
       ),

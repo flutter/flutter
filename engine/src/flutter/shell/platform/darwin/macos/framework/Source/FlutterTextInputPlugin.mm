@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
@@ -425,8 +426,12 @@ static char markerKey;
       }
 
       _activeModel = std::make_unique<flutter::TextInputModel>();
-      NSNumber* viewId = config[kViewId];
-      _currentViewController = [_delegate viewControllerForIdentifier:viewId.longLongValue];
+      FlutterViewIdentifier viewId = flutter::kFlutterImplicitViewId;
+      NSObject* requestViewId = config[kViewId];
+      if ([requestViewId isKindOfClass:[NSNumber class]]) {
+        viewId = [(NSNumber*)requestViewId longLongValue];
+      }
+      _currentViewController = [_delegate viewControllerForIdentifier:viewId];
       FML_DCHECK(_currentViewController != nil);
     }
   } else if ([method isEqualToString:kShowMethod]) {
