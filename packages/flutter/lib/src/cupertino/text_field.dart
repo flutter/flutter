@@ -1879,6 +1879,6 @@ class _RenderBaselineAlignedStack extends RenderBox
     width = math.max(width, editableTextSize.width);
     final Size size = Size(width, height);
     assert(size.isFinite);
-    return size;
+    return constraints.constrain(size);
   }
 }

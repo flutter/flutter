@@ -129,7 +129,7 @@ void main() {
     );
 
     Text placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.darkColor.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.secondaryLabel.darkColor.value);
 
     await tester.pumpAndSettle();
 
@@ -141,7 +141,7 @@ void main() {
     );
 
     placeholder = tester.widget(find.text('Search'));
-    expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.color.value);
+    expect(placeholder.style!.color!.value, CupertinoColors.secondaryLabel.color.value);
   });
 
   testWidgets("placeholderStyle modifies placeholder's style and doesn't affect text's style", (
@@ -623,7 +623,7 @@ void main() {
     expect(suffixIconFinder, findsOneWidget);
     expect(placeholderFinder, findsOneWidget);
 
-    // Initially, the icons and placeholder text are fully opaque.
+    // Initially, the icons are fully opaque.
     expect(
       tester
           .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
@@ -636,7 +636,8 @@ void main() {
           .opacity,
       equals(1.0),
     );
-    expect(tester.widget<Text>(placeholderFinder).style?.color?.a, equals(1.0));
+    // The default placeholder color is semi-transparent.
+    expect(tester.widget<Text>(placeholderFinder).style?.color?.a, equals(0.6));
 
     final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
 
