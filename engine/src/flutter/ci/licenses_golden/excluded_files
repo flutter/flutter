@@ -2958,10 +2958,7 @@
 ../../../flutter/third_party/rapidjson/readme.md
 ../../../flutter/third_party/rapidjson/readme.zh-cn.md
 ../../../flutter/third_party/rapidjson/test
-../../../flutter/third_party/re2/benchlog/benchlog.c2
-../../../flutter/third_party/re2/benchlog/benchlog.mini
-../../../flutter/third_party/re2/benchlog/benchlog.r70
-../../../flutter/third_party/re2/benchlog/benchlog.wreck
+../../../flutter/third_party/re2/benchlog
 ../../../flutter/third_party/shaderc/.clang-format
 ../../../flutter/third_party/shaderc/.git
 ../../../flutter/third_party/shaderc/.github
