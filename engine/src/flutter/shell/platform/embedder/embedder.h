@@ -1693,7 +1693,7 @@ typedef struct {
   // Has length `decreased_value_attribute_count`.
   const FlutterStringAttribute** decreased_value_attributes;
   // The set of semantics flags associated with this node. Prefer to use this
-  // over `flags`.
+  // over `flags__deprecated__`.
   FlutterSemanticsFlags* flags2;
 } FlutterSemanticsNode2;
 
