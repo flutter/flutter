@@ -144,18 +144,15 @@ void main() {
       assert(runtimeIdPattern.hasMatch('multi_window'));
       assert(!runtimeIdPattern.hasMatch('multi-window'));
 
-      for (final Feature feature in featureFlags.allFeatures) {
-        final String? runtimeId = feature.runtimeId;
-        if (runtimeId == null) {
-          continue;
-        }
+      final Iterable<String?> runtimeIds = featureFlags.allFeatures
+          .where((Feature feature) => feature.runtimeId != null)
+          .map((Feature feature) => feature.runtimeId);
 
-        expect(
-          runtimeId,
-          matches(runtimeIdPattern),
-          reason: 'Feature runtime ID must contain only alphabetical or underscore characters',
-        );
-      }
+      expect(
+        runtimeIds,
+        everyElement(matches(runtimeIdPattern)),
+        reason: 'Feature runtime ID must contain only alphabetical or underscore characters',
+      );
     });
   });
 
