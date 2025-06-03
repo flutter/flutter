@@ -21,8 +21,8 @@ struct GlyphProperties {
   std::optional<StrokeParameters> stroke;
 
   struct Equal {
-    constexpr bool operator()(const impeller::GlyphProperties& lhs,
-                              const impeller::GlyphProperties& rhs) const {
+    inline bool operator()(const impeller::GlyphProperties& lhs,
+                           const impeller::GlyphProperties& rhs) const {
       return lhs.color.ToARGB() == rhs.color.ToARGB() &&
              lhs.stroke == rhs.stroke;
     }
@@ -43,8 +43,8 @@ struct ScaledFont {
   }
 
   struct Equal {
-    constexpr bool operator()(const impeller::ScaledFont& lhs,
-                              const impeller::ScaledFont& rhs) const {
+    inline bool operator()(const impeller::ScaledFont& lhs,
+                           const impeller::ScaledFont& rhs) const {
       return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale;
     }
   };
