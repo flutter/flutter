@@ -332,8 +332,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
       case BorderStyle.solid:
         final double strokeOffset = (side.strokeOutset - side.strokeInset) / 2;
         if (borderRadius == BorderRadius.zero) {
-          final Rect rect = rect.inflate(strokeOffset);
-          canvas.drawRect(rect, side.toPaint());
+          canvas.drawRect(rect.inflate(strokeOffset), side.toPaint());
         } else {
           canvas.drawRSuperellipse(
             _getStrokeShape(rect, textDirection, strokeOffset),
