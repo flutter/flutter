@@ -210,6 +210,35 @@ Future<void> testMain() async {
           ),
         );
       });
+
+      test('should retain composing base offset if composing text area is changed', () {
+        const String composingText = '今日は寒い日です';
+
+        EditingState editingState = EditingState(text: '今日は寒い日です', baseOffset: 0, extentOffset: 8);
+
+        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
+            _MockWithCompositionAwareMixin();
+        mockWithCompositionAwareMixin.composingText = composingText;
+
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(editingState),
+          editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
+        );
+
+        editingState = editingState.copyWith(baseOffset: 0, extentOffset: 3);
+
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(editingState),
+          editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
+        );
+
+        editingState = editingState.copyWith(baseOffset: 3, extentOffset: 6);
+
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(editingState),
+          editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
+        );
+      });
     });
   });
 
