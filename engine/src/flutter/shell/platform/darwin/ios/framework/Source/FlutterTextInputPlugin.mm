@@ -523,8 +523,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 #pragma mark - FlutterTextPosition
 
-@implementation FlutterTextPosition
+@interface FlutterTextPosition (ClassMethod)
++ (instancetype)positionWithIndex:(NSUInteger)index;
++ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
+@end
 
+@implementation FlutterTextPosition (ClassMethod)
 + (instancetype)positionWithIndex:(NSUInteger)index {
   return [[FlutterTextPosition alloc] initWithIndex:index affinity:UITextStorageDirectionForward];
 }
@@ -532,55 +536,57 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 + (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
   return [[FlutterTextPosition alloc] initWithIndex:index affinity:affinity];
 }
-
-- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-  self = [super init];
-  if (self) {
-    _index = index;
-    _affinity = affinity;
-  }
-  return self;
-}
+//
+//- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
+//  self = [super init];
+//  if (self) {
+//    _index = index;
+//    _affinity = affinity;
+//  }
+//  return self;
+//}
 
 @end
 
 #pragma mark - FlutterTextRange
 
-@implementation FlutterTextRange
-
+@interface FlutterTextRange (ClassMethod)
++ (instancetype)rangeWithNSRange:(NSRange)range;
+@end
+@implementation FlutterTextRange (ClassMethod)
 + (instancetype)rangeWithNSRange:(NSRange)range {
   return [[FlutterTextRange alloc] initWithNSRange:range];
 }
 
-- (instancetype)initWithNSRange:(NSRange)range {
-  self = [super init];
-  if (self) {
-    _range = range;
-  }
-  return self;
-}
-
-- (UITextPosition*)start {
-  return [FlutterTextPosition positionWithIndex:self.range.location
-                                       affinity:UITextStorageDirectionForward];
-}
-
-- (UITextPosition*)end {
-  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length
-                                       affinity:UITextStorageDirectionBackward];
-}
-
-- (BOOL)isEmpty {
-  return self.range.length == 0;
-}
-
-- (id)copyWithZone:(NSZone*)zone {
-  return [[FlutterTextRange allocWithZone:zone] initWithNSRange:self.range];
-}
-
-- (BOOL)isEqualTo:(FlutterTextRange*)other {
-  return NSEqualRanges(self.range, other.range);
-}
+//- (instancetype)initWithNSRange:(NSRange)range {
+//  self = [super init];
+//  if (self) {
+//    _range = range;
+//  }
+//  return self;
+//}
+//
+//- (UITextPosition*)start {
+//  return [FlutterTextPosition positionWithIndex:self.range.location
+//                                       affinity:UITextStorageDirectionForward];
+//}
+//
+//- (UITextPosition*)end {
+//  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length
+//                                       affinity:UITextStorageDirectionBackward];
+//}
+//
+//- (BOOL)isEmpty {
+//  return self.range.length == 0;
+//}
+//
+//- (id)copyWithZone:(NSZone*)zone {
+//  return [[FlutterTextRange allocWithZone:zone] initWithNSRange:self.range];
+//}
+//
+//- (BOOL)isEqualTo:(FlutterTextRange*)other {
+//  return NSEqualRanges(self.range, other.range);
+//}
 @end
 
 #pragma mark - FlutterTokenizer
@@ -634,9 +640,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     // According to the API doc if the text position is at a text-unit boundary, it is considered
     // enclosed only if the next position in the given direction is entirely enclosed. Link:
     // https://developer.apple.com/documentation/uikit/uitextinputtokenizer/1614464-rangeenclosingposition?language=objc
-    FlutterTextPosition* flutterPosition = (FlutterTextPosition*)position;
-    if (flutterPosition.index > _textInputView.text.length ||
-        (flutterPosition.index == _textInputView.text.length &&
+    if (position.index > _textInputView.text.length ||
+        (position.index == _textInputView.text.length &&
          direction == UITextStorageDirectionForward)) {
       return nil;
     }
@@ -840,7 +845,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
     // UITextInput
     _text = [[NSMutableString alloc] init];
-    _selectedTextRange = [[FlutterTextRange alloc] initWithNSRange:NSMakeRange(0, 0)];
+    _selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 0)];
     _markedRect = kInvalidFirstRect;
     _cachedFirstRect = kInvalidFirstRect;
     _scribbleInteractionStatus = FlutterScribbleInteractionStatusNone;
@@ -1602,28 +1607,30 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position offset:(NSInteger)offset {
-  NSUInteger offsetPosition = ((FlutterTextPosition*)position).index;
-
-  NSInteger newLocation = (NSInteger)offsetPosition + offset;
-  if (newLocation < 0 || newLocation > (NSInteger)self.text.length) {
-    return nil;
-  }
-
-  if (_scribbleInteractionStatus != FlutterScribbleInteractionStatusNone) {
-    return [FlutterTextPosition positionWithIndex:newLocation];
-  }
-
-  if (offset >= 0) {
-    for (NSInteger i = 0; i < offset && offsetPosition < self.text.length; ++i) {
-      offsetPosition = [self incrementOffsetPosition:offsetPosition];
-    }
-  } else {
-    for (NSInteger i = 0; i < ABS(offset) && offsetPosition > 0; ++i) {
-      offsetPosition = [self decrementOffsetPosition:offsetPosition];
-    }
-  }
-  return [FlutterTextPosition positionWithIndex:offsetPosition];
+  return [position offsetBy: offset inDocument: self];
 }
+//  NSUInteger offsetPosition = ((FlutterTextPosition*)position).index;
+//
+//  NSInteger newLocation = (NSInteger)offsetPosition + offset;
+//  if (newLocation < 0 || newLocation > (NSInteger)self.text.length) {
+//    return nil;
+//  }
+//
+//  if (_scribbleInteractionStatus != FlutterScribbleInteractionStatusNone) {
+//    return [FlutterTextPosition positionWithIndex:newLocation];
+//  }
+//
+//  if (offset >= 0) {
+//    for (NSInteger i = 0; i < offset && offsetPosition < self.text.length; ++i) {
+//      offsetPosition = [self incrementOffsetPosition:offsetPosition];
+//    }
+//  } else {
+//    for (NSInteger i = 0; i < ABS(offset) && offsetPosition > 0; ++i) {
+//      offsetPosition = [self decrementOffsetPosition:offsetPosition];
+//    }
+//  }
+//  return [FlutterTextPosition positionWithIndex:offsetPosition];
+//}
 
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position
                             inDirection:(UITextLayoutDirection)direction

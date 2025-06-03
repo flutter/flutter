@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import InternalFlutterSwift
-import Testing
 import UIKit
 import XCTest
 
@@ -62,12 +61,13 @@ struct EditingState: Equatable, ExpressibleByStringLiteral {
         base: markedTextRange.upperBound, extent: markedTextRange.upperBound,
         markedRange: markedTextRange))
   }
-  
-  
-  private func parseComposingRegion(string: String) -> Either<(String, String, String), String> {
+
+  private static func parseComposingRegion(string: String) -> Either<
+    (String, String, String), String
+  > {
     // "|" is the token that represents composing regions
     let components = string.components(separatedBy: "|")
-    if (components.count == 1) {
+    if components.count == 1 {
       return .right(string)
     } else {
       assert(components.count == 3)
@@ -75,98 +75,46 @@ struct EditingState: Equatable, ExpressibleByStringLiteral {
       return .left((components[0], components[1], components[2]))
     }
   }
-  
-  private func parseSelection(string: String) -> (String, UInt, UInt) {
-    assert(string[string.utf16.indices(of: "<")].count <= 1)
-    assert(string[string.utf16.indices(of: ">")].count <= 1)
-    guard let baseIndex = string.utf16.first("<"), let extentIndex = string.utf16.first(">") else {
-      assert(!string.contains(">"))
-      return (string, string.utf16.count, string.utf16.count)
+
+  private static func parseSelection(string: String) -> (String, UInt, UInt) {
+    assert(string.count(where: { $0 == "<" }) <= 1)
+    assert(string.count(where: { $0 == ">" }) == string.count(where: { $0 == "<" }))
+    let baseIndex = string.prefix(while: { $0 != "<" }).utf16.count
+    let extentIndex = string.prefix(while: { $0 != ">" }).utf16.count
+    if extentIndex == baseIndex {
+      let caret = UInt(string.utf16.count)
+      return (string, caret, caret)
     }
-    return (string.removeAll { c in c = "<" || c = ">" }, baseIndex, extentIndex - 1)
+    let text = string.filter { c in c != "<" || c != ">" }
+    return baseIndex < extentIndex
+      ? (text, UInt(baseIndex), UInt(extentIndex - 1))
+      : (text, UInt(baseIndex - 1), UInt(extentIndex - 1))
   }
 
   init(stringLiteral: StaticString) {
     let selection: TextSelection
-    
-    switch parseComposingRegion(string: stringLiteral.description) {
+    let string: String
+
+    switch EditingState.parseComposingRegion(string: stringLiteral.description) {
     case let .left((p1, p2, p3)):
-      
-      TextSelection(base: p1.utf16.count + , extent: <#T##UInt#>, markedRange: <#T##Range<UInt>?#>)
+      let (text, start, end) = EditingState.parseSelection(string: p2)
+      let markedRange = UInt(p1.utf16.count)..<UInt(p1.utf16.count + p2.utf16.count)
+      selection = TextSelection(
+        base: markedRange.lowerBound + start, extent: markedRange.lowerBound + end,
+        markedRange: markedRange)
+      string = p1 + text + p3
+    case let .right(s):
+      let (text, start, end) = EditingState.parseSelection(string: s)
+      selection = TextSelection(base: start, extent: end, markedRange: nil)
+      string = text
     }
-    
-    self.init(string: stringLiteral.description)
+
+    self.init(string: string, selectedTextRange: selection)
   }
 
   let string: String
 
   let selectedTextRange: TextSelection?
-}
-
-// MARK: DSL for describing text selection
-private struct EditingStateExpectingRightBracket {
-  let string: String
-  let leftBracketLocation: UInt
-
-}
-
-//postfix operator |>
-//fileprivate postfix func |> (lhs: EditingStateExpectingRightBracket) -> EditingState {
-//  EditingState(string: lhs.string, selectedTextRange: TextSelection(base: lhs.leftBracketLocation, extent: UInt(lhs.string.utf16.count), markedRange: nil))
-//}
-infix operator > : MultiplicationPrecedence
-fileprivate func > (lhs: EditingStateExpectingRightBracket, rhs: String) -> EditingState {
-  EditingState(string: lhs.string + rhs, selectedTextRange: TextSelection(base: lhs.leftBracketLocation, extent: UInt(lhs.string.utf16.count), markedRange: nil))
-}
-fileprivate func > (lhs: String, rhs: String) -> EditingStateExpectingLeftBracket {
-  EditingStateExpectingLeftBracket(string: lhs + rhs, rightBracketLocation: UInt(lhs.utf16.count))
-}
-
-
-private struct EditingStateExpectingLeftBracket {
-  let string: String
-  let rightBracketLocation: UInt
-
-}
-
-//postfix operator <|
-//fileprivate postfix func <| (lhs: EditingStateExpectingLeftBracket) -> EditingState {
-//  EditingState(string: lhs.string, selectedTextRange: TextSelection(base: UInt(lhs.string.utf16.count), extent: lhs.rightBracketLocation, markedRange: nil))
-//}
-infix operator < : MultiplicationPrecedence
-fileprivate func < (lhs: EditingStateExpectingLeftBracket, rhs: String) -> EditingState {
-  EditingState(string: lhs.string + rhs, selectedTextRange: TextSelection(base: UInt(lhs.string.utf16.count), extent: lhs.rightBracketLocation, markedRange: nil))
-}
-fileprivate func < (lhs: String, rhs: String) -> EditingStateExpectingRightBracket {
-  EditingStateExpectingRightBracket(string: lhs + rhs, leftBracketLocation: UInt(lhs.utf16.count))
-}
-
-
-
-extension String {
-  func with(selection: TextSelection?) -> EditingState {
-    EditingState(string: self, selectedTextRange: selection)
-  }
-
-  func with(selection: Range<UInt>) -> EditingState {
-    with(
-      selection: TextSelection(
-        base: selection.lowerBound, extent: selection.upperBound, markedRange: nil))
-  }
-
-  func with(markedTextRange: Range<UInt>) -> EditingState {
-    with(
-      selection: TextSelection(
-        base: markedTextRange.upperBound, extent: markedTextRange.upperBound,
-        markedRange: markedTextRange))
-  }
-
-  func with(selection: Range<UInt>, andMarkedTextRange markedRange: Range<UInt>) -> EditingState {
-    with(
-      selection: TextSelection(
-        base: selection.lowerBound, extent: selection.upperBound,
-        markedRange: markedRange))
-  }
 }
 
 protocol UITextInputTestable: UITextInput {
@@ -215,6 +163,25 @@ extension UITextInputTestable {
         selectedTextRange = nil
       }
     }
+  }
+
+  // Returns all unique UITextPositions in the EditingState's text.
+  var allPositions: [UITextPosition] {
+    var position: UITextPosition? = beginningOfDocument
+    var positions: [UITextPosition] = []
+    while let p = position {
+      positions.append(p)
+      position = self.position(from: p, offset: 1)
+    }
+    return positions
+  }
+
+  func textBefore(position: UITextPosition) -> String? {
+    text(in: textRange(from: beginningOfDocument, to: position)!)
+  }
+
+  func textAfter(position: UITextPosition) -> String? {
+    text(in: textRange(from: position, to: endOfDocument)!)
   }
 }
 
@@ -270,22 +237,70 @@ class UITextInputImplementationTests: XCTestCase {
 
     actions(inputClient)
     actions(textView)
-    //print("test: \(inputClient.editingState), textView: \(textView.editingState)")
-    XCTAssertEqual(inputClient.editingState, textView.editingState)
+    XCTAssertEqual(
+      inputClient.editingState, textView.editingState, "failed with input \(initialState)")
+  }
+
+  // First and foremost, make sure the UITextInput's interpretation of position
+  // is in-line with UITextView.
+  func testPositions() {
+    let initialStates: [EditingState] = [
+      "",
+      "text",
+      "क्षि",  // Indic script
+      "퓛",  // pre-composed Hangul syllable block
+      "퓛",   // 3 decomposed Hangul syllables
+      "🧑‍🤝‍🧑",  // Emoji ZWJ sequence
+      "😀",  // surrogate pair
+    ]
+
+    initialStates.forEach { initialState in
+      inputClient.editingState = initialState
+      textView.editingState = initialState
+
+      XCTAssertEqual(
+        inputClient.position(from: inputClient.beginningOfDocument, offset: -1),
+        textView.position(from: textView.beginningOfDocument, offset: -1),
+        initialState.string
+      )  // Regardless of the position type, this method is supposed to return nil
+      XCTAssertEqual(
+        inputClient.position(from: inputClient.endOfDocument, offset: 1),
+        textView.position(from: textView.endOfDocument, offset: 1),
+        initialState.string
+      )  // Regardless of the position type, this method is supposed to return nil
+
+      // Verify that inputClient has the same unique TextPositions as a
+      // UITextView if the text is the same.
+
+      XCTAssertEqual(
+        inputClient.allPositions.count, textView.allPositions.count, initialState.string)
+      for (offset, (p1, p2)) in zip(inputClient.allPositions, textView.allPositions).enumerated() {
+        XCTAssertEqual(
+          inputClient.textBefore(position: p1), textView.textBefore(position: p2),
+          "\(initialState.string) @ \(offset)")
+        XCTAssertEqual(
+          inputClient.textAfter(position: p1), textView.textAfter(position: p2),
+          "\(initialState.string) @ \(offset)")
+      }
+    }
+  }
+
+  func testRanges() {
+
   }
 
   // MARK: deleteBackward
   func testDeleteBackward() {
     let initialStates: [EditingState] = [
-      "",  // empty
-      "String",  // no selection
-      "123 n<ihao>",
-      "123 nihao".with(markedTextRange: 5..<10),  // with marked text
-      //"123 nihao".with(selection: 5..<9, andMarkedTextRange: 5..<10),  // with marked text and selection
+      "",
+      "String",         // collapsed selection
+      "123 n<ihao>",    // has selection
       "123 n|<iha>o|",  // with marked text and selection
-      "123 n<ihao>"
-      "क्षि",  // Indic script
-      "🧑‍🤝‍🧑",  // Emoji ZWJ sequence
+      "क्षि",             // Indic script
+      "퓛",             // pre-composed Hangul syllable block
+      "퓛",             // 3 decomposed Hangul syllables
+      "🧑‍🤝‍🧑",            // Emoji ZWJ sequence
+      "😀",            // surrogate pair
     ]
 
     initialStates.forEach {

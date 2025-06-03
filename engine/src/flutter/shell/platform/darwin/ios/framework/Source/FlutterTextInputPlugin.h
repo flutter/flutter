@@ -12,6 +12,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 typedef NS_ENUM(NSInteger, FlutterScribbleFocusStatus) {
   // NOLINTBEGIN(readability-identifier-naming)
@@ -72,26 +73,27 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 @end
 
 /** An indexed position in the buffer of a Flutter text editing widget. */
-@interface FlutterTextPosition : UITextPosition
 
-@property(nonatomic, readonly) NSUInteger index;
-@property(nonatomic, readonly) UITextStorageDirection affinity;
-
-+ (instancetype)positionWithIndex:(NSUInteger)index;
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-
-@end
-
-/** A range of text in the buffer of a Flutter text editing widget. */
-@interface FlutterTextRange : UITextRange <NSCopying>
-
-@property(nonatomic, readonly) NSRange range;
-
-+ (instancetype)rangeWithNSRange:(NSRange)range;
-
-@end
-
+//@interface FlutterTextPosition : UITextPosition
+//
+//@property(nonatomic, readonly) NSUInteger index;
+//@property(nonatomic, readonly) UITextStorageDirection affinity;
+//
+//+ (instancetype)positionWithIndex:(NSUInteger)index;
+//+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
+//- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
+//
+//@end
+//
+///** A range of text in the buffer of a Flutter text editing widget. */
+//@interface FlutterTextRange : UITextRange <NSCopying>
+//
+//@property(nonatomic, readonly) NSRange range;
+//
+//+ (instancetype)rangeWithNSRange:(NSRange)range;
+//
+//@end
+//
 /** A tokenizer used by `FlutterTextInputView` to customize string parsing. */
 @interface FlutterTokenizer : UITextInputStringTokenizer
 @end
@@ -186,6 +188,17 @@ FLUTTER_DARWIN_EXPORT
 
 @interface UIView (FindFirstResponder)
 @property(nonatomic, readonly) id flutterFirstResponder;
+@end
+
+
+@interface FlutterTextInputView (UITextInputDefaultImpl) <UITextInputDefaultImpl>
+- (NSString*)fullText;
+@end
+
+@implementation FlutterTextInputView (UITextInputDefaultImpl)
+- (NSString*)fullText {
+  return self.text;
+}
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_
