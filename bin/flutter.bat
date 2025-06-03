@@ -29,6 +29,19 @@ IF "%ERRORLEVEL%" NEQ "0" (
   EXIT /B 1
 )
 
+REM Detect which PowerShell executable is available on the host
+REM PowerShell version <= 5: PowerShell.exe
+REM PowerShell version >= 6: pwsh.exe
+WHERE /Q pwsh.exe && (
+    SET powershell_executable=pwsh.exe
+) || WHERE /Q PowerShell.exe && (
+    SET powershell_executable=PowerShell.exe
+) || (
+    ECHO Error: PowerShell executable not found.                        1>&2
+    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+    EXIT /B 1
+)
+
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.

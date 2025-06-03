@@ -98,18 +98,6 @@ GOTO :after_subroutine
   EXIT /B
 
   :do_ensure_engine_version
-    REM Detect which PowerShell executable is available on the Host
-    REM PowerShell version <= 5: PowerShell.exe
-    REM PowerShell version >= 6: pwsh.exe
-    WHERE /Q pwsh.exe && (
-        SET powershell_executable=pwsh.exe
-    ) || WHERE /Q PowerShell.exe && (
-        SET powershell_executable=PowerShell.exe
-    ) || (
-        ECHO Error: PowerShell executable not found.                        1>&2
-        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-        EXIT 1
-    )
     SET update_engine_bin=%FLUTTER_ROOT%\bin\internal\update_engine_version.ps1
     REM Escape apostrophes from the executable path
     SET "update_engine_bin=%update_engine_bin:'=''%"
@@ -128,18 +116,6 @@ GOTO :after_subroutine
     EXIT /B
 
   :do_sdk_update_and_snapshot
-    REM Detect which PowerShell executable is available on the Host
-    REM PowerShell version <= 5: PowerShell.exe
-    REM PowerShell version >= 6: pwsh.exe
-    WHERE /Q pwsh.exe && (
-        SET powershell_executable=pwsh.exe
-    ) || WHERE /Q PowerShell.exe && (
-        SET powershell_executable=PowerShell.exe
-    ) || (
-        ECHO Error: PowerShell executable not found.                        1>&2
-        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-        EXIT 1
-    )
     SET /A dart_sdk_retries+=1
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
