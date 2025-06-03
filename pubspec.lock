@@ -835,10 +835,10 @@ packages:
     dependency: "direct main"
     description:
       name: test
-      sha256: "0561f3a2cfd33d10232360f16dfcab9351cfb7ad9b23e6cd6e8c7fb0d62c7ac3"
+      sha256: "65e29d831719be0591f7b3b1a32a3cda258ec98c58c7b25f7b84241bc31215bb"
       url: "https://pub.dev"
     source: hosted
-    version: "1.26.1"
+    version: "1.26.2"
   test_api:
     dependency: "direct main"
     description:
@@ -851,10 +851,10 @@ packages:
     dependency: "direct main"
     description:
       name: test_core
-      sha256: "8619a9a45be044b71fe2cd6b77b54fd60f1c67904c38d48706e2852a2bda1c60"
+      sha256: "80bf5a02b60af04b09e14f6fe68b921aad119493e26e490deaca5993fef1b05a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.10"
+    version: "0.6.11"
   typed_data:
     dependency: "direct main"
     description:

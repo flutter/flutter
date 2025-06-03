@@ -141,10 +141,10 @@ packages:
     dependency: "direct main"
     description:
       name: coverage
-      sha256: "802bd084fb82e55df091ec8ad1553a7331b61c08251eef19a508b6f3f3a9858d"
+      sha256: "4b8701e48a58f7712492c9b1f7ba0bb9d525644dd66d023b62e1fc8cdb560c8a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.13.1"
+    version: "1.14.0"
   crypto:
     dependency: "direct main"
     description:
@@ -181,10 +181,10 @@ packages:
     dependency: "direct main"
     description:
       name: dds
-      sha256: "575cffd0474c3c334351c7523484ba09ba46b2b39f5cbd767582a64d1ed485e3"
+      sha256: "76fc5140ce4e8922711bbe6dfd3713283ecc7f386c52fc7f594cd5f3e6b80633"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.1"
+    version: "5.0.2"
   dds_service_extensions:
     dependency: "direct main"
     description:
@@ -405,10 +405,10 @@ packages:
     dependency: "direct main"
     description:
       name: meta
-      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
+      sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.0"
+    version: "1.16.0"
   mime:
     dependency: "direct main"
     description:
@@ -437,10 +437,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_stack_traces
-      sha256: "8ba566c10ea781491c203876b04b9bdcf19dfbe17b9e486869f20eaae0ee470f"
+      sha256: d34cf916db87b14d39465b3e3b4b4a8ee1f304bde6ed7605571e34802e3d6a11
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.6.1"
   node_preamble:
     dependency: "direct dev"
     description:
@@ -645,10 +645,10 @@ packages:
     dependency: "direct dev"
     description:
       name: test
-      sha256: "0561f3a2cfd33d10232360f16dfcab9351cfb7ad9b23e6cd6e8c7fb0d62c7ac3"
+      sha256: "65e29d831719be0591f7b3b1a32a3cda258ec98c58c7b25f7b84241bc31215bb"
       url: "https://pub.dev"
     source: hosted
-    version: "1.26.1"
+    version: "1.26.2"
   test_api:
     dependency: "direct main"
     description:
@@ -661,10 +661,10 @@ packages:
     dependency: "direct main"
     description:
       name: test_core
-      sha256: "8619a9a45be044b71fe2cd6b77b54fd60f1c67904c38d48706e2852a2bda1c60"
+      sha256: "80bf5a02b60af04b09e14f6fe68b921aad119493e26e490deaca5993fef1b05a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.10"
+    version: "0.6.11"
   typed_data:
     dependency: "direct main"
     description:
