@@ -34,23 +34,23 @@ const double _kInnerRadius = 4.5;
 
 /// A Material Design radio button.
 ///
+/// This widget builds a [RawRadio] with a material UI.
+///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group cease to
 /// be selected. The values are of type `T`, the type parameter of the [Radio]
 /// class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
+/// [RadioGroup.groupValue], and the [Radio] under it with matching [value]
+/// will be selected.
 ///
 /// {@tool dartpad}
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.
 ///
-/// The currently selected character is passed into `groupValue`, which is
-/// maintained by the example's `State`. In this case, the first [Radio]
+/// The currently selected character is passed into `RadioGroup.groupValue`,
+/// which is maintained by the example's `State`. In this case, the first [Radio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
@@ -71,25 +71,27 @@ const double _kInnerRadius = 4.5;
 ///  * [Slider], for selecting a value in a range.
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
-class Radio<T> extends StatelessWidget {
+class Radio<T> extends StatefulWidget {
   /// Creates a Material Design radio button.
   ///
-  /// The radio button itself does not maintain any state. Instead, when the
-  /// radio button is selected, the widget calls the [onChanged] callback. Most
-  /// widgets that use a radio button will listen for the [onChanged] callback
-  /// and rebuild the radio button with a new [groupValue] to update the visual
-  /// appearance of the radio button.
+  /// This widget typically has a [RadioGroup] ancestor, which takes in a
+  /// [RadioGroup.groupValue], and the [Radio] under it with matching [value]
+  /// will be selected.
   ///
-  /// The following arguments are required:
-  ///
-  /// * [value] and [groupValue] together determine whether the radio button is
-  ///   selected.
-  /// * [onChanged] is called when the user selects this radio button.
+  /// The [value] is required.
   const Radio({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    @Deprecated(
+      'Use a RadioGroup ancestor to manage group value instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.groupValue,
+    @Deprecated(
+      'Use RadioGroup to handle value change instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -102,6 +104,8 @@ class Radio<T> extends StatelessWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
+    this.enabled,
+    this.groupRegistry,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false;
 
@@ -124,8 +128,16 @@ class Radio<T> extends StatelessWidget {
   const Radio.adaptive({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    @Deprecated(
+      'Use a RadioGroup ancestor to manage group value instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.groupValue,
+    @Deprecated(
+      'Use RadioGroup to handle value change instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -139,15 +151,46 @@ class Radio<T> extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.useCupertinoCheckmarkStyle = false,
+    this.enabled,
+    this.groupRegistry,
   }) : _radioType = _RadioType.adaptive;
 
   /// {@macro flutter.widget.RawRadio.value}
   final T value;
 
-  /// {@macro flutter.widget.RawRadio.groupValue}
+  /// {@template flutter.material.Radio.groupValue}
+  /// The currently selected value for a group of radio buttons.
+  ///
+  /// This radio button is considered selected if its [value] matches the
+  /// [groupValue].
+  ///
+  /// This is deprecated, use [RadioGroup] to manage group value instead.
+  /// {@endtemplate}
+  @Deprecated(
+    'Use a RadioGroup ancestor to manage group value instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
   final T? groupValue;
 
-  /// {@macro flutter.widget.RawRadio.onChanged}
+  /// {@template flutter.material.Radio.onChanged}
+  /// Called when the user selects this radio button.
+  ///
+  /// The radio button passes [value] as a parameter to this callback. The radio
+  /// button does not actually change state until the parent widget rebuilds the
+  /// radio button with the new [groupValue].
+  ///
+  /// If null, the radio button will be displayed as disabled.
+  ///
+  /// The provided callback will not be invoked if this radio button is already
+  /// selected and [toggleable] is not set to true.
+  ///
+  /// If the [toggleable] is set to true, tapping a already selected radio will
+  /// invoke this callback with `null` as value.
+  ///
+  /// The callback provided to [onChanged] should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt.
+  /// {@endtemplate}
   ///
   /// For example:
   ///
@@ -162,6 +205,12 @@ class Radio<T> extends StatelessWidget {
   ///   },
   /// )
   /// ```
+  ///
+  /// This is deprecated, use [RadioGroup] to handle value change instead.
+  @Deprecated(
+    'Use RadioGroup to handle value change instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
   final ValueChanged<T?>? onChanged;
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
@@ -205,8 +254,6 @@ class Radio<T> extends StatelessWidget {
   /// ```dart
   /// Radio<int>(
   ///   value: 1,
-  ///   groupValue: 1,
-  ///   onChanged: (_){},
   ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
@@ -328,12 +375,75 @@ class Radio<T> extends StatelessWidget {
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
+  /// {@macro flutter.widget.RawRadio.groupRegistry}
+  ///
+  /// Unless provided, the [BuildContext] will be used to look up the ancestor
+  /// [RadioGroupRegistry].
+  final RadioGroupRegistry<T>? groupRegistry;
+
   final _RadioType _radioType;
+
+  /// {@template flutter.material.Radio.enabled}
+  /// Whether this widget is interactive.
+  ///
+  /// If not provided, this widget will be interactable if one of the following
+  /// is true:
+  ///
+  /// * A [onChanged] is provided.
+  /// * Having a [RadioGroup] with the same type T above this widget.
+  /// * A [groupRegistry] is provided.
+  ///
+  /// If this is set to true, one of the above condition must also be true.
+  /// Otherwise, an assertion error is thrown.
+  /// {@endtemplate}
+  final bool? enabled;
+
+  @override
+  State<Radio<T>> createState() => _RadioState<T>();
+}
+
+class _RadioState<T> extends State<Radio<T>> {
+  FocusNode? _internalFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+
+  bool get _enabled =>
+      widget.enabled ??
+      (widget.onChanged != null ||
+          widget.groupRegistry != null ||
+          RadioGroup.maybeOf<T>(context) != null);
+
+  _RadioRegistry<T>? _internalRadioRegistry;
+  RadioGroupRegistry<T> get _effectiveRegistry {
+    if (widget.groupRegistry != null) {
+      return widget.groupRegistry!;
+    }
+
+    final RadioGroupRegistry<T>? inheritedRegistry = RadioGroup.maybeOf<T>(context);
+    if (inheritedRegistry != null) {
+      return inheritedRegistry;
+    }
+
+    // Handles deprecated API.
+    return _internalRadioRegistry ??= _RadioRegistry<T>(this);
+  }
+
+  @override
+  void dispose() {
+    _internalFocusNode?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      !(widget.enabled ?? false) ||
+          widget.onChanged != null ||
+          widget.groupRegistry != null ||
+          RadioGroup.maybeOf<T>(context) != null,
+      'Radio is enabled but has no Radio.onChange or registry above',
+    );
     assert(debugCheckHasMaterial(context));
-    switch (_radioType) {
+    switch (widget._radioType) {
       case _RadioType.material:
         break;
 
@@ -348,16 +458,18 @@ class Radio<T> extends StatelessWidget {
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             return CupertinoRadio<T>(
-              value: value,
-              groupValue: groupValue,
-              onChanged: onChanged,
-              mouseCursor: mouseCursor,
-              toggleable: toggleable,
-              activeColor: activeColor,
-              focusColor: focusColor,
-              focusNode: focusNode,
-              autofocus: autofocus,
-              useCheckmarkStyle: useCupertinoCheckmarkStyle,
+              value: widget.value,
+              groupValue: widget.groupValue,
+              onChanged: widget.onChanged,
+              mouseCursor: widget.mouseCursor,
+              toggleable: widget.toggleable,
+              activeColor: widget.activeColor,
+              focusColor: widget.focusColor,
+              focusNode: _focusNode,
+              autofocus: widget.autofocus,
+              useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
+              groupRegistry: _effectiveRegistry,
+              enabled: _enabled,
             );
         }
     }
@@ -365,37 +477,54 @@ class Radio<T> extends StatelessWidget {
     final RadioThemeData radioTheme = RadioTheme.of(context);
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
         MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-          return MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states) ??
+          return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
               MaterialStateProperty.resolveAs<MouseCursor>(
                 MaterialStateMouseCursor.clickable,
                 states,
               );
         });
-
     return RawRadio<T>(
-      value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
+      value: widget.value,
       mouseCursor: effectiveMouseCursor,
-      toggleable: toggleable,
-      focusNode: focusNode,
-      autofocus: autofocus,
+      toggleable: widget.toggleable,
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      groupRegistry: _effectiveRegistry,
+      enabled: _enabled,
       builder: (BuildContext context, ToggleableStateMixin state) {
         return _RadioPaint(
           toggleableState: state,
-          activeColor: activeColor,
-          fillColor: fillColor,
-          hoverColor: hoverColor,
-          focusColor: focusColor,
-          overlayColor: overlayColor,
-          splashRadius: splashRadius,
-          visualDensity: visualDensity,
-          materialTapTargetSize: materialTapTargetSize,
+          activeColor: widget.activeColor,
+          fillColor: widget.fillColor,
+          hoverColor: widget.hoverColor,
+          focusColor: widget.focusColor,
+          overlayColor: widget.overlayColor,
+          splashRadius: widget.splashRadius,
+          visualDensity: widget.visualDensity,
+          materialTapTargetSize: widget.materialTapTargetSize,
         );
       },
     );
   }
+}
+
+/// A registry for deprecated API.
+// TODO(chunhtai): Remove this once deprecated API is removed.
+class _RadioRegistry<T> extends RadioGroupRegistry<T> {
+  _RadioRegistry(this.state);
+  final _RadioState<T> state;
+  @override
+  T? get groupValue => state.widget.groupValue;
+
+  @override
+  ValueChanged<T?> get onChanged => state.widget.onChanged!;
+
+  @override
+  void registerClient(RadioClient<T> radio) {}
+
+  @override
+  void unregisterClient(RadioClient<T> radio) {}
 }
 
 class _RadioPaint extends StatefulWidget {
