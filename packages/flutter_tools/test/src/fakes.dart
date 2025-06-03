@@ -548,6 +548,21 @@ class TestFeatureFlags implements FeatureFlags {
       _ => false,
     };
   }
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+  ];
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {

@@ -1,4 +1,4 @@
-Signature: aebc333eca857a2ca876b998e04ccf66
+Signature: 3dbee7ec0ad2093e63a5a20f11f93796
 
 ====================================================================================================
 LIBRARY: etc1
@@ -434,6 +434,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/fontconfig.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -9895,6 +9896,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPUContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
@@ -9925,7 +9927,9 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Precompile
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig_freetype.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp
 FILE: ../../../flutter/third_party/skia/include/core/SkCPUContext.h
 FILE: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h
 FILE: ../../../flutter/third_party/skia/include/core/SkRecorder.h
@@ -9956,6 +9960,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileIm
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp
+FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig_freetype.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC
 
