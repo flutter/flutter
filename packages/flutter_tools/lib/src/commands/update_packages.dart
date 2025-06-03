@@ -57,18 +57,15 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addFlag(
         _keyUpgradeMajor,
-        help:
-            'Upgrade major versions as well. Only makes sense with force-upgrade.',
+        help: 'Upgrade major versions as well. Only makes sense with force-upgrade.',
       )
       ..addFlag(
         _keyExcludeTools,
-        help:
-            "Don't update the deps in tools. For example when unpinning a dep.",
+        help: "Don't update the deps in tools. For example when unpinning a dep.",
       )
       ..addFlag(
         _keyCrash,
-        help:
-            'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
+        help: 'For Flutter CLI testing only, forces this command to throw an unhandled exception.',
         negatable: false,
         hide: !verboseHelp,
       );
@@ -109,11 +106,8 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   Future<void> _downloadCoverageData() async {
     final String urlBase =
-        globals.platform.environment[kFlutterStorageBaseUrl] ??
-        'https://storage.googleapis.com';
-    final Uri coverageUri = Uri.parse(
-      '$urlBase/flutter_infra_release/flutter/coverage/lcov.info',
-    );
+        globals.platform.environment[kFlutterStorageBaseUrl] ?? 'https://storage.googleapis.com';
+    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int>? data = await _net.fetchUrl(coverageUri, maxAttempts: 3);
     if (data == null) {
       throwToolExit('Failed to fetch coverage data from $coverageUri');
@@ -141,10 +135,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool forceUpgrade = boolArg(_keyForceUpgrade);
     final bool updateHashes = boolArg(_keyUpdateHashes);
     final bool offline = boolArg(_keyOffline);
-    final List<CherryPick> cherryPicks = stringsArg(_keyCherryPick)
-        .map((String e) => e.split(':'))
-        .map((List<String> e) => (package: e[0], version: e[1]))
-        .toList();
+    final List<CherryPick> cherryPicks =
+        stringsArg(_keyCherryPick)
+            .map((String e) => e.split(':'))
+            .map((List<String> e) => (package: e[0], version: e[1]))
+            .toList();
     final bool relaxToAny = boolArg(_keyUpgradeMajor);
     final bool excludeTools = boolArg(_keyExcludeTools);
 
@@ -157,15 +152,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
 
     if (forceUpgrade && cherryPicks.isNotEmpty) {
-      throwToolExit(
-        '--force-upgrade cannot be used with the --cherry-pick-package flag',
-      );
+      throwToolExit('--force-upgrade cannot be used with the --cherry-pick-package flag');
     }
 
     if (cherryPicks.isNotEmpty && offline) {
-      throwToolExit(
-        '--cherry-pick-package cannot be used with the --offline flag',
-      );
+      throwToolExit('--cherry-pick-package cannot be used with the --offline flag');
     }
 
     if (forceUpgrade) {
@@ -175,27 +166,21 @@ class UpdatePackagesCommand extends FlutterCommand {
       // such package fixed at a single version across all the pubspec.yamls.
       globals.printStatus('Upgrading packages...');
     }
-    final FlutterProject rootProject = FlutterProject.fromDirectory(
-      rootDirectory,
-    );
+    final FlutterProject rootProject = FlutterProject.fromDirectory(rootDirectory);
     final FlutterProject toolProject = FlutterProject.fromDirectory(
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
     // This needs to be special cased, as it is below flutter_tools, so cannot
     // be in the flutter pub workspace.
-    final FlutterProject widgetPreviewScaffoldProject =
-        FlutterProject.fromDirectory(
-          rootProject.directory
-              .childDirectory('packages')
-              .childDirectory('flutter_tools')
-              .childDirectory('test')
-              .childDirectory('widget_preview_scaffold.shard')
-              .childDirectory('widget_preview_scaffold'),
-        );
-    final List<Directory> packages = <Directory>[
-      ...runner!.getRepoPackages(),
-      rootDirectory,
-    ];
+    final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
+      rootProject.directory
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .childDirectory('test')
+          .childDirectory('widget_preview_scaffold.shard')
+          .childDirectory('widget_preview_scaffold'),
+    );
+    final List<Directory> packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
 
     if (!updateHashes) {
       _verifyPubspecs(packages);
@@ -222,9 +207,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory,
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
-        rootDirectory
-            .childDirectory('packages')
-            .childDirectory('flutter_localizations'),
+        rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
         widgetPreviewScaffoldProject.directory,
       ]) {
         _updatePubspec(package, deps);
@@ -238,14 +221,8 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkWithFlutterTools(rootDirectory);
     _checkPins(rootDirectory);
 
-    await _pubGet(
-      rootProject,
-      !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
-    );
-    await _pubGet(
-      toolProject,
-      !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
-    );
+    await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
+    await _pubGet(toolProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
     await _pubGet(
       widgetPreviewScaffoldProject,
       !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
@@ -257,11 +234,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   Future<void> _pubGet(FlutterProject project, bool enforceLockfile) async =>
-      pub.get(
-        context: PubContext.pubGet,
-        project: project,
-        enforceLockfile: enforceLockfile,
-      );
+      pub.get(context: PubContext.pubGet, project: project, enforceLockfile: enforceLockfile);
 
   Future<ResolvedDependencies> _upgrade(
     bool forceUpgrade,
@@ -276,13 +249,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     } else if (cherryPicks.isNotEmpty) {
       globals.printStatus('Pinning packages "$cherryPicks"...');
       pinnedDeps = <String, String>{
-        for (final CherryPick cherryPick in cherryPicks)
-          cherryPick.package: cherryPick.version,
+        for (final CherryPick cherryPick in cherryPicks) cherryPick.package: cherryPick.version,
       };
     } else {
-      throw StateError(
-        'To get here, either forceUpgrade or cherry pick should be set.',
-      );
+      throw StateError('To get here, either forceUpgrade or cherry pick should be set.');
     }
 
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
@@ -295,10 +265,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final ResolvedDependencies oldDeps = _fetchDeps(yamlEditor);
 
     final List<String> workspacePath = <String>['workspace'];
-    if (yamlEditor
-            .parseAt(workspacePath, orElse: () => wrapAsYamlNode(null))
-            .value !=
-        null) {
+    if (yamlEditor.parseAt(workspacePath, orElse: () => wrapAsYamlNode(null)).value != null) {
       yamlEditor.remove(workspacePath);
     }
 
@@ -318,68 +285,53 @@ class UpdatePackagesCommand extends FlutterCommand {
       command: 'update',
     );
 
-    final ResolvedDependencies newDeps = _fetchDeps(
-      YamlEditor(tempPubspec.readAsStringSync()),
-    );
+    final ResolvedDependencies newDeps = _fetchDeps(YamlEditor(tempPubspec.readAsStringSync()));
 
-    final ResolvedDependencies deps = ResolvedDependencies.mergeDeps(
-      oldDeps,
-      newDeps,
-      cherryPicks,
-    );
+    final ResolvedDependencies deps = ResolvedDependencies.mergeDeps(oldDeps, newDeps, cherryPicks);
     tempDir.deleteSync(recursive: true);
     return deps;
   }
 
-  void _relaxDeps(
-    YamlEditor yamlEditor,
-    RelaxMode relaxMode,
-    Map<String, String> fixedDeps,
-  ) {
+  void _relaxDeps(YamlEditor yamlEditor, RelaxMode relaxMode, Map<String, String> fixedDeps) {
     ResolvedDependencies().forEach(
       yamlEditor: yamlEditor,
-      func:
-          (
-            Map<String, String> dependencies,
-            String depType,
-            String packageName,
-            Object? version,
-          ) {
-            if (version is String) {
-              if (fixedDeps.containsKey(packageName)) {
-                yamlEditor.update(<String>[
-                  depType,
-                  packageName,
-                ], fixedDeps[packageName]);
-              } else {
-                yamlEditor.update(
-                  <String>[depType, packageName],
-                  switch (relaxMode) {
-                    RelaxMode.any => 'any',
-                    RelaxMode.caret => _versionWithCaret(version),
-                    RelaxMode.strict => _versionWithoutCaret(version),
-                  },
-                );
-              }
-            }
-          },
+      func: (
+        Map<String, String> dependencies,
+        String depType,
+        String packageName,
+        Object? version,
+      ) {
+        if (version is String) {
+          if (fixedDeps.containsKey(packageName)) {
+            yamlEditor.update(<String>[depType, packageName], fixedDeps[packageName]);
+          } else {
+            yamlEditor.update(
+              <String>[depType, packageName],
+              switch (relaxMode) {
+                RelaxMode.any => 'any',
+                RelaxMode.caret => _versionWithCaret(version),
+                RelaxMode.strict => _versionWithoutCaret(version),
+              },
+            );
+          }
+        }
+      },
     );
   }
 
   ResolvedDependencies _fetchDeps(YamlEditor yamlEditor) {
     return ResolvedDependencies()..forEach(
       yamlEditor: yamlEditor,
-      func:
-          (
-            Map<String, String> dependencies,
-            String depType,
-            String packageName,
-            Object? version,
-          ) {
-            if (version is String) {
-              dependencies[packageName] = version;
-            }
-          },
+      func: (
+        Map<String, String> dependencies,
+        String depType,
+        String packageName,
+        Object? version,
+      ) {
+        if (version is String) {
+          dependencies[packageName] = version;
+        }
+      },
     );
   }
 
@@ -388,18 +340,17 @@ class UpdatePackagesCommand extends FlutterCommand {
     final YamlEditor yamlEditor = YamlEditor(pubspecFile.readAsStringSync());
     dependencies.forEach(
       yamlEditor: yamlEditor,
-      func:
-          (
-            Map<String, String> dependencies,
-            String depType,
-            String packageName,
-            Object? version,
-          ) {
-            if (dependencies.containsKey(packageName)) {
-              final String version = dependencies[packageName]!;
-              yamlEditor.update(<String>[depType, packageName], version);
-            }
-          },
+      func: (
+        Map<String, String> dependencies,
+        String depType,
+        String packageName,
+        Object? version,
+      ) {
+        if (dependencies.containsKey(packageName)) {
+          final String version = dependencies[packageName]!;
+          yamlEditor.update(<String>[depType, packageName], version);
+        }
+      },
     );
     pubspecFile.writeAsStringSync(yamlEditor.toString());
   }
@@ -408,17 +359,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     globals.printStatus('Verifying pubspecs...');
     for (final Directory directory in packages) {
       globals.printTrace('Reading pubspec.yaml from ${directory.path}');
-      final String pubspecString = directory
-          .childFile(_pubspecName)
-          .readAsStringSync();
+      final String pubspecString = directory.childFile(_pubspecName).readAsStringSync();
       _checkHash(pubspecString, directory);
     }
   }
 
   void _checkWithFlutterTools(Directory rootDirectory) {
-    final Pubspec pubspec = Pubspec.parse(
-      rootDirectory.childFile(_pubspecName).readAsStringSync(),
-    );
+    final Pubspec pubspec = Pubspec.parse(rootDirectory.childFile(_pubspecName).readAsStringSync());
     final Pubspec pubspecTools = Pubspec.parse(
       rootDirectory
           .childDirectory('packages')
@@ -427,25 +374,17 @@ class UpdatePackagesCommand extends FlutterCommand {
           .readAsStringSync(),
     );
     for (final String package in fixedPackages) {
-      if (!(pubspec.dependencies[package] ==
-              pubspecTools.dependencies[package] &&
-          pubspec.devDependencies[package] ==
-              pubspecTools.devDependencies[package] &&
-          pubspec.dependencyOverrides[package] ==
-              pubspecTools.dependencyOverrides[package])) {
-        throwToolExit(
-          'The dependency on $package must be fixed between flutter and flutter_tools',
-        );
+      if (!(pubspec.dependencies[package] == pubspecTools.dependencies[package] &&
+          pubspec.devDependencies[package] == pubspecTools.devDependencies[package] &&
+          pubspec.dependencyOverrides[package] == pubspecTools.dependencyOverrides[package])) {
+        throwToolExit('The dependency on $package must be fixed between flutter and flutter_tools');
       }
     }
   }
 
   void _checkPins(Directory directory) {
-    final Pubspec pubspec = Pubspec.parse(
-      directory.childFile(_pubspecName).readAsStringSync(),
-    );
-    for (final MapEntry<String, String> pin
-        in kManuallyPinnedDependencies.entries) {
+    final Pubspec pubspec = Pubspec.parse(directory.childFile(_pubspecName).readAsStringSync());
+    for (final MapEntry<String, String> pin in kManuallyPinnedDependencies.entries) {
       Dependency dependency;
       if (pubspec.dependencies.containsKey(pin.key)) {
         dependency = pubspec.dependencies[pin.key]!;
@@ -472,9 +411,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   void _checkHash(String pubspec, Directory directory) {
     final RegExpMatch? firstMatch = checksumRegex.firstMatch(pubspec);
     if (firstMatch == null) {
-      throwToolExit(
-        'Pubspec in ${directory.path} does not contain a checksum.',
-      );
+      throwToolExit('Pubspec in ${directory.path} does not contain a checksum.');
     }
     final String checksum = firstMatch[1]!;
     final String actualChecksum = _computeChecksum(pubspec);
@@ -513,21 +450,16 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Pubspec pubspec = Pubspec.parse(pubspecString);
     return SplayTreeMap<String, Dependency>.from(<String, Dependency>{
           ...pubspec.dependencies.map(
-            (String key, Dependency value) =>
-                MapEntry<String, Dependency>('dep:$key', value),
+            (String key, Dependency value) => MapEntry<String, Dependency>('dep:$key', value),
           ),
           ...pubspec.devDependencies.map(
-            (String key, Dependency value) =>
-                MapEntry<String, Dependency>('dev_dep:$key', value),
+            (String key, Dependency value) => MapEntry<String, Dependency>('dev_dep:$key', value),
           ),
           ...pubspec.dependencyOverrides.map(
-            (String key, Dependency value) =>
-                MapEntry<String, Dependency>('dep_over:$key', value),
+            (String key, Dependency value) => MapEntry<String, Dependency>('dep_over:$key', value),
           ),
         }).entries
-        .map(
-          (MapEntry<String, Dependency> entry) => '${entry.key}${entry.value}',
-        )
+        .map((MapEntry<String, Dependency> entry) => '${entry.key}${entry.value}')
         .join()
         .hashCode
         .toRadixString(32);
@@ -562,14 +494,10 @@ class ResolvedDependencies {
     )
     func,
   }) {
-    for (final String dependencyType in <String>[
-      _dependencies,
-      _devDependencies,
-    ]) {
+    for (final String dependencyType in <String>[_dependencies, _devDependencies]) {
       data[dependencyType] ??= <String, String>{};
       final Map<Object?, Object?> map =
-          yamlEditor.parseAt(<String>[dependencyType], orElse: () => YamlMap())
-              as YamlMap;
+          yamlEditor.parseAt(<String>[dependencyType], orElse: () => YamlMap()) as YamlMap;
       for (final MapEntry<Object?, Object?> dep in map.entries) {
         final String packageName = dep.key! as String;
         final Object? restriction = dep.value;
@@ -583,11 +511,10 @@ class ResolvedDependencies {
     ResolvedDependencies newDeps,
     List<CherryPick> cherryPicks,
   ) {
-    final ResolvedDependencies mergedDeps = ResolvedDependencies(
-      <String, Map<String, String>>{...newDeps.data},
-    );
-    for (final MapEntry<String, Map<String, String>> entry
-        in mergedDeps.data.entries) {
+    final ResolvedDependencies mergedDeps = ResolvedDependencies(<String, Map<String, String>>{
+      ...newDeps.data,
+    });
+    for (final MapEntry<String, Map<String, String>> entry in mergedDeps.data.entries) {
       final String dependencyType = entry.key;
       final Map<String, String>? oldData = oldDeps.data[dependencyType];
       for (final MapEntry<String, String> dep in entry.value.entries) {
@@ -601,8 +528,8 @@ class ResolvedDependencies {
             oldData?[packageName];
         mergedDeps.data[dependencyType]![packageName] =
             oldVersion?.startsWith('^') ?? false
-            ? _versionWithCaret(newVersion)
-            : _versionWithoutCaret(newVersion);
+                ? _versionWithCaret(newVersion)
+                : _versionWithoutCaret(newVersion);
       }
     }
     return mergedDeps;
@@ -623,8 +550,7 @@ enum RelaxMode {
   strict,
 }
 
-String _versionWithCaret(String version) =>
-    version.startsWith('^') ? version : '^$version';
+String _versionWithCaret(String version) => version.startsWith('^') ? version : '^$version';
 
 String _versionWithoutCaret(String version) =>
     version.startsWith('^') ? version.substring(1) : version;
