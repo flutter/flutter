@@ -8,7 +8,6 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../features.dart';
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -340,7 +339,6 @@ class LocalizationOptions {
     this.headerFile,
     bool? useDeferredLoading,
     this.genInputsAndOutputsList,
-    bool? syntheticPackage,
     this.projectDir,
     bool? requiredResourceAttributes,
     bool? nullableGetter,
@@ -353,7 +351,6 @@ class LocalizationOptions {
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
        useDeferredLoading = useDeferredLoading ?? false,
-       syntheticPackage = syntheticPackage ?? !featureFlags.isExplicitPackageDependenciesEnabled,
        requiredResourceAttributes = requiredResourceAttributes ?? false,
        nullableGetter = nullableGetter ?? true,
        format = format ?? true,
@@ -415,12 +412,6 @@ class LocalizationOptions {
   /// This path is relative to [arbDir].
   final String? genInputsAndOutputsList;
 
-  /// The `--synthetic-package` argument.
-  ///
-  /// Whether to generate the Dart localization files in a synthetic package
-  /// or in a custom directory.
-  final bool syntheticPackage;
-
   /// The `--project-dir` argument.
   ///
   /// This path is relative to [arbDir].
@@ -481,7 +472,6 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
   required Logger logger,
   required FileSystem fileSystem,
   required String defaultArbDir,
-  required bool defaultSyntheticPackage,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
@@ -518,8 +508,6 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     headerFile: _tryReadFilePath(yamlNode, 'header-file', logger, fileSystem),
     useDeferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
-    syntheticPackage:
-        _tryReadBool(yamlNode, 'synthetic-package', logger) ?? defaultSyntheticPackage,
     requiredResourceAttributes: _tryReadBool(yamlNode, 'required-resource-attributes', logger),
     nullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger),
     format: _tryReadBool(yamlNode, 'format', logger),
@@ -535,15 +523,6 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
 }) {
-  // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/102983.
-  final bool syntheticPackage;
-  if (command.argResults!.wasParsed('synthetic-package')) {
-    // If provided explicitly, use the explicit value.
-    syntheticPackage = command.boolArg('synthetic-package');
-  } else {
-    // Otherwise, inherit from whatever the reverse of flutter config --explicit-package-dependencies.
-    syntheticPackage = !featureFlags.isExplicitPackageDependenciesEnabled;
-  }
   return LocalizationOptions(
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
     outputDir: command.stringArg('output-dir'),
@@ -555,7 +534,6 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     headerFile: command.stringArg('header-file'),
     useDeferredLoading: command.boolArg('use-deferred-loading'),
     genInputsAndOutputsList: command.stringArg('gen-inputs-and-outputs-list'),
-    syntheticPackage: syntheticPackage,
     projectDir: command.stringArg('project-dir'),
     requiredResourceAttributes: command.boolArg('required-resource-attributes'),
     nullableGetter: command.boolArg('nullable-getter'),
