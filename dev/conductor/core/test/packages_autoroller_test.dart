@@ -252,7 +252,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: 'deadbeef'),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
           'pub',
           'get',
         ],
@@ -344,7 +344,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: 'deadbeef'),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
           'pub',
           'get',
         ],
