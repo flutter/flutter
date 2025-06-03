@@ -11,9 +11,15 @@
 %option noyywrap
 %option extra-type="LexerContext*"
 
+%top{
+// No linting because it's generated code.
+// FLUTTER_NOLINT: https://github.com/flutter/flutter/issues/167141
+}
+
 %{
 #include "flutter/tools/licenses_cpp/src/comments.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
+#pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wunused-function"
 typedef void* yyscan_t;
 

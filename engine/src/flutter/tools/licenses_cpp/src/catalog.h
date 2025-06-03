@@ -22,7 +22,7 @@ class Catalog {
   static absl::StatusOr<Catalog> Open(std::string_view data_dir);
 
   static absl::StatusOr<Catalog> Make(
-      std::vector<std::vector<std::string_view>> entries);
+      const std::vector<std::vector<std::string_view>>& entries);
 
   /// @brief Tries to identify a match for the `query` across the `Catalog`.
   /// @param query The text that will be matched against. @return

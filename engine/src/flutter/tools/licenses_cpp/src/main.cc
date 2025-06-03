@@ -27,19 +27,18 @@ int main(int argc, char** argv) {
   std::vector<char*> args = absl::ParseCommandLine(argc, argv);
   absl::SetGlobalVLogLevel(absl::GetFlag(FLAGS_v));
 
-  bool run = true;
-  if (!absl::GetFlag(FLAGS_working_dir).has_value()) {
-    run = false;
-    std::cerr << "Expected --working_dir flag." << std::endl;
-  }
-  if (!absl::GetFlag(FLAGS_data_dir).has_value()) {
-    run = false;
-    std::cerr << "Expected --data_dir flag." << std::endl;
+  std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
+  std::optional<std::string> data_dir = absl::GetFlag(FLAGS_working_dir);
+  if (working_dir.has_value() && data_dir.has_value()) {
+    return LicenseChecker::Run(working_dir.value(), data_dir.value());
   }
 
-  if (run) {
-    return LicenseChecker::Run(absl::GetFlag(FLAGS_working_dir).value(),
-                               absl::GetFlag(FLAGS_data_dir).value());
+  if (!working_dir.has_value()) {
+    std::cerr << "Expected --working_dir flag." << std::endl;
+  }
+
+  if (!data_dir.has_value()) {
+    std::cerr << "Expected --data_dir flag." << std::endl;
   }
 
   return 1;

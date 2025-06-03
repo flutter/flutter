@@ -9,7 +9,7 @@ absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
 }
 
 absl::StatusOr<Catalog> Catalog::Make(
-    std::vector<std::vector<std::string_view>> entries) {
+    const std::vector<std::vector<std::string_view>>& entries) {
   RE2::Set selector(RE2::Options(), RE2::Anchor::UNANCHORED);
   std::vector<std::unique_ptr<RE2>> matchers;
   std::vector<std::string> names;
