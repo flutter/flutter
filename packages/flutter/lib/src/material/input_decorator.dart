@@ -3991,11 +3991,22 @@ class InputDecoration {
   }
 
   /// Used by widgets like [TextField] and [InputDecorator] to create a new
-  /// [InputDecoration] with default values taken from the [theme].
+  /// [InputDecoration] with default values taken from the [inputDecorationTheme].
   ///
   /// Only null valued properties from this [InputDecoration] are replaced
-  /// by the corresponding values from [theme].
-  InputDecoration applyDefaults(InputDecorationThemeData theme) {
+  /// by the corresponding values from [inputDecorationTheme].
+  InputDecoration applyDefaults(Object inputDecorationTheme) {
+    // TODO(bleroux): Clean this up once the type of `inputDecorationTheme` is changed to `InputDecorationThemeData`
+    if (inputDecorationTheme is! InputDecorationTheme &&
+        inputDecorationTheme is! InputDecorationThemeData) {
+      throw ArgumentError(
+        'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+      );
+    }
+    final InputDecorationThemeData theme =
+        (inputDecorationTheme is InputDecorationTheme)
+            ? inputDecorationTheme.data
+            : inputDecorationTheme as InputDecorationThemeData;
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? theme.floatingLabelStyle,

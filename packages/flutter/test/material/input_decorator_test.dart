@@ -7707,9 +7707,7 @@ void main() {
     expect(nodeValues.length, 11);
   });
 
-  testWidgets('InputDecorationThemeData.applyDefaults initializes empty field', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('InputDecoration.applyDefaults initializes empty field', (WidgetTester tester) async {
     const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
     const Color themeColor = Color(0xFF00FF00);
     const InputBorder themeInputBorder = OutlineInputBorder(
@@ -7804,7 +7802,7 @@ void main() {
     );
   });
 
-  testWidgets('InputDecorationThemeData.applyDefaults does not override non-null fields', (
+  testWidgets('InputDecoration.applyDefaults does not override non-null fields', (
     WidgetTester tester,
   ) async {
     const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
@@ -7922,6 +7920,32 @@ void main() {
     expect(decoration.alignLabelWithHint, false);
     expect(decoration.constraints, decorationConstraints);
   });
+
+  testWidgets(
+    'InputDecoration.applyDefaults accepts only a InputDecorationTheme or a InputDecorationThemeData',
+    (WidgetTester tester) async {
+      const InputDecoration().applyDefaults(const InputDecorationTheme());
+      expect(tester.takeException(), isNull);
+
+      const InputDecoration().applyDefaults(const InputDecorationThemeData());
+      expect(tester.takeException(), isNull);
+
+      expect(
+        () {
+          const InputDecoration().applyDefaults(const Object());
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError error) => error.message,
+            'message',
+            equals(
+              'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+            ),
+          ),
+        ),
+      );
+    },
+  );
 
   testWidgets('InputDecorationThemeData.inputDecoration with MaterialState', (
     WidgetTester tester,
