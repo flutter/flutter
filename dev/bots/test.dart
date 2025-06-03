@@ -295,7 +295,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/framework.dart::Widget',
   ];
@@ -307,7 +307,7 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--snapshot',
     path.join(tempDirectory.path, 'snapshot.arm64-v8a.json'),
     '--package-config',
-    path.join(flutterRoot, 'examples', 'hello_world', '.dart_tool', 'package_config.json'),
+    path.join(flutterRoot, '.dart_tool', 'package_config.json'),
     '--forbidden-type',
     'package:flutter/src/widgets/widget_inspector.dart::WidgetInspectorService',
     '--forbidden-type',
