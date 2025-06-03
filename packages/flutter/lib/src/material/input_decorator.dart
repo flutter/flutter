@@ -1604,7 +1604,7 @@ class _RenderDecoration extends RenderBox
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
       _labelTransform =
           Matrix4.identity()
-            ..translateByDouble(dx, labelOffset.dy + dy,0,1)
+            ..translateByDouble(dx, labelOffset.dy + dy, 0, 1)
             ..scaleByDouble(scale, scale, scale, 1);
       layer = context.pushTransform(
         needsCompositing,
