@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_ROUND_SUPERELLIPSE_H_
 #define FLUTTER_IMPELLER_GEOMETRY_ROUND_SUPERELLIPSE_H_
 
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/geometry/point.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/rounding_radii.h"
@@ -140,6 +141,33 @@ struct RoundSuperellipse {
 
   Rect bounds_;
   RoundingRadii radii_;
+};
+
+class RoundSuperellipsePathSource : public PathSource {
+ public:
+  explicit RoundSuperellipsePathSource(
+      const RoundSuperellipse& round_superellipse);
+
+  ~RoundSuperellipsePathSource();
+
+  const RoundSuperellipse& GetRoundSuperellipse() const {
+    return round_superellipse_;
+  }
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const RoundSuperellipse round_superellipse_;
 };
 
 }  // namespace impeller

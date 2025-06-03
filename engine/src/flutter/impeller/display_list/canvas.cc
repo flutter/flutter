@@ -758,29 +758,26 @@ void Canvas::DrawDiffRoundRect(const RoundRect& outer,
   }
 }
 
-void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
+void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
                                    const Paint& paint) {
-  auto& rect = rse.GetBounds();
-  auto& radii = rse.GetRadii();
+  auto& rect = round_superellipse.GetBounds();
+  auto& radii = round_superellipse.GetRadii();
   if (radii.AreAllCornersSame() &&
       AttemptDrawBlurredRSuperellipse(rect, radii.top_left, paint)) {
     return;
   }
 
-  if (paint.style == Paint::Style::kFill) {
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
 
+  if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(rect, radii);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-    return;
+  } else {
+    StrokeRoundSuperellipseGeometry geom(round_superellipse, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
-
-  auto path = flutter::DlPathBuilder{}  //
-                  .AddRoundSuperellipse(rse)
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawCircle(const Point& center,

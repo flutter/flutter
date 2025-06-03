@@ -519,7 +519,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
   };
 }
 
-void RoundSuperellipseParam::AddToPath(PathReceiver& path_receiver) const {
+void RoundSuperellipseParam::Dispatch(PathReceiver& path_receiver) const {
   RoundSuperellipseBuilder builder(path_receiver);
 
   Point start = top_right.offset +
