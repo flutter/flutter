@@ -35,7 +35,6 @@ void main() {
       flutterProject
         ..manifest = FakeFlutterManifest()
         ..directory = fileSystem.systemTempDirectory.childDirectory('app')
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         )
@@ -451,9 +450,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late Directory directory;
-
-  @override
-  late File flutterPluginsFile;
 
   @override
   late File flutterPluginsDependenciesFile;
