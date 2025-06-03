@@ -576,10 +576,6 @@ targets:
 
   - name: Linux docs_generate_release
     recipe: flutter/docs
-    # TODO(matanlurey): This has no effect, is used to allow creating a builder.
-    # Remove in the next PR.
-    # https://github.com/flutter/flutter/issues/168913
-    bringup: true
     scheduler: release
     presubmit: false
     postsubmit: false
