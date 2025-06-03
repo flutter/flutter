@@ -1505,23 +1505,11 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final StringBuffer enabledFeatureFlags = StringBuffer();
-    for (final Feature feature in featureFlags.allFeatures) {
-      if (!featureFlags.isEnabled(feature)) {
-        continue;
-      }
-
-      final String? runtimeId = feature.runtimeId;
-      if (runtimeId == null) {
-        continue;
-      }
-
-      if (enabledFeatureFlags.isNotEmpty) {
-        enabledFeatureFlags.write(',');
-      }
-
-      enabledFeatureFlags.write(runtimeId);
-    }
+    final String enabledFeatureFlags = featureFlags.allFeatures
+        .where((Feature feature) => featureFlags.isEnabled(feature))
+        .where((Feature feature) => feature.runtimeId != null)
+        .map((Feature feature) => feature.runtimeId!)
+        .join(',');
 
     if (enabledFeatureFlags.isNotEmpty) {
       dartDefines.add('$kEnabledFeatureFlags=$enabledFeatureFlags');
