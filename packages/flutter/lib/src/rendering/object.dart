@@ -2521,14 +2521,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsLayout = true;
-    if (_isRelayoutBoundary ?? false) {
-      if (parent != null) {
-        // The _isRelayoutBoundary flag is cleared by an ancestor in
-        // RenderObject.layout. Conservatively mark everything dirty until it
-        // reaches the closest known relayout boundary.
-        markParentNeedsLayout();
-      }
-    } else if (owner case final PipelineOwner owner?) {
+    if (owner case final PipelineOwner owner? when (_isRelayoutBoundary ?? false)) {
       assert(() {
         if (debugPrintMarkNeedsLayoutStacks) {
           debugPrintStack(label: 'markNeedsLayout() called for $this');
@@ -2537,6 +2530,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }());
       owner._nodesNeedingLayout.add(this);
       owner.requestVisualUpdate();
+    } else if (parent != null) {
+      markParentNeedsLayout();
     }
   }
 
@@ -2741,6 +2736,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     _constraints = constraints;
 
+    if (_isRelayoutBoundary != null && isRelayoutBoundary != _isRelayoutBoundary) {
+      // The local relayout boundary has changed, must notify children in case
+      // they also need updating. Otherwise, they will be confused about what
+      // their actual relayout boundary is later.
+      visitChildren(_cleanChildRelayoutBoundary);
+    }
     _isRelayoutBoundary = isRelayoutBoundary;
 
     assert(!_debugMutationsLocked);
