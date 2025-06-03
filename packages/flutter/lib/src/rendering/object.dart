@@ -3852,7 +3852,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       int count = 0;
       for (
         RenderObject? node = this;
-        node != null && !(node._isRelayoutBoundary ?? true);
+        node != null && !(node._isRelayoutBoundary ?? false);
         node = node.parent
       ) {
         count += 1;
