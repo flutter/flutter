@@ -889,7 +889,11 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 ///
 /// Minimally, a [largeTitle] widget will appear in the middle of the app bar
 /// when the sliver is collapsed and transfer to the area below in larger font
-/// when the sliver is expanded. For advanced uses, an optional [middle] widget
+/// when the sliver is expanded. This expanded view will only trigger in
+/// portrait orientation, while in landscape mode the bar will stay in its
+/// collapsed view.
+///
+/// For advanced uses, an optional [middle] widget
 /// can be supplied to show a different widget in the middle of the navigation
 /// bar when the sliver is collapsed.
 ///
