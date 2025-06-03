@@ -2049,7 +2049,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    _isRelayoutBoundary = null;
+    if (!(_isRelayoutBoundary ?? true)) {
+      _isRelayoutBoundary = null;
+    }
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
@@ -2460,19 +2462,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   static bool debugCheckingIntrinsics = false;
 
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    if (_isRelayoutBoundary == null) {
-      // We don't know whether this is a relayout boundary yet.
-      return true;
-    }
-    RenderObject node = this;
-    while (!(node._isRelayoutBoundary ?? false)) {
-      assert(node.parent != null);
-      node = node.parent!;
-      if ((!node._needsLayout) && (!node._debugDoingThisLayout)) {
+    for (
+      RenderObject? node = this;
+      node != null && node._isRelayoutBoundary != null;
+      node = node.parent
+    ) {
+      final bool alreadyMarkedNeedsLayout = node._needsLayout || node._debugDoingThisLayout;
+      if (!alreadyMarkedNeedsLayout) {
         return false;
       }
+      if (node._isRelayoutBoundary!) {
+        return true;
+      }
     }
-    assert(node._isRelayoutBoundary ?? false);
     return true;
   }
 
@@ -2593,7 +2595,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_isRelayoutBoundary ?? false || this is RenderObjectWithLayoutCallbackMixin);
+    assert((_isRelayoutBoundary ?? false) || this is RenderObjectWithLayoutCallbackMixin);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -3846,14 +3848,26 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
+
+      int count = 0;
+      for (RenderObject? node = this; node != null; node = node.parent) {
+        final bool? isRelayoutBoundary = node._isRelayoutBoundary;
+        if (isRelayoutBoundary == null || isRelayoutBoundary) {
+          count = isRelayoutBoundary == null ? -1 : count;
+          break;
+        }
+        count += 1;
+      }
+      if (count > 0) {
+        header += ' relayoutBoundary=up$count';
+      }
+
       if (_isRelayoutBoundary ?? false) {
-        int count = 1;
         RenderObject? target = parent;
         while (target != null && (target._isRelayoutBoundary ?? false)) {
           target = target.parent;
           count += 1;
         }
-        header += ' relayoutBoundary=up$count';
       }
       if (_needsLayout) {
         header += ' NEEDS-LAYOUT';
