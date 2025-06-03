@@ -1,4 +1,4 @@
-Signature: 48043fe727a1773d1d6a7b0a79f458e1
+Signature: 834b84033cf957044a91c66bf3292afa
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14395,6 +14395,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/collector.shard.
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/bounded_list_node.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/bounded_list_node.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -14502,6 +14504,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/collector.shard.cm
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/bounded_list_node.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/bounded_list_node.h
 FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc

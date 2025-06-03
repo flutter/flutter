@@ -13,6 +13,13 @@
 .history
 .svn/
 
+# As packages are no longer pinned, we use a lockfile for testing locally.
+# When unpinning packages, Using lockfiles ensures that failures in PRs are
+# actually due to those PRs, not due to a package being updated.
+!/pubspec.lock
+!packages/flutter_tools/pubspec.lock
+!packages/flutter_tools/test/widget_preview_scaffold.shard/widget_preview_scaffold/pubspec.lock
+
 # IntelliJ related
 *.iml
 *.ipr
