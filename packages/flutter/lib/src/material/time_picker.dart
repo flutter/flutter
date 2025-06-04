@@ -502,7 +502,7 @@ class _TimeSelectorSeparator extends StatelessWidget {
           defaultTheme.timeSelectorSeparatorTextStyle?.resolve(states) ??
           defaultTheme.hourMinuteTextStyle,
       states,
-    ).copyWith(color: effectiveTextColor);
+    ).copyWith(color: effectiveTextColor, height: 1.0);
 
     final double height;
     switch (_TimePickerModel.entryModeOf(context)) {
