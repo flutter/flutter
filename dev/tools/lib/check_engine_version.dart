@@ -72,36 +72,14 @@ Future<bool> checkEngineVersion({
 }
 
 Future<bool> _wasUpdated(String path, ProcessRunner runner, StringSink stderr) async {
-  ProcessRunnerResult mergeBaseResult = await runner.runProcess(<String>[
-    'git',
-    'merge-base',
-    '--fork-point',
-    'FETCH_HEAD',
-    'HEAD',
-  ], failOk: true);
-
-  // Fallback to the default merge-base instead.
-  if (mergeBaseResult.exitCode != 0) {
-    stderr.writeln('git merge-base --fork-point failed, using default merge-base');
-    mergeBaseResult = await runner.runProcess(<String>[
-      'git',
-      'merge-base',
-      'FETCH_HEAD',
-      'HEAD',
-    ], failOk: true);
-  }
-  if (mergeBaseResult.exitCode != 0) {
-    stderr.writeln('git merge-base failed: ${mergeBaseResult.stdout}');
-    return false;
-  }
-
-  final String mergeBase = mergeBaseResult.stdout.trim();
   final ProcessRunnerResult diffResult = await runner.runProcess(<String>[
     'git',
     'diff',
     '--name-only',
     '--relative',
-    mergeBase,
+    'master...HEAD',
+    '--',
+    path,
   ], failOk: true);
   if (diffResult.exitCode != 0) {
     stderr.writeln('git diff failed: ${diffResult.stdout}');

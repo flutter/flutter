@@ -56,13 +56,7 @@ void main() {
         .createSync(recursive: true);
 
     final ProcessRunner gitExec = FakeProcessRunner(<String, ProcessRunnerResult>{
-      'git merge-base --fork-point FETCH_HEAD HEAD': ProcessRunnerResult(
-        0,
-        utf8.encode('abc123'),
-        <int>[],
-        <int>[],
-      ),
-      'git diff --name-only --relative abc123': ProcessRunnerResult(
+      'git diff --name-only --relative master...HEAD -- $versionPath': ProcessRunnerResult(
         0,
         utf8.encode('dev/another/file.txt\n'),
         <int>[],
