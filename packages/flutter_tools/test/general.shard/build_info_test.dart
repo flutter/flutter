@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/test_build_system.dart';
 
 void main() {
   late BufferLogger logger;
@@ -309,7 +310,7 @@ void main() {
     );
 
     expect(buildInfo.toGradleConfig(), <String>[
-      '-Pdart-defines=Zm9vPTI=,YmFyPTI=',
+      '-Pdart-defines=${encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'})}',
       '-Pdart-obfuscation=true',
       '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
       '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',

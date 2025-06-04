@@ -18,7 +18,7 @@ foreach(test, tests) {
   }
 }
 
-group("observatory") {
+group("vm_service") {
   testonly = true
   deps = []
   foreach(test, tests) {

@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <optional>
 
+#include "flutter/fml/build_config.h"
 #include "impeller/shader_archive/shader_archive_flatbuffers.h"
 
 namespace impeller {
@@ -18,6 +19,9 @@ ShaderArchiveWriter::~ShaderArchiveWriter() = default;
 
 std::optional<ArchiveShaderType> InferShaderTypefromFileExtension(
     const std::filesystem::path& path) {
+#if FML_OS_QNX
+  return std::nullopt;
+#else   // FML_OS_QNX
   if (path == ".vert") {
     return ArchiveShaderType::kVertex;
   } else if (path == ".frag") {
@@ -26,9 +30,13 @@ std::optional<ArchiveShaderType> InferShaderTypefromFileExtension(
     return ArchiveShaderType::kCompute;
   }
   return std::nullopt;
+#endif  // FML_OS_QNX
 }
 
 bool ShaderArchiveWriter::AddShaderAtPath(const std::string& std_path) {
+#if FML_OS_QNX
+  return false;
+#else   // FML_OS_QNX
   std::filesystem::path path(std_path);
 
   if (path.stem().empty()) {
@@ -69,6 +77,7 @@ bool ShaderArchiveWriter::AddShaderAtPath(const std::string& std_path) {
   }
 
   return AddShader(shader_type.value(), shader_name, std::move(file_mapping));
+#endif  // FML_OS_QNX
 }
 
 bool ShaderArchiveWriter::AddShader(ArchiveShaderType type,

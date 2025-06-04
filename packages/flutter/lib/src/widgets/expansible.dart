@@ -55,11 +55,11 @@ typedef ExpansibleBuilder =
 /// state.
 ///
 /// The controller's [expand] and [collapse] methods cause the
-/// the [Expansible] to rebuild, so they may not be called from
+/// [Expansible] to rebuild, so they may not be called from
 /// a build method.
 ///
 /// Remember to [dispose] of the [ExpansibleController] when it is no longer
-/// needed. This will ensure we discard any resources used by the object.
+/// needed. This will ensure all resources used by the object are discarded.
 class ExpansibleController extends ChangeNotifier {
   /// Creates a controller to be used with [Expansible.controller].
   ExpansibleController();

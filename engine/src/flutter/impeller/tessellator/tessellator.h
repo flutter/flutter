@@ -14,11 +14,13 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/trig.h"
 
 namespace impeller {
 
 /// The size of the point arena buffer stored on the tessellator.
+[[maybe_unused]]
 static constexpr size_t kPointArenaSize = 4096u;
 
 //------------------------------------------------------------------------------
@@ -181,6 +183,116 @@ class Tessellator {
                               Data&& data);
   };
 
+  /// A structure to describe the iteration through a set of angle vectors
+  /// in a |Trigs| structure to render the points along an arc. The start
+  /// and end vectors and each iteration's axis vector are all unit vectors
+  /// that point in the direction of the point on the circle to be emitted.
+  ///
+  /// Each vector should be rendered by multiplying it by the radius of the
+  /// circle, or in the case of a stroked arc, by the inner and outer radii
+  /// of the sides of the stroke.
+  ///
+  /// - The start vector will always be rendered first.
+  /// - Then each quadrant will be iterated by composing the trigs vectors
+  ///   with the given axis vector, iterating from the start index (inclusive)
+  ///   to the end index (exclusive) of the vector of |Trig| values.
+  /// - Finally the end vector will be rendered.
+  /// For example:
+  ///   Insert(arc_iteration.start * radius);
+  ///   for (size_t i = 0u, i < arc_iteration.iteration_count; i++) {
+  ///     Quadrant quadrant = arc_iteration.quadrants[i];
+  ///     for (j = quadrant.start_index; j < quadrant.end_index; j++) {
+  ///       Insert(quadrant.axis * trigs[j] * radius);
+  ///     }
+  ///   }
+  ///   Insert(arc_iteration.end * radius);
+  ///
+  /// The rendering routine may adjust the manner/order in which those vertices
+  /// are inserted into the vertex buffer to optimally match the vertex triangle
+  /// mode it plans to use, but the description above represents the basic
+  /// technique to compute the points along the actual curve.
+  struct ArcIteration {
+    // The axis to multiply by each |Trig| value and the half-open [start, end)
+    // range of the |Trig| vector over which to compute.
+    struct Quadrant {
+      impeller::Vector2 axis;
+      size_t start_index = 0u;
+      size_t end_index = 0u;
+
+      size_t GetPointCount() const {
+        FML_DCHECK(start_index < end_index);
+        return end_index - start_index;
+      }
+    };
+
+    // The true begin and end angles of the arc, expressed as unit direction
+    // vectors.
+    impeller::Vector2 start;
+    impeller::Vector2 end;
+
+    // The variable number of quadrants that have to be iterated and
+    // cross-referenced with values in a |Trigs| object.
+    size_t quadrant_count = 0u;
+    // We can have at most 5 |Quadrant| entries when an arc starts and ends in
+    // the same circle quadrant with the start point later in the quadrant
+    // than the end point.
+    //
+    // Worst case:
+    // - First iteration goes from the start angle to the end of that quadrant.
+    // - Then 3 full iterations for the 3 other full quarter circles.
+    // - Then a last iteration that goes from the start of that quadrant to the
+    //   end angle.
+    //
+    // We can also have 0 quadrants for arcs that are smaller than the
+    // step size of the pixel-radius |Trigs| vector.
+    Quadrant quadrants[5];
+
+    size_t GetPointCount() const {
+      size_t count = 2;
+      for (size_t i = 0; i < quadrant_count; i++) {
+        count += quadrants[i].GetPointCount();
+      }
+      return count;
+    }
+  };
+
+  /// @brief  The |VertexGenerator| implementation common to all shapes
+  ///         that are based on a polygonal representation of an ellipse.
+  class ArcVertexGenerator : public virtual VertexGenerator {
+   public:
+    /// |VertexGenerator|
+    PrimitiveType GetTriangleType() const override;
+
+    /// |VertexGenerator|
+    size_t GetVertexCount() const override;
+
+    /// |VertexGenerator|
+    void GenerateVertices(const TessellatedVertexProc& proc) const override;
+
+   private:
+    friend class Tessellator;
+
+    const ArcIteration iteration_;
+    const Trigs trigs_;
+    const Rect oval_bounds_;
+    const bool use_center_;
+    const Scalar half_width_;
+    const Cap cap_;
+    const bool supports_triangle_fans_;
+
+    ArcVertexGenerator(const ArcIteration& iteration,
+                       Trigs&& trigs,
+                       const Rect& oval_bounds,
+                       bool use_center,
+                       bool supports_triangle_fans);
+
+    ArcVertexGenerator(const ArcIteration& iteration,
+                       Trigs&& trigs,
+                       const Rect& oval_bounds,
+                       Scalar half_width,
+                       Cap cap);
+  };
+
   Tessellator();
 
   virtual ~Tessellator();
@@ -251,6 +363,44 @@ class Tessellator {
                                           Scalar half_width);
 
   /// @brief   Create a |VertexGenerator| that can produce vertices for
+  ///          a stroked arc inscribed within the given oval_bounds with
+  ///          the given stroke half_width with enough polygon sub-divisions
+  ///          to provide reasonable fidelity when viewed under the given
+  ///          view transform. The outer edge of the stroked arc is
+  ///          generated at (radius + half_width) and the inner edge is
+  ///          generated at (radius - half_width).
+  ///
+  ///          Note that the view transform is only used to choose the
+  ///          number of sample points to use per quarter circle and the
+  ///          returned points are not transformed by it, instead they are
+  ///          relative to the coordinate space of the oval bounds.
+  ArcVertexGenerator FilledArc(const Matrix& view_transform,
+                               const Rect& oval_bounds,
+                               Degrees start,
+                               Degrees sweep,
+                               bool use_center,
+                               bool supports_triangle_fans);
+
+  /// @brief   Create a |VertexGenerator| that can produce vertices for
+  ///          a stroked arc inscribed within the given oval_bounds with
+  ///          the given stroke half_width with enough polygon sub-divisions
+  ///          to provide reasonable fidelity when viewed under the given
+  ///          view transform. The outer edge of the stroked arc is
+  ///          generated at (radius + half_width) and the inner edge is
+  ///          generated at (radius - half_width).
+  ///
+  ///          Note that the view transform is only used to choose the
+  ///          number of sample points to use per quarter circle and the
+  ///          returned points are not transformed by it, instead they are
+  ///          relative to the coordinate space of the oval bounds.
+  ArcVertexGenerator StrokedArc(const Matrix& view_transform,
+                                const Rect& oval_bounds,
+                                Degrees start,
+                                Degrees sweep,
+                                Cap cap,
+                                Scalar half_width);
+
+  /// @brief   Create a |VertexGenerator| that can produce vertices for
   ///          a line with round end caps of the given radius with enough
   ///          polygon sub-divisions to provide reasonable fidelity when
   ///          viewed under the given view transform.
@@ -296,6 +446,10 @@ class Tessellator {
   /// circle quadrant of the specified pixel radius
   Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
 
+  static ArcIteration ComputeArcQuadrantIterations(size_t trig_count,
+                                                   impeller::Degrees start,
+                                                   impeller::Degrees sweep);
+
  protected:
   /// Used for polyline generation.
   std::unique_ptr<std::vector<Point>> point_buffer_;
@@ -320,6 +474,25 @@ class Tessellator {
                                     const EllipticalVertexGenerator::Data& data,
                                     const TessellatedVertexProc& proc);
 
+  static void GenerateFilledArcFan(const Trigs& trigs,
+                                   const ArcIteration& iteration,
+                                   const Rect& oval_bounds,
+                                   bool use_center,
+                                   const TessellatedVertexProc& proc);
+
+  static void GenerateFilledArcStrip(const Trigs& trigs,
+                                     const ArcIteration& iteration,
+                                     const Rect& oval_bounds,
+                                     bool use_center,
+                                     const TessellatedVertexProc& proc);
+
+  static void GenerateStrokedArc(const Trigs& trigs,
+                                 const ArcIteration& iteration,
+                                 const Rect& oval_bounds,
+                                 Scalar half_width,
+                                 Cap cap,
+                                 const TessellatedVertexProc& proc);
+
   static void GenerateRoundCapLine(const Trigs& trigs,
                                    const EllipticalVertexGenerator::Data& data,
                                    const TessellatedVertexProc& proc);
@@ -332,6 +505,8 @@ class Tessellator {
       const Trigs& trigs,
       const EllipticalVertexGenerator::Data& data,
       const TessellatedVertexProc& proc);
+
+  static const ArcIteration ComputeCircleArcIterations(size_t count);
 
   Tessellator(const Tessellator&) = delete;
 

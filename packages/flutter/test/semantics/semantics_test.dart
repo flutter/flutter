@@ -731,8 +731,6 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   elevation: 0.0\n'
-      '   thickness: 0.0\n'
       '   headingLevel: 0\n',
     );
 
@@ -867,8 +865,6 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   elevation: 0.0\n'
-      '   thickness: 0.0\n'
       '   headingLevel: 0\n',
     );
   });
@@ -916,6 +912,26 @@ void main() {
     newNode.attach(owner);
     // Id is reused.
     expect(newNode.id, expectId);
+  });
+
+  test('performActionAt can hit test on merged semantics node', () {
+    bool tapped = false;
+    final SemanticsOwner owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+    final SemanticsNode root = SemanticsNode.root(owner: owner)
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final SemanticsNode merged = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final SemanticsConfiguration mergeConfig =
+        SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true
+          ..onTap = () => tapped = true;
+    final SemanticsConfiguration rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
+
+    merged.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[]);
+    root.updateWith(config: rootConfig, childrenInInversePaintOrder: <SemanticsNode>[merged]);
+
+    owner.performActionAt(const Offset(5, 5), SemanticsAction.tap);
+    expect(tapped, isTrue);
   });
 
   test('Tags show up in debug properties', () {

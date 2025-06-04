@@ -33,14 +33,13 @@ class FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -134,6 +133,10 @@ void main() {
           ];
           for (final String templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
+            globals.fs
+                .directory(templatePath)
+                .childFile('pubspec.yaml.tmpl')
+                .writeAsStringSync('name: my_app');
           }
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(
@@ -174,7 +177,6 @@ void main() {
         },
         overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         },
       );
     });

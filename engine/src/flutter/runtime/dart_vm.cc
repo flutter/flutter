@@ -28,23 +28,6 @@
 #include "third_party/tonic/logging/dart_error.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-namespace dart {
-namespace observatory {
-
-#if !OS_FUCHSIA && !FLUTTER_RELEASE
-
-// These two symbols are defined in |observatory_archive.cc| which is generated
-// by the |//third_party/dart/runtime/observatory:archive_observatory| rule.
-// Both of these symbols will be part of the data segment and therefore are read
-// only.
-extern unsigned int observatory_assets_archive_len;
-extern const uint8_t* observatory_assets_archive;
-
-#endif  // !OS_FUCHSIA && !FLUTTER_RELEASE
-
-}  // namespace observatory
-}  // namespace dart
-
 namespace flutter {
 
 // Arguments passed to the Dart VM in all configurations.
@@ -157,26 +140,6 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
 }
 
 void ThreadExitCallback() {}
-
-Dart_Handle GetVMServiceAssetsArchiveCallback() {
-#if FLUTTER_RELEASE
-  return nullptr;
-#elif OS_FUCHSIA
-  fml::UniqueFD fd = fml::OpenFile("pkg/data/observatory.tar", false,
-                                   fml::FilePermission::kRead);
-  fml::FileMapping mapping(fd, {fml::FileMapping::Protection::kRead});
-  if (mapping.GetSize() == 0 || mapping.GetMapping() == nullptr) {
-    FML_LOG(ERROR) << "Fail to load Observatory archive";
-    return nullptr;
-  }
-  return tonic::DartConverter<tonic::Uint8List>::ToDart(mapping.GetMapping(),
-                                                        mapping.GetSize());
-#else
-  return tonic::DartConverter<tonic::Uint8List>::ToDart(
-      ::dart::observatory::observatory_assets_archive,
-      ::dart::observatory::observatory_assets_archive_len);
-#endif
-}
 
 static const char kStdoutStreamId[] = "Stdout";
 static const char kStderrStreamId[] = "Stderr";
@@ -472,7 +435,6 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
     params.file_write = dart::bin::WriteFile;
     params.file_close = dart::bin::CloseFile;
     params.entropy_source = dart::bin::GetEntropy;
-    params.get_service_assets = GetVMServiceAssetsArchiveCallback;
     DartVMInitializer::Initialize(&params,
                                   settings_.enable_timeline_event_handler,
                                   settings_.trace_systrace);

@@ -1604,8 +1604,8 @@ class _RenderDecoration extends RenderBox
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
       _labelTransform =
           Matrix4.identity()
-            ..translate(dx, labelOffset.dy + dy)
-            ..scale(scale);
+            ..translateByDouble(dx, labelOffset.dy + dy, 0, 1)
+            ..scaleByDouble(scale, scale, scale, 1);
       layer = context.pushTransform(
         needsCompositing,
         offset,
@@ -1636,7 +1636,7 @@ class _RenderDecoration extends RenderBox
       final Offset labelOffset = _boxParentData(label!).offset;
       transform
         ..multiply(_labelTransform!)
-        ..translate(-labelOffset.dx, -labelOffset.dy);
+        ..translateByDouble(-labelOffset.dx, -labelOffset.dy, 0, 1);
     }
     super.applyPaintTransform(child, transform);
   }

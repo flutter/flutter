@@ -505,10 +505,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _platformViewsController = nil;
 }
 
-- (NSURL*)observatoryUrl {
-  return self.publisher.url;
-}
-
 - (NSURL*)vmServiceUrl {
   return self.publisher.url;
 }

@@ -631,4 +631,29 @@ TEST_P(InteropPlaygroundTest, CanGetPathBounds) {
   ASSERT_EQ(bounds.height, 100);
 }
 
+TEST_P(InteropPlaygroundTest, CanControlEllipses) {
+  hpp::TypographyContext context;
+  auto style = hpp::ParagraphStyle{};
+  style.SetFontSize(50);
+  style.SetForeground(hpp::Paint{}.SetColor({.red = 1.0, .alpha = 1.0}));
+  const auto text = std::string{"The quick brown fox jumped over the lazy dog"};
+  style.SetEllipsis("🐶");
+  auto para1 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  style.SetForeground(hpp::Paint{}.SetColor({.green = 1.0, .alpha = 1.0}));
+  style.SetEllipsis(nullptr);
+  auto para2 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawParagraph(para1, {100, 100})
+                .DrawParagraph(para2, {100, 200})
+                .Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
 }  // namespace impeller::interop::testing

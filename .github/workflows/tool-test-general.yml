@@ -1,0 +1,93 @@
+name: Tool tests general - experiment
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/tool-test-general.yml'
+      - 'dev/**'
+      - 'packages/flutter_tools/**'
+      - 'bin/**'
+      - '.ci.yaml'
+      - 'engine/**'
+      - 'DEPS'
+  push:
+    branches: [master]
+
+jobs:
+  Linux_tool-tests-general:
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Real checkout on github actions for pull requests
+      - name: Checkout code (non-act pull_request)
+        uses: actions/checkout@v4
+        if: github.event_name == 'pull_request' && !env.ACT
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          # Checkout the PR; not the merge commit - we need to describe tags
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # Real checkout on github actions for post submit
+      - name: Checkout code (non-act push)
+        uses: actions/checkout@v4
+        if: github.event_name == 'push' && !env.ACT
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          # Checkout the PR; not the merge commit - we need to describe tags
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # Fake checkout if running locally
+      - name: Checkout code (act local)
+        uses: actions/checkout@v4
+        if: env.ACT
+
+      # If this is a branch / pr NOT on fluter/flutter, set the remote upstream
+      # so the flutter tool can figure out the version
+      - name: Set upstream (if not flutter/flutter)
+        if: github.repository != 'flutter/flutter' && !env.ACT
+        run: |
+          git remote add upstream https://github.com/flutter/flutter.git
+          git fetch --all --tags
+
+      # If running locally; install the JDK - Github runners have everything on them
+      - name: Set up our JDK environment
+        if: env.ACT
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # If running locally; install Android SDK tools - Github runners have everything on them
+      - name: Setup Android SDK
+        if: env.ACT
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          cmdline-tools-version: 13114758
+
+      # If running locally; install Android SDK - Github runners have everything on them
+      - name: install android
+        if: env.ACT
+        run: |
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Add `flutter` to the PATH
+        run: |
+          echo "$PWD/bin" >> "$GITHUB_PATH"
+
+      - name: Flutter Doctor
+        run: |
+          flutter doctor
+
+      - name: update-packages
+        run: |
+          flutter update-packages
+
+      - name: Tool Test
+        run: |
+          SHARD=tool_tests SUBSHARD=general dart --enable-asserts dev/bots/test.dart

@@ -38,4 +38,29 @@ RoundRect RoundSuperellipse::ToApproximateRoundRect() const {
   return RoundRect::MakeRectRadii(GetBounds(), GetRadii());
 }
 
+RoundSuperellipsePathSource::RoundSuperellipsePathSource(
+    const RoundSuperellipse& round_superellipse)
+    : round_superellipse_(round_superellipse) {}
+
+RoundSuperellipsePathSource::~RoundSuperellipsePathSource() = default;
+
+FillType RoundSuperellipsePathSource::GetFillType() const {
+  return FillType::kNonZero;
+}
+
+Rect RoundSuperellipsePathSource::GetBounds() const {
+  return round_superellipse_.GetBounds();
+}
+
+bool RoundSuperellipsePathSource::IsConvex() const {
+  return true;
+}
+
+void RoundSuperellipsePathSource::Dispatch(PathReceiver& receiver) const {
+  auto param = RoundSuperellipseParam::MakeBoundsRadii(
+      round_superellipse_.GetBounds(), round_superellipse_.GetRadii());
+  param.Dispatch(receiver);
+  receiver.PathEnd();
+}
+
 }  // namespace impeller
