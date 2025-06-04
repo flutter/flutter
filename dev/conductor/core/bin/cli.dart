@@ -35,15 +35,7 @@ Future<void> main(List<String> args) async {
     usageLineLength: 80,
   );
 
-  final String conductorVersion =
-      (await const Git(processManager).getOutput(
-        <String>['rev-parse'],
-        'Get the revision of the current Flutter SDK',
-        workingDirectory: _localFlutterRoot.path,
-      )).trim();
-
   <Command<void>>[
-    StartCommand(checkouts: checkouts, conductorVersion: conductorVersion),
     CleanCommand(checkouts: checkouts),
     NextCommand(checkouts: checkouts),
   ].forEach(runner.addCommand);
