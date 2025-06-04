@@ -2314,6 +2314,73 @@ Gradle Crashed
     );
 
     testUsingContext(
+      'honors --android-project-cache-dir setting',
+          () async {
+        final AndroidGradleBuilder builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Ptarget=lib/main.dart',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              '--project-cache-dir=/made/up/dir',
+              'assembleRelease',
+            ],
+          ),
+        );
+        fileSystem.file('android/gradlew').createSync(recursive: true);
+
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.file('android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await expectLater(() async {
+          await builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                androidGradleProjectCacheDir: '/made/up/dir',
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+            ),
+            target: 'lib/main.dart',
+            isBuildingBundle: false,
+            configOnly: false,
+            localGradleErrors: const <GradleHandledError>[],
+          );
+        }, throwsToolExit());
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+    );
+
+    testUsingContext(
       'build aar uses selected local engine with arm32 ABI',
       () async {
         final AndroidGradleBuilder builder = AndroidGradleBuilder(
