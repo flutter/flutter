@@ -8,6 +8,7 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -487,6 +488,22 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();
   }
+  const String kSyntheticPackage = 'synthetic-package';
+  const String kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
+  final bool? syntheticPackage = _tryReadBool(yamlNode, kSyntheticPackage, logger);
+  if (syntheticPackage != null) {
+    if (syntheticPackage) {
+      throwToolExit(
+        '${file.path}: Cannot enable "$kSyntheticPackage", this feature has '
+        'been removed. See $kFlutterGenNotice.',
+      );
+    } else {
+      logger.printWarning(
+        '${file.path}: The argument "$kSyntheticPackage" no longer has any '
+        'effect and should be removed. See $kFlutterGenNotice',
+      );
+    }
+  }
   return LocalizationOptions(
     arbDir: _tryReadFilePath(yamlNode, 'arb-dir', logger, fileSystem) ?? defaultArbDir,
     outputDir: _tryReadFilePath(yamlNode, 'output-dir', logger, fileSystem),
@@ -523,6 +540,21 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
 }) {
+  const String kSyntheticPackage = 'synthetic-package';
+  const String kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
+  if (command.argResults!.wasParsed(kSyntheticPackage)) {
+    if (command.boolArg(kSyntheticPackage)) {
+      throwToolExit(
+        'Cannot enable "$kSyntheticPackage", this feature has been removed. '
+        'See $kFlutterGenNotice.',
+      );
+    } else {
+      globals.logger.printWarning(
+        'The argument "$kSyntheticPackage" no longer has any effect and should '
+        'be removed. See $kFlutterGenNotice',
+      );
+    }
+  }
   return LocalizationOptions(
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
     outputDir: command.stringArg('output-dir'),

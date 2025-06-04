@@ -1888,9 +1888,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
-    );
+    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.
@@ -2048,7 +2046,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;

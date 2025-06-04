@@ -50,15 +50,10 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isNativeAssetsEnabled => isEnabled(nativeAssets);
 
   @override
-  bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
+  bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
 
-  // TODO(matanlurey): Remove this when the flag is no longer in use.
-  //
-  // Setting this always to true prevents `false` from ever being returned in
-  // production code, but still allows tests to override it so that they can be
-  // migrated (or deleted) one at a time instead of a single large PR.
   @override
-  bool get isExplicitPackageDependenciesEnabled => true;
+  bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
