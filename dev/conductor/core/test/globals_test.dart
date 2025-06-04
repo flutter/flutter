@@ -14,18 +14,18 @@ void main() {
   });
 
   group('getNewPrLink', () {
-    const String userName = 'flutterer';
-    const String releaseChannel = 'beta';
-    const String releaseVersion = '1.2.0-3.4.pre';
-    const String candidateBranch = 'flutter-1.2-candidate.3';
-    const String workingBranch = 'cherrypicks-$candidateBranch';
-    const String dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
-    const String engineCherrypick1 = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
-    const String engineCherrypick2 = '94d06a2e1d01a3b0c693b94d70c5e1df9d78d249';
-    const String frameworkCherrypick = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
+    const userName = 'flutterer';
+    const releaseChannel = 'beta';
+    const releaseVersion = '1.2.0-3.4.pre';
+    const candidateBranch = 'flutter-1.2-candidate.3';
+    const workingBranch = 'cherrypicks-$candidateBranch';
+    const dartRevision = 'fe9708ab688dcda9923f584ba370a66fcbc3811f';
+    const engineCherrypick1 = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
+    const engineCherrypick2 = '94d06a2e1d01a3b0c693b94d70c5e1df9d78d249';
+    const frameworkCherrypick = 'a5a25cd702b062c24b2c67b8d30b5cb33e0ef6f0';
 
-    final RegExp titlePattern = RegExp(r'&title=(.*)&');
-    final RegExp bodyPattern = RegExp(r'&body=(.*)$');
+    final titlePattern = RegExp(r'&title=(.*)&');
+    final bodyPattern = RegExp(r'&body=(.*)$');
 
     late pb.ConductorState state;
 
@@ -65,7 +65,7 @@ void main() {
         Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
         '[flutter_releases] Flutter $releaseChannel $releaseVersion Engine Cherrypicks',
       );
-      final String expectedBody = '''
+      final expectedBody = '''
 # Flutter $releaseChannel $releaseVersion Engine
 
 ## Scheduled Cherrypicks
@@ -85,7 +85,7 @@ void main() {
         Uri.decodeQueryComponent(titlePattern.firstMatch(link)?.group(1) ?? ''),
         '[flutter_releases] Flutter $releaseChannel $releaseVersion Framework Cherrypicks',
       );
-      final String expectedBody = '''
+      final expectedBody = '''
 # Flutter $releaseChannel $releaseVersion Framework
 
 ## Scheduled Cherrypicks
@@ -97,18 +97,18 @@ void main() {
   });
 
   group('getBoolFromEnvOrArgs', () {
-    const String flagName = 'a-cli-flag';
+    const flagName = 'a-cli-flag';
 
     test('prefers env over argResults', () {
       final ArgResults argResults = FakeArgs(results: <String, Object>{flagName: false});
-      final Map<String, String> env = <String, String>{'A_CLI_FLAG': 'TRUE'};
+      final env = <String, String>{'A_CLI_FLAG': 'TRUE'};
       final bool result = getBoolFromEnvOrArgs(flagName, argResults, env);
       expect(result, true);
     });
 
     test('falls back to argResults if env is empty', () {
       final ArgResults argResults = FakeArgs(results: <String, Object>{flagName: false});
-      final Map<String, String> env = <String, String>{};
+      final env = <String, String>{};
       final bool result = getBoolFromEnvOrArgs(flagName, argResults, env);
       expect(result, false);
     });

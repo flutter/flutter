@@ -623,7 +623,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     required Offset origin,
   }) {
     if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
-      final Paint reactionPaint =
+      final reactionPaint =
           Paint()
             ..color =
                 Color.lerp(

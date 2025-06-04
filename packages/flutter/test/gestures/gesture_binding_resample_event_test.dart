@@ -61,11 +61,11 @@ void testResampleEvent(String description, ResampleEventTest callback) {
 }
 
 void main() {
-  final TestResampleEventFlutterBinding binding = TestResampleEventFlutterBinding();
+  final binding = TestResampleEventFlutterBinding();
   testResampleEvent('Pointer event resampling', (FakeAsync async) {
     Duration currentTime() => Duration(milliseconds: clock.now().millisecondsSinceEpoch);
     final Duration epoch = currentTime();
-    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+    final packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.add, timeStamp: epoch),
         ui.PointerData(
@@ -110,13 +110,13 @@ void main() {
       ],
     );
 
-    const Duration samplingOffset = Duration(milliseconds: -5);
-    const Duration frameInterval = Duration(microseconds: 16667);
+    const samplingOffset = Duration(milliseconds: -5);
+    const frameInterval = Duration(microseconds: 16667);
 
     GestureBinding.instance.resamplingEnabled = true;
     GestureBinding.instance.samplingOffset = samplingOffset;
 
-    final List<PointerEvent> events = <PointerEvent>[];
+    final events = <PointerEvent>[];
     binding.callback = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);

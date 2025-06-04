@@ -48,7 +48,7 @@ void main() {
 
   group('config', () {
     testUsingContext('prints all settings with --list', () async {
-      final ConfigCommand configCommand = ConfigCommand();
+      final configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
       await commandRunner.run(<String>['config', '--list']);
       expect(
@@ -60,7 +60,7 @@ void main() {
     });
 
     testUsingContext('throws error on excess arguments', () {
-      final ConfigCommand configCommand = ConfigCommand();
+      final configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       expect(
@@ -78,7 +78,7 @@ void main() {
     testUsingContext(
       'machine flag',
       () async {
-        final ConfigCommand command = ConfigCommand();
+        final command = ConfigCommand();
         await command.handleMachine();
 
         expect(testLogger.statusText, isNotEmpty);
@@ -100,7 +100,7 @@ void main() {
     );
 
     testUsingContext('Can set build-dir', () async {
-      final ConfigCommand configCommand = ConfigCommand();
+      final configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--build-dir=foo']);
@@ -112,7 +112,7 @@ void main() {
     testUsingContext(
       'throws error on absolute path to build-dir',
       () async {
-        final ConfigCommand configCommand = ConfigCommand();
+        final configCommand = ConfigCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
@@ -124,7 +124,7 @@ void main() {
     testUsingContext(
       'allows setting and removing feature flags',
       () async {
-        final ConfigCommand configCommand = ConfigCommand();
+        final configCommand = ConfigCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         await commandRunner.run(<String>[
@@ -179,7 +179,7 @@ void main() {
     );
 
     testUsingContext('warns the user to reload IDE', () async {
-      final ConfigCommand configCommand = ConfigCommand();
+      final configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--enable-web']);
@@ -194,7 +194,7 @@ void main() {
       'displays which config settings are available on stable',
       () async {
         fakeFlutterVersion.channel = 'stable';
-        final ConfigCommand configCommand = ConfigCommand();
+        final configCommand = ConfigCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         await commandRunner.run(<String>[
@@ -224,7 +224,7 @@ void main() {
     testUsingContext(
       'analytics flag enables/disables analytics',
       () async {
-        final ConfigCommand configCommand = ConfigCommand();
+        final configCommand = ConfigCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         expect(fakeAnalytics.telemetryEnabled, true);
@@ -239,7 +239,7 @@ void main() {
     );
 
     testUsingContext('analytics reported with help usages', () async {
-      final ConfigCommand configCommand = ConfigCommand();
+      final configCommand = ConfigCommand();
       createTestCommandRunner(configCommand);
 
       await fakeAnalytics.setTelemetry(false);

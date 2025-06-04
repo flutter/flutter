@@ -61,8 +61,8 @@ class CandidatesCommand extends Command<void> {
     )).split('\n');
 
     // Pattern for extracting only the branch name via sub-group 1
-    final RegExp remotePattern = RegExp('${results[kRemote]}\\/(.*)');
-    for (final String branchName in branches) {
+    final remotePattern = RegExp('${results[kRemote]}\\/(.*)');
+    for (final branchName in branches) {
       final RegExpMatch? candidateMatch = releaseCandidateBranchRegex.firstMatch(branchName);
       if (candidateMatch == null) {
         continue;

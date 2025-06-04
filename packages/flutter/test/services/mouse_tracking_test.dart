@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('MouseTrackerAnnotation has correct toString', () {
-    final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+    final annotation1 = MouseTrackerAnnotation(
       onEnter: (_) {},
       onExit: (_) {},
     );
@@ -18,13 +18,13 @@ void main() {
       equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, exit])'),
     );
 
-    const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
+    const annotation2 = MouseTrackerAnnotation();
     expect(
       annotation2.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
     );
 
-    final MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(
+    final annotation3 = MouseTrackerAnnotation(
       onEnter: (_) {},
       cursor: SystemMouseCursors.grab,
     );

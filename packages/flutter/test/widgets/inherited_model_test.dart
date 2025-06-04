@@ -67,9 +67,9 @@ class _ShowABCFieldState extends State<ShowABCField> {
 
 void main() {
   testWidgets('InheritedModel basics', (WidgetTester tester) async {
-    int a = 0;
-    int b = 1;
-    int c = 2;
+    var a = 0;
+    var b = 1;
+    var c = 2;
 
     final Widget abcPage = StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
@@ -207,9 +207,9 @@ void main() {
   });
 
   testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
-    int a = 0;
-    int b = 1;
-    int c = 2;
+    var a = 0;
+    var b = 1;
+    var c = 2;
 
     // Same as in abcPage in the "InheritedModel basics" test except:
     // there are two ABCModels and the inner model's "a" and "b"
@@ -336,9 +336,9 @@ void main() {
   });
 
   testWidgets('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
-    int a = 0;
-    int b = 1;
-    int c = 2;
+    var a = 0;
+    var b = 1;
+    var c = 2;
     Set<String>? innerModelAspects = <String>{'a'};
 
     // Same as in abcPage in the "Inner InheritedModel shadows the outer one"

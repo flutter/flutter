@@ -41,7 +41,7 @@ abstract class AotAssemblyBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -66,10 +66,10 @@ abstract class AotAssemblyBase extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+    final buildMode = BuildMode.fromCliName(environmentBuildMode);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> darwinArchs =
         environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
         <DarwinArch>[DarwinArch.arm64];
@@ -91,9 +91,9 @@ abstract class AotAssemblyBase extends Target {
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
-    final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch darwinArch in darwinArchs) {
-      final List<String> archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
+    final pending = <Future<int>>[];
+    for (final darwinArch in darwinArchs) {
+      final archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
@@ -377,9 +377,9 @@ Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
 ) async {
   final List<String> lines = file.readAsLinesSync();
 
-  bool inDidFinishLaunchingWithOptions = false;
-  int lineNumber = 0;
-  for (final String line in lines) {
+  var inDidFinishLaunchingWithOptions = false;
+  var lineNumber = 0;
+  for (final line in lines) {
     lineNumber += 1;
     if (!inDidFinishLaunchingWithOptions) {
       if (line.contains('didFinishLaunchingWithOptions')) {
@@ -560,7 +560,7 @@ abstract class IosLLDBInit extends Target {
       return;
     }
 
-    bool anyLLDBInitFound = false;
+    var anyLLDBInitFound = false;
     await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
       if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
         if (entity.readAsStringSync().contains('customLLDBInitFile')) {
@@ -645,7 +645,7 @@ abstract class IosAssetBundle extends Target {
     if (environmentBuildMode == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+    final buildMode = BuildMode.fromCliName(environmentBuildMode);
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkBinary = frameworkDirectory.childFile('App');
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
@@ -807,7 +807,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
 
   @override
   Future<void> build(Environment environment) async {
-    bool buildSuccess = true;
+    var buildSuccess = true;
     try {
       await super.build(environment);
     } catch (_) {
@@ -915,7 +915,7 @@ Future<void> _signFramework(Environment environment, File binary, BuildMode buil
   if (result.exitCode != 0) {
     final String stdout = (result.stdout as String).trim();
     final String stderr = (result.stderr as String).trim();
-    final StringBuffer output = StringBuffer();
+    final output = StringBuffer();
     output.writeln('Failed to codesign ${binary.path} with identity $codesignIdentity.');
     if (stdout.isNotEmpty) {
       output.writeln(stdout);

@@ -39,7 +39,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     final Color oddItemColor = Colors.lime.shade100;
     final Color evenItemColor = Colors.deepPurple.shade100;
 
-    final List<Card> cards = <Card>[
+    final cards = <Card>[
       for (int index = 0; index < _items.length; index += 1)
         Card(
           key: Key('$index'),

@@ -393,7 +393,7 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
+    const radius = Radius.circular(_defaultSelectionOverlayRadius);
 
     return Container(
       margin: EdgeInsetsDirectional.only(
@@ -510,7 +510,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
       return super.assembleSemanticsNode(node, config, children);
     }
     final SemanticsNode scrollable = children.first;
-    final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
+    final indexedChildren = <int, SemanticsNode>{};
     scrollable.visitChildren((SemanticsNode child) {
       assert(child.indexInParent != null);
       indexedChildren[child.indexInParent!] = child;

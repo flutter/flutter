@@ -180,7 +180,7 @@ abstract class Target {
 
   void _writeStamp(List<File> inputs, List<File> outputs, Environment environment) {
     String getPath(File file) => file.path;
-    final Map<String, Object> result = <String, Object>{
+    final result = <String, Object>{
       'inputs': inputs.map(getPath).toList(),
       'outputs': outputs.map(getPath).toList(),
       if (buildKey case final String key) 'buildKey': key,
@@ -234,7 +234,7 @@ abstract class Target {
 
   /// Locate the stamp file for a particular target name and environment.
   File _findStampFile(Environment environment) {
-    final String fileName = '$name.stamp';
+    final fileName = '$name.stamp';
     return environment.buildDir.childFile(fileName);
   }
 
@@ -244,7 +244,7 @@ abstract class Target {
     Environment environment, {
     bool inputs = true,
   }) {
-    final SourceVisitor collector = SourceVisitor(environment, inputs);
+    final collector = SourceVisitor(environment, inputs);
     for (final Source source in config) {
       source.accept(collector);
     }
@@ -347,17 +347,17 @@ class Environment {
     // include the engine and dart versions.
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     // The engine revision is `null` for local or custom engines.
     if (engineVersion != null) {
       buffer.write(engineVersion);
     }
-    for (final String key in keys) {
+    for (final key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
     }
     buffer.write(outputDir.path);
-    final String output = buffer.toString();
+    final output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
 
@@ -612,13 +612,13 @@ class FlutterBuildSystem extends BuildSystem {
 
     // Load file store from previous builds.
     final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
+    final fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
 
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
+    final buildInstance = _BuildInstance(
       environment: environment,
       fileCache: fileCache,
       buildSystemConfig: buildSystemConfig,
@@ -626,7 +626,7 @@ class FlutterBuildSystem extends BuildSystem {
       fileSystem: _fileSystem,
       platform: _platform,
     );
-    bool passed = true;
+    var passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
     } finally {
@@ -698,7 +698,7 @@ class FlutterBuildSystem extends BuildSystem {
       fileCache = _incrementalFileStore[previousBuild];
     }
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
+    final buildInstance = _BuildInstance(
       environment: environment,
       fileCache: fileCache!,
       buildSystemConfig: const BuildSystemConfig(),
@@ -706,13 +706,13 @@ class FlutterBuildSystem extends BuildSystem {
       fileSystem: _fileSystem,
       platform: _platform,
     );
-    bool passed = true;
+    var passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
     } finally {
       fileCache.persistIncremental();
     }
-    final BuildResult result = BuildResult(
+    final result = BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
@@ -773,7 +773,7 @@ class FlutterBuildSystem extends BuildSystem {
     }
     final List<String> lastOutputs =
         (json.decode(outputsFile.readAsStringSync()) as List<Object?>).cast<String>();
-    for (final String lastOutput in lastOutputs) {
+    for (final lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
         ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
@@ -820,9 +820,9 @@ class _BuildInstance {
 
   Future<bool> _invokeInternal(Node node) async {
     final PoolResource resource = await resourcePool.request();
-    final Stopwatch stopwatch = Stopwatch()..start();
-    bool succeeded = true;
-    bool skipped = false;
+    final stopwatch = Stopwatch()..start();
+    var succeeded = true;
+    var skipped = false;
 
     // The build system produces a list of aggregate input and output
     // files for the overall build. This list is provided to a hosting build
@@ -981,7 +981,7 @@ void checkCycles(Target initial) {
 void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  final List<File> missingOutputs = <File>[];
+  final missingOutputs = <File>[];
   for (final File sourceFile in outputs) {
     if (!sourceFile.existsSync()) {
       missingOutputs.add(sourceFile);
@@ -1026,7 +1026,7 @@ class Node {
       }
     }
     if (stampValues != null) {
-      final String? previousBuildKey = stampValues['buildKey'] as String?;
+      final previousBuildKey = stampValues['buildKey'] as String?;
       final Object? stampInputs = stampValues['inputs'];
       final Object? stampOutputs = stampValues['outputs'];
       if (stampInputs is List<Object?> && stampOutputs is List<Object?>) {
@@ -1137,11 +1137,11 @@ class Node {
       _invalidate(InvalidatedReasonKind.buildKeyChanged);
       _dirty = true;
     }
-    final Set<String> currentOutputPaths = <String>{for (final File file in outputs) file.path};
+    final currentOutputPaths = <String>{for (final File file in outputs) file.path};
     // For each input, first determine if we've already computed the key
     // for it. Then collect it to be sent off for diffing as a group.
-    final List<File> sourcesToDiff = <File>[];
-    final List<File> missingInputs = <File>[];
+    final sourcesToDiff = <File>[];
+    final missingInputs = <File>[];
     for (final File file in inputs) {
       if (!file.existsSync()) {
         missingInputs.add(file);

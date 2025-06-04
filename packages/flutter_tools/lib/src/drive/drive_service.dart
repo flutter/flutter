@@ -173,9 +173,9 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
-    int attempt = 0;
+    var attempt = 0;
     LaunchResult? result;
-    bool prebuiltApplication = applicationBinary != null;
+    var prebuiltApplication = applicationBinary != null;
     while (attempt < _kLaunchAttempts) {
       result = await device.startApp(
         _applicationPackage,

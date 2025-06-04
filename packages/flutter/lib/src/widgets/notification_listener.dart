@@ -70,7 +70,7 @@ abstract class Notification {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     return '${objectRuntimeType(this, 'Notification')}(${description.join(", ")})';
   }
@@ -130,7 +130,7 @@ class _NotificationElement<T extends Notification> extends ProxyElement
 
   @override
   bool onNotification(Notification notification) {
-    final NotificationListener<T> listener = widget as NotificationListener<T>;
+    final listener = widget as NotificationListener<T>;
     if (listener.onNotification != null && notification is T) {
       return listener.onNotification!(notification);
     }

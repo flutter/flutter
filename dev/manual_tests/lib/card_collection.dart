@@ -93,7 +93,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   void _initFixedSizedCardModels() {
-    const int cardCount = 27;
+    const cardCount = 27;
     _cardModels = List<CardModel>.generate(cardCount, (int i) => CardModel(i, kFixedCardHeight));
   }
 
@@ -208,7 +208,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   String _dismissDirectionText(DismissDirection direction) {
-    final String s = direction.toString();
+    final s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
 

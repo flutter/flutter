@@ -78,7 +78,7 @@ class PageStorageBucket {
   }
 
   List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
-    final List<PageStorageKey<dynamic>> keys = <PageStorageKey<dynamic>>[];
+    final keys = <PageStorageKey<dynamic>>[];
     if (_maybeAddKey(context, keys)) {
       context.visitAncestorElements((Element element) {
         return _maybeAddKey(element, keys);

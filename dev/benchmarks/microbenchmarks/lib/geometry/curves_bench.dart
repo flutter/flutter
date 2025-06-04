@@ -14,10 +14,10 @@ void _testCurve(
   required String description,
   required BenchmarkResultPrinter printer,
 }) {
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
   print('$description benchmark...');
   watch.start();
-  for (int i = 0; i < _kNumIters; i += 1) {
+  for (var i = 0; i < _kNumIters; i += 1) {
     final double t = i / _kNumIters.toDouble();
     curve.transform(t);
   }
@@ -33,7 +33,7 @@ void _testCurve(
 
 void main() {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   _testCurve(
     const Cubic(0.0, 0.25, 0.5, 1.0),
     name: 'cubic_animation_transform_iteration',
@@ -41,7 +41,7 @@ void main() {
     printer: printer,
   );
 
-  final CatmullRomCurve catmullRomCurve = CatmullRomCurve(const <Offset>[
+  final catmullRomCurve = CatmullRomCurve(const <Offset>[
     Offset(0.09, 0.99),
     Offset(0.21, 0.01),
     Offset(0.28, 0.99),

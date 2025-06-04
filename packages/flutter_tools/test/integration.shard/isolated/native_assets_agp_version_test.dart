@@ -60,7 +60,7 @@ void main() {
             // Use expected AGP version.
             final String settingsGradle = settingsGradleFile.readAsStringSync();
 
-            final RegExp androidPluginRegExp = RegExp(
+            final androidPluginRegExp = RegExp(
               r'id\("com\.android\.application"\)\s+version\s+"([^"]+)"\s+apply\s+false',
             );
             expect(androidPluginRegExp.firstMatch(settingsGradle), isNotNull);
@@ -76,11 +76,11 @@ void main() {
               '\r\n',
               '\n',
             );
-            final RegExp buildTypesBlockRegExp = RegExp(
+            final buildTypesBlockRegExp = RegExp(
               r'buildTypes {\n[ \t]+release {((.|\n)*)\n[ \t]+}\n[ \t]+}',
             );
             final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)![0]!;
-            final String appBuildGradleSegmentDefiningFlavors = '''
+            final appBuildGradleSegmentDefiningFlavors = '''
     $buildTypesBlock
 
     flavorDimensions += "mode"

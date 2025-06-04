@@ -27,8 +27,8 @@ class ConstrainedExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const int rowCount = 48;
-    const int columnCount = 6;
+    const rowCount = 48;
+    const columnCount = 6;
 
     return InteractiveViewer(
       panAxis: PanAxis.aligned,

@@ -97,7 +97,7 @@ class AndroidDevice extends Device {
           : DeviceConnectionInterface.attached;
 
   late final Future<Map<String, String>> _properties = () async {
-    Map<String, String> properties = <String, String>{};
+    var properties = <String, String>{};
 
     final List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
     _logger.printTrace(propCommand.join(' '));
@@ -154,20 +154,20 @@ class AndroidDevice extends Device {
 
     // Emulators always have IDs in the format emulator-(port) where port is the
     // Android Console port number.
-    final RegExp emulatorPortRegex = RegExp(r'emulator-(\d+)');
+    final emulatorPortRegex = RegExp(r'emulator-(\d+)');
 
     final Match? portMatch = emulatorPortRegex.firstMatch(id);
     if (portMatch == null || portMatch.groupCount < 1) {
       return null;
     }
 
-    const String host = 'localhost';
+    const host = 'localhost';
     final int port = int.parse(portMatch.group(1)!);
     _logger.printTrace('Fetching avd name for $name via Android console on $host:$port');
 
     try {
       final Socket socket = await _androidConsoleSocketFactory(host, port);
-      final AndroidConsole console = AndroidConsole(socket);
+      final console = AndroidConsole(socket);
 
       try {
         await console.connect().timeout(
@@ -449,7 +449,7 @@ class AndroidDevice extends Device {
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
-    final RegExp failureExp = RegExp(r'^Failure.*$', multiLine: true);
+    final failureExp = RegExp(r'^Failure.*$', multiLine: true);
     final String? failure = failureExp.stringMatch(installResult.stdout);
     if (failure != null) {
       _logger.printError('Package install error: $failure');
@@ -503,7 +503,7 @@ class AndroidDevice extends Device {
       _logger.printError('adb uninstall failed: $error');
       return false;
     }
-    final RegExp failureExp = RegExp(r'^Failure.*$', multiLine: true);
+    final failureExp = RegExp(r'^Failure.*$', multiLine: true);
     final String? failure = failureExp.stringMatch(uninstallOut);
     if (failure != null) {
       _logger.printError('Package uninstall error: $failure');
@@ -620,7 +620,7 @@ class AndroidDevice extends Device {
     final String? traceAllowlist = debuggingOptions.traceAllowlist;
     final String? traceSkiaAllowlist = debuggingOptions.traceSkiaAllowlist;
     final String? traceToFile = debuggingOptions.traceToFile;
-    final List<String> cmd = <String>[
+    final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
@@ -868,7 +868,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    const String remotePath = '/data/local/tmp/flutter_screenshot.png';
+    const remotePath = '/data/local/tmp/flutter_screenshot.png';
     await runAdbCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
     await _processUtils.run(
       adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
@@ -890,8 +890,8 @@ class AndroidDevice extends Device {
 }
 
 Map<String, String> parseAdbDeviceProperties(String str) {
-  final Map<String, String> properties = <String, String>{};
-  final RegExp propertyExp = RegExp(r'\[(.*?)\]: \[(.*?)\]');
+  final properties = <String, String>{};
+  final propertyExp = RegExp(r'\[(.*?)\]: \[(.*?)\]');
   for (final Match match in propertyExp.allMatches(str)) {
     properties[match.group(1)!] = match.group(2)!;
   }
@@ -961,7 +961,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 /// For more information, see https://developer.android.com/studio/command-line/dumpsys.
 @visibleForTesting
 AndroidMemoryInfo parseMeminfoDump(String input) {
-  final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
+  final androidMemoryInfo = AndroidMemoryInfo();
 
   final List<String> lines = input.split('\n');
 
@@ -1057,7 +1057,7 @@ class AdbLogReader extends DeviceLogReader {
     bool includePastLogs = false,
   }) async {
     // logcat -T is not supported on Android releases before Lollipop.
-    const int kLollipopVersionCode = 21;
+    const kLollipopVersionCode = 21;
     final int? apiVersion = (String? v) {
       // If the API version string isn't found, conservatively assume that the
       // version is less recent than the one we're looking for.
@@ -1067,7 +1067,7 @@ class AdbLogReader extends DeviceLogReader {
     // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
     // Some devices (notably LG) will only output logcat via shell
     // https://github.com/flutter/flutter/issues/51853
-    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
+    final args = <String>['shell', '-x', 'logcat', '-v', 'time'];
 
     // If past logs are included then filter for 'flutter' logs only.
     if (includePastLogs) {
@@ -1118,7 +1118,7 @@ class AdbLogReader extends DeviceLogReader {
   void _start() {
     // We expect logcat streams to occasionally contain invalid utf-8,
     // see: https://github.com/flutter/flutter/pull/8864.
-    const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
+    const decoder = Utf8Decoder(reportErrors: false);
     _adbProcess.stdout
         .transform<String>(decoder)
         .transform<String>(const LineSplitter())
@@ -1194,7 +1194,7 @@ class AdbLogReader extends DeviceLogReader {
     line = line.substring(timeMatch.end + 1);
     final Match? logMatch = _logFormat.firstMatch(line);
     if (logMatch != null) {
-      bool acceptLine = false;
+      var acceptLine = false;
 
       if (_fatalCrash) {
         // While a fatal crash is going on, only accept lines from the crash
@@ -1277,7 +1277,7 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
 
   @override
   List<ForwardedPort> get forwardedPorts {
-    final List<ForwardedPort> ports = <ForwardedPort>[];
+    final ports = <ForwardedPort>[];
 
     String stdout;
     try {
@@ -1292,7 +1292,7 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
     }
 
     final List<String> lines = LineSplitter.split(stdout).toList();
-    for (final String line in lines) {
+    for (final line in lines) {
       if (!line.startsWith(_deviceId)) {
         continue;
       }
@@ -1373,7 +1373,7 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
-    final String tcpLine = 'tcp:${forwardedPort.hostPort}';
+    final tcpLine = 'tcp:${forwardedPort.hostPort}';
     final RunResult runResult = await _processUtils.run(<String>[
       _adbPath,
       '-s',

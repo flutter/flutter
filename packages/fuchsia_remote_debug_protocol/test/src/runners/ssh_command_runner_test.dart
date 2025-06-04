@@ -42,8 +42,8 @@ void main() {
     });
 
     test('verify interface is appended to ipv6 address', () async {
-      const String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
-      const String interface = 'eno1';
+      const ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
+      const interface = 'eno1';
       runner = SshCommandRunner.withProcessManager(
         fakeProcessManager,
         address: ipV6Addr,
@@ -56,7 +56,7 @@ void main() {
     });
 
     test('verify no percentage symbol is added when no ipv6 interface', () async {
-      const String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
+      const ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
       runner = SshCommandRunner.withProcessManager(fakeProcessManager, address: ipV6Addr);
       fakeProcessManager.fakeResult = ProcessResult(23, 0, 'somestuff', null);
       await runner.run('ls /whatever');
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('verify commands are split into multiple lines', () async {
-      const String addr = '192.168.1.1';
+      const addr = '192.168.1.1';
       runner = SshCommandRunner.withProcessManager(fakeProcessManager, address: addr);
       fakeProcessManager.fakeResult = ProcessResult(23, 0, '''
           this
@@ -76,7 +76,7 @@ void main() {
     });
 
     test('verify exception on nonzero process result exit code', () async {
-      const String addr = '192.168.1.1';
+      const addr = '192.168.1.1';
       runner = SshCommandRunner.withProcessManager(fakeProcessManager, address: addr);
       fakeProcessManager.fakeResult = ProcessResult(23, 1, 'whatever', null);
       Future<void> failingFunction() async {
@@ -87,8 +87,8 @@ void main() {
     });
 
     test('verify correct args with config', () async {
-      const String addr = 'fe80::8eae:4cff:fef4:9247';
-      const String config = '/this/that/this/and/uh';
+      const addr = 'fe80::8eae:4cff:fef4:9247';
+      const config = '/this/that/this/and/uh';
       runner = SshCommandRunner.withProcessManager(
         fakeProcessManager,
         address: addr,
@@ -96,7 +96,7 @@ void main() {
       );
       fakeProcessManager.fakeResult = ProcessResult(23, 0, 'somestuff', null);
       await runner.run('ls /whatever');
-      final List<String?> passedCommand = fakeProcessManager.runCommands.single as List<String?>;
+      final passedCommand = fakeProcessManager.runCommands.single as List<String?>;
       expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String? passedConfig = passedCommand[indexOfFlag + 1];
@@ -104,11 +104,11 @@ void main() {
     });
 
     test('verify config is excluded correctly', () async {
-      const String addr = 'fe80::8eae:4cff:fef4:9247';
+      const addr = 'fe80::8eae:4cff:fef4:9247';
       runner = SshCommandRunner.withProcessManager(fakeProcessManager, address: addr);
       fakeProcessManager.fakeResult = ProcessResult(23, 0, 'somestuff', null);
       await runner.run('ls /whatever');
-      final List<String?> passedCommand = fakeProcessManager.runCommands.single as List<String?>;
+      final passedCommand = fakeProcessManager.runCommands.single as List<String?>;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));
     });

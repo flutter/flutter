@@ -74,7 +74,7 @@ class _FrontLayerState extends State<_FrontLayer> {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isSmallDesktop = isDisplaySmallDesktop(context);
-    final int crossAxisCount = isDesktop ? 4 : 1;
+    final crossAxisCount = isDesktop ? 4 : 1;
 
     return FocusTraversalGroup(
       policy: ReadingOrderTraversalPolicy(),

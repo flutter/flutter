@@ -34,7 +34,7 @@ TaskFunction dartPluginRegistryTest({String? deviceIdOverride, Map<String, Strin
         );
       });
 
-      final File pluginMain = File(
+      final pluginMain = File(
         path.join(
           tempDir.absolute.path,
           'aplugin_platform_implementation',
@@ -56,7 +56,7 @@ class ApluginPlatformInterfaceMacOS {
 ''', flush: true);
 
       // Patch plugin main pubspec file.
-      final File pluginImplPubspec = File(
+      final pluginImplPubspec = File(
         path.join(tempDir.absolute.path, 'aplugin_platform_implementation', 'pubspec.yaml'),
       );
       String pluginImplPubspecContent = await pluginImplPubspec.readAsString();
@@ -87,7 +87,7 @@ class ApluginPlatformInterfaceMacOS {
           environment: environment,
         );
       });
-      final File pluginInterfacePubspec = File(
+      final pluginInterfacePubspec = File(
         path.join(tempDir.absolute.path, 'aplugin_platform_interface', 'pubspec.yaml'),
       );
       String pluginInterfacePubspecContent = await pluginInterfacePubspec.readAsString();
@@ -120,7 +120,7 @@ class ApluginPlatformInterfaceMacOS {
         );
       });
 
-      final File appPubspec = File(path.join(tempDir.absolute.path, 'app', 'pubspec.yaml'));
+      final appPubspec = File(path.join(tempDir.absolute.path, 'app', 'pubspec.yaml'));
       String appPubspecContent = await appPubspec.readAsString();
       appPubspecContent = appPubspecContent.replaceFirst(
         'dependencies:',
@@ -137,7 +137,7 @@ class ApluginPlatformInterfaceMacOS {
         run = await startFlutter('run', options: <String>['-d', 'macos', '-v']);
       });
 
-      Completer<void> registryExecutedCompleter = Completer<void>();
+      var registryExecutedCompleter = Completer<void>();
       final StreamSubscription<void> stdoutSub = run.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())

@@ -67,7 +67,7 @@ class CleanCommand extends Command<void> {
     }
     stdio.printStatus('Deleting persistent state file ${stateFile.path}...');
 
-    final CleanContext cleanContext = CleanContext(stateFile: stateFile);
+    final cleanContext = CleanContext(stateFile: stateFile);
     return cleanContext.run();
   }
 }

@@ -29,7 +29,7 @@ class Adb {
   }) async {
     target ??= const AndroidDeviceTarget.onlyEmulatorOrDevice();
     final String tool = adbPath ?? 'adb';
-    final Adb adb = Adb._(<String>[
+    final adb = Adb._(<String>[
       tool,
       ...target._toAdbArgs(),
     ], processManager ?? const LocalProcessManager());
@@ -153,7 +153,7 @@ class Adb {
 
   /// Disable animations on the device.
   Future<void> disableAnimations() async {
-    const Map<String, String> settings = <String, String>{
+    const settings = <String, String>{
       'show_surface_updates': '1',
       'transition_animation_scale': '0',
       'window_animation_scale': '0',

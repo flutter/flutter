@@ -28,7 +28,7 @@ void main() {
   testWidgets('Passes spellCheckConfiguration to underlying CupertinoTextField', (
     WidgetTester tester,
   ) async {
-    final SpellCheckConfiguration spellCheckConfig = SpellCheckConfiguration(
+    final spellCheckConfig = SpellCheckConfiguration(
       spellCheckService: DefaultSpellCheckService(),
       misspelledSelectionColor: const Color.fromARGB(255, 255, 255, 0),
     );
@@ -47,7 +47,7 @@ void main() {
   });
 
   testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
-    const ScrollPhysics scrollPhysics = ScrollPhysics();
+    const scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
       CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(scrollPhysics: scrollPhysics))),
@@ -115,9 +115,9 @@ void main() {
   testWidgets('Passes cursor attributes to underlying CupertinoTextField', (
     WidgetTester tester,
   ) async {
-    const double cursorWidth = 3.14;
-    const double cursorHeight = 6.28;
-    const Radius cursorRadius = Radius.circular(2);
+    const cursorWidth = 3.14;
+    const cursorHeight = 6.28;
+    const cursorRadius = Radius.circular(2);
     const Color cursorColor = CupertinoColors.systemPurple;
 
     await tester.pumpWidget(
@@ -143,7 +143,7 @@ void main() {
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
-    bool called = false;
+    var called = false;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -184,7 +184,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    var validateCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -207,7 +207,7 @@ void main() {
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
-    int validateCalled = 0;
+    var validateCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -266,7 +266,7 @@ void main() {
   }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
-    int tapCount = 0;
+    var tapCount = 0;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -329,7 +329,7 @@ void main() {
   testWidgets('onChanged callbacks value and FormFieldState.value are sync', (
     WidgetTester tester,
   ) async {
-    bool called = false;
+    var called = false;
 
     late FormFieldState<String> state;
 
@@ -369,7 +369,7 @@ void main() {
   });
 
   testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
-    int validateCalled = 0;
+    var validateCalled = 0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -414,7 +414,7 @@ void main() {
   });
 
   testWidgets('Shows error text upon invalid input', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: '');
+    final controller = TextEditingController(text: '');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -485,9 +485,9 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
-    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String value = 'initialValue';
+    final stateKey = GlobalKey<FormFieldState<String>>();
+    final formKey = GlobalKey<FormState>();
+    var value = 'initialValue';
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -532,7 +532,7 @@ void main() {
           tester.view.reset();
         });
 
-        final TextEditingController controller = TextEditingController(text: 'one two three');
+        final controller = TextEditingController(text: 'one two three');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           // Don't wrap with the global View so that the change to

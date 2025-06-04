@@ -8,7 +8,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('DisposableBuildContext asserts on disposed state', (WidgetTester tester) async {
-    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
     final TestWidgetState state = key.currentState!;
@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('DisposableBuildContext dispatches memory events', (WidgetTester tester) async {
-    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
     final TestWidgetState state = key.currentState!;

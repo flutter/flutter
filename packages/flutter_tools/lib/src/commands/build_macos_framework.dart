@@ -72,7 +72,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     );
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    for (final BuildInfo buildInfo in buildInfos) {
+    for (final buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
       // Create the build-mode specific metadata.
       //
@@ -191,10 +191,10 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode =
+      final artifactsMode =
           mode == BuildMode.debug ? 'darwin-x64' : 'darwin-x64-${mode.cliName}';
 
-      final String podspecContents = '''
+      final podspecContents = '''
 Pod::Spec.new do |s|
   s.name                  = 'FlutterMacOS'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
@@ -233,7 +233,7 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     try {
-      final Environment environment = Environment(
+      final environment = Environment(
         projectDir: globals.fs.currentDirectory,
         packageConfigPath: packageConfigPath(),
         outputDir: macosBuildOutput,
@@ -320,7 +320,7 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
-      final List<String> pluginsBuildCommand = <String>[
+      final pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
@@ -347,7 +347,7 @@ end
 
       final Iterable<Directory> products =
           buildConfiguration.listSync(followLinks: false).whereType<Directory>();
-      for (final Directory builtProduct in products) {
+      for (final builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
           if (globals.fs.path.extension(podFrameworkName) != '.framework') {

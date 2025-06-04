@@ -16,7 +16,7 @@ void main() {
   });
 
   group('DecoratedBoxTransition test', () {
-    final DecorationTween decorationTween = DecorationTween(
+    final decorationTween = DecorationTween(
       begin: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         border: Border.all(width: 4.0),
@@ -40,14 +40,14 @@ void main() {
     });
 
     testWidgets('decoration test', (WidgetTester tester) async {
-      final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
+      final transitionUnderTest = DecoratedBoxTransition(
         decoration: decorationTween.animate(controller),
         child: const Text("Doesn't matter", textDirection: TextDirection.ltr),
       );
 
       await tester.pumpWidget(transitionUnderTest);
       RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
-      BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
+      var actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, isSameColorAs(const Color(0xFFFFFFFF)));
       expect(actualDecoration.boxShadow![0].blurRadius, 10.0);
@@ -62,7 +62,7 @@ void main() {
 
       expect(actualDecoration.color, isSameColorAs(const Color(0xFF7F7F7F)));
       expect(actualDecoration.border, isA<Border>());
-      final Border border = actualDecoration.border! as Border;
+      final border = actualDecoration.border! as Border;
       expect(border.left.width, 2.5);
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF101010));
@@ -84,7 +84,7 @@ void main() {
     });
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
-      final CurvedAnimation curvedAnimation = CurvedAnimation(
+      final curvedAnimation = CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
       );
@@ -93,7 +93,7 @@ void main() {
         curvedAnimation,
       );
 
-      final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
+      final transitionUnderTest = DecoratedBoxTransition(
         decoration: curvedDecorationAnimation,
         position: DecorationPosition.foreground,
         child: const Text("Doesn't matter", textDirection: TextDirection.ltr),
@@ -102,7 +102,7 @@ void main() {
       await tester.pumpWidget(transitionUnderTest);
 
       RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
-      BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
+      var actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, isSameColorAs(const Color(0xFFFFFFFF)));
       expect(actualDecoration.boxShadow![0].blurRadius, 10.0);
@@ -119,7 +119,7 @@ void main() {
       // tween's end values given the easeOut curve.
       expect(actualDecoration.color, isSameColorAs(const Color(0xFF505050)));
       expect(actualDecoration.border, isA<Border>());
-      final Border border = actualDecoration.border! as Border;
+      final border = actualDecoration.border! as Border;
       expect(border.left.width, moreOrLessEquals(1.9, epsilon: 0.1));
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, isSameColorAs(const Color(0xFF151515)));
@@ -136,7 +136,7 @@ void main() {
   });
 
   testWidgets('AlignTransition animates', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
@@ -151,7 +151,7 @@ void main() {
 
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
 
-    Alignment actualAlignment = actualPositionedBox.alignment as Alignment;
+    var actualAlignment = actualPositionedBox.alignment as Alignment;
     expect(actualAlignment, Alignment.centerLeft);
 
     controller.value = 0.5;
@@ -161,7 +161,7 @@ void main() {
   });
 
   testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<Rect?> rectTween = RectTween(
       begin: const Rect.fromLTWH(0, 0, 30, 40),
@@ -186,7 +186,7 @@ void main() {
     final Positioned actualPositioned = tester.widget(find.byType(Positioned));
     final RenderBox renderBox = tester.renderObject(find.byType(Placeholder));
 
-    Rect actualRect = Rect.fromLTRB(
+    var actualRect = Rect.fromLTRB(
       actualPositioned.left!,
       actualPositioned.top!,
       actualPositioned.right ?? 0.0,
@@ -208,7 +208,7 @@ void main() {
   });
 
   testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
@@ -232,7 +232,7 @@ void main() {
   testWidgets('SizeTransition clamps negative size factors - vertical axis', (
     WidgetTester tester,
   ) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
@@ -270,7 +270,7 @@ void main() {
   testWidgets('SizeTransition clamps negative size factors - horizontal axis', (
     WidgetTester tester,
   ) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
@@ -309,11 +309,11 @@ void main() {
   testWidgets(
     'SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis',
     (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
 
-      const Key key = Key('key');
+      const key = Key('key');
 
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
@@ -371,11 +371,11 @@ void main() {
   testWidgets(
     'SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis',
     (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
-      const Key key = Key('key');
+      const key = Key('key');
 
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
@@ -432,7 +432,7 @@ void main() {
   );
 
   testWidgets('MatrixTransition animates', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
@@ -502,7 +502,7 @@ void main() {
   testWidgets('MatrixTransition maintains chosen alignment during animation', (
     WidgetTester tester,
   ) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
@@ -524,7 +524,7 @@ void main() {
   });
 
   testWidgets('RotationTransition animates', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
@@ -597,7 +597,7 @@ void main() {
   testWidgets('RotationTransition maintains chosen alignment during animation', (
     WidgetTester tester,
   ) async {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
@@ -626,7 +626,7 @@ void main() {
     }
 
     testWidgets('animates', (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
@@ -665,7 +665,7 @@ void main() {
     }
 
     testWidgets('animates', (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
@@ -716,7 +716,7 @@ void main() {
     testWidgets('uses ImageFilter when provided with FilterQuality argument', (
       WidgetTester tester,
     ) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
@@ -788,7 +788,7 @@ void main() {
     testWidgets('uses ImageFilter when provided with FilterQuality argument', (
       WidgetTester tester,
     ) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
@@ -859,7 +859,7 @@ void main() {
     testWidgets('uses ImageFilter when provided with FilterQuality argument', (
       WidgetTester tester,
     ) async {
-      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
@@ -928,8 +928,8 @@ void main() {
 
   group('Builders', () {
     testWidgets('AnimatedBuilder rebuilds when changed', (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
-      final ChangeNotifier notifier = ChangeNotifier();
+      final redrawKey = GlobalKey<RedrawCounterState>();
+      final notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
       await tester.pumpWidget(
@@ -958,9 +958,9 @@ void main() {
     });
 
     testWidgets("AnimatedBuilder doesn't rebuild the child", (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
-      final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
-      final ChangeNotifier notifier = ChangeNotifier();
+      final redrawKey = GlobalKey<RedrawCounterState>();
+      final redrawKeyChild = GlobalKey<RedrawCounterState>();
+      final notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
       await tester.pumpWidget(
@@ -994,8 +994,8 @@ void main() {
     });
 
     testWidgets('ListenableBuilder rebuilds when changed', (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
-      final ChangeNotifier notifier = ChangeNotifier();
+      final redrawKey = GlobalKey<RedrawCounterState>();
+      final notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
       await tester.pumpWidget(
@@ -1024,9 +1024,9 @@ void main() {
     });
 
     testWidgets("ListenableBuilder doesn't rebuild the child", (WidgetTester tester) async {
-      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
-      final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
-      final ChangeNotifier notifier = ChangeNotifier();
+      final redrawKey = GlobalKey<RedrawCounterState>();
+      final redrawKeyChild = GlobalKey<RedrawCounterState>();
+      final notifier = ChangeNotifier();
       addTearDown(notifier.dispose);
 
       await tester.pumpWidget(

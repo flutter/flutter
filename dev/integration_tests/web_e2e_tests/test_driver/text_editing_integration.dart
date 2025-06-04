@@ -27,7 +27,7 @@ void main() {
     // A native input element will be appended to the DOM.
     final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
+    final input = nodeList.item(0)! as web.HTMLInputElement;
     // The element's value will be the same as the textFormField's value.
     expect(input.value, 'Text1');
 
@@ -50,7 +50,7 @@ void main() {
     // A native input element will be appended to the DOM.
     final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
+    final input = nodeList.item(0)! as web.HTMLInputElement;
     // The element's value will be empty.
     expect(input.value, '');
 
@@ -78,7 +78,7 @@ void main() {
     await tester.tap(find.byKey(const Key('input2')));
 
     // Press Tab. This should trigger `onFieldSubmitted` of TextField.
-    final web.HTMLInputElement input = findElements('input').item(0)! as web.HTMLInputElement;
+    final input = findElements('input').item(0)! as web.HTMLInputElement;
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
       'keyCode': 13, // Enter.
       'cancelable': true,
@@ -109,7 +109,7 @@ void main() {
     // A native input element will be appended to the DOM.
     final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
+    final input = nodeList.item(0)! as web.HTMLInputElement;
 
     // Press Tab. The focus should move to the next TextFormField.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -132,7 +132,7 @@ void main() {
 
     // A native input element for the next TextField should be attached to the
     // DOM.
-    final web.HTMLInputElement input2 = findElements('input').item(0)! as web.HTMLInputElement;
+    final input2 = findElements('input').item(0)! as web.HTMLInputElement;
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
@@ -150,7 +150,7 @@ void main() {
     // A native input element will be appended to the DOM.
     final web.NodeList nodeList = findElements('input');
     expect(nodeList.length, equals(1));
-    final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
+    final input = nodeList.item(0)! as web.HTMLInputElement;
 
     // Press and release CapsLock.
     dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
@@ -189,12 +189,12 @@ void main() {
 
     // A native input element for the next TextField should be attached to the
     // DOM.
-    final web.HTMLInputElement input2 = findElements('input').item(0)! as web.HTMLInputElement;
+    final input2 = findElements('input').item(0)! as web.HTMLInputElement;
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
   testWidgets('Read-only fields work', (WidgetTester tester) async {
-    const String text = 'Lorem ipsum dolor sit amet';
+    const text = 'Lorem ipsum dolor sit amet';
     app.main();
     await tester.pumpAndSettle();
 
@@ -213,7 +213,7 @@ void main() {
     // A native input element will be appended to the DOM.
     final web.NodeList nodeList = findElements('textarea');
     expect(nodeList.length, equals(1));
-    final web.HTMLTextAreaElement input = nodeList.item(0)! as web.HTMLTextAreaElement;
+    final input = nodeList.item(0)! as web.HTMLTextAreaElement;
     // The element's value should contain the selectable text.
     expect(input.value, text);
     expect(input.hasAttribute('readonly'), isTrue);
@@ -247,9 +247,9 @@ web.KeyboardEvent dispatchKeyboardEvent(
   String type,
   Map<String, dynamic> args,
 ) {
-  final Object jsKeyboardEvent = js_util.getProperty(web.window, 'KeyboardEvent') as Object;
-  final List<dynamic> eventArgs = <dynamic>[type, args];
-  final web.KeyboardEvent event =
+  final jsKeyboardEvent = js_util.getProperty(web.window, 'KeyboardEvent') as Object;
+  final eventArgs = <dynamic>[type, args];
+  final event =
       js_util.callConstructor(jsKeyboardEvent, js_util.jsify(eventArgs) as List<dynamic>)
           as web.KeyboardEvent;
   target.dispatchEvent(event);

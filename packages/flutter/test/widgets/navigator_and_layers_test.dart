@@ -26,7 +26,7 @@ class TestCustomPainter extends CustomPainter {
 
 void main() {
   testWidgets('Do we paint when coming back from a navigation', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     log.add('0');
     await tester.pumpWidget(
       MaterialApp(

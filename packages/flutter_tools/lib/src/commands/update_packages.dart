@@ -180,7 +180,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           .childDirectory('widget_preview_scaffold.shard')
           .childDirectory('widget_preview_scaffold'),
     );
-    final List<Directory> packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
+    final packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
 
     if (!updateHashes) {
       _verifyPubspecs(packages);
@@ -203,7 +203,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         relaxToAny,
       );
 
-      for (final Directory package in <Directory>[
+      for (final package in <Directory>[
         rootDirectory,
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
@@ -261,10 +261,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     final File tempPubspec = tempDir.childFile(_pubspecName)..createSync();
     globals.printStatus('Writing to temp pubspec at $tempPubspec');
     final String pubspecContents = project.pubspecFile.readAsStringSync();
-    final YamlEditor yamlEditor = YamlEditor(pubspecContents);
+    final yamlEditor = YamlEditor(pubspecContents);
     final ResolvedDependencies oldDeps = _fetchDeps(yamlEditor);
 
-    final List<String> workspacePath = <String>['workspace'];
+    final workspacePath = <String>['workspace'];
     if (yamlEditor.parseAt(workspacePath, orElse: () => wrapAsYamlNode(null)).value != null) {
       yamlEditor.remove(workspacePath);
     }
@@ -337,7 +337,7 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   void _updatePubspec(Directory package, ResolvedDependencies dependencies) {
     final File pubspecFile = package.childFile(_pubspecName);
-    final YamlEditor yamlEditor = YamlEditor(pubspecFile.readAsStringSync());
+    final yamlEditor = YamlEditor(pubspecFile.readAsStringSync());
     dependencies.forEach(
       yamlEditor: yamlEditor,
       func: (
@@ -365,8 +365,8 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _checkWithFlutterTools(Directory rootDirectory) {
-    final Pubspec pubspec = Pubspec.parse(rootDirectory.childFile(_pubspecName).readAsStringSync());
-    final Pubspec pubspecTools = Pubspec.parse(
+    final pubspec = Pubspec.parse(rootDirectory.childFile(_pubspecName).readAsStringSync());
+    final pubspecTools = Pubspec.parse(
       rootDirectory
           .childDirectory('packages')
           .childDirectory('flutter_tools')
@@ -383,7 +383,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _checkPins(Directory directory) {
-    final Pubspec pubspec = Pubspec.parse(directory.childFile(_pubspecName).readAsStringSync());
+    final pubspec = Pubspec.parse(directory.childFile(_pubspecName).readAsStringSync());
     for (final MapEntry<String, String> pin in kManuallyPinnedDependencies.entries) {
       Dependency dependency;
       if (pubspec.dependencies.containsKey(pin.key)) {
@@ -447,7 +447,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   String _computeChecksum(String pubspecString) {
-    final Pubspec pubspec = Pubspec.parse(pubspecString);
+    final pubspec = Pubspec.parse(pubspecString);
     return SplayTreeMap<String, Dependency>.from(<String, Dependency>{
           ...pubspec.dependencies.map(
             (String key, Dependency value) => MapEntry<String, Dependency>('dep:$key', value),
@@ -494,12 +494,12 @@ class ResolvedDependencies {
     )
     func,
   }) {
-    for (final String dependencyType in <String>[_dependencies, _devDependencies]) {
+    for (final dependencyType in <String>[_dependencies, _devDependencies]) {
       data[dependencyType] ??= <String, String>{};
       final Map<Object?, Object?> map =
           yamlEditor.parseAt(<String>[dependencyType], orElse: () => YamlMap()) as YamlMap;
       for (final MapEntry<Object?, Object?> dep in map.entries) {
-        final String packageName = dep.key! as String;
+        final packageName = dep.key! as String;
         final Object? restriction = dep.value;
         func(data[dependencyType]!, dependencyType, packageName, restriction);
       }
@@ -511,7 +511,7 @@ class ResolvedDependencies {
     ResolvedDependencies newDeps,
     List<CherryPick> cherryPicks,
   ) {
-    final ResolvedDependencies mergedDeps = ResolvedDependencies(<String, Map<String, String>>{
+    final mergedDeps = ResolvedDependencies(<String, Map<String, String>>{
       ...newDeps.data,
     });
     for (final MapEntry<String, Map<String, String>> entry in mergedDeps.data.entries) {

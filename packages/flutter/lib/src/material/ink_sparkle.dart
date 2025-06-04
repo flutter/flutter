@@ -139,7 +139,7 @@ class InkSparkle extends InteractiveInkFeature {
 
     // Functionally equivalent to Android 12's SkSL:
     //`return mix(u_touch, u_resolution, saturate(in_radius_scale * 2.0))`
-    final Tween<Vector2> centerTween = Tween<Vector2>(
+    final centerTween = Tween<Vector2>(
       begin: Vector2.array(<double>[_position.dx, _position.dy]),
       end: Vector2.array(<double>[referenceBox.size.width / 2, referenceBox.size.height / 2]),
     );
@@ -264,7 +264,7 @@ class InkSparkle extends InteractiveInkFeature {
 
     _updateFragmentShader();
 
-    final Paint paint = Paint()..shader = _fragmentShader;
+    final paint = Paint()..shader = _fragmentShader;
     if (_clipCallback != null) {
       canvas.drawRect(_clipCallback(), paint);
     } else {
@@ -282,9 +282,9 @@ class InkSparkle extends InteractiveInkFeature {
   /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
   /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
   void _updateFragmentShader() {
-    const double turbulenceScale = 1.5;
+    const turbulenceScale = 1.5;
     final double turbulencePhase = _turbulenceSeed + _radiusScale.value;
-    final double noisePhase = turbulencePhase;
+    final noisePhase = turbulencePhase;
     final double rotation1 = turbulencePhase * _rotateRight + 1.7 * math.pi;
     final double rotation2 = turbulencePhase * _rotateLeft + 2.0 * math.pi;
     final double rotation3 = turbulencePhase * _rotateRight + 2.75 * math.pi;

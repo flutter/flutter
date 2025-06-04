@@ -12,7 +12,7 @@ import '../src/common.dart';
 
 void main() {
   testWithoutContext('StdoutHandler can produce output message', () async {
-    final StdoutHandler stdoutHandler = StdoutHandler(
+    final stdoutHandler = StdoutHandler(
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
     );
@@ -28,7 +28,7 @@ void main() {
 
   testWithoutContext('StdoutHandler can read output bytes', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
+    final stdoutHandler = StdoutHandler(
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
     );
@@ -48,7 +48,7 @@ void main() {
 
   testWithoutContext('StdoutHandler reads output bytes if errorCount > 0', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final StdoutHandler stdoutHandler = StdoutHandler(
+    final stdoutHandler = StdoutHandler(
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
     );

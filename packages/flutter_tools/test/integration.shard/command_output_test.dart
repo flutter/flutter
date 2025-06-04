@@ -114,7 +114,7 @@ void main() {
       '--machine',
     ]);
 
-    final Map<String, Object?> versionInfo =
+    final versionInfo =
         json.decode(
               result.stdout
                   .toString()

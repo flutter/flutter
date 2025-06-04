@@ -22,7 +22,7 @@ Future<void> main() async {
     print('\nUsing JAVA_HOME=$javaHome');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
-    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
+    final projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       section('Create module project');
 
@@ -67,7 +67,7 @@ Future<void> main() async {
 
       section('Add plugins to pubspec.yaml');
 
-      final File modulePubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      final modulePubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = modulePubspec.readAsStringSync();
       content = content.replaceFirst(
         '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',

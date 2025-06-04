@@ -14,10 +14,10 @@ void main() {
   group(
     'candidates command',
     () {
-      const String flutterRoot = '/flutter';
-      const String flutterBinPath = '$flutterRoot/bin/flutter';
-      const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
-      const String remoteName = 'origin';
+      const flutterRoot = '/flutter';
+      const flutterBinPath = '$flutterRoot/bin/flutter';
+      const checkoutsParentDirectory = '$flutterRoot/dev/tools/';
+      const remoteName = 'origin';
 
       late MemoryFileSystem fileSystem;
       late FakePlatform platform;
@@ -31,7 +31,7 @@ void main() {
       });
 
       CommandRunner<void> createRunner({required Checkouts checkouts}) {
-        final CandidatesCommand command = CandidatesCommand(
+        final command = CandidatesCommand(
           checkouts: checkouts,
           flutterRoot: fileSystem.directory(flutterRoot),
         );
@@ -39,8 +39,8 @@ void main() {
       }
 
       test('prints only branches from targeted remote', () async {
-        const String currentVersion = '1.2.3';
-        const String branch = 'flutter-1.3-candidate.0';
+        const currentVersion = '1.2.3';
+        const branch = 'flutter-1.3-candidate.0';
 
         processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['git', 'fetch', remoteName]),
@@ -64,7 +64,7 @@ void main() {
             ].join('\n'),
           ),
         ]);
-        final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
+        final pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
 
         platform = FakePlatform(
           environment: <String, String>{
@@ -72,7 +72,7 @@ void main() {
           },
           pathSeparator: pathSeparator,
         );
-        final Checkouts checkouts = Checkouts(
+        final checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory),
           platform: platform,
@@ -88,10 +88,10 @@ void main() {
       });
 
       test('does not print branches older or equal to current version', () async {
-        const String currentVersion = '2.3.0-13.0.pre.48';
-        const String newBranch = 'flutter-2.4-candidate.0';
-        const String oldBranch = 'flutter-1.0-candidate.0';
-        const String currentBranch = 'flutter-2.3-candidate.13';
+        const currentVersion = '2.3.0-13.0.pre.48';
+        const newBranch = 'flutter-2.4-candidate.0';
+        const oldBranch = 'flutter-1.0-candidate.0';
+        const currentBranch = 'flutter-2.3-candidate.13';
 
         processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['git', 'fetch', remoteName]),
@@ -116,7 +116,7 @@ void main() {
             ].join('\n'),
           ),
         ]);
-        final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
+        final pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
 
         platform = FakePlatform(
           environment: <String, String>{
@@ -124,7 +124,7 @@ void main() {
           },
           pathSeparator: pathSeparator,
         );
-        final Checkouts checkouts = Checkouts(
+        final checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory),
           platform: platform,

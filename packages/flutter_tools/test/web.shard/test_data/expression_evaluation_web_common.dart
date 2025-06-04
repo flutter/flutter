@@ -17,7 +17,7 @@ final RegExp stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get cur
 
 Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   group('Flutter run for web, DDC library bundle format: $useDDCLibraryBundleFormat', () {
-    final BasicProject project = BasicProject();
+    final project = BasicProject();
     late Directory tempDir;
     late FlutterRunTestDriver flutter;
 
@@ -144,7 +144,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   });
 
   group('Flutter test for web, DDC library bundle format: $useDDCLibraryBundleFormat', () {
-    final TestsProject project = TestsProject();
+    final project = TestsProject();
     late Directory tempDir;
     late FlutterRunTestDriver flutter;
 

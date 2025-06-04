@@ -133,15 +133,15 @@ class _DefaultUsage implements Usage {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version =
         versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    final bool suppressEnvFlag =
+    final suppressEnvFlag =
         globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String? logFilePath =
         logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     final AnalyticsFactory analyticsFactory = analyticsIOFactory ?? _defaultAnalyticsIOFactory;
-    bool suppressAnalytics = false;
-    bool skipAnalyticsSessionSetup = false;
+    var suppressAnalytics = false;
+    var skipAnalyticsSessionSetup = false;
     Analytics? setupAnalytics;
     if ( // To support testing, only allow other signals to suppress analytics
     // when analytics are not being shunted to a file.
@@ -375,7 +375,7 @@ class LogToFileAnalytics extends AnalyticsMock {
     if (!enabled) {
       return Future<void>.value();
     }
-    final Map<String, String> parameters = <String, String>{
+    final parameters = <String, String>{
       'variableName': variableName,
       'time': '$time',
       if (category != null) 'category': category,

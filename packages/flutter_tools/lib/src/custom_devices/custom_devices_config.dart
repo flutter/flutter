@@ -117,7 +117,7 @@ class CustomDevicesConfig {
     if (json == null) {
       return null;
     } else if (json is! List) {
-      const String msg =
+      const msg =
           "Could not load custom devices config. config['$_kCustomDevicesConfigKey'] is not a JSON array.";
       _logger.printError(msg);
       throw const CustomDeviceRevivalException(msg);
@@ -138,12 +138,12 @@ class CustomDevicesConfig {
     }
 
     final List<dynamic> typedList = typedListNullable;
-    final List<CustomDeviceConfig> revived = <CustomDeviceConfig>[];
+    final revived = <CustomDeviceConfig>[];
     for (final MapEntry<int, dynamic> entry in typedList.asMap().entries) {
       try {
         revived.add(CustomDeviceConfig.fromJson(entry.value));
       } on CustomDeviceRevivalException catch (e) {
-        final String msg = 'Could not load custom device from config index ${entry.key}: $e';
+        final msg = 'Could not load custom device from config index ${entry.key}: $e';
         _logger.printError(msg);
         throw CustomDeviceRevivalException(msg);
       }

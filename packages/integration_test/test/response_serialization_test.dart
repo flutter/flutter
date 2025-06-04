@@ -8,7 +8,7 @@ import 'package:integration_test/common.dart';
 
 void main() {
   test('Serialize and deserialize Failure', () {
-    final Failure fail = Failure('what a name', 'no detail');
+    final fail = Failure('what a name', 'no detail');
     final Failure restored = Failure.fromJsonString(fail.toString());
     expect(restored.methodName, fail.methodName);
     expect(restored.details, fail.details);
@@ -26,8 +26,8 @@ void main() {
     expect(restored.data, null);
     expect(restored.formattedFailureDetails, '');
 
-    final Failure fail = Failure('what a name', 'no detail');
-    final Failure fail2 = Failure('what a name2', 'no detail2');
+    final fail = Failure('what a name', 'no detail');
+    final fail2 = Failure('what a name2', 'no detail2');
     response = Response.someTestsFailed(<Failure>[fail, fail2]);
     jsonString = response.toJson();
     restored = Response.fromJson(jsonString);
@@ -35,7 +35,7 @@ void main() {
     expect(restored.data, null);
     expect(restored.formattedFailureDetails, response.formattedFailureDetails);
 
-    final Map<String, dynamic> data = <String, dynamic>{'aaa': 'bbb'};
+    final data = <String, dynamic>{'aaa': 'bbb'};
     response = Response.allTestsPassed(data: data);
     jsonString = response.toJson();
     restored = Response.fromJson(jsonString);

@@ -21,24 +21,24 @@ class _MockKey {
 
 void main() {
   test('PersistentHashMap - Simple Test', () {
-    final List<PersistentHashMap<String, int>> maps = <PersistentHashMap<String, int>>[];
+    final maps = <PersistentHashMap<String, int>>[];
     maps.add(const PersistentHashMap<String, int>.empty());
-    for (int i = 0; i < 50; i++) {
+    for (var i = 0; i < 50; i++) {
       maps.add(maps.last.put('key:$i', i));
     }
-    for (int i = 1; i < maps.length; i++) {
+    for (var i = 1; i < maps.length; i++) {
       final PersistentHashMap<String, int> m = maps[i];
-      for (int j = 0; j < i; j++) {
+      for (var j = 0; j < i; j++) {
         expect(m['key:$j'], equals(j));
       }
     }
   });
 
   test('PersistentHashMap - hash collisions', () {
-    const _MockKey key1 = _MockKey(hashCode: 1, payload: 'key:1');
-    const _MockKey key2 = _MockKey(hashCode: 0 | (1 << 5), payload: 'key:2');
-    const _MockKey key3 = _MockKey(hashCode: 1, payload: 'key:3');
-    const _MockKey key4 = _MockKey(hashCode: 1 | (1 << 5), payload: 'key:4');
+    const key1 = _MockKey(hashCode: 1, payload: 'key:1');
+    const key2 = _MockKey(hashCode: 0 | (1 << 5), payload: 'key:2');
+    const key3 = _MockKey(hashCode: 1, payload: 'key:3');
+    const key4 = _MockKey(hashCode: 1 | (1 << 5), payload: 'key:4');
 
     final PersistentHashMap<_MockKey, String> map =
         const PersistentHashMap<_MockKey, String>.empty()
@@ -65,14 +65,14 @@ void main() {
   });
 
   test('PersistentHashMap - inflation of nodes', () {
-    final List<PersistentHashMap<_MockKey, int>> maps = <PersistentHashMap<_MockKey, int>>[];
+    final maps = <PersistentHashMap<_MockKey, int>>[];
     maps.add(const PersistentHashMap<_MockKey, int>.empty());
-    for (int i = 0; i < 32 * 32; i++) {
+    for (var i = 0; i < 32 * 32; i++) {
       maps.add(maps.last.put(_MockKey(hashCode: i, payload: '$i'), i));
     }
-    for (int i = 1; i < maps.length; i++) {
+    for (var i = 1; i < maps.length; i++) {
       final PersistentHashMap<_MockKey, int> m = maps[i];
-      for (int j = 0; j < i; j++) {
+      for (var j = 0; j < i; j++) {
         expect(m[_MockKey(hashCode: j, payload: '$j')], equals(j));
       }
     }

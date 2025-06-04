@@ -14,7 +14,7 @@ void main() {
       find.ancestor(of: find.byType(example.AppBarContent), matching: find.byType(PreferredSize)),
     );
 
-    final RenderBox appBarContent =
+    final appBarContent =
         tester.renderObject(find.byType(example.AppBarContent)) as RenderBox;
 
     expect(preferredSize.preferredSize.height, equals(appBarContent.size.height));

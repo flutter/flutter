@@ -57,7 +57,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       return controller.tap(backButton);
     }
 
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       final Finder demoItem = find.text(demoName);
       await controller.scrollUntilVisible(demoItem, 48.0);
       await controller.pumpAndSettle();

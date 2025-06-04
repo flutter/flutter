@@ -20,7 +20,7 @@ Future<void> main(List<String> args) async {
   const ProcessManager processManager = LocalProcessManager();
   const Platform platform = LocalPlatform();
   final Stdio stdio = VerboseStdio(stdout: io.stdout, stderr: io.stderr, stdin: io.stdin);
-  final Checkouts checkouts = Checkouts(
+  final checkouts = Checkouts(
     fileSystem: fileSystem,
     parentDirectory: _localFlutterRoot.parent,
     platform: platform,
@@ -28,7 +28,7 @@ Future<void> main(List<String> args) async {
     stdio: stdio,
   );
 
-  final CommandRunner<void> runner = CommandRunner<void>(
+  final runner = CommandRunner<void>(
     'conductor',
     'A tool for coordinating Flutter releases. For more documentation on '
         'usage, please see $readmeUrl.',

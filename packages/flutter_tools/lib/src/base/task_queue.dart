@@ -35,7 +35,7 @@ class TaskQueue<T> {
     if (_activeTasks.isEmpty && _pendingTasks.isEmpty) {
       return Future<void>.value();
     }
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _completeListeners.add(completer);
     return completer.future;
   }
@@ -43,7 +43,7 @@ class TaskQueue<T> {
   /// Adds a single closure to the task queue, returning a future that
   /// completes when the task completes.
   Future<T> add(TaskQueueClosure<T> task) {
-    final Completer<T> completer = Completer<T>();
+    final completer = Completer<T>();
     _pendingTasks.add(_TaskQueueItem<T>(task, completer));
     if (_activeTasks.length < maxJobs) {
       _processTask();

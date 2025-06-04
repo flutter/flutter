@@ -123,11 +123,11 @@ Future<void> _generateEntrypoint() async {
     'create',
     'generated_entrypoint_test',
   ], workingDirectory: tempDirectory.path);
-  final File generatedEntrypoint = File(
+  final generatedEntrypoint = File(
     path.join(tempDirectory.path, 'generated_entrypoint_test', 'web', 'index.html'),
   );
   final String generatedEntrypointCode = generatedEntrypoint.readAsStringSync();
-  final File testEntrypoint = File(
+  final testEntrypoint = File(
     path.join(
       _testAppWebDirectory,
       _testTypeToIndexFile(ServiceWorkerTestType.generatedEntrypoint),
@@ -138,7 +138,7 @@ Future<void> _generateEntrypoint() async {
 }
 
 Future<void> _setAppVersion(int version) async {
-  final File targetFile = File(_targetPath);
+  final targetFile = File(_targetPath);
   await targetFile.writeAsString(
     (await targetFile.readAsString()).replaceFirst(
       RegExp(r'CLOSE\?version=\d+'),
@@ -195,7 +195,7 @@ Future<void> _waitForAppToLoad(
   print('Waiting for app to load $waitForCounts');
   await Future.any(<Future<Object?>>[
     () async {
-      int tries = 1;
+      var tries = 1;
       while (!waitForCounts.entries.every(
         (MapEntry<String, int> entry) => (requestedPathCounts[entry.key] ?? 0) >= entry.value,
       )) {
@@ -216,18 +216,18 @@ Future<void> _waitForAppToLoad(
 void expect(Object? actual, Object? expected) {
   final Matcher matcher = wrapMatcher(expected);
   // matchState needs to be of type <Object?, Object?>, see https://github.com/flutter/flutter/issues/99522
-  final Map<Object?, Object?> matchState = <Object?, Object?>{};
+  final matchState = <Object?, Object?>{};
   if (matcher.matches(actual, matchState)) {
     return;
   }
-  final StringDescription mismatchDescription = StringDescription();
+  final mismatchDescription = StringDescription();
   matcher.describeMismatch(actual, mismatchDescription, matchState, true);
 
   //
   // COPIED FROM pkg:matcher - formatFailure() - 2025-05-21
   //
-  final String which = mismatchDescription.toString();
-  final StringBuffer buffer = StringBuffer();
+  final which = mismatchDescription.toString();
+  final buffer = StringBuffer();
   buffer.writeln(_indent(_prettyPrint(expected), first: 'Expected: '));
   buffer.writeln(_indent(_prettyPrint(actual), first: '  Actual: '));
   if (which.isNotEmpty) {
@@ -258,7 +258,7 @@ String _indent(String text, {required String first}) {
     return '$first$text';
   }
 
-  final StringBuffer buffer = StringBuffer('$first${lines.first}\n');
+  final buffer = StringBuffer('$first${lines.first}\n');
 
   // Write out all but the first and last lines with [prefix].
   for (final String line in lines.skip(1).take(lines.length - 2)) {
@@ -272,7 +272,7 @@ Future<void> runWebServiceWorkerTest({
   required bool headless,
   required ServiceWorkerTestType testType,
 }) async {
-  final Map<String, int> requestedPathCounts = <String, int>{};
+  final requestedPathCounts = <String, int>{};
   void expectRequestCounts(Map<String, int> expectedCounts) =>
       _expectRequestCounts(expectedCounts, requestedPathCounts);
 
@@ -315,7 +315,7 @@ Future<void> runWebServiceWorkerTest({
     'index_og.html',
   ], workingDirectory: _testAppWebDirectory);
 
-  final bool shouldExpectFlutterJs = testType != ServiceWorkerTestType.withoutFlutterJs;
+  final shouldExpectFlutterJs = testType != ServiceWorkerTestType.withoutFlutterJs;
 
   print('BEGIN runWebServiceWorkerTest(headless: $headless, testType: $testType)');
 
@@ -486,7 +486,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
   required bool headless,
   required ServiceWorkerTestType testType,
 }) async {
-  final Map<String, int> requestedPathCounts = <String, int>{};
+  final requestedPathCounts = <String, int>{};
   void expectRequestCounts(Map<String, int> expectedCounts) =>
       _expectRequestCounts(expectedCounts, requestedPathCounts);
 
@@ -526,7 +526,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
     'index_og.html',
   ], workingDirectory: _testAppWebDirectory);
 
-  final bool usesFlutterBootstrapJs = testType == ServiceWorkerTestType.generatedEntrypoint;
+  final usesFlutterBootstrapJs = testType == ServiceWorkerTestType.generatedEntrypoint;
   final bool shouldExpectFlutterJs =
       !usesFlutterBootstrapJs && testType != ServiceWorkerTestType.withoutFlutterJs;
   print(
@@ -630,7 +630,7 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
 }
 
 Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool headless}) async {
-  final Map<String, int> requestedPathCounts = <String, int>{};
+  final requestedPathCounts = <String, int>{};
   void expectRequestCounts(Map<String, int> expectedCounts) =>
       _expectRequestCounts(expectedCounts, requestedPathCounts);
 
@@ -703,7 +703,7 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
 
 /// Regression test for https://github.com/flutter/flutter/issues/130212.
 Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required bool headless}) async {
-  final Map<String, int> requestedPathCounts = <String, int>{};
+  final requestedPathCounts = <String, int>{};
   void expectRequestCounts(Map<String, int> expectedCounts) =>
       _expectRequestCounts(expectedCounts, requestedPathCounts);
 

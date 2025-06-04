@@ -526,7 +526,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     };
 
     // Default to false if no source timestamp is available.
-    bool isFast = false;
+    var isFast = false;
     final Duration? currentTimestamp = details.sourceTimeStamp;
     if (currentTimestamp != null && _lastUpdateTimestamp != null) {
       final int timeDelta = (currentTimestamp - _lastUpdateTimestamp!).inMilliseconds;
@@ -586,7 +586,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     final Canvas canvas = context.canvas;
 
     if (visualPosition > 0.0) {
-      final Paint paint = Paint()..color = rightColor;
+      final paint = Paint()..color = rightColor;
       canvas.drawRSuperellipse(
         RSuperellipse.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0),
         paint,
@@ -594,14 +594,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     }
 
     if (visualPosition < 1.0) {
-      final Paint paint = Paint()..color = leftColor;
+      final paint = Paint()..color = leftColor;
       canvas.drawRSuperellipse(
         RSuperellipse.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0),
         paint,
       );
     }
 
-    final Offset thumbCenter = Offset(trackActive, trackCenter);
+    final thumbCenter = Offset(trackActive, trackCenter);
     CupertinoThumbPainter(
       color: thumbColor,
     ).paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));

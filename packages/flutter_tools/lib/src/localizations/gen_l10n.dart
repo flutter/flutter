@@ -91,7 +91,7 @@ Future<LocalizationsGenerator> generateLocalizations({
       return generator;
     }
     final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
+    final command = <String>[dartBinary, 'format', ...formatFileList];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
       throw ProcessException(dartBinary, command, '''
@@ -280,7 +280,7 @@ String generateBaseClassMethod(
   final String comment =
       message.description?.split('\n').map((String line) => '  /// $line').join('\n') ??
       '  /// No description provided for @${message.resourceId}.';
-  final String templateLocaleTranslationComment = '''
+  final templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
   /// **'${generateString(message.value)}'**''';
 
@@ -305,7 +305,7 @@ String generateBaseClassMethod(
 // Add spaces to pad the start of each line. Skips the first line
 // assuming that the padding is already present.
 String _addSpaces(String message, {int spaces = 0}) {
-  bool isFirstLine = true;
+  var isFirstLine = true;
   return message
       .split('\n')
       .map((String value) {
@@ -1046,7 +1046,7 @@ class LocalizationsGenerator {
       );
     }
 
-    final List<LocaleInfo> allLocales = List<LocaleInfo>.from(_allBundles.locales);
+    final allLocales = List<LocaleInfo>.from(_allBundles.locales);
     for (final LocaleInfo preferredLocale in preferredSupportedLocales) {
       final int index = allLocales.indexOf(preferredLocale);
       if (index == -1) {
@@ -1103,7 +1103,7 @@ class LocalizationsGenerator {
 
   String _generateSubclass(String className, AppResourceBundle bundle) {
     final LocaleInfo locale = bundle.locale;
-    final String baseClassName =
+    final baseClassName =
         '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
     _allMessages.where((Message message) => message.messages[locale] == null).forEach((
@@ -1170,7 +1170,7 @@ class LocalizationsGenerator {
       }
     });
 
-    final Set<String> supportedLanguageCodes = Set<String>.from(
+    final supportedLanguageCodes = Set<String>.from(
       _allBundles.locales.map<String>((LocaleInfo locale) => "'${locale.languageCode}'"),
     );
 
@@ -1184,7 +1184,7 @@ class LocalizationsGenerator {
     }
     final String fileName = outputFileName.substring(0, extensionIndex);
     final String fileExtension = outputFileName.substring(extensionIndex + 1);
-    for (final LocaleInfo locale in allLocales) {
+    for (final locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
         final File languageMessageFile = outputDirectory.childFile(
           '${fileName}_$locale.$fileExtension',
@@ -1218,7 +1218,7 @@ class LocalizationsGenerator {
         supportedLocales
             .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
             .map((LocaleInfo locale) {
-              final String library = '${fileName}_$locale';
+              final library = '${fileName}_$locale';
               if (useDeferredLoading) {
                 return "import '$library.$fileExtension' deferred as $library;";
               } else {
@@ -1282,9 +1282,9 @@ class LocalizationsGenerator {
             );
       }
 
-      final List<String> tempVariables = <String>[];
+      final tempVariables = <String>[];
       // Get a unique temporary variable name.
-      int variableCount = 0;
+      var variableCount = 0;
       String getTempVariableName() {
         return '_temp${variableCount++}';
       }
@@ -1319,7 +1319,7 @@ class LocalizationsGenerator {
             return '\$${node.children[1].value}';
 
           case ST.pluralExpr:
-            final Map<String, String> pluralLogicArgs = <String, String>{};
+            final pluralLogicArgs = <String, String>{};
             // Recall that pluralExpr are of the form
             // pluralExpr := "{" ID "," "plural" "," pluralParts "}"
             assert(node.children[1].type == ST.identifier);
@@ -1385,7 +1385,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
             assert(node.children[5].type == ST.selectParts);
 
             final Node identifier = node.children[1];
-            final List<String> selectLogicArgs = <String>[];
+            final selectLogicArgs = <String>[];
             final Node selectParts = node.children[5];
             for (final Node selectPart in selectParts.children) {
               assert(
@@ -1441,7 +1441,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       }
 
       final String messageString = generateVariables(node, isRoot: true);
-      final String tempVarLines = tempVariables.isEmpty ? '' : '${tempVariables.join('\n')}\n';
+      final tempVarLines = tempVariables.isEmpty ? '' : '${tempVariables.join('\n')}\n';
       return (useNamedParameters ? methodWithNamedParameterTemplate : methodTemplate)
           .replaceAll('@(name)', message.resourceId)
           .replaceAll(
@@ -1561,13 +1561,13 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       return;
     }
 
-    String resultingFile = '{\n';
-    int count = 0;
+    var resultingFile = '{\n';
+    var count = 0;
     final int numberOfLocales = _unimplementedMessages.length;
     _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
       resultingFile += '  "$locale": [\n';
 
-      for (int i = 0; i < messages.length; i += 1) {
+      for (var i = 0; i < messages.length; i += 1) {
         resultingFile += '    "${messages[i]}"';
         if (i != messages.length - 1) {
           resultingFile += ',';

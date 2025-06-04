@@ -126,7 +126,7 @@ void main() {
   }
 
   String getGeneratedFileContent({String? locale}) {
-    final String fileName =
+    final fileName =
         locale == null ? 'output-localization-file.dart' : 'output-localization-file_$locale.dart';
     return fs.file(fs.path.join(defaultL10nPath, fileName)).readAsStringSync();
   }
@@ -453,10 +453,10 @@ void main() {
       fs.path.join(defaultL10nPath, 'gen_l10n_inputs_and_outputs.json'),
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
-    final Map<String, dynamic> jsonResult =
+    final jsonResult =
         json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     expect(jsonResult.containsKey('outputs'), isTrue);
-    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+    final outputList = jsonResult['outputs'] as List<dynamic>;
     expect(outputList, contains(contains('unimplemented_message_translations.json')));
   });
 
@@ -593,15 +593,15 @@ void main() {
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final Map<String, dynamic> jsonResult =
+    final jsonResult =
         json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     expect(jsonResult.containsKey('inputs'), isTrue);
-    final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
+    final inputList = jsonResult['inputs'] as List<dynamic>;
     expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_en.arb')));
     expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_es.arb')));
 
     expect(jsonResult.containsKey('outputs'), isTrue);
-    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+    final outputList = jsonResult['outputs'] as List<dynamic>;
     expect(
       outputList,
       contains(fs.path.absolute(defaultL10nPath, 'output-localization-file.dart')),
@@ -630,12 +630,12 @@ void main() {
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final Map<String, dynamic> jsonResult =
+    final jsonResult =
         json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
-    final String oppositeSeparator = globals.platform.isWindows ? '/' : r'\';
-    final List<dynamic> inputList = jsonResult['inputs'] as List<dynamic>;
+    final oppositeSeparator = globals.platform.isWindows ? '/' : r'\';
+    final inputList = jsonResult['inputs'] as List<dynamic>;
     expect(inputList, everyElement(isNot(contains(oppositeSeparator))));
-    final List<dynamic> outputList = jsonResult['outputs'] as List<dynamic>;
+    final outputList = jsonResult['outputs'] as List<dynamic>;
     expect(outputList, everyElement(isNot(contains(oppositeSeparator))));
   });
 
@@ -743,7 +743,7 @@ flutter:
 
     testWithoutContext('forwards arguments correctly', () async {
       _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationOptions options = LocalizationOptions(
+      final options = LocalizationOptions(
         header: 'HEADER',
         arbDir: Uri.directory(defaultL10nPath).path,
         useDeferredLoading: true,
@@ -815,7 +815,7 @@ flutter:
   uses-material-design: true
 ''');
 
-      final LocalizationOptions options = LocalizationOptions(
+      final options = LocalizationOptions(
         header: 'HEADER',
         headerFile: Uri.file('header', windows: false).path,
         arbDir: Uri.file('arb', windows: false).path,
@@ -855,7 +855,7 @@ flutter:\r
   generate: true\r
 ''');
 
-      final LocalizationOptions options = LocalizationOptions(
+      final options = LocalizationOptions(
         arbDir: fs.path.join('lib', 'l10n'),
         outputClass: defaultClassNameString,
         outputLocalizationFile: defaultOutputFileString,
@@ -951,7 +951,7 @@ class AppLocalizationsEn extends AppLocalizations {
       () {
         _standardFlutterDirectoryL10nSetup(fs);
 
-        final LocalizationsGenerator generator = LocalizationsGenerator(
+        final generator = LocalizationsGenerator(
           fileSystem: fs,
           inputPathString: defaultL10nPath,
           outputPathString: defaultL10nPath,
@@ -977,7 +977,7 @@ class AppLocalizationsEn extends AppLocalizations {
         l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
         l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
 
-        final LocalizationsGenerator generator = LocalizationsGenerator(
+        final generator = LocalizationsGenerator(
           fileSystem: fs,
           inputPathString: defaultL10nPath,
           outputPathString: defaultL10nPath,
@@ -1003,8 +1003,8 @@ class AppLocalizationsEn extends AppLocalizations {
         l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
         l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
 
-        const List<String> preferredSupportedLocale = <String>['zh', 'es'];
-        final LocalizationsGenerator generator = LocalizationsGenerator(
+        const preferredSupportedLocale = <String>['zh', 'es'];
+        final generator = LocalizationsGenerator(
           fileSystem: fs,
           inputPathString: defaultL10nPath,
           outputPathString: defaultL10nPath,
@@ -1031,7 +1031,7 @@ class AppLocalizationsEn extends AppLocalizations {
         l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
         l10nDirectory.childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString);
 
-        const List<String> preferredSupportedLocale = <String>['am', 'es'];
+        const preferredSupportedLocale = <String>['am', 'es'];
         expect(
           () {
             LocalizationsGenerator(
@@ -1065,7 +1065,7 @@ class AppLocalizationsEn extends AppLocalizations {
       l10nDirectory.childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
       l10nDirectory.childFile('app_en.arb').writeAsStringSync(singleMessageArbFileString);
 
-      final LocalizationsGenerator generator = LocalizationsGenerator(
+      final generator = LocalizationsGenerator(
         fileSystem: fs,
         inputPathString: defaultL10nPath,
         outputPathString: defaultL10nPath,
@@ -1081,7 +1081,7 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testWithoutContext('correctly parses @@locale property in arb file', () {
-      const String arbFileWithEnLocale = '''
+      const arbFileWithEnLocale = '''
 {
   "@@locale": "en",
   "title": "Title",
@@ -1090,7 +1090,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 }''';
 
-      const String arbFileWithZhLocale = '''
+      const arbFileWithZhLocale = '''
 {
   "@@locale": "zh",
   "title": "标题",
@@ -1105,7 +1105,7 @@ class AppLocalizationsEn extends AppLocalizations {
       l10nDirectory.childFile('first_file.arb').writeAsStringSync(arbFileWithEnLocale);
       l10nDirectory.childFile('second_file.arb').writeAsStringSync(arbFileWithZhLocale);
 
-      final LocalizationsGenerator generator = LocalizationsGenerator(
+      final generator = LocalizationsGenerator(
         fileSystem: fs,
         inputPathString: defaultL10nPath,
         outputPathString: defaultL10nPath,
@@ -1122,7 +1122,7 @@ class AppLocalizationsEn extends AppLocalizations {
     testWithoutContext(
       'correctly requires @@locale property in arb file to match the filename locale suffix',
       () {
-        const String arbFileWithEnLocale = '''
+        const arbFileWithEnLocale = '''
 {
   "@@locale": "en",
   "title": "Stocks",
@@ -1131,7 +1131,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 }''';
 
-        const String arbFileWithZhLocale = '''
+        const arbFileWithZhLocale = '''
 {
   "@@locale": "zh",
   "title": "标题",
@@ -1196,7 +1196,7 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testWithoutContext('throws when an empty string is used as a key', () {
-      const String arbFileStringWithEmptyResourceId = '''
+      const arbFileStringWithEmptyResourceId = '''
 {
   "market": "MARKET",
   "": {
@@ -1231,7 +1231,7 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testWithoutContext('throws when the same locale is detected more than once', () {
-      const String secondMessageArbFileString = '''
+      const secondMessageArbFileString = '''
 {
   "market": "MARKET",
   "@market": {
@@ -1296,10 +1296,10 @@ class AppLocalizationsEn extends AppLocalizations {
     });
 
     testWithoutContext('AppResourceBundle throws if file contains non-string value', () {
-      const String inputPathString = 'lib/l10n';
-      const String templateArbFileName = 'app_en.arb';
-      const String outputFileString = 'app_localizations.dart';
-      const String classNameString = 'AppLocalizations';
+      const inputPathString = 'lib/l10n';
+      const templateArbFileName = 'app_en.arb';
+      const outputFileString = 'app_localizations.dart';
+      const classNameString = 'AppLocalizations';
 
       fs.file(fs.path.join(inputPathString, templateArbFileName))
         ..createSync(recursive: true)
@@ -1308,7 +1308,7 @@ class AppLocalizationsEn extends AppLocalizations {
         ..createSync(recursive: true)
         ..writeAsStringSync('{ "helloWorld": {} }');
 
-      final LocalizationsGenerator generator = LocalizationsGenerator(
+      final generator = LocalizationsGenerator(
         fileSystem: fs,
         inputPathString: inputPathString,
         templateArbFileName: templateArbFileName,
@@ -1474,7 +1474,7 @@ class AppLocalizationsEn extends AppLocalizations {
     testWithoutContext(
       'language imports are sorted when preferredSupportedLocaleString is given',
       () {
-        const List<String> preferredSupportedLocales = <String>['zh'];
+        const preferredSupportedLocales = <String>['zh'];
         setupLocalizations(<String, String>{
           'en': singleMessageArbFileString,
           'zh': singleZhMessageArbFileString,
@@ -2648,7 +2648,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     testWithoutContext(
       'intl package import should be kept in subclass files when plurals are included',
       () {
-        const String pluralMessageArb = '''
+        const pluralMessageArb = '''
 {
   "helloWorlds": "{count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}",
   "@helloWorlds": {
@@ -2659,7 +2659,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 ''';
-        const String pluralMessageEsArb = '''
+        const pluralMessageEsArb = '''
 {
   "helloWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello World} =2{ES - Hello two worlds} few{ES - Hello {count} worlds} many{ES - Hello all {count} worlds} other{ES - Hello other {count} worlds}}"
 }
@@ -2673,7 +2673,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     testWithoutContext(
       'intl package import should be kept in subclass files when select is included',
       () {
-        const String selectMessageArb = '''
+        const selectMessageArb = '''
 {
   "genderSelect": "{gender, select, female {She} male {He} other {they} }",
   "@genderSelect": {
@@ -2684,7 +2684,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }
 ''';
-        const String selectMessageEsArb = '''
+        const selectMessageEsArb = '''
 {
   "genderSelect": "{gender, select, female {ES - She} male {ES - He} other {ES - they} }"
 }
@@ -2741,7 +2741,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     );
 
     testWithoutContext('check for string interpolation rules', () {
-      const String enArbCheckList = '''
+      const enArbCheckList = '''
 {
   "one": "The number of {one} elapsed is: 44",
   "@one": {
@@ -2829,7 +2829,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       // It's fine that the arb is identical -- Just checking
       // generated code for use of '${variable}' vs '$variable'
-      const String esArbCheckList = '''
+      const esArbCheckList = '''
 {
   "one": "The number of {one} elapsed is: 44",
   "two": "哈{two}哈",
@@ -2856,7 +2856,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     testWithoutContext('check for string interpolation rules - plurals', () {
-      const String enArbCheckList = '''
+      const enArbCheckList = '''
 {
   "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
   "@first": {
@@ -2887,7 +2887,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
       // It's fine that the arb is identical -- Just checking
       // generated code for use of '${variable}' vs '$variable'
-      const String esArbCheckList = '''
+      const esArbCheckList = '''
 {
   "first": "{count,plural, =0{test {count} test} =1{哈{count}哈} =2{m{count}m} few{_{count}_} many{{count} test} other{{count}m}}",
   "second": "{count,plural, =0{test {count}} other{ {count}}}"
@@ -2910,7 +2910,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
     testWithoutContext('should throw with descriptive error message when failing to parse the '
         'arb file', () {
-      const String arbFileWithTrailingComma = '''
+      const arbFileWithTrailingComma = '''
 {
   "title": "Stocks",
   "@title": {
@@ -2938,7 +2938,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     testWithoutContext(
       'should throw when resource is missing resource attribute (isResourceAttributeRequired = true)',
       () {
-        const String arbFileWithMissingResourceAttribute = '''
+        const arbFileWithMissingResourceAttribute = '''
 {
   "title": "Stocks"
 }''';
@@ -2961,7 +2961,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
 
     group('checks for method/getter formatting', () {
       testWithoutContext('cannot contain non-alphanumeric symbols', () {
-        const String nonAlphaNumericArbFile = '''
+        const nonAlphaNumericArbFile = '''
 {
   "title!!": "Stocks",
   "@title!!": {
@@ -2981,7 +2981,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
 
       testWithoutContext('must start with lowercase character', () {
-        const String nonAlphaNumericArbFile = '''
+        const nonAlphaNumericArbFile = '''
 {
   "Title": "Stocks",
   "@Title": {
@@ -3001,7 +3001,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
 
       testWithoutContext('cannot start with a number', () {
-        const String nonAlphaNumericArbFile = '''
+        const nonAlphaNumericArbFile = '''
 {
   "123title": "Stocks",
   "@123title": {
@@ -3021,7 +3021,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       });
 
       testWithoutContext('can start with and contain a dollar sign', () {
-        const String dollarArbFile = r'''
+        const dollarArbFile = r'''
 {
   "$title$": "Stocks",
   "@$title$": {
@@ -3033,7 +3033,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     });
 
     testWithoutContext('throws when the language code is not supported', () {
-      const String arbFileWithInvalidCode = '''
+      const arbFileWithInvalidCode = '''
 {
   "@@locale": "invalid",
   "title": "invalid"
@@ -3207,7 +3207,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   });
 
   testWithoutContext('can use type: int without specifying a format', () {
-    const String arbFile = '''
+    const arbFile = '''
 {
   "orderNumber": "This is order #{number}.",
   "@orderNumber": {
@@ -3242,7 +3242,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   });
 
   testWithoutContext('escaping with single quotes', () {
-    const String arbFile = '''
+    const arbFile = '''
 {
   "singleQuote": "Flutter''s amazing!",
   "@singleQuote": {
@@ -3254,7 +3254,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   });
 
   testWithoutContext('suppress warnings flag actually suppresses warnings', () {
-    const String pluralMessageWithOverriddenParts = '''
+    const pluralMessageWithOverriddenParts = '''
 {
   "helloWorlds": "{count,plural, =0{Hello}zero{hello} other{hi}}",
   "@helloWorlds": {
@@ -3271,7 +3271,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   });
 
   testWithoutContext('can use decimalPatternDigits with decimalDigits optional parameter', () {
-    const String arbFile = '''
+    const arbFile = '''
 {
   "treeHeight": "Tree height is {height}m.",
   "@treeHeight": {
@@ -3307,7 +3307,7 @@ NumberFormat.decimalPatternDigits(
 
   // Regression test for https://github.com/flutter/flutter/issues/125461.
   testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
-    const String dollarSignWithSelect = r'''
+    const dollarSignWithSelect = r'''
 {
   "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifestation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
 }''';
@@ -3319,7 +3319,7 @@ NumberFormat.decimalPatternDigits(
   });
 
   testWithoutContext('can generate method with named parameter', () {
-    const String arbFile = '''
+    const arbFile = '''
 {
   "helloName": "Hello {name}!",
   "@helloName": {
@@ -3365,12 +3365,12 @@ String helloNameAndAge({required String name, required int age}) {
 
   // Regression test for https://github.com/flutter/flutter/issues/165794.
   testWithoutContext('handles missing placeholders gracefully', () async {
-    const String en = r'''
+    const en = r'''
     {
       "test": "No placeholder in here"
     }''';
 
-    const String da = r'''
+    const da = r'''
     {
       "test": "Placeholder in here {value}",
       "@test": {

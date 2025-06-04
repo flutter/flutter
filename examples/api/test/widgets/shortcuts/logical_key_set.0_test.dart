@@ -29,7 +29,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
-    for (int counter = 0; counter < 10; counter++) {
+    for (var counter = 0; counter < 10; counter++) {
       expect(find.text('count: $counter'), findsOneWidget);
 
       await sendKeyCombination(
@@ -45,7 +45,7 @@ void main() {
   testWidgets('CtrlRight+C key combination updates counter', (WidgetTester tester) async {
     await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
-    for (int counter = 0; counter < 10; counter++) {
+    for (var counter = 0; counter < 10; counter++) {
       expect(find.text('count: $counter'), findsOneWidget);
 
       await sendKeyCombination(tester, <LogicalKeyboardKey>[
@@ -59,7 +59,7 @@ void main() {
   testWidgets('CtrlLeft+A+C key combination does not update counter', (WidgetTester tester) async {
     await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
-    for (int counter = 0; counter < 10; counter++) {
+    for (var counter = 0; counter < 10; counter++) {
       expect(find.text('count: 0'), findsOneWidget);
 
       await sendKeyCombination(tester, <LogicalKeyboardKey>[
@@ -74,7 +74,7 @@ void main() {
   testWidgets('CtrlRight+A+C key combination does not update counter', (WidgetTester tester) async {
     await tester.pumpWidget(const example.LogicalKeySetExampleApp());
 
-    for (int counter = 0; counter < 10; counter++) {
+    for (var counter = 0; counter < 10; counter++) {
       expect(find.text('count: 0'), findsOneWidget);
 
       await sendKeyCombination(tester, <LogicalKeyboardKey>[

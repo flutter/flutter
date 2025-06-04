@@ -83,9 +83,9 @@ class HttpHostValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<String?> availabilityResults = <String?>[];
+    final availabilityResults = <String?>[];
 
-    final List<Uri> requiredHosts = <Uri>[];
+    final requiredHosts = <Uri>[];
     if (_platform.environment.containsKey(kPubDevOverride)) {
       final Uri? url = _parseUrl(_platform.environment[kPubDevOverride]!);
       if (url == null) {
@@ -126,10 +126,10 @@ class HttpHostValidator extends DoctorValidator {
       await Future.wait<String?>(requiredHosts.map(_checkHostAvailability)),
     );
 
-    int failures = 0;
-    int successes = 0;
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    for (final String? message in availabilityResults) {
+    var failures = 0;
+    var successes = 0;
+    final messages = <ValidationMessage>[];
+    for (final message in availabilityResults) {
       if (message == null) {
         successes += 1;
       } else {

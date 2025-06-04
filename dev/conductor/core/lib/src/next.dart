@@ -80,14 +80,14 @@ class NextContext extends Context {
   final bool force;
 
   Future<void> run(pb.ConductorState state) async {
-    const List<CherrypickState> finishedStates = <CherrypickState>[
+    const finishedStates = <CherrypickState>[
       CherrypickState.COMPLETED,
       CherrypickState.ABANDONED,
     ];
     switch (state.currentPhase) {
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        final Remote upstream = Remote.upstream(state.framework.upstream.url);
-        final FrameworkRepository framework = FrameworkRepository(
+        final upstream = Remote.upstream(state.framework.upstream.url);
+        final framework = FrameworkRepository(
           checkouts,
           initialRef: state.framework.workingBranch,
           upstreamRemote: upstream,
@@ -110,7 +110,7 @@ class NextContext extends Context {
           );
         }
 
-        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[
+        final unappliedCherrypicks = <pb.Cherrypick>[
           for (final pb.Cherrypick cherrypick in state.framework.cherrypicks)
             if (!finishedStates.contains(cherrypick.state)) cherrypick,
         ];
@@ -152,8 +152,8 @@ class NextContext extends Context {
 
         await pushWorkingBranch(framework, state.framework);
       case pb.ReleasePhase.UPDATE_ENGINE_VERSION:
-        final Remote upstream = Remote.upstream(state.framework.upstream.url);
-        final FrameworkRepository framework = FrameworkRepository(
+        final upstream = Remote.upstream(state.framework.upstream.url);
+        final framework = FrameworkRepository(
           checkouts,
           initialRef: state.framework.workingBranch,
           upstreamRemote: upstream,
@@ -197,7 +197,7 @@ class NextContext extends Context {
 
         await pushWorkingBranch(framework, state.framework);
       case pb.ReleasePhase.PUBLISH_VERSION:
-        final String command = '''
+        final command = '''
           tool-proxy-cli --tool_proxy=/abns/dart-eng-tool-proxy/prod-dart-eng-tool-proxy-tool-proxy.annealed-tool-proxy \\
           --block_on_mpa -I flutter_release \\
           :git_branch ${state.framework.candidateBranch} \\

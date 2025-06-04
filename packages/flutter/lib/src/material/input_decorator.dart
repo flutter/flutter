@@ -356,9 +356,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     final Widget? oldHelper = old.helper;
     final String? oldHelperText = old.helperText;
 
-    final bool errorStateChanged = (newError != null) != (oldError != null);
-    final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
-    final bool helperStateChanged = (newHelper != null) != (oldHelper != null);
+    final errorStateChanged = (newError != null) != (oldError != null);
+    final errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
+    final helperStateChanged = (newHelper != null) != (oldHelper != null);
     final bool helperTextStateChanged =
         newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
@@ -976,7 +976,7 @@ class _RenderDecoration extends RenderBox
     final Size prefixSize = prefix == null ? Size.zero : layoutChild(prefix, contentConstraints);
     final Size suffixSize = suffix == null ? Size.zero : layoutChild(suffix, contentConstraints);
 
-    final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
+    final accessoryHorizontalInsets = EdgeInsetsDirectional.only(
       start:
           iconWidth +
           prefixSize.width +
@@ -1140,7 +1140,7 @@ class _RenderDecoration extends RenderBox
       // below center alignments are interpolated independently.
       final double outlineCenterBaseline =
           inputInternalBaseline + baselineAdjustment / 2.0 + (containerHeight - inputHeight) / 2.0;
-      final double outlineTopBaseline = topInputBaseline;
+      final outlineTopBaseline = topInputBaseline;
       final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
       baseline = _interpolateThree(
         outlineTopBaseline,
@@ -1215,7 +1215,7 @@ class _RenderDecoration extends RenderBox
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {
-    double height = 0.0;
+    var height = 0.0;
     for (final RenderBox? box in boxes) {
       if (box == null) {
         continue;
@@ -1360,7 +1360,7 @@ class _RenderDecoration extends RenderBox
 
     final RenderBox? container = this.container;
     if (container != null) {
-      final BoxConstraints containerConstraints = BoxConstraints.tightFor(
+      final containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
@@ -1516,7 +1516,7 @@ class _RenderDecoration extends RenderBox
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          double offsetToPrefixIcon = 0.0;
+          var offsetToPrefixIcon = 0.0;
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
             offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - contentPadding.end : 0;
           }
@@ -1530,7 +1530,7 @@ class _RenderDecoration extends RenderBox
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, it's already relative to _BorderContainer.
-          double offsetToPrefixIcon = 0.0;
+          var offsetToPrefixIcon = 0.0;
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
             offsetToPrefixIcon =
                 material3 ? (-_boxSize(prefixIcon).width + contentPadding.start) : 0;
@@ -1667,7 +1667,7 @@ class _RenderDecoration extends RenderBox
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(
     List<SemanticsConfiguration> childConfigs,
   ) {
-    final ChildSemanticsConfigurationsResultBuilder builder =
+    final builder =
         ChildSemanticsConfigurationsResultBuilder();
     List<SemanticsConfiguration>? prefixMergeGroup;
     List<SemanticsConfiguration>? suffixMergeGroup;
@@ -2042,7 +2042,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       _effectiveDecoration = null;
     }
 
-    final bool floatBehaviorChanged =
+    final floatBehaviorChanged =
         widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
@@ -2430,7 +2430,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     final bool decorationIsDense = decoration.isDense ?? false;
-    final double iconSize = decorationIsDense ? 18.0 : 24.0;
+    final iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon =
         decoration.icon == null
@@ -2619,7 +2619,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               : const EdgeInsetsDirectional.fromSTEB(12.0, 24.0, 12.0, 16.0));
     }
 
-    double inputGap = 0.0;
+    var inputGap = 0.0;
     if (useMaterial3) {
       if (border is OutlineInputBorder) {
         inputGap = border.gapPadding;
@@ -2628,7 +2628,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       }
     }
 
-    final _Decorator decorator = _Decorator(
+    final decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed,
@@ -4104,7 +4104,7 @@ class InputDecoration {
 
   @override
   int get hashCode {
-    final List<Object?> values = <Object?>[
+    final values = <Object?>[
       icon,
       iconColor,
       label,
@@ -4168,7 +4168,7 @@ class InputDecoration {
 
   @override
   String toString() {
-    final List<String> description = <String>[
+    final description = <String>[
       if (icon != null) 'icon: $icon',
       if (iconColor != null) 'iconColor: $iconColor',
       if (label != null) 'label: $label',
@@ -4941,7 +4941,7 @@ class InputDecorationTheme with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const InputDecorationTheme defaultTheme = InputDecorationTheme();
+    const defaultTheme = InputDecorationTheme();
     properties.add(
       DiagnosticsProperty<TextStyle>(
         'labelStyle',

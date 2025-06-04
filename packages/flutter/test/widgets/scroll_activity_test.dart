@@ -19,7 +19,7 @@ void main() {
   testWidgets('Scrolling with list view changes, leaving the overscroll', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(home: ListView(controller: controller, children: children(30))),
@@ -43,7 +43,7 @@ void main() {
   testWidgets('Scrolling with list view changes, remaining overscrolled', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(home: ListView(controller: controller, children: children(30))),
@@ -62,9 +62,9 @@ void main() {
   });
 
   testWidgets('DrivenScrollActivity allows overriding applyMoveTo', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    final List<ScrollNotification> notifications = <ScrollNotification>[];
+    final notifications = <ScrollNotification>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -79,7 +79,7 @@ void main() {
         ),
       ),
     );
-    final ScrollPositionWithSingleContext position =
+    final position =
         controller.position as ScrollPositionWithSingleContext;
     final double end = position.maxScrollExtent;
 
@@ -206,7 +206,7 @@ void main() {
   });
 
   testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     int? lastTapped;
     int? lastHovered;
@@ -303,7 +303,7 @@ void main() {
   });
 
   testWidgets('DrivenScrollActivity.simulation constructor', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -311,10 +311,10 @@ void main() {
         child: ListView(controller: controller, children: children(10)),
       ),
     );
-    final ScrollPositionWithSingleContext position =
+    final position =
         controller.position as ScrollPositionWithSingleContext;
 
-    const double g = 9.8;
+    const g = 9.8;
     position.beginActivity(
       DrivenScrollActivity.simulation(
         position,
@@ -369,7 +369,7 @@ class _PageView62209State extends State<PageView62209> {
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       _pages.add(Carousel62209Page(key: Key('$_nextPageNum'), number: _nextPageNum++));
     }
     _pages.add(const Carousel62209Page(number: 100));
@@ -438,8 +438,8 @@ class _Carousel62209State extends State<Carousel62209> {
   void didUpdateWidget(Carousel62209 oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_jumpingToPage) {
-      int newPage = -1;
-      for (int i = 0; i < widget.pages.length; i++) {
+      var newPage = -1;
+      for (var i = 0; i < widget.pages.length; i++) {
         if (widget.pages[i].number == _pages[_currentPage].number) {
           newPage = i;
         }
@@ -509,7 +509,7 @@ class _NoOverscrollDrivenScrollActivity extends DrivenScrollActivity {
 
   @override
   bool applyMoveTo(double value) {
-    bool done = false;
+    var done = false;
     if (velocity >= 0.0 && value > _position.maxScrollExtent) {
       value = _position.maxScrollExtent;
       done = true;

@@ -50,19 +50,19 @@ class SectorAppState extends State<SectorApp> {
   }
 
   void doUpdates() {
-    int index = 0;
+    var index = 0;
     while (index < actualSectorSizes.length &&
         index < wantedSectorSizes.length &&
         actualSectorSizes[index] == wantedSectorSizes[index]) {
       index += 1;
     }
-    final RenderSectorRing ring = sectors.child! as RenderSectorRing;
+    final ring = sectors.child! as RenderSectorRing;
     while (index < actualSectorSizes.length) {
       ring.remove(ring.lastChild!);
       actualSectorSizes.removeLast();
     }
     while (index < wantedSectorSizes.length) {
-      final Color color = Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
+      final color = Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
       ring.add(RenderSolidColor(color, desiredDeltaTheta: wantedSectorSizes[index]));
       actualSectorSizes.add(wantedSectorSizes[index]);
       index += 1;
@@ -70,7 +70,7 @@ class SectorAppState extends State<SectorApp> {
   }
 
   static RenderBoxToRenderSectorAdapter initSector(Color color) {
-    final RenderSectorRing ring = RenderSectorRing(padding: 1.0);
+    final ring = RenderSectorRing(padding: 1.0);
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(RenderSolidColor(color, desiredDeltaTheta: kTwoPi * 0.2));

@@ -128,7 +128,7 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
@@ -185,7 +185,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,

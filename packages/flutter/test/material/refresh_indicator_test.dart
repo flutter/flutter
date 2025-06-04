@@ -249,7 +249,7 @@ void main() {
       warnIfMissed: true,
       callee: 'drag',
     );
-    final TestPointer testPointer = TestPointer();
+    final testPointer = TestPointer();
     await tester.sendEventToBinding(testPointer.down(startLocation));
     await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
     await tester.pump();
@@ -285,7 +285,7 @@ void main() {
       warnIfMissed: true,
       callee: 'drag',
     );
-    final TestPointer testPointer = TestPointer();
+    final testPointer = TestPointer();
     await tester.sendEventToBinding(testPointer.down(startLocation));
     await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
     await tester.pump();
@@ -313,7 +313,7 @@ void main() {
       ),
     );
 
-    bool completed = false;
+    var completed = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator)).show().then<void>((
       void value,
     ) {
@@ -355,7 +355,7 @@ void main() {
       ),
     );
 
-    bool completed = false;
+    var completed = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator)).show().then<void>((
       void value,
     ) {
@@ -398,13 +398,13 @@ void main() {
       ),
     );
 
-    bool completed1 = false;
+    var completed1 = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator)).show().then<void>((
       void value,
     ) {
       completed1 = true;
     });
-    bool completed2 = false;
+    var completed2 = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator)).show().then<void>((
       void value,
     ) {
@@ -426,7 +426,7 @@ void main() {
     (WidgetTester tester) async {
       refreshCalled = false;
       double lastScrollOffset;
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -467,7 +467,7 @@ void main() {
   );
 
   testWidgets('RefreshIndicator does not force child to relayout', (WidgetTester tester) async {
-    int layoutCount = 0;
+    var layoutCount = 0;
 
     Widget layoutCallback(BuildContext context, BoxConstraints constraints) {
       layoutCount++;
@@ -611,7 +611,7 @@ void main() {
     'Top RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position',
     (WidgetTester tester) async {
       refreshCalled = false;
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           home: RefreshIndicator(
@@ -645,7 +645,7 @@ void main() {
     'Reverse RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position',
     (WidgetTester tester) async {
       refreshCalled = false;
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           home: RefreshIndicator(
@@ -681,7 +681,7 @@ void main() {
     'RefreshIndicator(anywhere mode) should not be shown when overscroll occurs due to inertia',
     (WidgetTester tester) async {
       refreshCalled = false;
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           home: RefreshIndicator(
@@ -716,7 +716,7 @@ void main() {
     'Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position',
     (WidgetTester tester) async {
       refreshCalled = false;
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           home: RefreshIndicator(
@@ -749,7 +749,7 @@ void main() {
     'Reverse RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position',
     (WidgetTester tester) async {
       refreshCalled = false;
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           home: RefreshIndicator(
@@ -783,7 +783,7 @@ void main() {
     WidgetTester tester,
   ) async {
     refreshCalled = false;
-    final ScrollController scrollController = ScrollController(initialScrollOffset: 500.0);
+    final scrollController = ScrollController(initialScrollOffset: 500.0);
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
@@ -826,7 +826,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     ]) {
@@ -839,7 +839,7 @@ void main() {
       expect(find.byType(RefreshProgressIndicator), findsNothing);
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.linux,
@@ -861,8 +861,8 @@ void main() {
   testWidgets('RefreshIndicator color defaults to ColorScheme.primary', (
     WidgetTester tester,
   ) async {
-    const Color primaryColor = Color(0xff4caf50);
-    final ThemeData theme = ThemeData.from(
+    const primaryColor = Color(0xff4caf50);
+    final theme = ThemeData.from(
       colorScheme: const ColorScheme.light().copyWith(primary: primaryColor),
     );
     await tester.pumpWidget(
@@ -983,7 +983,7 @@ void main() {
 
   testWidgets('RefreshIndicator disallows indicator - glow', (WidgetTester tester) async {
     refreshCalled = false;
-    bool glowAccepted = true;
+    var glowAccepted = true;
     ScrollNotification? lastNotification;
 
     await tester.pumpWidget(
@@ -997,7 +997,7 @@ void main() {
                 onNotification: (ScrollNotification notification) {
                   if (notification is OverscrollNotification &&
                       lastNotification is! OverscrollNotification) {
-                    final OverscrollIndicatorNotification confirmationNotification =
+                    final confirmationNotification =
                         OverscrollIndicatorNotification(leading: true);
                     confirmationNotification.dispatch(context);
                     glowAccepted = confirmationNotification.accepted;
@@ -1034,7 +1034,7 @@ void main() {
 
   testWidgets('RefreshIndicator disallows indicator - stretch', (WidgetTester tester) async {
     refreshCalled = false;
-    bool stretchAccepted = true;
+    var stretchAccepted = true;
     ScrollNotification? lastNotification;
 
     await tester.pumpWidget(
@@ -1047,7 +1047,7 @@ void main() {
                 onNotification: (ScrollNotification notification) {
                   if (notification is OverscrollNotification &&
                       lastNotification is! OverscrollNotification) {
-                    final OverscrollIndicatorNotification confirmationNotification =
+                    final confirmationNotification =
                         OverscrollIndicatorNotification(leading: true);
                     confirmationNotification.dispatch(context);
                     stretchAccepted = confirmationNotification.accepted;
@@ -1085,10 +1085,10 @@ void main() {
   group('RefreshIndicator.noSpinner', () {
     testWidgets('onStatusChange and onRefresh Trigger', (WidgetTester tester) async {
       refreshCalled = false;
-      bool modeSnap = false;
-      bool modeDrag = false;
-      bool modeArmed = false;
-      bool modeDone = false;
+      var modeSnap = false;
+      var modeDrag = false;
+      var modeArmed = false;
+      var modeDone = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1142,17 +1142,17 @@ void main() {
   testWidgets('RefreshIndicator manipulates value color opacity correctly', (
     WidgetTester tester,
   ) async {
-    final List<Color> colors = <Color>[
+    final colors = <Color>[
       Colors.black,
       Colors.black54,
       Colors.white,
       Colors.white54,
       Colors.transparent,
     ];
-    const List<double> positions = <double>[50.0, 100.0, 150.0];
+    const positions = <double>[50.0, 100.0, 150.0];
 
     Future<void> testColor(Color color) async {
-      final AnimationController positionController = AnimationController(vsync: const TestVSync());
+      final positionController = AnimationController(vsync: const TestVSync());
       addTearDown(positionController.dispose);
       // Correspond to [_setupColorTween].
       final Animation<Color?> valueColorAnimation = positionController.drive(
@@ -1183,7 +1183,7 @@ void main() {
       // Correspond to [_kDragContainerExtentPercentage].
       final double maxPosition =
           tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
-      for (final double position in positions) {
+      for (final position in positions) {
         await tester.fling(find.text('X'), Offset(0.0, position), 1.0);
         await tester.pump();
         positionController.value = position / maxPosition;
@@ -1193,7 +1193,7 @@ void main() {
       }
     }
 
-    for (final Color color in colors) {
+    for (final color in colors) {
       await testColor(color);
     }
   });
@@ -1201,7 +1201,7 @@ void main() {
   testWidgets('RefreshIndicator passes the default elevation through correctly', (
     WidgetTester tester,
   ) async {
-    final AnimationController positionController = AnimationController(vsync: const TestVSync());
+    final positionController = AnimationController(vsync: const TestVSync());
     addTearDown(positionController.dispose);
 
     await tester.pumpWidget(
@@ -1218,7 +1218,7 @@ void main() {
 
     final double maxPosition =
         tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
-    const double position = 50.0;
+    const position = 50.0;
     await tester.fling(find.text('X'), const Offset(0.0, position), 1.0);
     await tester.pump();
     positionController.value = position / maxPosition;
@@ -1231,8 +1231,8 @@ void main() {
   testWidgets('RefreshIndicator passes custom elevation values through correctly', (
     WidgetTester tester,
   ) async {
-    for (final double elevation in <double>[0.0, 2.0]) {
-      final AnimationController positionController = AnimationController(vsync: const TestVSync());
+    for (final elevation in <double>[0.0, 2.0]) {
+      final positionController = AnimationController(vsync: const TestVSync());
       addTearDown(positionController.dispose);
 
       await tester.pumpWidget(
@@ -1250,7 +1250,7 @@ void main() {
 
       final double maxPosition =
           tester.view.physicalSize.height / tester.view.devicePixelRatio * 0.25;
-      const double position = 50.0;
+      const position = 50.0;
       await tester.fling(find.text('X'), const Offset(0.0, position), 1.0);
       await tester.pump();
       positionController.value = position / maxPosition;

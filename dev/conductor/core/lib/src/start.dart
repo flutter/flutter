@@ -240,8 +240,8 @@ class StartContext extends Context {
       );
     }
 
-    final Int64 unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
-    final pb.ConductorState state = pb.ConductorState();
+    final unixDate = Int64(DateTime.now().millisecondsSinceEpoch);
+    final state = pb.ConductorState();
 
     state.releaseChannel = releaseChannel;
     state.createdDate = unixDate;
@@ -249,7 +249,7 @@ class StartContext extends Context {
 
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
-    final String workingBranchName = 'cherrypicks-$candidateBranch';
+    final workingBranchName = 'cherrypicks-$candidateBranch';
 
     final String frameworkHead = await framework.reverseParse('HEAD');
     state.framework =
@@ -274,7 +274,7 @@ class StartContext extends Context {
     }
 
     // Get framework version
-    final Version lastVersion = Version.fromString(
+    final lastVersion = Version.fromString(
       await framework.getFullTag(framework.upstreamRemote.name, candidateBranch, exact: false),
     );
 
@@ -282,7 +282,7 @@ class StartContext extends Context {
       '${framework.upstreamRemote.name}/$candidateBranch',
       '${framework.upstreamRemote.name}/${FrameworkRepository.defaultBranch}',
     );
-    final bool atBranchPoint = branchPoint == frameworkHead;
+    final atBranchPoint = branchPoint == frameworkHead;
 
     final ReleaseType releaseType = computeReleaseType(lastVersion, atBranchPoint);
     state.releaseType = releaseType;
@@ -367,7 +367,7 @@ class StartContext extends Context {
     stdio.printStatus('Applying the tag $requestedVersion at the branch point $branchPoint');
 
     await framework.tag(branchPoint, requestedVersion.toString(), frameworkUpstream);
-    final Version nextVersion = Version.increment(requestedVersion, 'n');
+    final nextVersion = Version.increment(requestedVersion, 'n');
     stdio.printStatus('The actual release will be version $nextVersion.');
     return nextVersion;
   }

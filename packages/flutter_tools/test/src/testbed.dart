@@ -103,7 +103,7 @@ class TestBed {
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
   Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
-    final Map<Type, Generator> testOverrides = <Type, Generator>{
+    final testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
       ...?_overrides,
@@ -116,7 +116,7 @@ class TestBed {
     // Cache the original flutter root to restore after the test case.
     final String? originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
-    final Map<Timer, StackTrace> timers = <Timer, StackTrace>{};
+    final timers = <Timer, StackTrace>{};
 
     return HttpOverrides.runZoned(() {
       return runInContext<T?>(() {

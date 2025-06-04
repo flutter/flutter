@@ -59,9 +59,9 @@ final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
 
 void main() {
   testWithoutContext('Can trace application startup', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
@@ -118,9 +118,9 @@ void main() {
   });
 
   testWithoutContext('throws tool exit if the vmservice disconnects', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
@@ -145,9 +145,9 @@ void main() {
   });
 
   testWithoutContext('throws tool exit if timeline is missing the engine start event', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
@@ -177,15 +177,15 @@ void main() {
   });
 
   testWithoutContext('prints when first frame is taking a long time', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      final Map<String, String> extensionData = <String, String>{
+      final extensionData = <String, String>{
         'test': 'data',
         'renderedErrorText': 'error text',
       };
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -236,9 +236,9 @@ void main() {
   });
 
   testWithoutContext('throws tool exit if first frame events are missing', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
@@ -277,9 +277,9 @@ void main() {
   });
 
   testWithoutContext('Can trace application startup without awaiting for first frame', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         FakeVmServiceRequest(
           method: 'getVMTimeline',
@@ -323,9 +323,9 @@ void main() {
   });
 
   testWithoutContext('downloadStartupTrace also downloads the timeline', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
@@ -371,7 +371,7 @@ void main() {
       logger: logger,
     );
 
-    final Map<String, Object> expectedTimeline = <String, Object>{
+    final expectedTimeline = <String, Object>{
       'type': 'Timeline',
       'traceEvents': <Object>[
         <String, Object>{'name': 'FlutterEngineMainEnter', 'ts': 0, 'type': 'TimelineEvent'},

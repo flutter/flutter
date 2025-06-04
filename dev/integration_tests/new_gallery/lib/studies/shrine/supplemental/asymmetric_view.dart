@@ -232,7 +232,7 @@ class DesktopColumns extends StatelessWidget {
       smallImageWidth: smallImageWidth,
     );
 
-    final List<DesktopProductCardColumn> productCardColumns =
+    final productCardColumns =
         List<DesktopProductCardColumn>.generate(columnCount, (int column) {
           final bool alignToEnd = column.isOdd || (column == columnCount - 1);
           final bool startLarge = column.isOdd;

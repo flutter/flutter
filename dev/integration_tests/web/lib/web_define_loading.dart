@@ -7,7 +7,7 @@ import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 
 Future<void> main() async {
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
   const String combined =
       String.fromEnvironment('test.valueA') + String.fromEnvironment('test.valueB');
   if (combined == 'Example,AValue') {

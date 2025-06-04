@@ -34,7 +34,7 @@ class _OffstageExampleState extends State<OffstageExample> {
   bool _offstage = true;
 
   Size _getFlutterLogoSize() {
-    final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
+    final renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
     return renderLogo.size;
   }
 

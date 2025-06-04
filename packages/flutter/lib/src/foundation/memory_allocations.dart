@@ -172,7 +172,7 @@ class FlutterMemoryAllocations {
       // If there are active dispatch loops, listeners.remove
       // should not be invoked, as it will
       // break the dispatch loops correctness.
-      for (int i = 0; i < listeners.length; i++) {
+      for (var i = 0; i < listeners.length; i++) {
         if (listeners[i] == listener) {
           listeners[i] = null;
           _listenersContainNulls = true;
@@ -238,11 +238,11 @@ class FlutterMemoryAllocations {
 
     _activeDispatchLoops++;
     final int end = listeners.length;
-    for (int i = 0; i < end; i++) {
+    for (var i = 0; i < end; i++) {
       try {
         listeners[i]?.call(event);
       } catch (exception, stack) {
-        final String type = event.object.runtimeType.toString();
+        final type = event.object.runtimeType.toString();
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: exception,

@@ -61,7 +61,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(
   bool throwOnError = true,
 }) async {
   final FileSystem fileSystem = file.fileSystem;
-  bool didError = false;
+  var didError = false;
   final PackageConfig result = await loadPackageConfigUri(
     file.absolute.uri,
     loader: (Uri uri) async {
@@ -76,7 +76,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(
         return;
       }
       logger.printTrace(error.toString());
-      String message = '${file.path} does not exist.';
+      var message = '${file.path} does not exist.';
       final String pubspecPath = fileSystem.path.absolute(
         fileSystem.path.dirname(file.path),
         'pubspec.yaml',

@@ -234,7 +234,7 @@ class PackagesGetCommand extends FlutterCommand {
   ///
   /// commands accept.
   ArgParser get _permissiveArgParser {
-    final ArgParser argParser = ArgParser();
+    final argParser = ArgParser();
     argParser.addOption('directory', abbr: 'C');
     argParser.addFlag('offline');
     argParser.addFlag('dry-run', abbr: 'n');
@@ -257,11 +257,11 @@ class PackagesGetCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<String> rest = argResults!.rest;
-    bool isHelp = false;
-    bool example = true;
-    bool exampleWasParsed = false;
+    var isHelp = false;
+    var example = true;
+    var exampleWasParsed = false;
     String? directoryOption;
-    bool dryRun = false;
+    var dryRun = false;
     try {
       final ArgResults results = _permissiveArgParser.parse(rest);
       isHelp = results['help'] as bool;
@@ -288,7 +288,7 @@ class PackagesGetCommand extends FlutterCommand {
       rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
       _rootProject = rootProject;
 
-      final Environment environment = Environment(
+      final environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
         cacheDir: globals.cache.getRoot(),
@@ -321,7 +321,7 @@ class PackagesGetCommand extends FlutterCommand {
     final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
 
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
-    final Stopwatch timer = Stopwatch()..start();
+    final timer = Stopwatch()..start();
     try {
       await pub.interactively(
         <String>[
@@ -370,7 +370,7 @@ class PackagesGetCommand extends FlutterCommand {
       // anyway, we assume this is fine.
       //
       // It won't be if they do `flutter build --no-pub`, though.
-      const bool ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+      const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
 
       // We need to regenerate the platform specific tooling for both the project
       // itself and example(if present).

@@ -128,7 +128,7 @@ class AbstractNode {
   void adoptChild(covariant AbstractNode child) {
     assert(child._parent == null);
     assert(() {
-      AbstractNode node = this;
+      var node = this;
       while (node.parent != null) {
         node = node.parent!;
       }

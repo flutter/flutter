@@ -524,7 +524,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     if (oldWidget.onChanged == widget.onChanged) {
       return;
     }
-    final bool wasEnabled = oldWidget.onChanged != null;
+    final wasEnabled = oldWidget.onChanged != null;
     final bool isEnabled = _enabled;
     if (wasEnabled != isEnabled) {
       if (isEnabled) {
@@ -654,7 +654,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    final Set<MaterialState> states = <MaterialState>{
+    final states = <MaterialState>{
       if (!_enabled) MaterialState.disabled,
       if (_hovering) MaterialState.hovered,
       if (_dragging) MaterialState.dragged,
@@ -898,7 +898,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
        _textDirection = textDirection,
        _hovering = hovering {
     _updateLabelPainters();
-    final GestureArenaTeam team = GestureArenaTeam();
+    final team = GestureArenaTeam();
     _drag =
         HorizontalDragGestureRecognizer()
           ..team = team
@@ -1356,7 +1356,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     // If no selection has been made yet, test for thumb selection again now
     // that the value of dx can be non-zero. If this is the first selection of
     // the interaction, then onChangeStart must be called.
-    bool shouldCallOnChangeStart = false;
+    var shouldCallOnChangeStart = false;
     if (_lastThumbSelection == null) {
       _lastThumbSelection = sliderTheme.thumbSelector!(
         textDirection,
@@ -1617,12 +1617,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions! >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
-        for (int i = 0; i <= divisions!; i++) {
+        for (var i = 0; i <= divisions!; i++) {
           final double value = i / divisions!;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
           final double dx = trackRect.left + value * adjustedTrackWidth + discreteTrackPadding / 2;
-          final Offset tickMarkOffset = Offset(dx, dy);
+          final tickMarkOffset = Offset(dx, dy);
           _sliderTheme.rangeTickMarkShape!.paint(
             context,
             tickMarkOffset,
@@ -1640,15 +1640,15 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
     final double thumbDelta = (_endThumbCenter.dx - _startThumbCenter.dx).abs();
 
-    final bool isLastThumbStart = _lastThumbSelection == Thumb.start;
+    final isLastThumbStart = _lastThumbSelection == Thumb.start;
     final Thumb bottomThumb = isLastThumbStart ? Thumb.end : Thumb.start;
     final Thumb topThumb = isLastThumbStart ? Thumb.start : Thumb.end;
     final Offset bottomThumbCenter = isLastThumbStart ? _endThumbCenter : _startThumbCenter;
     final Offset topThumbCenter = isLastThumbStart ? _startThumbCenter : _endThumbCenter;
     final TextPainter bottomLabelPainter = isLastThumbStart ? _endLabelPainter : _startLabelPainter;
     final TextPainter topLabelPainter = isLastThumbStart ? _startLabelPainter : _endLabelPainter;
-    final double bottomValue = isLastThumbStart ? endValue : startValue;
-    final double topValue = isLastThumbStart ? startValue : endValue;
+    final bottomValue = isLastThumbStart ? endValue : startValue;
+    final topValue = isLastThumbStart ? startValue : endValue;
     final bool shouldPaintValueIndicators =
         isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
 
@@ -1794,7 +1794,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     VoidCallback increaseAction,
     VoidCallback decreaseAction,
   ) {
-    final SemanticsConfiguration config = SemanticsConfiguration();
+    final config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
     config.textDirection = textDirection;
     config.isSlider = true;
@@ -1840,12 +1840,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     );
 
     // Split the semantics node area between the start and end nodes.
-    final Rect leftRect = Rect.fromCenter(
+    final leftRect = Rect.fromCenter(
       center: _startThumbCenter,
       width: kMinInteractiveDimension,
       height: kMinInteractiveDimension,
     );
-    final Rect rightRect = Rect.fromCenter(
+    final rightRect = Rect.fromCenter(
       center: _endThumbCenter,
       width: kMinInteractiveDimension,
       height: kMinInteractiveDimension,
@@ -1866,7 +1866,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _startSemanticsNode!.updateWith(config: startSemanticsConfiguration);
     _endSemanticsNode!.updateWith(config: endSemanticsConfiguration);
 
-    final List<SemanticsNode> finalChildren = <SemanticsNode>[
+    final finalChildren = <SemanticsNode>[
       _startSemanticsNode!,
       _endSemanticsNode!,
     ];

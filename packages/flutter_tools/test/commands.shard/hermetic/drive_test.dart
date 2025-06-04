@@ -61,7 +61,7 @@ void main() {
   testUsingContext(
     'fails if the specified --target is not found',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -92,7 +92,7 @@ void main() {
   testUsingContext(
     'fails if the default --target is not found',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -121,7 +121,7 @@ void main() {
   testUsingContext(
     'fails with an informative error message if --target looks like --driver',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -155,7 +155,7 @@ void main() {
   testUsingContext(
     'warns if screenshot is not supported but continues test',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -197,7 +197,7 @@ void main() {
   testUsingContext(
     'does not register screenshot signal handler if --screenshot not provided',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -240,7 +240,7 @@ void main() {
   testUsingContext(
     'takes screenshot and rethrows on drive exception',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -282,7 +282,7 @@ void main() {
   testUsingContext(
     'takes screenshot on drive test failure',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -336,7 +336,7 @@ void main() {
   testUsingContext(
     'drive --screenshot errors but does not fail if screenshot fails',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -382,7 +382,7 @@ void main() {
   testUsingContext(
     'drive --timeout takes screenshot and tool exits after timeout',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -397,11 +397,11 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.directory('drive_screenshots').createSync();
 
-      final ScreenshotDevice screenshotDevice = ScreenshotDevice();
+      final screenshotDevice = ScreenshotDevice();
       fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
       expect(screenshotDevice.screenshots, isEmpty);
-      bool caughtToolExit = false;
+      var caughtToolExit = false;
       FakeAsync().run<void>((FakeAsync time) {
         // Because the tool exit will be thrown asynchronously by a [Timer],
         // use [asyncGuard] to catch it
@@ -447,9 +447,9 @@ void main() {
   testUsingContext(
     'drive --screenshot takes screenshot if sent a registered signal',
     () async {
-      final FakeProcessSignal signal = FakeProcessSignal();
-      final ProcessSignal signalUnderTest = ProcessSignal(signal);
-      final DriveCommand command = DriveCommand(
+      final signal = FakeProcessSignal();
+      final signalUnderTest = ProcessSignal(signal);
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -470,7 +470,7 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.directory('drive_screenshots').createSync();
 
-      final ScreenshotDevice screenshotDevice = ScreenshotDevice();
+      final screenshotDevice = ScreenshotDevice();
       fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
       expect(screenshotDevice.screenshots, isEmpty);
@@ -509,7 +509,7 @@ void main() {
   testUsingContext(
     'shouldRunPub is true unless user specifies --no-pub',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -548,7 +548,7 @@ void main() {
   testUsingContext(
     'flags propagate to debugging options',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -608,7 +608,7 @@ void main() {
   testUsingContext(
     'Port publication not disabled for wireless device',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -644,7 +644,7 @@ void main() {
   testUsingContext(
     'Port publication is disabled for wired device',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -680,7 +680,7 @@ void main() {
   testUsingContext(
     'Port publication does not default to enabled for wireless device if flag manually added',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -716,11 +716,11 @@ void main() {
   testUsingContext(
     '--use-existing-app keeps the app running',
     () async {
-      bool wasStopped = false;
+      var wasStopped = false;
 
-      final FakeProcessSignal signal = FakeProcessSignal();
-      final ProcessSignal signalUnderTest = ProcessSignal(signal);
-      final DriveCommand command = DriveCommand(
+      final signal = FakeProcessSignal();
+      final signalUnderTest = ProcessSignal(signal);
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -774,11 +774,11 @@ void main() {
   testUsingContext(
     '--no-keep-app-running always stops the app running',
     () async {
-      bool wasStopped = false;
+      var wasStopped = false;
 
-      final FakeProcessSignal signal = FakeProcessSignal();
-      final ProcessSignal signalUnderTest = ProcessSignal(signal);
-      final DriveCommand command = DriveCommand(
+      final signal = FakeProcessSignal();
+      final signalUnderTest = ProcessSignal(signal);
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -833,7 +833,7 @@ void main() {
   testUsingContext(
     'flutter drive --help explains how to use the command',
     () async {
-      final DriveCommand command = DriveCommand(
+      final command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,

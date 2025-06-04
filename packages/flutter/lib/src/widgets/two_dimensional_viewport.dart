@@ -294,8 +294,8 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
   }
 
   static int _compareChildren(Element a, Element b) {
-    final ChildVicinity aSlot = a.slot! as ChildVicinity;
-    final ChildVicinity bSlot = b.slot! as ChildVicinity;
+    final aSlot = a.slot! as ChildVicinity;
+    final bSlot = b.slot! as ChildVicinity;
     return aSlot.compareTo(bSlot);
   }
 
@@ -871,7 +871,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> debugChildren = <DiagnosticsNode>[
+    final debugChildren = <DiagnosticsNode>[
       ..._children.keys.map<DiagnosticsNode>((ChildVicinity vicinity) {
         return _children[vicinity]!.toDiagnosticsNode(name: vicinity.toString());
       }),
@@ -956,10 +956,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
 
     assert(child.parent == this);
-    final RenderBox box = child as RenderBox;
+    final box = child as RenderBox;
     final Rect rectLocal = MatrixUtils.transformRect(target.getTransformTo(child), rect);
 
-    double leadingScrollOffset = offset;
+    var leadingScrollOffset = offset;
 
     // The scroll offset of `rect` within `child`.
     leadingScrollOffset += switch (axisDirection) {
@@ -1003,7 +1003,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       AxisDirection.right => targetRect.translate(offsetDifference, 0.0),
     };
 
-    final RevealedOffset revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
+    final revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
     return revealedOffset;
   }
 
@@ -1268,7 +1268,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   void _cacheKeepAlives() {
     final List<RenderBox> remainingChildren =
         _children.values.toSet().difference(_activeChildrenForLayoutPass.values.toSet()).toList();
-    for (final RenderBox child in remainingChildren) {
+    for (final child in remainingChildren) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
       if (childParentData.keepAlive) {
         _keepAliveBucket[childParentData.vicinity] = child;
@@ -1299,7 +1299,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         for (int minorIndex = _leadingYIndex!; minorIndex <= _trailingYIndex!; minorIndex++) {
           // Major
           for (int majorIndex = _leadingXIndex!; majorIndex <= _trailingXIndex!; majorIndex++) {
-            final ChildVicinity vicinity = ChildVicinity(xIndex: majorIndex, yIndex: minorIndex);
+            final vicinity = ChildVicinity(xIndex: majorIndex, yIndex: minorIndex);
             previousChild =
                 _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
           }
@@ -1310,7 +1310,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         for (int minorIndex = _leadingXIndex!; minorIndex <= _trailingXIndex!; minorIndex++) {
           // Major
           for (int majorIndex = _leadingYIndex!; majorIndex <= _trailingYIndex!; majorIndex++) {
-            final ChildVicinity vicinity = ChildVicinity(xIndex: minorIndex, yIndex: majorIndex);
+            final vicinity = ChildVicinity(xIndex: minorIndex, yIndex: majorIndex);
             previousChild =
                 _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
           }
@@ -1350,7 +1350,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   bool _debugCheckContentDimensions() {
-    const String hint =
+    const hint =
         'Subclasses should call applyContentDimensions on the '
         'verticalOffset and horizontalOffset to set the min and max scroll offset. '
         'If the contents exceed one or both sides of the viewportDimension, '

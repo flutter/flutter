@@ -17,7 +17,7 @@ void main() {
 
   // The ContentSenstivity levels that get set by the native platform via calls to
   // `SensitiveContent.setContentSensitivity`.
-  List<ContentSensitivity> setContentSensitivityArgs = <ContentSensitivity>[];
+  var setContentSensitivityArgs = <ContentSensitivity>[];
 
   setUp(() {
     // Reset number of method channel calls to `SensitiveContent.setContentSensitivity`.
@@ -106,15 +106,15 @@ void main() {
       testWidgets('when it gets disposed with another sensitive widget', (
         WidgetTester tester,
       ) async {
-        const Key sc1Key = Key('sc1');
-        final DisposeTester sc1 = DisposeTester(
+        const sc1Key = Key('sc1');
+        final sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent sc2 = SensitiveContent(
+        final sc2 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -135,15 +135,15 @@ void main() {
       });
 
       testWidgets('with two other sensitive widgets', (WidgetTester tester) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent sc2 = SensitiveContent(
+        final sc2 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent sc3 = SensitiveContent(
+        final sc3 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -160,19 +160,19 @@ void main() {
       testWidgets('with two other sensitive widgets and one gets disposed', (
         WidgetTester tester,
       ) async {
-        const Key sc1Key = Key('sc1');
-        final DisposeTester sc1 = DisposeTester(
+        const sc1Key = Key('sc1');
+        final sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent sc2 = SensitiveContent(
+        final sc2 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent sc3 = SensitiveContent(
+        final sc3 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -194,11 +194,11 @@ void main() {
 
       // Tests with auto sensitive widget(s):
       testWidgets('with one auto sensitive widget', (WidgetTester tester) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -215,15 +215,15 @@ void main() {
       testWidgets('when it gets disposed with one auto sensitive widget', (
         WidgetTester tester,
       ) async {
-        const Key sc1Key = Key('sc1');
-        final DisposeTester sc1 = DisposeTester(
+        const sc1Key = Key('sc1');
+        final sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -250,12 +250,12 @@ void main() {
       });
 
       testWidgets('with one auto sensitive widget that gets disposed', (WidgetTester tester) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        const Key asc1Key = Key('asc1');
-        final DisposeTester asc1 = DisposeTester(
+        const asc1Key = Key('asc1');
+        final asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
             sensitivity: ContentSensitivity.autoSensitive,
@@ -282,19 +282,19 @@ void main() {
       testWidgets('with two auto sensitive widgets and one gets disposed', (
         WidgetTester tester,
       ) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        const Key asc1Key = Key('asc1');
-        final DisposeTester asc1 = DisposeTester(
+        const asc1Key = Key('asc1');
+        final asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -317,11 +317,11 @@ void main() {
 
       // Tests with not sensitive widget(s):
       testWidgets('with one not sensitive widget', (WidgetTester tester) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -338,15 +338,15 @@ void main() {
       testWidgets('when it gets disposed with one not sensitive widget', (
         WidgetTester tester,
       ) async {
-        const Key sc1Key = Key('sc1');
-        final DisposeTester sc1 = DisposeTester(
+        const sc1Key = Key('sc1');
+        final sc1 = DisposeTester(
           child: SensitiveContent(
             key: sc1Key,
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -372,12 +372,12 @@ void main() {
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        const Key nsc1Key = Key('nsc1');
-        final DisposeTester nsc1 = DisposeTester(
+        const nsc1Key = Key('nsc1');
+        final nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
             sensitivity: ContentSensitivity.notSensitive,
@@ -403,19 +403,19 @@ void main() {
       testWidgets('with two not sensitive widgets and one gets disposed', (
         WidgetTester tester,
       ) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        const Key nsc1Key = Key('nsc1');
-        final DisposeTester asc1 = DisposeTester(
+        const nsc1Key = Key('nsc1');
+        final asc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent nsc2 = SensitiveContent(
+        final nsc2 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -439,15 +439,15 @@ void main() {
       testWidgets('with one not sensitive widget and one auto sensitive widget', (
         WidgetTester tester,
       ) async {
-        final SensitiveContent sc1 = SensitiveContent(
+        final sc1 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -464,19 +464,19 @@ void main() {
       testWidgets(
         'when it gets disposed with one not sensitive widget and one auto sensitive widget',
         (WidgetTester tester) async {
-          const Key sc1Key = Key('sc1');
-          final DisposeTester sc1 = DisposeTester(
+          const sc1Key = Key('sc1');
+          final sc1 = DisposeTester(
             child: SensitiveContent(
               key: sc1Key,
               sensitivity: ContentSensitivity.sensitive,
               child: Container(),
             ),
           );
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -505,19 +505,19 @@ void main() {
       testWidgets(
         'with one not sensitive widget and one auto sensitive widget and auto sensitive widget gets disposed',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          const Key asc1Key = Key('asc1');
-          final DisposeTester asc1 = DisposeTester(
+          const asc1Key = Key('asc1');
+          final asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
               sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -541,16 +541,16 @@ void main() {
       testWidgets(
         'with one not sensitive widget and one auto sensitive widget and not sensitive widget gets disposed',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          const Key nsc1Key = Key('nsc1');
-          final DisposeTester nsc1 = DisposeTester(
+          const nsc1Key = Key('nsc1');
+          final nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
               sensitivity: ContentSensitivity.notSensitive,
@@ -578,19 +578,19 @@ void main() {
       testWidgets(
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent sc2 = SensitiveContent(
+          final sc2 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -608,23 +608,23 @@ void main() {
       testWidgets(
         'when it gets disposed with another sensitive widget, one not sensitive widget, and one auto sensitive widget',
         (WidgetTester tester) async {
-          const Key sc1Key = Key('sc1');
-          final DisposeTester sc1 = DisposeTester(
+          const sc1Key = Key('sc1');
+          final sc1 = DisposeTester(
             child: SensitiveContent(
               key: sc1Key,
               sensitivity: ContentSensitivity.sensitive,
               child: Container(),
             ),
           );
-          final SensitiveContent sc2 = SensitiveContent(
+          final sc2 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -648,23 +648,23 @@ void main() {
       testWidgets(
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the auto sensitive widget is disposed',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent sc2 = SensitiveContent(
+          final sc2 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          const Key asc1Key = Key('asc1');
-          final DisposeTester asc1 = DisposeTester(
+          const asc1Key = Key('asc1');
+          final asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
               sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -688,20 +688,20 @@ void main() {
       testWidgets(
         'with another sensitive widget, one not sensitive widget, and one auto sensitive widget and the not sensitive widget is disposed',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent sc2 = SensitiveContent(
+          final sc2 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          const Key nsc1Key = Key('nsc1');
-          final DisposeTester nsc1 = DisposeTester(
+          const nsc1Key = Key('nsc1');
+          final nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
               sensitivity: ContentSensitivity.notSensitive,
@@ -729,12 +729,12 @@ void main() {
       testWidgets(
         'with two auto sensitive widgets and one not sensitive widget and one auto sensitive widget gets disposed',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          const Key asc1Key = Key('asc1');
-          final DisposeTester asc1 = DisposeTester(
+          const asc1Key = Key('asc1');
+          final asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
               sensitivity: ContentSensitivity.autoSensitive,
@@ -742,11 +742,11 @@ void main() {
             ),
           );
 
-          final SensitiveContent asc2 = SensitiveContent(
+          final asc2 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -770,23 +770,23 @@ void main() {
       testWidgets(
         'with one auto sensitive widgets and two not sensitive widgets and one not sensitive widget gets disposed',
         (WidgetTester tester) async {
-          final SensitiveContent sc1 = SensitiveContent(
+          final sc1 = SensitiveContent(
             sensitivity: ContentSensitivity.sensitive,
             child: Container(),
           );
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          const Key nsc1Key = Key('nsc1');
-          final DisposeTester nsc1 = DisposeTester(
+          const nsc1Key = Key('nsc1');
+          final nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
               sensitivity: ContentSensitivity.notSensitive,
               child: Container(),
             ),
           );
-          final SensitiveContent nsc2 = SensitiveContent(
+          final nsc2 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -814,11 +814,11 @@ void main() {
     () {
       // Tests with other auto sensitive widget(s):
       testWidgets('with another auto sensitive widget', (WidgetTester tester) async {
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -835,15 +835,15 @@ void main() {
       testWidgets('when it gets disposed with another auto sensitive widget', (
         WidgetTester tester,
       ) async {
-        const Key asc1Key = Key('asc1');
-        final DisposeTester asc1 = DisposeTester(
+        const asc1Key = Key('asc1');
+        final asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -865,11 +865,11 @@ void main() {
 
       // Tests with not sensitive widget(s):
       testWidgets('with one not sensitive widget', (WidgetTester tester) async {
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -886,15 +886,15 @@ void main() {
       testWidgets('when it gets disposed with one not sensitive widget', (
         WidgetTester tester,
       ) async {
-        const Key asc1Key = Key('asc1');
-        final DisposeTester asc1 = DisposeTester(
+        const asc1Key = Key('asc1');
+        final asc1 = DisposeTester(
           child: SensitiveContent(
             key: asc1Key,
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -915,12 +915,12 @@ void main() {
       });
 
       testWidgets('with one not sensitive widget that gets disposed', (WidgetTester tester) async {
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        const Key nsc1Key = Key('nsc1');
-        final DisposeTester nsc1 = DisposeTester(
+        const nsc1Key = Key('nsc1');
+        final nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
             sensitivity: ContentSensitivity.notSensitive,
@@ -946,19 +946,19 @@ void main() {
       testWidgets('with two not sensitive widgets and one gets disposed', (
         WidgetTester tester,
       ) async {
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        const Key nsc1Key = Key('nsc1');
-        final DisposeTester nsc1 = DisposeTester(
+        const nsc1Key = Key('nsc1');
+        final nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent nsc2 = SensitiveContent(
+        final nsc2 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -982,15 +982,15 @@ void main() {
       testWidgets('with another auto sensitive widget and one not sensitive widget', (
         WidgetTester tester,
       ) async {
-        final SensitiveContent asc1 = SensitiveContent(
+        final asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1007,19 +1007,19 @@ void main() {
       testWidgets(
         'when it gets disposed with another auto sensitive widget and one not sensitive widget',
         (WidgetTester tester) async {
-          const Key asc1Key = Key('asc1');
-          final DisposeTester asc1 = DisposeTester(
+          const asc1Key = Key('asc1');
+          final asc1 = DisposeTester(
             child: SensitiveContent(
               key: asc1Key,
               sensitivity: ContentSensitivity.autoSensitive,
               child: Container(),
             ),
           );
-          final SensitiveContent asc2 = SensitiveContent(
+          final asc2 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          final SensitiveContent nsc1 = SensitiveContent(
+          final nsc1 = SensitiveContent(
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           );
@@ -1043,16 +1043,16 @@ void main() {
       testWidgets(
         'with another auto sensitive widget and one not sensitive widget and the not sensitive widget gets disposed',
         (WidgetTester tester) async {
-          final SensitiveContent asc1 = SensitiveContent(
+          final asc1 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          final SensitiveContent asc2 = SensitiveContent(
+          final asc2 = SensitiveContent(
             sensitivity: ContentSensitivity.autoSensitive,
             child: Container(),
           );
-          const Key nsc1Key = Key('nsc1');
-          final DisposeTester nsc1 = DisposeTester(
+          const nsc1Key = Key('nsc1');
+          final nsc1 = DisposeTester(
             child: SensitiveContent(
               key: nsc1Key,
               sensitivity: ContentSensitivity.notSensitive,
@@ -1082,11 +1082,11 @@ void main() {
     'one not sensitive (with no sensitive or auto sensitive SensitiveContent widgets in the tree) SensitiveContent widget in the tree determines content sensitivity for tree as expected',
     () {
       testWidgets('with another not sensitive widget', (WidgetTester tester) async {
-        final SensitiveContent nsc1 = SensitiveContent(
+        final nsc1 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
-        final SensitiveContent nsc2 = SensitiveContent(
+        final nsc2 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1103,15 +1103,15 @@ void main() {
       testWidgets('when it gets disposed with one not sensitive widget', (
         WidgetTester tester,
       ) async {
-        const Key nsc1Key = Key('nsc1');
-        final DisposeTester nsc1 = DisposeTester(
+        const nsc1Key = Key('nsc1');
+        final nsc1 = DisposeTester(
           child: SensitiveContent(
             key: nsc1Key,
             sensitivity: ContentSensitivity.notSensitive,
             child: Container(),
           ),
         );
-        final SensitiveContent nsc2 = SensitiveContent(
+        final nsc2 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1138,8 +1138,8 @@ void main() {
     testWidgets('when one sensitive SensitiveContent widget changes to sensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.sensitive,
       );
@@ -1169,8 +1169,8 @@ void main() {
     testWidgets('when one sensitive SensitiveContent widget changes to autoSensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.sensitive,
       );
@@ -1203,8 +1203,8 @@ void main() {
     testWidgets('when one sensitive SensitiveContent widget changes to notSensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.sensitive,
       );
@@ -1237,8 +1237,8 @@ void main() {
     testWidgets('when one autoSensitive SensitiveContent widget changes to sensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.autoSensitive,
       );
@@ -1268,8 +1268,8 @@ void main() {
     testWidgets('when one autoSensitive SensitiveContent widget changes to autoSensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.autoSensitive,
       );
@@ -1299,8 +1299,8 @@ void main() {
     testWidgets('when one autoSensitive SensitiveContent widget changes to notSensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.autoSensitive,
       );
@@ -1330,8 +1330,8 @@ void main() {
     testWidgets('when one notSensitive SensitiveContent widget changes to sensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.notSensitive,
       );
@@ -1364,8 +1364,8 @@ void main() {
     testWidgets('when one notSensitive SensitiveContent widget changes to autoSensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.notSensitive,
       );
@@ -1398,8 +1398,8 @@ void main() {
     testWidgets('when one notSensitive SensitiveContent widget changes to notSensitive', (
       WidgetTester tester,
     ) async {
-      const Key scKey = Key('scKey');
-      const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+      const scKey = Key('scKey');
+      const sc = ChangeContentSensitivityTester(
         key: scKey,
         initialContentSensitivity: ContentSensitivity.notSensitive,
       );
@@ -1430,12 +1430,12 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to autoSensitive with another sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key sc1Key = Key('sc1Key');
-        const ChangeContentSensitivityTester sc1 = ChangeContentSensitivityTester(
+        const sc1Key = Key('sc1Key');
+        const sc1 = ChangeContentSensitivityTester(
           key: sc1Key,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent sc2 = SensitiveContent(
+        final sc2 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -1466,12 +1466,12 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to notSensitive with another sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key sc1Key = Key('sc1Key');
-        const ChangeContentSensitivityTester sc1 = ChangeContentSensitivityTester(
+        const sc1Key = Key('sc1Key');
+        const sc1 = ChangeContentSensitivityTester(
           key: sc1Key,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent sc2 = SensitiveContent(
+        final sc2 = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -1502,12 +1502,12 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to autoSensitive with an autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key scKey = Key('scKey');
-        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+        const scKey = Key('scKey');
+        const sc = ChangeContentSensitivityTester(
           key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent asc = SensitiveContent(
+        final asc = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -1541,12 +1541,12 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to notSensitive with an autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key scKey = Key('scKey');
-        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+        const scKey = Key('scKey');
+        const sc = ChangeContentSensitivityTester(
           key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent asc = SensitiveContent(
+        final asc = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -1580,12 +1580,12 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to autoSensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key scKey = Key('sc1Key');
-        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+        const scKey = Key('sc1Key');
+        const sc = ChangeContentSensitivityTester(
           key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent nsc = SensitiveContent(
+        final nsc = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1619,12 +1619,12 @@ void main() {
     testWidgets(
       'when one sensitive SensitiveContent widget changes to notSensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key scKey = Key('scKey');
-        const ChangeContentSensitivityTester sc = ChangeContentSensitivityTester(
+        const scKey = Key('scKey');
+        const sc = ChangeContentSensitivityTester(
           key: scKey,
           initialContentSensitivity: ContentSensitivity.sensitive,
         );
-        final SensitiveContent nsc = SensitiveContent(
+        final nsc = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1658,12 +1658,12 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to sensitive with a sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key ascKey = Key('ascKey');
-        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+        const ascKey = Key('ascKey');
+        const asc = ChangeContentSensitivityTester(
           key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent sc = SensitiveContent(
+        final sc = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -1694,12 +1694,12 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to notSensitive with a sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key ascKey = Key('ascKey');
-        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+        const ascKey = Key('ascKey');
+        const asc = ChangeContentSensitivityTester(
           key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent sc = SensitiveContent(
+        final sc = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -1730,12 +1730,12 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to sensitive with another autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key asc1Key = Key('asc1Key');
-        const ChangeContentSensitivityTester asc1 = ChangeContentSensitivityTester(
+        const asc1Key = Key('asc1Key');
+        const asc1 = ChangeContentSensitivityTester(
           key: asc1Key,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -1766,12 +1766,12 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to notSensitive with another autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key asc1Key = Key('asc1Key');
-        const ChangeContentSensitivityTester asc1 = ChangeContentSensitivityTester(
+        const asc1Key = Key('asc1Key');
+        const asc1 = ChangeContentSensitivityTester(
           key: asc1Key,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -1802,12 +1802,12 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to sensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key ascKey = Key('ascKey');
-        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+        const ascKey = Key('ascKey');
+        const asc = ChangeContentSensitivityTester(
           key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent nsc = SensitiveContent(
+        final nsc = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1838,12 +1838,12 @@ void main() {
     testWidgets(
       'when one autoSensitive SensitiveContent widget changes to notSensitive with a notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key ascKey = Key('ascKey');
-        const ChangeContentSensitivityTester asc = ChangeContentSensitivityTester(
+        const ascKey = Key('ascKey');
+        const asc = ChangeContentSensitivityTester(
           key: ascKey,
           initialContentSensitivity: ContentSensitivity.autoSensitive,
         );
-        final SensitiveContent nsc = SensitiveContent(
+        final nsc = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -1874,12 +1874,12 @@ void main() {
     testWidgets(
       'when one notSensitive SensitiveContent widget changes to sensitive with a sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key nscKey = Key('nscKey');
-        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+        const nscKey = Key('nscKey');
+        const nsc = ChangeContentSensitivityTester(
           key: nscKey,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final SensitiveContent sc = SensitiveContent(
+        final sc = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -1916,12 +1916,12 @@ void main() {
     testWidgets(
       'when one notSensitive SensitiveContent widget changes to autoSensitive with a sensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key nscKey = Key('nscKey');
-        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+        const nscKey = Key('nscKey');
+        const nsc = ChangeContentSensitivityTester(
           key: nscKey,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final SensitiveContent sc = SensitiveContent(
+        final sc = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
@@ -1958,12 +1958,12 @@ void main() {
     testWidgets(
       'when one notSensitive SensitiveContent widget changes to sensitive with an autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key nscKey = Key('nscKey');
-        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+        const nscKey = Key('nscKey');
+        const nsc = ChangeContentSensitivityTester(
           key: nscKey,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final SensitiveContent asc2 = SensitiveContent(
+        final asc2 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -2001,12 +2001,12 @@ void main() {
     testWidgets(
       'when one notSensitive SensitiveContent widget changes to autoSensitive with an autoSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key nscKey = Key('nscKey');
-        const ChangeContentSensitivityTester nsc = ChangeContentSensitivityTester(
+        const nscKey = Key('nscKey');
+        const nsc = ChangeContentSensitivityTester(
           key: nscKey,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final SensitiveContent asc = SensitiveContent(
+        final asc = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
@@ -2043,12 +2043,12 @@ void main() {
     testWidgets(
       'when one notSensitive SensitiveContent widget changes to sensitive with another notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key nsc1Key = Key('nsc1Key');
-        const ChangeContentSensitivityTester nsc1 = ChangeContentSensitivityTester(
+        const nsc1Key = Key('nsc1Key');
+        const nsc1 = ChangeContentSensitivityTester(
           key: nsc1Key,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final SensitiveContent nsc2 = SensitiveContent(
+        final nsc2 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -2082,12 +2082,12 @@ void main() {
     testWidgets(
       'when one notSensitive SensitiveContent widget changes to autoSensitive with another notSensitive SensitiveContent widget',
       (WidgetTester tester) async {
-        const Key nsc1Key = Key('nsc1Key');
-        const ChangeContentSensitivityTester nsc1 = ChangeContentSensitivityTester(
+        const nsc1Key = Key('nsc1Key');
+        const nsc1 = ChangeContentSensitivityTester(
           key: nsc1Key,
           initialContentSensitivity: ContentSensitivity.notSensitive,
         );
-        final SensitiveContent nsc2 = SensitiveContent(
+        final nsc2 = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
@@ -2130,11 +2130,11 @@ void main() {
           // Ignore ContentSensitivity.unknown for this test.
           break;
         }
-        final SensitiveContent scChild = SensitiveContent(
+        final scChild = SensitiveContent(
           sensitivity: contentSensitivity,
           child: Container(),
         );
-        final SensitiveContent sc = SensitiveContent(
+        final sc = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: scChild,
         );
@@ -2152,11 +2152,11 @@ void main() {
     testWidgets(
       'when an autoSensitive SensitiveContent widget has a sensitive SensitiveContent child',
       (WidgetTester tester) async {
-        final SensitiveContent ascChild = SensitiveContent(
+        final ascChild = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent sc = SensitiveContent(
+        final sc = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: ascChild,
         );
@@ -2174,11 +2174,11 @@ void main() {
     testWidgets(
       'when an autoSensitive SensitiveContent widget has an autoSensitive SensitiveContent child',
       (WidgetTester tester) async {
-        final SensitiveContent ascChild = SensitiveContent(
+        final ascChild = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent asc = SensitiveContent(
+        final asc = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: ascChild,
         );
@@ -2196,11 +2196,11 @@ void main() {
     testWidgets(
       'when an autoSensitive SensitiveContent widget has an notSensitive SensitiveContent child',
       (WidgetTester tester) async {
-        final SensitiveContent nscChild = SensitiveContent(
+        final nscChild = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: Container(),
         );
-        final SensitiveContent asc = SensitiveContent(
+        final asc = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: nscChild,
         );
@@ -2218,11 +2218,11 @@ void main() {
     testWidgets(
       'when an notSensitive SensitiveContent widget has a sensitive SensitiveContent child',
       (WidgetTester tester) async {
-        final SensitiveContent scChild = SensitiveContent(
+        final scChild = SensitiveContent(
           sensitivity: ContentSensitivity.sensitive,
           child: Container(),
         );
-        final SensitiveContent nsc = SensitiveContent(
+        final nsc = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: scChild,
         );
@@ -2244,11 +2244,11 @@ void main() {
     testWidgets(
       'when an notSensitive SensitiveContent widget has an autoSensitive SensitiveContent child',
       (WidgetTester tester) async {
-        final SensitiveContent ascChild = SensitiveContent(
+        final ascChild = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
         );
-        final SensitiveContent nsc = SensitiveContent(
+        final nsc = SensitiveContent(
           sensitivity: ContentSensitivity.notSensitive,
           child: ascChild,
         );

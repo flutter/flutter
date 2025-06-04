@@ -96,8 +96,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   ) {
     assert(validate(yaml));
 
-    final String? dartPluginClass = yaml[kDartPluginClass] as String?;
-    final String? dartFileName = yaml[kDartFileName] as String?;
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
 
     if (dartPluginClass == null && dartFileName != null) {
       throwToolExit(
@@ -182,7 +182,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   late final Set<String> _supportedEmbeddings = _getSupportedEmbeddings();
 
   Set<String> _getSupportedEmbeddings() {
-    final Set<String> supportedEmbeddings = <String>{};
+    final supportedEmbeddings = <String>{};
     final String baseMainPath = _fileSystem.path.join(pluginPath, 'android', 'src', 'main');
 
     final String? package = this.package;
@@ -192,7 +192,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       return supportedEmbeddings;
     }
 
-    final List<String> mainClassCandidates = <String>[
+    final mainClassCandidates = <String>[
       _fileSystem.path.join(
         baseMainPath,
         'java',
@@ -208,8 +208,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     ];
 
     File? mainPluginClass;
-    bool mainClassFound = false;
-    for (final String mainClassCandidate in mainClassCandidates) {
+    var mainClassFound = false;
+    for (final mainClassCandidate in mainClassCandidates) {
       mainPluginClass = _fileSystem.file(mainClassCandidate);
       if (mainPluginClass.existsSync()) {
         mainClassFound = true;
@@ -265,8 +265,8 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
 
-    final String? dartPluginClass = yaml[kDartPluginClass] as String?;
-    final String? dartFileName = yaml[kDartFileName] as String?;
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
 
     if (dartPluginClass == null && dartFileName != null) {
       throwToolExit(
@@ -358,8 +358,8 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
 
-    final String? dartPluginClass = yaml[kDartPluginClass] as String?;
-    final String? dartFileName = yaml[kDartFileName] as String?;
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
 
     if (dartPluginClass == null && dartFileName != null) {
       throwToolExit(
@@ -447,17 +447,17 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String?;
+    var pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
       pluginClass = null;
     }
-    final Set<PluginPlatformVariant> variants = <PluginPlatformVariant>{};
-    final YamlList? variantList = yaml[kSupportedVariants] as YamlList?;
+    final variants = <PluginPlatformVariant>{};
+    final variantList = yaml[kSupportedVariants] as YamlList?;
     if (variantList == null) {
       // If no variant list is provided assume Win32 for backward compatibility.
       variants.add(PluginPlatformVariant.win32);
     } else {
-      const Map<String, PluginPlatformVariant> variantByName = <String, PluginPlatformVariant>{
+      const variantByName = <String, PluginPlatformVariant>{
         'win32': PluginPlatformVariant.win32,
       };
       for (final String variantName in variantList.cast<String>()) {
@@ -470,8 +470,8 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
       }
     }
 
-    final String? dartPluginClass = yaml[kDartPluginClass] as String?;
-    final String? dartFileName = yaml[kDartFileName] as String?;
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
 
     if (dartPluginClass == null && dartFileName != null) {
       throwToolExit(
@@ -557,8 +557,8 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
 
-    final String? dartPluginClass = yaml[kDartPluginClass] as String?;
-    final String? dartFileName = yaml[kDartFileName] as String?;
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
 
     if (dartPluginClass == null && dartFileName != null) {
       throwToolExit(

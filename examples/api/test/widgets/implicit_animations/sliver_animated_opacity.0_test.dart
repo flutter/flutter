@@ -20,8 +20,8 @@ void main() {
       matching: find.byType(SliverFadeTransition),
     );
 
-    const double beginOpacity = 1.0;
-    const double endOpacity = 0.0;
+    const beginOpacity = 1.0;
+    const endOpacity = 0.0;
 
     SliverFadeTransition fadeTransition = tester.widget(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, beginOpacity);

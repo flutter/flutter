@@ -18,7 +18,7 @@ void main() {
     await tester.pump();
 
     // Changes the focus to the unfocus button.
-    for (int i = 0; i < 6; i++) {
+    for (var i = 0; i < 6; i++) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
     }
@@ -44,7 +44,7 @@ void main() {
       await tester.pump();
 
       // Changes the focus to the second radio button.
-      for (int i = 0; i < 5; i++) {
+      for (var i = 0; i < 5; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }
@@ -60,7 +60,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // After pressing tab twice, the focus is on the first text field.
-      for (int i = 0; i < 2; i++) {
+      for (var i = 0; i < 2; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }

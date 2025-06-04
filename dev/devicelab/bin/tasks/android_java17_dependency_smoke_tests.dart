@@ -38,7 +38,7 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
-  const LocalFileSystem fileSystem = LocalFileSystem();
+  const fileSystem = LocalFileSystem();
 
   final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
     'flutter_android_dependency_version_tests',

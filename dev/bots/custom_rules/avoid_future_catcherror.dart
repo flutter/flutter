@@ -45,7 +45,7 @@ class AvoidFutureCatchError extends AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _Visitor visitor = _Visitor();
+    final visitor = _Visitor();
     unit.unit.visitChildren(visitor);
     if (visitor._offendingNodes.isNotEmpty) {
       _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(visitor._offendingNodes);

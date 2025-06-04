@@ -355,7 +355,7 @@ class _HourMinuteControl extends StatelessWidget {
     final Color backgroundColor = timePickerTheme.hourMinuteColor ?? defaultTheme.hourMinuteColor;
     final ShapeBorder shape = timePickerTheme.hourMinuteShape ?? defaultTheme.hourMinuteShape;
 
-    final Set<MaterialState> states = <MaterialState>{if (isSelected) MaterialState.selected};
+    final states = <MaterialState>{if (isSelected) MaterialState.selected};
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(
       _TimePickerModel.themeOf(context).hourMinuteTextColor ??
           _TimePickerModel.defaultThemeOf(context).hourMinuteTextColor,
@@ -486,7 +486,7 @@ class _TimeSelectorSeparator extends StatelessWidget {
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final _TimePickerDefaults defaultTheme =
         theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{};
+    final states = <MaterialState>{};
 
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(
       timePickerTheme.timeSelectorSeparatorColor?.resolve(states) ??
@@ -613,7 +613,7 @@ class _DayPeriodControl extends StatelessWidget {
     final TimePickerThemeData timePickerTheme = _TimePickerModel.themeOf(context);
     final _TimePickerDefaults defaultTheme = _TimePickerModel.defaultThemeOf(context);
     final TimeOfDay selectedTime = _TimePickerModel.selectedTimeOf(context);
-    final bool amSelected = selectedTime.period == DayPeriod.am;
+    final amSelected = selectedTime.period == DayPeriod.am;
     final bool pmSelected = !amSelected;
     final BorderSide resolvedSide =
         timePickerTheme.dayPeriodBorderSide ?? defaultTheme.dayPeriodBorderSide;
@@ -711,7 +711,7 @@ class _AmPmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
+    final states = <MaterialState>{if (selected) MaterialState.selected};
     final TimePickerThemeData timePickerTheme = _TimePickerModel.themeOf(context);
     final _TimePickerDefaults defaultTheme = _TimePickerModel.defaultThemeOf(context);
     final Color resolvedBackgroundColor = MaterialStateProperty.resolveAs<Color>(
@@ -856,7 +856,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   void performLayout() {
     size = _computeSize(constraints: constraints, layoutChild: ChildLayoutHelper.layoutChild);
     if (child != null) {
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     }
   }
@@ -980,8 +980,8 @@ class _DialPainter extends CustomPainter {
       _kTimePickerDialMinRadius,
       double.infinity,
     );
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    final Offset centerPoint = center;
+    final center = Offset(size.width / 2, size.height / 2);
+    final centerPoint = center;
     canvas.drawCircle(centerPoint, dialRadius, Paint()..color = backgroundColor);
 
     Offset getOffsetForTheta(double theta, double radius) {
@@ -997,7 +997,7 @@ class _DialPainter extends CustomPainter {
 
       for (final _TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
-        final Offset labelOffset = Offset(-labelPainter.width / 2, -labelPainter.height / 2);
+        final labelOffset = Offset(-labelPainter.width / 2, -labelPainter.height / 2);
         labelPainter.paint(canvas, getOffsetForTheta(labelTheta, radius) + labelOffset);
         labelTheta += labelThetaIncrement;
       }
@@ -1014,7 +1014,7 @@ class _DialPainter extends CustomPainter {
 
     paintInnerOuterLabels(primaryLabels);
 
-    final Paint selectorPaint = Paint()..color = handColor;
+    final selectorPaint = Paint()..color = handColor;
     final Offset focusedPoint = getOffsetForTheta(theta, handleRadius);
     canvas.drawCircle(centerPoint, centerRadius, selectorPaint);
     canvas.drawCircle(focusedPoint, dotRadius, selectorPaint);
@@ -1030,7 +1030,7 @@ class _DialPainter extends CustomPainter {
       canvas.drawCircle(focusedPoint, 2, selectorPaint..color = dotColor);
     }
 
-    final Rect focusedRect = Rect.fromCircle(center: focusedPoint, radius: dotRadius);
+    final focusedRect = Rect.fromCircle(center: focusedPoint, radius: dotRadius);
     canvas
       ..save()
       ..clipPath(Path()..addOval(focusedRect));
@@ -1269,7 +1269,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
-    final RenderBox box = context.findRenderObject()! as RenderBox;
+    final box = context.findRenderObject()! as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _dialSize = box.size;
     _center = _dialSize!.center(Offset.zero);
@@ -1296,7 +1296,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox box = context.findRenderObject()! as RenderBox;
+    final box = context.findRenderObject()! as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _dialSize = box.size;
@@ -1350,7 +1350,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _selectMinute(int minute) {
-    final TimeOfDay time = TimeOfDay(hour: widget.selectedTime.hour, minute: minute);
+    final time = TimeOfDay(hour: widget.selectedTime.hour, minute: minute);
     final double angle = _getThetaForTime(time);
     _thetaTween
       ..begin = angle
@@ -1496,7 +1496,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _buildMinutes({required TextStyle? textStyle, required int selectedValue}) {
-    const List<TimeOfDay> minuteMarkerValues = <TimeOfDay>[
+    const minuteMarkerValues = <TimeOfDay>[
       TimeOfDay(hour: 0, minute: 0),
       TimeOfDay(hour: 0, minute: 5),
       TimeOfDay(hour: 0, minute: 10),
@@ -1548,7 +1548,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       color: dialTextUnselectedColor,
     );
     final TextStyle resolvedSelectedLabelStyle = labelStyle.copyWith(color: dialTextSelectedColor);
-    final Color dotColor = dialTextSelectedColor;
+    final dotColor = dialTextSelectedColor;
 
     List<_TappableLabel> primaryLabels;
     List<_TappableLabel> selectedLabels;
@@ -1787,7 +1787,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(
       context,
     ).timeOfDayFormat(alwaysUse24HourFormat: _TimePickerModel.use24HourFormatOf(context));
-    final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
+    final use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = _TimePickerModel.themeOf(context);
     final _TimePickerDefaults defaultTheme = _TimePickerModel.defaultThemeOf(context);
@@ -2127,7 +2127,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 
     inputDecoration = inputDecoration.copyWith(hintText: hintText, fillColor: fillColor);
 
-    final Set<MaterialState> states = <MaterialState>{
+    final states = <MaterialState>{
       if (focusNode.hasFocus) MaterialState.focused,
       if (focusNode.hasFocus) MaterialState.selected,
     };
@@ -2422,7 +2422,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     // to 1.1 as that provides enough space to reasonably fit all the content.
     //
     // 14 is a common font size used to compute the effective text scale.
-    const double fontSizeToScale = 14.0;
+    const fontSizeToScale = 14.0;
     final double textScaleFactor =
         MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.1).scale(fontSizeToScale) /
         fontSizeToScale;
@@ -2562,7 +2562,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final Size constrainedSize = constraints.constrain(dialogSize);
-            final Size allowedSize = Size(
+            final allowedSize = Size(
               constrainedSize.width < minDialogSize.width
                   ? minDialogSize.width
                   : constrainedSize.width,
@@ -3667,10 +3667,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onPrimaryContainer;
         } else if (states.contains(MaterialState.hovered)) {
-          const double hoverOpacity = 0.08;
+          const hoverOpacity = 0.08;
           overlayColor = _colors.onPrimaryContainer.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.1;
+          const focusOpacity = 0.1;
           overlayColor = _colors.onPrimaryContainer.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.primaryContainer);
@@ -3679,10 +3679,10 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
         if (states.contains(MaterialState.pressed)) {
           overlayColor = _colors.onSurface;
         } else if (states.contains(MaterialState.hovered)) {
-          const double hoverOpacity = 0.08;
+          const hoverOpacity = 0.08;
           overlayColor = _colors.onSurface.withOpacity(hoverOpacity);
         } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = 0.1;
+          const focusOpacity = 0.1;
           overlayColor = _colors.onSurface.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, _colors.surfaceContainerHighest);

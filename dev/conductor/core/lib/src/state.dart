@@ -71,7 +71,7 @@ String defaultStateFilePath(Platform platform) {
 }
 
 String presentState(pb.ConductorState state) {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.writeln('Conductor version: ${state.conductorVersion}');
   buffer.writeln('Release channel: ${state.releaseChannel}');
   buffer.writeln('Release version: ${state.releaseVersion}');
@@ -118,8 +118,8 @@ String presentState(pb.ConductorState state) {
 }
 
 String presentPhases(ReleasePhase currentPhase) {
-  final StringBuffer buffer = StringBuffer();
-  bool phaseCompleted = true;
+  final buffer = StringBuffer();
+  var phaseCompleted = true;
 
   for (final ReleasePhase phase in ReleasePhase.values) {
     if (phase == currentPhase) {
@@ -241,7 +241,7 @@ void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
 }
 
 pb.ConductorState readStateFromFile(File file) {
-  final pb.ConductorState state = pb.ConductorState();
+  final state = pb.ConductorState();
   final String stateAsString = file.readAsStringSync();
   state.mergeFromProto3Json(jsonDecode(stateAsString));
   return state;

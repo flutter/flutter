@@ -115,7 +115,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox =
+      final renderBox =
           _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
@@ -1461,11 +1461,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     }
 
     final bool enabled = widget.enabled;
-    final Offset cursorOffset = Offset(
+    final cursorOffset = Offset(
       _iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context),
       0,
     );
-    final List<TextInputFormatter> formatters = <TextInputFormatter>[
+    final formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null)
         LengthLimitingTextInputFormatter(
@@ -1509,7 +1509,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     );
 
     final BoxBorder? border = widget.decoration?.border;
-    Border? resolvedBorder = border as Border?;
+    var resolvedBorder = border as Border?;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
@@ -1792,9 +1792,9 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox? placeholder = _placeholderChild;
     final RenderBox editableText = _editableTextChild;
 
-    final _BaselineAlignedStackParentData editableTextParentData =
+    final editableTextParentData =
         editableText.parentData! as _BaselineAlignedStackParentData;
-    final _BaselineAlignedStackParentData? placeholderParentData =
+    final placeholderParentData =
         placeholder?.parentData as _BaselineAlignedStackParentData?;
 
     size = _computeSize(
@@ -1826,12 +1826,12 @@ class _RenderBaselineAlignedStack extends RenderBox
     final RenderBox editableText = _editableTextChild;
 
     if (placeholder != null) {
-      final _BaselineAlignedStackParentData placeholderParentData =
+      final placeholderParentData =
           placeholder.parentData! as _BaselineAlignedStackParentData;
       context.paintChild(placeholder, offset + placeholderParentData.offset);
     }
 
-    final _BaselineAlignedStackParentData editableTextParentData =
+    final editableTextParentData =
         editableText.parentData! as _BaselineAlignedStackParentData;
     context.paintChild(editableText, offset + editableTextParentData.offset);
   }
@@ -1877,7 +1877,7 @@ class _RenderBaselineAlignedStack extends RenderBox
 
     height = math.max(height, editableTextSize.height);
     width = math.max(width, editableTextSize.width);
-    final Size size = Size(width, height);
+    final size = Size(width, height);
     assert(size.isFinite);
     return size;
   }

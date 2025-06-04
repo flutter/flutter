@@ -66,7 +66,7 @@ class LogsCommand extends FlutterCommand {
 
     globals.printStatus('Showing $logReader logs:');
 
-    final Completer<int> exitCompleter = Completer<int>();
+    final exitCompleter = Completer<int>();
 
     // First check if we already completed by another branch before completing
     // with [exitCode].

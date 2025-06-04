@@ -36,7 +36,7 @@ void main() {
   }();
 
   const FileSystem localFs = LocalFileSystem();
-  final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin(
+  final flutterRoot = _FlutterRootUnderTest.findWithin(
     forcePowershell: usePowershellOnPosix,
   );
 
@@ -104,8 +104,8 @@ void main() {
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
-      const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
-      for (final String key in powerShellVariables) {
+      const powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
+      for (final key in powerShellVariables) {
         final String? value = io.Platform.environment[key];
         if (value != null) {
           environment[key] = value;

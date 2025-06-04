@@ -60,7 +60,7 @@ String getFlutterRoot() {
     case 'file':
       scriptUri = platform.script;
     case 'data':
-      final RegExp flutterTools = RegExp(
+      final flutterTools = RegExp(
         r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)',
         multiLine: true,
       );
@@ -84,7 +84,7 @@ String getFlutterRoot() {
 
 /// Capture console print events into a string buffer.
 Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   await runZoned<Future<void>>(
     () async {
       // Service the event loop.
@@ -106,7 +106,7 @@ final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 ///
 /// [message] is matched using the [contains] matcher.
 Matcher throwsToolExit({int? exitCode, Pattern? message}) {
-  TypeMatcher<ToolExit> result = const TypeMatcher<ToolExit>();
+  var result = const TypeMatcher<ToolExit>();
 
   if (exitCode != null) {
     result = result.having((ToolExit e) => e.exitCode, 'exitCode', equals(exitCode));
@@ -374,14 +374,14 @@ bool analyticsTimingEventExists({
   required String variableName,
   String? label,
 }) {
-  final Map<String, String> lookup = <String, String>{
+  final lookup = <String, String>{
     'workflow': workflow,
     'variableName': variableName,
     if (label != null) 'label': label,
   };
 
   for (final Event e in sentEvents) {
-    final Map<String, Object?> eventData = <String, Object?>{...e.eventData};
+    final eventData = <String, Object?>{...e.eventData};
     eventData.remove('elapsedMilliseconds');
 
     if (const DeepCollectionEquality().equals(lookup, eventData)) {

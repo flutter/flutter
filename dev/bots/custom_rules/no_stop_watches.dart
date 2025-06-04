@@ -27,7 +27,7 @@ class _NoStopwatches implements AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _StopwatchVisitor visitor = _StopwatchVisitor(unit);
+    final visitor = _StopwatchVisitor(unit);
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.stopwatchAccessNodes;
     if (violationsInUnit.isNotEmpty) {

@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Expanded widget in a Column', (WidgetTester tester) async {
     const double totalHeight = 600;
-    const double appBarHeight = 56.0;
-    const double columnWidth = 100.0;
+    const appBarHeight = 56.0;
+    const columnWidth = 100.0;
     const double columnHeight = totalHeight - appBarHeight;
     const double containerOneHeight = 100;
     const double containerTwoHeight = columnHeight - 200;

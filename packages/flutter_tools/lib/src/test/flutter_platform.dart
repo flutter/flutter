@@ -90,7 +90,7 @@ FlutterPlatform installHook({
       return platform;
     });
   };
-  final FlutterPlatform platform = FlutterPlatform(
+  final platform = FlutterPlatform(
     flutterTesterBinPath: flutterTesterBinPath,
     debuggingOptions: debuggingOptions,
     watcher: watcher,
@@ -151,10 +151,10 @@ String generateTestBootstrap({
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  final String websocketUrl =
+  final websocketUrl =
       host.type == InternetAddressType.IPv4 ? 'ws://${host.address}' : 'ws://[${host.address}]';
 
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.write('''
 $languageVersionHeader
 import 'dart:async';
@@ -426,19 +426,19 @@ class FlutterPlatform extends PlatformPlugin {
 
     final int ourTestCount = _testCount;
     _testCount += 1;
-    final StreamController<dynamic> localController = StreamController<dynamic>();
-    final StreamController<dynamic> remoteController = StreamController<dynamic>();
-    final Completer<_AsyncError?> testCompleteCompleter = Completer<_AsyncError?>();
-    final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink =
+    final localController = StreamController<dynamic>();
+    final remoteController = StreamController<dynamic>();
+    final testCompleteCompleter = Completer<_AsyncError?>();
+    final remoteSink =
         _FlutterPlatformStreamSinkWrapper<dynamic>(
           remoteController.sink,
           testCompleteCompleter.future,
         );
-    final StreamChannel<dynamic> localChannel = StreamChannel<dynamic>.withGuarantees(
+    final localChannel = StreamChannel<dynamic>.withGuarantees(
       remoteController.stream,
       localController.sink,
     );
-    final StreamChannel<dynamic> remoteChannel = StreamChannel<dynamic>.withGuarantees(
+    final remoteChannel = StreamChannel<dynamic>.withGuarantees(
       localController.stream,
       remoteSink,
     );
@@ -543,7 +543,7 @@ class FlutterPlatform extends PlatformPlugin {
       if (data == null) {
         throw StateError('Expected VM service data, but got null.');
       }
-      final int id = data['id']! as int;
+      final id = data['id']! as int;
       final Uri relativePath = Uri.parse(data['path']! as String);
       final Uint8List bytes = base64.decode(data['bytes']! as String);
 
@@ -583,9 +583,9 @@ class FlutterPlatform extends PlatformPlugin {
     outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     // Will be run in reverse order.
-    final List<Finalizer> finalizers = <Finalizer>[];
-    bool ranFinalizers = false;
-    bool controllerSinkClosed = false;
+    final finalizers = <Finalizer>[];
+    var ranFinalizers = false;
+    var controllerSinkClosed = false;
     Future<void> finalize() async {
       if (ranFinalizers) {
         return;
@@ -678,7 +678,7 @@ class FlutterPlatform extends PlatformPlugin {
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final Completer<StreamChannel<String>> remoteChannelCompleter =
+      final remoteChannelCompleter =
           Completer<StreamChannel<String>>();
       unawaited(
         asyncGuard(
@@ -722,7 +722,7 @@ class FlutterPlatform extends PlatformPlugin {
             // deadlock.
             eagerError: true,
           );
-          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
+          final remoteChannel = first! as StreamChannel<String>;
 
           globals.printTrace(
             'test $ourTestCount: connected to test device, now awaiting test result',
@@ -748,7 +748,7 @@ class FlutterPlatform extends PlatformPlugin {
       ]);
     } on Exception catch (error, stackTrace) {
       Object reportedError = error;
-      StackTrace reportedStackTrace = stackTrace;
+      var reportedStackTrace = stackTrace;
       if (error is TestDeviceException) {
         reportedError = error.message;
         reportedStackTrace = error.stackTrace;

@@ -78,7 +78,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
         'Error details: ${exception.message}',
       );
     }
-    final List<AndroidDevice> devices = <AndroidDevice>[];
+    final devices = <AndroidDevice>[];
     _parseADBDeviceOutput(text, devices: devices);
     return devices;
   }
@@ -97,7 +97,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     if (result.exitCode != 0) {
       return <String>[];
     }
-    final List<String> diagnostics = <String>[];
+    final diagnostics = <String>[];
     _parseADBDeviceOutput(result.stdout, diagnostics: diagnostics);
     return diagnostics;
   }
@@ -148,7 +148,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
         final String deviceState = match[2]!;
         String? rest = match[3];
 
-        final Map<String, String> info = <String, String>{};
+        final info = <String, String>{};
         if (rest != null && rest.isNotEmpty) {
           rest = rest.trim();
           for (final String data in rest.split(' ')) {

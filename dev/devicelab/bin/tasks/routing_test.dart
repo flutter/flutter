@@ -28,7 +28,7 @@ void main() {
     });
     section('TEST WHETHER `flutter run --route` WORKS');
     await inDirectory(appDir, () async {
-      final Completer<void> ready = Completer<void>();
+      final ready = Completer<void>();
       late bool ok;
       print('run: starting...');
       final Process run = await startFlutter(

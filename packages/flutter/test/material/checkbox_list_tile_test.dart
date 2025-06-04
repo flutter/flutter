@@ -20,7 +20,7 @@ Widget wrap({required Widget child}) {
 
 void main() {
   testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
+    final log = <dynamic>[];
     await tester.pumpWidget(
       wrap(
         child: CheckboxListTile(
@@ -39,8 +39,8 @@ void main() {
   });
 
   testWidgets('Material2 - CheckboxListTile checkColor test', (WidgetTester tester) async {
-    const Color checkBoxBorderColor = Color(0xff2196f3);
-    Color checkBoxCheckColor = const Color(0xffFFFFFF);
+    const checkBoxBorderColor = Color(0xff2196f3);
+    var checkBoxCheckColor = const Color(0xffFFFFFF);
 
     Widget buildFrame(Color? color) {
       return MaterialApp(
@@ -77,8 +77,8 @@ void main() {
   });
 
   testWidgets('Material3 - CheckboxListTile checkColor test', (WidgetTester tester) async {
-    const Color checkBoxBorderColor = Color(0xff6750a4);
-    Color checkBoxCheckColor = const Color(0xffFFFFFF);
+    const checkBoxBorderColor = Color(0xff6750a4);
+    var checkBoxCheckColor = const Color(0xffFFFFFF);
 
     Widget buildFrame(Color? color) {
       return MaterialApp(
@@ -196,7 +196,7 @@ void main() {
     final Rect checkboxRect = tester.getRect(find.byType(Checkbox));
     final Rect titleRect = tester.getRect(find.text('Title'));
 
-    final Rect tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
+    final tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
 
     // Check the offsets of Checkbox and title after padding is applied.
     expect(paddingRect.right, checkboxRect.right + 4);
@@ -210,7 +210,7 @@ void main() {
 
   testWidgets('CheckboxListTile tristate test', (WidgetTester tester) async {
     bool? value = false;
-    bool tristate = false;
+    var tristate = false;
 
     await tester.pumpWidget(
       Material(
@@ -347,7 +347,7 @@ void main() {
   testWidgets('CheckboxListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76908
 
-    const Color activeColor = Color(0xff00ff00);
+    const activeColor = Color(0xff00ff00);
 
     Widget buildFrame({Color? activeColor, Color? fillColor}) {
       return MaterialApp(
@@ -403,10 +403,10 @@ void main() {
       );
     }
 
-    const RoundedRectangleBorder border1 = RoundedRectangleBorder(
+    const border1 = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
     );
-    const BorderSide side1 = BorderSide(color: Color(0xfff44336));
+    const side1 = BorderSide(color: Color(0xfff44336));
     await tester.pumpWidget(buildApp(side1, border1));
     expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).side, side1);
     expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).checkboxShape, border1);
@@ -420,10 +420,10 @@ void main() {
         inner: RRect.fromLTRBR(12.0, 12.0, 28.0, 28.0, const Radius.circular(4)),
       ),
     );
-    const RoundedRectangleBorder border2 = RoundedRectangleBorder(
+    const border2 = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5)),
     );
-    const BorderSide side2 = BorderSide(width: 4.0, color: Color(0xff424242));
+    const side2 = BorderSide(width: 4.0, color: Color(0xff424242));
     await tester.pumpWidget(buildApp(side2, border2));
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).side, side2);
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).shape, border2);
@@ -438,7 +438,7 @@ void main() {
   });
 
   testWidgets('CheckboxListTile respects visualDensity', (WidgetTester tester) async {
-    const Key key = Key('test');
+    const key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
         wrap(
@@ -484,8 +484,8 @@ void main() {
   });
 
   testWidgets('CheckboxListTile onFocusChange callback', (WidgetTester tester) async {
-    final FocusNode node = FocusNode(debugLabel: 'CheckboxListTile onFocusChange');
-    bool gotFocus = false;
+    final node = FocusNode(debugLabel: 'CheckboxListTile onFocusChange');
+    var gotFocus = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -516,7 +516,7 @@ void main() {
 
   testWidgets('CheckboxListTile can be disabled', (WidgetTester tester) async {
     bool? value = false;
-    bool enabled = true;
+    var enabled = true;
 
     await tester.pumpWidget(
       Material(
@@ -634,8 +634,8 @@ void main() {
   testWidgets('CheckboxListTile respects fillColor in enabled/disabled states', (
     WidgetTester tester,
   ) async {
-    const Color activeEnabledFillColor = Color(0xFF000001);
-    const Color activeDisabledFillColor = Color(0xFF000002);
+    const activeEnabledFillColor = Color(0xFF000001);
+    const activeDisabledFillColor = Color(0xFF000002);
 
     Color getFillColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -671,7 +671,7 @@ void main() {
 
   testWidgets('CheckboxListTile respects fillColor in hovered state', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    const Color hoveredFillColor = Color(0xFF000001);
+    const hoveredFillColor = Color(0xFF000001);
 
     Color getFillColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
@@ -771,11 +771,11 @@ void main() {
     (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-      const Color fillColor = Color(0xFF000000);
-      const Color activePressedOverlayColor = Color(0xFF000001);
-      const Color inactivePressedOverlayColor = Color(0xFF000002);
-      const Color hoverOverlayColor = Color(0xFF000003);
-      const Color hoverColor = Color(0xFF000005);
+      const fillColor = Color(0xFF000000);
+      const activePressedOverlayColor = Color(0xFF000001);
+      const inactivePressedOverlayColor = Color(0xFF000002);
+      const hoverOverlayColor = Color(0xFF000003);
+      const hoverColor = Color(0xFF000005);
 
       Color? getOverlayColor(Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
@@ -790,7 +790,7 @@ void main() {
         return null;
       }
 
-      const double splashRadius = 24.0;
+      const splashRadius = 24.0;
 
       Widget buildCheckbox({bool active = false, bool useOverlay = true}) {
         return MaterialApp(
@@ -894,11 +894,11 @@ void main() {
     (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-      const Color fillColor = Color(0xFF000000);
-      const Color activePressedOverlayColor = Color(0xFF000001);
-      const Color inactivePressedOverlayColor = Color(0xFF000002);
-      const Color hoverOverlayColor = Color(0xFF000003);
-      const Color hoverColor = Color(0xFF000005);
+      const fillColor = Color(0xFF000000);
+      const activePressedOverlayColor = Color(0xFF000001);
+      const inactivePressedOverlayColor = Color(0xFF000002);
+      const hoverOverlayColor = Color(0xFF000003);
+      const hoverColor = Color(0xFF000005);
 
       Color? getOverlayColor(Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
@@ -913,7 +913,7 @@ void main() {
         return null;
       }
 
-      const double splashRadius = 24.0;
+      const splashRadius = 24.0;
 
       Widget buildCheckbox({bool active = false, bool useOverlay = true}) {
         return MaterialApp(
@@ -1075,7 +1075,7 @@ void main() {
   });
 
   testWidgets('Material3 - CheckboxListTile respects isError', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp() {
@@ -1144,7 +1144,7 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     ]) {
@@ -1154,7 +1154,7 @@ void main() {
       expect(find.byType(CupertinoCheckbox), findsOneWidget);
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[
+    for (final platform in <TargetPlatform>[
       TargetPlatform.android,
       TargetPlatform.fuchsia,
       TargetPlatform.linux,
@@ -1208,7 +1208,7 @@ void main() {
   });
 
   testWidgets('CheckboxListTile has proper semantics', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
+    final log = <dynamic>[];
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       wrap(
@@ -1322,7 +1322,7 @@ void main() {
   });
 
   testWidgets('CheckboxListTile respects checkboxScaleFactor', (WidgetTester tester) async {
-    const double scale = 1.5;
+    const scale = 1.5;
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -1341,7 +1341,7 @@ void main() {
 
   testWidgets('CheckboxListTile isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double switchTop = 130.0;
+    const switchTop = 130.0;
 
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
@@ -1455,7 +1455,7 @@ void main() {
 
   testWidgets('CheckboxListTile.adaptive isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double switchTop = 128.0;
+    const switchTop = 128.0;
 
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
@@ -1571,11 +1571,11 @@ void main() {
   });
 
   testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
-    const Key secondaryKey = Key('secondary');
-    const double titleHeight = 50.0;
-    const double secondaryHeight = 24.0;
+    const secondaryKey = Key('secondary');
+    const titleHeight = 50.0;
+    const secondaryHeight = 24.0;
     // The default vertical padding for material 3 is 8.0.
-    const double minVerticalPadding = 8.0;
+    const minVerticalPadding = 8.0;
 
     Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
       return MaterialApp(
@@ -1663,7 +1663,7 @@ void main() {
 
     // Leading and trailing widgets are placed minVerticalPadding below
     // the top of the title widget. The default for material 3 is 8.0.
-    const double topPosition = minVerticalPadding;
+    const topPosition = minVerticalPadding;
     expect(checkboxOffset.dy - tileOffset.dy, topPosition);
     expect(secondaryOffset.dy - tileOffset.dy, topPosition);
 
@@ -1706,11 +1706,11 @@ void main() {
   testWidgets('titleAlignment position with title and subtitle widgets', (
     WidgetTester tester,
   ) async {
-    const Key secondaryKey = Key('secondary');
-    const double titleHeight = 50.0;
-    const double subtitleHeight = 50.0;
-    const double secondaryHeight = 24.0;
-    const double verticalPadding = 8.0;
+    const secondaryKey = Key('secondary');
+    const titleHeight = 50.0;
+    const subtitleHeight = 50.0;
+    const secondaryHeight = 24.0;
+    const verticalPadding = 8.0;
 
     Widget buildFrame({ListTileTitleAlignment? titleAlignment}) {
       return MaterialApp(
@@ -1784,7 +1784,7 @@ void main() {
 
     // Leading and trailing widgets are positioned 16.0 pixels below the
     // top of the title widget.
-    const double titlePosition = 16.0;
+    const titlePosition = 16.0;
     expect(checkboxOffset.dy - tileOffset.dy, titlePosition);
     expect(secondaryOffset.dy - tileOffset.dy, titlePosition);
 
@@ -1802,7 +1802,7 @@ void main() {
 
     // Leading and trailing widgets are placed minVerticalPadding below
     // the top of the title widget.
-    const double topPosition = verticalPadding;
+    const topPosition = verticalPadding;
     expect(checkboxOffset.dy - tileOffset.dy, topPosition);
     expect(secondaryOffset.dy - tileOffset.dy, topPosition);
 

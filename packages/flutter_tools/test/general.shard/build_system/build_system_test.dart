@@ -72,7 +72,7 @@ void main() {
           })
           ..name = 'shared'
           ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')];
-    final Artifacts artifacts = Artifacts.test();
+    final artifacts = Artifacts.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
@@ -153,7 +153,7 @@ void main() {
   });
 
   group('BuildResult.outputs filtering', () {
-    final TestTarget allFilesTarget =
+    final allFilesTarget =
         TestTarget((Environment environment) async {})
           ..name = 'allTextFiles'
           ..inputs = const <Source>[
@@ -316,7 +316,7 @@ void main() {
 
   testWithoutContext('Automatically cleans old outputs when build graph changes', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testTarget =
+    final testTarget =
         TestTarget((Environment environment) async {
             environment.buildDir.childFile('foo.out').createSync();
           })
@@ -328,7 +328,7 @@ void main() {
 
     expect(environment.buildDir.childFile('foo.out'), exists);
 
-    final TestTarget testTarget2 =
+    final testTarget2 =
         TestTarget((Environment environment) async {
             environment.buildDir.childFile('bar.out').createSync();
           })
@@ -343,7 +343,7 @@ void main() {
 
   testWithoutContext('Does not crash when filesystem and cache are out of sync', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testWithoutContextTarget =
+    final testWithoutContextTarget =
         TestTarget((Environment environment) async {
             environment.buildDir.childFile('foo.out').createSync();
           })
@@ -356,7 +356,7 @@ void main() {
     expect(environment.buildDir.childFile('foo.out'), exists);
     environment.buildDir.childFile('foo.out').deleteSync();
 
-    final TestTarget testWithoutContextTarget2 =
+    final testWithoutContextTarget2 =
         TestTarget((Environment environment) async {
             environment.buildDir.childFile('bar.out').createSync();
           })
@@ -371,7 +371,7 @@ void main() {
 
   testWithoutContext('Reruns build if stamp is corrupted', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testWithoutContextTarget =
+    final testWithoutContextTarget =
         TestTarget((Environment environment) async {
             environment.buildDir.childFile('foo.out').createSync();
           })
@@ -427,8 +427,8 @@ void main() {
     'Target with depfile dependency will not run twice without invalidation',
     () async {
       final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-      int called = 0;
-      final TestTarget target = TestTarget((Environment environment) async {
+      var called = 0;
+      final target = TestTarget((Environment environment) async {
         environment.buildDir.childFile('example.d').writeAsStringSync('a.txt: b.txt');
         fileSystem.file('a.txt').writeAsStringSync('a');
         called += 1;
@@ -450,8 +450,8 @@ void main() {
   testWithoutContext('Target with depfile dependency will not run twice without '
       'invalidation in incremental builds', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    int called = 0;
-    final TestTarget target = TestTarget((Environment environment) async {
+    var called = 0;
+    final target = TestTarget((Environment environment) async {
       environment.buildDir.childFile('example.d').writeAsStringSync('a.txt: b.txt');
       fileSystem.file('a.txt').writeAsStringSync('a');
       called += 1;
@@ -470,7 +470,7 @@ void main() {
   });
 
   testWithoutContext('output directory is an input to the build', () async {
-    final Environment environmentA = Environment.test(
+    final environmentA = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a'),
       artifacts: Artifacts.test(),
@@ -478,7 +478,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
     );
-    final Environment environmentB = Environment.test(
+    final environmentB = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('b'),
       artifacts: Artifacts.test(),
@@ -491,7 +491,7 @@ void main() {
   });
 
   testWithoutContext('Additional inputs do not change the build configuration', () async {
-    final Environment environmentA = Environment.test(
+    final environmentA = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
@@ -499,7 +499,7 @@ void main() {
       logger: BufferLogger.test(),
       inputs: <String, String>{'C': 'D'},
     );
-    final Environment environmentB = Environment.test(
+    final environmentB = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
       processManager: FakeProcessManager.any(),
@@ -515,8 +515,8 @@ void main() {
     'A target with depfile dependencies can delete stale outputs on the first run',
     () async {
       final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-      int called = 0;
-      final TestTarget target = TestTarget((Environment environment) async {
+      var called = 0;
+      final target = TestTarget((Environment environment) async {
         if (called == 0) {
           environment.buildDir.childFile('example.d').writeAsStringSync('a.txt c.txt: b.txt');
           fileSystem.file('a.txt').writeAsStringSync('a');
@@ -561,7 +561,7 @@ void main() {
   });
 
   testWithoutContext('trackSharedBuildDirectory handles a missing output dir', () {
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a/b/c/d'),
       artifacts: Artifacts.test(),
@@ -649,7 +649,7 @@ void main() {
     'multiple builds to the same output directory do no leave stale artifacts',
     () async {
       final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-      final Environment testEnvironmentDebug = Environment.test(
+      final testEnvironmentDebug = Environment.test(
         fileSystem.currentDirectory,
         outputDir: fileSystem.directory('output'),
         defines: <String, String>{'config': 'debug'},
@@ -658,7 +658,7 @@ void main() {
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
       );
-      final Environment testEnvironmentProfile = Environment.test(
+      final testEnvironmentProfile = Environment.test(
         fileSystem.currentDirectory,
         outputDir: fileSystem.directory('output'),
         defines: <String, String>{'config': 'profile'},
@@ -668,10 +668,10 @@ void main() {
         fileSystem: fileSystem,
       );
 
-      final TestTarget debugTarget = TestTarget((Environment environment) async {
+      final debugTarget = TestTarget((Environment environment) async {
         environment.outputDir.childFile('debug').createSync();
       })..outputs = const <Source>[Source.pattern('{OUTPUT_DIR}/debug')];
-      final TestTarget releaseTarget = TestTarget((Environment environment) async {
+      final releaseTarget = TestTarget((Environment environment) async {
         environment.outputDir.childFile('release').createSync();
       })..outputs = const <Source>[Source.pattern('{OUTPUT_DIR}/release')];
 
@@ -701,7 +701,7 @@ void main() {
     final File foo = environment.buildDir.childFile('foo');
 
     // The target will write a file `foo`, but only if `bar` already exists.
-    final TestTarget target = TestTarget(
+    final target = TestTarget(
       (Environment environment) async {
         foo.writeAsStringSync(bar.readAsStringSync());
         environment.buildDir.childFile('example.d').writeAsStringSync('${foo.path}: ${bar.path}');
@@ -736,26 +736,26 @@ void main() {
   });
 
   testWithoutContext('Build completes all dependencies before failing', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final fileSystem = MemoryFileSystem.test();
     final BuildSystem buildSystem = setUpBuildSystem(
       fileSystem,
       FakePlatform(
         numberOfProcessors: 10, // Ensure the tool will process tasks concurrently.
       ),
     );
-    final Completer<void> startB = Completer<void>();
-    final Completer<void> startC = Completer<void>();
-    final Completer<void> finishB = Completer<void>();
+    final startB = Completer<void>();
+    final startC = Completer<void>();
+    final finishB = Completer<void>();
 
-    final TestTarget a = TestTarget((Environment environment) {
+    final a = TestTarget((Environment environment) {
       throw StateError('Should not run');
     })..name = 'A';
-    final TestTarget b = TestTarget((Environment environment) async {
+    final b = TestTarget((Environment environment) async {
       startB.complete();
       await finishB.future;
       throw Exception('1');
     })..name = 'B';
-    final TestTarget c = TestTarget((Environment environment) {
+    final c = TestTarget((Environment environment) {
       startC.complete();
       throw Exception('2');
     })..name = 'C';

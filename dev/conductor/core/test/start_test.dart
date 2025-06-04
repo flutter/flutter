@@ -20,15 +20,15 @@ void main() {
   group(
     'start command',
     () {
-      const String branchPointRevision = '5131a6e5e0c50b8b7b2906cd58dab8746d6450be';
-      const String flutterRoot = '/flutter';
-      const String checkoutsParentDirectory = '$flutterRoot/dev/tools/';
-      const String githubUsername = 'user';
-      const String frameworkMirror = 'git@github.com:$githubUsername/flutter.git';
-      const String candidateBranch = 'flutter-1.2-candidate.3';
-      const String releaseChannel = 'beta';
-      const String revision = 'abcd1234';
-      const String conductorVersion = 'deadbeef';
+      const branchPointRevision = '5131a6e5e0c50b8b7b2906cd58dab8746d6450be';
+      const flutterRoot = '/flutter';
+      const checkoutsParentDirectory = '$flutterRoot/dev/tools/';
+      const githubUsername = 'user';
+      const frameworkMirror = 'git@github.com:$githubUsername/flutter.git';
+      const candidateBranch = 'flutter-1.2-candidate.3';
+      const releaseChannel = 'beta';
+      const revision = 'abcd1234';
+      const conductorVersion = 'deadbeef';
       late Checkouts checkouts;
       late MemoryFileSystem fileSystem;
       late FakePlatform platform;
@@ -46,7 +46,7 @@ void main() {
         List<FakeCommand>? commands,
       }) {
         operatingSystem ??= const LocalPlatform().operatingSystem;
-        final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
+        final pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
         environment ??= <String, String>{'HOME': '/path/to/user/home'};
         final Directory homeDir = fileSystem.directory(environment['HOME']);
         // Tool assumes this exists
@@ -64,7 +64,7 @@ void main() {
           processManager: processManager,
           stdio: stdio,
         );
-        final StartCommand command = StartCommand(
+        final command = StartCommand(
           checkouts: checkouts,
           conductorVersion: conductorVersion,
         );
@@ -72,11 +72,11 @@ void main() {
       }
 
       group('start arg parser', () {
-        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+        const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
         late StartCommand startCommand;
         setUp(() {
           final String operatingSystem = const LocalPlatform().operatingSystem;
-          final Map<String, String> environment = <String, String>{'HOME': '/path/to/user/home'};
+          final environment = <String, String>{'HOME': '/path/to/user/home'};
           final Directory homeDir = fileSystem.directory(environment['HOME']);
           // Tool assumes this exists
           homeDir.createSync(recursive: true);
@@ -97,7 +97,7 @@ void main() {
         });
 
         test('default args', () async {
-          final List<String> args = <String>[
+          final args = <String>[
             'start',
             '--$kCandidateOption',
             candidateBranch,
@@ -119,8 +119,8 @@ void main() {
         });
 
         test('overridden mirror', () async {
-          const String customFrameworkMirror = 'git@github.com:$githubUsername/flutter-work.git';
-          final List<String> args = <String>[
+          const customFrameworkMirror = 'git@github.com:$githubUsername/flutter-work.git';
+          final args = <String>[
             'start',
             '--$kCandidateOption',
             candidateBranch,
@@ -191,16 +191,16 @@ void main() {
 
       test('creates state file if provided correct inputs', () async {
         stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
-        const String revision2 = 'def789';
-        const String revision3 = '123abc';
-        const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-        const String previousVersion = '1.2.0-1.0.pre';
+        const revision2 = 'def789';
+        const revision3 = '123abc';
+        const previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+        const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+        const previousVersion = '1.2.0-1.0.pre';
         // This is what this release will be
-        const String nextVersion = '1.2.0-1.1.pre';
-        const String candidateBranch = 'flutter-1.2-candidate.1';
+        const nextVersion = '1.2.0-1.1.pre';
+        const candidateBranch = 'flutter-1.2-candidate.1';
 
-        final List<FakeCommand> commands = <FakeCommand>[
+        final commands = <FakeCommand>[
           // clone and rev-parse framework
           FakeCommand(
             command: <String>[
@@ -305,7 +305,7 @@ void main() {
 
         final File stateFile = fileSystem.file(stateFilePath);
 
-        final pb.ConductorState state = pb.ConductorState();
+        final state = pb.ConductorState();
         state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
 
         expect(state.releaseType, ReleaseType.BETA_HOTFIX);
@@ -326,15 +326,15 @@ void main() {
 
       test('uses --$kVersionOverrideOption', () async {
         stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
-        const String revision2 = 'def789';
-        const String revision3 = '123abc';
-        const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-        const String previousVersion = '1.2.0-1.0.pre';
-        const String candidateBranch = 'flutter-1.2-candidate.1';
-        const String versionOverride = '42.0.0-42.0.pre';
+        const revision2 = 'def789';
+        const revision3 = '123abc';
+        const previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+        const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+        const previousVersion = '1.2.0-1.0.pre';
+        const candidateBranch = 'flutter-1.2-candidate.1';
+        const versionOverride = '42.0.0-42.0.pre';
 
-        final List<FakeCommand> commands = <FakeCommand>[
+        final commands = <FakeCommand>[
           // clone and rev-parse framework
           FakeCommand(
             command: <String>[
@@ -434,7 +434,7 @@ void main() {
 
         final File stateFile = fileSystem.file(stateFilePath);
 
-        final pb.ConductorState state = pb.ConductorState();
+        final state = pb.ConductorState();
         state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
 
         expect(processManager, hasNoRemainingExpectations);
@@ -442,14 +442,14 @@ void main() {
       });
 
       test('can convert from dev style version to stable version', () async {
-        const String revision2 = 'def789';
-        const String revision3 = '123abc';
-        const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-        const String previousVersion = '1.2.0-3.0.pre';
-        const String nextVersion = '1.2.0';
+        const revision2 = 'def789';
+        const revision3 = '123abc';
+        const previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+        const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+        const previousVersion = '1.2.0-3.0.pre';
+        const nextVersion = '1.2.0';
 
-        final List<FakeCommand> commands = <FakeCommand>[
+        final commands = <FakeCommand>[
           // rev-parse framework
           FakeCommand(
             command: <String>[
@@ -551,7 +551,7 @@ void main() {
 
         final File stateFile = fileSystem.file(stateFilePath);
 
-        final pb.ConductorState state = pb.ConductorState();
+        final state = pb.ConductorState();
         state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
 
         expect(processManager, hasNoRemainingExpectations);
@@ -568,20 +568,20 @@ void main() {
 
       test('StartContext gets framework checkout directory after run', () async {
         stdio.stdin.add('y');
-        const String revision2 = 'def789';
-        const String branchPointRevision = 'deadbeef';
-        const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-        const String previousVersion = '1.2.0-1.0.pre';
+        const revision2 = 'def789';
+        const branchPointRevision = 'deadbeef';
+        const previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+        const nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+        const previousVersion = '1.2.0-1.0.pre';
         // This is a git tag applied to the branch point, not an actual release
-        const String branchPointTag = '1.2.0-3.0.pre';
+        const branchPointTag = '1.2.0-3.0.pre';
 
         final Directory framework = fileSystem
             .directory(checkoutsParentDirectory)
             .childDirectory('flutter_conductor_checkouts')
             .childDirectory('framework');
 
-        final List<FakeCommand> commands = <FakeCommand>[
+        final commands = <FakeCommand>[
           // checkout and rev-parse framework
           FakeCommand(
             command: <String>[
@@ -672,7 +672,7 @@ void main() {
         ];
 
         final String operatingSystem = const LocalPlatform().operatingSystem;
-        final Map<String, String> environment = <String, String>{'HOME': '/path/to/user/home'};
+        final environment = <String, String>{'HOME': '/path/to/user/home'};
         final Directory homeDir = fileSystem.directory(environment['HOME']);
         // Tool assumes this exists
         homeDir.createSync(recursive: true);
@@ -693,7 +693,7 @@ void main() {
           stdio: stdio,
         );
 
-        final StartContext startContext = StartContext(
+        final startContext = StartContext(
           candidateBranch: candidateBranch,
           checkouts: checkouts,
           dartRevision: nextDartRevision,
@@ -708,7 +708,7 @@ void main() {
 
         await startContext.run();
 
-        final pb.ConductorState state = pb.ConductorState();
+        final state = pb.ConductorState();
         state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
 
         expect((await startContext.framework.checkoutDirectory).path, equals(framework.path));

@@ -1097,7 +1097,7 @@ void main() {
     required bool useSyntheticPackage,
     required bool useNamedParameters,
   }) {
-    String l10nYamlString = '';
+    var l10nYamlString = '';
 
     if (useDeferredLoading) {
       l10nYamlString += 'use-deferred-loading: true\n';

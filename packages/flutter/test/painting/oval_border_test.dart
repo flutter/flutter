@@ -7,21 +7,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('OvalBorder defaults', () {
-    const OvalBorder border = OvalBorder();
+    const border = OvalBorder();
     expect(border.side, BorderSide.none);
   });
 
   test('OvalBorder copyWith, ==, hashCode', () {
     expect(const OvalBorder(), const OvalBorder().copyWith());
     expect(const OvalBorder().hashCode, const OvalBorder().copyWith().hashCode);
-    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const side = BorderSide(width: 10.0, color: Color(0xff123456));
     expect(const OvalBorder().copyWith(side: side), const OvalBorder(side: side));
   });
 
   test('OvalBorder', () {
-    const OvalBorder c10 = OvalBorder(side: BorderSide(width: 10.0));
-    const OvalBorder c15 = OvalBorder(side: BorderSide(width: 15.0));
-    const OvalBorder c20 = OvalBorder(side: BorderSide(width: 20.0));
+    const c10 = OvalBorder(side: BorderSide(width: 10.0));
+    const c15 = OvalBorder(side: BorderSide(width: 15.0));
+    const c20 = OvalBorder(side: BorderSide(width: 20.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);

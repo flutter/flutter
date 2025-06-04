@@ -25,7 +25,7 @@ void main() {
     final ImageLoadingBuilder loadingBuilder = image.loadingBuilder!;
     final BuildContext context = tester.element(find.byType(Image));
 
-    const SizedBox child = SizedBox(key: Key('child'));
+    const child = SizedBox(key: Key('child'));
 
     await tester.pumpWidget(loadingBuilder(context, child, null));
 
@@ -43,7 +43,7 @@ void main() {
     final ImageLoadingBuilder loadingBuilder = image.loadingBuilder!;
     final BuildContext context = tester.element(find.byType(Image));
 
-    const SizedBox child = SizedBox(key: Key('child'));
+    const child = SizedBox(key: Key('child'));
 
     await tester.pumpWidget(
       MaterialApp(

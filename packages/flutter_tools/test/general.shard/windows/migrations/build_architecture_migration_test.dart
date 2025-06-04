@@ -41,7 +41,7 @@ void main() {
       executable.createSync();
       expect(oldRunnerDirectory.existsSync(), isTrue);
 
-      final BuildArchitectureMigration migration = BuildArchitectureMigration(
+      final migration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,
@@ -60,7 +60,7 @@ void main() {
     });
 
     testWithoutContext('skipped if CMake file is missing', () async {
-      final BuildArchitectureMigration migration = BuildArchitectureMigration(
+      final migration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,
@@ -78,13 +78,13 @@ void main() {
     });
 
     testWithoutContext('skipped if nothing to migrate', () async {
-      const String cmakeFileContents = 'Nothing to migrate';
+      const cmakeFileContents = 'Nothing to migrate';
 
       cmakeFile.writeAsStringSync(cmakeFileContents);
 
       final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
 
-      final BuildArchitectureMigration buildArchitectureMigration = BuildArchitectureMigration(
+      final buildArchitectureMigration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,
@@ -97,7 +97,7 @@ void main() {
     });
 
     testWithoutContext('skipped if already migrated', () async {
-      const String cmakeFileContents =
+      const cmakeFileContents =
           '# TODO: Move the rest of this into files in ephemeral. See\n'
           '# https://github.com/flutter/flutter/issues/57146.\n'
           'set(WRAPPER_ROOT "\${EPHEMERAL_DIR}/cpp_client_wrapper")\n'
@@ -125,7 +125,7 @@ void main() {
 
       final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
 
-      final BuildArchitectureMigration buildArchitectureMigration = BuildArchitectureMigration(
+      final buildArchitectureMigration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,
@@ -139,7 +139,7 @@ void main() {
     });
 
     testWithoutContext('skipped if already migrated (CRLF)', () async {
-      const String cmakeFileContents =
+      const cmakeFileContents =
           '# TODO: Move the rest of this into files in ephemeral. See\r\n'
           '# https://github.com/flutter/flutter/issues/57146.\r\n'
           'set(WRAPPER_ROOT "\${EPHEMERAL_DIR}/cpp_client_wrapper")\r\n'
@@ -167,7 +167,7 @@ void main() {
 
       final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
 
-      final BuildArchitectureMigration buildArchitectureMigration = BuildArchitectureMigration(
+      final buildArchitectureMigration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,
@@ -200,7 +200,7 @@ void main() {
         '  VERBATIM\n'
         ')\n',
       );
-      final BuildArchitectureMigration buildArchitectureMigration = BuildArchitectureMigration(
+      final buildArchitectureMigration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,
@@ -260,7 +260,7 @@ void main() {
         ')\r\n',
       );
 
-      final BuildArchitectureMigration buildArchitectureMigration = BuildArchitectureMigration(
+      final buildArchitectureMigration = BuildArchitectureMigration(
         mockProject,
         buildDirectory,
         testLogger,

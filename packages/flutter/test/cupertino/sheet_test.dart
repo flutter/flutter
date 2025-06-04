@@ -922,7 +922,7 @@ void main() {
 
       expect(find.text('Page 2'), findsOneWidget);
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
@@ -1187,7 +1187,7 @@ void main() {
 
       expect(find.text('Page 2'), findsOneWidget);
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
@@ -1217,7 +1217,7 @@ void main() {
     testWidgets('showCupertinoSheet shows snackbar at bottom of screen', (
       WidgetTester tester,
     ) async {
-      final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+      final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
       void showSheet(BuildContext context) {
         showCupertinoSheet<void>(

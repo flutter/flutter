@@ -92,7 +92,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
       to: constraints.viewportMainAxisExtent,
     );
     if (child != null) {
-      double maxExtent = extent;
+      var maxExtent = extent;
 
       // If sliver has no extent, but is within viewport's cacheExtent, use the
       // sliver's cacheExtent as the maxExtent so that it does not get dropped

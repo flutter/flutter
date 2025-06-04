@@ -65,7 +65,7 @@ void main() {
   });
 
   testWidgets('Mock MessageHandler is set correctly', (WidgetTester tester) async {
-    final TestDefaultBinaryMessenger binaryMessenger = TestDefaultBinaryMessenger(
+    final binaryMessenger = TestDefaultBinaryMessenger(
       WorkingTestDelegate(),
     );
     binaryMessenger.setMockMessageHandler(
@@ -78,7 +78,7 @@ void main() {
   });
 
   test('Mock StreamHandler is set correctly', () async {
-    const EventChannel channel = EventChannel('');
+    const channel = EventChannel('');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
       channel,
       MockStreamHandler.inline(
@@ -106,7 +106,7 @@ void main() {
   });
 
   testWidgets('Mock AllMessagesHandler is set correctly', (WidgetTester tester) async {
-    final TestDefaultBinaryMessenger binaryMessenger = TestDefaultBinaryMessenger(
+    final binaryMessenger = TestDefaultBinaryMessenger(
       WorkingTestDelegate(),
     );
     binaryMessenger.allMessagesHandler =

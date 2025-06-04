@@ -10,7 +10,7 @@ import '../suite_runners/run_verify_binaries_codesigned_tests.dart';
 import './common.dart';
 
 void main() async {
-  const String flutterRoot = '/a/b/c';
+  const flutterRoot = '/a/b/c';
   final List<String> allExpectedFiles =
       binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
   final String allFilesStdout = allExpectedFiles.join('\n');
@@ -42,13 +42,13 @@ void main() async {
     });
 
     test('All files found', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      final FakeCommand findCmd = FakeCommand(
+      final commandList = <FakeCommand>[];
+      final findCmd = FakeCommand(
         command: const <String>['find', '$flutterRoot/bin/cache', '-type', 'f'],
         stdout: allFilesStdout,
       );
       commandList.add(findCmd);
-      for (final String expectedFile in allExpectedFiles) {
+      for (final expectedFile in allExpectedFiles) {
         commandList.add(
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', expectedFile],
@@ -63,13 +63,13 @@ void main() async {
 
   group('find paths', () {
     test('All binary files found', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      final FakeCommand findCmd = FakeCommand(
+      final commandList = <FakeCommand>[];
+      final findCmd = FakeCommand(
         command: const <String>['find', '$flutterRoot/bin/cache', '-type', 'f'],
         stdout: allFilesStdout,
       );
       commandList.add(findCmd);
-      for (final String expectedFile in allExpectedFiles) {
+      for (final expectedFile in allExpectedFiles) {
         commandList.add(
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', expectedFile],
@@ -86,8 +86,8 @@ void main() async {
     });
 
     test('Empty file list', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      const FakeCommand findCmd = FakeCommand(
+      final commandList = <FakeCommand>[];
+      const findCmd = FakeCommand(
         command: <String>['find', '$flutterRoot/bin/cache', '-type', 'f'],
       );
       commandList.add(findCmd);
@@ -100,7 +100,7 @@ void main() async {
     });
 
     test('All xcframeworks files found', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[
+      final commandList = <FakeCommand>[
         FakeCommand(
           command: const <String>[
             'find',
@@ -123,9 +123,9 @@ void main() async {
 
     group('isBinary', () {
       test('isTrue', () async {
-        final List<FakeCommand> commandList = <FakeCommand>[];
-        const String fileToCheck = '/a/b/c/one.zip';
-        const FakeCommand findCmd = FakeCommand(
+        final commandList = <FakeCommand>[];
+        const fileToCheck = '/a/b/c/one.zip';
+        const findCmd = FakeCommand(
           command: <String>['file', '--mime-type', '-b', fileToCheck],
           stdout: 'application/x-mach-binary',
         );
@@ -136,9 +136,9 @@ void main() async {
       });
 
       test('isFalse', () async {
-        final List<FakeCommand> commandList = <FakeCommand>[];
-        const String fileToCheck = '/a/b/c/one.zip';
-        const FakeCommand findCmd = FakeCommand(
+        final commandList = <FakeCommand>[];
+        const fileToCheck = '/a/b/c/one.zip';
+        const findCmd = FakeCommand(
           command: <String>['file', '--mime-type', '-b', fileToCheck],
           stdout: 'text/xml',
         );
@@ -151,9 +151,9 @@ void main() async {
 
     group('hasExpectedEntitlements', () {
       test('expected entitlements', () async {
-        final List<FakeCommand> commandList = <FakeCommand>[];
-        const String fileToCheck = '/a/b/c/one.zip';
-        const FakeCommand codesignCmd = FakeCommand(
+        final commandList = <FakeCommand>[];
+        const fileToCheck = '/a/b/c/one.zip';
+        const codesignCmd = FakeCommand(
           command: <String>['codesign', '--display', '--entitlements', ':-', fileToCheck],
         );
         commandList.add(codesignCmd);
@@ -167,9 +167,9 @@ void main() async {
       });
 
       test('unexpected entitlements', () async {
-        final List<FakeCommand> commandList = <FakeCommand>[];
-        const String fileToCheck = '/a/b/c/one.zip';
-        const FakeCommand codesignCmd = FakeCommand(
+        final commandList = <FakeCommand>[];
+        const fileToCheck = '/a/b/c/one.zip';
+        const codesignCmd = FakeCommand(
           command: <String>['codesign', '--display', '--entitlements', ':-', fileToCheck],
           exitCode: 1,
         );
@@ -187,13 +187,13 @@ void main() async {
 
   group('verifySignatures', () {
     test('succeeds if every binary is codesigned and has correct entitlements', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      final FakeCommand findCmd = FakeCommand(
+      final commandList = <FakeCommand>[];
+      final findCmd = FakeCommand(
         command: const <String>['find', '$flutterRoot/bin/cache', '-type', 'f'],
         stdout: allFilesStdout,
       );
       commandList.add(findCmd);
-      for (final String expectedFile in allExpectedFiles) {
+      for (final expectedFile in allExpectedFiles) {
         commandList.add(
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', expectedFile],
@@ -214,7 +214,7 @@ void main() async {
           stdout: allXcframeworksStdout,
         ),
       );
-      for (final String expectedFile in allExpectedFiles) {
+      for (final expectedFile in allExpectedFiles) {
         commandList.add(FakeCommand(command: <String>['codesign', '-vvv', expectedFile]));
         if (withEntitlements.contains(expectedFile)) {
           commandList.add(
@@ -226,7 +226,7 @@ void main() async {
         }
       }
 
-      for (final String expectedXcframework in allExpectedXcframeworks) {
+      for (final expectedXcframework in allExpectedXcframeworks) {
         commandList.add(FakeCommand(command: <String>['codesign', '-vvv', expectedXcframework]));
       }
       final ProcessManager processManager = FakeProcessManager.list(commandList);
@@ -234,13 +234,13 @@ void main() async {
     });
 
     test('fails if binaries do not have the right entitlements', () async {
-      final List<FakeCommand> commandList = <FakeCommand>[];
-      final FakeCommand findCmd = FakeCommand(
+      final commandList = <FakeCommand>[];
+      final findCmd = FakeCommand(
         command: const <String>['find', '$flutterRoot/bin/cache', '-type', 'f'],
         stdout: allFilesStdout,
       );
       commandList.add(findCmd);
-      for (final String expectedFile in allExpectedFiles) {
+      for (final expectedFile in allExpectedFiles) {
         commandList.add(
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', expectedFile],
@@ -261,7 +261,7 @@ void main() async {
           stdout: allXcframeworksStdout,
         ),
       );
-      for (final String expectedFile in allExpectedFiles) {
+      for (final expectedFile in allExpectedFiles) {
         commandList.add(FakeCommand(command: <String>['codesign', '-vvv', expectedFile]));
         if (withEntitlements.contains(expectedFile)) {
           commandList.add(
@@ -271,7 +271,7 @@ void main() async {
           );
         }
       }
-      for (final String expectedXcframework in allExpectedXcframeworks) {
+      for (final expectedXcframework in allExpectedXcframeworks) {
         commandList.add(FakeCommand(command: <String>['codesign', '-vvv', expectedXcframework]));
       }
       final ProcessManager processManager = FakeProcessManager.list(commandList);

@@ -59,7 +59,7 @@ void main() {
   });
 
   testUsingContext('pub shows help', () async {
-    final PackagesCommand command = PackagesCommand();
+    final command = PackagesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['pub']);
 
@@ -82,7 +82,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -118,7 +118,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -148,7 +148,7 @@ void main() {
       final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
       targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
@@ -180,7 +180,7 @@ void main() {
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
       await commandRunner.run(<String>['get', '--unknown-flag']);
@@ -197,7 +197,7 @@ void main() {
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
       await commandRunner.run(<String>['get', '-v']);
@@ -221,15 +221,15 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('add', '', PubContext.pubAdd);
+      final command = PackagesGetCommand('add', '', PubContext.pubAdd);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-      const List<String> availableSyntax = <String>[
+      const availableSyntax = <String>[
         'foo:{"path":"../foo"}',
         'foo:{"hosted":"my-pub.dev"}',
         'foo:{"sdk":"flutter"}',
         'foo:{"git":"https://github.com/foo/foo"}',
       ];
-      for (final String syntax in availableSyntax) {
+      for (final syntax in availableSyntax) {
         pub.expectedArguments = <String>['add', syntax, '--example', '--directory', '.'];
         await commandRunner.run(<String>['add', syntax]);
       }
@@ -250,7 +250,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -276,7 +276,7 @@ void main() {
   testUsingContext(
     'pub get throws error on missing directory',
     () async {
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       try {
@@ -318,7 +318,7 @@ flutter:
       }
       ''');
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);

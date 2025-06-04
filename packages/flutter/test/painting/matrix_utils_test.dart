@@ -10,13 +10,13 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('MatrixUtils.transformRect handles very large finite values', () {
-    const Rect evilRect = Rect.fromLTRB(
+    const evilRect = Rect.fromLTRB(
       0.0,
       -1.7976931348623157e+308,
       800.0,
       1.7976931348623157e+308,
     );
-    final Matrix4 transform = Matrix4.identity()..translate(10.0);
+    final transform = Matrix4.identity()..translate(10.0);
     final Rect transformedRect = MatrixUtils.transformRect(transform, evilRect);
     expect(transformedRect.isFinite, true);
   });
@@ -111,7 +111,7 @@ void main() {
   });
 
   test('forceToPoint', () {
-    const Offset forcedOffset = Offset(20, -30);
+    const forcedOffset = Offset(20, -30);
     final Matrix4 forcedTransform = MatrixUtils.forceToPoint(forcedOffset);
 
     expect(MatrixUtils.transformPoint(forcedTransform, forcedOffset), forcedOffset);
@@ -131,7 +131,7 @@ void main() {
   });
 
   test('transformRect with no perspective (w = 1)', () {
-    const Rect rectangle20x20 = Rect.fromLTRB(10, 20, 30, 40);
+    const rectangle20x20 = Rect.fromLTRB(10, 20, 30, 40);
 
     // Identity
     expect(MatrixUtils.transformRect(Matrix4.identity(), rectangle20x20), rectangle20x20);
@@ -156,8 +156,8 @@ void main() {
       perspective: 0.3,
     );
 
-    for (int i = 1; i < 10000; i++) {
-      final Rect rect = Rect.fromLTRB(11.0 * i, 12.0 * i, 15.0 * i, 18.0 * i);
+    for (var i = 1; i < 10000; i++) {
+      final rect = Rect.fromLTRB(11.0 * i, 12.0 * i, 15.0 * i, 18.0 * i);
       final Rect golden = _vectorWiseTransformRect(transform, rect);
       expect(
         MatrixUtils.transformRect(transform, rect),
@@ -172,7 +172,7 @@ void main() {
 // golden implementation of the optimized `MatrixUtils.transformPoint`
 // to make sure optimizations do not contain bugs.
 Offset _transformPoint(Matrix4 transform, Offset point) {
-  final Vector3 position3 = Vector3(point.dx, point.dy, 0.0);
+  final position3 = Vector3(point.dx, point.dy, 0.0);
   final Vector3 transformed3 = transform.perspectiveTransform(position3);
   return Offset(transformed3.x, transformed3.y);
 }

@@ -25,7 +25,7 @@ void main() {
 
 void _defineTests() {
   testWidgets('builds no semantics by default', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(painter: _PainterWithoutSemantics()));
 
@@ -35,7 +35,7 @@ void _defineTests() {
   });
 
   testWidgets('provides foreground semantics', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CustomPaint(
@@ -73,7 +73,7 @@ void _defineTests() {
   });
 
   testWidgets('provides background semantics', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CustomPaint(
@@ -111,7 +111,7 @@ void _defineTests() {
   });
 
   testWidgets('combines background, child and foreground semantics', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CustomPaint(
@@ -169,7 +169,7 @@ void _defineTests() {
   });
 
   testWidgets('applies $SemanticsProperties', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CustomPaint(
@@ -291,7 +291,7 @@ void _defineTests() {
   });
 
   testWidgets('provides semantic role', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CustomPaint(
@@ -334,7 +334,7 @@ void _defineTests() {
   });
 
   testWidgets('provides semantic validation result', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
       CustomPaint(
@@ -405,7 +405,7 @@ void _defineTests() {
     expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
 
     // Semantics on
-    SemanticsTester semantics = SemanticsTester(tester);
+    var semantics = SemanticsTester(tester);
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
 
@@ -423,8 +423,8 @@ void _defineTests() {
   }, semanticsEnabled: false);
 
   testWidgets('Supports all actions', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final List<SemanticsAction> performedActions = <SemanticsAction>[];
+    final semantics = SemanticsTester(tester);
+    final performedActions = <SemanticsAction>[];
 
     await tester.pumpWidget(
       CustomPaint(
@@ -472,8 +472,8 @@ void _defineTests() {
           ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
           ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
-    const int expectedId = 2;
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    const expectedId = 2;
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
@@ -494,8 +494,8 @@ void _defineTests() {
 
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    int expectedLength = 1;
-    for (final SemanticsAction action in allActions) {
+    var expectedLength = 1;
+    for (final action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
@@ -535,7 +535,7 @@ void _defineTests() {
   });
 
   testWidgets('Supports all flags', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
       CustomPaint(
@@ -578,7 +578,7 @@ void _defineTests() {
     flags
       ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.isCheckStateMixed);
-    TestSemantics expectedSemantics = TestSemantics.root(
+    var expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
@@ -647,8 +647,8 @@ void _defineTests() {
   });
 
   testWidgets('semantics properties', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsProperties properties = SemanticsProperties(
+    final semantics = SemanticsTester(tester);
+    final properties = SemanticsProperties(
       label: 'label',
       value: 'value',
       increasedValue: 'increasedValue',
@@ -681,8 +681,8 @@ void _defineTests() {
       ),
     );
 
-    const int expectedId = 2;
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    const expectedId = 2;
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
@@ -720,7 +720,7 @@ void _defineTests() {
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
-      final SemanticsTester semanticsTester = SemanticsTester(tester);
+      final semanticsTester = SemanticsTester(tester);
       await tester.pumpWidget(CustomPaint(painter: _SemanticsDiffTest(<String>['a-k', 'a-k'])));
       expect(tester.takeException(), isFlutterError);
       semanticsTester.dispose();
@@ -760,16 +760,16 @@ void _defineTests() {
   });
 
   testWidgets('rebuilds semantics upon resize', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
-    final _PainterWithSemantics painter = _PainterWithSemantics(
+    final painter = _PainterWithSemantics(
       semantics: const CustomPainterSemantics(
         rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
         properties: SemanticsProperties(label: 'background', textDirection: TextDirection.rtl),
       ),
     );
 
-    final CustomPaint paint = CustomPaint(painter: painter);
+    final paint = CustomPaint(painter: painter);
 
     await tester.pumpWidget(SizedBox(height: 20.0, width: 20.0, child: paint));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
@@ -790,9 +790,9 @@ void _defineTests() {
   });
 
   testWidgets('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
-    const CustomPainterSemantics testSemantics = CustomPainterSemantics(
+    const testSemantics = CustomPainterSemantics(
       rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       properties: SemanticsProperties(label: 'background', textDirection: TextDirection.rtl),
     );
@@ -807,7 +807,7 @@ void _defineTests() {
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
     expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
-    const CustomPainterSemantics testSemantics2 = CustomPainterSemantics(
+    const testSemantics2 = CustomPainterSemantics(
       rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       properties: SemanticsProperties(label: 'background', textDirection: TextDirection.rtl),
     );
@@ -840,7 +840,7 @@ class _DiffTester {
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
   Future<void> diff({required List<String> from, required List<String> to}) async {
-    final SemanticsTester semanticsTester = SemanticsTester(tester);
+    final semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {
       return TestSemantics.root(
@@ -860,7 +860,7 @@ class _DiffTester {
     expect(semanticsTester, hasSemantics(createExpectations(from), ignoreId: true));
 
     SemanticsNode root = RendererBinding.instance.renderView.debugSemantics!;
-    final Map<Key, int> idAssignments = <Key, int>{};
+    final idAssignments = <Key, int>{};
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null) {
@@ -910,7 +910,7 @@ class _SemanticsDiffTest extends CustomPainter {
   SemanticsBuilderCallback get semanticsBuilder => buildSemantics;
 
   List<CustomPainterSemantics> buildSemantics(Size size) {
-    final List<CustomPainterSemantics> semantics = <CustomPainterSemantics>[];
+    final semantics = <CustomPainterSemantics>[];
     for (final String label in data) {
       Key? key;
       if (label.endsWith('-k')) {

@@ -70,7 +70,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     // Collect the shortcuts from the different menu selections so that they can
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+    final shortcuts = <ShortcutActivator, Intent>{
       for (final MenuEntry item in MenuEntry.values)
         if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
     };
