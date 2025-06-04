@@ -249,7 +249,7 @@ void main() {
           '--no-debug',
           '--no-profile',
           '--target-platform',
-          'android-x86',
+          'android-x64',
           '--tree-shake-icons',
           '--flavor',
           'free',
@@ -272,7 +272,7 @@ void main() {
 
       final AndroidBuildInfo androidBuildInfo =
           (buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>).single;
-      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
+      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86_64]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
       expect(buildInfo.mode, BuildMode.release);

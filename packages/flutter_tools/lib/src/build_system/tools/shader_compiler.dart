@@ -107,7 +107,6 @@ class ShaderCompiler {
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android:

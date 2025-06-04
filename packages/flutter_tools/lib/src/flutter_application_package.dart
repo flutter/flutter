@@ -54,7 +54,6 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
             FlutterProject.current().android,

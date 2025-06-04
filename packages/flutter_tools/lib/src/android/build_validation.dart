@@ -18,12 +18,6 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
       '--target-platform flag.',
     );
   }
-  if (buildInfo.mode.isPrecompiled && androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {
-    throwToolExit(
-      'Cannot build ${androidBuildInfo.buildInfo.mode.cliName} mode for x86 ABI.\n'
-      'For more information see $kSupportedAbis .',
-    );
-  }
   if (buildInfo.buildNumber != null) {
     final int? result = int.tryParse(buildInfo.buildNumber!);
     if (result == null) {
