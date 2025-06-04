@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2853,6 +2855,67 @@ void _tests() {
 
     expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
     expect(node.childrenCount, 1);
+    semantics.dispose();
+  });
+
+  testWidgets('slivers that are transformed are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverMainAxisGroup(
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: Text('Label 1')),
+              const SliverToBoxAdapter(child: Text('Label 2')),
+              SliverToBoxAdapter(
+                child: Transform.rotate(
+                  angle: pi / 2.0,
+                  child: const Row(
+                    children: <Widget>[Text('Label 3'), Text('Label 4'), Text('Label 5')],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    // Label 3 is off-screen so it gets dropped.
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+              children: <TestSemantics>[
+                TestSemantics(label: 'Label 1', textDirection: TextDirection.ltr),
+                TestSemantics(label: 'Label 2', textDirection: TextDirection.ltr),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                  label: 'Label 4',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                  label: 'Label 5',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true),
+    );
+
     semantics.dispose();
   });
 }
