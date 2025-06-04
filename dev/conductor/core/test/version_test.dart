@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:conductor_core/src/proto/conductor_state.pbenum.dart';
 import 'package:conductor_core/src/version.dart';
 
 import 'common.dart';
@@ -103,65 +102,4 @@ void main() {
       'windows': const Skip('Flutter Conductor only supported on macos/linux'),
     },
   );
-
-  group('.ensureValid()', () {
-    test('throws when x does not match', () {
-      const String versionString = '1.2.3-4.5.pre';
-      const String candidateBranch = 'flutter-3.2-candidate.4';
-      final Version version = Version.fromString(versionString);
-      expect(
-        () => version.ensureValid(candidateBranch, ReleaseType.BETA_HOTFIX),
-        throwsExceptionWith(
-          'Parsed version $versionString has a different x value than '
-          'candidate branch $candidateBranch',
-        ),
-      );
-    });
-
-    test('throws when y does not match', () {
-      const String versionString = '1.2.3';
-      const String candidateBranch = 'flutter-1.15-candidate.4';
-      final Version version = Version.fromString(versionString);
-      expect(
-        () => version.ensureValid(candidateBranch, ReleaseType.BETA_INITIAL),
-        throwsExceptionWith(
-          'Parsed version $versionString has a different y value than '
-          'candidate branch $candidateBranch',
-        ),
-      );
-    });
-
-    test('throws when m does not match', () {
-      const String versionString = '1.2.3-4.5.pre';
-      const String candidateBranch = 'flutter-1.2-candidate.0';
-      final Version version = Version.fromString(versionString);
-      expect(
-        () => version.ensureValid(candidateBranch, ReleaseType.BETA_HOTFIX),
-        throwsExceptionWith(
-          'Parsed version $versionString has a different m value than '
-          'candidate branch $candidateBranch',
-        ),
-      );
-    });
-
-    test('does not validate m if version type is stable', () {
-      const String versionString = '1.2.0';
-      const String candidateBranch = 'flutter-1.2-candidate.98';
-      final Version version = Version.fromString(versionString);
-      expect(
-        () => version.ensureValid(candidateBranch, ReleaseType.STABLE_HOTFIX),
-        isNot(throwsException),
-      );
-    });
-
-    test('throws on malformed candidate branch', () {
-      const String versionString = '1.2.0';
-      const String candidateBranch = 'stable';
-      final Version version = Version.fromString(versionString);
-      expect(
-        () => version.ensureValid(candidateBranch, ReleaseType.STABLE_HOTFIX),
-        throwsExceptionWith('Candidate branch $candidateBranch does not match the pattern'),
-      );
-    });
-  });
 }

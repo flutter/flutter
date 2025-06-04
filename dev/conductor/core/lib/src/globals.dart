@@ -4,7 +4,6 @@
 
 import 'package:args/args.dart';
 
-import 'proto/conductor_state.pb.dart' as pb;
 import 'repository.dart';
 
 const String gsutilBinary = 'gsutil.py';
@@ -136,65 +135,4 @@ List<String> getValuesFromEnvOrArgs(String name, ArgResults argResults, Map<Stri
 /// For example, 'state-file' -> 'STATE_FILE'.
 String fromArgToEnvName(String argName) {
   return argName.toUpperCase().replaceAll(r'-', r'_');
-}
-
-/// Return a web link for the user to open a new PR.
-///
-/// Includes PR title and body via query params.
-String getNewPrLink({
-  required String userName,
-  required String repoName,
-  required pb.ConductorState state,
-}) {
-  assert(state.releaseChannel.isNotEmpty);
-  assert(state.releaseVersion.isNotEmpty);
-  final (pb.Repository repository, String repoLabel) = switch (repoName) {
-    'flutter' => (state.framework, 'Framework'),
-    'engine' => (state.engine, 'Engine'),
-    _ =>
-      throw ConductorException(
-        'Expected repoName to be one of flutter or engine but got $repoName.',
-      ),
-  };
-  final String candidateBranch = repository.candidateBranch;
-  final String workingBranch = repository.workingBranch;
-  assert(candidateBranch.isNotEmpty);
-  assert(workingBranch.isNotEmpty);
-  final String title =
-      '[flutter_releases] Flutter ${state.releaseChannel} '
-      '${state.releaseVersion} $repoLabel Cherrypicks';
-  final StringBuffer body = StringBuffer();
-  body.write('''
-# Flutter ${state.releaseChannel} ${state.releaseVersion} $repoLabel
-
-## Scheduled Cherrypicks
-
-''');
-  if (repoName == 'engine') {
-    if (state.engine.dartRevision.isNotEmpty) {
-      // shorten hashes to make final link manageable
-      // prefix with github org/repo so GitHub will auto-generate a hyperlink
-      body.writeln(
-        '- Roll dart revision: dart-lang/sdk@${state.engine.dartRevision.substring(0, 9)}',
-      );
-    }
-    for (final pb.Cherrypick cp in state.engine.cherrypicks) {
-      // Only list commits that map to a commit that exists upstream.
-      if (cp.trunkRevision.isNotEmpty) {
-        body.writeln('- commit: flutter/engine@${cp.trunkRevision.substring(0, 9)}');
-      }
-    }
-  } else {
-    for (final pb.Cherrypick cp in state.framework.cherrypicks) {
-      // Only list commits that map to a commit that exists upstream.
-      if (cp.trunkRevision.isNotEmpty) {
-        body.writeln('- commit: ${cp.trunkRevision.substring(0, 9)}');
-      }
-    }
-  }
-  return 'https://github.com/flutter/$repoName/compare/'
-      '$candidateBranch...$userName:$workingBranch?'
-      'expand=1'
-      '&title=${Uri.encodeQueryComponent(title)}'
-      '&body=${Uri.encodeQueryComponent(body.toString())}';
 }

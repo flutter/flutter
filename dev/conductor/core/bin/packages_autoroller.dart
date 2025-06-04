@@ -5,8 +5,9 @@
 import 'dart:io' as io;
 
 import 'package:args/args.dart';
-import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/packages_autoroller.dart';
+import 'package:conductor_core/src/repository.dart';
+import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
