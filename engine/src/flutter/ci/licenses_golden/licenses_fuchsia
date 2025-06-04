@@ -1,4 +1,4 @@
-Signature: be695e23b6b7bdb6edc4a69d377929db
+Signature: 834b84033cf957044a91c66bf3292afa
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -12101,8 +12101,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysm
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/constructors.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/storage.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/utility.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/string_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/utility.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12504,8 +12502,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/constructors.h
-FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/storage.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/utility.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/string_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/utility.h
@@ -13560,12 +13556,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia/fuchsia.bind + ../../../fuchsia/sdk/linux/LICENSE
@@ -13703,57 +13702,75 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/overview.fidl + ../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/softmac.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/errors.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls-next.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls.inc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/syscalls/iob.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/sequence_checker.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -13896,12 +13913,15 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/reboot.
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/zbi.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia/fuchsia.bind
@@ -14039,57 +14059,75 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/softmac.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/zx/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/errors.h
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls-next.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/syscalls/internal/cdecls.inc
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/zircon/syscalls/iob.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/sequence_checker.h
@@ -14357,6 +14395,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/collector.shard.
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/bounded_list_node.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/bounded_list_node.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -14464,6 +14504,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/collector.shard.cm
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/bounded_list_node.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/bounded_list_node.h
 FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc
@@ -14757,12 +14799,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/fuchsia.interconnect.bind + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/address_lookup.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/haptics.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/interconnect.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.bus/observability.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/qrtr.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/vendor.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/resolver.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14775,12 +14826,21 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/processargs.h + ../
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/fuchsia.interconnect.bind
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.sys/address_lookup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/haptics.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/interconnect.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.bus/observability.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/qrtr.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/vendor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/resolver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl

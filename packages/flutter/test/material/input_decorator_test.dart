@@ -238,6 +238,14 @@ Rect getContainerRect(WidgetTester tester) {
   return box.paintBounds;
 }
 
+Animation<double> _getHoverAnimation(WidgetTester tester) {
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
+  final Animation<double> animation = inputBorderPainter.hoverAnimation as Animation<double>;
+  return animation;
+}
+
 InputBorder? getBorder(WidgetTester tester) {
   if (!tester.any(findBorderPainter())) {
     return null;
@@ -13360,6 +13368,15 @@ void main() {
       expect(getContainerColor(tester), isSameColorAs(hoverColor));
       await tester.pump(const Duration(milliseconds: 15));
       expect(getContainerColor(tester), isSameColorAs(fillColor));
+
+      // Test that for high refresh rate displays, the color mid-animation is somewhere between
+      // the fill color and the hover color.
+      await pumpDecorator(hovering: true);
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
+      await tester.pump(const Duration(milliseconds: 6));
+      final Color midHoverColor =
+          Color.lerp(hoverColor.withAlpha(0), hoverColor, _getHoverAnimation(tester).value)!;
+      expect(getContainerColor(tester), isSameColorAs(Color.alphaBlend(midHoverColor, fillColor)));
 
       await pumpDecorator(hovering: false, enabled: false);
       expect(getContainerColor(tester), isSameColorAs(disabledColor));

@@ -172,10 +172,7 @@ Future<void> run(List<String> arguments) async {
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
-  await runCommand(flutter, <String>[
-    'update-packages',
-    '--verify-only',
-  ], workingDirectory: flutterRoot);
+  await runCommand(flutter, <String>['update-packages'], workingDirectory: flutterRoot);
 
   /// Ensure that no new dependencies have been accidentally
   /// added to core packages.
@@ -2336,7 +2333,7 @@ Future<void> _checkConsumerDependencies() async {
       dependencies.add(currentPackage['name']! as String);
 
       final List<String> currentDependencies =
-          (currentPackage['dependencies']! as List<Object?>).cast<String>();
+          (currentPackage['directDependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
         // Don't add dependencies we've already seen or we will get stuck
         // forever if there are any circular references.
@@ -2660,6 +2657,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',
+  'bin/internal/last_engine_commit.sh',
   'bin/internal/update_dart_sdk.sh',
   'bin/internal/update_engine_version.sh',
   'bin/internal/content_aware_hash.sh',

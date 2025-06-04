@@ -10,6 +10,7 @@ import '../../base/build.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart' show Logger;
 import '../../base/process.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
@@ -239,7 +240,7 @@ class DebugUniversalFramework extends Target {
 /// This class is abstract to share logic between the three concrete
 /// implementations. The shelling out is done to avoid complications with
 /// preserving special files (e.g., symbolic links) in the framework structure.
-abstract class UnpackIOS extends Target {
+abstract class UnpackIOS extends UnpackDarwin {
   const UnpackIOS();
 
   @override
@@ -271,7 +272,20 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    await _copyFramework(environment, sdkRoot);
+
+    // Copy Flutter framework.
+    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+      sdkRoot,
+      environment.fileSystem,
+    );
+    await copyFramework(
+      environment,
+      environmentType: environmentType,
+      framework: Artifact.flutterFramework,
+      targetPlatform: TargetPlatform.ios,
+      buildMode: buildMode,
+    );
+    await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
 
     final File frameworkBinary = environment.outputDir
         .childDirectory('Flutter.framework')
@@ -280,40 +294,15 @@ abstract class UnpackIOS extends Target {
     if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    await _thinFramework(environment, frameworkBinaryPath, archs);
+    await thinFramework(environment, frameworkBinaryPath, archs);
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
-  Future<void> _copyFramework(Environment environment, String sdkRoot) async {
-    // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
-      sdkRoot,
-      environment.fileSystem,
-    );
-    final String basePath = environment.artifacts.getArtifactPath(
-      Artifact.flutterFramework,
-      platform: TargetPlatform.ios,
-      mode: buildMode,
-      environmentType: environmentType,
-    );
-
-    final ProcessResult result = await environment.processManager.run(<String>[
-      'rsync',
-      '-av',
-      '--delete',
-      '--filter',
-      '- .DS_Store/',
-      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-      basePath,
-      environment.outputDir.path,
-    ]);
-    if (result.exitCode != 0) {
-      throw Exception(
-        'Failed to copy framework (exit ${result.exitCode}:\n'
-        '${result.stdout}\n---\n${result.stderr}',
-      );
-    }
-
+  Future<void> _copyFrameworkDysm(
+    Environment environment, {
+    required String sdkRoot,
+    EnvironmentType? environmentType,
+  }) async {
     // Copy Flutter framework dSYM (debug symbol) bundle, if present.
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
@@ -340,63 +329,6 @@ abstract class UnpackIOS extends Target {
           '${result.stdout}\n---\n${result.stderr}',
         );
       }
-    }
-  }
-
-  /// Destructively thin Flutter.framework to include only the specified architectures.
-  Future<void> _thinFramework(
-    Environment environment,
-    String frameworkBinaryPath,
-    String archs,
-  ) async {
-    final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = await environment.processManager.run(<String>[
-      'lipo',
-      '-info',
-      frameworkBinaryPath,
-    ]);
-    final String lipoInfo = infoResult.stdout as String;
-
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
-      'lipo',
-      frameworkBinaryPath,
-      '-verify_arch',
-      ...archList,
-    ]);
-
-    if (verifyResult.exitCode != 0) {
-      throw Exception(
-        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
-        '\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
-    }
-
-    // Skip thinning for non-fat executables.
-    if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
-      return;
-    }
-
-    // Thin in-place.
-    final ProcessResult extractResult = await environment.processManager.run(<String>[
-      'lipo',
-      '-output',
-      frameworkBinaryPath,
-      for (final String arch in archList) ...<String>['-extract', arch],
-      ...<String>[frameworkBinaryPath],
-    ]);
-
-    if (extractResult.exitCode != 0) {
-      throw Exception(
-        'Failed to extract architectures "$archs" for $frameworkBinaryPath.\n'
-        '\n'
-        'stderr:\n'
-        '${extractResult.stderr}\n\n'
-        'lipo -info:\n'
-        '$lipoInfo',
-      );
     }
   }
 }
@@ -432,6 +364,126 @@ class DebugUnpackIOS extends UnpackIOS {
 
   @override
   BuildMode get buildMode => BuildMode.debug;
+}
+
+// TODO(gaaclarke): Remove this after a reasonable amount of time where the
+// UISceneDelegate migration being on stable. This incurs a minor build time
+// cost.
+Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
+  Logger logger,
+  File file,
+  Pattern usage,
+  Pattern terminator,
+) async {
+  final List<String> lines = file.readAsLinesSync();
+
+  bool inDidFinishLaunchingWithOptions = false;
+  int lineNumber = 0;
+  for (final String line in lines) {
+    lineNumber += 1;
+    if (!inDidFinishLaunchingWithOptions) {
+      if (line.contains('didFinishLaunchingWithOptions')) {
+        inDidFinishLaunchingWithOptions = true;
+      }
+    } else {
+      if (line.startsWith(terminator)) {
+        inDidFinishLaunchingWithOptions = false;
+      } else if (line.contains(usage)) {
+        _printWarning(
+          logger,
+          file.path,
+          lineNumber,
+          // TODO(gaaclarke): Add a link to the migration guide when it's written.
+          'Flutter deprecation: Accessing rootViewController in `application:didFinishLaunchingWithOptions:` [flutter-launch-rootvc].\n'
+          '\tnote: \n' // The space after `note:` is meaningful, it is required associate the note with the warning in Xcode.
+          '\tAfter the UISceneDelegate migration the `UIApplicationDelegate.window` and '
+          '`UIWindow.rootViewController` properties will not be set in '
+          '`application:didFinishLaunchingWithOptions:`. If you are relying on that '
+          'in order to register platform channels at application launch use the '
+          '`FlutterPluginRegistry` API instead. Other setup can be moved to a '
+          'FlutterViewController subclass (ex: `awakeFromNib`).',
+        );
+      }
+    }
+  }
+}
+
+/// Checks [file] representing objc code for deprecated usage of the
+/// rootViewController and writes it to [logger].
+@visibleForTesting
+Future<void> checkForLaunchRootViewControllerAccessDeprecationObjc(Logger logger, File file) async {
+  try {
+    await _checkForLaunchRootViewControllerAccessDeprecation(
+      logger,
+      file,
+      RegExp('self.*?window.*?rootViewController'),
+      RegExp('^}'),
+    );
+    // ignore: avoid_catches_without_on_clauses
+  } catch (_) {}
+}
+
+/// Checks [file] representing swift code for deprecated usage of the
+/// rootViewController and writes it to [logger].
+@visibleForTesting
+Future<void> checkForLaunchRootViewControllerAccessDeprecationSwift(
+  Logger logger,
+  File file,
+) async {
+  try {
+    await _checkForLaunchRootViewControllerAccessDeprecation(
+      logger,
+      file,
+      'window?.rootViewController',
+      RegExp(r'^.*?func\s*?\S*?\('),
+    );
+    // ignore: avoid_catches_without_on_clauses
+  } catch (_) {}
+}
+
+void _printWarning(Logger logger, String path, int line, String warning) {
+  logger.printWarning('$path:$line: warning: $warning');
+}
+
+class _IssueLaunchRootViewControllerAccess extends Target {
+  const _IssueLaunchRootViewControllerAccess();
+
+  @override
+  Future<void> build(Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    if (flutterProject.ios.appDelegateSwift.existsSync()) {
+      await checkForLaunchRootViewControllerAccessDeprecationSwift(
+        environment.logger,
+        flutterProject.ios.appDelegateSwift,
+      );
+    }
+    if (flutterProject.ios.appDelegateObjc.existsSync()) {
+      await checkForLaunchRootViewControllerAccessDeprecationObjc(
+        environment.logger,
+        flutterProject.ios.appDelegateObjc,
+      );
+    }
+  }
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+      ),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc, optional: true),
+      Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
+    ];
+  }
+
+  @override
+  String get name => 'IssueLaunchRootViewControllerAccess';
+
+  @override
+  List<Source> get outputs => <Source>[];
 }
 
 abstract class IosLLDBInit extends Target {
@@ -553,37 +605,6 @@ class DebugIosLLDBInit extends IosLLDBInit {
   BuildMode get buildMode => BuildMode.debug;
 }
 
-class CheckDevDependenciesIos extends CheckDevDependencies {
-  const CheckDevDependenciesIos();
-
-  @override
-  String get name => 'check_dev_dependencies_ios';
-
-  @override
-  List<Source> get inputs {
-    return <Source>[
-      ...super.inputs,
-      const Source.pattern(
-        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
-      ),
-
-      // The generated Xcode properties file contains
-      // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
-      // This target should re-run whenever that value changes.
-      Source.fromProject((FlutterProject project) => project.ios.generatedXcodePropertiesFile),
-    ];
-  }
-
-  @override
-  String get debugBuildCommand => 'flutter build ios --config-only --debug';
-
-  @override
-  String get profileBuildCommand => 'flutter build ios --config-only --profile';
-
-  @override
-  String get releaseBuildCommand => 'flutter build ios --config-only --release';
-}
-
 /// The base class for all iOS bundle targets.
 ///
 /// This is responsible for setting up the basic App.framework structure, including:
@@ -595,7 +616,11 @@ abstract class IosAssetBundle extends Target {
   const IosAssetBundle();
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+    InstallCodeAssets(),
+    _IssueLaunchRootViewControllerAccess(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -736,7 +761,6 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
-    const CheckDevDependenciesIos(),
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
     ...super.dependencies,
@@ -768,11 +792,7 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    CheckDevDependenciesIos(),
-    AotAssemblyProfile(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
 }
 
 /// Build a release iOS application bundle.
@@ -783,11 +803,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'release_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    CheckDevDependenciesIos(),
-    AotAssemblyRelease(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[AotAssemblyRelease(), InstallCodeAssets()];
 
   @override
   Future<void> build(Environment environment) async {

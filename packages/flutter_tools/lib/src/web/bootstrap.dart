@@ -308,14 +308,13 @@ $_simpleLoaderScript
 /// The JavaScript bootstrap script to support in-browser hot restart.
 ///
 /// The [requireUrl] loads our cached RequireJS script file. The [mapperUrl]
-/// loads the special Dart stack trace mapper. The [entrypoint] is the
-/// actual main.dart file.
+/// loads the special Dart stack trace mapper.
 ///
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
 ///
-/// If `generateLoadingIndicator` is true, embeds a loading indicator onto the
+/// If [generateLoadingIndicator] is `true`, embeds a loading indicator onto the
 /// web page that's visible while the Flutter app is loading.
 String generateBootstrapScript({
   required String requireUrl,
@@ -663,15 +662,19 @@ String generateTestBootstrapFileContents(String mainUri, String requireUrl, Stri
 ''';
 }
 
-String generateDefaultFlutterBootstrapScript() {
-  return '''
-{{flutter_js}}
-{{flutter_build_config}}
-
-_flutter.loader.load({
+String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
+  final String serviceWorkerSettings =
+      includeServiceWorkerSettings
+          ? '''
+{
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}}
   }
-});
+}'''
+          : '';
+  return '''
+{{flutter_js}}
+{{flutter_build_config}}
+_flutter.loader.load($serviceWorkerSettings);
 ''';
 }

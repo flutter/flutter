@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -13,7 +14,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -47,10 +47,7 @@ void main() {
 
   testUsingContext(
     'Native assets: non-bundled libraries require no copying',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.json').uri;
@@ -96,7 +93,11 @@ void main() {
 
   testUsingContext(
     'build with assets but not enabled',
-    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    overrides: <Type, Generator>{
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
+      ProcessManager: () => FakeProcessManager.empty(),
+    },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -122,10 +123,7 @@ void main() {
 
   testUsingContext(
     'build no assets',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       final Uri nonFlutterTesterAssetUri =
@@ -169,10 +167,7 @@ void main() {
 
   testUsingContext(
     'Native assets build error',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -195,10 +190,7 @@ void main() {
 
   testUsingContext(
     'Native assets: no duplicate assets with linking',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();

@@ -4,7 +4,7 @@
 
 // Logic for native assets shared between all host OSes.
 
-import 'package:native_assets_cli/code_assets.dart' show OS;
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../base/platform.dart';
