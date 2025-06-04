@@ -4,9 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/web_paragraph/code_unit_flags.dart';
-import 'package:ui/src/engine/web_paragraph/layout.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
+import 'package:ui/src/engine.dart';
 
 import '../../common/test_initialization.dart';
 
@@ -15,7 +13,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test('Extract unicode info', () {
     final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
@@ -24,11 +22,9 @@ Future<void> testMain() async {
       'World domination is such an ugly phrase - \nI prefer to call it world optimisation.',
     );
     final WebParagraph paragraph = builder.build();
-    final TextLayout layout = TextLayout(paragraph);
-    layout.extractUnicodeInfo();
 
     int i = 0;
-    for (final CodeUnitFlags flags in layout.codeUnitFlags) {
+    for (final CodeUnitFlags flags in CodeUnitFlags.extractForParagraph(paragraph)) {
       expect(flags.isGraphemeStart, true);
       if (i == 0 ||
           i == 6 ||
@@ -45,11 +41,51 @@ Future<void> testMain() async {
           i == 63 ||
           i == 69 ||
           i == 82) {
-        expect(flags.isSoftLineBreak, true);
+        expect(flags.isSoftLineBreak, isTrue, reason: 'Expected soft line break at index $i');
       } else {
-        expect(flags.isSoftLineBreak, false);
+        expect(flags.isSoftLineBreak, isFalse, reason: 'Expected no soft line break at index $i');
       }
-      expect((i == 43) == (flags.isHardLineBreak), true);
+      if (i == 43) {
+        expect(flags.isHardLineBreak, isTrue, reason: 'Expected hard line break at index $i');
+      } else {
+        expect(flags.isHardLineBreak, isFalse, reason: 'Expected no hard line break at index $i');
+      }
+      if (i == 0 ||
+          i == 5 ||
+          i == 6 ||
+          i == 16 ||
+          i == 17 ||
+          i == 19 ||
+          i == 20 ||
+          i == 24 ||
+          i == 25 ||
+          i == 27 ||
+          i == 28 ||
+          i == 32 ||
+          i == 33 ||
+          i == 39 ||
+          i == 40 ||
+          i == 41 ||
+          i == 42 ||
+          i == 43 ||
+          i == 44 ||
+          i == 45 ||
+          i == 51 ||
+          i == 52 ||
+          i == 54 ||
+          i == 55 ||
+          i == 59 ||
+          i == 60 ||
+          i == 62 ||
+          i == 63 ||
+          i == 68 ||
+          i == 69 ||
+          i == 81 ||
+          i == 82) {
+        expect(flags.isWordBreak, isTrue, reason: 'Expected word break at index $i');
+      } else {
+        expect(flags.isWordBreak, isFalse, reason: 'Expected no word break at index $i');
+      }
       if (i == 5 ||
           i == 16 ||
           i == 19 ||
@@ -65,9 +101,9 @@ Future<void> testMain() async {
           i == 59 ||
           i == 62 ||
           i == 68) {
-        expect(flags.isWhitespace, true);
+        expect(flags.isWhitespace, isTrue, reason: 'Expected whitespace at index $i');
       } else {
-        expect(flags.isWhitespace, false);
+        expect(flags.isWhitespace, isFalse, reason: 'Expected no whitespace at index $i');
       }
       i += 1;
     }

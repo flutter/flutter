@@ -9,23 +9,22 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
-import '../canvaskit/text_fragmenter.dart';
 import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'paragraph.dart';
 import 'wrapper.dart';
 
-/// A single canvas2d context to use for all text information.
+/// A single canvas2d context to use during text layout.
 @visibleForTesting
 final DomCanvasRenderingContext2D layoutContext =
     // We don't use this canvas to draw anything, so let's make it as small as
     // possible to save memory.
     createDomCanvasElement(width: 0, height: 0).context2D;
 
-/// Performs layout on a [CanvasParagraph].
+/// Performs layout on a [WebParagraph].
 ///
-/// It uses a [DomCanvasElement] to get text information
+/// It uses a [DomHTMLCanvasElement] to get text information
 class TextLayout {
   TextLayout(this.paragraph);
 
@@ -38,51 +37,16 @@ class TextLayout {
 
   Map<int, int> textToClusterMap = <int, int>{};
 
-  bool hasFlag(ui.TextRange cluster, int flag) {
-    return codeUnitFlags[cluster.start].hasFlag(flag);
-  }
-
   void performLayout(double width) {
     extractClusterTexts();
 
     extractBidiRuns();
 
-    extractUnicodeInfo();
+    codeUnitFlags = CodeUnitFlags.extractForParagraph(paragraph);
 
     wrapText(width);
 
     formatLines(width);
-  }
-
-  void extractUnicodeInfo() {
-    codeUnitFlags.clear();
-
-    final List<CodeUnitInfo> flags = canvasKit.CodeUnits.compute(paragraph.text!);
-    assert(flags.length == (paragraph.text!.length + 1));
-    for (final CodeUnitInfo flag in flags) {
-      codeUnitFlags.add(CodeUnitFlags(flag.flags));
-    }
-
-    // Get the information from the browser
-    final SegmentationResult result = segmentText(paragraph.text!);
-
-    // Fill out grapheme flags
-    for (final grapheme in result.graphemes) {
-      codeUnitFlags[grapheme].graphemeStart = true;
-    }
-    // Fill out word flags
-    for (final word in result.words) {
-      codeUnitFlags[word].wordBreak = true;
-    }
-    // Fill out line break flags
-    for (int index = 0; index < result.breaks.length; index += 2) {
-      final int lineBreak = result.breaks[index];
-      if (result.breaks[index + 1] == 0) {
-        codeUnitFlags[lineBreak].softLineBreak = true;
-      } else {
-        codeUnitFlags[lineBreak].hardLineBreak = true;
-      }
-    }
   }
 
   void extractClusterTexts() {

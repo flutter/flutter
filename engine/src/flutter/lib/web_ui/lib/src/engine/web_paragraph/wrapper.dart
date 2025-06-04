@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui.dart' as ui;
-
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -29,24 +27,19 @@ class TextWrapper {
   double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
 
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(
-      ui.TextRange(start: cluster.start, end: cluster.end),
-      CodeUnitFlags.kPartOfWhiteSpaceBreak,
-    );
+    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kWhitespaceFlag);
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(
-      ui.TextRange(start: cluster.start, end: cluster.end),
-      CodeUnitFlags.kSoftLineBreakBefore,
-    );
+    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kSoftLineBreakFlag);
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(
-      ui.TextRange(start: cluster.start, end: cluster.end),
-      CodeUnitFlags.kHardLineBreakBefore,
-    );
+    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kHardLineBreakFlag);
+  }
+
+  bool _hasCodeUnitFlag(ExtendedTextCluster cluster, int flag) {
+    return _layout.codeUnitFlags[cluster.start].hasFlag(flag);
   }
 
   void startNewLine(int start, double clusterWidth) {
