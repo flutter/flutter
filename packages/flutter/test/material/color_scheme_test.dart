@@ -276,7 +276,7 @@ void main() {
     expect(scheme.error, const Color(0xffba1a1a));
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, const Color(0xffffdad6));
-    expect(scheme.onErrorContainer, const Color(4287823882));
+    expect(scheme.onErrorContainer, const Color(0xff93000a));
     expect(scheme.outline, const Color(0xff73777f));
     expect(scheme.outlineVariant, const Color(0xffc3c7cf));
     expect(scheme.background, const Color(0xfff8f9ff));
