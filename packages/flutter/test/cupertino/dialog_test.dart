@@ -2119,7 +2119,7 @@ void main() {
     expect(yesButton.dx > noButton.dx, false);
   });
 
-  testWidgets('CupertinoDialogAction action cursor behavior', (WidgetTester tester) async {
+  testWidgets('CupertinoDialogAction.mouseCursor can customize the mouse cursor', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
