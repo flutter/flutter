@@ -2502,6 +2502,46 @@ void _tests() {
     );
   });
 
+  testWidgets(
+    'does not merge conflicting actions even if one of them is blocked with Semantics widget',
+    (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        boilerPlate(
+          slivers: <Widget>[
+            SliverSemantics(
+              key: key,
+              container: true,
+              explicitChildNodes: true, // This is needed to pass the test in this scenario why?
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(<Widget>[
+                  // The widgets in this list merge into one node in this test scenario but not the pure sliver one above why?
+                  Semantics(
+                    blockUserActions: true,
+                    label: 'label1',
+                    onTap: () {},
+                    child: const SizedBox(height: 10),
+                  ),
+                  Semantics(label: 'label2', onTap: () {}, child: const SizedBox(height: 10)),
+                ]),
+              ),
+            ),
+          ],
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      expect(
+        node,
+        matchesSemantics(
+          children: <Matcher>[
+            containsSemantics(label: 'label1'),
+            containsSemantics(label: 'label2'),
+          ],
+        ),
+      );
+    },
+  );
+
   testWidgets('RenderSliverSemanticsAnnotations provides validation result', (
     WidgetTester tester,
   ) async {
