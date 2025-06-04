@@ -2050,7 +2050,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child.attached == attached);
     assert(child.parentData != null);
     if (!(_isRelayoutBoundary ?? true)) {
-      _isRelayoutBoundary = null;
+      child._isRelayoutBoundary = null;
     }
     child.parentData!.detach();
     child.parentData = null;
@@ -2719,6 +2719,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         _debugDoingThisResize = false;
         return true;
       }());
+      assert(_isRelayoutBoundary != null);
 
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
         FlutterTimeline.finishSync();
@@ -3855,6 +3856,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         node != null && !(node._isRelayoutBoundary ?? false);
         node = node.parent
       ) {
+        if (node._isRelayoutBoundary == null) {
+          count = -1;
+          break;
+        }
         count += 1;
       }
       if (count > 0) {
