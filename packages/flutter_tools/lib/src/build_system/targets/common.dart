@@ -13,6 +13,7 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart' show DartHookResult;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -82,9 +83,11 @@ class CopyFlutterBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       environment.outputDir,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: flavor,
@@ -101,7 +104,11 @@ class CopyFlutterBundle extends Target {
   }
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Copies the pre-built flutter bundle for release mode.
@@ -125,11 +132,6 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 }
 
 /// Generate a snapshot of the dart code used in the program.
-///
-/// This target depends on the `.dart_tool/package_config.json` file
-/// even though it is not listed as an input. Pub inserts a timestamp into
-/// the file which causes unnecessary rebuilds, so instead a subset of the contents
-/// are used an input instead.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
 
@@ -138,7 +140,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart',
     ),
@@ -221,7 +223,6 @@ class KernelSnapshot extends Target {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
@@ -236,8 +237,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.android ||
       TargetPlatform.android_arm ||
       TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 ||
-      TargetPlatform.android_x86 => 'android',
+      TargetPlatform.android_x64 => 'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
