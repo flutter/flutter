@@ -27,6 +27,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'material_state.dart';
 import 'slider_theme.dart';
+import 'slider_value_indicator_shape.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -1516,8 +1517,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       isEnabled: isEnabled,
     );
 
-    final bool startThumbSelected = _lastThumbSelection == Thumb.start;
-    final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+    final bool startThumbSelected = _lastThumbSelection == Thumb.start && !hoveringEndThumb;
+    final bool endThumbSelected = _lastThumbSelection == Thumb.end && !hoveringStartThumb;
     final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (!_overlayAnimation.isDismissed) {

@@ -150,12 +150,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             `CustomAccessibilityActionUpdates`,
     ///             `PlatformView::UpdateSemantics`
     ///
+    /// @param[in]  view_id  The ID of the view that this update is for
     /// @param[in]  updates  A map with the stable semantics node identifier as
     ///                      key and the node properties as the value.
     /// @param[in]  actions  A map with the stable semantics node identifier as
     ///                      key and the custom node action as the value.
     ///
     virtual void OnEngineUpdateSemantics(
+        int64_t view_id,
         SemanticsNodeUpdates updates,
         CustomAccessibilityActionUpdates actions) = 0;
 
@@ -323,6 +325,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///
     virtual double GetScaledFontSize(double unscaled_font_size,
                                      int configuration_id) const = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Notifies the client that the Flutter view focus state has
+    ///             changed and the platform view should be updated.
+    ///
+    /// @param[in]  request  The request to change the focus state of the view.
+    virtual void RequestViewFocusChange(
+        const ViewFocusChangeRequest& request) = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -748,6 +758,13 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   bool RemoveView(int64_t view_id);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notify the Flutter application that the focus state of a
+  ///             native view has changed.
+  ///
+  /// @param[in]  event  The focus event describing the change.
+  bool SendViewFocusEvent(const ViewFocusEvent& event);
+
+  //----------------------------------------------------------------------------
   /// @brief      Updates the viewport metrics for a view. The viewport metrics
   ///             detail the size of the rendering viewport in texels as well as
   ///             edge insets if present.
@@ -804,12 +821,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             originates on the platform view and has been forwarded to the
   ///             engine here on the UI task runner by the shell.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The accessibility related action performed on the
   ///                     node of the specified ID.
   /// @param[in]  args    Optional data that applies to the specified action.
   ///
-  void DispatchSemanticsAction(int node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -978,6 +997,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   void ShutdownPlatformIsolates();
 
+  //--------------------------------------------------------------------------
+  /// @brief      Flushes the microtask queue of the root isolate.
+  ///
+  void FlushMicrotaskQueue();
+
  private:
   // |RuntimeDelegate|
   std::string DefaultRouteName() override;
@@ -988,7 +1012,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
               float device_pixel_ratio) override;
 
   // |RuntimeDelegate|
-  void UpdateSemantics(SemanticsNodeUpdates update,
+  void UpdateSemantics(int64_t view_id,
+                       SemanticsNodeUpdates update,
                        CustomAccessibilityActionUpdates actions) override;
 
   // |RuntimeDelegate|
@@ -1018,6 +1043,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   // |RuntimeDelegate|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
+
+  // |RuntimeDelegate|
+  void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
   void SetNeedsReportTimings(bool value) override;
 

@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -146,6 +147,8 @@ class SearchAnchor extends StatefulWidget {
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
+    this.viewOnClose,
+    this.viewOnOpen,
     required this.builder,
     required this.suggestionsBuilder,
     this.textInputAction,
@@ -171,6 +174,8 @@ class SearchAnchor extends StatefulWidget {
     GestureTapCallback? onTap,
     ValueChanged<String>? onSubmitted,
     ValueChanged<String>? onChanged,
+    VoidCallback? onClose,
+    VoidCallback? onOpen,
     MaterialStateProperty<double?>? barElevation,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<Color?>? barOverlayColor,
@@ -204,6 +209,7 @@ class SearchAnchor extends StatefulWidget {
     TextInputType? keyboardType,
     EdgeInsets scrollPadding,
     EditableTextContextMenuBuilder contextMenuBuilder,
+    bool enabled,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -369,6 +375,12 @@ class SearchAnchor extends StatefulWidget {
   /// of the search view.
   final ValueChanged<String>? viewOnSubmitted;
 
+  /// Called when the search view is closed.
+  final VoidCallback? viewOnClose;
+
+  /// Called when the search view is opened.
+  final VoidCallback? viewOnOpen;
+
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
@@ -458,6 +470,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
     _route = _SearchViewRoute(
       viewOnChanged: widget.viewOnChanged,
       viewOnSubmitted: widget.viewOnSubmitted,
+      viewOnClose: widget.viewOnClose,
+      viewOnOpen: widget.viewOnOpen,
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -536,6 +550,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   _SearchViewRoute({
     this.viewOnChanged,
     this.viewOnSubmitted,
+    this.viewOnClose,
+    this.viewOnOpen,
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
@@ -567,6 +583,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
   final ValueChanged<String>? viewOnChanged;
   final ValueChanged<String>? viewOnSubmitted;
+  final VoidCallback? viewOnClose;
+  final VoidCallback? viewOnOpen;
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
@@ -632,6 +650,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     updateViewConfig(anchorKey.currentContext!);
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
+    viewOnOpen?.call();
     return super.didPush();
   }
 
@@ -640,6 +659,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     assert(anchorKey.currentContext != null);
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
+    viewOnClose?.call();
     return super.didPop(result);
   }
 
@@ -1182,11 +1202,14 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.textCapitalization,
     ValueChanged<String>? onChanged,
     ValueChanged<String>? onSubmitted,
+    VoidCallback? onClose,
+    VoidCallback? onOpen,
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
+    super.enabled,
   }) : super(
          viewHintText: viewHintText ?? barHintText,
          headerHeight: viewHeaderHeight,
@@ -1194,6 +1217,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
          headerHintStyle: viewHeaderHintStyle,
          viewOnSubmitted: onSubmitted,
          viewOnChanged: onChanged,
+         viewOnClose: onClose,
+         viewOnOpen: onOpen,
          builder: (BuildContext context, SearchController controller) {
            return SearchBar(
              constraints: constraints,
@@ -1234,6 +1259,9 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
 /// A [SearchController] is used to control a menu after it has been created,
 /// with methods such as [openView] and [closeView]. It can also control the text in the
 /// input field.
+///
+/// To observe open/close state changes of search view, provide
+/// [SearchAnchor.viewOnOpen] and/or [SearchAnchor.viewOnClose] callbacks.
 ///
 /// See also:
 ///
@@ -1509,6 +1537,9 @@ class SearchBar extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
@@ -1668,36 +1699,39 @@ class _SearchBarState extends State<SearchBar> {
                     Expanded(
                       child: Padding(
                         padding: effectivePadding,
-                        child: TextField(
-                          autofocus: widget.autoFocus,
-                          onTap: widget.onTap,
-                          onTapAlwaysCalled: true,
-                          onTapOutside: widget.onTapOutside,
-                          focusNode: _focusNode,
-                          onChanged: widget.onChanged,
-                          onSubmitted: widget.onSubmitted,
-                          controller: widget.controller,
-                          style: effectiveTextStyle,
-                          enabled: widget.enabled,
-                          decoration: InputDecoration(hintText: widget.hintText).applyDefaults(
-                            InputDecorationTheme(
-                              hintStyle: effectiveHintStyle,
-                              // The configuration below is to make sure that the text field
-                              // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                              enabledBorder: InputBorder.none,
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              // Setting `isDense` to true to allow the text field height to be
-                              // smaller than 48.0
-                              isDense: true,
+                        child: Semantics(
+                          inputType: SemanticsInputType.search,
+                          child: TextField(
+                            autofocus: widget.autoFocus,
+                            onTap: widget.onTap,
+                            onTapAlwaysCalled: true,
+                            onTapOutside: widget.onTapOutside,
+                            focusNode: _focusNode,
+                            onChanged: widget.onChanged,
+                            onSubmitted: widget.onSubmitted,
+                            controller: widget.controller,
+                            style: effectiveTextStyle,
+                            enabled: widget.enabled,
+                            decoration: InputDecoration(hintText: widget.hintText).applyDefaults(
+                              InputDecorationTheme(
+                                hintStyle: effectiveHintStyle,
+                                // The configuration below is to make sure that the text field
+                                // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                                enabledBorder: InputBorder.none,
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                                // Setting `isDense` to true to allow the text field height to be
+                                // smaller than 48.0
+                                isDense: true,
+                              ),
                             ),
+                            textCapitalization: effectiveTextCapitalization,
+                            textInputAction: widget.textInputAction,
+                            keyboardType: widget.keyboardType,
+                            scrollPadding: widget.scrollPadding,
+                            contextMenuBuilder: widget.contextMenuBuilder,
                           ),
-                          textCapitalization: effectiveTextCapitalization,
-                          textInputAction: widget.textInputAction,
-                          keyboardType: widget.keyboardType,
-                          scrollPadding: widget.scrollPadding,
-                          contextMenuBuilder: widget.contextMenuBuilder,
                         ),
                       ),
                     ),

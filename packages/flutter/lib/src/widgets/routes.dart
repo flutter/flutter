@@ -1092,13 +1092,21 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   void _updateFocusScopeNode() {
     final TraversalEdgeBehavior traversalEdgeBehavior;
+    final TraversalEdgeBehavior directionalTraversalEdgeBehavior;
     final ModalRoute<T> route = widget.route;
     if (route.traversalEdgeBehavior != null) {
       traversalEdgeBehavior = route.traversalEdgeBehavior!;
     } else {
       traversalEdgeBehavior = route.navigator!.widget.routeTraversalEdgeBehavior;
     }
+    if (route.directionalTraversalEdgeBehavior != null) {
+      directionalTraversalEdgeBehavior = route.directionalTraversalEdgeBehavior!;
+    } else {
+      directionalTraversalEdgeBehavior =
+          route.navigator!.widget.routeDirectionalTraversalEdgeBehavior;
+    }
     focusScopeNode.traversalEdgeBehavior = traversalEdgeBehavior;
+    focusScopeNode.directionalTraversalEdgeBehavior = directionalTraversalEdgeBehavior;
     if (route.isCurrent && _shouldRequestFocus) {
       route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
@@ -1231,7 +1239,13 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 ///  * [Route], which further documents the meaning of the `T` generic type argument.
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   /// Creates a route that blocks interaction with previous routes.
-  ModalRoute({super.settings, super.requestFocus, this.filter, this.traversalEdgeBehavior});
+  ModalRoute({
+    super.settings,
+    super.requestFocus,
+    this.filter,
+    this.traversalEdgeBehavior,
+    this.directionalTraversalEdgeBehavior,
+  });
 
   /// The filter to add to the barrier.
   ///
@@ -1244,6 +1258,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// If set to null, [Navigator.routeTraversalEdgeBehavior] is used.
   final TraversalEdgeBehavior? traversalEdgeBehavior;
+
+  /// Controls the directional transfer of focus beyond the first and the last
+  /// items of a [FocusScopeNode].
+  ///
+  /// If set to null, [Navigator.routeDirectionalTraversalEdgeBehavior] is used.
+  final TraversalEdgeBehavior? directionalTraversalEdgeBehavior;
 
   // The API for general users of this class
 
@@ -1563,7 +1583,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    if (receivedTransition == null) {
+    if (receivedTransition == null || secondaryAnimation.isDismissed) {
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
@@ -2295,7 +2315,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 ///   * [Navigator.pop], which is used to dismiss the route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
-  PopupRoute({super.settings, super.requestFocus, super.filter, super.traversalEdgeBehavior});
+  PopupRoute({
+    super.settings,
+    super.requestFocus,
+    super.filter,
+    super.traversalEdgeBehavior,
+    super.directionalTraversalEdgeBehavior,
+  });
 
   @override
   bool get opaque => false;
@@ -2497,6 +2523,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.requestFocus,
     this.anchorPoint,
     super.traversalEdgeBehavior,
+    super.directionalTraversalEdgeBehavior,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
@@ -2604,6 +2631,9 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// The `routeSettings` will be used in the construction of the dialog's route.
 /// See [RouteSettings] for more details.
 ///
+/// {@macro flutter.material.dialog.requestFocus}
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
@@ -2645,6 +2675,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  bool? requestFocus,
 }) {
   assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
@@ -2657,6 +2688,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       transitionBuilder: transitionBuilder,
       settings: routeSettings,
       anchorPoint: anchorPoint,
+      requestFocus: requestFocus,
     ),
   );
 }

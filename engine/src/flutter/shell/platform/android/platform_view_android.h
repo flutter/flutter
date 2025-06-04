@@ -7,11 +7,9 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <android/hardware_buffer_jni.h>
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
@@ -22,13 +20,15 @@
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
   AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller);
+                            bool enable_impeller,
+                            bool lazy_shader_mode);
 
   ~AndroidSurfaceFactoryImpl() override;
 
@@ -37,6 +37,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  private:
   const std::shared_ptr<AndroidContext>& android_context_;
   const bool enable_impeller_;
+  const bool lazy_shader_mode_;
 };
 
 class PlatformViewAndroid final : public PlatformView {
@@ -46,7 +47,7 @@ class PlatformViewAndroid final : public PlatformView {
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
                       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                      bool use_software_rendering);
+                      AndroidRenderingAPI rendering_api);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a new PlatformViewAndroid but using an existing
@@ -93,7 +94,8 @@ class PlatformViewAndroid final : public PlatformView {
 
   void RegisterImageTexture(
       int64_t texture_id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry);
+      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+      ImageExternalTexture::ImageLifecycle lifecycle);
 
   // |PlatformView|
   void LoadDartDeferredLibrary(
@@ -119,6 +121,9 @@ class PlatformViewAndroid final : public PlatformView {
     return platform_message_handler_;
   }
 
+  /// @brief Whether the SurfaceControl based swapchain is enabled and active.
+  bool IsSurfaceControlEnabled() const;
+
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
@@ -128,9 +133,11 @@ class PlatformViewAndroid final : public PlatformView {
 
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
+  bool android_use_new_platform_view_ = false;
 
   // |PlatformView|
   void UpdateSemantics(
+      int64_t view_id,
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 

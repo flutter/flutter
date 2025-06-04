@@ -10,20 +10,21 @@
 namespace flutter {
 namespace testing {
 
-TEST(AndroidPlatformView, SelectsVulkanBasedOnApiLevel) {
+// TODO(matanlurey): Re-enable.
+//
+// This test (and the entire suite) was skipped on CI (see
+// https://github.com/flutter/flutter/issues/163742) and has since bit rotted
+// (we fallback to OpenGLES on emulators for performance reasons); either fix
+// the test, or remove it.
+TEST(AndroidPlatformView, DISABLED_SelectsVulkanBasedOnApiLevel) {
   Settings settings;
   settings.enable_software_rendering = false;
   settings.enable_impeller = true;
 
-  int api_level = android_get_device_api_level();
-  EXPECT_GT(api_level, 0);
-  if (api_level >= 29) {
-    EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings),
-              AndroidRenderingAPI::kImpellerVulkan);
-  } else {
-    EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings),
-              AndroidRenderingAPI::kImpellerOpenGLES);
-  }
+  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 29),
+            AndroidRenderingAPI::kImpellerVulkan);
+  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 24),
+            AndroidRenderingAPI::kImpellerOpenGLES);
 }
 
 TEST(AndroidPlatformView, SoftwareRenderingNotSupportedWithImpeller) {
@@ -31,7 +32,23 @@ TEST(AndroidPlatformView, SoftwareRenderingNotSupportedWithImpeller) {
   settings.enable_software_rendering = true;
   settings.enable_impeller = true;
 
-  ASSERT_DEATH(FlutterMain::SelectedRenderingAPI(settings), "");
+  ASSERT_DEATH(FlutterMain::SelectedRenderingAPI(settings, 29), "");
+}
+
+TEST(AndroidPlatformView, FallsBackToGLESonEmulator) {
+  std::string emulator_product = "gphone_x64";
+  std::string device_product = "smg1234";
+
+  EXPECT_TRUE(FlutterMain::IsDeviceEmulator(emulator_product));
+  EXPECT_FALSE(FlutterMain::IsDeviceEmulator(device_product));
+}
+
+TEST(AndroidPlatformView, FallsBackToGLESonMostExynos) {
+  std::string exynos_board = "exynos7870";
+  std::string snap_board = "smg1234";
+
+  EXPECT_TRUE(FlutterMain::IsKnownBadSOC(exynos_board));
+  EXPECT_FALSE(FlutterMain::IsKnownBadSOC(snap_board));
 }
 
 TEST(AndroidPlatformView, FallsBackToGLESonEmulator) {

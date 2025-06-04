@@ -23,7 +23,6 @@ const String kResultType = 'type';
 const String kResultTypeSuccess = 'Success';
 const String kError = 'error';
 
-const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
 const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 const String kRunInViewMethod = '_flutter.runInView';
@@ -38,7 +37,6 @@ const String kHotRestartServiceName = 'hotRestart';
 const String kFlutterVersionServiceName = 'flutterVersion';
 const String kCompileExpressionServiceName = 'compileExpression';
 const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
-const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -93,11 +91,6 @@ typedef CompileExpression =
       String? method,
       bool isStatic,
     );
-
-/// A method that pulls an SkSL shader from the device and writes it to a file.
-///
-/// The name of the file returned as a result.
-typedef GetSkSLMethod = Future<String?> Function();
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -169,7 +162,6 @@ typedef VMServiceConnector =
       ReloadSources? reloadSources,
       Restart? restart,
       CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
       FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions compression,
@@ -186,7 +178,6 @@ Future<vm_service.VmService> setUpVmService({
   Restart? restart,
   CompileExpression? compileExpression,
   Device? device,
-  GetSkSLMethod? skSLMethod,
   FlutterProject? flutterProject,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   required vm_service.VmService vmService,
@@ -314,24 +305,6 @@ Future<vm_service.VmService> setUpVmService({
       vmService.registerService(kFlutterMemoryInfoServiceName, kFlutterToolAlias),
     );
   }
-  if (skSLMethod != null) {
-    vmService.registerServiceCallback(kFlutterGetSkSLServiceName, (
-      Map<String, Object?> params,
-    ) async {
-      final String? filename = await skSLMethod();
-      if (filename == null) {
-        return <String, Object>{
-          'result': <String, Object>{kResultType: kResultTypeSuccess},
-        };
-      }
-      return <String, Object>{
-        'result': <String, Object>{kResultType: kResultTypeSuccess, 'filename': filename},
-      };
-    });
-    registrationRequests.add(
-      vmService.registerService(kFlutterGetSkSLServiceName, kFlutterToolAlias),
-    );
-  }
 
   if (printStructuredErrorLogMethod != null) {
     vmService.onExtensionEvent.listen(printStructuredErrorLogMethod);
@@ -373,7 +346,6 @@ Future<FlutterVmService> connectToVmService(
   ReloadSources? reloadSources,
   Restart? restart,
   CompileExpression? compileExpression,
-  GetSkSLMethod? getSkSLMethod,
   FlutterProject? flutterProject,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -388,7 +360,6 @@ Future<FlutterVmService> connectToVmService(
     compileExpression: compileExpression,
     compression: compression,
     device: device,
-    getSkSLMethod: getSkSLMethod,
     flutterProject: flutterProject,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     logger: logger,
@@ -419,7 +390,6 @@ Future<FlutterVmService> _connect(
   ReloadSources? reloadSources,
   Restart? restart,
   CompileExpression? compileExpression,
-  GetSkSLMethod? getSkSLMethod,
   FlutterProject? flutterProject,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
@@ -438,7 +408,6 @@ Future<FlutterVmService> _connect(
     restart: restart,
     compileExpression: compileExpression,
     device: device,
-    skSLMethod: getSkSLMethod,
     flutterProject: flutterProject,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     vmService: delegateService,
@@ -517,6 +486,7 @@ class FlutterVmService {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          err.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           err.message.contains('Service connection disposed')) {
         globals.printTrace('VmService.getVm call failed: $err');
         return null;
@@ -538,6 +508,7 @@ class FlutterVmService {
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
       if (e.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          e.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           e.message.contains('Service connection disposed')) {
         return null;
       }
@@ -560,21 +531,6 @@ class FlutterVmService {
         'assetDirectory': assetsDirectory.toFilePath(windows: windows),
       },
     );
-  }
-
-  /// Retrieve the cached SkSL shaders from an attached Flutter view.
-  ///
-  /// This method will only return data if `--cache-sksl` was provided as a
-  /// flutter run argument, and only then on physical devices.
-  Future<Map<String, Object?>?> getSkSLs({required String viewId}) async {
-    final vm_service.Response? response = await callMethodWrapper(
-      kGetSkSLsMethod,
-      args: <String, String>{'viewId': viewId},
-    );
-    if (response == null) {
-      return null;
-    }
-    return response.json?['SkSLs'] as Map<String, Object?>?;
   }
 
   /// Flush all tasks on the UI thread for an attached Flutter view.
@@ -606,21 +562,6 @@ class FlutterVmService {
       }
     }
 
-    // TODO(andrewkolos): this is to assist in troubleshooting
-    //  https://github.com/flutter/flutter/issues/152220 and should be reverted
-    //  once this issue is resolved.
-    final StreamSubscription<String> onReceiveSubscription = service.onReceive.listen((
-      String message,
-    ) {
-      globals.logger.printTrace('runInView VM service onReceive listener received "$message"');
-      final dynamic messageAsJson = jsonDecode(message);
-      // ignore: avoid_dynamic_calls -- Temporary code.
-      final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
-      if (messageKind == 'IsolateRunnable') {
-        globals.logger.printTrace('Received IsolateRunnable event from onReceive.');
-      }
-    });
-
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -633,7 +574,6 @@ class FlutterVmService {
       },
     );
     await onRunnable;
-    await onReceiveSubscription.cancel();
   }
 
   Future<String> flutterDebugDumpApp({required String isolateId}) async {
@@ -730,7 +670,7 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, Object?>?> flutterReassemble({required String isolateId}) {
+  Future<Map<String, Object?>?> flutterReassemble({required String? isolateId}) {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble', isolateId: isolateId);
   }
 
@@ -758,14 +698,6 @@ class FlutterVmService {
   Future<Map<String, Object?>?> flutterEvictShader(String assetPath, {required String isolateId}) {
     return invokeFlutterExtensionRpcRaw(
       'ext.ui.window.reinitializeShader',
-      isolateId: isolateId,
-      args: <String, Object?>{'assetKey': assetPath},
-    );
-  }
-
-  Future<Map<String, Object?>?> flutterEvictScene(String assetPath, {required String isolateId}) {
-    return invokeFlutterExtensionRpcRaw(
-      'ext.ui.window.reinitializeScene',
       isolateId: isolateId,
       args: <String, Object?>{'assetKey': assetPath},
     );
@@ -846,6 +778,7 @@ class FlutterVmService {
       // disappears while handling a request, return null.
       if ((err.code == vm_service.RPCErrorKind.kMethodNotFound.code) ||
           (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code) ||
+          (err.code == vm_service.RPCErrorKind.kConnectionDisposed.code) ||
           (err.message.contains('Service connection disposed'))) {
         return null;
       }
@@ -857,12 +790,12 @@ class FlutterVmService {
   /// available, returns null.
   Future<Map<String, Object?>?> invokeFlutterExtensionRpcRaw(
     String method, {
-    required String isolateId,
+    required String? isolateId,
     Map<String, Object?>? args,
   }) async {
     final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, Object?>{'isolateId': isolateId, ...?args},
+      args: <String, Object?>{if (isolateId != null) 'isolateId': isolateId, ...?args},
     );
     return response?.json;
   }

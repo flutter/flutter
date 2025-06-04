@@ -102,11 +102,19 @@ impellerc("runtime_stages") {
 
 test_fixtures("file_fixtures") {
   fixtures = [
+<<<<<<< HEAD
     "//flutter/third_party/txt/third_party/fonts/ahem.ttf",
     "//flutter/third_party/txt/third_party/fonts/HomemadeApple.ttf",
     "//flutter/third_party/txt/third_party/fonts/NotoColorEmoji.ttf",
     "//flutter/third_party/txt/third_party/fonts/Roboto-Medium.ttf",
     "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
+=======
+    "//flutter/txt/third_party/fonts/ahem.ttf",
+    "//flutter/txt/third_party/fonts/HomemadeApple.ttf",
+    "//flutter/txt/third_party/fonts/NotoColorEmoji.ttf",
+    "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
+    "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
     "airplane.jpg",
     "bay_bridge.jpg",
     "blend_mode_dst.png",

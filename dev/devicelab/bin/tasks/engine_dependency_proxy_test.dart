@@ -59,7 +59,7 @@ tasks.register("printEngineMavenUrl") {
 
         String realm =
             File(
-              path.join(flutterDirectory.path, 'bin', 'internal', 'engine.realm'),
+              path.join(flutterDirectory.path, 'bin', 'cache', 'engine.realm'),
             ).readAsStringSync().trim();
         if (realm.isNotEmpty) {
           realm = '$realm/';

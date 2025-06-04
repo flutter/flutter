@@ -8,6 +8,7 @@ import("//flutter/build/bin_to_obj.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
@@ -166,7 +167,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
     "//flutter/skia",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
     "//flutter/vulkan",
   ]
 
@@ -284,6 +285,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/systemchannels/NavigationChannel.java",
   "io/flutter/embedding/engine/systemchannels/PlatformChannel.java",
   "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java",
+  "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel2.java",
   "io/flutter/embedding/engine/systemchannels/ProcessTextChannel.java",
   "io/flutter/embedding/engine/systemchannels/RestorationChannel.java",
   "io/flutter/embedding/engine/systemchannels/ScribeChannel.java",
@@ -331,6 +333,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformViewWrapper.java",
   "io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java",
   "io/flutter/plugin/platform/PlatformViewsController.java",
+  "io/flutter/plugin/platform/PlatformViewsController2.java",
   "io/flutter/plugin/platform/SingleViewFakeWindowViewGroup.java",
   "io/flutter/plugin/platform/SingleViewPresentation.java",
   "io/flutter/plugin/platform/SingleViewWindowManager.java",
@@ -679,11 +682,22 @@ generated_file("android_entitlement_config") {
 
 if (target_cpu != "x86") {
   zip_bundle("gen_snapshot") {
-    gen_snapshot_bin = "gen_snapshot"
     gen_snapshot_out_dir =
         get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
                        "root_out_dir")
-    gen_snapshot_path = rebase_path("$gen_snapshot_out_dir/$gen_snapshot_bin")
+
+    # The source gen_snapshot binary from the build outputs.
+    gen_snapshot_src = rebase_path("$gen_snapshot_out_dir/gen_snapshot")
+
+    # The output gen_snapshot binary name in the archive.
+    gen_snapshot_dest = "gen_snapshot"
+
+    if (host_os == "mac") {
+      gen_snapshot_src = rebase_path("$root_out_dir/universal/gen_snapshot")
+    } else if (host_os == "win") {
+      gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
+      gen_snapshot_dest = "gen_snapshot.exe"
+    }
 
     if (host_os == "linux") {
       output = "$android_zip_archive_dir/linux-x64.zip"
@@ -691,57 +705,16 @@ if (target_cpu != "x86") {
       output = "$android_zip_archive_dir/darwin-x64.zip"
     } else if (host_os == "win") {
       output = "$android_zip_archive_dir/windows-x64.zip"
-      gen_snapshot_bin = "gen_snapshot.exe"
-      gen_snapshot_path = rebase_path("$root_out_dir/$gen_snapshot_bin")
     }
 
     files = [
       {
-        source = gen_snapshot_path
-        destination = gen_snapshot_bin
+        source = gen_snapshot_src
+        destination = gen_snapshot_dest
       },
     ]
 
-    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
-
-    if (host_os == "mac") {
-      deps += [ ":android_entitlement_config" ]
-      files += [
-        {
-          source = "$target_gen_dir/android_entitlements.txt"
-          destination = "entitlements.txt"
-        },
-      ]
-    }
-  }
-
-  # TODO(godofredoc): Remove gen_snapshot and rename new_gen_snapshot when v2 migration is complete.
-  # BUG: https://github.com/flutter/flutter/issues/105351
-  zip_bundle("new_gen_snapshot") {
-    gen_snapshot_bin = "gen_snapshot"
-    gen_snapshot_out_dir =
-        get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
-                       "root_out_dir")
-    gen_snapshot_path = rebase_path("$gen_snapshot_out_dir/$gen_snapshot_bin")
-
-    if (host_os == "linux") {
-      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/linux-x64.zip"
-    } else if (host_os == "mac") {
-      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/darwin-x64.zip"
-    } else if (host_os == "win") {
-      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/windows-x64.zip"
-      gen_snapshot_bin = "gen_snapshot.exe"
-      gen_snapshot_path = rebase_path("$root_out_dir/$gen_snapshot_bin")
-    }
-
-    files = [
-      {
-        source = gen_snapshot_path
-        destination = gen_snapshot_bin
-      },
-    ]
-
-    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
+    deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
     if (host_os == "mac") {
       deps += [ ":android_entitlement_config" ]
@@ -773,37 +746,6 @@ if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
       output = "$android_zip_archive_dir/analyze-snapshot-darwin-x64.zip"
     } else if (host_os == "win") {
       output = "$android_zip_archive_dir/analyze-snapshot-windows-x64.zip"
-      analyze_snapshot_bin = "analyze-snapshot.exe"
-      analyze_snapshot_path = rebase_path("$root_out_dir/$analyze_snapshot_bin")
-    }
-
-    files = [
-      {
-        source = analyze_snapshot_path
-        destination = analyze_snapshot_bin
-      },
-    ]
-  }
-
-  # TODO(godofredoc): Remove analyze_snapshot and rename new_analyze_snapshot when v2 migration is complete.
-  # BUG: https://github.com/flutter/flutter/issues/105351
-  zip_bundle("new_analyze_snapshot") {
-    deps = [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
-
-    analyze_snapshot_bin = "analyze_snapshot"
-    analyze_snapshot_out_dir =
-        get_label_info(
-            "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)",
-            "root_out_dir")
-    analyze_snapshot_path =
-        rebase_path("$analyze_snapshot_out_dir/$analyze_snapshot_bin")
-
-    if (host_os == "linux") {
-      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/analyze-snapshot-linux-x64.zip"
-    } else if (host_os == "mac") {
-      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/analyze-snapshot-darwin-x64.zip"
-    } else if (host_os == "win") {
-      output = "$android_zip_archive_dir/$full_platform_name-$flutter_runtime_mode/analyze-snapshot-windows-x64.zip"
       analyze_snapshot_bin = "analyze-snapshot.exe"
       analyze_snapshot_path = rebase_path("$root_out_dir/$analyze_snapshot_bin")
     }

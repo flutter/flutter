@@ -6,6 +6,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
 
@@ -126,9 +127,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange));
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction));
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
+    subscriptions.add(
+      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+    );
     preventDefaultForMouseEvents();
   }
 
@@ -208,18 +215,22 @@ class SemanticTextField extends SemanticRole {
   late final DomHTMLElement editableElement;
 
   @override
+  void updateValidationResult() {
+    SemanticRole.updateAriaInvalid(editableElement, semanticsObject.validationResult);
+  }
+
+  @override
   bool focusAsRouteDefault() {
     editableElement.focusWithoutScroll();
     return true;
   }
 
   DomHTMLInputElement _createSingleLineField() {
-    return createDomHTMLInputElement()
-      ..type = semanticsObject.hasFlag(ui.SemanticsFlag.isObscured) ? 'password' : 'text';
+    return createDomHTMLInputElement();
   }
 
   DomHTMLTextAreaElement _createMultiLineField() {
-    final textArea = createDomHTMLTextAreaElement();
+    final textArea = createMultilineTextArea();
 
     if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
       // -webkit-text-security is not standard, but it's the best we can do.
@@ -321,10 +332,41 @@ class SemanticTextField extends SemanticRole {
     } else {
       editableElement.removeAttribute('aria-label');
     }
+
+    if (semanticsObject.isRequirable) {
+      editableElement.setAttribute('aria-required', semanticsObject.isRequired);
+    } else {
+      editableElement.removeAttribute('aria-required');
+    }
+    _updateInputType();
   }
 
   void _updateEnabledState() {
     (editableElement as DomElementWithDisabledProperty).disabled = !semanticsObject.isEnabled;
+  }
+
+  void _updateInputType() {
+    if (semanticsObject.hasFlag(ui.SemanticsFlag.isMultiline)) {
+      // text area can't be annotated with input type
+      return;
+    }
+    final DomHTMLInputElement input = editableElement as DomHTMLInputElement;
+    if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
+      input.type = 'password';
+    } else {
+      switch (semanticsObject.inputType) {
+        case ui.SemanticsInputType.search:
+          input.type = 'search';
+        case ui.SemanticsInputType.email:
+          input.type = 'email';
+        case ui.SemanticsInputType.url:
+          input.type = 'url';
+        case ui.SemanticsInputType.phone:
+          input.type = 'tel';
+        default:
+          input.type = 'text';
+      }
+    }
   }
 
   @override

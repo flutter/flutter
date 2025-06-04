@@ -51,7 +51,7 @@ void main() {
   }
 
   testWidgets('SearchBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
@@ -1013,9 +1013,8 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const Center(
+      const MaterialApp(
+        home: Center(
           child: Material(child: SearchBar(constraints: BoxConstraints.tightFor(height: 35.0))),
         ),
       ),
@@ -1030,7 +1029,7 @@ void main() {
   });
 
   testWidgets('The search view defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -2796,10 +2795,7 @@ void main() {
       disabledBorder: UnderlineInputBorder(),
       constraints: BoxConstraints(maxWidth: 300),
     );
-    final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      inputDecorationTheme: inputDecorationTheme,
-    );
+    final ThemeData theme = ThemeData(inputDecorationTheme: inputDecorationTheme);
 
     void checkDecorationInSearchBar(WidgetTester tester) {
       final Finder textField = findTextField();
@@ -3200,7 +3196,34 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Disabled SearchBar semantics node still contains value', (
+  testWidgets('Block entering text on disabled widget with SearchAnchor.bar', (
+    WidgetTester tester,
+  ) async {
+    const String initValue = 'init';
+    final TextEditingController controller = TextEditingController(text: initValue);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abcdefghi';
+    await tester.enterText(find.byType(SearchBar), testValue);
+    expect(controller.value.text, initValue);
+  });
+
+  testWidgets('Disabled SearchBar semantics node still contains value and inputType', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -3213,7 +3236,23 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[],
+        value: 'text',
+        inputType: SemanticsInputType.search,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: SearchBar()))));
+
+    expect(semantics, includesNodeWith(inputType: SemanticsInputType.search));
     semantics.dispose();
   });
 
@@ -3664,6 +3703,41 @@ void main() {
 
       expect(find.byType(Placeholder), findsOneWidget);
     });
+
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   testWidgets('SearchAnchor does not dispose external SearchController', (
@@ -3802,6 +3876,188 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('SearchAnchor viewOnClose function test', (WidgetTester tester) async {
+    String name = 'silva';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              viewOnClose: () {
+                name = 'Pedro';
+              },
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(name, 'silva');
+
+    // Pop search view route
+    await tester.tap(find.backButton());
+    await tester.pumpAndSettle();
+    expect(name, 'Pedro');
+
+    // No exception.
+  });
+
+  testWidgets('SearchAnchor.bar viewOnClose function test', (WidgetTester tester) async {
+    String name = 'silva';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            onClose: () {
+              name = 'Pedro';
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[
+                ListTile(
+                  title: const Text('item 0'),
+                  onTap: () {
+                    controller.closeView('item 0');
+                  },
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open search view
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+    expect(name, 'silva');
+
+    // Pop search view route
+    await tester.tap(find.backButton());
+    await tester.pumpAndSettle();
+    expect(name, 'Pedro');
+
+    // No exception.
+  });
+
+  testWidgets('SearchAnchor viewOnOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              viewOnClose: () {
+                searchViewState = 'Closed';
+              },
+              viewOnOpen: () {
+                searchViewState = 'Opened';
+              },
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
+
+  testWidgets('SearchAnchor.bar onOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor.bar(
+              onClose: () {
+                searchViewState = 'Closed';
+              },
+              onOpen: () {
+                searchViewState = 'Opened';
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
 }
 
 Future<void> checkSearchBarDefaults(
@@ -3901,4 +4157,24 @@ Material getSearchViewMaterial(WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(of: findViewContent(), matching: find.byType(Material)).first,
   );
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

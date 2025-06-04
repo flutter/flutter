@@ -17,6 +17,17 @@ namespace flutter {
 using UniqueAotDataPtr =
     std::unique_ptr<_FlutterEngineAOTData, FlutterEngineCollectAOTDataFnPtr>;
 
+enum class FlutterGpuPreference {
+  NoPreference,
+  LowPowerPreference,
+};
+
+enum class FlutterUIThreadPolicy {
+  Default,
+  RunOnPlatformThread,
+  RunOnSeparateThread,
+};
+
 // The data associated with a Flutter project needed to run it in an engine.
 class FlutterProjectBundle {
  public:
@@ -59,6 +70,12 @@ class FlutterProjectBundle {
     return dart_entrypoint_arguments_;
   }
 
+  // Returns the app's GPU preference.
+  FlutterGpuPreference gpu_preference() const { return gpu_preference_; }
+
+  // Returns thread policy for running the UI isolate.
+  FlutterUIThreadPolicy ui_thread_policy() { return ui_thread_policy_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -74,6 +91,12 @@ class FlutterProjectBundle {
 
   // Engine switches.
   std::vector<std::string> engine_switches_;
+
+  // App's GPU preference.
+  FlutterGpuPreference gpu_preference_;
+
+  // Thread policy for running the UI isolate.
+  FlutterUIThreadPolicy ui_thread_policy_;
 };
 
 }  // namespace flutter

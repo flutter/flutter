@@ -67,7 +67,70 @@ glyphs.
 ### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
 Initial stable release.
 
+<!-- EDIT MADE TO LAND AN EMPTY COMMIT DUE TO https://github.com/flutter/cocoon/pull/4541 -->
+
+## Flutter 3.32 Changes
+
+### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
+
+- [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fixes flaky crash when targeting web applications via IDEs using the DAP.
+- [flutter/168849](https://github.com/flutter/flutter/issues/168849) - Fixes an issue rendering wide gamut images.
+- [flutter/168846](https://github.com/flutter/flutter/issues/168846) - Fixes an issue displaying the wrong icons in the widget inspector for some apps.
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) - Fixes Flutter Android builds for apps which use plugins with old Android Gradle Plugin versions.
+- [flutter/169101](https://github.com/flutter/flutter/issues/169101) - Reduces the cost of running the (sometimes flaky) Linux fuchsia_test on release branches.
+- [flutter/169318](https://github.com/flutter/flutter/issues/169318) - Fixed a bug where the flutter tool crash reporting did not include what plugins were being used by the current project.
+- [flutter/169160](https://github.com/flutter/flutter/issues/169160) Fixed a bug where `appFlavor` is null after hot restarts or during `flutter test`.
+- [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fix flaky crash when targeting web applications via IDEs using the DAP.
+
+### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
+Initial stable release.
+
+## Flutter 3.29 Changes
+
+### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
+
+- [flutter/163175](https://github.com/flutter/flutter/pull/163175) - Improve performance of CanvasKit rendering for web.
+- [flutter/164628](https://github.com/flutter/flutter/issues/164628) - iOS Fixes crash when allocation of surface for toImage/toImageSync fails.
+- [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) Fixes double-download of canvaskit.wasm
+- [flutter/164024](https://github.com/flutter/flutter/issues/164024): - Add back an empty io.flutter.app.FlutterApplication for Android apps post v2 embedder migration.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
+- [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
+
+### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
+
+- [flutter/163830](https://github.com/flutter/flutter/pull/163830) - Fix Tab linear and elastic animation blink.
+- [flutter/164119](https://github.com/flutter/flutter/pull/164119) - Configuration changes to run test on macOS 14 for Flutter's CI.
+- [flutter/164155](https://github.com/flutter/flutter/pull/164155) - Roll .ci.yaml changes into the LUCI configuration only when the master branch is updated.
+- [flutter/164191](https://github.com/flutter/flutter/pull/164191) - Improve safaridriver launch process in Flutter's CI testing for web.
+- [flutter/164193](https://github.com/flutter/flutter/pull/164193) - Provide guided error message when app crashes due to JIT restriction on iPhones.
+- [flutter/164050](https://github.com/flutter/flutter/pull/164050) - Fixes test reorderable_list_test.dart failing for certain ordering seeds, such as 20250221.
+- [flutter/163316](https://github.com/flutter/flutter/pull/163316) - Configuration changes to run test on macOS 14 for Flutter's CI.
+- [flutter/163581](https://github.com/flutter/flutter/pull/163581) - Fix crash when using BackdropFilters in certain GLES drivers.
+- [flutter/163616](https://github.com/flutter/flutter/pull/163616) - Disable Vulkan on known bad Xclipse GPU drivers for Android.
+- [flutter/163666](https://github.com/flutter/flutter/pull/163666) - Always post new task during gesture dispatch to fix jittery scrolling on iOS devices.
+- [flutter/163667](https://github.com/flutter/flutter/pull/163667) - Ensure that OpenGL "flipped" textures do not leak via texture readback.
+- [flutter/163741](https://github.com/flutter/flutter/pull/163741) - Flutter tool respects tracked engine.version.
+- [flutter/163754](https://github.com/flutter/flutter/pull/163754) - Fix text glitch when returning to foreground for Android.
+- [flutter/163058](https://github.com/flutter/flutter/pull/163058) - Fixes jittery glyphs.
+- [flutter/163201](https://github.com/flutter/flutter/pull/163201) - Fixes buttons with icons that ignore foregroundColor.
+- [flutter/163265](https://github.com/flutter/flutter/pull/163265) - Disable Vulkan on known bad exynos SoCs for Android.
+- [flutter/163261](https://github.com/flutter/flutter/pull/163261) - Fixes for Impeller DrawVertices issues involving snapshots with empty sizes.
+- [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding.
+
+### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
+Initial stable release.
+
 ## Flutter 3.27 Changes
+
+### [3.27.4](https://github.com/flutter/flutter/releases/tag/3.27.4)
+- [flutter/162132](https://github.com/flutter/flutter/pull/162132) On all platforms DropdownMenu's menuChildren might be placed somewhere far from menuAnchor.
+
+### [3.27.3](https://github.com/flutter/flutter/releases/tag/3.27.3)
+- [flutter/159212](https://github.com/flutter/flutter/issues/159212) Track (via Google Analytics) if the Dart AOT Android "Deferred Components" feature is being meaningfully used.
+- [flutter/160631](https://github.com/flutter/flutter/issues/160631) Fixes an issue with Material 3 Tab Bar animations.
+- [flutter/159289](https://github.com/flutter/flutter/issues/159289) Fixes an issue with fullscreen route transitions.
+- [flutter/162132](https://github.com/flutter/flutter/issues/162132) Fixes an issue that incorrectly positions `MenuAnchor`s in nested overlays.
 
 ### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
 

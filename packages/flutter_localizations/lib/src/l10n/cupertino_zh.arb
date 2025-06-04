@@ -27,5 +27,7 @@
   "lookUpButtonLabel": "查询",
   "searchWebButtonLabel": "搜索",
   "shareButtonLabel": "共享…",
-  "clearButtonLabel": "清除"
+  "clearButtonLabel": "清除",
+  "cancelButtonLabel": "取消",
+  "backButtonLabel": "返回"
 }

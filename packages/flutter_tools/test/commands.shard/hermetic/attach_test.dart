@@ -25,9 +25,9 @@ import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -51,6 +51,10 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
+  tearDown(() {
+    MacOSDesignedForIPadDevices.allowDiscovery = false;
+  });
+
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -174,7 +178,6 @@ void main() {
                   <String, List<SrvResourceRecord>>{},
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
         },
@@ -255,7 +258,6 @@ void main() {
                   <String, List<SrvResourceRecord>>{},
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
           Signals: () => FakeSignals(),
@@ -351,7 +353,6 @@ void main() {
                   <String, List<SrvResourceRecord>>{},
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
           ProcessManager: () => FakeProcessManager.empty(),
@@ -442,7 +443,6 @@ void main() {
                   },
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
         },
@@ -535,7 +535,6 @@ void main() {
                   },
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
         },
@@ -641,7 +640,6 @@ void main() {
                   },
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
         },
@@ -747,7 +745,6 @@ void main() {
                   },
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
         },
@@ -1011,7 +1008,6 @@ void main() {
                   <String, List<SrvResourceRecord>>{},
                 ),
                 logger: logger,
-                flutterUsage: TestUsage(),
                 analytics: const NoOpAnalytics(),
               ),
         },
@@ -1330,6 +1326,7 @@ void main() {
         expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
         expect(testLogger.statusText, contains('xx1'));
         expect(testLogger.statusText, contains('yy2'));
+        expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
@@ -1388,7 +1385,55 @@ void main() {
     );
 
     testUsingContext(
-      'Catches "Service connection disposed" error',
+      'Catches "Service connection disposed" error by code',
+      () async {
+        final FakeAndroidDevice device =
+            FakeAndroidDevice(id: '1')
+              ..portForwarder = const NoOpDevicePortForwarder()
+              ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async {
+          await null;
+          throw vm_service.RPCError(
+            'flutter._listViews',
+            vm_service.RPCErrorKind.kConnectionDisposed.code,
+            'dummy text not matched',
+          );
+        };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final AttachCommand command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(message: 'Lost connection to device.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'Catches "Service connection disposed" error by text',
       () async {
         final FakeAndroidDevice device =
             FakeAndroidDevice(id: '1')
@@ -1518,7 +1563,7 @@ class FakeHotRunner extends Fake implements HotRunner {
   bool stayResident = true;
 
   @override
-  void printHelp({required bool details}) {}
+  void printHelp({required bool details, bool reloadIsRestart = false}) {}
 }
 
 class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
@@ -1942,6 +1987,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
     InternetAddress? mDnsAddress,
+    Function? onError,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);

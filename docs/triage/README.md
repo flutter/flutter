@@ -209,7 +209,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android%2Cfyi-android+-label%3Atriaged-android+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
 - [P1, No Assignee list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3Ap1+no%3Aassignee+sort%3Aupdated-asc)
-- PRs: [Engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22Work+in+progress+%28WIP%29%22+sort%3Aupdated-asc), [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
+- PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
 ### Codelabs team (`team-codelabs`)
 
@@ -263,11 +263,7 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 ### Infrastructure team (`team-infra`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra+label%3AP0+sort%3Aupdated-asc)
-- [Cocoon PRs](https://github.com/flutter/cocoon/pulls)
-- [GoB CLs](https://flutter-review.googlesource.com/q/status:open+-is:wip)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra%2Cfyi-infra+-label%3Atriaged-infra+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [Latest updated issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra%2Cfyi-infra+sort%3Aupdated-desc)
+See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 ### iOS and macOS platform team (`team-ios` and `team-macos`)
 
@@ -278,17 +274,14 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
-- [iOS PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
-- [macOS PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-macos+sort%3Aupdated-asc)
 - [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
-- [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+platform-macos++sort%3Aupdated-asc)
+- [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
 - [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
 
 ### Linux platforms team (`team-linux`)
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux%2Cfyi-linux+-label%3Atriaged-linux+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-linux+label%3AP0+sort%3Aupdated-asc)
-- [Linux PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
 - [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
 - [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+sort%3Aupdated-asc)
 
@@ -322,7 +315,6 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows%2Cfyi-windows+-label%3Atriaged-windows+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-windows+label%3AP0+sort%3Aupdated-asc)
-- [Windows PRs on the engine](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22affects%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
 - [Windows PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-windows+sort%3Aupdated-asc)
 - [Windows PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-windows+sort%3Aupdated-asc)
 
@@ -343,7 +335,7 @@ During these meetings, we go through the following lists:
 
 * [P0](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3AP0+sort%3Aupdated-asc): all bugs should be assigned, and progress should be happening actively. There should be an update within the last week. If no progress is happening and owner cannot work on it immediately (e.g. they're on vacation, they're busy with their day job, family reasons, etc), find a new owner.
 * [Bugs flagged for additional triage](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+no%3Aassignee): figure out what should be done with the bug, then remove the `will need additional triage` label.
-* [flutter-pub-roller-bot](https://github.com/flutter/flutter/pulls/flutter-pub-roller-bot): check that the pub auto roller is chugging along. If it has gotten trivially stuck, such as having a merge conflict, close the PR so that it can open a new one. If it is non-trivially stuck, file an issue for the infra ticket queue: https://github.com/flutter/flutter/blob/main/docs/infra/Infra-Ticket-Queue.md.
+* [flutter-pub-roller-bot](https://github.com/flutter/flutter/pulls/flutter-pub-roller-bot): check that the pub auto roller is chugging along. If it has gotten trivially stuck, such as having a merge conflict, close the PR so that it can open a new one. If it is non-trivially stuck, file an issue for `team-infra`.
 * [The stale PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+-repo%3Aflutter%2Fwebsite-cms+sort%3Aupdated-asc+): examine the 25 least-recently updated PRs, if the least recently updated one was updated more than 2 months ago.
 
 ## Self test issue

@@ -296,7 +296,7 @@ class WidgetsApp extends StatefulWidget {
   /// _must_ contain an entry for `'/'`.
   ///
   /// If [home] or [routes] are not null, the routing implementation needs to know how
-  /// appropriately build [PageRoute]s. This can be achieved by supplying the
+  /// to appropriately build [PageRoute]s. This can be achieved by supplying the
   /// [pageRouteBuilder] parameter. The [pageRouteBuilder] is used by [MaterialApp]
   /// and [CupertinoApp] to create [MaterialPageRoute]s and [CupertinoPageRoute],
   /// respectively.
@@ -305,7 +305,7 @@ class WidgetsApp extends StatefulWidget {
   /// content of the app in some other widget. It is recommended that you use [home]
   /// rather than [builder] if you intend to only display a single route in your app.
   ///
-  /// [WidgetsApp] is also possible to provide a custom implementation of routing via the
+  /// [WidgetsApp] is also able to provide a custom implementation of routing via the
   /// [onGenerateRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
@@ -355,6 +355,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
+    this.tapBehaviorButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -446,6 +447,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
+    this.tapBehaviorButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -1041,18 +1043,26 @@ class WidgetsApp extends StatefulWidget {
 
   /// Builds the widget the [WidgetInspector] uses to exit selection mode.
   ///
-  /// This lets [MaterialApp] to use a Material Design button to exit the
-  /// inspector select mode without requiring [WidgetInspector] to depend on the
-  /// Material package.
+  /// This lets [MaterialApp] and [CupertinoApp] use an appropriately styled
+  /// button for their design systems without requiring [WidgetInspector] to
+  /// depend on the Material or Cupertino packages.
   final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
 
   /// Builds the widget the [WidgetInspector] uses to move the exit selection
   /// mode button.
   ///
-  /// This lets [MaterialApp] to use a Material Design button to change the
-  /// alignment without requiring [WidgetInspector] to depend on the Material
-  /// package.
+  /// This lets [MaterialApp] and [CupertinoApp] use an appropriately styled
+  /// button for their design systems without requiring [WidgetInspector] to
+  /// depend on the Material or Cupertino packages.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
+
+  /// Builds the widget the [WidgetInspector] uses to change the default
+  /// behavior when tapping on widgets in the app.
+  ///
+  /// This lets [MaterialApp] and [CupertinoApp] use an appropriately styled
+  /// button for their design systems without requiring [WidgetInspector] to
+  /// depend on the Material or Cupertino packages.
+  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   /// Turns on a little "DEBUG" banner in debug mode to indicate
@@ -1824,6 +1834,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             return WidgetInspector(
               exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
               moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
+              tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
               child: child!,
             );
           }

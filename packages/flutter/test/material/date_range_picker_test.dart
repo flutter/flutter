@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -139,23 +138,14 @@ void main() {
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
       expect(saveButtonBottomLeft.dx, moreOrLessEquals(711.6, epsilon: 1e-5));
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
-      }
+      expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
-      }
+      expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
 
       // Test help text position.
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(helpTextBottomLeft.dx, 72.0);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0);
-      }
+      expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0);
 
       // Test the header position.
       final Offset firstDateHeaderTopLeft = tester.getTopLeft(firstDateHeaderText);
@@ -181,7 +171,7 @@ void main() {
   });
 
   testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
         find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -200,7 +190,7 @@ void main() {
   });
 
   testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Material dialogMaterial = tester.widget<Material>(
         find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -219,7 +209,7 @@ void main() {
   });
 
   testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       expect(scaffold.backgroundColor, null);
@@ -956,7 +946,7 @@ void main() {
     });
 
     testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         final Material dialogMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -1197,9 +1187,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light().copyWith(
-            inputDecorationTheme: const InputDecorationTheme(border: border),
-          ),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
@@ -1483,6 +1471,7 @@ void main() {
             label: '30, Saturday, January 30, 2016, Today',
             hasTapAction: true,
             hasFocusAction: true,
+            hasSelectedState: true,
             isFocusable: true,
           ),
         );
@@ -1497,9 +1486,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.light().copyWith(
-            inputDecorationTheme: const InputDecorationTheme(border: border),
-          ),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
@@ -1817,6 +1804,101 @@ void main() {
       });
     });
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DateRangePickerDialog(
+              initialDateRange: initialDateRange,
+              firstDate: firstDate,
+              lastDate: lastDate,
+            ),
+          ),
+        ),
+      );
+
+      final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+      expect(dialog.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DateRangePickerDialog(
+              initialDateRange: initialDateRange,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final DateRangePickerDialog dialog = tester.widget(find.byType(DateRangePickerDialog));
+      expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
+      Finder getMonthItem() {
+        final Finder dayItem = find.descendant(
+          of: find.byType(ConstrainedBox),
+          matching: find.text('1'),
+        );
+        return find.ancestor(of: dayItem, matching: find.byType(Column));
+      }
+
+      int getDayCount(Finder parent) {
+        final Finder dayItem = find.descendant(
+          of: parent,
+          matching: find.descendant(of: find.byType(InkResponse), matching: find.byType(Text)),
+        );
+        return tester.widgetList(dayItem).length;
+      }
+
+      Text getMonthYear(Finder parent) {
+        return tester.widget(
+          find
+              .descendant(
+                of: parent,
+                matching: find.descendant(
+                  of: find.byType(ConstrainedBox),
+                  matching: find.byType(Text),
+                ),
+              )
+              .first,
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DateRangePickerDialog(
+              initialDateRange: initialDateRange,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final Finder monthItem = getMonthItem();
+
+      final Finder firstMonthItem = monthItem.at(0);
+      expect(getMonthYear(firstMonthItem).data, 'January 2016');
+      expect(getDayCount(firstMonthItem), 28);
+
+      final Finder secondMonthItem = monthItem.at(2);
+      expect(getMonthYear(secondMonthItem).data, 'February 2016');
+      expect(getDayCount(secondMonthItem), 21);
+    });
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
@@ -1916,5 +1998,19 @@ class _RestorableDateRangePickerDialogTestWidgetState
         ),
       ),
     );
+  }
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  int getDaysInMonth(int year, int month) {
+    return month.isEven ? 21 : 28;
+  }
+
+  @override
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    return 1;
   }
 }

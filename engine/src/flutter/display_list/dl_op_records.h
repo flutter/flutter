@@ -486,6 +486,7 @@ struct TransformResetOp final : TransformClipOpBase {
 // DlRect is 16 more bytes, which packs efficiently into 24 bytes total
 // DlRoundRect is 48 more bytes, which rounds up to 48 bytes
 //         which packs into 56 bytes total
+// DlRoundSuperellipse is the same as DlRoundRect
 // CacheablePath is 128 more bytes, which packs efficiently into 136 bytes total
 //
 // We could pack the clip_op and the bool both into the free 4 bytes after
@@ -503,15 +504,17 @@ struct TransformResetOp final : TransformClipOpBase {
     const shapetype shape;                                                     \
                                                                                \
     void dispatch(DlOpReceiver& receiver) const {                              \
-      receiver.clip##shapename(shape, DlCanvas::ClipOp::k##clipop, is_aa);     \
+      receiver.clip##shapename(shape, DlClipOp::k##clipop, is_aa);             \
     }                                                                          \
   };
 DEFINE_CLIP_SHAPE_OP(Rect, DlRect, Intersect)
 DEFINE_CLIP_SHAPE_OP(Oval, DlRect, Intersect)
 DEFINE_CLIP_SHAPE_OP(RoundRect, DlRoundRect, Intersect)
+DEFINE_CLIP_SHAPE_OP(RoundSuperellipse, DlRoundSuperellipse, Intersect)
 DEFINE_CLIP_SHAPE_OP(Rect, DlRect, Difference)
 DEFINE_CLIP_SHAPE_OP(Oval, DlRect, Difference)
 DEFINE_CLIP_SHAPE_OP(RoundRect, DlRoundRect, Difference)
+DEFINE_CLIP_SHAPE_OP(RoundSuperellipse, DlRoundSuperellipse, Difference)
 #undef DEFINE_CLIP_SHAPE_OP
 
 // 4 byte header + 20 byte payload packs evenly into 24 bytes
@@ -526,7 +529,7 @@ DEFINE_CLIP_SHAPE_OP(RoundRect, DlRoundRect, Difference)
     const DlPath path;                                                    \
                                                                           \
     void dispatch(DlOpReceiver& receiver) const {                         \
-      receiver.clipPath(path, DlCanvas::ClipOp::k##clipop, is_aa);        \
+      receiver.clipPath(path, DlClipOp::k##clipop, is_aa);                \
     }                                                                     \
                                                                           \
     DisplayListCompare equals(const Clip##clipop##PathOp* other) const {  \
@@ -578,6 +581,7 @@ struct DrawColorOp final : DrawOpBase {
 // SkOval is same as DlRect
 // DlRoundRect is 48 more bytes, using 52 bytes which rounds up to 56 bytes
 //        total (4 bytes unused)
+// DlRoundSuperellipse is the same as DlRoundRect
 #define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)             \
   struct Draw##op_name##Op final : DrawOpBase {                      \
     static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
@@ -594,6 +598,7 @@ struct DrawColorOp final : DrawOpBase {
 DEFINE_DRAW_1ARG_OP(Rect, DlRect, rect)
 DEFINE_DRAW_1ARG_OP(Oval, DlRect, oval)
 DEFINE_DRAW_1ARG_OP(RoundRect, DlRoundRect, rrect)
+DEFINE_DRAW_1ARG_OP(RoundSuperellipse, DlRoundSuperellipse, rse)
 #undef DEFINE_DRAW_1ARG_OP
 
 // 4 byte header + 16 byte payload uses 20 bytes but is rounded
@@ -702,7 +707,7 @@ struct DrawArcOp final : DrawOpBase {
                                                                        \
     void dispatch(DlOpReceiver& receiver) const {                      \
       const DlPoint* pts = reinterpret_cast<const DlPoint*>(this + 1); \
-      receiver.drawPoints(DlCanvas::PointMode::mode, count, pts);      \
+      receiver.drawPoints(DlPointMode::mode, count, pts);              \
     }                                                                  \
   };
 DEFINE_DRAW_POINTS_OP(Points, kPoints);
@@ -769,7 +774,7 @@ struct DrawImageRectOp final : DrawOpBase {
                   const DlRect& dst,
                   DlImageSampling sampling,
                   bool render_with_attributes,
-                  DlCanvas::SrcRectConstraint constraint)
+                  DlSrcRectConstraint constraint)
       : DrawOpBase(kType),
         src(src),
         dst(dst),
@@ -782,7 +787,7 @@ struct DrawImageRectOp final : DrawOpBase {
   const DlRect dst;
   const DlImageSampling sampling;
   const bool render_with_attributes;
-  const DlCanvas::SrcRectConstraint constraint;
+  const DlSrcRectConstraint constraint;
   const sk_sp<DlImage> image;
 
   void dispatch(DlOpReceiver& receiver) const {

@@ -188,6 +188,8 @@ class DropdownMenu<T> extends StatefulWidget {
     required this.dropdownMenuEntries,
     this.inputFormatters,
     this.closeBehavior = DropdownMenuCloseBehavior.all,
+    this.maxLines = 1,
+    this.textInputAction,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -502,6 +504,29 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to [DropdownMenuCloseBehavior.all].
   final DropdownMenuCloseBehavior closeBehavior;
 
+  /// Specifies the maximum number of lines the selected value can display
+  /// in the [DropdownMenu].
+  ///
+  /// If the provided value is 1, then the text will not wrap, but will scroll
+  /// horizontally instead. Defaults to 1.
+  ///
+  /// If this is null, there is no limit to the number of lines, and the text
+  /// container will start with enough vertical space for one line and
+  /// automatically grow to accommodate additional lines as they are entered, up
+  /// to the height of its constraints.
+  ///
+  /// If this is not null, the provided value must be greater than zero. The text
+  /// field will restrict the input to the given number of lines and take up enough
+  /// horizontal space to accommodate that number of lines.
+  ///
+  /// See also:
+  ///  * [TextField.maxLines], which specifies the maximum number of lines
+  ///    the [TextField] can display.
+  final int? maxLines;
+
+  /// {@macro flutter.widgets.TextField.textInputAction}
+  final TextInputAction? textInputAction;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -703,7 +728,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       final double padding =
           entry.leadingIcon == null
               ? (leadingPadding ?? _kDefaultHorizontalPadding)
-              : (_kDefaultHorizontalPadding + _kLeadingIconToInputPadding);
+              : _kDefaultHorizontalPadding;
       ButtonStyle effectiveStyle =
           entry.style ??
           switch (textDirection) {
@@ -780,7 +805,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         child: MenuItemButton(
           key: enableScrollToHighlight ? buttonItemKeys[i] : null,
           style: effectiveStyle,
-          leadingIcon: entry.leadingIcon,
+          leadingIcon:
+              entry.leadingIcon != null
+                  ? Padding(
+                    padding: const EdgeInsetsDirectional.only(end: _kLeadingIconToInputPadding),
+                    child: entry.leadingIcon,
+                  )
+                  : null,
           trailingIcon: entry.trailingIcon,
           closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
           onPressed:
@@ -848,17 +879,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     });
   }
 
-  void handlePressed(MenuController controller) {
+  void handlePressed(MenuController controller, {bool focusForKeyboard = true}) {
     if (controller.isOpen) {
       currentHighlight = null;
       controller.close();
     } else {
+      filteredEntries = widget.dropdownMenuEntries;
       // close to open
       if (_localTextEditingController!.text.isNotEmpty) {
         _enableFilter = false;
       }
       controller.open();
-      _internalFocudeNode.requestFocus();
+      if (focusForKeyboard) {
+        _internalFocudeNode.requestFocus();
+      }
     }
     setState(() {});
   }
@@ -901,8 +935,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries =
           widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text) ??
           filter(widget.dropdownMenuEntries, _localTextEditingController!);
-    } else {
-      filteredEntries = widget.dropdownMenuEntries;
     }
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
@@ -936,11 +968,19 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final double? anchorWidth = getWidth(_anchorKey);
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStatePropertyAll<Size?>(Size(widget.width!, 0.0)),
+        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+          final double? effectiveMaximumWidth =
+              effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
+          return Size(math.min(widget.width!, effectiveMaximumWidth ?? 0.0), 0.0);
+        }),
       );
     } else if (anchorWidth != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStatePropertyAll<Size?>(Size(anchorWidth, 0.0)),
+        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+          final double? effectiveMaximumWidth =
+              effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
+          return Size(math.min(anchorWidth, effectiveMaximumWidth ?? 0.0), 0.0);
+        }),
       );
     }
 
@@ -999,6 +1039,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           keyboardType: widget.keyboardType,
           textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
+          maxLines: widget.maxLines,
+          textInputAction: widget.textInputAction,
           style: effectiveTextStyle,
           controller: _localTextEditingController,
           onEditingComplete: _handleEditingComplete,
@@ -1006,7 +1048,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               !widget.enabled
                   ? null
                   : () {
-                    handlePressed(controller);
+                    handlePressed(controller, focusForKeyboard: !canRequestFocus());
                   },
           onChanged: (String text) {
             controller.open();
@@ -1038,11 +1080,24 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 ? textField
                 : _DropdownMenuBody(
                   width: widget.width,
+                  // The children, except the text field, are used to compute the preferred width,
+                  // which is the width of the longest children, plus the width of trailingButton
+                  // and leadingButton.
+                  //
+                  // See _RenderDropdownMenuBody layout logic.
                   children: <Widget>[
                     textField,
                     ..._initialMenu!.map(
                       (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
                     ),
+                    if (widget.label != null)
+                      ExcludeSemantics(
+                        child: Padding(
+                          // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
+                        ),
+                      ),
                     trailingButton,
                     leadingButton,
                   ],
@@ -1276,9 +1331,11 @@ class _RenderDropdownMenuBody extends RenderBox
         continue;
       }
       final double maxIntrinsicWidth = child.getMinIntrinsicWidth(height);
+      // Add the width of leading icon.
       if (child == lastChild) {
         width += maxIntrinsicWidth;
       }
+      // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
         width += maxIntrinsicWidth;
       }
@@ -1303,11 +1360,11 @@ class _RenderDropdownMenuBody extends RenderBox
         continue;
       }
       final double maxIntrinsicWidth = child.getMaxIntrinsicWidth(height);
-      // Add the width of leading Icon.
+      // Add the width of leading icon.
       if (child == lastChild) {
         width += maxIntrinsicWidth;
       }
-      // Add the width of trailing Icon.
+      // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
         width += maxIntrinsicWidth;
       }

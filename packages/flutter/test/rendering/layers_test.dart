@@ -357,6 +357,14 @@ void main() {
     );
   });
 
+  test('ClipRSuperellipseLayer prints clipBehavior in debug info', () {
+    expect(getDebugInfo(ClipRSuperellipseLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      getDebugInfo(ClipRSuperellipseLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
   test('ClipPathLayer prints clipBehavior in debug info', () {
     expect(getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
@@ -464,6 +472,18 @@ void main() {
     });
   });
 
+  test('mutating ClipRSuperellipseLayer fields triggers needsAddToScene', () {
+    final ClipRSuperellipseLayer layer = ClipRSuperellipseLayer(
+      clipRSuperellipse: RSuperellipse.zero,
+    );
+    checkNeedsAddToScene(layer, () {
+      layer.clipRSuperellipse = RSuperellipse.fromRectAndRadius(unitRect, Radius.zero);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
   test('mutating ClipPath fields triggers needsAddToScene', () {
     final ClipPathLayer layer = ClipPathLayer(clipPath: Path());
     checkNeedsAddToScene(layer, () {
@@ -521,51 +541,41 @@ void main() {
     });
   });
 
-  test(
-    'ContainerLayer.toImage can render interior layer',
-    () {
-      final OffsetLayer parent = OffsetLayer();
-      final OffsetLayer child = OffsetLayer();
-      final OffsetLayer grandChild = OffsetLayer();
-      child.append(grandChild);
-      parent.append(child);
+  test('ContainerLayer.toImage can render interior layer', () {
+    final OffsetLayer parent = OffsetLayer();
+    final OffsetLayer child = OffsetLayer();
+    final OffsetLayer grandChild = OffsetLayer();
+    child.append(grandChild);
+    parent.append(child);
 
-      // This renders the layers and generates engine layers.
-      parent.buildScene(SceneBuilder());
+    // This renders the layers and generates engine layers.
+    parent.buildScene(SceneBuilder());
 
-      // Causes grandChild to pass its engine layer as `oldLayer`
-      grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
+    // Causes grandChild to pass its engine layer as `oldLayer`
+    grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
 
-      // Ensure we can render the same scene again after rendering an interior
-      // layer.
-      parent.buildScene(SceneBuilder());
-    },
-    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
-    skip: isBrowser && !isSkiaWeb,
-  );
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
+    parent.buildScene(SceneBuilder());
+  });
 
-  test(
-    'ContainerLayer.toImageSync can render interior layer',
-    () {
-      final OffsetLayer parent = OffsetLayer();
-      final OffsetLayer child = OffsetLayer();
-      final OffsetLayer grandChild = OffsetLayer();
-      child.append(grandChild);
-      parent.append(child);
+  test('ContainerLayer.toImageSync can render interior layer', () {
+    final OffsetLayer parent = OffsetLayer();
+    final OffsetLayer child = OffsetLayer();
+    final OffsetLayer grandChild = OffsetLayer();
+    child.append(grandChild);
+    parent.append(child);
 
-      // This renders the layers and generates engine layers.
-      parent.buildScene(SceneBuilder());
+    // This renders the layers and generates engine layers.
+    parent.buildScene(SceneBuilder());
 
-      // Causes grandChild to pass its engine layer as `oldLayer`
-      grandChild.toImageSync(const Rect.fromLTRB(0, 0, 10, 10));
+    // Causes grandChild to pass its engine layer as `oldLayer`
+    grandChild.toImageSync(const Rect.fromLTRB(0, 0, 10, 10));
 
-      // Ensure we can render the same scene again after rendering an interior
-      // layer.
-      parent.buildScene(SceneBuilder());
-    },
-    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
-    skip: isBrowser && !isSkiaWeb,
-  );
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
+    parent.buildScene(SceneBuilder());
+  });
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
@@ -736,12 +746,16 @@ void main() {
     expect(layer.describeClipBounds(), null);
 
     const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
-    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    final RRect rrBounds = RRect.fromRectXY(bounds, 2, 2);
+    final RSuperellipse rseBounds = RSuperellipse.fromRectXY(bounds, 2, 2);
     layer = ClipRectLayer(clipRect: bounds);
     expect(layer.describeClipBounds(), bounds);
 
-    layer = ClipRRectLayer(clipRRect: rbounds);
-    expect(layer.describeClipBounds(), rbounds.outerRect);
+    layer = ClipRRectLayer(clipRRect: rrBounds);
+    expect(layer.describeClipBounds(), rrBounds.outerRect);
+
+    layer = ClipRSuperellipseLayer(clipRSuperellipse: rseBounds);
+    expect(layer.describeClipBounds(), rseBounds.outerRect);
 
     layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
     expect(layer.describeClipBounds(), bounds);
@@ -1000,6 +1014,7 @@ void main() {
     final OpacityLayer opacityLayer = OpacityLayer();
     final ClipRectLayer clipRectLayer = ClipRectLayer();
     final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ClipRSuperellipseLayer clipRSuperellipseLayer = ClipRSuperellipseLayer();
     final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
     final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
     final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
@@ -1009,6 +1024,7 @@ void main() {
     expect(opacityLayer.supportsRasterization(), true);
     expect(clipRectLayer.supportsRasterization(), true);
     expect(clipRRectLayer.supportsRasterization(), true);
+    expect(clipRSuperellipseLayer.supportsRasterization(), true);
     expect(imageFilterLayer.supportsRasterization(), true);
     expect(backdropFilterLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);

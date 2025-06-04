@@ -1901,7 +1901,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light(),
+          data: ThemeData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -1959,7 +1959,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light(),
+          data: ThemeData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -2043,7 +2043,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light(),
+          data: ThemeData(),
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Material(
@@ -2810,4 +2810,140 @@ void main() {
 
     semantics.dispose();
   }, semanticsEnabled: false);
+
+  testWidgets('RangeSlider overlay appears correctly for specific thumb interactions', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    RangeValues values = const RangeValues(50, 70);
+    const Color hoverColor = Color(0xffff0000);
+    const Color dragColor = Color(0xff0000ff);
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100.0,
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                      Set<WidgetState> states,
+                    ) {
+                      if (states.contains(WidgetState.hovered)) {
+                        return hoverColor;
+                      }
+                      if (states.contains(WidgetState.dragged)) {
+                        return dragColor;
+                      }
+
+                      return null;
+                    }),
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    // Initial state - no overlay.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: dragColor)),
+    );
+
+    // Drag start thumb to left.
+    final Offset topThumbLocation = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture dragStartThumb = await tester.startGesture(topThumbLocation);
+    await tester.pump(kPressTimeout);
+    await dragStartThumb.moveBy(const Offset(-20.0, 0));
+    await tester.pumpAndSettle();
+
+    // Verify overlay is visible and shadow is visible on single thumb.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints
+        ..circle(color: dragColor)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 12.0),
+    );
+
+    // Move back and release.
+    await dragStartThumb.moveBy(const Offset(20.0, 0));
+    await dragStartThumb.up();
+    await tester.pumpAndSettle();
+
+    // Verify overlay and shadow disappears
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(
+        paints
+          ..circle(color: dragColor)
+          ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+          ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0),
+      ),
+    );
+
+    // Drag end thumb and return to original position.
+    final Offset bottomThumbLocation = tester
+        .getCenter(find.byType(RangeSlider))
+        .translate(220.0, 0.0);
+    final TestGesture dragEndThumb = await tester.startGesture(bottomThumbLocation);
+    await tester.pump(kPressTimeout);
+    await dragEndThumb.moveBy(const Offset(20.0, 0));
+    await tester.pump(kPressTimeout);
+    await dragEndThumb.moveBy(const Offset(-20.0, 0));
+    await dragEndThumb.up();
+    await tester.pumpAndSettle();
+
+    // Verify overlay disappears.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: dragColor)),
+    );
+
+    // Hover on start thumb.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(topThumbLocation);
+    await tester.pumpAndSettle();
+
+    // Verify overlay appears only for start thumb and no shadow is visible.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints
+        ..circle(color: hoverColor)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0),
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
+    // 2 thumbs and 1 overlay.
+    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 3));
+
+    // Move away from thumb
+    await gesture.moveTo(tester.getTopRight(find.byType(RangeSlider)));
+    await tester.pumpAndSettle();
+
+    // Verify overlay disappears
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: hoverColor)),
+    );
+  });
 }

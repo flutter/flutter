@@ -32,6 +32,11 @@ bool _rrectIsValid(RRect rrect) {
   return true;
 }
 
+bool _rsuperellipseIsValid(RSuperellipse rsuperellipse) {
+  assert(!rsuperellipse.hasNaN, 'RSuperellipse argument contained a NaN value.');
+  return true;
+}
+
 bool _offsetIsValid(Offset offset) {
   assert(!offset.dx.isNaN && !offset.dy.isNaN, 'Offset argument contained a NaN value.');
   return true;
@@ -258,7 +263,7 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use .a.')
+  @Deprecated('Use (*.a * 255.0).round() & 0xff')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
@@ -269,15 +274,15 @@ class Color {
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  @Deprecated('Use .r.')
+  @Deprecated('Use (*.r * 255.0).round() & 0xff')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  @Deprecated('Use .g.')
+  @Deprecated('Use (*.g * 255.0).round() & 0xff')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  @Deprecated('Use .b.')
+  @Deprecated('Use (*.b * 255.0).round() & 0xff')
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color with the provided components updated.
@@ -288,6 +293,13 @@ class Color {
   /// If [colorSpace] is provided, and is different than the current color
   /// space, the component values are updated before transforming them to the
   /// provided [ColorSpace].
+  ///
+  /// Example:
+  /// ```dart
+  /// import 'dart:ui';
+  /// /// Create a color with 50% opacity.
+  /// Color makeTransparent(Color color) => color.withValues(alpha: 0.5);
+  /// ```
   Color withValues({
     double? alpha,
     double? red,
@@ -2623,7 +2635,12 @@ void decodeImageFromList(Uint8List list, ImageDecoderCallback callback) {
 
 Future<void> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback callback) async {
   final Codec codec = await instantiateImageCodec(list);
-  final FrameInfo frameInfo = await codec.getNextFrame();
+  final FrameInfo frameInfo;
+  try {
+    frameInfo = await codec.getNextFrame();
+  } finally {
+    codec.dispose();
+  }
   callback(frameInfo.image);
 }
 
@@ -3016,6 +3033,10 @@ abstract class Path {
   /// argument.
   void addRRect(RRect rrect);
 
+  /// Adds a new sub-path that consists of curves needed to form the rounded
+  /// superellipse described by the argument.
+  void addRSuperellipse(RSuperellipse rsuperellipse);
+
   /// Adds the sub-paths of `path`, offset by `offset`, to this path.
   ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
@@ -3357,6 +3378,15 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'Path::addRRect')
   external void _addRRect(Float32List rrect);
+
+  @override
+  void addRSuperellipse(RSuperellipse rsuperellipse) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _addRSuperellipse(rsuperellipse._native());
+  }
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>)>(symbol: 'Path::addRSuperellipse')
+  external void _addRSuperellipse(_NativeRSuperellipse rsuperellipse);
 
   @override
   void addPath(Path path, Offset offset, {Float64List? matrix4}) {
@@ -4457,8 +4487,13 @@ class _FragmentShaderImageFilter implements ImageFilter {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _FragmentShaderImageFilter && other.shader == shader;
+    return other is _FragmentShaderImageFilter &&
+        other.shader == shader &&
+        _equals(nativeFilter, other.nativeFilter);
   }
+
+  @Native<Bool Function(Handle, Handle)>(symbol: 'ImageFilter::equal')
+  external static bool _equals(_ImageFilter a, _ImageFilter b);
 
   @override
   int get hashCode => shader.hashCode;
@@ -5258,6 +5293,7 @@ base class FragmentShader extends Shader {
   /// results will be undefined.
   void setImageSampler(int index, Image image) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
+    assert(!image.debugDisposed, 'Image has been disposed');
     _setImageSampler(index, image._image);
   }
 
@@ -5566,7 +5602,7 @@ base class Vertices extends NativeFieldWrapperClass1 {
 /// Defines how a list of points is interpreted when drawing a set of points.
 ///
 /// Used by [Canvas.drawPoints] and [Canvas.drawRawPoints].
-// These enum values must be kept in sync with DlCanvas::PointMode.
+// These enum values must be kept in sync with DlPointMode.
 enum PointMode {
   /// Draw each point separately.
   ///
@@ -5862,6 +5898,18 @@ abstract class Canvas {
   void clipRRect(RRect rrect, {bool doAntiAlias = true});
 
   /// Reduces the clip region to the intersection of the current clip and the
+  /// given rounded superellipse.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/clip_rsuperellipse.png)
+  ///
+  /// If [doAntiAlias] is true, then the clip will be anti-aliased.
+  ///
+  /// If multiple draw commands intersect with the clip boundary, this can result
+  /// in incorrect blending at the clip boundary. See [saveLayer] for a
+  /// discussion of how to address that and some examples of using [clipRSuperellipse].
+  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true});
+
+  /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/clip_path.png)
@@ -5983,6 +6031,13 @@ abstract class Canvas {
   ///
   /// This shape is almost but not quite entirely unlike an annulus.
   void drawDRRect(RRect outer, RRect inner, Paint paint);
+
+  /// Draws a rounded superellipse with the given [Paint]. The shape is filled,
+  /// and the value of the [Paint.style] is ignored for this call.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-light-mode-only)
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-dark-mode-only)
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint);
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
@@ -6596,6 +6651,15 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   external void _clipRRect(Float32List rrect, bool doAntiAlias);
 
   @override
+  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _clipRSuperellipse(rsuperellipse._native(), doAntiAlias);
+  }
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Bool)>(symbol: 'Canvas::clipRSuperellipse')
+  external void _clipRSuperellipse(_NativeRSuperellipse rsuperellipse, bool doAntiAlias);
+
+  @override
   void clipPath(Path path, {bool doAntiAlias = true}) {
     _clipPath(path as _NativePath, doAntiAlias);
   }
@@ -6701,6 +6765,21 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   external void _drawDRRect(
     Float32List outer,
     Float32List inner,
+    List<Object?>? paintObjects,
+    ByteData paintData,
+  );
+
+  @override
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
+  }
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
+    symbol: 'Canvas::drawRSuperellipse',
+  )
+  external void _drawRSuperellipse(
+    _NativeRSuperellipse rsuperellipse,
     List<Object?>? paintObjects,
     ByteData paintData,
   );

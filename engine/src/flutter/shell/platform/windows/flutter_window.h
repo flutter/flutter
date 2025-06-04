@@ -104,9 +104,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                               FlutterPointerDeviceKind device_kind,
                               int32_t device_id);
 
-  // Called when the cursor should be set for the client area.
-  virtual void OnSetCursor();
-
   // |WindowBindingHandlerDelegate|
   virtual void OnText(const std::u16string& text) override;
 
@@ -162,12 +159,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual PhysicalWindowBounds GetPhysicalWindowBounds() override;
 
   // |FlutterWindowBindingHandler|
-  virtual void UpdateFlutterCursor(const std::string& cursor_name) override;
-
-  // |FlutterWindowBindingHandler|
-  virtual void SetFlutterCursor(HCURSOR cursor) override;
-
-  // |FlutterWindowBindingHandler|
   virtual bool OnBitmapSurfaceCleared() override;
 
   // |FlutterWindowBindingHandler|
@@ -186,6 +177,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // |WindowBindingHandler|
   virtual ui::AXPlatformNodeWin* GetAlert() override;
+
+  // [WindowBindingHandler]
+  virtual bool Focus() override;
 
   // Called to obtain a pointer to the fragment root delegate.
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate();
@@ -325,9 +319,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // A pointer to a FlutterWindowsView that can be used to update engine
   // windowing and input state.
   WindowBindingHandlerDelegate* binding_handler_delegate_ = nullptr;
-
-  // The last cursor set by Flutter. Defaults to the arrow cursor.
-  HCURSOR current_cursor_;
 
   // The cursor rect set by Flutter.
   RECT cursor_rect_;

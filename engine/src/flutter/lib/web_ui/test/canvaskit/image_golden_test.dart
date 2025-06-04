@@ -14,8 +14,6 @@ import 'package:ui/ui.dart' as ui;
 import 'common.dart';
 import 'test_data.dart';
 
-List<TestCodec>? testCodecs;
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -29,6 +27,11 @@ abstract class TestCodec {
   Future<ui.Codec> getCodec() async => _cachedCodec ??= await createCodec();
 
   Future<ui.Codec> createCodec();
+
+  void dispose() {
+    _cachedCodec?.dispose();
+    _cachedCodec = null;
+  }
 }
 
 abstract class TestFileCodec extends TestCodec {
@@ -97,7 +100,7 @@ class BitmapTestCodec extends TestFileCodec {
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement as JSObject, (
+    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
       x: 0,
       y: 0,
       width: imageElement.naturalWidth.toInt(),
@@ -134,13 +137,11 @@ class BitmapSingleFrameCodec implements ui.Codec {
 }
 
 Future<void> testMain() async {
-  Future<List<TestCodec>> createTestCodecs({
-    int testTargetWidth = 300,
-    int testTargetHeight = 300,
-  }) async {
-    final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-    final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+  final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
+  final List<String> testFiles =
+      ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>).cast<String>();
 
+  List<TestCodec> createTestCodecs({int testTargetWidth = 300, int testTargetHeight = 300}) {
     // Sanity-check the test file list. If suddenly test files are moved or
     // deleted, and the test server returns an empty list, or is missing some
     // important test files, we want to know.
@@ -192,8 +193,6 @@ Future<void> testMain() async {
     return testCodecs;
   }
 
-  testCodecs = await createTestCodecs();
-
   group('CanvasKit Images', () {
     setUpCanvasKitTest(withImplicitView: true);
 
@@ -202,7 +201,8 @@ Future<void> testMain() async {
     });
 
     group('Codecs', () {
-      for (final TestCodec testCodec in testCodecs!) {
+      final List<TestCodec> testCodecs = createTestCodecs();
+      for (final TestCodec testCodec in testCodecs) {
         test('${testCodec.description} can create an image', () async {
           try {
             final ui.Codec codec = await testCodec.getCodec();
@@ -246,6 +246,9 @@ Future<void> testMain() async {
                 'contain nonzero value',
           );
         });
+      }
+      for (final testCodec in testCodecs) {
+        testCodec.dispose();
       }
     });
 

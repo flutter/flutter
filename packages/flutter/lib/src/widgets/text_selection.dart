@@ -348,15 +348,7 @@ class TextSelectionOverlay {
     required TextMagnifierConfiguration magnifierConfiguration,
   }) : _handlesVisible = handlesVisible,
        _value = value {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$TextSelectionOverlay',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
     renderObject.selectionStartInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.addListener(_updateTextSelectionOverlayVisibilities);
     _updateTextSelectionOverlayVisibilities();
@@ -607,11 +599,7 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.dispose}
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _selectionOverlay.dispose();
     renderObject.selectionStartInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
     renderObject.selectionEndInViewport.removeListener(_updateTextSelectionOverlayVisibilities);
@@ -1050,15 +1038,7 @@ class SelectionOverlay {
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
        assert(debugCheckHasOverlay(context)) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$SelectionOverlay',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.context}
@@ -1619,11 +1599,7 @@ class SelectionOverlay {
   /// Disposes this object and release resources.
   /// {@endtemplate}
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     hide();
     _magnifierInfo.dispose();
   }
@@ -2317,7 +2293,7 @@ class TextSelectionGestureDetectorBuilder {
           if (stylusEnabled) {
             Scribe.isFeatureAvailable().then((bool isAvailable) {
               if (isAvailable) {
-                renderEditable.selectPosition(cause: SelectionChangedCause.scribble);
+                renderEditable.selectPosition(cause: SelectionChangedCause.stylusHandwriting);
                 Scribe.startStylusHandwriting();
               }
             });

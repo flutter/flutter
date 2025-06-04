@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,7 +16,7 @@ void main() {
     expect(dark, equals(dark.copyWith()));
     expect(dark.hashCode, equals(dark.copyWith().hashCode));
 
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
 
     expect(dawn.brightness, Brightness.dark);
@@ -108,15 +110,15 @@ void main() {
   });
 
   test('light, dark and fallback constructors support useMaterial3', () {
-    final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData lightTheme = ThemeData();
     expect(lightTheme.useMaterial3, true);
     expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
-    final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
+    final ThemeData darkTheme = ThemeData.dark();
     expect(darkTheme.useMaterial3, true);
     expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
-    final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
+    final ThemeData fallbackTheme = ThemeData();
     expect(fallbackTheme.useMaterial3, true);
     expect(
       fallbackTheme.typography,
@@ -316,7 +318,7 @@ void main() {
   });
 
   test('ThemeData can generate a default M3 light colorScheme when useMaterial3 is true', () {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     expect(theme.colorScheme.primary, const Color(0xff6750a4));
     expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -378,9 +380,421 @@ void main() {
   });
 
   test(
+    'ThemeData applies light system colors when useSystemColors is true',
+    () {
+      final ThemeData theme = ThemeData(
+        colorSchemeSeed: Colors.orange,
+        brightness: Brightness.light,
+        useSystemColors: true,
+      );
+
+      expect(
+        theme.colorScheme.secondary,
+        SystemColor.light.accentColor.value,
+        skip: !SystemColor.light.accentColor.isSupported, // Color not always supported.
+        reason: 'Theme secondary color did not match system accent color',
+      );
+      expect(
+        theme.colorScheme.onSecondary,
+        SystemColor.light.accentColorText.value,
+        skip: !SystemColor.light.accentColorText.isSupported, // Color not always supported.
+        reason: 'Theme onSecondary color did not match system accent color text',
+      );
+      expect(
+        theme.colorScheme.surface,
+        SystemColor.light.canvas.value,
+        skip: !SystemColor.light.canvas.isSupported, // Color not always supported.
+        reason: 'Theme surface color did not match system canvas color',
+      );
+      expect(
+        theme.colorScheme.onSurface,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'Theme onSurface color did not match system canvas color text',
+      );
+
+      // Text theme
+
+      expect(
+        theme.textTheme.displayLarge?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme displayLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.displayMedium?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme displayMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.displaySmall?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme displaySmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.headlineLarge?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme headlineLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.headlineMedium?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme headlineMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.headlineSmall?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme headlineSmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.titleLarge?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme titleLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.titleMedium?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme titleMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.titleSmall?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme titleSmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.bodyLarge?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme bodyLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.bodyMedium?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme bodyMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.bodySmall?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme bodySmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.labelLarge?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme labelLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.labelMedium?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme labelMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.labelSmall?.color,
+        SystemColor.light.canvasText.value,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme labelSmall color did not match system text color',
+      );
+
+      // Button themes
+
+      expect(
+        theme.elevatedButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.light.buttonText.value,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
+        reason: 'ElevatedButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.elevatedButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.light.buttonFace.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'ElevatedButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.textButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.light.buttonText.value,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
+        reason: 'TextButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.textButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.light.buttonFace.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'TextButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.outlinedButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.light.buttonText.value,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
+        reason: 'OutlinedButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.outlinedButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.light.buttonFace.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'OutlinedButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.filledButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.light.buttonText.value,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
+        reason: 'FilledButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.light.buttonFace.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'FilledButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.floatingActionButtonTheme.foregroundColor,
+        SystemColor.light.buttonText.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.floatingActionButtonTheme.backgroundColor,
+        SystemColor.light.buttonFace.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme backgroundColor did not match system button face color',
+      );
+    },
+    // Only run this test on platforms that provide system colors.
+    skip: !SystemColor.platformProvidesSystemColors,
+  );
+
+  test(
+    'ThemeData applies dark system colors when useSystemColors is true',
+    () {
+      final ThemeData theme = ThemeData(
+        colorSchemeSeed: Colors.orange,
+        brightness: Brightness.dark,
+        useSystemColors: true,
+      );
+
+      expect(
+        theme.colorScheme.secondary,
+        SystemColor.dark.accentColor.value,
+        skip: !SystemColor.dark.accentColor.isSupported, // Color not always supported.
+        reason: 'Theme secondary color did not match system accent color',
+      );
+      expect(
+        theme.colorScheme.onSecondary,
+        SystemColor.dark.accentColorText.value,
+        skip: !SystemColor.dark.accentColorText.isSupported, // Color not always supported.
+        reason: 'Theme onSecondary color did not match system accent color text',
+      );
+      expect(
+        theme.colorScheme.surface,
+        SystemColor.dark.canvas.value,
+        skip: !SystemColor.dark.canvas.isSupported, // Color not always supported.
+        reason: 'Theme surface color did not match system canvas color',
+      );
+      expect(
+        theme.colorScheme.onSurface,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'Theme onSurface color did not match system canvas color text',
+      );
+
+      // Text theme
+
+      expect(
+        theme.textTheme.displayLarge?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme displayLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.displayMedium?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme displayMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.displaySmall?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme displaySmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.headlineLarge?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme headlineLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.headlineMedium?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme headlineMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.headlineSmall?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme headlineSmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.titleLarge?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme titleLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.titleMedium?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme titleMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.titleSmall?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme titleSmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.bodyLarge?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme bodyLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.bodyMedium?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme bodyMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.bodySmall?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme bodySmall color did not match system text color',
+      );
+      expect(
+        theme.textTheme.labelLarge?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme labelLarge color did not match system text color',
+      );
+      expect(
+        theme.textTheme.labelMedium?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme labelMedium color did not match system text color',
+      );
+      expect(
+        theme.textTheme.labelSmall?.color,
+        SystemColor.dark.canvasText.value,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
+        reason: 'TextTheme labelSmall color did not match system text color',
+      );
+
+      // Button themes
+
+      expect(
+        theme.elevatedButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.dark.buttonText.value,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
+        reason: 'ElevatedButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.elevatedButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.dark.buttonFace.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'ElevatedButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.textButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.dark.buttonText.value,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
+        reason: 'TextButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.textButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.dark.buttonFace.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'TextButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.outlinedButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.dark.buttonText.value,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
+        reason: 'OutlinedButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.outlinedButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{
+          WidgetState.pressed,
+        }),
+        SystemColor.dark.buttonFace.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'OutlinedButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.filledButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.dark.buttonText.value,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
+        reason: 'FilledButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
+        SystemColor.dark.buttonFace.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'FilledButtonTheme backgroundColor did not match system button face color',
+      );
+
+      expect(
+        theme.floatingActionButtonTheme.foregroundColor,
+        SystemColor.dark.buttonText.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.floatingActionButtonTheme.backgroundColor,
+        SystemColor.dark.buttonFace.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme backgroundColor did not match system button face color',
+      );
+    },
+    // Only run this test on platforms that provide system colors.
+    skip: !SystemColor.platformProvidesSystemColors,
+  );
+
+  test(
     'ThemeData.light() can generate a default M3 light colorScheme when useMaterial3 is true',
     () {
-      final ThemeData theme = ThemeData.light(useMaterial3: true);
+      final ThemeData theme = ThemeData.light();
 
       expect(theme.colorScheme.primary, const Color(0xff6750a4));
       expect(theme.colorScheme.onPrimary, const Color(0xffffffff));
@@ -443,7 +857,7 @@ void main() {
   );
 
   test('ThemeData.dark() can generate a default M3 dark colorScheme when useMaterial3 is true', () {
-    final ThemeData theme = ThemeData.dark(useMaterial3: true);
+    final ThemeData theme = ThemeData.dark();
     expect(theme.colorScheme.primary, const Color(0xffd0bcff));
     expect(theme.colorScheme.onPrimary, const Color(0xff381e72));
     expect(theme.colorScheme.primaryContainer, const Color(0xff4f378b));
@@ -537,7 +951,7 @@ void main() {
   testWidgets(
     'splashFactory is InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
 
       // Basic check that this theme is in fact using material 3.
       expect(theme.useMaterial3, true);
@@ -893,14 +1307,12 @@ void main() {
       canvasColor: Colors.black,
       cardColor: Colors.black,
       colorScheme: const ColorScheme.light(),
-      dialogBackgroundColor: Colors.black,
       disabledColor: Colors.black,
       dividerColor: Colors.black,
       focusColor: Colors.black,
       highlightColor: Colors.black,
       hintColor: Colors.black,
       hoverColor: Colors.black,
-      indicatorColor: Colors.black,
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
@@ -925,7 +1337,6 @@ void main() {
         type: BottomNavigationBarType.fixed,
       ),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
-      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       cardTheme: const CardThemeData(color: Colors.black),
       checkboxTheme: const CheckboxThemeData(),
@@ -980,6 +1391,10 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      // DEPRECATED (newest deprecations at the bottom)
+      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
+      dialogBackgroundColor: Colors.black,
+      indicatorColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -1004,13 +1419,11 @@ void main() {
       // GENERAL CONFIGURATION
       adaptationMap: const <Type, Adaptation<Object>>{SwitchThemeData: SwitchThemeAdaptation()},
       applyElevationOverlayColor: true,
-      cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
+      cupertinoOverrideTheme: ThemeData().cupertinoOverrideTheme,
       extensions: const <Object, ThemeExtension<dynamic>>{
         MyThemeExtensionB: MyThemeExtensionB(textStyle: TextStyle()),
       },
-      inputDecorationTheme: ThemeData.light().inputDecorationTheme.copyWith(
-        border: InputBorder.none,
-      ),
+      inputDecorationTheme: ThemeData().inputDecorationTheme.copyWith(border: InputBorder.none),
       materialTapTargetSize: MaterialTapTargetSize.padded,
       pageTransitionsTheme: const PageTransitionsTheme(),
       platform: TargetPlatform.android,
@@ -1018,19 +1431,16 @@ void main() {
       splashFactory: InkRipple.splashFactory,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
-
       // COLOR
       canvasColor: Colors.white,
       cardColor: Colors.white,
       colorScheme: const ColorScheme.light(),
-      dialogBackgroundColor: Colors.white,
       disabledColor: Colors.white,
       dividerColor: Colors.white,
       focusColor: Colors.white,
       highlightColor: Colors.white,
       hintColor: Colors.white,
       hoverColor: Colors.white,
-      indicatorColor: Colors.white,
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
@@ -1039,14 +1449,12 @@ void main() {
       shadowColor: Colors.white,
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
-
       // TYPOGRAPHY & ICONOGRAPHY
-      iconTheme: ThemeData.light().iconTheme,
-      primaryIconTheme: ThemeData.light().iconTheme,
-      primaryTextTheme: ThemeData.light().textTheme,
-      textTheme: ThemeData.light().textTheme,
+      iconTheme: ThemeData().iconTheme,
+      primaryIconTheme: ThemeData().iconTheme,
+      primaryTextTheme: ThemeData().textTheme,
+      textTheme: ThemeData().textTheme,
       typography: Typography.material2018(platform: TargetPlatform.iOS),
-
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
@@ -1057,7 +1465,6 @@ void main() {
         type: BottomNavigationBarType.shifting,
       ),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
-      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.light()),
       cardTheme: const CardThemeData(color: Colors.white),
       checkboxTheme: const CheckboxThemeData(),
@@ -1102,6 +1509,10 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      // DEPRECATED (newest deprecations at the bottom)
+      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
+      dialogBackgroundColor: Colors.white,
+      indicatorColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -1123,19 +1534,16 @@ void main() {
       splashFactory: otherTheme.splashFactory,
       useMaterial3: otherTheme.useMaterial3,
       visualDensity: otherTheme.visualDensity,
-
       // COLOR
       canvasColor: otherTheme.canvasColor,
       cardColor: otherTheme.cardColor,
       colorScheme: otherTheme.colorScheme,
-      dialogBackgroundColor: otherTheme.dialogBackgroundColor,
       disabledColor: otherTheme.disabledColor,
       dividerColor: otherTheme.dividerColor,
       focusColor: otherTheme.focusColor,
       highlightColor: otherTheme.highlightColor,
       hintColor: otherTheme.hintColor,
       hoverColor: otherTheme.hoverColor,
-      indicatorColor: otherTheme.indicatorColor,
       primaryColor: otherTheme.primaryColor,
       primaryColorDark: otherTheme.primaryColorDark,
       primaryColorLight: otherTheme.primaryColorLight,
@@ -1144,14 +1552,12 @@ void main() {
       shadowColor: otherTheme.shadowColor,
       splashColor: otherTheme.splashColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
-
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: otherTheme.iconTheme,
       primaryIconTheme: otherTheme.primaryIconTheme,
       primaryTextTheme: otherTheme.primaryTextTheme,
       textTheme: otherTheme.textTheme,
       typography: otherTheme.typography,
-
       // COMPONENT THEMES
       actionIconTheme: otherTheme.actionIconTheme,
       appBarTheme: otherTheme.appBarTheme,
@@ -1160,7 +1566,6 @@ void main() {
       bottomAppBarTheme: otherTheme.bottomAppBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
       bottomSheetTheme: otherTheme.bottomSheetTheme,
-      buttonBarTheme: otherTheme.buttonBarTheme,
       buttonTheme: otherTheme.buttonTheme,
       cardTheme: otherTheme.cardTheme,
       checkboxTheme: otherTheme.checkboxTheme,
@@ -1197,6 +1602,10 @@ void main() {
       timePickerTheme: otherTheme.timePickerTheme,
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       tooltipTheme: otherTheme.tooltipTheme,
+      // DEPRECATED (newest deprecations at the bottom)
+      buttonBarTheme: otherTheme.buttonBarTheme,
+      dialogBackgroundColor: otherTheme.dialogBackgroundColor,
+      indicatorColor: otherTheme.indicatorColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1217,19 +1626,16 @@ void main() {
     expect(themeDataCopy.splashFactory, equals(otherTheme.splashFactory));
     expect(themeDataCopy.useMaterial3, equals(otherTheme.useMaterial3));
     expect(themeDataCopy.visualDensity, equals(otherTheme.visualDensity));
-
     // COLOR
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
     expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
-    expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
     expect(themeDataCopy.disabledColor, equals(otherTheme.disabledColor));
     expect(themeDataCopy.dividerColor, equals(otherTheme.dividerColor));
     expect(themeDataCopy.focusColor, equals(otherTheme.focusColor));
     expect(themeDataCopy.highlightColor, equals(otherTheme.highlightColor));
     expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
     expect(themeDataCopy.hoverColor, equals(otherTheme.hoverColor));
-    expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
     expect(themeDataCopy.primaryColor, equals(otherTheme.primaryColor));
     expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
@@ -1238,14 +1644,12 @@ void main() {
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
-
     // TYPOGRAPHY & ICONOGRAPHY
     expect(themeDataCopy.iconTheme, equals(otherTheme.iconTheme));
     expect(themeDataCopy.primaryIconTheme, equals(otherTheme.primaryIconTheme));
     expect(themeDataCopy.primaryTextTheme, equals(otherTheme.primaryTextTheme));
     expect(themeDataCopy.textTheme, equals(otherTheme.textTheme));
     expect(themeDataCopy.typography, equals(otherTheme.typography));
-
     // COMPONENT THEMES
     expect(themeDataCopy.actionIconTheme, equals(otherTheme.actionIconTheme));
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
@@ -1254,7 +1658,6 @@ void main() {
     expect(themeDataCopy.bottomAppBarTheme, equals(otherTheme.bottomAppBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
     expect(themeDataCopy.bottomSheetTheme, equals(otherTheme.bottomSheetTheme));
-    expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
     expect(themeDataCopy.buttonTheme, equals(otherTheme.buttonTheme));
     expect(themeDataCopy.cardTheme, equals(otherTheme.cardTheme));
     expect(themeDataCopy.checkboxTheme, equals(otherTheme.checkboxTheme));
@@ -1302,6 +1705,10 @@ void main() {
     expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
     expect(themeDataCopy.toggleButtonsTheme, equals(otherTheme.toggleButtonsTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
+    // DEPRECATED (newest deprecations at the bottom)
+    expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
+    expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
+    expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (
@@ -1383,8 +1790,6 @@ void main() {
       'unselectedWidgetColor',
       'disabledColor',
       'secondaryHeaderColor',
-      'dialogBackgroundColor',
-      'indicatorColor',
       'hintColor',
       // TYPOGRAPHY & ICONOGRAPHY
       'typography',
@@ -1400,7 +1805,6 @@ void main() {
       'bottomAppBarTheme',
       'bottomNavigationBarTheme',
       'bottomSheetTheme',
-      'buttonBarTheme',
       'buttonTheme',
       'cardTheme',
       'checkboxTheme',
@@ -1439,10 +1843,14 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
+      // DEPRECATED (newest deprecations at the bottom)
+      'buttonBarTheme',
+      'dialogBackgroundColor',
+      'indicatorColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
-    ThemeData.light().debugFillProperties(properties);
+    ThemeData().debugFillProperties(properties);
     final List<String> propertyNameList =
         properties.properties
             .map((final DiagnosticsNode node) => node.name)

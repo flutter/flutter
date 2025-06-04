@@ -11,13 +11,30 @@
 
 namespace impeller {
 
+namespace {
+
+bool RequiresYCBCRConversion(vk::Format format) {
+  switch (format) {
+    case vk::Format::eG8B8R83Plane420Unorm:
+    case vk::Format::eG8B8R82Plane420Unorm:
+    case vk::Format::eG8B8R83Plane422Unorm:
+    case vk::Format::eG8B8R82Plane422Unorm:
+    case vk::Format::eG8B8R83Plane444Unorm:
+      return true;
+    default:
+      // NOTE: NOT EXHAUSTIVE.
+      break;
+  }
+  return false;
+}
+
 using AHBProperties = vk::StructureChain<
     // For VK_ANDROID_external_memory_android_hardware_buffer
     vk::AndroidHardwareBufferPropertiesANDROID,
     // For VK_ANDROID_external_memory_android_hardware_buffer
     vk::AndroidHardwareBufferFormatPropertiesANDROID>;
 
-static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
+vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
     const vk::Device& device,
     const AHBProperties& ahb_props,
     const AHardwareBuffer_Desc& ahb_desc) {
@@ -39,11 +56,7 @@ static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
   }
   if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
     image_usage_flags |= vk::ImageUsageFlagBits::eColorAttachment;
-  }
-  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY) {
-    image_usage_flags |= vk::ImageUsageFlagBits::eColorAttachment;
     image_usage_flags |= vk::ImageUsageFlagBits::eInputAttachment;
-    image_usage_flags |= vk::ImageUsageFlagBits::eTransferDst;
   }
 
   vk::ImageCreateFlags image_create_flags;
@@ -94,7 +107,7 @@ static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
   return std::move(image.value);
 }
 
-static vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
+vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
     const vk::Device& device,
     const vk::PhysicalDevice& physical_device,
     const vk::Image& image,
@@ -138,7 +151,7 @@ static vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
   return std::move(device_memory.value);
 }
 
-static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
+std::shared_ptr<YUVConversionVK> CreateYUVConversion(
     const ContextVK& context,
     const AHBProperties& ahb_props) {
   YUVConversionDescriptorVK conversion_chain;
@@ -176,10 +189,10 @@ static std::shared_ptr<YUVConversionVK> CreateYUVConversion(
   return context.GetYUVConversionLibrary()->GetConversion(conversion_chain);
 }
 
-static vk::UniqueImageView CreateVKImageView(
+vk::UniqueImageView CreateVKImageView(
     const vk::Device& device,
     const vk::Image& image,
-    const vk::SamplerYcbcrConversion& yuv_conversion,
+    const std::shared_ptr<YUVConversionVK>& yuv_conversion_wrapper,
     const AHBProperties& ahb_props,
     const AHardwareBuffer_Desc& ahb_desc) {
   const auto& ahb_format =
@@ -205,9 +218,10 @@ static vk::UniqueImageView CreateVKImageView(
   view_info.subresourceRange.layerCount = ahb_desc.layers;
 
   // We need a custom YUV conversion only if we don't recognize the format.
-  if (view_info.format == vk::Format::eUndefined) {
+  if (view_info.format == vk::Format::eUndefined ||
+      RequiresYCBCRConversion(view_info.format)) {
     view_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =
-        yuv_conversion;
+        yuv_conversion_wrapper->GetConversion();
   } else {
     view_chain.unlink<vk::SamplerYcbcrConversionInfo>();
   }
@@ -222,7 +236,7 @@ static vk::UniqueImageView CreateVKImageView(
   return std::move(image_view.value);
 }
 
-static PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
+PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
   switch (format) {
     case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
       return PixelFormat::kR8G8B8A8UNormInt;
@@ -256,7 +270,7 @@ static PixelFormat ToPixelFormat(AHardwareBuffer_Format format) {
   return PixelFormat::kR8G8B8A8UNormInt;
 }
 
-static TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
+TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
   if (ahb_desc.layers == 1u) {
     return TextureType::kTexture2D;
   }
@@ -269,8 +283,7 @@ static TextureType ToTextureType(const AHardwareBuffer_Desc& ahb_desc) {
   return TextureType::kTexture2D;
 }
 
-static TextureDescriptor ToTextureDescriptor(
-    const AHardwareBuffer_Desc& ahb_desc) {
+TextureDescriptor ToTextureDescriptor(const AHardwareBuffer_Desc& ahb_desc) {
   const auto ahb_size = ISize{ahb_desc.width, ahb_desc.height};
   TextureDescriptor desc;
   // We are not going to touch hardware buffers on the CPU or use them as
@@ -285,11 +298,12 @@ static TextureDescriptor ToTextureDescriptor(
   desc.mip_count = (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_MIPMAP_COMPLETE)
                        ? ahb_size.MipCount()
                        : 1u;
-  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY) {
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
     desc.usage = TextureUsage::kRenderTarget;
   }
   return desc;
 }
+}  // namespace
 
 AHBTextureSourceVK::AHBTextureSourceVK(
     const std::shared_ptr<Context>& p_context,
@@ -339,23 +353,27 @@ AHBTextureSourceVK::AHBTextureSourceVK(
   }
 
   // Figure out how to perform YUV conversions.
-  auto yuv_conversion = CreateYUVConversion(context, ahb_props);
-  if (!yuv_conversion || !yuv_conversion->IsValid()) {
-    return;
+  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined ||
+                          RequiresYCBCRConversion(ahb_format.format);
+  std::shared_ptr<YUVConversionVK> yuv_conversion;
+  if (needs_yuv_conversion_) {
+    yuv_conversion = CreateYUVConversion(context, ahb_props);
+    if (!yuv_conversion || !yuv_conversion->IsValid()) {
+      return;
+    }
   }
 
   // Create image view for the newly created image.
-  auto image_view = CreateVKImageView(device,                           //
-                                      image.get(),                      //
-                                      yuv_conversion->GetConversion(),  //
-                                      ahb_props,                        //
-                                      ahb_desc                          //
+  auto image_view = CreateVKImageView(device,          //
+                                      image.get(),     //
+                                      yuv_conversion,  //
+                                      ahb_props,       //
+                                      ahb_desc         //
   );
   if (!image_view) {
     return;
   }
 
-  needs_yuv_conversion_ = ahb_format.format == vk::Format::eUndefined;
   device_memory_ = std::move(device_memory);
   image_ = std::move(image);
   yuv_conversion_ = std::move(yuv_conversion);
@@ -364,7 +382,10 @@ AHBTextureSourceVK::AHBTextureSourceVK(
 #ifdef IMPELLER_DEBUG
   context.SetDebugName(device_memory_.get(), "AHB Device Memory");
   context.SetDebugName(image_.get(), "AHB Image");
-  context.SetDebugName(yuv_conversion_->GetConversion(), "AHB YUV Conversion");
+  if (yuv_conversion_) {
+    context.SetDebugName(yuv_conversion_->GetConversion(),
+                         "AHB YUV Conversion");
+  }
   context.SetDebugName(image_view_.get(), "AHB ImageView");
 #endif  // IMPELLER_DEBUG
 

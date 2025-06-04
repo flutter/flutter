@@ -315,7 +315,11 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
     Paint paint;
     paint.color_source = gradient.get();
     canvas.DrawVertices(std::make_shared<DlVerticesGeometry>(vertices, context),
+<<<<<<< HEAD
                         BlendMode::kSourceOver, paint);
+=======
+                        BlendMode::kSrcOver, paint);
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
 
     canvas.EndReplay();
     return true;
@@ -364,7 +368,11 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
     Paint paint;
     paint.color_source = color_source.get();
     canvas.DrawVertices(std::make_shared<DlVerticesGeometry>(vertices, context),
+<<<<<<< HEAD
                         BlendMode::kSourceOver, paint);
+=======
+                        BlendMode::kSrcOver, paint);
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
 
     canvas.EndReplay();
     return true;
@@ -378,7 +386,11 @@ TEST_P(AiksTest, SupportsBlitToOnscreen) {
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
+<<<<<<< HEAD
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+=======
+  if (GetBackend() != PlaygroundBackend::kMetal) {
+>>>>>>> b25305a8832cfc6ba632a7f87ad455e319dccce8
     EXPECT_FALSE(canvas->SupportsBlitToOnscreen());
   } else {
     EXPECT_TRUE(canvas->SupportsBlitToOnscreen());

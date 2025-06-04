@@ -65,6 +65,10 @@ namespace testing {
 using EntityTest = EntityPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
+Rect RectMakeCenterSize(Point center, Size size) {
+  return Rect::MakeSize(size).Shift(center - size / 2);
+}
+
 TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
   ASSERT_TRUE(entity.GetTransform().IsIdentity());
@@ -708,36 +712,36 @@ TEST_P(EntityTest, BlendingModeOptions) {
       case BlendMode::kClear:
         blend_mode_names.push_back("Clear");
         blend_mode_values.push_back(BlendMode::kClear);
-      case BlendMode::kSource:
+      case BlendMode::kSrc:
         blend_mode_names.push_back("Source");
-        blend_mode_values.push_back(BlendMode::kSource);
-      case BlendMode::kDestination:
+        blend_mode_values.push_back(BlendMode::kSrc);
+      case BlendMode::kDst:
         blend_mode_names.push_back("Destination");
-        blend_mode_values.push_back(BlendMode::kDestination);
-      case BlendMode::kSourceOver:
+        blend_mode_values.push_back(BlendMode::kDst);
+      case BlendMode::kSrcOver:
         blend_mode_names.push_back("SourceOver");
-        blend_mode_values.push_back(BlendMode::kSourceOver);
-      case BlendMode::kDestinationOver:
+        blend_mode_values.push_back(BlendMode::kSrcOver);
+      case BlendMode::kDstOver:
         blend_mode_names.push_back("DestinationOver");
-        blend_mode_values.push_back(BlendMode::kDestinationOver);
-      case BlendMode::kSourceIn:
+        blend_mode_values.push_back(BlendMode::kDstOver);
+      case BlendMode::kSrcIn:
         blend_mode_names.push_back("SourceIn");
-        blend_mode_values.push_back(BlendMode::kSourceIn);
-      case BlendMode::kDestinationIn:
+        blend_mode_values.push_back(BlendMode::kSrcIn);
+      case BlendMode::kDstIn:
         blend_mode_names.push_back("DestinationIn");
-        blend_mode_values.push_back(BlendMode::kDestinationIn);
-      case BlendMode::kSourceOut:
+        blend_mode_values.push_back(BlendMode::kDstIn);
+      case BlendMode::kSrcOut:
         blend_mode_names.push_back("SourceOut");
-        blend_mode_values.push_back(BlendMode::kSourceOut);
-      case BlendMode::kDestinationOut:
+        blend_mode_values.push_back(BlendMode::kSrcOut);
+      case BlendMode::kDstOut:
         blend_mode_names.push_back("DestinationOut");
-        blend_mode_values.push_back(BlendMode::kDestinationOut);
-      case BlendMode::kSourceATop:
+        blend_mode_values.push_back(BlendMode::kDstOut);
+      case BlendMode::kSrcATop:
         blend_mode_names.push_back("SourceATop");
-        blend_mode_values.push_back(BlendMode::kSourceATop);
-      case BlendMode::kDestinationATop:
+        blend_mode_values.push_back(BlendMode::kSrcATop);
+      case BlendMode::kDstATop:
         blend_mode_names.push_back("DestinationATop");
-        blend_mode_values.push_back(BlendMode::kDestinationATop);
+        blend_mode_values.push_back(BlendMode::kDstATop);
       case BlendMode::kXor:
         blend_mode_names.push_back("Xor");
         blend_mode_values.push_back(BlendMode::kXor);
@@ -814,7 +818,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
                                       pass.GetRenderTargetSize().height),
                        Color(), BlendMode::kClear);
     result = result && draw_rect(Rect::MakeLTRB(a.x, a.y, b.x, b.y), color1,
-                                 BlendMode::kSourceOver);
+                                 BlendMode::kSrcOver);
     result = result && draw_rect(Rect::MakeLTRB(c.x, c.y, d.x, d.y), color2,
                                  selected_mode);
     return result;
@@ -1184,7 +1188,7 @@ TEST_P(EntityTest, MorphologyFilter) {
 
 TEST_P(EntityTest, SetBlendMode) {
   Entity entity;
-  ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSourceOver);
+  ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSrcOver);
   entity.SetBlendMode(BlendMode::kClear);
   ASSERT_EQ(entity.GetBlendMode(), BlendMode::kClear);
 }
@@ -1887,7 +1891,7 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorClearBlend) {
 TEST_P(EntityTest, ColorFilterWithForegroundColorSrcBlend) {
   auto image = CreateTextureForFixture("boston.jpg");
   auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kSource, FilterInput::Make({image}), Color::Red());
+      BlendMode::kSrc, FilterInput::Make({image}), Color::Red());
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     Entity entity;
@@ -1903,7 +1907,7 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorSrcBlend) {
 TEST_P(EntityTest, ColorFilterWithForegroundColorDstBlend) {
   auto image = CreateTextureForFixture("boston.jpg");
   auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kDestination, FilterInput::Make({image}), Color::Red());
+      BlendMode::kDst, FilterInput::Make({image}), Color::Red());
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     Entity entity;
@@ -1919,7 +1923,7 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorDstBlend) {
 TEST_P(EntityTest, ColorFilterWithForegroundColorSrcInBlend) {
   auto image = CreateTextureForFixture("boston.jpg");
   auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kSourceIn, FilterInput::Make({image}), Color::Red());
+      BlendMode::kSrcIn, FilterInput::Make({image}), Color::Red());
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     Entity entity;
@@ -2099,18 +2103,18 @@ TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
   dst_contents->SetColor(Color::Blue());
 
   auto contents = ColorFilterContents::MakeBlend(
-      BlendMode::kSourceOver, {FilterInput::Make(dst_contents, false),
-                               FilterInput::Make(src_contents, false)});
+      BlendMode::kSrcOver, {FilterInput::Make(dst_contents, false),
+                            FilterInput::Make(src_contents, false)});
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
 }
 
 TEST_P(EntityTest, TextContentsCeilsGlyphScaleToDecimal) {
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f), 0.43f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f), 0.53f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f), 2.1f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f), 0.0f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f), 48.0f);
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f), Rational(43, 100));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f), Rational(53, 100));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f), Rational(21, 10));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f), Rational(0, 1));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f), Rational(48, 1));
 }
 
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
@@ -2321,11 +2325,14 @@ TEST_P(EntityTest, DrawSuperEllipse) {
 TEST_P(EntityTest, DrawRoundSuperEllipse) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     // UI state.
+    static int style_index = 0;
     static float center[2] = {830, 830};
     static float size[2] = {600, 600};
     static bool horizontal_symmetry = true;
     static bool vertical_symmetry = true;
     static bool corner_symmetry = true;
+
+    const char* style_options[] = {"Fill", "Stroke"};
 
     // Initially radius_tl[0] will be mirrored to all 8 values since all 3
     // symmetries are enabled.
@@ -2362,6 +2369,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
+      ImGui::Combo("Style", &style_index, style_options,
+                   sizeof(style_options) / sizeof(char*));
       ImGui::SliderFloat2("Center", center, 0, 1000);
       ImGui::SliderFloat2("Size", size, 0, 1000);
       ImGui::Checkbox("Symmetry: Horizontal", &horizontal_symmetry);
@@ -2398,11 +2407,25 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
         .bottom_right = {radius_br[0], radius_br[1]},
     };
 
+    auto rse = RoundSuperellipse::MakeRectRadii(
+        RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}), radii);
+
+    Path path;
+    std::unique_ptr<Geometry> geom;
+    if (style_index == 0) {
+      geom = std::make_unique<RoundSuperellipseGeometry>(
+          RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}),
+          radii);
+    } else {
+      path = PathBuilder{}
+                 .SetConvexity(Convexity::kConvex)
+                 .AddRoundSuperellipse(rse)
+                 .SetBounds(rse.GetBounds())
+                 .TakePath();
+      geom = Geometry::MakeStrokePath(path, /*stroke_width=*/2);
+    }
+
     auto contents = std::make_shared<SolidColorContents>();
-    std::unique_ptr<RoundSuperellipseGeometry> geom =
-        std::make_unique<RoundSuperellipseGeometry>(
-            Rect::MakeOriginSize({center[0], center[1]}, {size[0], size[1]}),
-            radii);
     contents->SetColor(Color::Red());
     contents->SetGeometry(geom.get());
 

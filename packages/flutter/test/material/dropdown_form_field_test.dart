@@ -488,11 +488,65 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text', (
+  // Regression test for https://github.com/flutter/flutter/issues/159971.
+  testWidgets('DropdownButtonFormField does not clip large scale text', (
     WidgetTester tester,
   ) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
+    const double scaleFactor = 3.0;
+
+    final List<DropdownMenuItem<String>> dropdownItems =
+        menuItems.map<DropdownMenuItem<String>>((String item) {
+          return DropdownMenuItem<String>(
+            key: ValueKey<String>(item),
+            value: item,
+            child: Text(item, key: ValueKey<String>('${item}Text')),
+          );
+        }).toList();
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: Material(
+                child: Center(
+                  child: DropdownButtonFormField<String>(
+                    key: buttonKey,
+                    value: value,
+                    onChanged: onChanged,
+                    items: dropdownItems,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(DropdownButton<String>));
+    final TextStyle style = Theme.of(context).textTheme.titleMedium!;
+    final double lineHeight = style.fontSize! * style.height!; // 16 * 1.5 = 24
+    final double labelHeight = lineHeight * scaleFactor; // 24 * 3.0 = 72
+    const double decorationVerticalPadding = 16.0;
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
+    expect(box.size.height, labelHeight + decorationVerticalPadding);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/159971.
+  testWidgets('DropdownButtonFormField with custom text style does not clip large scale text', (
+    WidgetTester tester,
+  ) async {
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+    const double scaleFactor = 3.0;
+    const double fontSize = 22;
+    const double fontHeight = 1.5;
 
     await tester.pumpWidget(
       TestApp(
@@ -500,24 +554,21 @@ void main() {
         child: Builder(
           builder:
               (BuildContext context) => MediaQuery.withClampedTextScaling(
-                minScaleFactor: 3.0,
-                maxScaleFactor: 3.0,
+                minScaleFactor: scaleFactor,
+                maxScaleFactor: scaleFactor,
                 child: Material(
                   child: Center(
                     child: DropdownButtonFormField<String>(
                       key: buttonKey,
                       value: value,
                       onChanged: onChanged,
+                      style: const TextStyle(fontSize: fontSize, height: fontHeight),
                       items:
                           menuItems.map<DropdownMenuItem<String>>((String item) {
                             return DropdownMenuItem<String>(
                               key: ValueKey<String>(item),
                               value: item,
-                              child: Text(
-                                item,
-                                key: ValueKey<String>('${item}Text'),
-                                style: const TextStyle(fontSize: 20.0),
-                              ),
+                              child: Text(item, key: ValueKey<String>('${item}Text')),
                             );
                           }).toList(),
                     ),
@@ -528,8 +579,11 @@ void main() {
       ),
     );
 
+    const double lineHeight = fontSize * fontHeight; // 22 * 1.5 = 33
+    const double labelHeight = lineHeight * scaleFactor; // 33 * 3.0 = 99
+    const double decorationVerticalPadding = 16.0;
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
-    expect(box.size.height, 64.0);
+    expect(box.size.height, labelHeight + decorationVerticalPadding);
   });
 
   testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
@@ -1174,5 +1228,158 @@ void main() {
     final InputDecorator inputDecorator = tester.widget(find.byType(InputDecorator));
     expect(inputDecorator.isFocused, true);
     expect(inputDecorator.decoration.errorText, 'Required');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/135292.
+  testWidgets('Widget returned by errorBuilder is shown', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButtonFormField<String>(
+            items:
+                menuItems.map((String value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(),
+            onChanged: onChanged,
+            autovalidateMode: AutovalidateMode.always,
+            validator: (String? v) => 'Required',
+            errorBuilder: (BuildContext context, String errorText) => Text('**$errorText**'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('**Required**'), findsOneWidget);
+  });
+
+  testWidgets('ButtonTheme.alignedDropdown does not affect the field content position', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame({required bool alignedDropdown, required TextDirection textDirection}) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: ButtonTheme(
+            alignedDropdown: alignedDropdown,
+            child: Material(
+              child: DropdownButtonFormField<String>(
+                value: menuItems.first,
+                items:
+                    menuItems.map((String value) {
+                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                    }).toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder findSelectedValue = find.text(menuItems.first).first;
+
+    await tester.pumpWidget(buildFrame(alignedDropdown: false, textDirection: TextDirection.ltr));
+    Rect contentRectForUnalignedDropdown = tester.getRect(findSelectedValue);
+
+    // When alignedDropdown is true, the content should be at the same position.
+    await tester.pumpWidget(buildFrame(alignedDropdown: true, textDirection: TextDirection.ltr));
+    expect(tester.getRect(findSelectedValue), contentRectForUnalignedDropdown);
+
+    await tester.pumpWidget(buildFrame(alignedDropdown: false, textDirection: TextDirection.rtl));
+    contentRectForUnalignedDropdown = tester.getRect(findSelectedValue);
+
+    // When alignedDropdown is true, the content should be at the same position.
+    await tester.pumpWidget(buildFrame(alignedDropdown: true, textDirection: TextDirection.rtl));
+    expect(tester.getRect(findSelectedValue), contentRectForUnalignedDropdown);
+  });
+
+  testWidgets('isValid returns false when forceErrorText is set and changes error display', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const String forceErrorText = 'Forcing error.';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: ListView(
+                    children: <Widget>[
+                      DropdownButtonFormField<String>(
+                        key: fieldKey1,
+                        items:
+                            menuItems.map((String value) {
+                              return DropdownMenuItem<String>(value: value, child: Text(value));
+                            }).toList(),
+                        onChanged: null,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                      DropdownButtonFormField<String>(
+                        key: fieldKey2,
+                        items:
+                            menuItems.map((String value) {
+                              return DropdownMenuItem<String>(value: value, child: Text(value));
+                            }).toList(),
+                        forceErrorText: forceErrorText,
+                        onChanged: onChanged,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(fieldKey1.currentState!.isValid, isTrue);
+    expect(fieldKey1.currentState!.hasError, isFalse);
+    expect(fieldKey2.currentState!.isValid, isFalse);
+    expect(fieldKey2.currentState!.hasError, isTrue);
+  });
+
+  testWidgets('forceErrorText overrides InputDecoration.error when both are provided', (
+    WidgetTester tester,
+  ) async {
+    const String forceErrorText = 'Forcing error';
+    const String decorationErrorText = 'Decoration';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: DropdownButtonFormField<String>(
+                    items:
+                        menuItems.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(value: value, child: Text(value));
+                        }).toList(),
+                    decoration: const InputDecoration(errorText: decorationErrorText),
+                    forceErrorText: forceErrorText,
+                    onChanged: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(decorationErrorText), findsNothing);
   });
 }

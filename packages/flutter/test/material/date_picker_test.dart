@@ -9,7 +9,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -178,7 +177,7 @@ void main() {
     });
 
     testWidgets('Default dialog properties', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final Material dialogMaterial = tester.widget<Material>(
           find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first,
@@ -847,7 +846,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -898,10 +896,7 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerTopRight = tester.getTopRight(divider);
       expect(subHeaderTextTopLeft.dx, dividerTopRight.dx + 24.0);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(subHeaderTextTopLeft.dy, dialogTopLeft.dy + 16.0);
-      }
+      expect(subHeaderTextTopLeft.dy, dialogTopLeft.dy + 16.0);
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);
@@ -915,10 +910,7 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dividerTopRight.dx);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
-      }
+      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
 
       // Test month navigation icons position.
       final Finder previousMonthButton = find.widgetWithIcon(IconButton, Icons.chevron_left);
@@ -955,7 +947,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DatePickerDialog(
               initialDate: initialDate,
@@ -982,10 +973,7 @@ void main() {
       final Offset headerTextTextTopLeft = tester.getTopLeft(headerText);
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(headerTextTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0);
-      }
+      expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0);
 
       // Test switch button position.
       final Finder switchButtonM3 = find.widgetWithIcon(IconButton, Icons.edit_outlined);
@@ -1005,10 +993,7 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerBottomLeft = tester.getBottomLeft(divider);
       expect(subHeaderTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0);
-      }
+      expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0);
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);
@@ -1031,10 +1016,7 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dialogTopLeft.dx);
-      if (!kIsWeb || isSkiaWeb) {
-        // https://github.com/flutter/flutter/issues/99933
-        expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
-      }
+      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
 
       // Test action buttons position.
       final Offset dialogBottomRight = tester.getBottomRight(find.byType(AnimatedContainer));
@@ -1732,6 +1714,7 @@ void main() {
             label: '3, Sunday, January 3, 2016, Today',
             isButton: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1840,6 +1823,7 @@ void main() {
             hasPasteAction: true,
             hasMoveCursorBackwardByCharacterAction: true,
             hasMoveCursorBackwardByWordAction: true,
+            validationResult: SemanticsValidationResult.valid,
           ),
         );
 
@@ -2652,6 +2636,86 @@ void main() {
       await gesture.up();
     });
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DatePickerDialog(
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+            ),
+          ),
+        ),
+      );
+
+      final DatePickerDialog dialog = tester.widget(find.byType(DatePickerDialog));
+      expect(dialog.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DatePickerDialog(
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final DatePickerDialog dialog = tester.widget(find.byType(DatePickerDialog));
+      expect(dialog.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+
+    testWidgets('Displays calendar based on the calendar delegate', (WidgetTester tester) async {
+      Text getLastDayText() {
+        final Finder dayFinder = find.descendant(of: find.byType(Ink), matching: find.byType(Text));
+        return tester.widget(dayFinder.last);
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: DatePickerDialog(
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final Finder nextMonthButton = find.byIcon(Icons.chevron_right);
+
+      Text lastDayText = getLastDayText();
+      expect(find.text('January 2016'), findsOneWidget);
+      expect(lastDayText.data, equals('28'));
+
+      await tester.tap(nextMonthButton);
+      await tester.pumpAndSettle();
+
+      lastDayText = getLastDayText();
+      expect(find.text('February 2016'), findsOneWidget);
+      expect(lastDayText.data, equals('21'));
+
+      await tester.tap(nextMonthButton);
+      await tester.pumpAndSettle();
+
+      lastDayText = getLastDayText();
+      expect(find.text('March 2016'), findsOneWidget);
+      expect(lastDayText.data, equals('28'));
+    });
+  });
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
@@ -2767,5 +2831,19 @@ class _DatePickerObserver extends NavigatorObserver {
       datePickerCount--;
     }
     super.didPop(route, previousRoute);
+  }
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  int getDaysInMonth(int year, int month) {
+    return month.isEven ? 21 : 28;
+  }
+
+  @override
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    return 1;
   }
 }

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -531,9 +536,9 @@ void main() {
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
-              toggleAnimationStyle: AnimationStyle(
+              toggleAnimationStyle: const AnimationStyle(
                 curve: Curves.easeIn,
-                duration: const Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 200),
               ),
               treeNodeBuilder: (
                 BuildContext context,
@@ -819,9 +824,9 @@ void main() {
                 TreeSliver<String>(
                   tree: tree,
                   controller: controller,
-                  toggleAnimationStyle: AnimationStyle(
+                  toggleAnimationStyle: const AnimationStyle(
                     curve: Curves.easeInOut,
-                    duration: const Duration(milliseconds: 200),
+                    duration: Duration(milliseconds: 200),
                   ),
                   treeNodeBuilder: (
                     BuildContext context,
@@ -861,4 +866,43 @@ void main() {
       });
     },
   );
+
+  testWidgets('TreeSliver and PinnedHeaderSliver can render correctly when used together.', (
+    WidgetTester tester,
+  ) async {
+    const ValueKey<String> key = ValueKey<String>('sliver_tree_pined_header');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  const PinnedHeaderSliver(child: SizedBox(height: 10)),
+                  TreeSliver<Object>(
+                    tree: <TreeSliverNode<Object>>[TreeSliverNode<Object>(Object())],
+                    treeRowExtentBuilder: (_, _) => 10,
+                    treeNodeBuilder: (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle animationStyle,
+                    ) {
+                      return const ColoredBox(color: Colors.red);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(find.byKey(key), matchesGoldenFile('sliver_tree.pined_header.0.png'));
+    expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, 10));
+  });
 }

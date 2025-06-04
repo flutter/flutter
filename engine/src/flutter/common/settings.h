@@ -7,7 +7,6 @@
 
 #include <fcntl.h>
 
-#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -21,14 +20,6 @@
 #include "flutter/fml/unique_fd.h"
 
 namespace flutter {
-
-// The combination of targeted graphics API and Impeller support.
-enum class AndroidRenderingAPI {
-  kSoftware,
-  kImpellerOpenGLES,
-  kImpellerVulkan,
-  kSkiaOpenGLES
-};
 
 class FrameTiming {
  public:
@@ -237,12 +228,14 @@ struct Settings {
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
 
+  // Whether to lazily initialize impeller PSO state.
+  bool impeller_enable_lazy_shader_mode = false;
+
+  // An experimental mode that antialiases lines.
+  bool impeller_antialiased_lines = false;
+
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
-
-  // The selected Android rendering API.
-  AndroidRenderingAPI android_rendering_api =
-      AndroidRenderingAPI::kSkiaOpenGLES;
 
   // Requests a specific rendering backend.
   std::optional<std::string> requested_rendering_backend;

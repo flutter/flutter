@@ -54,6 +54,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -89,6 +91,7 @@ void main() {
               '-dTargetPlatform=ios',
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dConfiguration=$buildMode',
               '-dIosArchs=',
               '-dSdkRoot=',
               '-dSplitDebugInfo=',
@@ -100,6 +103,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -132,6 +137,8 @@ void main() {
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
+      const String srcRoot = '/path/to/project';
+      const String iOSVersion = '18.3.1';
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
@@ -139,7 +146,7 @@ void main() {
           'ARCHS': archs,
           'BUILT_PRODUCTS_DIR': buildDir.path,
           'CODE_SIGNING_REQUIRED': 'YES',
-          'CONFIGURATION': buildMode,
+          'CONFIGURATION': '$buildMode-strawberry',
           'DART_DEFINES': dartDefines,
           'DART_OBFUSCATION': dartObfuscation,
           'EXPANDED_CODE_SIGN_IDENTITY': expandedCodeSignIdentity,
@@ -153,6 +160,8 @@ void main() {
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -165,6 +174,7 @@ void main() {
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
               '-dFlavor=strawberry',
+              '-dConfiguration=$buildMode-strawberry',
               '-dIosArchs=$archs',
               '-dSdkRoot=$sdkRoot',
               '-dSplitDebugInfo=$splitDebugInfo',
@@ -176,6 +186,8 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
+              '-dTargetDeviceOSVersion=$iOSVersion',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
             ],
@@ -249,6 +261,8 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dPreBuildAction=PrepareFramework',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_unpack_ios',
             ],
           ),
@@ -284,6 +298,7 @@ void main() {
               '-dTargetPlatform=ios',
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dConfiguration=$buildMode',
               '-dIosArchs=',
               '-dSdkRoot=',
               '-dSplitDebugInfo=',
@@ -295,6 +310,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -323,6 +340,8 @@ void main() {
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
+      const String srcRoot = '/path/to/project';
+      const String iOSVersion = '18.3.1';
       final TestContext context = TestContext(
         <String>['prepare'],
         <String, String>{
@@ -330,7 +349,6 @@ void main() {
           'ARCHS': archs,
           'BUILT_PRODUCTS_DIR': buildDir.path,
           'CODE_SIGNING_REQUIRED': 'YES',
-          'CONFIGURATION': buildMode,
           'DART_DEFINES': dartDefines,
           'DART_OBFUSCATION': dartObfuscation,
           'EXPANDED_CODE_SIGN_IDENTITY': expandedCodeSignIdentity,
@@ -340,10 +358,13 @@ void main() {
           'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
           'INFOPLIST_PATH': 'Info.plist',
           'SDKROOT': sdkRoot,
+          'CONFIGURATION': '$buildMode-strawberry',
           'FLAVOR': 'strawberry',
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -356,6 +377,7 @@ void main() {
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
               '-dFlavor=strawberry',
+              '-dConfiguration=$buildMode-strawberry',
               '-dIosArchs=$archs',
               '-dSdkRoot=$sdkRoot',
               '-dSplitDebugInfo=$splitDebugInfo',
@@ -367,6 +389,8 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
+              '-dTargetDeviceOSVersion=$iOSVersion',
               '-dPreBuildAction=PrepareFramework',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_unpack_ios',
@@ -406,6 +430,7 @@ void main() {
               '-dTargetPlatform=ios',
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dConfiguration=$buildMode',
               '-dIosArchs=arm64',
               '-dSdkRoot=',
               '-dSplitDebugInfo=',
@@ -417,6 +442,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -456,6 +483,7 @@ void main() {
               '-dTargetPlatform=ios',
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dConfiguration=$buildMode',
               '-dIosArchs=arm64',
               '-dSdkRoot=',
               '-dSplitDebugInfo=',
@@ -467,6 +495,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -505,6 +535,7 @@ void main() {
               '-dTargetPlatform=ios',
               '-dTargetFile=lib/main.dart',
               '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dConfiguration=$buildMode',
               '-dIosArchs=arm64 x86_64',
               '-dSdkRoot=',
               '-dSplitDebugInfo=',
@@ -516,6 +547,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],

@@ -168,7 +168,7 @@ class ReorderableList extends StatefulWidget {
     this.anchor = 0.0,
     this.cacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.keyboardDismissBehavior,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
@@ -280,8 +280,9 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   ///
-  /// The default is [ScrollViewKeyboardDismissBehavior.manual]
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+  /// If [keyboardDismissBehavior] is null then it will fallback to the inherited
+  /// [ScrollBehavior.getKeyboardDismissBehavior].
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
@@ -1397,15 +1398,7 @@ class _DragInfo extends Drag {
     this.proxyDecorator,
     required this.tickerProvider,
   }) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_DragInfo',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_DragInfo', this));
     final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
     listState = item._listState;
     index = item.index;
@@ -1448,9 +1441,7 @@ class _DragInfo extends Drag {
   late Offset _rawDragPosition;
 
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _proxyAnimation?.dispose();
   }
 
