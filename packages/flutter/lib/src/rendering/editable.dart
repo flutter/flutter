@@ -1432,7 +1432,7 @@ class RenderEditable extends RenderBox
     var placeholderIndex = 0;
     var childIndex = 0;
     RenderBox? child = firstChild;
-    final newChildCache = <Key, SemanticsNode>{};
+    final newChildCache = LinkedHashMap<Key, SemanticsNode>();
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       final selection = TextSelection(
