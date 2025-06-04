@@ -316,7 +316,7 @@
 # Linux docs_publish
 /dev/bots/docs.sh @Piinks @flutter/framework
 # Linux gradle_lock_files_check
-/dev/bots/suite_runners/run_gradle_lock_files_check.dart @ash2moon
+/dev/bots/suite_runners/run_gradle_lock_files_check.dart @ash2moon @flutter/android
 # Linux packages_autoroller
 /dev/conductor/core @christopherfujino @flutter/tool
 # Linux web_e2e_test
