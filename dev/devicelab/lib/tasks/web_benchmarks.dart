@@ -71,7 +71,10 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-browser-flag=--headless=new',
           '--web-browser-flag=--no-sandbox',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          if (benchmarkOptions.withHotReload) '--web-experimental-hot-reload',
+          if (benchmarkOptions.withHotReload)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
           '--no-web-resources-cdn',
           'lib/web_benchmarks_ddc.dart',
         ],
