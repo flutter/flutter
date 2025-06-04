@@ -260,8 +260,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       options = parseLocalizationsOptionsFromYAML(
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
+        fileSystem: _fileSystem,
         defaultArbDir: defaultArbDir,
-        defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '

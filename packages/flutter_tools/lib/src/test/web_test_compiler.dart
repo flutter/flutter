@@ -219,7 +219,7 @@ class WebTestCompiler {
       ),
       'compile',
       'wasm',
-      '--packages=.dart_tool/package_config.json',
+      '--packages=../../.dart_tool/package_config.json',
       '--extra-compiler-option=--platform=$platformFilePath',
       '--extra-compiler-option=--multi-root-scheme=org-dartlang-app',
       '--extra-compiler-option=--multi-root=${projectDirectory.childDirectory('test').path}',

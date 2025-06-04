@@ -161,7 +161,7 @@ Then you can open it in the debugger with:
 gdb build/linux/x64/debug/bundle/your_app_name
 ```
 
-Note that this won't help you debug the Dart portion of the app: this is just for debugging the engine code. If you need to simultaneously debug the Dart portion, you can connect to the observatory port given when you run the app in `gdb`.
+Note that this won't help you debug the Dart portion of the app: this is just for debugging the engine code. If you need to simultaneously debug the Dart portion, you can connect to the VM service port given when you run the app in `gdb`.
 
 ## Logging in the engine
 
