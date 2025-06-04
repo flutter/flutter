@@ -148,6 +148,7 @@ String generateDDCLibraryBundleBootstrapScript({
   required bool isWindows,
 }) {
   return '''
+console.log('logging start of bootstrap');
 console.error('starting bootstrap');
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
 // Save the current directory so we can access it in a closure.

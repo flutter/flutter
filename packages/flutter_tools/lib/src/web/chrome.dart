@@ -200,6 +200,7 @@ class ChromiumLauncher {
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
+    _logger.printError('webbrowserflags: $webBrowserFlags');
     final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
@@ -229,11 +230,26 @@ class ChromiumLauncher {
         '--no-sandbox',
         '--window-size=2400,1800',
       ],
-      '--enable-logging=stderr',
-      '--v=1',
+      '--enable-logging',
+      '--v=stderr',
       ...webBrowserFlags,
       url,
     ];
+
+    final io.File chromeDebugLogFile = io.File('${userDataDir.path}/chrome_debug.log');
+    String previousString = '';
+    final Completer<void> gotLogs = Completer<void>();
+    Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+      if (chromeDebugLogFile.existsSync()) {
+        timer.cancel();
+        _logger.printTrace('${chromeDebugLogFile.path} exists');
+        previousString = chromeDebugLogFile.readAsStringSync();
+        _logger.printTrace('Chrome debug log output: $previousString');
+        gotLogs.complete();
+      } else {
+        _logger.printTrace('${chromeDebugLogFile.path} does not exist yet');
+      }
+    });
 
     final Process process = await _spawnChromiumProcess(args, chromeExecutable);
 
@@ -244,7 +260,7 @@ class ChromiumLauncher {
           _cacheUserSessionInformation(userDataDir, cacheDir);
           // cleanup temp dir
           try {
-            userDataDir.deleteSync(recursive: true);
+            gotLogs.future.then((_) => userDataDir.deleteSync(recursive: true));
           } on FileSystemException {
             // ignore
           }

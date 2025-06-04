@@ -103,7 +103,6 @@ class StdoutHandler {
   StringBuffer _errorBuffer = StringBuffer();
 
   void handler(String message) {
-    _logger.printTrace('frontend server handler: $message');
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
