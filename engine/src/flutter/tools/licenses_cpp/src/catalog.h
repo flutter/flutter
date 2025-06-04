@@ -21,6 +21,9 @@ class Catalog {
  public:
   static absl::StatusOr<Catalog> Open(std::string_view data_dir);
 
+  /// Make a Catalog for testing.
+  /// The format is [[<name>, <unique regex>, <full regex>]*] where the unique
+  /// regex should only match one license.
   static absl::StatusOr<Catalog> Make(
       const std::vector<std::vector<std::string_view>>& entries);
 

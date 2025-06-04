@@ -110,7 +110,7 @@ group("flutter") {
         "//flutter/impeller/compiler:impellerc",
         "//flutter/impeller/tessellator:tessellator_shared",
 
-        # path_ops
+        # tools
         "//flutter/tools/licenses_cpp",
         "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
         "//flutter/tools/path_ops",

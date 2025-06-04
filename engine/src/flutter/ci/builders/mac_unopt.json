@@ -183,7 +183,8 @@
             "ninja": {
                 "config": "ci/host_release_arm64_licenses",
                 "targets": [
-                    "flutter/tools/licenses_cpp"
+                    "flutter/tools/licenses_cpp",
+                    "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
                 ]
             },
             "properties": {
@@ -192,6 +193,10 @@
                 }
             },
             "tests": [
+                {
+                    "name": "Run license_cpp unittests",
+                    "script": "out/ci/host_release_arm64_licenses/licenses_cpp_testrunner"
+                }
             ]
         },
         {
