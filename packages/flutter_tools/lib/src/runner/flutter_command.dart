@@ -1374,9 +1374,9 @@ abstract class FlutterCommand extends Command<void> {
             : <String>[];
 
     final String? androidGradleProjectCacheDir =
-    argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
-        ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
-        : null;
+        argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
+            ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+            : null;
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(

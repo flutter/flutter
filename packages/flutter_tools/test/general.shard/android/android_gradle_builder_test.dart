@@ -2315,7 +2315,7 @@ Gradle Crashed
 
     testUsingContext(
       'honors --android-project-cache-dir setting',
-          () async {
+      () async {
         final AndroidGradleBuilder builder = AndroidGradleBuilder(
           java: FakeJava(),
           logger: logger,
