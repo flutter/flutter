@@ -297,9 +297,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// stay hidden.
   ///
   /// If a [RawMenuAnchor] is used in a themed menu that plays an opening
-  /// animation, the themed menu should ensure the overlay is showing before
-  /// starting the opening animation, since the animation plays on the overlay
-  /// itself.
+  /// animation, the themed menu should show the overlay before starting the
+  /// opening animation, since the animation plays on the overlay itself.
   ///
   /// The `position` argument is the `position` that [MenuController.open] was
   /// called with.
@@ -321,7 +320,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// hidden.
   ///
   /// After a close request is intercepted and closing behaviors have finished,
-  /// and, the `hideOverlay` callback should be called. This callback sets
+  /// the `hideOverlay` callback should be called. This callback sets
   /// [MenuController.isOpen] to false and hides the menu overlay widget. If the
   /// [RawMenuAnchor] is used in a themed menu that plays a closing animation,
   /// `hideOverlay` should be called after the closing animation has ended,
