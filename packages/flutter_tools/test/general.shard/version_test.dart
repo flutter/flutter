@@ -61,14 +61,19 @@ void main() {
       const String flutterRoot = '/path/to/flutter';
 
       setUpAll(() {
-        fs = MemoryFileSystem.test();
-        fs.directory(flutterRoot).createSync(recursive: true);
         Cache.disableLocking();
         VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
 
+      setUp(() {
+        fs = MemoryFileSystem.test();
+        fs.directory(flutterRoot).createSync(recursive: true);
+        FlutterVersion.getVersionFile(fs, flutterRoot).createSync(recursive: true);
+        fs.file(fs.path.join(flutterRoot, 'version')).createSync(recursive: true);
+      });
+
       testUsingContext(
-        'prints nothing when Flutter installation looks fresh',
+        'prints nothing when Flutter installation looks fresh $channel',
         () async {
           const String flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
           processManager.addCommands(<FakeCommand>[
@@ -302,6 +307,34 @@ void main() {
               ],
               stdout: getChannelUpToDateVersion().toString(),
             ),
+            FakeCommand(
+              command: const <String>[
+                'git',
+                '-c',
+                'log.showSignature=false',
+                'log',
+                'abcdefg',
+                '-n',
+                '1',
+                '--pretty=format:%ad',
+                '--date=iso',
+              ],
+              stdout: getChannelUpToDateVersion().toString(),
+            ),
+            FakeCommand(
+              command: const <String>[
+                'git',
+                '-c',
+                'log.showSignature=false',
+                'log',
+                'HEAD',
+                '-n',
+                '1',
+                '--pretty=format:%ad',
+                '--date=iso',
+              ],
+              stdout: getChannelUpToDateVersion().toString(),
+            ),
             const FakeCommand(command: <String>['git', 'fetch', '--tags']),
             FakeCommand(
               command: const <String>[
@@ -315,7 +348,7 @@ void main() {
                 '--pretty=format:%ad',
                 '--date=iso',
               ],
-              stdout: getChannelOutOfDateVersion().toString(),
+              stdout: getChannelUpToDateVersion().toString(),
             ),
             const FakeCommand(
               command: <String>[
@@ -355,20 +388,6 @@ void main() {
                 'abcdefg',
               ],
               stdout: '2 seconds ago',
-            ),
-            FakeCommand(
-              command: const <String>[
-                'git',
-                '-c',
-                'log.showSignature=false',
-                'log',
-                'abcdefg',
-                '-n',
-                '1',
-                '--pretty=format:%ad',
-                '--date=iso',
-              ],
-              stdout: getChannelUpToDateVersion().toString(),
             ),
           ]);
 

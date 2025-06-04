@@ -128,14 +128,18 @@ abstract class FlutterVersion {
       fetchTags: fetchTags,
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
-    return _FlutterVersionGit._(
+    final _FlutterVersionGit result = _FlutterVersionGit._(
       clock: clock,
       flutterRoot: flutterRoot,
       frameworkRevision: frameworkRevision,
       frameworkVersion: frameworkVersion,
       gitTagVersion: gitTagVersion,
       fs: fs,
-    )..ensureVersionFile();
+    );
+    if (fetchTags) {
+      result.ensureVersionFile();
+    }
+    return result;
   }
 
   /// Ensure the latest git tags are fetched and recalculate [FlutterVersion].
