@@ -1501,6 +1501,7 @@ class _RenderTheater extends RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -2442,8 +2443,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     super.markNeedsLayout();
   }
 
-  @override
-  RenderObject? get semanticsParent => _layoutSurrogate;
+  // remove semanticsParent and use parent instead.
+  // @override
+  // RenderObject? get semanticsParent => _layoutSurrogate;
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
@@ -2594,15 +2596,6 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
           ? theaterConstraints.biggest
           : theater.size;
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
-    }
-  }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    super.visitChildrenForSemantics(visitor);
-    final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
-    if (deferredChild != null) {
-      visitor(deferredChild);
     }
   }
 }
