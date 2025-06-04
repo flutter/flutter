@@ -69,6 +69,7 @@ void main() {
         devtoolsHandler: createNoOpHandler,
         analytics: FakeAnalytics(),
         nativeAssetsYamlFile: 'foo.yaml',
+        logger: globals.logger,
       );
 
       final int result = await residentRunner.run();
