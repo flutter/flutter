@@ -6822,6 +6822,7 @@ targets:
 
   # windows mokey test
   - name: Windows_mokey channels_integration_test_win
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/169972
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
