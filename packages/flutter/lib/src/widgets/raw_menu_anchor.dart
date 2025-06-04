@@ -284,17 +284,17 @@ class RawMenuAnchor extends StatefulWidget {
   /// Called when a request is made to open the menu.
   ///
   /// This callback is triggered every time [MenuController.open] is called,
-  /// including cases when the overlay is already showing. As a result, this
-  /// callback can be used to observe when a menu is repositioned, or when a
-  /// menu is reopened during a closing animation.
+  /// even when the menu overlay is already showing. As a result, this callback
+  /// can be used to observe when a menu is repositioned, or when a menu is
+  /// reopened during a closing animation.
   ///
   /// After an open request is intercepted, the `showOverlay` callback should be
-  /// called when the menu overlay widget built by [overlayBuilder] is ready to
-  /// be shown. This can occur immediately (the default behavior), or after a
-  /// delay. Callbacks can also choose not to call `showOverlay` at all, in
-  /// which case the menu will stay hidden. Calling `showOverlay` sets
-  /// [MenuController.isOpen] to true, builds (or rebuilds) the overlay widget,
-  /// and shows the menu overlay at the front of the overlay stack.
+  /// called when the menu overlay widget (the widget built by [overlayBuilder])
+  /// is ready to be shown. This can occur immediately (the default behavior),
+  /// or after a delay. Calling `showOverlay` sets [MenuController.isOpen] to
+  /// true, builds (or rebuilds) the overlay widget, and shows the menu overlay
+  /// at the front of the overlay stack. If `showOverlay` is not called, the
+  /// menu will stay hidden.
   ///
   /// If a [RawMenuAnchor] is used in a themed menu that plays an opening
   /// animation, the themed menu should ensure the overlay is showing before
