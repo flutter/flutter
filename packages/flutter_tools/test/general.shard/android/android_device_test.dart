@@ -78,7 +78,6 @@ void main() {
     // The format is [ABI, ABI list]: expected target platform.
     final Map<List<String>, TargetPlatform> values = <List<String>, TargetPlatform>{
       <String>['x86_64', 'unknown']: TargetPlatform.android_x64,
-      <String>['x86', 'unknown']: TargetPlatform.android_x86,
       // The default ABI is arm32
       <String>['???', 'unknown']: TargetPlatform.android_arm,
       <String>['arm64-v8a', 'arm64-v8a,']: TargetPlatform.android_arm64,
@@ -107,7 +106,6 @@ void main() {
     // The format is [ABI, ABI list]: expected release mode support.
     final Map<List<String>, bool> values = <List<String>, bool>{
       <String>['x86_64', 'unknown']: true,
-      <String>['x86', 'unknown']: false,
       // The default ABI is arm32
       <String>['???', 'unknown']: true,
       <String>['arm64-v8a', 'arm64-v8a,']: true,
