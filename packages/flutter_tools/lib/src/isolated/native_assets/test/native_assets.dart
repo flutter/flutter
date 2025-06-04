@@ -12,7 +12,6 @@ import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
-import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
@@ -23,7 +22,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, OS.windows.name).toFilePath();
+      nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath();
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
@@ -58,7 +57,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
   final Map<String, String> environmentDefines = <String, String>{
@@ -66,7 +65,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   };
 
   // First perform the dart build.
-  final DartHookResult dartHookResult = await runFlutterSpecificHooks(
+  final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: TargetPlatform.tester,
@@ -76,7 +75,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
 
   // Then "install" the code assets so they can be used at runtime.
   await installCodeAssets(
-    dartHookResult: dartHookResult,
+    dartBuildResult: dartBuildResult,
     environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
