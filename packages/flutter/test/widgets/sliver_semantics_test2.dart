@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -82,6 +83,47 @@ void _tests() {
       semantics,
       hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true),
     );
+    semantics.dispose();
+  }, semanticsEnabled: false);
+
+  testWidgets('tag only applies to immediate child', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverMainAxisGroup(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: Container(padding: const EdgeInsets.only(top: 20.0))),
+              const SliverToBoxAdapter(child: Text('label')),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      semantics,
+      isNot(
+        includesNodeWith(
+          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+          tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+        ),
+      ),
+    );
+
+    await tester.pump();
+    // Semantics should stay the same after a frame update.
+    expect(
+      semantics,
+      isNot(
+        includesNodeWith(
+          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+          tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+        ),
+      ),
+    );
+
     semantics.dispose();
   }, semanticsEnabled: false);
 
@@ -802,8 +844,8 @@ void _tests() {
           ..remove(SemanticsAction.moveCursorForwardByWord)
           ..remove(SemanticsAction.moveCursorBackwardByWord)
           ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-          ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-          ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
+          ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed.
+          ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed.
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -907,7 +949,7 @@ void _tests() {
             key: const Key('a'),
             container: true,
             explicitChildNodes: true,
-            // flags
+            // flags.
             enabled: true,
             hidden: true,
             checked: true,
@@ -1079,7 +1121,7 @@ void _tests() {
             key: const Key('a'),
             container: true,
             explicitChildNodes: true,
-            // flags
+            // flags.
             enabled: true,
             hidden: true,
             checked: false,
@@ -1246,7 +1288,7 @@ void _tests() {
     semanticsUpdateCount = 0;
     performedActions.clear();
 
-    // Updating existing handler should not trigger semantics update
+    // Updating existing handler should not trigger semantics update.
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -1267,7 +1309,7 @@ void _tests() {
     semanticsUpdateCount = 0;
     performedActions.clear();
 
-    // Adding a handler works
+    // Adding a handler works.
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -1313,7 +1355,7 @@ void _tests() {
     semanticsUpdateCount = 0;
     performedActions.clear();
 
-    // Removing a handler works
+    // Removing a handler works.
     await tester.pumpWidget(
       boilerPlate(
         slivers: <Widget>[
@@ -1495,4 +1537,1351 @@ void _tests() {
     );
     semantics.dispose();
   });
+
+  testWidgets('slivers built in a widget tree are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            sortKey: const CustomSortKey(0.0),
+            explicitChildNodes: true,
+            sliver: SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverSemantics(
+                  sortKey: const CustomSortKey(3.0),
+                  sliver: const SliverToBoxAdapter(child: Text('Label 1')),
+                ),
+                SliverSemantics(
+                  sortKey: const CustomSortKey(2.0),
+                  sliver: const SliverToBoxAdapter(child: Text('Label 2')),
+                ),
+                SliverSemantics(
+                  sortKey: const CustomSortKey(1.0),
+                  explicitChildNodes: true,
+                  sliver: SliverCrossAxisGroup(
+                    slivers: <Widget>[
+                      SliverSemantics(
+                        sortKey: const OrdinalSortKey(3.0),
+                        sliver: const SliverToBoxAdapter(child: Text('Label 3')),
+                      ),
+                      SliverSemantics(
+                        sortKey: const OrdinalSortKey(2.0),
+                        sliver: const SliverToBoxAdapter(child: Text('Label 4')),
+                      ),
+                      SliverSemantics(
+                        sortKey: const OrdinalSortKey(1.0),
+                        sliver: const SliverToBoxAdapter(child: Text('Label 5')),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 9,
+              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 5,
+                      children: <TestSemantics>[
+                        TestSemantics(id: 8, label: 'Label 5', textDirection: TextDirection.ltr),
+                        TestSemantics(id: 7, label: 'Label 4', textDirection: TextDirection.ltr),
+                        TestSemantics(id: 6, label: 'Label 3', textDirection: TextDirection.ltr),
+                      ],
+                    ),
+                    TestSemantics(id: 4, label: 'Label 2', textDirection: TextDirection.ltr),
+                    TestSemantics(id: 3, label: 'Label 1', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverCrossAxisGroup(
+            slivers: <Widget>[
+              SliverSemantics(
+                sortKey: const CustomSortKey(3.0),
+                sliver: const SliverToBoxAdapter(child: Text('Label 1')),
+              ),
+              SliverSemantics(
+                sortKey: const CustomSortKey(1.0),
+                sliver: const SliverToBoxAdapter(child: Text('Label 2')),
+              ),
+              SliverSemantics(
+                sortKey: const CustomSortKey(2.0),
+                sliver: const SliverToBoxAdapter(child: Text('Label 3')),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          id: 1,
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 5,
+              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+              children: <TestSemantics>[
+                TestSemantics(id: 3, label: 'Label 2', textDirection: TextDirection.ltr),
+                TestSemantics(id: 4, label: 'Label 3', textDirection: TextDirection.ltr),
+                TestSemantics(id: 2, label: 'Label 1', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('slivers without sort orders are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+      semanticsUpdateCount += 1;
+    });
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: const <Widget>[
+          SliverMainAxisGroup(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: Text('Label 1')),
+              SliverToBoxAdapter(child: Text('Label 2')),
+              SliverCrossAxisGroup(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(child: Text('Label 3')),
+                  SliverToBoxAdapter(child: Text('Label 4')),
+                  SliverToBoxAdapter(child: Text('Label 5')),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+              children: <TestSemantics>[
+                TestSemantics(label: 'Label 1', textDirection: TextDirection.ltr),
+                TestSemantics(label: 'Label 2', textDirection: TextDirection.ltr),
+                TestSemantics(label: 'Label 3', textDirection: TextDirection.ltr),
+                TestSemantics(label: 'Label 4', textDirection: TextDirection.ltr),
+                TestSemantics(label: 'Label 5', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true),
+    );
+
+    semantics.dispose();
+  });
+
+  // testWidgets('slivers that are transformed are sorted properly', (WidgetTester tester) async {
+  //   final SemanticsTester semantics = SemanticsTester(tester);
+  //   int semanticsUpdateCount = 0;
+  //   tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
+  //     semanticsUpdateCount += 1;
+  //   });
+  //   await tester.pumpWidget(
+  //     boilerPlate(
+  //       slivers: <Widget>[
+  //         SliverMainAxisGroup(
+  //           slivers: <Widget>[
+  //             const SliverToBoxAdapter(child: Text('Label 1')),
+  //             const SliverToBoxAdapter(child: Text('Label 2')),
+  //             SliverToBoxAdapter(
+  //               child: Transform.rotate(
+  //                 angle: pi / 2.0,
+  //                 child: const Row(
+  //                   children: <Widget>[Text('Label 3'), Text('Label 4'), Text('Label 5')],
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  //   expect(semanticsUpdateCount, 1);
+  //   final TestSemantics expectedSemantics = TestSemantics.root(
+  //     children: <TestSemantics>[
+  //       TestSemantics(
+  //         children: <TestSemantics>[
+  //           TestSemantics(
+  //             flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+  //             children: <TestSemantics>[
+  //               TestSemantics(label: 'Label 1', textDirection: TextDirection.ltr),
+  //               TestSemantics(label: 'Label 2', textDirection: TextDirection.ltr),
+  //               TestSemantics(
+  //                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+  //                 label: 'Label 4',
+  //                 textDirection: TextDirection.ltr,
+  //               ),
+  //               TestSemantics(
+  //                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+  //                 label: 'Label 5',
+  //                 textDirection: TextDirection.ltr,
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  //   expect(
+  //     semantics,
+  //     hasSemantics(
+  //       TestSemantics(
+  //         children: <TestSemantics>[
+  //           TestSemantics(label: r'Label 1', textDirection: TextDirection.ltr),
+  //           TestSemantics(label: r'Label 2', textDirection: TextDirection.ltr),
+  //           TestSemantics(label: r'Label 3', textDirection: TextDirection.ltr),
+  //           TestSemantics(label: r'Label 4', textDirection: TextDirection.ltr),
+  //           TestSemantics(label: r'Label 5', textDirection: TextDirection.ltr),
+  //         ],
+  //       ),
+  //       ignoreId: true,
+  //       ignoreRect: true,
+  //       ignoreTransform: true,
+  //     ),
+  //   );
+
+  //   semantics.dispose();
+  // });
+
+  testWidgets('Can change handlers', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onTap: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasTapAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onDismiss: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasDismissAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onLongPress: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasLongPressAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onScrollLeft: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasScrollLeftAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onScrollRight: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasScrollRightAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onScrollUp: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasScrollUpAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onScrollDown: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasScrollDownAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onIncrease: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasIncreaseAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onDecrease: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasDecreaseAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onCopy: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasCopyAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onCut: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasCutAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onPaste: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasPasteAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onSetSelection: (TextSelection _) {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', hasSetSelectionAction: true, textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onDidGainAccessibilityFocus: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(
+        label: 'foo',
+        hasDidGainAccessibilityFocusAction: true,
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            onDidLoseAccessibilityFocus: () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(
+        label: 'foo',
+        hasDidLoseAccessibilityFocusAction: true,
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            label: 'foo',
+            textDirection: TextDirection.ltr,
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('foo')),
+      matchesSemantics(label: 'foo', textDirection: TextDirection.ltr),
+    );
+  });
+
+  testWidgets('blocking user interaction works on explicit child node', (
+    WidgetTester tester,
+  ) async {
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            blockUserActions: true,
+            explicitChildNodes: true,
+            sliver: SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverSemantics(
+                  key: key1,
+                  label: 'label1',
+                  onTap: () {},
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                ),
+                SliverSemantics(
+                  key: key2,
+                  label: 'label2',
+                  onTap: () {},
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key1)),
+      // Tap action is blocked.
+      matchesSemantics(label: 'label1'),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key2)),
+      // Tap action is blocked.
+      matchesSemantics(label: 'label2'),
+    );
+  });
+
+  testWidgets('blocking user interaction works on explicit child node with Semantics widget', (
+    WidgetTester tester,
+  ) async {
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            blockUserActions: true,
+            explicitChildNodes: true,
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(<Widget>[
+                Semantics(
+                  key: key1,
+                  label: 'label1',
+                  onTap: () {},
+                  child: const SizedBox(height: 10),
+                ),
+                Semantics(
+                  key: key2,
+                  label: 'label2',
+                  onTap: () {},
+                  child: const SizedBox(height: 10),
+                ),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key1)),
+      // Tap action is blocked.
+      matchesSemantics(label: 'label1'),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key2)),
+      // Tap action is blocked.
+      matchesSemantics(label: 'label2'),
+    );
+  });
+
+  testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            key: key,
+            container: true,
+            sliver: SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverSemantics(
+                  blockUserActions: true,
+                  label: 'label1',
+                  onTap: () {},
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                ),
+                SliverSemantics(
+                  label: 'label2',
+                  onLongPress: () {},
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      // Tap action in label1 is blocked.
+      matchesSemantics(label: 'label1\nlabel2', hasLongPressAction: true),
+    );
+  });
+
+  testWidgets('blocking user interaction on a merged child with Semantics widget', (
+    WidgetTester tester,
+  ) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            key: key,
+            container: true,
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(<Widget>[
+                Semantics(
+                  blockUserActions: true,
+                  label: 'label1',
+                  onTap: () {},
+                  child: const SizedBox(height: 10),
+                ),
+                Semantics(label: 'label2', onLongPress: () {}, child: const SizedBox(height: 10)),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      // Tap action in label1 is blocked.
+      matchesSemantics(label: 'label1\nlabel2', hasLongPressAction: true),
+    );
+  });
+
+  testWidgets('does not merge conflicting actions even if one of them is blocked', (
+    WidgetTester tester,
+  ) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            key: key,
+            container: true,
+            sliver: SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverSemantics(
+                  blockUserActions: true,
+                  label: 'label1',
+                  onTap: () {},
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                ),
+                SliverSemantics(
+                  label: 'label2',
+                  onTap: () {},
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(
+      node,
+      matchesSemantics(
+        children: <Matcher>[containsSemantics(label: 'label1'), containsSemantics(label: 'label2')],
+      ),
+    );
+  });
+
+  // testWidgets(
+  //   'does not merge conflicting actions even if one of them is blocked with Semantics widget',
+  //   (WidgetTester tester) async {
+  //     final UniqueKey key = UniqueKey();
+  //     await tester.pumpWidget(
+  //       boilerPlate(
+  //         slivers: <Widget>[
+  //           SliverSemantics(
+  //             key: key,
+  //             container: true,
+  //             sliver: SliverList(
+  //               delegate: SliverChildListDelegate(<Widget>[
+  //                 Semantics(
+  //                   blockUserActions: true,
+  //                   label: 'label1',
+  //                   onTap: () {},
+  //                   child: const SizedBox(height: 10),
+  //                 ),
+  //                 Semantics(label: 'label2', onTap: () {}, child: const SizedBox(height: 10)),
+  //               ]),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     );
+  //     final SemanticsNode node = tester.getSemantics(find.byKey(key));
+  //     expect(
+  //       node,
+  //       matchesSemantics(
+  //         children: <Matcher>[
+  //           containsSemantics(label: 'label1'),
+  //           containsSemantics(label: 'label2'),
+  //         ],
+  //       ),
+  //     );
+  //   },
+  // );
+
+  testWidgets('RenderSliverSemanticsAnnotations provides validation result', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<SemanticsConfiguration> pumpValidationResult(SemanticsValidationResult result) async {
+      final ValueKey<String> key = ValueKey<String>('validation-$result');
+      await tester.pumpWidget(
+        boilerPlate(
+          slivers: <Widget>[
+            SliverSemantics(
+              key: key,
+              validationResult: result,
+              sliver: SliverToBoxAdapter(
+                child: Text('Validation result $result', textDirection: TextDirection.ltr),
+              ),
+            ),
+          ],
+        ),
+      );
+      final RenderSliverSemanticsAnnotations object = tester
+          .renderObject<RenderSliverSemanticsAnnotations>(find.byKey(key));
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      object.describeSemanticsConfiguration(config);
+      return config;
+    }
+
+    final SemanticsConfiguration noneResult = await pumpValidationResult(
+      SemanticsValidationResult.none,
+    );
+    expect(noneResult.validationResult, SemanticsValidationResult.none);
+
+    final SemanticsConfiguration validResult = await pumpValidationResult(
+      SemanticsValidationResult.valid,
+    );
+    expect(validResult.validationResult, SemanticsValidationResult.valid);
+
+    final SemanticsConfiguration invalidResult = await pumpValidationResult(
+      SemanticsValidationResult.invalid,
+    );
+    expect(invalidResult.validationResult, SemanticsValidationResult.invalid);
+
+    semantics.dispose();
+  });
+
+  testWidgets('validation result precedence', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<void> expectValidationResult({
+      required SemanticsValidationResult outer,
+      required SemanticsValidationResult inner,
+      required SemanticsValidationResult expected,
+    }) async {
+      const ValueKey<String> key = ValueKey<String>('validated-widget');
+      await tester.pumpWidget(
+        boilerPlate(
+          slivers: <Widget>[
+            SliverSemantics(
+              validationResult: outer,
+              sliver: SliverSemantics(
+                validationResult: inner,
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    key: key,
+                    'Outer = $outer; inner = $inner',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      final SemanticsNode result = tester.getSemantics(find.byKey(key));
+      expect(
+        result,
+        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+      );
+    }
+
+    // Outer is none.
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.none,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    // Outer is valid.
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    // Outer is invalid.
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.invalid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.invalid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('supports heading levels', (WidgetTester tester) async {
+    // Default: not a heading.
+    expect(
+      SliverSemantics(
+        sliver: const SliverToBoxAdapter(child: Text('dummy text')),
+      ).properties.headingLevel,
+      isNull,
+    );
+
+    // Headings level 1-6.
+    for (int level = 1; level <= 6; level++) {
+      final SliverSemantics semantics = SliverSemantics(
+        headingLevel: level,
+        sliver: const SliverToBoxAdapter(child: Text('dummy text')),
+      );
+      expect(semantics.properties.headingLevel, level);
+    }
+
+    // Invalid heading levels.
+    for (final int badLevel in const <int>[-1, 0, 7, 8, 9]) {
+      expect(
+        () => SliverSemantics(
+          headingLevel: badLevel,
+          sliver: const SliverToBoxAdapter(child: Text('dummy text')),
+        ),
+        throwsAssertionError,
+      );
+    }
+  });
+
+  testWidgets('parent heading level takes precedence when it absorbs a child', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<SemanticsConfiguration> pumpHeading(int? level) async {
+      final ValueKey<String> key = ValueKey<String>('heading-$level');
+      await tester.pumpWidget(
+        boilerPlate(
+          slivers: <Widget>[
+            SliverSemantics(
+              key: key,
+              headingLevel: level,
+              sliver: SliverToBoxAdapter(
+                child: Text('Heading level $level', textDirection: TextDirection.ltr),
+              ),
+            ),
+          ],
+        ),
+      );
+      final RenderSliverSemanticsAnnotations object = tester
+          .renderObject<RenderSliverSemanticsAnnotations>(find.byKey(key));
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      object.describeSemanticsConfiguration(config);
+      return config;
+    }
+
+    // Tuples contain (parent level, child level, expected combined level).
+    final List<(int, int, int)> scenarios = <(int, int, int)>[
+      // Case: neither are headings
+      (0, 0, 0), // expect not a heading
+      // Case: parent not a heading, child always wins.
+      (0, 1, 1),
+      (0, 2, 2),
+
+      // Case: child not a heading, parent always wins.
+      (1, 0, 1),
+      (2, 0, 2),
+
+      // Case: child heading level higher, parent still wins.
+      (3, 2, 3),
+      (4, 1, 4),
+
+      // Case: parent heading level higher, parent still wins.
+      (2, 3, 2),
+      (1, 5, 1),
+    ];
+
+    for (final (int, int, int) scenario in scenarios) {
+      final int parentLevel = scenario.$1;
+      final int childLevel = scenario.$2;
+      final int resultLevel = scenario.$3;
+
+      final SemanticsConfiguration parent = await pumpHeading(
+        parentLevel == 0 ? null : parentLevel,
+      );
+      final SemanticsConfiguration child = SemanticsConfiguration()..headingLevel = childLevel;
+      parent.absorb(child);
+      expect(
+        reason:
+            'parent heading level is $parentLevel, '
+            'child heading level is $childLevel, '
+            'expecting $resultLevel.',
+        parent.headingLevel,
+        resultLevel,
+      );
+    }
+
+    semantics.dispose();
+  });
+
+  testWidgets('applies heading semantics to semantics tree', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverMainAxisGroup(
+            slivers: <Widget>[
+              for (int level = 1; level <= 6; level++)
+                SliverSemantics(
+                  key: ValueKey<String>('heading-$level'),
+                  headingLevel: level,
+                  sliver: SliverToBoxAdapter(child: Text('Heading level $level')),
+                ),
+              const SliverToBoxAdapter(child: Text('This is not a heading')),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    for (int level = 1; level <= 6; level++) {
+      final ValueKey<String> key = ValueKey<String>('heading-$level');
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      expect('$node', contains('headingLevel: $level'));
+    }
+
+    final SemanticsNode notHeading = tester.getSemantics(find.text('This is not a heading'));
+    expect(notHeading, isNot(contains('headingLevel')));
+
+    semantics.dispose();
+  });
+}
+
+class CustomSortKey extends OrdinalSortKey {
+  const CustomSortKey(super.order, {super.name});
 }
