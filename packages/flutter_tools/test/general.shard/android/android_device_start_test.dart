@@ -128,46 +128,6 @@ void main() {
     });
   }
 
-  testWithoutContext('AndroidDevice.startApp does not allow release builds on x86', () async {
-    final AndroidDevice device = AndroidDevice(
-      '1234',
-      modelID: 'TestModel',
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: BufferLogger.test(),
-      platform: FakePlatform(),
-      androidSdk: androidSdk,
-    );
-    final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk apk = AndroidApk(
-      id: 'FlutterApp',
-      applicationPackage: apkFile,
-      launchActivity: 'FlutterActivity',
-      versionCode: 1,
-    );
-
-    processManager.addCommand(kAdbVersionCommand);
-    processManager.addCommand(kStartServer);
-
-    // This configures the target platform of the device.
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-        stdout: '[ro.product.cpu.abi]: [x86]',
-      ),
-    );
-
-    final LaunchResult launchResult = await device.startApp(
-      apk,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      platformArgs: <String, dynamic>{},
-    );
-
-    expect(launchResult.started, false);
-    expect(processManager, hasNoRemainingExpectations);
-  });
-
   testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
     final AndroidDevice device = AndroidDevice(
       '1234',

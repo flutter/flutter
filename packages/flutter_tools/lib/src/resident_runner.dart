@@ -32,6 +32,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
 import 'project.dart';
@@ -114,6 +115,12 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
+      final List<String> extraFrontEndOptions = <String>[
+        ...buildInfo.extraFrontEndOptions,
+        if (buildInfo.webEnableHotReload)
+        // These flags are only valid to be passed when compiling with DDC.
+        ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+      ];
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -133,7 +140,7 @@ class FlutterDevice {
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec:
@@ -980,6 +987,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
     CommandHelp? commandHelp,
+    this.dartBuilder,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1050,7 +1058,32 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   BuildResult? _lastBuild;
-  Environment? _environment;
+
+  late final Environment _environment = Environment(
+    artifacts: globals.artifacts!,
+    logger: globals.logger,
+    cacheDir: globals.cache.getRoot(),
+    engineVersion: globals.flutterVersion.engineRevision,
+    fileSystem: globals.fs,
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    outputDir: globals.fs.directory(getBuildDirectory()),
+    processManager: globals.processManager,
+    platform: globals.platform,
+    analytics: globals.analytics,
+    projectDir: globals.fs.currentDirectory,
+    packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+    generateDartPluginRegistry: generateDartPluginRegistry,
+    defines: <String, String>{
+      // Needed for Dart plugin registry generation.
+      kTargetFile: mainPath,
+      kBuildMode: debuggingOptions.buildInfo.mode.cliName,
+    },
+  );
+
+  Environment get environment => _environment;
+
+  /// Can dispatch [FlutterHookRunner.runHooks] to get new assets from the hooks.
+  final FlutterHookRunner? dartBuilder;
 
   @override
   bool hotMode;
@@ -1148,26 +1181,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
-    _environment ??= Environment(
-      artifacts: globals.artifacts!,
-      logger: globals.logger,
-      cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.flutterVersion.engineRevision,
-      fileSystem: globals.fs,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      outputDir: globals.fs.directory(getBuildDirectory()),
-      processManager: globals.processManager,
-      platform: globals.platform,
-      analytics: globals.analytics,
-      projectDir: globals.fs.currentDirectory,
-      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-      generateDartPluginRegistry: generateDartPluginRegistry,
-      defines: <String, String>{
-        // Needed for Dart plugin registry generation.
-        kTargetFile: mainPath,
-      },
-    );
-
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
       globals.buildTargets.generateLocalizationsTarget,
       globals.buildTargets.dartPluginRegistrantTarget,
@@ -1175,7 +1188,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
     _lastBuild = await globals.buildSystem.buildIncremental(
       compositeTarget,
-      _environment!,
+      _environment,
       _lastBuild,
     );
     if (!_lastBuild!.success) {
@@ -1345,23 +1358,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     globals.printStatus('Lost connection to device.');
     _finished.complete(0);
-  }
-
-  Future<void> enableObservatory() async {
-    assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests =
-        <Future<vm_service.Response?>>[
-          for (final FlutterDevice? device in flutterDevices)
-            if (device != null)
-              // Notify the VM service if the user wants Observatory to be served.
-              device.vmService?.callMethodWrapper('_serveObservatory') ??
-                  Future<vm_service.Response?>.value(),
-        ];
-    try {
-      await Future.wait(serveObservatoryRequests);
-    } on vm_service.RPCError catch (e) {
-      globals.printWarning('Unable to enable Observatory: $e');
-    }
   }
 
   @protected
@@ -1553,7 +1549,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();
       final String manifestPath = globals.fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';

@@ -22,6 +22,7 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -142,7 +143,6 @@ class AttachCommand extends FlutterCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
@@ -207,8 +207,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     return uri;
   }
-
-  bool get serveObservatory => boolArg('serve-observatory');
 
   String? get appId {
     return stringArg('app-id');
@@ -487,7 +485,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDds: enableDds,
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
-      serveObservatory: serveObservatory,
       usingCISystem: usingCISystem,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
@@ -506,8 +503,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterProject: flutterProject,
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           analytics: analytics,
+          logger: _logger,
         )
-        : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
+        : ColdRunner(
+          flutterDevices,
+          target: targetFile,
+          debuggingOptions: debuggingOptions,
+          dartBuilder: hookRunner,
+        );
   }
 
   Future<void> _validateArguments() async {}
@@ -532,6 +535,7 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
+    Logger? logger,
   }) => HotRunner(
     devices,
     target: target,
@@ -544,5 +548,7 @@ class HotRunnerFactory {
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
+    dartBuilder: hookRunner,
+    logger: logger,
   );
 }

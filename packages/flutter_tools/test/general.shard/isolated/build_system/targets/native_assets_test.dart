@@ -189,7 +189,6 @@ void main() {
               ],
             ),
           ]),
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {
       writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
@@ -216,14 +215,14 @@ void main() {
       //  * dart build output should depend on C source
       //  * installation output should depend on shared library from dart build
 
-      final File dartBuildResult = iosEnvironment.buildDir.childFile(
-        DartBuild.dartBuildResultFilename,
+      final File dartHookResult = iosEnvironment.buildDir.childFile(
+        DartBuild.dartHookResultFilename,
       );
       final File buildDepsFile = iosEnvironment.buildDir.childFile(DartBuild.depFilename);
       expect(buildDepsFile, exists);
       expect(
         buildDepsFile.readAsStringSync(),
-        stringContainsInOrder(<String>[dartBuildResult.path, ':', 'src/foo.c']),
+        stringContainsInOrder(<String>[dartHookResult.path, ':', 'src/foo.c']),
       );
 
       final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(
@@ -252,7 +251,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       },
       () async {
         writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');

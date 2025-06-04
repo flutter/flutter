@@ -6,7 +6,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -19,17 +18,10 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/fakes.dart';
 import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('Dart plugin registrant', () {
     late FileSystem fs;
     late FakeFlutterProject flutterProject;
@@ -43,7 +35,6 @@ void main() {
           FakeFlutterProject()
             ..manifest = flutterManifest
             ..directory = directory
-            ..flutterPluginsFile = directory.childFile('.flutter-plugins')
             ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
             ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
       writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
@@ -1267,7 +1258,6 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1314,7 +1304,6 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1360,7 +1349,6 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1391,7 +1379,6 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1443,7 +1430,6 @@ void main() {
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: enableExplicitPackageDependencies,
           Pub: ThrowingPub.new,
         },
       );
@@ -1497,9 +1483,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
-
-  @override
-  late File flutterPluginsFile;
 
   @override
   late File flutterPluginsDependenciesFile;
