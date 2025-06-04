@@ -130,8 +130,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
       packageName,
       dependency.rootUri,
       project.manifest.dependencies,
-      isDevDependency:
-          featureFlags.isExplicitPackageDependenciesEnabled && dependency.isExclusiveDevDependency,
+      isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
     );
     if (plugin != null) {
@@ -1160,8 +1159,7 @@ void _createPlatformPluginSymlinks(
 ///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 ///
-/// If [FeatureFlags.isExplicitPackageDependenciesEnabled] is `true`,
-/// plugins that are development-only dependencies might be labeled or,
+/// Plugins that are development-only dependencies might be labeled or,
 /// depending on the platform, omitted from metadata or platform-specific artifacts.
 Future<void> refreshPluginsList(
   FlutterProject project, {

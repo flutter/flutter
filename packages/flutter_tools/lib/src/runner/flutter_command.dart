@@ -1888,9 +1888,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
-    );
+    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.

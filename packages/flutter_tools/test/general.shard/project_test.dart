@@ -35,11 +35,6 @@ import '../src/package_config.dart';
 import '../src/throwing_pub.dart';
 
 void main() {
-  FeatureFlags disableExplicitPackageDependencies() {
-    // ignore: avoid_redundant_argument_values
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: false);
-  }
-
   // TODO(zanderso): remove once FlutterProject is fully refactored.
   // this is safe since no tests have expectations on the test logger.
   final BufferLogger logger = BufferLogger.test();
@@ -280,33 +275,7 @@ void main() {
       });
 
       testUsingContext(
-        '--no-explicit-package-dependencies does not determine dev dependencies',
-        () async {
-          // Create a plugin.
-          await aPluginProject(legacy: false);
-          // Create a project that depends on that plugin.
-          final FlutterProject project = await projectWithPluginDependency();
-          // Don't bother with Android, we just want the manifest.
-          project.directory.childDirectory('android').deleteSync(recursive: true);
-
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
-          expect(
-            project.flutterPluginsDependenciesFile.readAsStringSync(),
-            isNot(contains('"dev_dependency":true')),
-          );
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: disableExplicitPackageDependencies,
-          FileSystem: () => MemoryFileSystem.test(),
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: () => const ThrowingPub(),
-          FlutterProjectFactory:
-              () => FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
-        },
-      );
-
-      testUsingContext(
-        '--explicit-package-dependencies determines dev dependencies',
+        'determines dev dependencies',
         () async {
           // Create a plugin.
           await aPluginProject(legacy: false);
@@ -331,7 +300,7 @@ void main() {
       );
 
       testUsingContext(
-        '--explicit-package-dependencies with releaseMode: false retains dev plugins',
+        'releaseMode: false retains dev plugins',
         () async {
           // Create a plugin.
           await aPluginProject(includeAndroidMain: true, legacy: false);
@@ -354,7 +323,7 @@ void main() {
       );
 
       testUsingContext(
-        '--explicit-package-dependencies with releaseMode: true omits dev plugins',
+        'releaseMode: true omits dev plugins',
         () async {
           // Create a plugin.
           await aPluginProject(includeAndroidMain: true, legacy: false);

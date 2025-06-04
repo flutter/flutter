@@ -51,14 +51,6 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
-
-  // TODO(matanlurey): Remove this when the flag is no longer in use.
-  //
-  // Setting this always to true prevents `false` from ever being returned in
-  // production code, but still allows tests to override it so that they can be
-  // migrated (or deleted) one at a time instead of a single large PR.
-  @override
-  bool get isExplicitPackageDependenciesEnabled => true;
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {

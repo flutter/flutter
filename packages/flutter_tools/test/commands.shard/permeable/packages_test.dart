@@ -387,7 +387,7 @@ workspace:
     );
 
     testUsingContext(
-      'get generates normal files when l10n.yaml has synthetic-package: false',
+      'get generates files into lib/l10n',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -403,7 +403,7 @@ flutter:
   generate: true
 ''');
         projectDir.childFile('pubspec.yaml').writeAsStringSync(pubspecFileContent);
-        projectDir.childFile('l10n.yaml').writeAsStringSync('synthetic-package: false');
+        projectDir.childFile('l10n.yaml').createSync();
         await runCommandIn(projectPath, 'get');
         expect(
           projectDir

@@ -43,7 +43,6 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
-synthetic-package: false
 required-resource-attributes: false
 nullable-getter: false
 ''');
@@ -66,6 +65,65 @@ nullable-getter: false
     expect(options.preferredSupportedLocales, <String>['en_US']);
     expect(options.requiredResourceAttributes, false);
     expect(options.nullableGetter, false);
+  });
+
+  testWithoutContext('parseLocalizationsOptions refuses synthetic-package: true', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+arb-dir: arb
+synthetic-package: true
+template-arb-file: example.arb
+output-localization-file: bar
+untranslated-messages-file: untranslated
+output-class: Foo
+header-file: header
+header: HEADER
+use-deferred-loading: true
+preferred-supported-locales: en_US
+required-resource-attributes: false
+nullable-getter: false
+''');
+
+    expect(
+      () => parseLocalizationsOptionsFromYAML(
+        file: configFile,
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      ),
+      throwsToolExit(message: 'synthetic-package'),
+    );
+  });
+
+  testWithoutContext('parseLocalizationsOptions warns on synthetic-package: false', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
+arb-dir: arb
+synthetic-package: false
+template-arb-file: example.arb
+output-localization-file: bar
+untranslated-messages-file: untranslated
+output-class: Foo
+header-file: header
+header: HEADER
+use-deferred-loading: true
+preferred-supported-locales: en_US
+required-resource-attributes: false
+nullable-getter: false
+''');
+
+    final BufferLogger logger = BufferLogger.test();
+    expect(
+      () => parseLocalizationsOptionsFromYAML(
+        file: configFile,
+        logger: logger,
+        fileSystem: fileSystem,
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      ),
+      returnsNormally,
+    );
+
+    expect(logger.warningText, contains('synthetic-package'));
   });
 
   testWithoutContext(
