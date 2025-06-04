@@ -1371,4 +1371,128 @@ void _tests() {
     );
     semantics.dispose();
   });
+
+  testWidgets('supports CustomSemanticsActions', (WidgetTester tester) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+              const CustomSemanticsAction(label: 'foo'): () {},
+              const CustomSemanticsAction(label: 'bar'): () {},
+            },
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(SliverSemantics)),
+      matchesSemantics(
+        customActions: <CustomSemanticsAction>[
+          const CustomSemanticsAction(label: 'bar'),
+          const CustomSemanticsAction(label: 'foo'),
+        ],
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('increased/decreased values are annotated', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            container: true,
+            value: '10s',
+            increasedValue: '11s',
+            decreasedValue: '9s',
+            onIncrease: () => () {},
+            onDecrease: () => () {},
+            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          ),
+        ],
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+              children: <TestSemantics>[
+                TestSemantics(
+                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                  actions: SemanticsAction.increase.index | SemanticsAction.decrease.index,
+                  textDirection: TextDirection.ltr,
+                  value: '10s',
+                  increasedValue: '11s',
+                  decreasedValue: '9s',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('excludeSemantics ignores children', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          SliverSemantics(
+            label: 'label',
+            excludeSemantics: true,
+            textDirection: TextDirection.ltr,
+            sliver: SliverSemantics(
+              label: 'other label',
+              textDirection: TextDirection.ltr,
+              sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+              children: <TestSemantics>[
+                TestSemantics(
+                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                  label: 'label',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true),
+    );
+    semantics.dispose();
+  });
 }
