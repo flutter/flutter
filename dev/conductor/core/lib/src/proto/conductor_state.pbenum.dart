@@ -17,53 +17,6 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class ReleasePhase extends $pb.ProtobufEnum {
-  static const ReleasePhase APPLY_FRAMEWORK_CHERRYPICKS =
-      ReleasePhase._(0, _omitEnumNames ? '' : 'APPLY_FRAMEWORK_CHERRYPICKS');
-  static const ReleasePhase UPDATE_ENGINE_VERSION =
-      ReleasePhase._(1, _omitEnumNames ? '' : 'UPDATE_ENGINE_VERSION');
-  static const ReleasePhase PUBLISH_VERSION =
-      ReleasePhase._(2, _omitEnumNames ? '' : 'PUBLISH_VERSION');
-  static const ReleasePhase VERIFY_RELEASE =
-      ReleasePhase._(3, _omitEnumNames ? '' : 'VERIFY_RELEASE');
-  static const ReleasePhase RELEASE_COMPLETED =
-      ReleasePhase._(4, _omitEnumNames ? '' : 'RELEASE_COMPLETED');
-
-  static const $core.List<ReleasePhase> values = <ReleasePhase>[
-    APPLY_FRAMEWORK_CHERRYPICKS,
-    UPDATE_ENGINE_VERSION,
-    PUBLISH_VERSION,
-    VERIFY_RELEASE,
-    RELEASE_COMPLETED,
-  ];
-
-  static final $core.Map<$core.int, ReleasePhase> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static ReleasePhase? valueOf($core.int value) => _byValue[value];
-
-  const ReleasePhase._($core.int v, $core.String n) : super(v, n);
-}
-
-class CherrypickState extends $pb.ProtobufEnum {
-  static const CherrypickState PENDING = CherrypickState._(0, _omitEnumNames ? '' : 'PENDING');
-  static const CherrypickState PENDING_WITH_CONFLICT =
-      CherrypickState._(1, _omitEnumNames ? '' : 'PENDING_WITH_CONFLICT');
-  static const CherrypickState COMPLETED = CherrypickState._(2, _omitEnumNames ? '' : 'COMPLETED');
-  static const CherrypickState ABANDONED = CherrypickState._(3, _omitEnumNames ? '' : 'ABANDONED');
-
-  static const $core.List<CherrypickState> values = <CherrypickState>[
-    PENDING,
-    PENDING_WITH_CONFLICT,
-    COMPLETED,
-    ABANDONED,
-  ];
-
-  static final $core.Map<$core.int, CherrypickState> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static CherrypickState? valueOf($core.int value) => _byValue[value];
-
-  const CherrypickState._($core.int v, $core.String n) : super(v, n);
-}
-
 ///  The type of release that is being created.
 ///
 ///  This determines how the version will be calculated.
