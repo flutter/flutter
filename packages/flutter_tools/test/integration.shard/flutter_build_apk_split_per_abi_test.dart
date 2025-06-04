@@ -12,12 +12,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 /// ABI → index map (same as FlutterPluginConstants.ABI_VERSION)
-const Map<String, int> _abiIndexMap = <String, int>{
-  'armeabi-v7a': 1,
-  'arm64-v8a': 2,
-  'x86': 3,
-  'x86_64': 4,
-};
+const Map<String, int> _abiIndexMap = <String, int>{'armeabi-v7a': 1, 'arm64-v8a': 2, 'x86_64': 4};
 
 // Check that `flutter build apk --split-per-abi` generates a versionCode equal to abiIndex * 1000 + buildNumber
 Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
