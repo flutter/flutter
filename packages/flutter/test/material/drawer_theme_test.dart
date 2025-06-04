@@ -168,9 +168,7 @@ void main() {
     const elevation = 7.0;
     const shadowColor = Color(0x00000003);
     const surfaceTintColor = Color(0x00000004);
-    const shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(16.0)),
-    );
+    const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const width = 200.0;
     const Clip clipBehavior = Clip.antiAlias;
 
@@ -213,9 +211,7 @@ void main() {
       const elevation = 7.0;
       const shadowColor = Color(0x00000003);
       const surfaceTintColor = Color(0x00000004);
-      const shape = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16.0)),
-      );
+      const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
       const width = 200.0;
       const Clip clipBehavior = Clip.antiAlias;
 
@@ -269,9 +265,7 @@ void main() {
       const elevation = 7.0;
       const shadowColor = Color(0x00000003);
       const surfaceTintColor = Color(0x00000004);
-      const shape = RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16.0)),
-      );
+      const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
       const width = 200.0;
       const Clip clipBehavior = Clip.antiAlias;
 

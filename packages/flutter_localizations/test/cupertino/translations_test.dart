@@ -193,8 +193,7 @@ void main() {
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
     final file = File(path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_kn.arb'));
 
-    final bundle =
-        json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
     // Encodes the arb resource values if they have not already been
     // encoded.

@@ -96,10 +96,7 @@ void main() {
       () {
         final bool done = FakeAsync().run<bool>((FakeAsync time) {
           final completer = Completer<void>();
-          final process = FakeProcess(
-            duration: const Duration(seconds: 30),
-            completer: completer,
-          );
+          final process = FakeProcess(duration: const Duration(seconds: 30), completer: completer);
 
           var hasExited = false;
           unawaited(
@@ -132,10 +129,7 @@ void main() {
       () {
         final bool done = FakeAsync().run<bool>((FakeAsync time) {
           final completer = Completer<void>();
-          final process = FakeProcess(
-            duration: const Duration(seconds: 30),
-            completer: completer,
-          );
+          final process = FakeProcess(duration: const Duration(seconds: 30), completer: completer);
 
           var hasExited = false;
           unawaited(

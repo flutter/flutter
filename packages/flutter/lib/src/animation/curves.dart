@@ -816,12 +816,7 @@ class CatmullRomSpline extends Curve2D {
     final double reverseTension = 1.0 - tension;
     final result = <List<Offset>>[];
     for (var i = 0; i < allPoints.length - 3; ++i) {
-      final curve = <Offset>[
-        allPoints[i],
-        allPoints[i + 1],
-        allPoints[i + 2],
-        allPoints[i + 3],
-      ];
+      final curve = <Offset>[allPoints[i], allPoints[i + 1], allPoints[i + 2], allPoints[i + 3]];
       final Offset diffCurve10 = curve[1] - curve[0];
       final Offset diffCurve21 = curve[2] - curve[1];
       final Offset diffCurve32 = curve[3] - curve[2];

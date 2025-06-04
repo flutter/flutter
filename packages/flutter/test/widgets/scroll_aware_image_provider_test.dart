@@ -48,11 +48,10 @@ void main() {
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
     final testImageProvider = TestImageProvider(testImage.clone());
-    final imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -84,11 +83,10 @@ void main() {
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
     final testImageProvider = TestImageProvider(testImage.clone());
-    final imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -131,11 +129,10 @@ void main() {
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
     final testImageProvider = TestImageProvider(testImage.clone());
-    final imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -195,11 +192,10 @@ void main() {
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
     final testImageProvider = TestImageProvider(testImage.clone());
-    final imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -269,11 +265,10 @@ void main() {
       final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
       addTearDown(context.dispose);
       final testImageProvider = TestImageProvider(cloneImage());
-      final imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       expect(testImageProvider.configuration, null);
       expect(imageCache.containsKey(testImageProvider), false);
@@ -342,11 +337,10 @@ void main() {
       final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
       addTearDown(context.dispose);
       final testImageProvider = TestImageProvider(cloneImage());
-      final imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       expect(testImageProvider.configuration, null);
       expect(imageCache.containsKey(testImageProvider), false);
@@ -408,11 +402,10 @@ void main() {
       final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
       addTearDown(context.dispose);
       final testImageProvider = TestImageProvider(testImage.clone());
-      final imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       expect(testImageProvider.configuration, null);
       expect(imageCache.containsKey(testImageProvider), false);

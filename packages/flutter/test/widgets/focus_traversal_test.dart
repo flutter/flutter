@@ -3356,8 +3356,7 @@ void main() {
     }
 
     Future<bool> previousFocus() async {
-      final result =
-          Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
       await tester.pump();
       return result;
     }
@@ -3431,8 +3430,7 @@ void main() {
     }
 
     Future<bool> previousFocus() async {
-      final result =
-          Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
       await tester.pump();
       return result;
     }
@@ -3573,10 +3571,7 @@ void main() {
 
   testWidgets('Edge cases for inDirection', (WidgetTester tester) async {
     var focus = List<bool?>.generate(6, (int _) => null);
-    final nodes = List<FocusNode>.generate(
-      6,
-      (int index) => FocusNode(debugLabel: 'Node $index'),
-    );
+    final nodes = List<FocusNode>.generate(6, (int index) => FocusNode(debugLabel: 'Node $index'));
     final childScope = FocusScopeNode(debugLabel: 'Child Scope');
     addTearDown(() {
       for (final node in nodes) {

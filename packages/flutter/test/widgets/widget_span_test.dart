@@ -46,8 +46,7 @@ void main() {
     double effectiveTextScaleFactorFromWidget(Widget widget) {
       final child = (widget as ProxyWidget).child as Semantics;
       final dynamic grandChild = child.child;
-      final textScaleFactor =
-          grandChild.textScaleFactor as double; // ignore: avoid_dynamic_calls
+      final textScaleFactor = grandChild.textScaleFactor as double; // ignore: avoid_dynamic_calls
       return textScaleFactor;
     }
 

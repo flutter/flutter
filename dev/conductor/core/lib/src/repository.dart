@@ -440,12 +440,7 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    final commitCmd = <String>[
-      'commit',
-      '--message',
-      message,
-      if (authorArg != null) authorArg,
-    ];
+    final commitCmd = <String>['commit', '--message', message, if (authorArg != null) authorArg];
     stdio.printTrace('Executing git $commitCmd...');
     final io.ProcessResult commitResult = await git.run(
       commitCmd,
@@ -648,8 +643,7 @@ class FrameworkRepository extends Repository {
   Future<Version> flutterVersion() async {
     // Check version
     final io.ProcessResult result = await runFlutter(<String>['--version', '--machine']);
-    final versionJson =
-        jsonDecode(stdoutToString(result.stdout)) as Map<String, dynamic>;
+    final versionJson = jsonDecode(stdoutToString(result.stdout)) as Map<String, dynamic>;
     return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 

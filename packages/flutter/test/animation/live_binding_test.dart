@@ -19,10 +19,7 @@ void main() {
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
   testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(200, 200),
-      allLayers: true,
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     addTearDown(animationSheet.dispose);
     final taps = <Offset>[];
     Widget target({bool recording = true}) => Container(

@@ -408,10 +408,7 @@ void main() {
   });
 
   test('can generate a dark scheme from a seed color', () {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      brightness: Brightness.dark,
-    );
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
     expect(scheme.primary, const Color(0xffa0cafd));
     expect(scheme.onPrimary, const Color(0xff003258));
     expect(scheme.primaryContainer, const Color(0xff194975));
@@ -467,10 +464,7 @@ void main() {
   test('can override specific colors in a generated scheme', () {
     final baseScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
     const primaryOverride = Color(0xffabcdef);
-    final scheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      primary: primaryOverride,
-    );
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue, primary: primaryOverride);
     expect(scheme.primary, primaryOverride);
     // The rest should be the same.
     expect(scheme.onPrimary, baseScheme.onPrimary);

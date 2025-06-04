@@ -4121,10 +4121,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     int newChildrenBottom = newWidgets.length - 1;
     int oldChildrenBottom = oldChildren.length - 1;
 
-    final newChildren = List<Element>.filled(
-      newWidgets.length,
-      _NullElement.instance,
-    );
+    final newChildren = List<Element>.filled(newWidgets.length, _NullElement.instance);
 
     Element? previousChild;
 
@@ -7017,8 +7014,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {
-    final renderObject =
-        this.renderObject as RenderObjectWithChildMixin<RenderObject>;
+    final renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
@@ -7032,8 +7028,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
-    final renderObject =
-        this.renderObject as RenderObjectWithChildMixin<RenderObject>;
+    final renderObject = this.renderObject as RenderObjectWithChildMixin<RenderObject>;
     assert(slot == null);
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -7164,8 +7159,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
-    final multiChildRenderObjectWidget =
-        widget as MultiChildRenderObjectWidget;
+    final multiChildRenderObjectWidget = widget as MultiChildRenderObjectWidget;
     final children = List<Element>.filled(
       multiChildRenderObjectWidget.children.length,
       _NullElement.instance,
@@ -7185,8 +7179,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
-    final multiChildRenderObjectWidget =
-        widget as MultiChildRenderObjectWidget;
+    final multiChildRenderObjectWidget = widget as MultiChildRenderObjectWidget;
     assert(widget == newWidget);
     assert(!debugChildrenHaveDuplicateKeys(widget, multiChildRenderObjectWidget.children));
     _children = updateChildren(

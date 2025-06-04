@@ -141,9 +141,7 @@ void main() {
     });
 
     testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
-      final reasonForCancelling = ReasonForCancelling(
-        message: 'Const class cannot remove fields',
-      );
+      final reasonForCancelling = ReasonForCancelling(message: 'Const class cannot remove fields');
 
       expect(reasonForCancelling.toString(), contains('Try performing a hot restart instead.'));
     });

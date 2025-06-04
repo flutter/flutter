@@ -201,9 +201,7 @@ void main() {
       ),
     );
 
-    final scrollController = ScrollController(
-      initialScrollOffset: kItemHeight / 2,
-    );
+    final scrollController = ScrollController(initialScrollOffset: kItemHeight / 2);
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -242,9 +240,7 @@ void main() {
       (int i) => MergeSemantics(child: SizedBox(height: kItemHeight, child: Text('container $i'))),
     );
 
-    final scrollController = ScrollController(
-      initialScrollOffset: kItemHeight / 2,
-    );
+    final scrollController = ScrollController(initialScrollOffset: kItemHeight / 2);
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -309,9 +305,7 @@ void main() {
       return SliverToBoxAdapter(child: child);
     });
 
-    final scrollController = ScrollController(
-      initialScrollOffset: 2.5 * kItemHeight,
-    );
+    final scrollController = ScrollController(initialScrollOffset: 2.5 * kItemHeight);
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(

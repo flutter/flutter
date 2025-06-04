@@ -93,8 +93,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 Future<void> main() async {
   final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
-  final binding =
-      widgetsBinding as IntegrationTestWidgetsFlutterBinding;
+  final binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final variant = ResampleFlagVariant(binding);

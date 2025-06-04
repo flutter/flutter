@@ -86,8 +86,7 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> Function() acti
     return true;
   }());
   if (instrument) {
-    final stopwatch =
-        Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
+    final stopwatch = Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
     // Ignore context: The framework does not use this function internally so it will not cause flakes.
     try {
       return await action();

@@ -56,11 +56,10 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.translate(mid.dx, mid.dy);
   canvas.rotate(math.pi / 4);
 
-  final yellowBlue = ui.Gradient.linear(
-    ui.Offset(-radius, -radius),
-    ui.Offset.zero,
-    <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)],
-  );
+  final yellowBlue = ui.Gradient.linear(ui.Offset(-radius, -radius), ui.Offset.zero, <ui.Color>[
+    const ui.Color(0xFFFFFF00),
+    const ui.Color(0xFF0000FF),
+  ]);
 
   // Draws a yellow-bluish rectangle.
   canvas.drawRect(

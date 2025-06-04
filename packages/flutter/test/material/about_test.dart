@@ -1599,9 +1599,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
-    final theme = ThemeData(
-      appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)),
-    );
+    final theme = ThemeData(appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)));
     const title = 'License ABC';
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -1622,8 +1620,7 @@ void main() {
 
     await tester.pumpAndSettle(); // Finish rendering the page.
 
-    final renderParagraph =
-        tester.renderObject(find.text('ABC').last) as RenderParagraph;
+    final renderParagraph = tester.renderObject(find.text('ABC').last) as RenderParagraph;
 
     // License page title should not use AppBarTheme's foregroundColor.
     expect(renderParagraph.text.style!.color, isNot(theme.appBarTheme.foregroundColor));
@@ -1660,8 +1657,7 @@ void main() {
     // Master view is no longer visible.
     expect(find.text('License ABC'), findsNothing);
 
-    final renderParagraph =
-        tester.renderObject(find.text('ABC').first) as RenderParagraph;
+    final renderParagraph = tester.renderObject(find.text('ABC').first) as RenderParagraph;
     expect(renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
   });
 
@@ -1698,8 +1694,7 @@ void main() {
       // Master view is no longer visible.
       expect(find.text('License ABC'), findsNothing);
 
-      final renderParagraph =
-          tester.renderObject(find.text('ABC').first) as RenderParagraph;
+      final renderParagraph = tester.renderObject(find.text('ABC').first) as RenderParagraph;
       expect(renderParagraph.text.style!.color, theme.primaryTextTheme.titleLarge!.color);
     });
   });
@@ -1707,10 +1702,7 @@ void main() {
   testWidgets('Adaptive AboutDialog shows correct widget on each platform', (
     WidgetTester tester,
   ) async {
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
@@ -1767,10 +1759,7 @@ void main() {
   testWidgets('Adaptive AboutDialog closes correctly on each platform', (
     WidgetTester tester,
   ) async {
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: platform),
@@ -1829,9 +1818,7 @@ void main() {
   });
 
   testWidgets('showLicensePage inherits ambient Theme', (WidgetTester tester) async {
-    final theme = ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0XFFFF0000)),
-    );
+    final theme = ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0XFFFF0000)));
 
     await tester.pumpWidget(
       MaterialApp(

@@ -1269,15 +1269,13 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         child.layout(innerConstraints, parentUsesSize: true);
         maxHeight ??= child.size.height;
-        final childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       child.layout(innerConstraints, parentUsesSize: true);
-      final childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
       maxHeight ??= child.size.height;
@@ -1294,8 +1292,7 @@ class _RenderDropdownMenuBody extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       context.paintChild(child, offset + childParentData.offset);
     }
   }
@@ -1317,15 +1314,13 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         final Size childSize = child.getDryLayout(innerConstraints);
         maxHeight ??= childSize.height;
-        final childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       final Size childSize = child.getDryLayout(innerConstraints);
-      final childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, childSize.width);
       maxHeight ??= childSize.height;
@@ -1344,8 +1339,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1359,8 +1353,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1373,8 +1366,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1388,8 +1380,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1420,8 +1411,7 @@ class _RenderDropdownMenuBody extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final childParentData = child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,

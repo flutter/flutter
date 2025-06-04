@@ -666,8 +666,7 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
-    final overlay =
-        Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
+    final overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
     final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
     final Rect overlayLineBoundaries = MatrixUtils.transformRect(
       transformToOverlay,
@@ -2937,9 +2936,7 @@ class TextSelectionGestureDetectorBuilder {
         delegate.selectionEnabled &&
         editableText.textEditingValue.selection.isCollapsed) {
       // Update the floating cursor.
-      final cursorPoint = RawFloatingCursorPoint(
-        state: FloatingCursorDragState.End,
-      );
+      final cursorPoint = RawFloatingCursorPoint(state: FloatingCursorDragState.End);
       editableText.updateFloatingCursor(cursorPoint);
     }
   }

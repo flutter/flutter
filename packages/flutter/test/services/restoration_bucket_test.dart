@@ -375,8 +375,7 @@ void main() {
     final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
     final RestorationBucket child = root.claimChild('child1', debugOwner: 'owner1');
-    final rawChildData =
-        (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
+    final rawChildData = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
     expect(rawChildData, isNotNull);
 
     expect(manager.updateScheduled, isFalse);
@@ -419,11 +418,9 @@ void main() {
     final RestorationBucket child2 = root.claimChild('child2', debugOwner: 'owner1');
     manager.doSerialization();
 
-    final rawChild1Data =
-        (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
+    final rawChild1Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
     expect(rawChild1Data, isNotNull);
-    final rawChild2Data =
-        (rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Object;
+    final rawChild2Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child2'] as Object;
     expect(rawChild2Data, isNotNull);
 
     expect(child1.restorationId, 'child1');
@@ -447,8 +444,7 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final rawChild1Data =
-        (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
+    final rawChild1Data = (rawData[childrenMapKey] as Map<String, dynamic>)['child1'] as Object;
     expect(rawChild1Data, isNotNull);
 
     final RestorationBucket child1 = root.claimChild('child1', debugOwner: 'owner1');
@@ -484,10 +480,7 @@ void main() {
     final Map<String, dynamic> rawData = _createRawDataSet();
     final root = RestorationBucket.root(manager: manager, rawData: rawData);
 
-    final child = RestorationBucket.empty(
-      restorationId: 'fresh-child',
-      debugOwner: 'owner1',
-    );
+    final child = RestorationBucket.empty(restorationId: 'fresh-child', debugOwner: 'owner1');
 
     root.adoptChild(child);
     expect(manager.updateScheduled, isTrue);
@@ -624,10 +617,7 @@ void main() {
   });
 
   test('throws when used after dispose', () {
-    final bucket = RestorationBucket.empty(
-      restorationId: 'foo',
-      debugOwner: null,
-    );
+    final bucket = RestorationBucket.empty(restorationId: 'foo', debugOwner: null);
     bucket.dispose();
 
     expect(() => bucket.debugOwner, throwsFlutterError);
@@ -637,10 +627,7 @@ void main() {
     expect(() => bucket.remove<int>('foo'), throwsFlutterError);
     expect(() => bucket.contains('foo'), throwsFlutterError);
     expect(() => bucket.claimChild('child', debugOwner: null), throwsFlutterError);
-    final child = RestorationBucket.empty(
-      restorationId: 'child',
-      debugOwner: null,
-    );
+    final child = RestorationBucket.empty(restorationId: 'child', debugOwner: null);
     expect(() => bucket.adoptChild(child), throwsFlutterError);
     expect(() => bucket.rename('bar'), throwsFlutterError);
     expect(() => bucket.dispose(), throwsFlutterError);
@@ -667,10 +654,7 @@ void main() {
 
     final manager2 = MockRestorationManager();
     addTearDown(manager2.dispose);
-    final parent = RestorationBucket.root(
-      manager: manager2,
-      rawData: _createRawDataSet(),
-    );
+    final parent = RestorationBucket.root(manager: manager2, rawData: _createRawDataSet());
     addTearDown(parent.dispose);
     await expectLater(
       await memoryEvents(

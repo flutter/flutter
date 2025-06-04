@@ -1323,18 +1323,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     );
     // Each highlightable state will be resolved separately to get the corresponding color.
     // For this resolution to be correct, the non-highlightable states should be preserved.
-    final pressed = <MaterialState>{
-      ...nonHighlightableStates,
-      MaterialState.pressed,
-    };
-    final focused = <MaterialState>{
-      ...nonHighlightableStates,
-      MaterialState.focused,
-    };
-    final hovered = <MaterialState>{
-      ...nonHighlightableStates,
-      MaterialState.hovered,
-    };
+    final pressed = <MaterialState>{...nonHighlightableStates, MaterialState.pressed};
+    final focused = <MaterialState>{...nonHighlightableStates, MaterialState.focused};
+    final hovered = <MaterialState>{...nonHighlightableStates, MaterialState.hovered};
 
     Color getHighlightColorForType(_HighlightType type) {
       return switch (type) {

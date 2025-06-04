@@ -43,12 +43,7 @@ void main() {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
-    final a = Descendant(
-      of: of,
-      matching: matching,
-      matchRoot: true,
-      firstMatchOnly: true,
-    );
+    final a = Descendant(of: of, matching: matching, matchRoot: true, firstMatchOnly: true);
     expect(a.serialize(), <String, String>{
       'finderType': 'Descendant',
       'of': '{"finderType":"ByType","type":"Text"}',

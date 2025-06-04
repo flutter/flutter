@@ -283,9 +283,7 @@ class XcodeDebug {
     try {
       final decodeResult = json.decode(trimmedResults) as Object;
       if (decodeResult is Map<String, Object?>) {
-        final response = XcodeAutomationScriptResponse.fromJson(
-          decodeResult,
-        );
+        final response = XcodeAutomationScriptResponse.fromJson(decodeResult);
         // Status should always be found
         if (response.status != null) {
           return response;

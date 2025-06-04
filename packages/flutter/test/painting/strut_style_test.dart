@@ -31,10 +31,7 @@ void main() {
     const s6 = StrutStyle(height: 14, leadingDistribution: TextLeadingDistribution.even);
     expect(s6.toString(), equals('StrutStyle(height: 14.0x, leadingDistribution: even)'));
 
-    const s7 = StrutStyle(
-      height: 14,
-      leadingDistribution: TextLeadingDistribution.proportional,
-    );
+    const s7 = StrutStyle(height: 14, leadingDistribution: TextLeadingDistribution.proportional);
     expect(s7.toString(), equals('StrutStyle(height: 14.0x, leadingDistribution: proportional)'));
 
     expect(s6, isNot(equals(s7)));

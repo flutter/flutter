@@ -84,8 +84,7 @@ void main() {
 
   testGesture('Should report most recent point to onStart by default', (GestureTester tester) {
     final drag = HorizontalDragGestureRecognizer();
-    final competingDrag =
-        VerticalDragGestureRecognizer()..onStart = (_) {};
+    final competingDrag = VerticalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(drag.dispose);
     addTearDown(competingDrag.dispose);
 
@@ -109,8 +108,7 @@ void main() {
     GestureTester tester,
   ) {
     final drag = HorizontalDragGestureRecognizer();
-    final competingDrag =
-        VerticalDragGestureRecognizer()..onStart = (_) {};
+    final competingDrag = VerticalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(drag.dispose);
     addTearDown(competingDrag.dispose);
 
@@ -137,8 +135,7 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     var didStartDrag = false;
@@ -294,8 +291,7 @@ void main() {
   });
 
   testGesture('DragGestureRecognizer.onStart behavior test', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     Duration? startTimestamp;
@@ -373,8 +369,7 @@ void main() {
     updatedTimestamp = null;
     updateDelta = null;
 
-    final competingDrag =
-        VerticalDragGestureRecognizer()..onStart = (_) {};
+    final competingDrag = VerticalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(competingDrag.dispose);
 
     down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 600));
@@ -426,8 +421,7 @@ void main() {
   });
 
   testGesture('Should report original timestamps', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     Duration? startTimestamp;
@@ -466,8 +460,7 @@ void main() {
   testGesture('Should report initial down point to onStart with a down configuration', (
     GestureTester tester,
   ) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     final competingDrag =
         VerticalDragGestureRecognizer()
           ..dragStartBehavior = DragStartBehavior.down
@@ -610,10 +603,8 @@ void main() {
   });
 
   testGesture('Drag with multiple pointers in down behavior - default', (GestureTester tester) {
-    final drag1 =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
-    final drag2 =
-        VerticalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag1 = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag2 = VerticalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag1.dispose);
     addTearDown(drag2.dispose);
 
@@ -1382,8 +1373,7 @@ void main() {
   });
 
   testGesture('Clamp max velocity', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     late Velocity velocity;
@@ -1537,8 +1527,7 @@ void main() {
   testGesture('Synthesized pointer events are ignored for velocity tracking', (
     GestureTester tester,
   ) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     late Velocity velocity;
@@ -1584,8 +1573,7 @@ void main() {
   /// Checks that quick flick gestures with 1 down, 2 move and 1 up pointer
   /// events still have a velocity
   testGesture('Quick flicks have velocity', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     late Velocity velocity;
@@ -1621,8 +1609,7 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     var didStartDrag = false;
@@ -1684,8 +1671,7 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    final drag =
-        HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
+    final drag = HorizontalDragGestureRecognizer()..dragStartBehavior = DragStartBehavior.down;
     addTearDown(drag.dispose);
 
     Offset? latestGlobalPosition;
@@ -2007,8 +1993,7 @@ void main() {
 
   testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
     final recognized = <String>[];
-    final tap =
-        TapGestureRecognizer()..onTap = () {}; // Need a listener to enable competition.
+    final tap = TapGestureRecognizer()..onTap = () {}; // Need a listener to enable competition.
     final pan =
         PanGestureRecognizer()
           ..onDown = (DragDownDetails details) {
@@ -2045,8 +2030,7 @@ void main() {
 
   testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
     final recognized = <String>[];
-    final tap =
-        TapGestureRecognizer()..onTap = () {}; // Need a listener to enable competition.
+    final tap = TapGestureRecognizer()..onTap = () {}; // Need a listener to enable competition.
     final pan =
         PanGestureRecognizer()
           ..onDown = (DragDownDetails details) {

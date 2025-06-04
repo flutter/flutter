@@ -1270,9 +1270,7 @@ void main() {
   });
 
   testWidgets('Passes undoController to undoController TextField', (WidgetTester tester) async {
-    final undoController = UndoHistoryController(
-      value: UndoHistoryValue.empty,
-    );
+    final undoController = UndoHistoryController(value: UndoHistoryValue.empty);
     addTearDown(undoController.dispose);
 
     await tester.pumpWidget(
@@ -1311,8 +1309,9 @@ void main() {
   testWidgets('Passes contentInsertionConfiguration to contentInsertionConfiguration TextField', (
     WidgetTester tester,
   ) async {
-    final contentInsertionConfiguration =
-        ContentInsertionConfiguration(onContentInserted: (KeyboardInsertedContent value) {});
+    final contentInsertionConfiguration = ContentInsertionConfiguration(
+      onContentInserted: (KeyboardInsertedContent value) {},
+    );
 
     await tester.pumpWidget(
       MaterialApp(

@@ -1440,12 +1440,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       transform,
       edge.localPosition,
     );
-    final scrollableRect = Rect.fromLTRB(
-      0,
-      0,
-      scrollableBox.size.width,
-      scrollableBox.size.height,
-    );
+    final scrollableRect = Rect.fromLTRB(0, 0, scrollableBox.size.width, scrollableBox.size.height);
     switch (state.axisDirection) {
       case AxisDirection.up:
         final double edgeBottom = edgeOffsetInScrollableCoordinates.dy;

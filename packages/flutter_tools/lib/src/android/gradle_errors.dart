@@ -378,8 +378,7 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
     required bool usesAndroidX,
   }) async {
     final File gradleFile = project.android.hostAppGradleFile;
-    final generatedGradleCommand =
-        globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
+    final generatedGradleCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
       'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}',

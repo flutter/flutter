@@ -273,8 +273,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
-    final oldWidget =
-        widget as _SliverPersistentHeaderRenderObjectWidget;
+    final oldWidget = widget as _SliverPersistentHeaderRenderObjectWidget;
     super.update(newWidget);
     final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;

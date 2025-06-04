@@ -38,10 +38,7 @@ void main() {
     expect(themeData.landscapeLayout, null);
     expect(themeData.mouseCursor, null);
 
-    const theme = BottomNavigationBarTheme(
-      data: BottomNavigationBarThemeData(),
-      child: SizedBox(),
-    );
+    const theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
     expect(theme.data.elevation, null);
     expect(theme.data.selectedIconTheme, null);

@@ -50,11 +50,7 @@ abstract final class SemanticsService {
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
   }) async {
-    final event = AnnounceSemanticsEvent(
-      message,
-      textDirection,
-      assertiveness: assertiveness,
-    );
+    final event = AnnounceSemanticsEvent(message, textDirection, assertiveness: assertiveness);
     await SystemChannels.accessibility.send(event.toMap());
   }
 

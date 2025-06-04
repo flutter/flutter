@@ -69,11 +69,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
     final buffer = StringBuffer();
-    const maskConstants = <MaskConstant>[
-      kValueMask,
-      kUnicodePlane,
-      kWindowsPlane,
-    ];
+    const maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kWindowsPlane];
     for (final constant in maskConstants) {
       buffer.writeln(
         'const uint64_t KeyboardKeyEmbedderHandler::${constant.lowerCamelName} = ${toHex(constant.value, digits: 11)};',

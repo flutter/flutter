@@ -380,10 +380,7 @@ void main() {
     expect(s1.fontFamilyFallback![1], 'test');
     expect(s1.fontFamilyFallback!.length, 2);
 
-    const s2 = TextStyle(
-      fontFamily: 'foo',
-      fontFamilyFallback: <String>['Roboto', 'test'],
-    );
+    const s2 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
     expect(s2.fontFamilyFallback![0], 'Roboto');
     expect(s2.fontFamilyFallback![1], 'test');
     expect(s2.fontFamily, 'foo');
@@ -459,21 +456,9 @@ void main() {
 
   test('TextStyle shadows', () {
     const shadow1 = ui.Shadow(blurRadius: 1.0, offset: Offset(1.0, 1.0));
-    const shadow2 = ui.Shadow(
-      blurRadius: 2.0,
-      color: Color(0xFF111111),
-      offset: Offset(2.0, 2.0),
-    );
-    const shadow3 = ui.Shadow(
-      blurRadius: 3.0,
-      color: Color(0xFF222222),
-      offset: Offset(3.0, 3.0),
-    );
-    const shadow4 = ui.Shadow(
-      blurRadius: 4.0,
-      color: Color(0xFF333333),
-      offset: Offset(4.0, 4.0),
-    );
+    const shadow2 = ui.Shadow(blurRadius: 2.0, color: Color(0xFF111111), offset: Offset(2.0, 2.0));
+    const shadow3 = ui.Shadow(blurRadius: 3.0, color: Color(0xFF222222), offset: Offset(3.0, 3.0));
+    const shadow4 = ui.Shadow(blurRadius: 4.0, color: Color(0xFF333333), offset: Offset(4.0, 4.0));
 
     const s1 = TextStyle(shadows: <ui.Shadow>[shadow1, shadow2]);
     const s2 = TextStyle(shadows: <ui.Shadow>[shadow3, shadow4]);

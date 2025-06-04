@@ -52,12 +52,9 @@ void main() {
 
     for (final Locale locale in testLocales.keys) {
       testWidgets('shows dates for $locale', (WidgetTester tester) async {
-        final expectedDaysOfWeek =
-            testLocales[locale]!['expectedDaysOfWeek'] as List<String>;
-        final expectedDaysOfMonth =
-            testLocales[locale]!['expectedDaysOfMonth'] as List<String>;
-        final expectedMonthYearHeader =
-            testLocales[locale]!['expectedMonthYearHeader'] as String;
+        final expectedDaysOfWeek = testLocales[locale]!['expectedDaysOfWeek'] as List<String>;
+        final expectedDaysOfMonth = testLocales[locale]!['expectedDaysOfMonth'] as List<String>;
+        final expectedMonthYearHeader = testLocales[locale]!['expectedMonthYearHeader'] as String;
         final textDirection = testLocales[locale]!['textDirection'] as TextDirection;
         final baseDate = DateTime(2017, 9, 27);
 

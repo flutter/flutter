@@ -22,13 +22,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
       path.join(utils.flutterDirectory.path, 'dev/benchmarks/platform_channels_benchmarks'),
     );
     final Process flutterProcess = await utils.inDirectory(appDir, () async {
-      final createArgs = <String>[
-        '--platforms',
-        'ios,android',
-        '--no-overwrite',
-        '-v',
-        '.',
-      ];
+      final createArgs = <String>['--platforms', 'ios,android', '--no-overwrite', '-v', '.'];
       print('\nExecuting: flutter create $createArgs $appDir');
       await utils.flutter('create', options: createArgs);
 

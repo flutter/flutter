@@ -83,8 +83,7 @@ class FakeVmServiceHost {
   // or until we hit a FakeRequest
   void _applyStreamListen() {
     while (_requests.isNotEmpty && !_requests.first.isRequest) {
-      final response =
-          _requests.removeAt(0) as FakeVmServiceStreamResponse;
+      final response = _requests.removeAt(0) as FakeVmServiceStreamResponse;
       _input.add(
         json.encode(<String, Object>{
           'jsonrpc': '2.0',

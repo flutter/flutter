@@ -47,16 +47,10 @@ void main() {
     final nullableDateTimeValue = RestorableDateTimeN(DateTime(2020, 4, 3));
     addTearDown(nullableDateTimeValue.dispose);
     expect(() => nullableDateTimeValue.value, throwsAssertionError);
-    final nullableEnumValue = RestorableEnumN<TestEnum>(
-      TestEnum.one,
-      values: TestEnum.values,
-    );
+    final nullableEnumValue = RestorableEnumN<TestEnum>(TestEnum.one, values: TestEnum.values);
     addTearDown(nullableEnumValue.dispose);
     expect(() => nullableEnumValue.value, throwsAssertionError);
-    final enumValue = RestorableEnum<TestEnum>(
-      TestEnum.one,
-      values: TestEnum.values,
-    );
+    final enumValue = RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values);
     addTearDown(enumValue.dispose);
     expect(() => enumValue.value, throwsAssertionError);
     final objectValue = _TestRestorableValue();

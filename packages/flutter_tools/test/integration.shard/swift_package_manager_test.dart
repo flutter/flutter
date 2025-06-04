@@ -606,8 +606,7 @@ void main() {
     expect(flutterPluginsDependenciesFile, exists);
 
     final String dependenciesString = flutterPluginsDependenciesFile.readAsStringSync();
-    final dependenciesJson =
-        json.decode(dependenciesString) as Map<String, dynamic>?;
+    final dependenciesJson = json.decode(dependenciesString) as Map<String, dynamic>?;
     final swiftPackageManagerEnabled =
         dependenciesJson?['swift_package_manager_enabled'] as Map<String, dynamic>?;
     final swiftPackageManagerEnabledIos = swiftPackageManagerEnabled?['ios'] as bool?;

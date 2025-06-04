@@ -172,9 +172,7 @@ Future<void> _loadIconFont() async {
     fs.path.join('bin', 'cache', 'artifacts', 'material_fonts', 'MaterialIcons-Regular.otf'),
   );
 
-  final bytes = Future<ByteData>.value(
-    iconFont.readAsBytesSync().buffer.asByteData(),
-  );
+  final bytes = Future<ByteData>.value(iconFont.readAsBytesSync().buffer.asByteData());
 
   await (FontLoader('MaterialIcons')..addFont(bytes)).load();
 }

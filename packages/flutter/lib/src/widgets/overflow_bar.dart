@@ -452,9 +452,7 @@ class _RenderOverflowBar extends RenderBox
         maxChildHeight = childSize.height;
       }
 
-      final baselineOffset = BaselineOffset(
-        child.getDryBaseline(childConstraints, baseline),
-      );
+      final baselineOffset = BaselineOffset(child.getDryBaseline(childConstraints, baseline));
       if (baselineOffset != null) {
         verticalBaseline ??= baselineOffset + y;
         minHorizontalBaseline = minHorizontalBaseline.minOf(

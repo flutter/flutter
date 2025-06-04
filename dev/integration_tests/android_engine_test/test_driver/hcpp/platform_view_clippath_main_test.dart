@@ -46,8 +46,7 @@ void main() async {
   });
 
   test('verify that HCPP is supported and enabled', () async {
-    final response =
-        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+    final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);

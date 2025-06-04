@@ -145,8 +145,7 @@ void main() {
 
   testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
     final scaffoldKey = GlobalKey<ScaffoldState>();
-    final scaffoldMessengerKey =
-        GlobalKey<ScaffoldMessengerState>();
+    final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final snackBar = SnackBar(
       content: const Text('Snack'),
       action: SnackBarAction(label: 'Test', onPressed: () {}),

@@ -261,8 +261,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         const kOpenGLCoreProfileExtensions = 'OpenGL core profile extensions';
         const kOpenGLESProfileRenderer = 'OpenGL ES profile renderer';
         const kOpenGLESProfileVersion = 'OpenGL ES profile version';
-        const kOpenGLESProfileShadingLanguageVersion =
-            'OpenGL ES profile shading language version';
+        const kOpenGLESProfileShadingLanguageVersion = 'OpenGL ES profile shading language version';
         const kOpenGLESProfileExtensions = 'OpenGL ES profile extensions';
 
         // Check both Wayland and X11 platforms for value.

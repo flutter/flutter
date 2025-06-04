@@ -80,9 +80,7 @@ void main() {
   });
 
   testWithoutContext('Retries application launch if it fails the first time', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
-      requests: <FakeVmServiceRequest>[getVM],
-    );
+    final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
@@ -112,9 +110,7 @@ void main() {
   });
 
   testWithoutContext('Connects to device VM Service and runs test application', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
-      requests: <FakeVmServiceRequest>[getVM],
-    );
+    final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
@@ -149,9 +145,7 @@ void main() {
   testWithoutContext(
     'Connects to device VM Service and runs test application with devtools memory profile',
     () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <FakeVmServiceRequest>[getVM],
-      );
+      final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
@@ -193,9 +187,7 @@ void main() {
   testWithoutContext(
     'Uses dart to execute the test if there is no package:test dependency',
     () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <FakeVmServiceRequest>[getVM],
-      );
+      final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['dart', '--enable-experiment=non-nullable', 'foo.test'],
@@ -231,9 +223,7 @@ void main() {
   testWithoutContext(
     'Connects to device VM Service and runs test application without dds',
     () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <FakeVmServiceRequest>[getVM],
-      );
+      final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>['dart', 'foo.test'],
@@ -270,9 +260,7 @@ void main() {
   );
 
   testWithoutContext('Safely stops and uninstalls application', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
-      requests: <FakeVmServiceRequest>[getVM],
-    );
+    final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
     final processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(
       processManager: processManager,
@@ -401,9 +389,7 @@ void main() {
   );
 
   testWithoutContext('Does not call flutterExit on device types that do not support it', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
-      requests: <FakeVmServiceRequest>[getVM],
-    );
+    final fakeVmServiceHost = FakeVmServiceHost(requests: <FakeVmServiceRequest>[getVM]);
     final processManager = FakeProcessManager.empty();
     final DriverService driverService = setUpDriverService(
       processManager: processManager,

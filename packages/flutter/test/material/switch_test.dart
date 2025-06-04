@@ -1177,10 +1177,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
       expect(find.byType(Switch), findsOneWidget, reason: 'on ${platform.name}');
@@ -1218,10 +1215,7 @@ void main() {
   });
 
   testWidgets('Switch.adaptive default mouse cursor(Cupertino)', (WidgetTester tester) async {
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(buildAdaptiveSwitch(platform: platform, value: false));
       final Size switchSize = tester.getSize(find.byType(Switch));
       expect(switchSize, const Size(60.0, 48.0));
@@ -1261,17 +1255,9 @@ void main() {
     WidgetTester tester,
   ) async {
     const Color thumbColor = Colors.white;
-    const inactiveTrackColor = Color.fromARGB(
-      40,
-      120,
-      120,
-      128,
-    ); // Default inactive track color.
+    const inactiveTrackColor = Color.fromARGB(40, 120, 120, 128); // Default inactive track color.
     const activeTrackColor = Color.fromARGB(255, 52, 199, 89); // Default active track color.
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       // Switches have same sizes on both platform but they are more compact on macOS.
       final trackRRect =
           platform == TargetPlatform.iOS
@@ -1380,10 +1366,7 @@ void main() {
       thumbColor: MaterialStatePropertyAll<Color>(updatedThumbColor),
       trackColor: MaterialStatePropertyAll<Color>(updatedTrackColor),
     );
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(
         buildAdaptiveSwitch(platform: platform, overallSwitchThemeData: overallSwitchTheme),
@@ -1470,10 +1453,7 @@ void main() {
       thumbColor: MaterialStatePropertyAll<Color>(updatedThumbColor),
       trackColor: MaterialStatePropertyAll<Color>(updatedTrackColor),
     );
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(
         buildAdaptiveSwitch(platform: platform, switchThemeData: switchTheme),
@@ -1545,10 +1525,7 @@ void main() {
   testWidgets('Override default adaptive SwitchThemeData on iOS/macOS', (
     WidgetTester tester,
   ) async {
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(Container());
       await tester.pumpWidget(
         buildAdaptiveSwitch(
@@ -4311,10 +4288,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       final trackRRect =
           platform == TargetPlatform.iOS
               ? RRect.fromLTRBR(4.0, 8.5, 55.0, 39.5, const Radius.circular(15.5))
@@ -4388,10 +4362,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       final trackRRect =
           platform == TargetPlatform.iOS
               ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))

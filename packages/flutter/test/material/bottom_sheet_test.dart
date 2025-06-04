@@ -1429,10 +1429,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final scaffoldKey = GlobalKey<ScaffoldState>();
-    const routeSettings = RouteSettings(
-      name: 'route_name',
-      arguments: 'route_argument',
-    );
+    const routeSettings = RouteSettings(name: 'route_name', arguments: 'route_argument');
 
     await tester.pumpWidget(
       MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),

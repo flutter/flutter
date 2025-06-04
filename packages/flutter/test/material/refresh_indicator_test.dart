@@ -826,10 +826,7 @@ void main() {
       );
     }
 
-    for (final platform in <TargetPlatform>[
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    ]) {
+    for (final platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.
       await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
@@ -997,8 +994,7 @@ void main() {
                 onNotification: (ScrollNotification notification) {
                   if (notification is OverscrollNotification &&
                       lastNotification is! OverscrollNotification) {
-                    final confirmationNotification =
-                        OverscrollIndicatorNotification(leading: true);
+                    final confirmationNotification = OverscrollIndicatorNotification(leading: true);
                     confirmationNotification.dispatch(context);
                     glowAccepted = confirmationNotification.accepted;
                   }
@@ -1047,8 +1043,7 @@ void main() {
                 onNotification: (ScrollNotification notification) {
                   if (notification is OverscrollNotification &&
                       lastNotification is! OverscrollNotification) {
-                    final confirmationNotification =
-                        OverscrollIndicatorNotification(leading: true);
+                    final confirmationNotification = OverscrollIndicatorNotification(leading: true);
                     confirmationNotification.dispatch(context);
                     stretchAccepted = confirmationNotification.accepted;
                   }

@@ -12,31 +12,11 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   testWithoutContext('VsCodeInstallLocation equality', () {
-    const installLocation1 = VsCodeInstallLocation(
-      'abc',
-      'zyx',
-      edition: '123',
-    );
-    const installLocation2 = VsCodeInstallLocation(
-      'abc',
-      'zyx',
-      edition: '123',
-    );
-    const installLocation3 = VsCodeInstallLocation(
-      'cba',
-      'zyx',
-      edition: '123',
-    );
-    const installLocation4 = VsCodeInstallLocation(
-      'abc',
-      'xyz',
-      edition: '123',
-    );
-    const installLocation5 = VsCodeInstallLocation(
-      'abc',
-      'xyz',
-      edition: '321',
-    );
+    const installLocation1 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const installLocation2 = VsCodeInstallLocation('abc', 'zyx', edition: '123');
+    const installLocation3 = VsCodeInstallLocation('cba', 'zyx', edition: '123');
+    const installLocation4 = VsCodeInstallLocation('abc', 'xyz', edition: '123');
+    const installLocation5 = VsCodeInstallLocation('abc', 'xyz', edition: '321');
 
     expect(installLocation1, installLocation2);
     expect(installLocation1.hashCode, installLocation2.hashCode);

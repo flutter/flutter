@@ -348,10 +348,7 @@ void main() {
   group('ProxiedDevice', () {
     testWithoutContext('calls stopApp without application package if not passed', () async {
       bufferLogger = BufferLogger.test();
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
       final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
       unawaited(device.stopApp(null, userIdentifier: 'user-id'));
       final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
@@ -539,10 +536,7 @@ void main() {
   group('ProxiedDevices', () {
     testWithoutContext('devices respects the filter passed in', () async {
       bufferLogger = BufferLogger.test();
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final fakeFilter = FakeDeviceDiscoveryFilter();
 
@@ -571,10 +565,7 @@ void main() {
 
     testWithoutContext('publishes the devices on deviceNotifier after startPolling', () async {
       bufferLogger = BufferLogger.test();
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       proxiedDevices.startPolling();
 
@@ -604,10 +595,7 @@ void main() {
 
     testWithoutContext('handles getDiagnostics', () async {
       bufferLogger = BufferLogger.test();
-      final proxiedDevices = ProxiedDevices(
-        clientDaemonConnection,
-        logger: bufferLogger,
-      );
+      final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
       final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
 
@@ -625,10 +613,7 @@ void main() {
       'returns empty result when daemon does not understand getDiagnostics',
       () async {
         bufferLogger = BufferLogger.test();
-        final proxiedDevices = ProxiedDevices(
-          clientDaemonConnection,
-          logger: bufferLogger,
-        );
+        final proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
         final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
 
@@ -953,9 +938,7 @@ void main() {
       'use the fallback discovery if the remote daemon does not support proxied discovery',
       () async {
         final portForwarder = FakeProxiedPortForwarder();
-        final fallbackUri = Stream<Uri>.value(
-          Uri.parse('http://127.0.0.1:500/fallback_auth_code'),
-        );
+        final fallbackUri = Stream<Uri>.value(Uri.parse('http://127.0.0.1:500/fallback_auth_code'));
         final discovery = ProxiedVMServiceDiscoveryForAttach(
           clientDaemonConnection,
           'test_device',
@@ -996,9 +979,7 @@ void main() {
 
     testWithoutContext('forwards other error from the daemon', () async {
       final portForwarder = FakeProxiedPortForwarder();
-      final fallbackUri = Stream<Uri>.value(
-        Uri.parse('http://127.0.0.1:500/fallback_auth_code'),
-      );
+      final fallbackUri = Stream<Uri>.value(Uri.parse('http://127.0.0.1:500/fallback_auth_code'));
       final discovery = ProxiedVMServiceDiscoveryForAttach(
         clientDaemonConnection,
         'test_device',

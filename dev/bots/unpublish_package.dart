@@ -177,8 +177,7 @@ class ProcessRunner {
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw UnpublishException(message, ProcessResult(0, exitCode, null, 'returned $exitCode'));
     }
     return utf8.decoder.convert(output).trim();

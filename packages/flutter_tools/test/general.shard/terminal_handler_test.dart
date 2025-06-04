@@ -744,8 +744,7 @@ void main() {
     testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final devtoolsHandler =
-          runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
       await terminalHandler.processTerminalInput('v');

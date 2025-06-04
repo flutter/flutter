@@ -137,10 +137,7 @@ Future<void> main(List<String> arguments) async {
   );
   configurator.generateConfiguration();
 
-  final platformGenerator = PlatformDocGenerator(
-    outputDir: publishRoot,
-    filesystem: filesystem,
-  );
+  final platformGenerator = PlatformDocGenerator(outputDir: publishRoot, filesystem: filesystem);
   await platformGenerator.generatePlatformDocs();
 
   final dartdocGenerator = DartdocGenerator(
@@ -339,11 +336,7 @@ class Configurator {
   }
 
   void _copyCustomizations() {
-    final files = <String>[
-      'README.md',
-      'analysis_options.yaml',
-      'dartdoc_options.yaml',
-    ];
+    final files = <String>['README.md', 'analysis_options.yaml', 'dartdoc_options.yaml'];
     for (final file in files) {
       final File source = docsRoot.childFile(file);
       final File destination = packageRoot.childFile(file);
@@ -556,9 +549,7 @@ class DartdocGenerator {
 
   Future<void> generateDartdoc() async {
     final Directory flutterRoot = FlutterInformation.instance.getFlutterRoot();
-    final pubEnvironment = <String, String>{
-      'FLUTTER_ROOT': flutterRoot.absolute.path,
-    };
+    final pubEnvironment = <String, String>{'FLUTTER_ROOT': flutterRoot.absolute.path};
 
     // If there's a .pub-cache dir in the Flutter root, use that.
     final File pubCache = flutterRoot.childFile('.pub-cache');
@@ -1248,8 +1239,7 @@ class FlutterInformation {
       );
     }
 
-    final flutterVersion =
-        json.decode(flutterVersionJson) as Map<String, dynamic>;
+    final flutterVersion = json.decode(flutterVersionJson) as Map<String, dynamic>;
     if (flutterVersion['flutterRoot'] == null ||
         flutterVersion['frameworkVersion'] == null ||
         flutterVersion['dartSdkVersion'] == null) {

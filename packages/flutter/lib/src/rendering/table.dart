@@ -1066,8 +1066,7 @@ class RenderTable extends RenderBox {
     final minWidths = List<double>.filled(columns, 0.0);
     final flexes = List<double?>.filled(columns, null);
     var tableWidth = 0.0; // running tally of the sum of widths[x] for all x
-    var unflexedTableWidth =
-        0.0; // sum of the maxIntrinsicWidths of any column that has null flex
+    var unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
     var totalFlex = 0.0;
     for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;

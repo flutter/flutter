@@ -187,8 +187,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
-    final scrollableElement =
-        find.byType(Scrollable).evaluate().first as StatefulElement;
+    final scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
     expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
 
     // Finish gesture to release resources.

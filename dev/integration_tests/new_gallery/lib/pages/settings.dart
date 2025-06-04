@@ -101,15 +101,14 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Create a sorted — by native name – map of supported locales to their
   /// intended display string, with a system option as the first element.
   LinkedHashMap<Locale, DisplayOption> _getLocaleOptions() {
-    final localeOptions =
-        LinkedHashMap<Locale, DisplayOption>.of(<Locale, DisplayOption>{
-          systemLocaleOption: DisplayOption(
-            GalleryLocalizations.of(context)!.settingsSystemDefault +
-                (deviceLocale != null
-                    ? ' - ${_getLocaleDisplayOption(context, deviceLocale).title}'
-                    : ''),
-          ),
-        });
+    final localeOptions = LinkedHashMap<Locale, DisplayOption>.of(<Locale, DisplayOption>{
+      systemLocaleOption: DisplayOption(
+        GalleryLocalizations.of(context)!.settingsSystemDefault +
+            (deviceLocale != null
+                ? ' - ${_getLocaleDisplayOption(context, deviceLocale).title}'
+                : ''),
+      ),
+    });
     final supportedLocales = List<Locale>.from(GalleryLocalizations.supportedLocales);
     supportedLocales.removeWhere((Locale locale) => locale == deviceLocale);
 

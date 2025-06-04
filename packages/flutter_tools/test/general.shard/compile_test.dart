@@ -28,10 +28,7 @@ void main() {
 
   testWithoutContext('StdoutHandler can read output bytes', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final stdoutHandler = StdoutHandler(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-    );
+    final stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
     fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3, 4]);
 
     stdoutHandler.reset(readFile: true);
@@ -48,10 +45,7 @@ void main() {
 
   testWithoutContext('StdoutHandler reads output bytes if errorCount > 0', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final stdoutHandler = StdoutHandler(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-    );
+    final stdoutHandler = StdoutHandler(logger: BufferLogger.test(), fileSystem: fileSystem);
     fileSystem.file('message').writeAsBytesSync(<int>[1, 2, 3, 4]);
 
     stdoutHandler.reset(readFile: true);

@@ -575,9 +575,7 @@ void main() {
       return Curves.easeIn.transform(lerp);
     }
 
-    final force = ForcePressGestureRecognizer(
-      interpolation: interpolateWithEasing,
-    );
+    final force = ForcePressGestureRecognizer(interpolation: interpolateWithEasing);
     addTearDown(force.dispose);
 
     force.onStart = onStart;

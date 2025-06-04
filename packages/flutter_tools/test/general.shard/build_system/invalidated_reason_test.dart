@@ -8,17 +8,14 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('InvalidatedReason formats message per invalidation kind', () {
-    final inputChanged = InvalidatedReason(InvalidatedReasonKind.inputChanged)
-      ..data.add('a.dart');
+    final inputChanged = InvalidatedReason(InvalidatedReasonKind.inputChanged)..data.add('a.dart');
     final outputChanged = InvalidatedReason(InvalidatedReasonKind.outputChanged)
       ..data.add('b.dart');
-    final inputMissing = InvalidatedReason(InvalidatedReasonKind.inputMissing)
-      ..data.add('c.dart');
+    final inputMissing = InvalidatedReason(InvalidatedReasonKind.inputMissing)..data.add('c.dart');
     final outputMissing = InvalidatedReason(InvalidatedReasonKind.outputMissing)
       ..data.add('d.dart');
-    final outputSetChanged = InvalidatedReason(
-      InvalidatedReasonKind.outputSetChanged,
-    )..data.add('e.dart');
+    final outputSetChanged = InvalidatedReason(InvalidatedReasonKind.outputSetChanged)
+      ..data.add('e.dart');
 
     expect(inputChanged.toString(), 'The following inputs have updated contents: a.dart');
     expect(outputChanged.toString(), 'The following outputs have updated contents: b.dart');

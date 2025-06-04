@@ -392,10 +392,7 @@ void main() {
     final observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const testRouteInformation = <String, dynamic>{
-      'location': 'testRouteName',
-      'state': 'state',
-    };
+    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': 'state'};
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
@@ -438,10 +435,7 @@ void main() {
     final observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const testRouteInformation = <String, dynamic>{
-      'location': 'testRouteName',
-      'state': null,
-    };
+    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': null};
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
@@ -459,10 +453,7 @@ void main() {
   testWidgets('pushRouteInformation not handled by observer returns false', (
     WidgetTester tester,
   ) async {
-    const testRouteInformation = <String, dynamic>{
-      'location': 'testRouteName',
-      'state': null,
-    };
+    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': null};
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );

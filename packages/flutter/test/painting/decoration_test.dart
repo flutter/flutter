@@ -147,15 +147,9 @@ void main() {
   });
 
   test('Decoration equality', () {
-    const a = BoxDecoration(
-      color: Color(0xFFFFFFFF),
-      boxShadow: <BoxShadow>[BoxShadow()],
-    );
+    const a = BoxDecoration(color: Color(0xFFFFFFFF), boxShadow: <BoxShadow>[BoxShadow()]);
 
-    const b = BoxDecoration(
-      color: Color(0xFFFFFFFF),
-      boxShadow: <BoxShadow>[BoxShadow()],
-    );
+    const b = BoxDecoration(color: Color(0xFFFFFFFF), boxShadow: <BoxShadow>[BoxShadow()]);
 
     expect(a.hashCode, equals(b.hashCode));
     expect(a, equals(b));

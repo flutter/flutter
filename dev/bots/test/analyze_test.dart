@@ -93,8 +93,7 @@ void main() {
     const noTag =
         "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
         'at the top of the file before import statements.';
-    const missingTag =
-        "Files containing golden tests must be tagged with 'reduced-test-set'.";
+    const missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
     final List<String> lines =
         <String>[
           '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
@@ -295,9 +294,7 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    final fixture = File(
-      path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'),
-    );
+    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'));
     expect(
       result,
       matchesErrorsInFile(
@@ -347,9 +344,7 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    final fixture = File(
-      path.join(testRootPath, 'packages', 'flutter', 'lib', 'stopwatch.dart'),
-    );
+    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'stopwatch.dart'));
     expect(
       result,
       matchesErrorsInFile(

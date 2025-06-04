@@ -598,10 +598,7 @@ void main() {
     final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     treeNodes = _setUpNodes();
-    final treeSliver = TreeSliver<String>(
-      treeRowExtentBuilder: (_, _) => 200,
-      tree: treeNodes,
-    );
+    final treeSliver = TreeSliver<String>(treeRowExtentBuilder: (_, _) => 200, tree: treeNodes);
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(controller: scrollController, slivers: <Widget>[treeSliver]),

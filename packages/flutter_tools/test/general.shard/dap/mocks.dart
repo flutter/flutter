@@ -23,11 +23,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
-    final channel = ByteStreamServerChannel(
-      stdinController.stream,
-      stdoutController.sink,
-      null,
-    );
+    final channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
     final clientChannel = ByteStreamServerChannel(
       stdoutController.stream,
       stdinController.sink,
@@ -85,11 +81,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   /// A stream of all progress events sent from the adapter back to the client.
   Stream<Map<String, Object?>> get dapToClientProgressEvents {
-    const progressEventTypes = <String>[
-      'progressStart',
-      'progressUpdate',
-      'progressEnd',
-    ];
+    const progressEventTypes = <String>['progressStart', 'progressUpdate', 'progressEnd'];
 
     return dapToClientMessages.where(
       (Map<String, Object?> message) => progressEventTypes.contains(message['event'] as String?),
@@ -231,11 +223,7 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
-    final channel = ByteStreamServerChannel(
-      stdinController.stream,
-      stdoutController.sink,
-      null,
-    );
+    final channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
 
     return MockFlutterTestDebugAdapter._(
       stdinController.sink,

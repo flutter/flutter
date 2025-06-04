@@ -181,10 +181,7 @@ class DartFormatChecker {
           );
         }
       }
-      final diffPool = ProcessPool(
-        processRunner: processRunner,
-        printReport: _namedReport('diff'),
-      );
+      final diffPool = ProcessPool(processRunner: processRunner, printReport: _namedReport('diff'));
       final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
       incorrect = completedDiffs.where((WorkerJob job) => job.result.exitCode != 0);
     } else {

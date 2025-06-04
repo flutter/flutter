@@ -255,8 +255,7 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
@@ -290,8 +289,7 @@ name: my_app
       setupMocks();
 
       residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -315,8 +313,7 @@ name: my_app
       setupMocks();
 
       residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -440,8 +437,7 @@ name: my_app
       mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       expect(mockDevice.isRunning, true);
@@ -482,8 +478,7 @@ name: my_app
       mockDevice.dds = DartDevelopmentService(logger: logger);
 
       expect(mockDevice.isRunning, false);
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       expect(mockDevice.isRunning, true);
@@ -526,8 +521,7 @@ name: my_app
         ],
       );
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -647,8 +641,7 @@ name: my_app
       fakeVmServiceHost = FakeVmServiceHost(requests: requests.toList());
 
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       assert(requests.length > 5, 'requests was modified');
@@ -705,8 +698,7 @@ name: my_app
       );
       fakeVmServiceHost = FakeVmServiceHost(requests: kStartPausedAndAttachExpectations.toList());
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
 
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
@@ -781,8 +773,7 @@ name: my_app
       );
       webDevFS.report = UpdateFSReport(success: true);
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
@@ -879,8 +870,7 @@ name: my_app
       );
       webDevFS.report = UpdateFSReport(success: true);
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
@@ -975,8 +965,7 @@ name: my_app
       );
       webDevFS.report = UpdateFSReport(success: true);
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
@@ -1055,8 +1044,7 @@ name: my_app
         );
         webDevFS.report = UpdateFSReport(success: true);
 
-        final connectionInfoCompleter =
-            Completer<DebugConnectionInfo>();
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
         unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
         await connectionInfoCompleter.future;
         final OperationResult result = await residentWebRunner.restart(fullRestart: fullRestart);
@@ -1124,8 +1112,7 @@ name: my_app
       flutterDevice.device = webServerDevice;
       webDevFS.report = UpdateFSReport(success: true);
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       final OperationResult result = await residentWebRunner.restart(fullRestart: true);
@@ -1166,8 +1153,7 @@ name: my_app
       setupMocks();
       webDevFS.report = UpdateFSReport();
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
 
       expect(await residentWebRunner.run(), 1);
@@ -1203,8 +1189,7 @@ name: my_app
         ],
       );
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -1227,8 +1212,7 @@ name: my_app
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       webDevFS.report = UpdateFSReport();
@@ -1262,8 +1246,7 @@ name: my_app
         ],
       );
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -1296,8 +1279,7 @@ name: my_app
         ],
       );
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
       final OperationResult result = await residentWebRunner.restart();
@@ -1340,8 +1322,7 @@ name: my_app
           ],
         );
         setupMocks();
-        final connectionInfoCompleter =
-            Completer<DebugConnectionInfo>();
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
         unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
         await connectionInfoCompleter.future;
 
@@ -1384,8 +1365,7 @@ name: my_app
           ],
         );
         setupMocks();
-        final connectionInfoCompleter =
-            Completer<DebugConnectionInfo>();
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
         unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
         await connectionInfoCompleter.future;
         final OperationResult result = await residentWebRunner.restart(fullRestart: true);
@@ -1459,8 +1439,7 @@ name: my_app
         requests: <VmServiceExpectation>[...kAttachExpectations],
       );
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -1485,8 +1464,7 @@ name: my_app
         requests: <VmServiceExpectation>[...kAttachExpectations],
       );
       setupMocks();
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       final Future<int?> result = residentWebRunner.run(
         connectionInfoCompleter: connectionInfoCompleter,
       );
@@ -1513,8 +1491,7 @@ name: my_app
       );
       setupMocks();
       mockDevice.name = 'Chromez';
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -1580,8 +1557,7 @@ name: my_app
         devtoolsHandler: createNoOpHandler,
       );
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(runner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 
@@ -1627,8 +1603,7 @@ name: my_app
         devtoolsHandler: createNoOpHandler,
       );
 
-      final connectionInfoCompleter =
-          Completer<DebugConnectionInfo>();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
       unawaited(runner.run(connectionInfoCompleter: connectionInfoCompleter));
       await connectionInfoCompleter.future;
 

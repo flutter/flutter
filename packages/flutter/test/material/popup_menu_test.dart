@@ -3408,8 +3408,7 @@ void main() {
     }
 
     Future<bool> previousFocus() async {
-      final result =
-          Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
+      final result = Actions.invoke(primaryFocus!.context!, const PreviousFocusIntent())! as bool;
       await tester.pump();
       return result;
     }

@@ -677,11 +677,7 @@ void main() {
       value = newValue;
     }
 
-    final button = DropdownButton<int>(
-      value: value,
-      onChanged: handleChanged,
-      items: items,
-    );
+    final button = DropdownButton<int>(value: value, onChanged: handleChanged, items: items);
 
     await tester.pumpWidget(
       MaterialApp(home: Material(child: Align(alignment: Alignment.topCenter, child: button))),
@@ -864,12 +860,7 @@ void main() {
     (WidgetTester tester) async {
       final Key iconKey = UniqueKey();
 
-      final customIcon = Icon(
-        Icons.assessment,
-        key: iconKey,
-        size: 40.0,
-        color: Colors.yellow,
-      );
+      final customIcon = Icon(Icons.assessment, key: iconKey, size: 40.0, color: Colors.yellow);
 
       await tester.pumpWidget(
         buildFrame(
@@ -1955,11 +1946,7 @@ void main() {
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
     );
 
-    final button = DropdownButton<int>(
-      value: 50,
-      onChanged: (int? newValue) {},
-      items: items,
-    );
+    final button = DropdownButton<int>(value: 50, onChanged: (int? newValue) {}, items: items);
 
     double getMenuScroll() {
       double scrollPosition;
@@ -1983,11 +1970,7 @@ void main() {
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
     );
 
-    final button = DropdownButton<int>(
-      value: 99,
-      onChanged: (int? newValue) {},
-      items: items,
-    );
+    final button = DropdownButton<int>(value: 99, onChanged: (int? newValue) {}, items: items);
 
     double getMenuScroll() {
       double scrollPosition;
@@ -2013,11 +1996,7 @@ void main() {
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
     );
 
-    final button = DropdownButton<int>(
-      value: 0,
-      onChanged: (int? newValue) {},
-      items: items,
-    );
+    final button = DropdownButton<int>(value: 0, onChanged: (int? newValue) {}, items: items);
 
     double getMenuScroll() {
       double scrollPosition;
@@ -2043,11 +2022,7 @@ void main() {
       (int i) => DropdownMenuItem<int>(value: i, child: Text('$i')),
     );
 
-    final button = DropdownButton<int>(
-      value: 99,
-      onChanged: (int? newValue) {},
-      items: items,
-    );
+    final button = DropdownButton<int>(value: 99, onChanged: (int? newValue) {}, items: items);
 
     double getMenuScroll() {
       double scrollPosition;

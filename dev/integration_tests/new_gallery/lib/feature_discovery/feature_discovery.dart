@@ -220,9 +220,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> with TickerProvider
           });
         } else {
           if (showOverlay && !FeatureDiscoveryController._of(ctx).isLocked) {
-            final entry = OverlayEntry(
-              builder: (_) => buildOverlay(ctx, getOverlayCenter(ctx)),
-            );
+            final entry = OverlayEntry(builder: (_) => buildOverlay(ctx, getOverlayCenter(ctx)));
 
             // Lock [FeatureDiscoveryController] early in order to prevent
             // another [FeatureDiscovery] widget from trying to show its

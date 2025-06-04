@@ -2365,16 +2365,7 @@ void main() {
         'Bohrium 𨨏 Code point U+28A0F': 'Bohrium 𨨏 Code point U+28A0F',
       };
       const expectedIndices = <int>[-1, 0, 0, -1, 0, -1, 24, -1];
-      const expectedHasAccelerator = <bool>[
-        false,
-        true,
-        true,
-        false,
-        true,
-        false,
-        true,
-        false,
-      ];
+      const expectedHasAccelerator = <bool>[false, true, true, false, true, false, true, false];
       var acceleratorIndex = -1;
       var count = 0;
       for (final String key in expected.keys) {

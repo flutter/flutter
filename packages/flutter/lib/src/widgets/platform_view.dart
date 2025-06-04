@@ -1526,8 +1526,7 @@ class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
   @override
   RenderObject createRenderObject(BuildContext context) {
     final viewController = controller as AndroidViewController;
-    final renderBox =
-        super.createRenderObject(context) as PlatformViewRenderBox;
+    final renderBox = super.createRenderObject(context) as PlatformViewRenderBox;
     viewController.pointTransformer = (Offset position) => renderBox.globalToLocal(position);
     return renderBox;
   }

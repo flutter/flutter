@@ -51,8 +51,7 @@ void main() {
       ),
     );
 
-    final element =
-        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
 
     expect(element, isNotNull);
     expect(element.style.width, '100%');
@@ -107,8 +106,7 @@ void main() {
       ),
     );
 
-    final element =
-        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
     expect(element, isNotNull);
 
     focusNode.requestFocus();
@@ -148,8 +146,7 @@ void main() {
       ),
     );
 
-    final element =
-        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
     expect(element, isNotNull);
 
     for (var i = 0; i <= 4; i++) {

@@ -1158,12 +1158,7 @@ abstract class FlutterCommand extends Command<void> {
     final bool jitReleaseResult = !_excludeRelease && argIfDefined('jit-release', false);
     final bool releaseResult = !_excludeRelease && argIfDefined('release', false);
     final bool profileResult = argIfDefined('profile', false);
-    final modeFlags = <bool>[
-      debugResult,
-      profileResult,
-      jitReleaseResult,
-      releaseResult,
-    ];
+    final modeFlags = <bool>[debugResult, profileResult, jitReleaseResult, releaseResult];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException(
         'Only one of "--debug", "--profile", "--jit-release", '

@@ -38,8 +38,7 @@ void main() {
 
   test('nodesNeedingPaint updated with paint changes', () {
     final owner = _TestPipelineOwner();
-    final renderObject = TestRenderObject(allowPaintBounds: true)
-      ..isRepaintBoundary = true;
+    final renderObject = TestRenderObject(allowPaintBounds: true)..isRepaintBoundary = true;
     final layer = OffsetLayer();
     layer.attach(owner);
     renderObject.attach(owner);

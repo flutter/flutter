@@ -273,14 +273,8 @@ void main() {
   testWidgets('Material2 - ThemeData colorScheme is used when no AppBarTheme is set', (
     WidgetTester tester,
   ) async {
-    final lightTheme = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
-      useMaterial3: false,
-    );
-    final darkTheme = ThemeData.from(
-      colorScheme: const ColorScheme.dark(),
-      useMaterial3: false,
-    );
+    final lightTheme = ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: false);
+    final darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark(), useMaterial3: false);
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
@@ -661,9 +655,7 @@ void main() {
     'Material3 - AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize',
     (WidgetTester tester) async {
       const actionsIconTheme = IconThemeData(size: 30.0);
-      final iconButtonTheme = IconButtonThemeData(
-        style: IconButton.styleFrom(iconSize: 32.0),
-      );
+      final iconButtonTheme = IconButtonThemeData(style: IconButton.styleFrom(iconSize: 32.0));
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -698,10 +690,7 @@ void main() {
         style: IconButton.styleFrom(foregroundColor: Colors.red),
       );
       const appBarTheme = AppBarTheme(foregroundColor: Colors.green);
-      final themeData = ThemeData(
-        iconButtonTheme: iconButtonTheme,
-        appBarTheme: appBarTheme,
-      );
+      final themeData = ThemeData(iconButtonTheme: iconButtonTheme, appBarTheme: appBarTheme);
 
       await tester.pumpWidget(
         MaterialApp(

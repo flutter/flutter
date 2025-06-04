@@ -21,8 +21,7 @@ Future<void> execute() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final binding =
-      TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
   final watch = Stopwatch();
   var iterations = 0;
@@ -32,14 +31,8 @@ Future<void> execute() async {
     // Wait for the UI to stabilize.
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final big = TestViewConfiguration.fromView(
-      size: const Size(360.0, 640.0),
-      view: tester.view,
-    );
-    final small = TestViewConfiguration.fromView(
-      size: const Size(100.0, 640.0),
-      view: tester.view,
-    );
+    final big = TestViewConfiguration.fromView(size: const Size(360.0, 640.0), view: tester.view);
+    final small = TestViewConfiguration.fromView(size: const Size(100.0, 640.0), view: tester.view);
     final RenderView renderView = WidgetsBinding.instance.renderViews.single;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 

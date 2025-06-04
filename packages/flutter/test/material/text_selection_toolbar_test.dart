@@ -205,10 +205,7 @@ void main() {
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 
-  for (final colorScheme in <ColorScheme>[
-    ThemeData().colorScheme,
-    ThemeData.dark().colorScheme,
-  ]) {
+  for (final colorScheme in <ColorScheme>[ThemeData().colorScheme, ThemeData.dark().colorScheme]) {
     testWidgets('default background color', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

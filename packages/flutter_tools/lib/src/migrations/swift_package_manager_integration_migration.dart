@@ -1052,8 +1052,7 @@ class ParsedProjectInfo {
     final buildFiles = <String>[];
     final references = <String>[];
     final groups = <ParsedProjectGroup>[];
-    final buildPhases =
-        <ParsedProjectFrameworksBuildPhase>[];
+    final buildPhases = <ParsedProjectFrameworksBuildPhase>[];
     final native = <ParsedNativeTarget>[];
     final project = <ParsedProject>[];
     final parsedSwiftPackageProductDependencies = <String>[];

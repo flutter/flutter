@@ -34,9 +34,7 @@ void main() {
   testWithoutContext(
     'Successive calls of ChromiumDevice.stopApp() do not try to close chrome',
     () async {
-      final launcher = TestChromiumLauncher(
-        launcher: () => _OnceClosableChromium(),
-      );
+      final launcher = TestChromiumLauncher(launcher: () => _OnceClosableChromium());
 
       final chromiumDevice = _FakeChromiumDevice(
         chromiumLauncher: launcher,

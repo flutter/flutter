@@ -417,9 +417,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final child in List<_RawMenuAnchorBaseMixin>.from(
-      _anchorChildren,
-    )) {
+    for (final child in List<_RawMenuAnchorBaseMixin>.from(_anchorChildren)) {
       child.close(inDispose: inDispose);
     }
   }

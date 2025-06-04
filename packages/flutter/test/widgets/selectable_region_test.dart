@@ -72,8 +72,7 @@ void main() {
       await gesture.moveTo(const Offset(200.0, 100.0));
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
-      final startEdge =
-          renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
+      final startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(startEdge.globalPosition, const Offset(200.0, 200.0));
       expect(renderSelectionSpy.events[1].type, SelectionEventType.endEdgeUpdate);
       var endEdge = renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent;
@@ -118,8 +117,7 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
@@ -149,8 +147,7 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
@@ -589,8 +586,7 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
@@ -616,8 +612,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
 
       renderSelectionSpy.events.clear();
@@ -625,8 +620,7 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
-      final edgeEvent =
-          renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
+      final edgeEvent = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
       expect(edgeEvent.granularity, TextGranularity.word);
     });
@@ -3498,8 +3492,7 @@ void main() {
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
 
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -3513,9 +3506,7 @@ void main() {
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - non apple',
       (WidgetTester tester) async {
-        final controller = TextEditingController(
-          text: 'I am fine, thank you.',
-        );
+        final controller = TextEditingController(text: 'I am fine, thank you.');
         addTearDown(controller.dispose);
         final selectableRegionFocus = FocusNode();
         addTearDown(selectableRegionFocus.dispose);
@@ -3587,9 +3578,7 @@ void main() {
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - apple',
       (WidgetTester tester) async {
-        final controller = TextEditingController(
-          text: 'I am fine, thank you.',
-        );
+        final controller = TextEditingController(text: 'I am fine, thank you.');
         addTearDown(controller.dispose);
         final selectableRegionFocus = FocusNode();
         addTearDown(selectableRegionFocus.dispose);
@@ -3748,8 +3737,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Good, and you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -3806,8 +3794,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'How are you?Good, and you?Fine,');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -4110,8 +4097,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -4163,8 +4149,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, meta: true),
         );
-        final clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -4578,8 +4563,7 @@ void main() {
       expect(paragraph2.selections.isEmpty, isTrue);
       expect(paragraph1.selections.isEmpty, isTrue);
 
-      final clipboardData =
-          mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 

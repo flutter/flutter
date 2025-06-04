@@ -664,9 +664,7 @@ void main() {
       WidgetTester tester,
     ) async {
       var calls = 0;
-      final controller = UndoHistoryController(
-        value: const UndoHistoryValue(canUndo: true),
-      );
+      final controller = UndoHistoryController(value: const UndoHistoryValue(canUndo: true));
       addTearDown(controller.dispose);
       controller.addListener(() {
         calls++;

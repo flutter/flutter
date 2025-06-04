@@ -382,9 +382,7 @@ void main() {
     const inkRect = Rect.fromLTRB(0, 0, 100, 100);
 
     Widget boilerplate({FocusNode? focusNode}) {
-      final statesController = WidgetStatesController(<MaterialState>{
-        MaterialState.selected,
-      });
+      final statesController = WidgetStatesController(<MaterialState>{MaterialState.selected});
       addTearDown(statesController.dispose);
 
       return Material(

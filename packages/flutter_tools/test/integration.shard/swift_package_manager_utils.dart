@@ -91,12 +91,7 @@ class SwiftPackageManagerUtils {
   }) async {
     final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
     final unexpectedLinesFound = <String>[];
-    final command = <String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      ...options,
-    ];
+    final command = <String>[flutterBin, ...getLocalEngineArguments(), 'build', ...options];
 
     final ProcessResult result = await processManager.run(
       command,

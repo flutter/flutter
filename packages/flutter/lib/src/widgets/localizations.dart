@@ -683,8 +683,7 @@ class _LocalizationsState extends State<Localizations> {
   }
 
   TextDirection get _textDirection {
-    final resources =
-        _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
+    final resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
     return resources.textDirection;
   }
 

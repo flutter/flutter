@@ -18,14 +18,7 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgets('The correct character is produced', (WidgetTester tester) async {
-      for (final platform in <String>[
-        'linux',
-        'android',
-        'macos',
-        'fuchsia',
-        'windows',
-        'ios',
-      ]) {
+      for (final platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         var character = '';
         void handleKey(RawKeyEvent event) {
           expect(event.character, equals(character), reason: 'on $platform');
@@ -67,14 +60,7 @@ void main() {
     testWidgets(
       'keysPressed is maintained',
       (WidgetTester tester) async {
-        for (final platform in <String>[
-          'linux',
-          'android',
-          'macos',
-          'fuchsia',
-          'windows',
-          'ios',
-        ]) {
+        for (final platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
           RawKeyboard.instance.clearKeysPressed();
           expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
           await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
@@ -168,14 +154,7 @@ void main() {
     testWidgets(
       'keysPressed is correct when modifier is released before key',
       (WidgetTester tester) async {
-        for (final platform in <String>[
-          'linux',
-          'android',
-          'macos',
-          'fuchsia',
-          'windows',
-          'ios',
-        ]) {
+        for (final platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
           RawKeyboard.instance.clearKeysPressed();
           expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
           await simulateKeyDownEvent(
@@ -3036,13 +3015,12 @@ void main() {
       RawKeyEventDataWeb.modifierScrollLock: ModifierKey.scrollLockModifier,
     };
 
-    const modifierTestsWithNoLocation =
-        <String, LogicalKeyboardKey>{
-          'Alt': LogicalKeyboardKey.altLeft,
-          'Shift': LogicalKeyboardKey.shiftLeft,
-          'Control': LogicalKeyboardKey.controlLeft,
-          'Meta': LogicalKeyboardKey.metaLeft,
-        };
+    const modifierTestsWithNoLocation = <String, LogicalKeyboardKey>{
+      'Alt': LogicalKeyboardKey.altLeft,
+      'Shift': LogicalKeyboardKey.shiftLeft,
+      'Control': LogicalKeyboardKey.controlLeft,
+      'Meta': LogicalKeyboardKey.metaLeft,
+    };
 
     test('modifier keys are recognized individually', () {
       for (final int modifier in modifierTests.keys) {

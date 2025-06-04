@@ -811,9 +811,7 @@ void main() {
   });
 
   testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
-    final clip = ValueNotifier<Rect>(
-      const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0),
-    );
+    final clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
     addTearDown(clip.dispose);
 
     await tester.pumpWidget(

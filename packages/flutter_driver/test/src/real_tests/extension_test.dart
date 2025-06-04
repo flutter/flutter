@@ -532,11 +532,7 @@ void main() {
   });
 
   testWidgets('getOffset', (WidgetTester tester) async {
-    final driverExtension = FlutterDriverExtension(
-      (String? arg) async => '',
-      true,
-      true,
-    );
+    final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
     Future<Offset> getOffset(OffsetType offset) async {
       final Map<String, String> arguments = GetOffset(ByValueKey(1), offset).serialize();
@@ -566,11 +562,7 @@ void main() {
 
   testWidgets('getText', (WidgetTester tester) async {
     await silenceDriverLogger(() async {
-      final driverExtension = FlutterDriverExtension(
-        (String? arg) async => '',
-        true,
-        true,
-      );
+      final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       Future<String?> getTextInternal(SerializableFinder search) async {
         final Map<String, String> arguments =
@@ -659,11 +651,7 @@ void main() {
 
   testWidgets('descendant finder', (WidgetTester tester) async {
     await silenceDriverLogger(() async {
-      final driverExtension = FlutterDriverExtension(
-        (String? arg) async => '',
-        true,
-        true,
-      );
+      final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       Future<String?> getDescendantText({String? of, bool matchRoot = false}) async {
         final Map<String, String> arguments =
@@ -708,11 +696,7 @@ void main() {
 
   testWidgets('descendant finder firstMatchOnly', (WidgetTester tester) async {
     await silenceDriverLogger(() async {
-      final driverExtension = FlutterDriverExtension(
-        (String? arg) async => '',
-        true,
-        true,
-      );
+      final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       Future<String?> getDescendantText() async {
         final Map<String, String> arguments =
@@ -750,11 +734,7 @@ void main() {
 
   testWidgets('ancestor finder', (WidgetTester tester) async {
     await silenceDriverLogger(() async {
-      final driverExtension = FlutterDriverExtension(
-        (String? arg) async => '',
-        true,
-        true,
-      );
+      final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       Future<Offset?> getAncestorTopLeft({
         String? of,
@@ -823,11 +803,7 @@ void main() {
 
   testWidgets('ancestor finder firstMatchOnly', (WidgetTester tester) async {
     await silenceDriverLogger(() async {
-      final driverExtension = FlutterDriverExtension(
-        (String? arg) async => '',
-        true,
-        true,
-      );
+      final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
       Future<Offset?> getAncestorTopLeft() async {
         final Map<String, String> arguments =
@@ -875,11 +851,7 @@ void main() {
   });
 
   testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
-    final driverExtension = FlutterDriverExtension(
-      (String? arg) async => '',
-      true,
-      true,
-    );
+    final driverExtension = FlutterDriverExtension((String? arg) async => '', true, true);
 
     Future<Map<String, dynamic>> getDiagnosticsTree(
       DiagnosticsType type,
@@ -895,9 +867,7 @@ void main() {
             includeProperties: properties,
           ).serialize();
       final Map<String, dynamic> response = await driverExtension.call(arguments);
-      final result = DiagnosticsTreeResult(
-        response['response'] as Map<String, dynamic>,
-      );
+      final result = DiagnosticsTreeResult(response['response'] as Map<String, dynamic>);
       return result.json;
     }
 

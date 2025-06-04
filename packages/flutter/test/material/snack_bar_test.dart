@@ -183,8 +183,7 @@ void main() {
     expect(find.text('bar2'), findsNothing);
     time = 1000;
     await tester.tap(find.byKey(tapTarget)); // queue bar1
-    final firstController =
-        lastController;
+    final firstController = lastController;
     time = 2;
     await tester.tap(find.byKey(tapTarget)); // queue bar2
     expect(find.text('bar1'), findsNothing);
@@ -1593,8 +1592,7 @@ void main() {
   );
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
-    final scaffoldMessengerKey =
-        GlobalKey<ScaffoldMessengerState>();
+    final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     var actionPressed = false;
     SnackBarClosedReason? closedReason;
 
@@ -3755,9 +3753,7 @@ void main() {
   testWidgets('SnackBarAction backgroundColor works as a MaterialStateColor', (
     WidgetTester tester,
   ) async {
-    final backgroundColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
-    ) {
+    final backgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
       }

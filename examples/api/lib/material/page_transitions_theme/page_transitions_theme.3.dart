@@ -58,9 +58,7 @@ class HomePage extends StatelessWidget {
                 child: ListView(
                   children: List<Widget>.generate(Colors.primaries.length, (int index) {
                     final kittenName = Text('Kitten $index');
-                    final avatar = CircleAvatar(
-                      backgroundColor: Colors.primaries[index],
-                    );
+                    final avatar = CircleAvatar(backgroundColor: Colors.primaries[index]);
                     final message =
                         index.isEven
                             ? 'Hello hooman! My name is Kitten $index'

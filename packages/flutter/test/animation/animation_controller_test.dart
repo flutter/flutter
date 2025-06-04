@@ -372,9 +372,7 @@ void main() {
 
   test('Custom springDescription can be applied', () {
     final controller = AnimationController(vsync: const TestVSync());
-    final customSpringController = AnimationController(
-      vsync: const TestVSync(),
-    );
+    final customSpringController = AnimationController(vsync: const TestVSync());
 
     controller.fling();
     // Will produce longer and smoother animation than the default.
@@ -705,10 +703,7 @@ void main() {
   });
 
   test('setting value directly sets correct status', () {
-    final controller = AnimationController(
-      value: 0.0,
-      vsync: const TestVSync(),
-    );
+    final controller = AnimationController(value: 0.0, vsync: const TestVSync());
 
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);

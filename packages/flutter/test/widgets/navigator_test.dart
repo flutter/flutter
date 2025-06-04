@@ -290,18 +290,9 @@ void main() {
   });
 
   testWidgets('Can push, pop, and replace in sequence', (WidgetTester tester) async {
-    const initial = MaterialPage<void>(
-      key: ValueKey<String>('initial'),
-      child: Text('initial'),
-    );
-    const push = MaterialPage<void>(
-      key: ValueKey<String>('push'),
-      child: Text('push'),
-    );
-    const replace = MaterialPage<void>(
-      key: ValueKey<String>('replace'),
-      child: Text('replace'),
-    );
+    const initial = MaterialPage<void>(key: ValueKey<String>('initial'), child: Text('initial'));
+    const push = MaterialPage<void>(key: ValueKey<String>('push'), child: Text('push'));
+    const replace = MaterialPage<void>(key: ValueKey<String>('replace'), child: Text('replace'));
     var pages = <Page<void>>[initial];
     bool popPageCallback(Route<dynamic> route, dynamic result) {
       pages.removeLast();
@@ -936,8 +927,7 @@ void main() {
   testWidgets(
     'pushReplacement sets secondaryAnimation after transition, with history change during transition',
     (WidgetTester tester) async {
-      final routes =
-          <String, SlideInOutPageRoute<dynamic>>{};
+      final routes = <String, SlideInOutPageRoute<dynamic>>{};
       final builders = <String, WidgetBuilder>{
         '/':
             (BuildContext context) => OnTapPage(
@@ -1006,8 +996,7 @@ void main() {
   testWidgets('new route removed from navigator history during pushReplacement transition', (
     WidgetTester tester,
   ) async {
-    final routes =
-        <String, SlideInOutPageRoute<dynamic>>{};
+    final routes = <String, SlideInOutPageRoute<dynamic>>{};
     final builders = <String, WidgetBuilder>{
       '/':
           (BuildContext context) => OnTapPage(
@@ -2940,8 +2929,7 @@ void main() {
 
     const kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 120);
     final navigator = GlobalKey<NavigatorState>();
-    final routeNameToContext =
-        <String, MaterialPageRoute<dynamic>>{};
+    final routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
 
     await tester.pumpWidget(
       TestDependencies(
@@ -3584,12 +3572,8 @@ void main() {
     ) async {
       // Regression test for https://github.com/flutter/flutter/issues/97363.
       final navigator = GlobalKey<NavigatorState>();
-      final myPages1 = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-      ];
-      final myPages2 = <TestPage>[
-        const TestPage(key: ValueKey<String>('2'), name: 'second'),
-      ];
+      final myPages1 = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
+      final myPages2 = <TestPage>[const TestPage(key: ValueKey<String>('2'), name: 'second')];
 
       bool onPopPage(Route<dynamic> route, dynamic result) => false;
 
@@ -4019,9 +4003,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Regression Test for https://github.com/flutter/flutter/issues/156033.
-      var pages = <Page<Object?>>[
-        MaterialPage<void>(key: UniqueKey(), child: const Text('home')),
-      ];
+      var pages = <Page<Object?>>[MaterialPage<void>(key: UniqueKey(), child: const Text('home'))];
       final key = GlobalKey<NavigatorState>();
       Widget buildNavigator() {
         return TestDependencies(
@@ -4194,9 +4176,7 @@ void main() {
 
     testWidgets('complex case 1', (WidgetTester tester) async {
       final navigator = GlobalKey<NavigatorState>();
-      var myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-      ];
+      var myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
         return route.didPop(result);
@@ -4358,9 +4338,7 @@ void main() {
     ) async {
       final navigator = GlobalKey<NavigatorState>();
       final transitionDelegate = AlwaysRemoveTransitionDelegate();
-      var myPages = <TestPage>[
-        const TestPage(key: ValueKey<String>('1'), name: 'initial'),
-      ];
+      var myPages = <TestPage>[const TestPage(key: ValueKey<String>('1'), name: 'initial')];
       bool onPopPage(Route<dynamic> route, dynamic result) {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
         return route.didPop(result);
@@ -4749,10 +4727,7 @@ void main() {
   testWidgets('Navigator requests focus if requestFocus is true', (WidgetTester tester) async {
     final GlobalKey navigatorKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
-    final routes = <String, Widget>{
-      '/': const Text('A'),
-      '/second': Text('B', key: innerKey),
-    };
+    final routes = <String, Widget>{'/': const Text('A'), '/second': Text('B', key: innerKey)};
     late final navigator = navigatorKey.currentState! as NavigatorState;
     final focusNode = FocusScopeNode();
     addTearDown(focusNode.dispose);
@@ -4826,10 +4801,7 @@ void main() {
   ) async {
     final GlobalKey navigatorKey = GlobalKey();
     final GlobalKey innerKey = GlobalKey();
-    final routes = <String, Widget>{
-      '/': const Text('A'),
-      '/second': Text('B', key: innerKey),
-    };
+    final routes = <String, Widget>{'/': const Text('A'), '/second': Text('B', key: innerKey)};
     late final navigator = navigatorKey.currentState! as NavigatorState;
     final focusNode = FocusScopeNode();
     addTearDown(focusNode.dispose);
@@ -5927,14 +5899,8 @@ void main() {
         var page2CanPop = false;
         var page3CanPop = false;
         final page1 = CanPopPage<int>(name: 'page1', pageCanPop: () => false);
-        final page2 = CanPopPage<String>(
-          name: 'page2',
-          pageCanPop: () => page2CanPop,
-        );
-        final page3 = CanPopPage<bool>(
-          name: 'page3',
-          pageCanPop: () => page3CanPop,
-        );
+        final page2 = CanPopPage<String>(name: 'page2', pageCanPop: () => page2CanPop);
+        final page3 = CanPopPage<bool>(name: 'page3', pageCanPop: () => page3CanPop);
         final pages = <Page<Object?>>[page1, page2, page3];
         final key = GlobalKey<NavigatorState>();
         await tester.pumpWidget(
@@ -6064,10 +6030,7 @@ void main() {
   ) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     var focus = List<bool?>.generate(4, (int _) => null);
-    final nodes = List<FocusNode>.generate(
-      6,
-      (int index) => FocusNode(debugLabel: 'Node $index'),
-    );
+    final nodes = List<FocusNode>.generate(6, (int index) => FocusNode(debugLabel: 'Node $index'));
     addTearDown(() {
       for (final node in nodes) {
         node.dispose();

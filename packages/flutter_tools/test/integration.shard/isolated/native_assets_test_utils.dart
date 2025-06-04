@@ -75,19 +75,15 @@ Future<void> addTestProjectAsDependency(
   final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(
     linkHookPubspecFile.readAsStringSync(),
   );
-  final linkHooksDependencies =
-      linkHookPubspec['dependencies']! as Map<String, Object?>;
-  final linkHooksDevDependencies =
-      linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
+  final linkHooksDependencies = linkHookPubspec['dependencies']! as Map<String, Object?>;
+  final linkHooksDevDependencies = linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
 
   final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(
     thisPubspecFile.readAsStringSync(),
   );
 
-  final thisDependencies =
-      thisPubspec['dependencies']! as Map<String, Object?>;
-  final thisDevDependencies =
-      thisPubspec['dev_dependencies']! as Map<String, Object?>;
+  final thisDependencies = thisPubspec['dependencies']! as Map<String, Object?>;
+  final thisDevDependencies = thisPubspec['dev_dependencies']! as Map<String, Object?>;
 
   // Flutter CI uses pinned dependencies for all packages (including
   // dev/integration_tests/link_hook) for deterministic testing on CI.

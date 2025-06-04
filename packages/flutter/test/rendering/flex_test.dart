@@ -15,10 +15,7 @@ void main() {
 
   test('Overconstrained flex', () {
     final box = RenderDecoratedBox(decoration: const BoxDecoration());
-    final flex = RenderFlex(
-      textDirection: TextDirection.ltr,
-      children: <RenderBox>[box],
-    );
+    final flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box]);
     layout(
       flex,
       constraints: const BoxConstraints(
@@ -45,10 +42,7 @@ void main() {
     };
     const square = BoxConstraints.tightFor(width: slightlyLarger, height: 100.0);
     final box1 = RenderConstrainedBox(additionalConstraints: square);
-    final flex = RenderFlex(
-      textDirection: TextDirection.ltr,
-      mainAxisSize: MainAxisSize.min,
-    );
+    final flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisSize: MainAxisSize.min);
     final parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
       maxWidth: slightlySmaller,
@@ -103,9 +97,7 @@ void main() {
   });
 
   test('Vertical Overflow', () {
-    final flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand(),
-    );
+    final flexible = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand());
     final flex = RenderFlex(
       direction: Axis.vertical,
       children: <RenderBox>[
@@ -125,9 +117,7 @@ void main() {
   });
 
   test('Vertical Overflow with RenderFlex.spacing', () {
-    final flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand(),
-    );
+    final flexible = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand());
     final flex = RenderFlex(
       direction: Axis.vertical,
       spacing: 16.0,
@@ -148,9 +138,7 @@ void main() {
   });
 
   test('Horizontal Overflow', () {
-    final flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand(),
-    );
+    final flexible = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand());
     final flex = RenderFlex(
       textDirection: TextDirection.ltr,
       children: <RenderBox>[
@@ -170,9 +158,7 @@ void main() {
   });
 
   test('Horizontal Overflow with RenderFlex.spacing', () {
-    final flexible = RenderConstrainedBox(
-      additionalConstraints: const BoxConstraints.expand(),
-    );
+    final flexible = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand());
     final flex = RenderFlex(
       textDirection: TextDirection.ltr,
       spacing: 12.0,
@@ -230,10 +216,7 @@ void main() {
   test('Parent data', () {
     final box1 = RenderDecoratedBox(decoration: const BoxDecoration());
     final box2 = RenderDecoratedBox(decoration: const BoxDecoration());
-    final flex = RenderFlex(
-      textDirection: TextDirection.ltr,
-      children: <RenderBox>[box1, box2],
-    );
+    final flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2]);
     layout(flex, constraints: const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0));
     expect(box1.size.width, equals(0.0));
     expect(box1.size.height, equals(0.0));
@@ -670,10 +653,7 @@ void main() {
     final box1 = RenderConstrainedBox(additionalConstraints: square);
     final box2 = RenderConstrainedBox(additionalConstraints: square);
     final box3 = RenderConstrainedBox(additionalConstraints: square);
-    final flex = RenderFlex(
-      textDirection: TextDirection.ltr,
-      mainAxisSize: MainAxisSize.min,
-    );
+    final flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisSize: MainAxisSize.min);
     final parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
       maxWidth: double.infinity,
@@ -711,10 +691,7 @@ void main() {
     final box1 = RenderConstrainedBox(additionalConstraints: square);
     final box2 = RenderConstrainedBox(additionalConstraints: square);
     final box3 = RenderConstrainedBox(additionalConstraints: square);
-    final flex = RenderFlex(
-      textDirection: TextDirection.ltr,
-      mainAxisSize: MainAxisSize.min,
-    );
+    final flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisSize: MainAxisSize.min);
     final parent = RenderConstrainedOverflowBox(
       minWidth: 0.0,
       maxWidth: double.infinity,
@@ -769,10 +746,7 @@ void main() {
     final box1 = RenderConstrainedBox(additionalConstraints: square);
     final box2 = RenderConstrainedBox(additionalConstraints: square);
     final box3 = RenderConstrainedBox(additionalConstraints: square);
-    final flex = RenderFlex(
-      textDirection: TextDirection.rtl,
-      mainAxisSize: MainAxisSize.min,
-    );
+    final flex = RenderFlex(textDirection: TextDirection.rtl, mainAxisSize: MainAxisSize.min);
     flex.addAll(<RenderBox>[box1, box2, box3]);
     layout(flex);
     expect(flex.constraints.hasTightWidth, isTrue);

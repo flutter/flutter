@@ -215,8 +215,7 @@ abstract class TokenTemplate {
   ///   - "SHAPE_FAMILY_ROUNDED_CORNERS" which maps to [RoundedRectangleBorder].
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
   String shape(String componentToken, [String prefix = 'const ']) {
-    final shape =
-        getToken(getToken('$componentToken.shape') as String) as Map<String, dynamic>;
+    final shape = getToken(getToken('$componentToken.shape') as String) as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
         final topLeft = shape['topLeft'] as double;

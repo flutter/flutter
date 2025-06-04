@@ -26,8 +26,7 @@ void main() {
     late FakeProcessManager fakeProcessManager;
 
     const flutterRoot = '/path/to/flutter';
-    const pathToXcodeAutomationScript =
-        '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
+    const pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();

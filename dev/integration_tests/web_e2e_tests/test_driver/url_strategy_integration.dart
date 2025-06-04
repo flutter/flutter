@@ -19,9 +19,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Can customize url strategy', (WidgetTester tester) async {
-    final strategy = TestUrlStrategy.fromEntry(
-      const TestHistoryEntry('initial state', null, '/'),
-    );
+    final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry('initial state', null, '/'));
     setUrlStrategy(strategy);
 
     app.appRoutes = <String, WidgetBuilder>{

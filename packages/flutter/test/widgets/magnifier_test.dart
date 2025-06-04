@@ -150,9 +150,7 @@ void main() {
 
       testWidgets('should update shown based on animation status', (WidgetTester tester) async {
         await runFakeAsync((FakeAsync async) async {
-          final magnifierController = MagnifierController(
-            animationController: animationController,
-          );
+          final magnifierController = MagnifierController(animationController: animationController);
 
           const testMagnifier = RawMagnifier(size: Size(100, 100));
 

@@ -757,9 +757,7 @@ void main() {
   testWidgets('Material2 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -778,9 +776,7 @@ void main() {
   testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(50, 50),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1052,9 +1048,7 @@ void main() {
   testWidgets('Material2 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(
@@ -1079,9 +1073,7 @@ void main() {
   testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (
     WidgetTester tester,
   ) async {
-    final animationSheet = AnimationSheetBuilder(
-      frameSize: const Size(40, 40),
-    );
+    final animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
     addTearDown(animationSheet.dispose);
 
     await tester.pumpFrames(

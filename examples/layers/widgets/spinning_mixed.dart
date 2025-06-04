@@ -96,10 +96,7 @@ void main() {
     transform: Matrix4.identity(),
     alignment: Alignment.center,
   );
-  final root = RenderPadding(
-    padding: const EdgeInsets.all(80.0),
-    child: transformBox,
-  );
+  final root = RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
 
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(binding.platformDispatcher.implicitView != null);

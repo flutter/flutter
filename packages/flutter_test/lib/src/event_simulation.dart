@@ -240,10 +240,7 @@ abstract final class KeyEventSimulator {
 
     assert(key.debugName != null);
 
-    final result = <String, dynamic>{
-      'type': isDown ? 'keydown' : 'keyup',
-      'keymap': platform,
-    };
+    final result = <String, dynamic>{'type': isDown ? 'keydown' : 'keyup', 'keymap': platform};
 
     final String resultCharacter = character ?? _keyLabel(key) ?? '';
     void assignWeb() {

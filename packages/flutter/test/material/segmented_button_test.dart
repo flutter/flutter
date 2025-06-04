@@ -792,10 +792,7 @@ void main() {
         ),
       ),
     );
-    final states = <MaterialState>{
-      MaterialState.selected,
-      MaterialState.disabled,
-    };
+    final states = <MaterialState>{MaterialState.selected, MaterialState.disabled};
     // Check the initial states.
     SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
     expect(state.statesControllers.values.first.value, states);

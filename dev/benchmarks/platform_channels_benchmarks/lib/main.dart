@@ -154,10 +154,7 @@ Future<void> _runTests() async {
     'dev.flutter.echo.basic.standard',
     StandardMessageCodec(),
   );
-  const basicBinary = BasicMessageChannel<ByteData>(
-    'dev.flutter.echo.basic.binary',
-    BinaryCodec(),
-  );
+  const basicBinary = BasicMessageChannel<ByteData>('dev.flutter.echo.basic.binary', BinaryCodec());
 
   /// WARNING: Don't change the following line of code, it will invalidate
   /// `Large` tests. Instead make a different test. The size of largeBuffer

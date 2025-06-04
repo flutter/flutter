@@ -1201,8 +1201,7 @@ class RenderParagraph extends RenderBox
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(
     List<SemanticsConfiguration> childConfigs,
   ) {
-    final builder =
-        ChildSemanticsConfigurationsResultBuilder();
+    final builder = ChildSemanticsConfigurationsResultBuilder();
     var placeholderIndex = 0;
     var childConfigsIndex = 0;
     var attributedLabelCacheIndex = 0;
@@ -1288,10 +1287,7 @@ class RenderParagraph extends RenderBox
     final newChildCache = LinkedHashMap<Key, SemanticsNode>();
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
-      final selection = TextSelection(
-        baseOffset: start,
-        extentOffset: start + info.text.length,
-      );
+      final selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
       start += info.text.length;
 
       if (info.isPlaceholder) {
@@ -1492,10 +1488,7 @@ class _SelectableFragment
             ? startOffsetInParagraphCoordinates
             : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
     final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
-    final selection = TextSelection(
-      baseOffset: selectionStart,
-      extentOffset: selectionEnd,
-    );
+    final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];
     for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
       selectionRects.add(textBox.toRect());
@@ -1569,8 +1562,7 @@ class _SelectableFragment
         final selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
       case SelectionEventType.selectParagraph:
-        final selectParagraph =
-            event as SelectParagraphSelectionEvent;
+        final selectParagraph = event as SelectParagraphSelectionEvent;
         if (selectParagraph.absorb) {
           _handleSelectAll();
           result = SelectionResult.next;
@@ -1579,16 +1571,14 @@ class _SelectableFragment
           result = _handleSelectParagraph(selectParagraph.globalPosition);
         }
       case SelectionEventType.granularlyExtendSelection:
-        final granularlyExtendSelection =
-            event as GranularlyExtendSelectionEvent;
+        final granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
           granularlyExtendSelection.forward,
           granularlyExtendSelection.isEnd,
           granularlyExtendSelection.granularity,
         );
       case SelectionEventType.directionallyExtendSelection:
-        final directionallyExtendSelection =
-            event as DirectionallyExtendSelectionEvent;
+        final directionallyExtendSelection = event as DirectionallyExtendSelectionEvent;
         result = _handleDirectionallyExtendSelection(
           directionallyExtendSelection.dx,
           directionallyExtendSelection.isEnd,

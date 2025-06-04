@@ -54,10 +54,7 @@ void main() {
     'buildTextSpanWithSpellCheckSuggestions, isolated misspelled word with separate composing region example',
     (WidgetTester tester) async {
       const text = 'Hello, wrold! Hey';
-      const value = TextEditingValue(
-        text: text,
-        composing: TextRange(start: 14, end: 17),
-      );
+      const value = TextEditingValue(text: text, composing: TextRange(start: 14, end: 17));
       const composingRegionOutOfRange = false;
       const spellCheckResults = SpellCheckResults(text, <SuggestionSpan>[
         SuggestionSpan(TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
@@ -88,10 +85,7 @@ void main() {
     'buildTextSpanWithSpellCheckSuggestions, composing region and misspelled words overlap example',
     (WidgetTester tester) async {
       const text = 'Right worng worng right';
-      const value = TextEditingValue(
-        text: text,
-        composing: TextRange(start: 12, end: 17),
-      );
+      const value = TextEditingValue(text: text, composing: TextRange(start: 12, end: 17));
       const composingRegionOutOfRange = false;
       const spellCheckResults = SpellCheckResults(text, <SuggestionSpan>[
         SuggestionSpan(TextRange(start: 6, end: 11), <String>['wrong', 'worn', 'wrung']),
@@ -371,9 +365,7 @@ void main() {
         SuggestionSpan(TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
       ]);
 
-      const expectedTextSpanTree = TextSpan(
-        children: <TextSpan>[TextSpan(text: 'Hello, wroldd!')],
-      );
+      const expectedTextSpanTree = TextSpan(children: <TextSpan>[TextSpan(text: 'Hello, wroldd!')]);
       final TextSpan textSpanTree = buildTextSpanWithSpellCheckSuggestions(
         value,
         composingRegionOutOfRange,
@@ -402,9 +394,7 @@ void main() {
         SuggestionSpan(TextRange(start: 7, end: 12), <String>['*rangesa']),
       ]);
 
-      const expectedTextSpanTree = TextSpan(
-        children: <TextSpan>[TextSpan(text: 'Hello, *ãresaa')],
-      );
+      const expectedTextSpanTree = TextSpan(children: <TextSpan>[TextSpan(text: 'Hello, *ãresaa')]);
       final TextSpan textSpanTree = buildTextSpanWithSpellCheckSuggestions(
         value,
         composingRegionOutOfRange,

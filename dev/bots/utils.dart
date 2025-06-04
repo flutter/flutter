@@ -487,9 +487,7 @@ Future<void> runDartTest(
     return;
   }
 
-  final test = TestFileReporterResults.fromFile(
-    metricFile,
-  ); // --file-reporter name
+  final test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
   final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
   info.writeAsStringSync(json.encode(test.errors));
 

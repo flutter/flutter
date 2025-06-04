@@ -14,10 +14,7 @@ void main() {
   });
 
   test('DataTableThemeData copyWith dataRowHeight', () {
-    const themeData = DataTableThemeData(
-      dataRowMinHeight: 10,
-      dataRowMaxHeight: 10,
-    );
+    const themeData = DataTableThemeData(dataRowMinHeight: 10, dataRowMaxHeight: 10);
     expect(themeData, themeData.copyWith());
     expect(
       themeData.copyWith(dataRowMinHeight: 20, dataRowMaxHeight: 20),

@@ -106,14 +106,8 @@ void main() {
 
   test('BoxDecorations with different blendModes are not equal', () {
     // Regression test for https://github.com/flutter/flutter/issues/100754.
-    const one = BoxDecoration(
-      color: Color(0x00000000),
-      backgroundBlendMode: BlendMode.color,
-    );
-    const two = BoxDecoration(
-      color: Color(0x00000000),
-      backgroundBlendMode: BlendMode.difference,
-    );
+    const one = BoxDecoration(color: Color(0x00000000), backgroundBlendMode: BlendMode.color);
+    const two = BoxDecoration(color: Color(0x00000000), backgroundBlendMode: BlendMode.difference);
     expect(one == two, isFalse);
   });
 }

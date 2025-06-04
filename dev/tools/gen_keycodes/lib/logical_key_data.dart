@@ -78,9 +78,7 @@ class LogicalKeyData {
     final data = <String, LogicalKeyEntry>{};
     data.addEntries(
       contentMap.values.map((dynamic value) {
-        final entry = LogicalKeyEntry.fromJsonMapEntry(
-          value as Map<String, dynamic>,
-        );
+        final entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
         return MapEntry<String, LogicalKeyEntry>(entry.name, entry);
       }),
     );
@@ -466,8 +464,7 @@ class LogicalKeyData {
   static final Map<String, List<String>> synonyms =
       (() {
         final String synonymKeys = File(path.join(dataRoot, 'synonyms.json')).readAsStringSync();
-        final dynamicSynonym =
-            json.decode(synonymKeys) as Map<String, dynamic>;
+        final dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
         return dynamicSynonym.map((String name, dynamic values) {
           // The keygen and algorithm of macOS relies on synonyms being pairs.
           // See siblingKeyMap in macos_code_gen.dart.

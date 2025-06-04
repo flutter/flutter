@@ -19,21 +19,13 @@ void main() {
     const green3 = BorderSide(color: Color(0xFF00FF00), width: 3.0);
     const green5 = BorderSide(color: Color(0xFF00FF00), width: 5.0);
     const none = BorderSide(style: BorderStyle.none);
-    const none2 = BorderSide(
-      color: Color(0xFF0000FF),
-      width: 2.0,
-      style: BorderStyle.none,
-    );
+    const none2 = BorderSide(color: Color(0xFF0000FF), width: 2.0, style: BorderStyle.none);
     const none3 = BorderSide(style: BorderStyle.none, width: 3.0);
     const side2 = BorderSide(width: 2.0);
     const side3 = BorderSide(width: 3.0);
     const side5 = BorderSide(width: 5.0);
     const solid = BorderSide();
-    const yellowNone = BorderSide(
-      style: BorderStyle.none,
-      color: Color(0xFFFFFF00),
-      width: 0.0,
-    );
+    const yellowNone = BorderSide(style: BorderStyle.none, color: Color(0xFFFFFF00), width: 0.0);
     // canMerge
     expect(BorderSide.canMerge(BorderSide.none, BorderSide.none), isTrue);
     expect(BorderSide.canMerge(BorderSide.none, side2), isTrue);
@@ -78,11 +70,7 @@ void main() {
     const blue3 = BorderSide(color: Color(0xFF0000FF), width: 3.0);
     const blue2 = BorderSide(color: Color(0xFF0000FF), width: 2.0);
     const green3 = BorderSide(color: Color(0xFF00FF00), width: 3.0);
-    const none2 = BorderSide(
-      color: Color(0xFF00FF00),
-      width: 2.0,
-      style: BorderStyle.none,
-    );
+    const none2 = BorderSide(color: Color(0xFF00FF00), width: 2.0, style: BorderStyle.none);
     expect(green2.copyWith(color: const Color(0xFF0000FF), width: 3.0), blue3);
     expect(green2.copyWith(width: 3.0), green3);
     expect(green2.copyWith(color: const Color(0xFF0000FF)), blue2);
@@ -91,11 +79,7 @@ void main() {
   test('BorderSide - scale', () {
     const side3 = BorderSide(width: 3.0, color: Color(0xFF0000FF));
     const side6 = BorderSide(width: 6.0, color: Color(0xFF0000FF));
-    const none = BorderSide(
-      style: BorderStyle.none,
-      width: 0.0,
-      color: Color(0xFF0000FF),
-    );
+    const none = BorderSide(style: BorderStyle.none, width: 0.0, color: Color(0xFF0000FF));
     expect(side3.scale(2.0), side6);
     expect(side6.scale(0.5), side3);
     expect(side6.scale(0.0), none);

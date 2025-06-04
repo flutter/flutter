@@ -753,8 +753,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
       xcdevice.devices.add(<IOSDevice>[]);
 
-      final rescheduledStream =
-          StreamController<XCDeviceEventNotification>();
+      final rescheduledStream = StreamController<XCDeviceEventNotification>();
 
       unawaited(
         xcdevice.deviceEventController.done.whenComplete(() {

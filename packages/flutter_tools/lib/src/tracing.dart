@@ -167,9 +167,7 @@ Future<void> downloadStartupTrace(
     throwToolExit('Engine start event is missing in the timeline. Cannot compute startup time.');
   }
 
-  final traceInfo = <String, Object?>{
-    'engineEnterTimestampMicros': engineEnterTimestampMicros,
-  };
+  final traceInfo = <String, Object?>{'engineEnterTimestampMicros': engineEnterTimestampMicros};
 
   if (frameworkInitTimestampMicros != null) {
     final int timeToFrameworkInitMicros = frameworkInitTimestampMicros - engineEnterTimestampMicros;

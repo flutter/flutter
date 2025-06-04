@@ -704,9 +704,7 @@ void main() {
 
   testGesture('Buttons filter should cancel invalid taps', (GestureTester tester) {
     final recognized = <String>[];
-    final doubleTap = DoubleTapGestureRecognizer(
-        allowedButtonsFilter: (int buttons) => false,
-      )
+    final doubleTap = DoubleTapGestureRecognizer(allowedButtonsFilter: (int buttons) => false)
       ..onDoubleTap = () {
         recognized.add('primary');
       };

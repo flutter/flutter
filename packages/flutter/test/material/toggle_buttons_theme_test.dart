@@ -51,10 +51,7 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    const theme = ToggleButtonsTheme(
-      data: ToggleButtonsThemeData(),
-      child: SizedBox(),
-    );
+    const theme = ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
     expect(theme.data.textStyle, null);
     expect(theme.data.constraints, null);
     expect(theme.data.color, null);

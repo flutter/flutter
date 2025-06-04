@@ -10,8 +10,7 @@ import 'package:flutter_api_samples/material/color_scheme/dynamic_content_color.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final loadColorSchemeCalls =
-      <(ImageProvider<Object>, Brightness)>[];
+  final loadColorSchemeCalls = <(ImageProvider<Object>, Brightness)>[];
 
   Future<ColorScheme> fakeColorSchemeLoader(
     ImageProvider<Object> provider,

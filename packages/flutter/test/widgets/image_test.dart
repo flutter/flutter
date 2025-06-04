@@ -44,9 +44,7 @@ void main() {
     final imageProvider1 = _TestImageProvider();
     final imageProvider2 = _TestImageProvider();
 
-    final imageListenable = ValueNotifier<_TestImageProvider>(
-      imageProvider1,
-    );
+    final imageListenable = ValueNotifier<_TestImageProvider>(imageProvider1);
     addTearDown(imageListenable.dispose);
     final innerListenable = ValueNotifier<int>(0);
     addTearDown(innerListenable.dispose);
@@ -226,13 +224,9 @@ void main() {
     final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
-    final imageProvider =
-        _ConfigurationKeyedTestImageProvider();
+    final imageProvider = _ConfigurationKeyedTestImageProvider();
     final seenKeys = <Object>{};
-    final debouncingProvider = _DebouncingImageProvider(
-      imageProvider,
-      seenKeys,
-    );
+    final debouncingProvider = _DebouncingImageProvider(imageProvider, seenKeys);
 
     // Of the two nested MediaQuery objects, the innermost one,
     // mediaQuery2, should define the configuration of the imageProvider.
@@ -272,13 +266,9 @@ void main() {
     final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
-    final imageProvider =
-        _ConfigurationKeyedTestImageProvider();
+    final imageProvider = _ConfigurationKeyedTestImageProvider();
     final seenKeys = <Object>{};
-    final debouncingProvider = _DebouncingImageProvider(
-      imageProvider,
-      seenKeys,
-    );
+    final debouncingProvider = _DebouncingImageProvider(imageProvider, seenKeys);
 
     // This is just a variation on the previous test. In this version the location
     // of the Image changes and the MediaQuery widgets do not.
@@ -331,10 +321,7 @@ void main() {
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
     final imageProvider = _TestImageProvider();
     final seenKeys = <Object>{};
-    final debouncingProvider = _DebouncingImageProvider(
-      imageProvider,
-      seenKeys,
-    );
+    final debouncingProvider = _DebouncingImageProvider(imageProvider, seenKeys);
 
     // Of the two nested MediaQuery objects, the innermost one,
     // mediaQuery2, should define the configuration of the imageProvider.
@@ -378,10 +365,7 @@ void main() {
       final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
       final imageProvider = _TestImageProvider();
       final seenKeys = <Object>{};
-      final debouncingProvider = _DebouncingImageProvider(
-        imageProvider,
-        seenKeys,
-      );
+      final debouncingProvider = _DebouncingImageProvider(imageProvider, seenKeys);
 
       // This is just a variation on the previous test. In this version the location
       // of the Image changes and the MediaQuery widgets do not.
@@ -1098,9 +1082,7 @@ void main() {
         LeakTesting.settings
             .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
-      final streamCompleter = _TestImageStreamCompleter(
-        ImageInfo(image: image10x10.clone()),
-      );
+      final streamCompleter = _TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
       final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
       int? lastFrame;
       late bool lastFrameWasSync;
@@ -1435,9 +1417,7 @@ void main() {
   testWidgets('Verify Image resets its ImageListeners', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final imageStreamCompleter = _TestImageStreamCompleter();
-    final imageProvider1 = _TestImageProvider(
-      streamCompleter: imageStreamCompleter,
-    );
+    final imageProvider1 = _TestImageProvider(streamCompleter: imageStreamCompleter);
     await tester.pumpWidget(Container(key: key, child: Image(image: imageProvider1)));
     // listener from resolveStreamForKey is always added.
     expect(imageStreamCompleter.listeners.length, 2);
@@ -1455,9 +1435,7 @@ void main() {
   testWidgets('Verify Image resets its ErrorListeners', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final imageStreamCompleter = _TestImageStreamCompleter();
-    final imageProvider1 = _TestImageProvider(
-      streamCompleter: imageStreamCompleter,
-    );
+    final imageProvider1 = _TestImageProvider(streamCompleter: imageStreamCompleter);
     await tester.pumpWidget(
       Container(
         key: key,

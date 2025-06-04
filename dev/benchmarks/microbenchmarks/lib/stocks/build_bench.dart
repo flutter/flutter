@@ -17,8 +17,7 @@ Future<List<double>> runBuildBenchmark() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final binding =
-      TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
   final watch = Stopwatch();
   var iterations = 0;

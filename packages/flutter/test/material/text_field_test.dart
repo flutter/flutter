@@ -5542,11 +5542,7 @@ void main() {
   });
 
   testWidgets('TextField with specified prefixStyle', (WidgetTester tester) async {
-    final prefixStyle = TextStyle(
-      inherit: false,
-      color: Colors.pink[500],
-      fontSize: 10.0,
-    );
+    final prefixStyle = TextStyle(inherit: false, color: Colors.pink[500], fontSize: 10.0);
 
     await tester.pumpWidget(
       overlay(
@@ -14945,12 +14941,7 @@ void main() {
     var isWide = false;
     const wideWidth = 300.0;
     const narrowWidth = 200.0;
-    const style = TextStyle(
-      fontSize: 10,
-      height: 1.0,
-      letterSpacing: 0.0,
-      wordSpacing: 0.0,
-    );
+    const style = TextStyle(fontSize: 10, height: 1.0, letterSpacing: 0.0, wordSpacing: 0.0);
     const caretWidth = 2.0;
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
@@ -15025,8 +15016,7 @@ void main() {
         MaterialApp(home: Material(child: TextField(controller: controller))),
       );
 
-      final selectAll =
-          defaultTargetPlatform == TargetPlatform.macOS ? 'Select All' : 'Select all';
+      final selectAll = defaultTargetPlatform == TargetPlatform.macOS ? 'Select All' : 'Select all';
 
       expect(find.text(selectAll), findsNothing);
       expect(find.text('Copy'), findsNothing);
@@ -16694,9 +16684,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Placeholder()));
 
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
-      final magnifierInfo = ValueNotifier<MagnifierInfo>(
-        MagnifierInfo.empty,
-      );
+      final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
       addTearDown(magnifierInfo.dispose);
 
       expect(
@@ -16721,9 +16709,7 @@ void main() {
 
           final BuildContext context = tester.firstElement(find.byType(TextField));
           final EditableText editableText = tester.widget(find.byType(EditableText));
-          final magnifierInfo = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo.empty,
-          );
+          final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
           addTearDown(magnifierInfo.dispose);
 
           expect(
@@ -16745,9 +16731,7 @@ void main() {
 
           final BuildContext context = tester.firstElement(find.byType(TextField));
           final EditableText editableText = tester.widget(find.byType(EditableText));
-          final magnifierInfo = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo.empty,
-          );
+          final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
           addTearDown(magnifierInfo.dispose);
 
           expect(
@@ -16769,9 +16753,7 @@ void main() {
 
           final BuildContext context = tester.firstElement(find.byType(TextField));
           final EditableText editableText = tester.widget(find.byType(EditableText));
-          final magnifierInfo = ValueNotifier<MagnifierInfo>(
-            MagnifierInfo.empty,
-          );
+          final magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
           addTearDown(magnifierInfo.dispose);
 
           expect(

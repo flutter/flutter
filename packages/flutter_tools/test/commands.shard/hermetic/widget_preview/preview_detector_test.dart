@@ -135,12 +135,10 @@ void main() {
       ];
 
       // Create two files with existing previews and one without.
-      final expectedInitialMapping =
-          <PreviewPath, List<PreviewDetailsMatcher>>{
-            addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
-            addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']):
-                expectedPreviewDetails,
-          };
+      final expectedInitialMapping = <PreviewPath, List<PreviewDetailsMatcher>>{
+        addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
+        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']): expectedPreviewDetails,
+      };
       final PreviewPath nonPreviewContainingFile = addNonPreviewContainingFile(
         projectRoot,
         <String>['baz.dart'],

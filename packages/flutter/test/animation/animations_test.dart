@@ -28,10 +28,7 @@ void main() {
     expect(kAlwaysCompleteAnimation, hasOneLineDescription);
     expect(kAlwaysDismissedAnimation, hasOneLineDescription);
     expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
-    var curvedAnimation = CurvedAnimation(
-      parent: kAlwaysDismissedAnimation,
-      curve: Curves.ease,
-    );
+    var curvedAnimation = CurvedAnimation(parent: kAlwaysDismissedAnimation, curve: Curves.ease);
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation, hasOneLineDescription);

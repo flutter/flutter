@@ -98,10 +98,7 @@ void main() {
       ];
       var i = 0;
       for (final layer in layers) {
-        final annotatedRegionLayer = AnnotatedRegionLayer<int>(
-          i,
-          size: const Size(100.0, 100.0),
-        );
+        final annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
         i += 1;
@@ -136,10 +133,7 @@ void main() {
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
       final child = AnnotatedRegionLayer<int>(1);
-      final parent = AnnotatedRegionLayer<String>(
-        'hello',
-        size: const Size(10.0, 10.0),
-      );
+      final parent = AnnotatedRegionLayer<String>('hello', size: const Size(10.0, 10.0));
       final layer = ContainerLayer();
       parent.append(child);
       layer.append(parent);
@@ -149,9 +143,7 @@ void main() {
 
     test('handles non-invertible transforms', () {
       final child = AnnotatedRegionLayer<int>(1);
-      final parent = TransformLayer(
-        transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0),
-      );
+      final parent = TransformLayer(transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0));
       parent.append(child);
 
       expect(parent.find<int>(Offset.zero), null);
@@ -279,10 +271,7 @@ void main() {
       ];
       var i = 0;
       for (final layer in layers) {
-        final annotatedRegionLayer = AnnotatedRegionLayer<int>(
-          i,
-          size: const Size(100.0, 100.0),
-        );
+        final annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
         i += 1;
@@ -365,10 +354,7 @@ void main() {
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
       final child = AnnotatedRegionLayer<int>(1);
-      final parent = AnnotatedRegionLayer<String>(
-        'hello',
-        size: const Size(10.0, 10.0),
-      );
+      final parent = AnnotatedRegionLayer<String>('hello', size: const Size(10.0, 10.0));
       final layer = ContainerLayer();
       parent.append(child);
       layer.append(parent);
@@ -381,9 +367,7 @@ void main() {
 
     test('handles non-invertible transforms', () {
       final child = AnnotatedRegionLayer<int>(1);
-      final parent = TransformLayer(
-        transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0),
-      );
+      final parent = TransformLayer(transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0));
       parent.append(child);
 
       expect(parent.findAllAnnotations<int>(Offset.zero).annotations.toList(), equals(<int>[]));

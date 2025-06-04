@@ -548,8 +548,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     });
 
     // Place the navigation button if needed.
-    final navButtonParentData =
-        navButton.parentData! as ToolbarItemsParentData;
+    final navButtonParentData = navButton.parentData! as ToolbarItemsParentData;
     if (_shouldPaintChild(firstChild!, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {

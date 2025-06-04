@@ -13,11 +13,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 class TestPlugin {
   static void registerWith(Registrar registrar) {
-    final channel = MethodChannel(
-      'test_plugin',
-      const StandardMethodCodec(),
-      registrar.messenger,
-    );
+    final channel = MethodChannel('test_plugin', const StandardMethodCodec(), registrar.messenger);
     final testPlugin = TestPlugin();
     channel.setMethodCallHandler(testPlugin.handleMethodCall);
   }

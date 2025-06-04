@@ -46,8 +46,7 @@ void main() {
   testWidgets(
     'Safe to query a RelayoutWhenSystemFontsChangeMixin for text layout after system fonts changes',
     (WidgetTester tester) async {
-      final child =
-          _RenderCustomRelayoutWhenSystemFontsChange();
+      final child = _RenderCustomRelayoutWhenSystemFontsChange();
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

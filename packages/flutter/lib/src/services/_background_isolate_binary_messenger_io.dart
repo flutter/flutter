@@ -43,8 +43,7 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   static void ensureInitialized(ui.RootIsolateToken token) {
     if (_instance == null) {
       ui.PlatformDispatcher.instance.registerBackgroundIsolate(token);
-      final portBinaryMessenger =
-          BackgroundIsolateBinaryMessenger._();
+      final portBinaryMessenger = BackgroundIsolateBinaryMessenger._();
       _instance = portBinaryMessenger;
       portBinaryMessenger._receivePort.listen((dynamic message) {
         try {

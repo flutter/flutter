@@ -260,9 +260,7 @@ void main() {
     });
 
     testWithoutContext('error', () async {
-      final mockLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences.test(),
-      );
+      final mockLogger = BufferLogger.test(outputPreferences: OutputPreferences.test());
       final verboseLogger = VerboseLogger(
         mockLogger,
         stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
@@ -1251,9 +1249,7 @@ void main() {
     });
 
     testWithoutContext('BufferLogger prints status, trace, error', () async {
-      final mockLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences.test(),
-      );
+      final mockLogger = BufferLogger.test(outputPreferences: OutputPreferences.test());
 
       mockLogger.printStatus('Hey Hey Hey Hey');
       mockLogger.printTrace('Oooh, I do I do I do');

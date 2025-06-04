@@ -1652,9 +1652,7 @@ void main() {
   });
 
   testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {
-    final enterRecorder = AnimationSheetBuilder(
-      frameSize: const Size(600, 600),
-    );
+    final enterRecorder = AnimationSheetBuilder(frameSize: const Size(600, 600));
     addTearDown(enterRecorder.dispose);
 
     final Widget target = createAppWithButtonThatLaunchesActionSheet(
@@ -1679,9 +1677,7 @@ void main() {
       matchesGoldenFile('cupertinoActionSheet.enter.png'),
     );
 
-    final exitRecorder = AnimationSheetBuilder(
-      frameSize: const Size(600, 600),
-    );
+    final exitRecorder = AnimationSheetBuilder(frameSize: const Size(600, 600));
     addTearDown(exitRecorder.dispose);
     await tester.pumpWidget(exitRecorder.record(target));
 

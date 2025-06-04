@@ -239,10 +239,7 @@ class WebTestCompiler {
       testFile.path, // dartfile
     ];
 
-    final processUtils = ProcessUtils(
-      logger: _logger,
-      processManager: _processManager,
-    );
+    final processUtils = ProcessUtils(logger: _logger, processManager: _processManager);
 
     await processUtils.stream(compilationArgs);
 

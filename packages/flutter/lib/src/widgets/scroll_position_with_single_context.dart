@@ -252,10 +252,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   ScrollHoldController hold(VoidCallback holdCancelCallback) {
     final double previousVelocity = activity!.velocity;
-    final holdActivity = HoldScrollActivity(
-      delegate: this,
-      onHoldCanceled: holdCancelCallback,
-    );
+    final holdActivity = HoldScrollActivity(delegate: this, onHoldCanceled: holdCancelCallback);
     beginActivity(holdActivity);
     _heldPreviousVelocity = previousVelocity;
     return holdActivity;

@@ -211,10 +211,7 @@ void main() {
   });
 
   test('Table border painting', () {
-    final table = RenderTable(
-      textDirection: TextDirection.rtl,
-      border: TableBorder.all(),
-    );
+    final table = RenderTable(textDirection: TextDirection.rtl, border: TableBorder.all());
     layout(table);
     table.setFlatChildren(1, <RenderBox>[]);
     pumpFrame();

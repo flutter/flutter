@@ -945,8 +945,7 @@ class _TreeNodeParentDataWidget extends ParentDataWidget<TreeSliverNodeParentDat
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final parentData =
-        renderObject.parentData! as TreeSliverNodeParentData;
+    final parentData = renderObject.parentData! as TreeSliverNodeParentData;
     var needsLayout = false;
 
     if (parentData.depth != depth) {

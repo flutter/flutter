@@ -70,9 +70,7 @@ void main() {
   });
 
   test('Should work on platforms that does not support mouse cursor', () async {
-    const annotation = TestAnnotationTarget(
-      cursor: SystemMouseCursors.grabbing,
-    );
+    const annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
 
     setUpMouseTracker(
       annotationFinder: (Offset position) => <TestAnnotationTarget>[annotation],

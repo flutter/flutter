@@ -372,10 +372,7 @@ class _DecorationImagePainter implements DecorationImagePainter {
 
     final ImageStream newImageStream = _details.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
-      final listener = ImageStreamListener(
-        _handleImage,
-        onError: _details.onError,
-      );
+      final listener = ImageStreamListener(_handleImage, onError: _details.onError);
       _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
       _imageStream!.addListener(listener);
