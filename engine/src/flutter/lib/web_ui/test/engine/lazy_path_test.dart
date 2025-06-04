@@ -21,6 +21,8 @@ class FakePath implements DisposablePath {
 
   bool isDisposed = false;
 
+  final List<FakePathMetrics> computedMetrics = [];
+
   @override
   void dispose() {
     isDisposed = true;
@@ -158,32 +160,30 @@ class FakePath implements DisposablePath {
 
   @override
   bool contains(Offset point) {
-    _apiCallCount++;
     return false;
   }
 
   @override
   Path shift(Offset offset) {
-    _apiCallCount++;
     return this;
   }
 
   @override
   Path transform(Float64List matrix4) {
-    _apiCallCount++;
     return this;
   }
 
   @override
   Rect getBounds() {
-    _apiCallCount++;
     return Rect.zero;
   }
 
   @override
   FakePathMetrics computeMetrics({bool forceClosed = false}) {
-    _apiCallCount++;
-    return FakePathMetrics();
+    print('computed');
+    final metrics = FakePathMetrics();
+    computedMetrics.add(metrics);
+    return metrics;
   }
 
   @override
@@ -194,12 +194,17 @@ class FakePath implements DisposablePath {
 
 class FakePathMetrics extends IterableBase<PathMetric> implements DisposablePathMetrics {
   @override
-  DisposablePathMetricIterator get iterator => FakePathMetricsIterator();
+  final FakePathMetricsIterator iterator = FakePathMetricsIterator();
 }
 
 class FakePathMetricsIterator implements DisposablePathMetricIterator {
+  bool isDisposed = false;
+
   @override
-  void dispose() {}
+  void dispose() {
+    print('disposed');
+    isDisposed = true;
+  }
 
   @override
   bool moveNext() {
@@ -265,12 +270,20 @@ void testMain() {
     final disposablePath = constructors.createdPaths.first;
 
     expect(disposablePath.isDisposed, false);
-    expect(disposablePath.apiCallCount, 21);
+    expect(disposablePath.apiCallCount, 20);
+
+    final metrics = path.computeMetrics();
+    expect(metrics.iterator.moveNext(), false);
+    expect(disposablePath.computedMetrics.length, 1);
+    final disposableMetrics = disposablePath.computedMetrics.first;
+    expect(disposableMetrics.iterator.isDisposed, false);
 
     EnginePlatformDispatcher.instance.frameArena.collect();
 
     expect(constructors.createdPaths.length, 1);
     expect(disposablePath.isDisposed, true);
+    expect(disposablePath.computedMetrics.length, 1);
+    expect(disposableMetrics.iterator.isDisposed, true);
 
     path.getBounds();
 
@@ -278,6 +291,9 @@ void testMain() {
     final resurrectedPath = constructors.createdPaths.last;
 
     expect(resurrectedPath.isDisposed, false);
-    expect(resurrectedPath.apiCallCount, 21);
+    expect(resurrectedPath.apiCallCount, 20);
+    expect(metrics.iterator.moveNext(), false);
+
+    EnginePlatformDispatcher.instance.frameArena.collect();
   });
 }
