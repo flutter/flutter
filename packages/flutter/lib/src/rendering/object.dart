@@ -2703,8 +2703,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
 
-    _isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
+    _isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     if (!_needsLayout && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
