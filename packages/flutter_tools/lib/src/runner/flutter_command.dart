@@ -1072,7 +1072,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       FlutterOptions.kAndroidGradleProjectCacheDir,
       help:
-          'Specifies the project-specific cache directory. Default value is .gradle in the root project directory.',
+          'Specifies the project-specific cache directory. Defaults to .gradle.',
     );
   }
 
