@@ -284,9 +284,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// Called when a request is made to open the menu.
   ///
   /// This callback is triggered every time [MenuController.open] is called,
-  /// regardless of whether the overlay is already showing. As a result,
-  /// handlers will be called when the menu is repositioned, and when the menu
-  /// closing animation is interrupted by a new open request.
+  /// including cases when the overlay is already showing. As a result, this
+  /// callback can be used to observe when a menu is repositioned or reopened
+  /// during a closing animation.
   ///
   /// After an open request is intercepted, the handler is responsible for
   /// eventually calling `showOverlay`. If needed, the call can be made after a
