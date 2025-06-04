@@ -2698,13 +2698,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     );
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
-    final bool isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     }());
 
+    _isRelayoutBoundary =
+        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     if (!_needsLayout && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
@@ -2719,15 +2719,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         _debugDoingThisResize = false;
         return true;
       }());
-      assert(_isRelayoutBoundary != null);
-
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
         FlutterTimeline.finishSync();
       }
       return;
     }
     _constraints = constraints;
-    _isRelayoutBoundary = isRelayoutBoundary;
 
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
