@@ -36,37 +36,33 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListSection(
-      children: <Widget>[
-        CupertinoListTile(
-          title: const Text('Hercules Mulligan'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.mulligan,
-            groupValue: _character,
-            // TRY THIS: Try setting the toggleable value to false and
-            // see how that changes the behavior of the widget.
-            toggleable: true,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+    return RadioGroup<SingingCharacter>(
+      groupValue: _character,
+      onChanged: (SingingCharacter? value) {
+        setState(() {
+          _character = value;
+        });
+      },
+      child: CupertinoListSection(
+        children: const <Widget>[
+          CupertinoListTile(
+            title: Text('Hercules Mulligan'),
+            leading: CupertinoRadio<SingingCharacter>(
+              value: SingingCharacter.mulligan,
+              // TRY THIS: Try setting the toggleable value to false and
+              // see how that changes the behavior of the widget.
+              toggleable: true,
+            ),
           ),
-        ),
-        CupertinoListTile(
-          title: const Text('Eliza Hamilton'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.hamilton,
-            groupValue: _character,
-            toggleable: true,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+          CupertinoListTile(
+            title: Text('Eliza Hamilton'),
+            leading: CupertinoRadio<SingingCharacter>(
+              value: SingingCharacter.hamilton,
+              toggleable: true,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

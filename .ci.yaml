@@ -546,18 +546,15 @@ targets:
   # to GCS", and conditionally on the "master" channel will also deploy the docs
   # to Firebase (https://main-api.flutter.dev/).
   #
-  # See "Linux docs_deploy_stable" for how the docs are deployed to stable API.
+  # See "Linux docs_generate_release" for how docs are built (but not published)
+  # and "Linux docs_deploy_stable" for how docs deployed for the stable branch
+  # (we do not deploy docs for beta).
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
     backfill: false
-    # This means "allow this to be scheduled by the release/release_builder"
-    # recipe. Normally we'd use "schedule: true", but that *also* means "do not
-    # run this in normal presubmit/postsubmit", and we do want it to run in
-    # postsubmit for the "master" channel. Sorry.
-    #
-    # See https://github.com/flutter/flutter/issues/168709 for details.
-    schedule_during_release_override: true
+    enabled_branches:
+      - master
     timeout: 60
     dimensions:
       os: "Linux"
@@ -574,6 +571,63 @@ targets:
       validation_name: Docs
       firebase_project: main-docs-flutter-prod
       release_ref: refs/heads/master
+    drone_dimensions:
+      - os=Linux
+
+  - name: Linux docs_generate_release
+    recipe: flutter/docs
+    scheduler: release
+    presubmit: false
+    postsubmit: false
+    enabled_branches:
+      - flutter-\d+\.\d+-candidate\.\d+
+    timeout: 60
+    dimensions:
+      os: "Linux"
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs
+      validation_name: Docs
+      # TODO(matanlurey): Neither of these properties are actually used, since
+      # the branch name is not "master", but if they are removed, the recipe
+      # will fail. See https://github.com/flutter/flutter/issues/169108.
+      firebase_project: main-docs-flutter-prod
+      release_ref: refs/heads/master
+    drone_dimensions:
+      - os=Linux
+
+
+  # This step runs on the release channel "stable", after the same commit SHA
+  # has been run and built by Linux flutter_release_builder as part of a release
+  # candidate branch (i.e. /flutter-\d+\.\d+-candidate\.\d+/) in the previous
+  # target, "Linux docs_generate_release".
+  - name: Linux docs_deploy_stable
+    recipe: flutter/docs
+    scheduler: release
+    presubmit: false
+    postsubmit: false
+    enabled_branches:
+      - stable
+    timeout: 60
+    properties:
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs_deploy
+      validation_name: Docs_deploy
+      firebase_project: docs-flutter-dev
     drone_dimensions:
       - os=Linux
 
@@ -6960,30 +7014,3 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     drone_dimensions:
       - os=Windows
-
-  # This step runs on the release channel "stable", after the same commit SHA
-  # has been run and built by Linux flutter_release_builder as part of a release
-  # candidate branch (i.e. /flutter-\d+\.\d+-candidate\.\d+/) in the previous
-  # target, "Linux docs_publish".
-  - name: Linux docs_deploy_stable
-    recipe: flutter/docs
-    scheduler: release
-    bringup: true
-    enabled_branches:
-      - stable
-    presubmit: false
-    timeout: 60
-    properties:
-      cores: "32"
-      dependencies: >-
-        [
-          {"dependency": "dashing", "version": "0.4.0"},
-          {"dependency": "firebase", "version": "v11.0.1"}
-        ]
-      tags: >
-        ["framework", "hostonly", "linux"]
-      validation: docs_deploy
-      validation_name: Docs_deploy
-      firebase_project: docs-flutter-dev
-    drone_dimensions:
-      - os=Linux

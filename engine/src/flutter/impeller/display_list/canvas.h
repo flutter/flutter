@@ -204,8 +204,8 @@ class Canvas {
   void DrawOval(const Rect& rect, const Paint& paint);
 
   void DrawArc(const Rect& oval_bounds,
-               Scalar start_degrees,
-               Scalar sweep_degrees,
+               Degrees start,
+               Degrees sweep,
                bool use_center,
                const Paint& paint);
 

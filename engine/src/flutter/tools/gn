@@ -188,6 +188,8 @@ def get_target_cpu(args):
     return 'wasm'
   if args.target_os == 'win':
     return args.windows_cpu
+  if args.target_os == 'qnx':
+    return 'arm64'
 
   # Host build. Default to x64 unless overridden.
   if get_host_os() == 'mac' and args.mac_cpu:
@@ -610,6 +612,10 @@ def to_gn_args(args):
     gn_args['skia_use_gl'] = False
     gn_args['shell_enable_metal'] = True
     gn_args['skia_use_metal'] = True
+  elif args.target_os == 'qnx':
+    gn_args['skia_enable_ganesh'] = False
+    gn_args['skia_enable_graphite'] = False
+    gn_args['arm_use_neon'] = False
   else:
     gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
@@ -925,7 +931,9 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win']
+      '--target-os',
+      type=str,
+      choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win', 'qnx']
   )
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(

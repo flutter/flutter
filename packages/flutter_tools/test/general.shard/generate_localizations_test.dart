@@ -708,7 +708,6 @@ flutter:
           arbDir: Uri.directory(defaultL10nPath).path,
           outputDir: Uri.directory(defaultL10nPath, windows: false).path,
           templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
-          syntheticPackage: false,
         ),
         logger: logger,
         projectDir: projectDir,
@@ -731,7 +730,6 @@ flutter:
           arbDir: Uri.directory(defaultL10nPath).path,
           outputDir: Uri.directory(defaultL10nPath, windows: false).path,
           templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
-          syntheticPackage: false,
         ),
         logger: logger,
         projectDir: fs.currentDirectory,
@@ -753,7 +751,6 @@ flutter:
         preferredSupportedLocales: <String>['es'],
         templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
         untranslatedMessagesFile: Uri.file('untranslated', windows: false).path,
-        syntheticPackage: false,
         requiredResourceAttributes: true,
         nullableGetter: false,
       );
@@ -778,7 +775,6 @@ flutter:
       expect(generator.header, 'HEADER');
       expect(generator.useDeferredLoading, isTrue);
       expect(generator.inputsAndOutputsListFile?.path, '/gen_l10n_inputs_and_outputs.json');
-      expect(generator.useSyntheticPackage, isFalse);
       expect(generator.projectDirectory?.path, '/');
       expect(generator.areResourceAttributesRequired, isTrue);
       expect(generator.untranslatedMessagesFile?.path, 'untranslated');
@@ -883,7 +879,6 @@ flutter:\r
           arbDir: Uri.directory(defaultL10nPath).path,
           outputDir: Uri.directory(defaultL10nPath, windows: false).path,
           templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
-          syntheticPackage: false,
         ),
         logger: BufferLogger.test(),
         projectDir: fs.currentDirectory,
@@ -916,7 +911,6 @@ class AppLocalizationsEn extends AppLocalizations {
           arbDir: Uri.directory(defaultL10nPath).path,
           outputDir: Uri.directory(defaultL10nPath, windows: false).path,
           templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
-          syntheticPackage: false,
         ),
         logger: logger,
         projectDir: fs.currentDirectory,

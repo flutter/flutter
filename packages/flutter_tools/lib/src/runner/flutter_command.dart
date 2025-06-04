@@ -17,11 +17,9 @@ import '../base/io.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -371,6 +369,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
       help: 'Enables new module format that supports hot reload.',
+      defaultsTo: true,
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -1327,10 +1326,9 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
-    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
-      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
-    }
+    final bool webEnableHotReload =
+        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload);
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1459,6 +1457,7 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
+      webEnableHotReload: webEnableHotReload,
     );
   }
 
@@ -1837,32 +1836,10 @@ abstract class FlutterCommand extends Command<void> {
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: analytics,
-        projectDir: project.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-
       await pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
-      );
-
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
       );
     }
 
@@ -1911,9 +1888,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
-    );
+    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.
@@ -2071,7 +2046,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;

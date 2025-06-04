@@ -25,6 +25,7 @@ class ColdRunner extends ResidentRunner {
     super.stayResident,
     super.machine,
     super.devtoolsHandler,
+    super.dartBuilder,
   }) : super(hotMode: false);
 
   final bool traceStartup;

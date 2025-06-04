@@ -17,6 +17,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
@@ -28,6 +29,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
+import 'native_assets.dart';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -132,7 +134,7 @@ abstract class Dart2WebTarget extends Target {
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
     const Source.artifact(Artifact.engineDartBinary),
     const Source.pattern('{BUILD_DIR}/main.dart'),
-    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 
   @override
@@ -181,7 +183,8 @@ class Dart2JSTarget extends Dart2WebTarget {
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
     ];
 
-    final List<String> compilationArgs = <String>[
+    // NOTE: most args should be populated in [toSharedCommandOptions].
+    final List<String> cfeCompilationArgs = <String>[
       ...sharedCommandOptions,
       ...compilerConfig.toSharedCommandOptions(buildMode),
       '-o',
@@ -198,7 +201,7 @@ class Dart2JSTarget extends Dart2WebTarget {
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
-    await processUtils.run(compilationArgs, throwOnError: true);
+    await processUtils.run(cfeCompilationArgs, throwOnError: true);
 
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
 
@@ -337,7 +340,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
-
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
@@ -414,7 +416,11 @@ class WebReleaseBundle extends Target {
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => <Target>[...compileTargets, templatedFilesTarget];
+  List<Target> get dependencies => <Target>[
+    ...compileTargets,
+    templatedFilesTarget,
+    const DartBuild(specifiedTargetPlatform: TargetPlatform.web_javascript),
+  ];
 
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
@@ -454,9 +460,11 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.web_javascript,
       buildMode: buildMode,
     );

@@ -726,6 +726,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        logger: globals.logger,
       );
     } else {
       runner = ColdRunner(

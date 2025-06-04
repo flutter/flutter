@@ -17,6 +17,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
+import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -50,6 +51,7 @@ class BuildInfo {
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
+    this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -177,6 +179,9 @@ class BuildInfo {
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
 
+  /// If set, web builds with DDC will run with support for hot reload.
+  final bool webEnableHotReload;
+
   /// Can be used when the actual information is not needed.
   static const BuildInfo dummy = BuildInfo(
     BuildMode.debug,
@@ -259,13 +264,36 @@ class BuildInfo {
   /// The module system DDC is targeting, or null if not using DDC or the
   /// associated flag isn't present.
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat? get ddcModuleFormat =>
-      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+  DdcModuleFormat get ddcModuleFormat {
+    final DdcModuleFormat moduleFormat =
+        webEnableHotReload ? DdcModuleFormat.ddc : DdcModuleFormat.amd;
+    final DdcModuleFormat? parsedFormat =
+        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+    if (parsedFormat != null && moduleFormat != parsedFormat) {
+      throw Exception(
+        'Unsupported option combination:\n'
+        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
+        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-module-format=${parsedFormat.name}',
+      );
+    }
+    return moduleFormat;
+  }
 
   /// Whether to enable canary features when using DDC, or null if not using
   /// DDC or the associated flag isn't present.
-  bool? get canaryFeatures =>
-      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+  bool get canaryFeatures {
+    final bool canaryEnabled = webEnableHotReload;
+    final bool? parsedCanary =
+        _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
+    if (parsedCanary != null && canaryEnabled != parsedCanary) {
+      throw Exception(
+        'Unsupported option combination:\n'
+        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
+        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-canary=$parsedCanary',
+      );
+    }
+    return canaryEnabled;
+  }
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -369,8 +397,6 @@ class AndroidBuildInfo {
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
 
-  bool get containsX86Target => targetArchs.contains(AndroidArch.x86);
-
   /// Whether to bootstrap an empty application.
   final bool fastStart;
 }
@@ -449,8 +475,7 @@ String? validatedBuildNumberForPlatform(
   }
   if (targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64 ||
-      targetPlatform == TargetPlatform.android_x86) {
+      targetPlatform == TargetPlatform.android_x64) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
     final RegExp disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
@@ -502,8 +527,7 @@ String? validatedBuildNameForPlatform(
   if (targetPlatform == TargetPlatform.android ||
       targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64 ||
-      targetPlatform == TargetPlatform.android_x86) {
+      targetPlatform == TargetPlatform.android_x64) {
     // See versionName at https://developer.android.com/studio/publish/versioning
     return buildName;
   }
@@ -542,8 +566,7 @@ enum TargetPlatform {
   // and [AndroidArch].
   android_arm,
   android_arm64,
-  android_x64,
-  android_x86;
+  android_x64;
 
   String get fuchsiaArchForTargetPlatform {
     switch (this) {
@@ -555,7 +578,6 @@ enum TargetPlatform {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.darwin:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
@@ -565,6 +587,33 @@ enum TargetPlatform {
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
+    }
+  }
+
+  String get osName {
+    switch (this) {
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+        return 'linux';
+      case TargetPlatform.darwin:
+        return 'macos';
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
+        return 'windows';
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+        return 'android';
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return 'fuchsia';
+      case TargetPlatform.ios:
+        return 'ios';
+      case TargetPlatform.tester:
+        return 'flutter-tester';
+      case TargetPlatform.web_javascript:
+        return 'web';
     }
   }
 
@@ -581,7 +630,6 @@ enum TargetPlatform {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
@@ -619,21 +667,18 @@ enum DarwinArch {
 enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
-  x86,
   x86_64;
 
   String get archName => switch (this) {
     AndroidArch.armeabi_v7a => 'armeabi-v7a',
     AndroidArch.arm64_v8a => 'arm64-v8a',
     AndroidArch.x86_64 => 'x86_64',
-    AndroidArch.x86 => 'x86',
   };
 
   String get platformName => switch (this) {
     AndroidArch.armeabi_v7a => 'android-arm',
     AndroidArch.arm64_v8a => 'android-arm64',
     AndroidArch.x86_64 => 'android-x64',
-    AndroidArch.x86 => 'android-x86',
   };
 }
 
@@ -694,6 +739,15 @@ DarwinArch getDarwinArchForName(String arch) {
   };
 }
 
+List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
+  const List<DarwinArch> defaultDarwinArchitectures = <DarwinArch>[
+    DarwinArch.x86_64,
+    DarwinArch.arm64,
+  ];
+  return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
+      defaultDarwinArchitectures;
+}
+
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   return switch (platform) {
     TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
@@ -703,7 +757,6 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
     TargetPlatform.android_arm => 'android-arm',
     TargetPlatform.android_arm64 => 'android-arm64',
     TargetPlatform.android_x64 => 'android-x64',
-    TargetPlatform.android_x86 => 'android-x86',
     TargetPlatform.linux_x64 => 'linux-x64',
     TargetPlatform.linux_arm64 => 'linux-arm64',
     TargetPlatform.windows_x64 => 'windows-x64',
@@ -722,7 +775,6 @@ TargetPlatform getTargetPlatformForName(String platform) {
     'android-arm' => TargetPlatform.android_arm,
     'android-arm64' => TargetPlatform.android_arm64,
     'android-x64' => TargetPlatform.android_x64,
-    'android-x86' => TargetPlatform.android_x86,
     'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
     'fuchsia-x64' => TargetPlatform.fuchsia_x64,
     'ios' => TargetPlatform.ios,
@@ -744,7 +796,6 @@ AndroidArch getAndroidArchForName(String platform) {
     'android-arm' => AndroidArch.armeabi_v7a,
     'android-arm64' => AndroidArch.arm64_v8a,
     'android-x64' => AndroidArch.x86_64,
-    'android-x86' => AndroidArch.x86,
     _ => throw Exception('Unsupported Android arch name "$platform"'),
   };
 }
@@ -932,20 +983,6 @@ const String kSdkRoot = 'SdkRoot';
 
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
-
-/// Whether to enable Native Assets.
-///
-/// If true, native assets are built and the mapping for native assets lookup
-/// at runtime is embedded in the kernel file.
-///
-/// If false, native assets are not built, and an empty mapping is embedded in
-/// the kernel file. Used for targets that trigger kernel builds but
-/// are not OS/architecture specific.
-///
-/// Supported values are 'true' and 'false'.
-///
-/// Defaults to 'true'.
-const String kNativeAssets = 'NativeAssets';
 
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
