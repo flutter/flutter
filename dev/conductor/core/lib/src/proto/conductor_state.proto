@@ -103,27 +103,3 @@ message Repository {
   // single commit on the [candidateBranch].
   string workingBranch = 9;
 }
-
-message ConductorState {
-  // One of 'stable', 'beta', or 'dev'
-  string releaseChannel = 1;
-
-  // The name of the release.
-  string releaseVersion = 2;
-
-  Repository engine = 4;
-  Repository framework = 5;
-  int64 createdDate = 6;
-  int64 lastUpdatedDate = 7;
-
-  repeated string logs = 8;
-
-  // The current [ReleasePhase] that has yet to be completed.
-  ReleasePhase currentPhase = 9;
-
-  // A string used to validate that the current conductor is the same version
-  // that created the [ConductorState] object.
-  string conductorVersion = 10;
-
-  ReleaseType releaseType = 11;
-}
