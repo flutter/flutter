@@ -33,16 +33,10 @@ final class DartHookResult {
     if (json case {
       _buildStartKey: final String buildStartString,
       _buildEndKey: final String buildEndString,
-      _dependenciesKey: final List<Object?>? dependenciesList,
+      _dependenciesKey: final List<Object?> dependenciesList,
       _codeAssetsKey: final List<Object?> codeAssetsList,
-      _dataAssetsKey: final List<Object?>? dataAssetsList,
+      _dataAssetsKey: final List<Object?> dataAssetsList,
     }) {
-      final DateTime buildStart = DateTime.parse(buildStartString);
-      final DateTime buildEnd = DateTime.parse(buildEndString);
-      final List<Uri> dependencies = <Uri>[
-        for (final Object? encodedUri in dependenciesList ?? <Object?>[])
-          Uri.parse(encodedUri! as String),
-      ];
       final Iterable<(Map<String, Object?>, String)> codeAssetsWithTargets = codeAssetsList.map(
         (Object? codeJson) => switch (codeJson) {
           {_assetKey: final Map<String, Object?> codeAsset, _targetKey: final String target} => (
@@ -52,23 +46,23 @@ final class DartHookResult {
           _ => throw UnimplementedError(),
         },
       );
-      final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
-        for (final (Map<String, Object?> codeAsset, String target) in codeAssetsWithTargets)
-          FlutterCodeAsset(
-            codeAsset: CodeAsset.fromEncoded(EncodedAsset.fromJson(codeAsset)),
-            target: Target.fromString(target),
-          ),
-      ];
-      final List<DataAsset> dataAssets = <DataAsset>[
-        for (final Object? dataAssetJson in dataAssetsList ?? const <Object?>[])
-          DataAsset.fromEncoded(EncodedAsset.fromJson(dataAssetJson! as Map<String, Object?>)),
-      ];
       return DartHookResult(
-        buildStart: buildStart,
-        buildEnd: buildEnd,
-        codeAssets: codeAssets,
-        dataAssets: dataAssets,
-        dependencies: dependencies,
+        buildStart: DateTime.parse(buildStartString),
+        buildEnd: DateTime.parse(buildEndString),
+        dependencies: <Uri>[
+          for (final Object? encodedUri in dependenciesList) Uri.parse(encodedUri! as String),
+        ],
+        codeAssets: <FlutterCodeAsset>[
+          for (final (Map<String, Object?> codeAsset, String target) in codeAssetsWithTargets)
+            FlutterCodeAsset(
+              codeAsset: CodeAsset.fromEncoded(EncodedAsset.fromJson(codeAsset)),
+              target: Target.fromString(target),
+            ),
+        ],
+        dataAssets: <DataAsset>[
+          for (final Object? dataAssetJson in dataAssetsList)
+            DataAsset.fromEncoded(EncodedAsset.fromJson(dataAssetJson! as Map<String, Object?>)),
+        ],
       );
     }
     throw ArgumentError('Invalid JSON $json');
@@ -80,8 +74,15 @@ final class DartHookResult {
   /// The timestamp at which we finish a build - so the timestamp of the
   /// outputs.
   final DateTime buildEnd;
+
+  /// The code assets produced by running the hooks.
   final List<FlutterCodeAsset> codeAssets;
+
+  /// The data assets produced by running the hooks.
   final List<DataAsset> dataAssets;
+
+  /// The dependencies from the hooks, indicating whether the hooks should be
+  /// re-run.
   final List<Uri> dependencies;
 
   Map<String, Object?> toJson() => <String, Object?>{
@@ -112,19 +113,16 @@ final class DartHookResult {
       if (code.codeAsset.linkMode is DynamicLoadingBundled) code.codeAsset.file!,
   ];
 
-  FlutterHookResult get asFlutterResult {
-    final List<HookAsset> hookAssets =
+  FlutterHookResult get asFlutterResult => FlutterHookResult(
+    buildStart: buildStart,
+    buildEnd: buildEnd,
+    dependencies: dependencies,
+    dataAssets:
         dataAssets
             .map(
               (DataAsset asset) =>
                   HookAsset(file: asset.file, name: asset.name, package: asset.package),
             )
-            .toList();
-    return FlutterHookResult(
-      buildStart: buildStart,
-      buildEnd: buildEnd,
-      dataAssets: hookAssets,
-      dependencies: dependencies,
-    );
-  }
+            .toList(),
+  );
 }

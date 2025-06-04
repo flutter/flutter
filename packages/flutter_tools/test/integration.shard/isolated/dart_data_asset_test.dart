@@ -167,7 +167,7 @@ void main() {
                       'FOUND "packages/data_asset_example/id3": "content3".',
                     ],
                     'NOT-FOUND "packages/data_asset_example/id4".',
-                    if (isWeb) 'Successful hot restart' else 'Hot reload performed',
+                    if (isWeb) 'Successful hot reload' else 'Hot reload performed',
                   ],
                   handler: (_) {
                     return 'q'; // quit

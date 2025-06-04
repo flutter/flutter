@@ -77,7 +77,6 @@ sealed class AssetBuildTarget {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
@@ -192,8 +191,12 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   final Architecture architecture;
   final OS os;
 
+  /// The C compiler configuration for this target. This is populated by
+  /// [precacheCCompilerConfig].
   late final CCompilerConfig? cCompilerConfigSync;
 
+  /// Precaching the C compiler config in [cCompilerConfigSync], to be able to
+  /// load it synchronously later.
   Future<void> precacheCCompilerConfig();
 
   List<CodeAssetExtension> get codeAssetExtensions {
@@ -378,8 +381,6 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
       return <AndroidArch>[AndroidArch.arm64_v8a];
     case TargetPlatform.android_x64:
       return <AndroidArch>[AndroidArch.x86_64];
-    case TargetPlatform.android_x86:
-      return <AndroidArch>[AndroidArch.x86];
     case TargetPlatform.android:
       if (androidArchsEnvironment == null) {
         throw MissingDefineException(kAndroidArchs, 'native_assets');
