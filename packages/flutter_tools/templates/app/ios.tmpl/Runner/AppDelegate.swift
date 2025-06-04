@@ -11,7 +11,7 @@ import UIKit
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  func registerPlugins(_ registry: FlutterPluginRegistry) {
+  func register(with registry: any FlutterPluginRegistry) {
     GeneratedPluginRegistrant.register(with: registry)
   }
 }
