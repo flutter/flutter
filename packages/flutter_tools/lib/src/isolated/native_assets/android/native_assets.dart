@@ -46,7 +46,6 @@ Architecture getNativeAndroidArchitecture(AndroidArch androidArch) {
   return switch (androidArch) {
     AndroidArch.armeabi_v7a => Architecture.arm,
     AndroidArch.arm64_v8a => Architecture.arm64,
-    AndroidArch.x86 => Architecture.ia32,
     AndroidArch.x86_64 => Architecture.x64,
   };
 }
@@ -56,7 +55,6 @@ AndroidArch _getAndroidArch(Architecture architecture) {
   return switch (architecture) {
     Architecture.arm => AndroidArch.armeabi_v7a,
     Architecture.arm64 => AndroidArch.arm64_v8a,
-    Architecture.ia32 => AndroidArch.x86,
     Architecture.x64 => AndroidArch.x86_64,
     Architecture.riscv64 => throwToolExit('Android RISC-V not yet supported.'),
     _ => throwToolExit('Invalid architecture: $architecture.'),
