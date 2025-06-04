@@ -17,6 +17,7 @@ import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -617,6 +618,7 @@ abstract class IosAssetBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
     KernelSnapshot(),
     InstallCodeAssets(),
     _IssueLaunchRootViewControllerAccess(),
@@ -706,9 +708,11 @@ abstract class IosAssetBundle extends Target {
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.ios,
       buildMode: buildMode,
       additionalInputs: <File>[

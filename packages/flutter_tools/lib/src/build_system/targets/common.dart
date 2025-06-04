@@ -13,6 +13,7 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart' show DartHookResult;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -82,9 +83,11 @@ class CopyFlutterBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
+    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       environment.outputDir,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: flavor,
@@ -101,7 +104,11 @@ class CopyFlutterBundle extends Target {
   }
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Copies the pre-built flutter bundle for release mode.
