@@ -10,77 +10,75 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import '../exceptions.dart' show MissingDefineException;
+import '../exceptions.dart';
 
 /// Runs the dart build of the app.
-class DartBuild extends Target {
-  const DartBuild({
-    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
-    this.specifiedTargetPlatform,
-  }) : _buildRunner = buildRunner;
+abstract class DartBuild extends Target {
+  const DartBuild({@visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner})
+    : _buildRunner = buildRunner;
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
-
-  /// The target OS and architecture that we are building for.
-  final TargetPlatform? specifiedTargetPlatform;
 
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    final DartHookResult result;
+    final String? nativeAssetsEnvironment = environment.defines[kNativeAssets];
 
-    final TargetPlatform targetPlatform =
-        specifiedTargetPlatform ?? _getTargetPlatformFromEnvironment(environment, name);
+    final DartBuildResult result;
+    if (nativeAssetsEnvironment == 'false') {
+      result = const DartBuildResult.empty();
+    } else {
+      final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
-    final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: environment.logger,
-    );
-    final Uri projectUri = environment.projectDir.uri;
-    final String? runPackageName =
-        packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
-    if (runPackageName == null) {
-      throw StateError(
-        'Could not determine run package name. '
-        'Project path "${projectUri.toFilePath()}" did not occur as package '
-        'root in package config "${environment.packageConfigPath}". '
-        'Please report a reproduction on '
-        'https://github.com/flutter/flutter/issues/169475.',
+      final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: environment.logger,
+      );
+      final Uri projectUri = environment.projectDir.uri;
+      final String? runPackageName =
+          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      if (runPackageName == null) {
+        throw StateError(
+          'Could not determine run package name. '
+          'Project path "${projectUri.toFilePath()}" did not occur as package '
+          'root in package config "${environment.packageConfigPath}". '
+          'Please report a reproduction on '
+          'https://github.com/flutter/flutter/issues/169475.',
+        );
+      }
+      final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+      final FlutterNativeAssetsBuildRunner buildRunner =
+          _buildRunner ??
+          FlutterNativeAssetsBuildRunnerImpl(
+            environment.packageConfigPath,
+            packageConfig,
+            fileSystem,
+            environment.logger,
+            runPackageName,
+            pubspecPath,
+          );
+      result = await runFlutterSpecificDartBuild(
+        environmentDefines: environment.defines,
+        buildRunner: buildRunner,
+        targetPlatform: targetPlatform,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
       );
     }
-    final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
-    final FlutterNativeAssetsBuildRunner buildRunner =
-        _buildRunner ??
-        FlutterNativeAssetsBuildRunnerImpl(
-          environment.packageConfigPath,
-          packageConfig,
-          fileSystem,
-          environment.logger,
-          runPackageName,
-          pubspecPath,
-        );
-    result = await runFlutterSpecificHooks(
-      environmentDefines: environment.defines,
-      buildRunner: buildRunner,
-      targetPlatform: targetPlatform,
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-    );
 
-    final File dartHookResultJsonFile = environment.buildDir.childFile(dartHookResultFilename);
-    if (!dartHookResultJsonFile.parent.existsSync()) {
-      dartHookResultJsonFile.parent.createSync(recursive: true);
+    final File dartBuildResultJsonFile = environment.buildDir.childFile(dartBuildResultFilename);
+    if (!dartBuildResultJsonFile.parent.existsSync()) {
+      dartBuildResultJsonFile.parent.createSync(recursive: true);
     }
-    dartHookResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
+    dartBuildResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
 
     final Depfile depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
-      <File>[fileSystem.file(dartHookResultJsonFile)],
+      <File>[fileSystem.file(dartBuildResultJsonFile)],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     if (!outputDepfile.parent.existsSync()) {
@@ -109,25 +107,22 @@ class DartBuild extends Target {
   String get name => 'dart_build';
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/$dartHookResultFilename')];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/$dartBuildResultFilename'),
+  ];
 
   /// Dependent build [Target]s can use this to consume the result of the
   /// [DartBuild] target.
-  static Future<DartHookResult> loadHookResult(Environment environment) async {
-    final File dartHookResultJsonFile = environment.buildDir.childFile(
-      DartBuild.dartHookResultFilename,
+  static Future<DartBuildResult> loadBuildResult(Environment environment) async {
+    final File dartBuildResultJsonFile = environment.buildDir.childFile(
+      DartBuild.dartBuildResultFilename,
     );
-    return !dartHookResultJsonFile.existsSync()
-        ? DartHookResult.empty()
-        : DartHookResult.fromJson(
-          json.decode(dartHookResultJsonFile.readAsStringSync()) as Map<String, Object?>,
-        );
+    return DartBuildResult.fromJson(
+      json.decode(dartBuildResultJsonFile.readAsStringSync()) as Map<String, Object?>,
+    );
   }
 
-  @override
-  List<Target> get dependencies => <Target>[];
-
-  static const String dartHookResultFilename = 'dart_build_result.json';
+  static const String dartBuildResultFilename = 'dart_build_result.json';
   static const String depFilename = 'dart_build.d';
 }
 
@@ -154,13 +149,13 @@ class InstallCodeAssets extends Target {
     final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
     // We fetch the result from the [DartBuild].
-    final DartHookResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartBuildResult dartBuildResult = await DartBuild.loadBuildResult(environment);
 
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
     await installCodeAssets(
-      dartHookResult: dartHookResult,
+      dartBuildResult: dartBuildResult,
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
@@ -170,7 +165,7 @@ class InstallCodeAssets extends Target {
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
     final Depfile depfile = Depfile(
-      <File>[for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file)],
+      <File>[for (final Uri file in dartBuildResult.filesToBeBundled) fileSystem.file(file)],
       <File>[fileSystem.file(nativeAssetsFileUri)],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);

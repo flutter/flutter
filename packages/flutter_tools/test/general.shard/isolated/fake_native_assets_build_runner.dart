@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:data_assets/data_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 
@@ -20,6 +18,8 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.onLink,
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
+    this.cCompilerConfigResult,
+    this.ndkCCompilerConfigResult,
   });
 
   // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
@@ -28,6 +28,8 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final BuildResult? buildResult;
   final LinkResult? linkResult;
   final List<String> packagesWithNativeAssetsResult;
+  final CCompilerConfig? cCompilerConfigResult;
+  final CCompilerConfig? ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
   int linkInvocations = 0;
@@ -96,19 +98,11 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     return packagesWithNativeAssetsResult;
   }
 
-  CCompilerConfig? get cCompilerConfigResult => null;
-  CCompilerConfig? get ndkCCompilerConfigResult => null;
+  @override
+  Future<CCompilerConfig?> get cCompilerConfig async => cCompilerConfigResult;
 
   @override
-  Future<void> precacheCCompilerConfig(CodeAssetTarget target) async {
-    if (target is AndroidAssetTarget) {
-      target.cCompilerConfigSync = ndkCCompilerConfigResult;
-    } else if (target is FlutterTesterAssetTarget) {
-      target.subtarget.cCompilerConfigSync = cCompilerConfigResult;
-    } else {
-      target.cCompilerConfigSync = cCompilerConfigResult;
-    }
-  }
+  Future<CCompilerConfig?> get ndkCCompilerConfig async => cCompilerConfigResult;
 }
 
 final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkResult {
@@ -120,24 +114,17 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
 
   factory FakeFlutterNativeAssetsBuilderResult.fromAssets({
     List<CodeAsset> codeAssets = const <CodeAsset>[],
-    List<DataAsset> dataAssets = const <DataAsset>[],
     Map<String, List<CodeAsset>> codeAssetsForLinking = const <String, List<CodeAsset>>{},
-    Map<String, List<DataAsset>> dataAssetsForLinking = const <String, List<DataAsset>>{},
     List<Uri> dependencies = const <Uri>[],
   }) {
     return FakeFlutterNativeAssetsBuilderResult(
       encodedAssets: <EncodedAsset>[
         for (final CodeAsset codeAsset in codeAssets) codeAsset.encode(),
-        for (final DataAsset dataAsset in dataAssets) dataAsset.encode(),
       ],
       encodedAssetsForLinking: <String, List<EncodedAsset>>{
         for (final String linkerName in codeAssetsForLinking.keys)
           linkerName: <EncodedAsset>[
             for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!) codeAsset.encode(),
-          ],
-        for (final String linkerName in dataAssetsForLinking.keys)
-          linkerName: <EncodedAsset>[
-            for (final DataAsset dataAsset in dataAssetsForLinking[linkerName]!) dataAsset.encode(),
           ],
       },
       dependencies: dependencies,
