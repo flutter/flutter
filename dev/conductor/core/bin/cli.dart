@@ -46,7 +46,6 @@ Future<void> main(List<String> args) async {
     StatusCommand(checkouts: checkouts),
     StartCommand(checkouts: checkouts, conductorVersion: conductorVersion),
     CleanCommand(checkouts: checkouts),
-    CandidatesCommand(checkouts: checkouts, flutterRoot: _localFlutterRoot),
     NextCommand(checkouts: checkouts),
   ].forEach(runner.addCommand);
 

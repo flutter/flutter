@@ -4,7 +4,6 @@
 
 // See: https://github.com/flutter/flutter/blob/main/docs/releases/Release-process.md
 
-export 'src/candidates.dart';
 export 'src/clean.dart';
 export 'src/git.dart';
 export 'src/globals.dart';
