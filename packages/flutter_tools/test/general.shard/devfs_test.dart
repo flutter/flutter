@@ -990,7 +990,6 @@ class FakeBundle extends AssetBundle {
 
   @override
   Future<int> build({
-    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     String? assetDirPath,
     String? packageConfigPath,
