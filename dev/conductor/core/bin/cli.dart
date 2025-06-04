@@ -35,10 +35,7 @@ Future<void> main(List<String> args) async {
     usageLineLength: 80,
   );
 
-  <Command<void>>[
-    CleanCommand(checkouts: checkouts),
-    NextCommand(checkouts: checkouts),
-  ].forEach(runner.addCommand);
+  <Command<void>>[NextCommand(checkouts: checkouts)].forEach(runner.addCommand);
 
   if (!assertsEnabled()) {
     stdio.printError('The conductor tool must be run with --enable-asserts.');
