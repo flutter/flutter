@@ -43,7 +43,6 @@ Future<void> main(List<String> args) async {
       )).trim();
 
   <Command<void>>[
-    StatusCommand(checkouts: checkouts),
     StartCommand(checkouts: checkouts, conductorVersion: conductorVersion),
     CleanCommand(checkouts: checkouts),
     NextCommand(checkouts: checkouts),
