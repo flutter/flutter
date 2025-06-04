@@ -103,7 +103,7 @@ void testMain() {
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     });
 
-    test('will download Noto Sans JP if Japanease text is added in ja', () async {
+    test('will download Noto Sans JP if Japanese text is added in ja', () async {
       expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
 
       renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'ja';
