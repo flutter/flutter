@@ -7,18 +7,24 @@ import 'package:test/test.dart';
 
 class _MockLicenseSource implements LicenseSource {
   _MockLicenseSource(this.name, this.libraryName, this.officialSourceLocation);
+  @override
   String name;
+  @override
   String libraryName;
+  @override
   String officialSourceLocation;
+  @override
   List<License>? nearestLicensesFor(String name) => null;
+  @override
   License? nearestLicenseOfType(LicenseType type) => null;
+  @override
   License? nearestLicenseWithName(String name, {String? authors}) => null;
 }
 
 void main() {
   test('Block comments', () {
-    _MockLicenseSource licenseSource = _MockLicenseSource('foo', 'bar', 'baz');
-    List<License> licenses = determineLicensesFor(
+    final _MockLicenseSource licenseSource = _MockLicenseSource('foo', 'bar', 'baz');
+    final List<License> licenses = determineLicensesFor(
       '''
 /*
  * The authors of this software are Rob Pike and Ken Thompson.
