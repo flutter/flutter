@@ -155,10 +155,11 @@ class BuildInfo {
   /// dependencies.
   final bool androidSkipBuildDependencyValidation;
 
-  /// Specifies Gradle's project-specific cache directory.
+  /// Additional key value pairs that are passed directly to the gradle project via the `-P`
+  /// flag.
   final List<String> androidProjectArgs;
 
-  /// Additional key value pairs that are passed directly to the Gradle cli invocation.
+  /// Specifies Gradle's project-specific cache directory.
   final String? androidGradleProjectCacheDir;
 
   /// The package configuration for the loaded application.
