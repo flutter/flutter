@@ -6,7 +6,6 @@
 
 export 'src/git.dart';
 export 'src/globals.dart';
-export 'src/next.dart' hide kStateOption, kYesFlag;
 export 'src/repository.dart';
 export 'src/state.dart';
 export 'src/stdio.dart';
