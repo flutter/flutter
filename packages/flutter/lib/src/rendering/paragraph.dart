@@ -1284,6 +1284,7 @@ class RenderParagraph extends RenderBox
     var placeholderIndex = 0;
     var childIndex = 0;
     RenderBox? child = firstChild;
+    // ignore: prefer_collection_literals
     final newChildCache = LinkedHashMap<Key, SemanticsNode>();
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
