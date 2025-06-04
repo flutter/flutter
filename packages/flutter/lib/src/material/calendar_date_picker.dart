@@ -40,7 +40,8 @@ const int _maxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 const double _maxDayPickerHeightM2 = _dayPickerRowHeightM2 * (_maxDayPickerRowCount + 1);
 const double _maxDayPickerHeightM3 = _dayPickerRowHeightM3 * (_maxDayPickerRowCount + 1);
 
-const double _monthPickerHorizontalPadding = 12.0;
+const double _monthPickerHorizontalPaddingPortraitM3 = 12.0;
+const double _monthPickerHorizontalPaddingM2 = 8.0;
 
 const int _yearPickerColumnCount = 3;
 const double _yearPickerPadding = 16.0;
@@ -1098,8 +1099,12 @@ class _DayPickerState extends State<_DayPicker> {
       }
     }
 
+    final double monthPickerHorizontalPadding =
+        Theme.of(context).useMaterial3 && !isLandscapeOrientation
+            ? _monthPickerHorizontalPaddingPortraitM3
+            : _monthPickerHorizontalPaddingM2;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: _monthPickerHorizontalPadding),
+      padding: EdgeInsets.symmetric(horizontal: monthPickerHorizontalPadding),
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor:
             isLandscapeOrientation
