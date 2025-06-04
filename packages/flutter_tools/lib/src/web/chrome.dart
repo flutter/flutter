@@ -237,14 +237,12 @@ class ChromiumLauncher {
     ];
 
     final io.File chromeDebugLogFile = io.File('${userDataDir.path}/chrome_debug.log');
-    String previousString = '';
     final Completer<void> gotLogs = Completer<void>();
     Timer.periodic(const Duration(seconds: 10), (Timer timer) {
       if (chromeDebugLogFile.existsSync()) {
         timer.cancel();
         _logger.printTrace('${chromeDebugLogFile.path} exists');
-        previousString = chromeDebugLogFile.readAsStringSync();
-        _logger.printTrace('Chrome debug log output: $previousString');
+        _logger.printTrace('Chrome debug log output: ${chromeDebugLogFile.readAsStringSync()}');
         gotLogs.complete();
       } else {
         _logger.printTrace('${chromeDebugLogFile.path} does not exist yet');
