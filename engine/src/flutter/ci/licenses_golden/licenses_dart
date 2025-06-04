@@ -1,4 +1,4 @@
-Signature: 2aaf29e2ecd232f0fe958feb7c07d900
+Signature: 98bc8f2531a06f3e56ce2915e1ed97c6
 
 ====================================================================================================
 LIBRARY: dart
@@ -4234,6 +4234,8 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/platform/list_queue.h + ../../
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/lockers.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/mach_o.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/mach_o.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S + ../../../flutter/third_party/dart/LICENSE
@@ -4252,6 +4254,8 @@ FILE: ../../../flutter/third_party/dart/runtime/platform/list_queue.h
 FILE: ../../../flutter/third_party/dart/runtime/platform/lockers.h
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
 FILE: ../../../flutter/third_party/dart/runtime/vm/dwarf_so_writer.h
+FILE: ../../../flutter/third_party/dart/runtime/vm/mach_o.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/mach_o.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S
@@ -4876,7 +4880,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/4de10a11ceb9e4feb056b230e757b98452b8c161
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/6aeb798bdbe27e6e6c5ee533dca392404ca496ce
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
