@@ -53,9 +53,6 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
-  /// Whether explicit package dependency management is enabled.
-  bool get isExplicitPackageDependenciesEnabled => false;
-
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
