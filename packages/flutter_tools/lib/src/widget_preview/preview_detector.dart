@@ -65,6 +65,7 @@ final class PreviewDetails {
   static const String kWrapper = 'wrapper';
   static const String kTheme = 'theme';
   static const String kBrightness = 'brightness';
+  static const String kLocalizations = 'localizations';
 
   /// The name of the function returning the preview.
   final String functionName;
@@ -109,6 +110,9 @@ final class PreviewDetails {
   Expression? get brightness => _brightness;
   Expression? _brightness;
 
+  Expression? get localizations => _localizations;
+  Expression? _localizations;
+
   void _setField({required NamedExpression node}) {
     final String key = node.name.label.name;
     final Expression expression = node.expression;
@@ -125,6 +129,8 @@ final class PreviewDetails {
         _theme = expression as Identifier;
       case kBrightness:
         _brightness = expression;
+      case kLocalizations:
+        _localizations = expression;
       default:
         throw StateError('Unknown Preview field "$name": ${expression.toSource()}');
     }
@@ -144,14 +150,15 @@ final class PreviewDetails {
         other.textScaleFactor == textScaleFactor &&
         other.wrapper == wrapper &&
         other.theme == theme &&
-        other.brightness == brightness;
+        other.brightness == brightness &&
+        other.localizations == localizations;
   }
 
   @override
   String toString() =>
       'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
       '$kSize: $size $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kTheme: $theme $kBrightness: $_brightness)';
+      '$kTheme: $theme $kBrightness: $_brightness $kLocalizations: $_localizations)';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -163,6 +170,7 @@ final class PreviewDetails {
     wrapper,
     theme,
     brightness,
+    localizations,
   ]);
 }
 

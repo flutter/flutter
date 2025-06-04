@@ -45,6 +45,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/widget_previews.dart';
 
 import 'brightness.dart';
+import 'localizations.dart';
 import 'theme.dart';
 import 'wrapper.dart';
 
@@ -61,6 +62,7 @@ Widget barPreview2() => Text('Foo');
   wrapper: wrapper,
   brightness: Brightness.dark,
   theme: myThemeData,
+  localizations: myLocalizations,
 )
 WidgetBuilder barPreview3() => (BuildContext context) {
   return Text('Foo');
@@ -84,6 +86,27 @@ import 'package:flutter/widgets.dart';
 
 Widget wrapper(Widget widget) {
   return widget;
+}
+''';
+
+const String kLocalizationsDart = '''
+import 'package:flutter/widget_previews.dart';
+
+PreviewLocalizationsData myLocalizations() {
+  return PreviewLocalizationsData(
+    locale: Locale('en'),
+    localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [
+      Locale('en'), // English
+      Locale('es'), // Spanish
+    ],
+    localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) => null,
+    localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => null,
+  );
 }
 ''';
 
@@ -113,6 +136,7 @@ void main() {
             ..childFile('lib/foo.dart').writeAsStringSync(kFooDart)
             ..childFile('lib/src/bar.dart').writeAsStringSync(kBarDart)
             ..childFile('lib/src/brightness.dart').writeAsStringSync(kBrightnessDart)
+            ..childFile('lib/src/localizations.dart').writeAsStringSync(kLocalizationsDart)
             ..childFile('lib/src/wrapper.dart').writeAsStringSync(kWrapperDart)
             ..childFile('lib/src/theme.dart').writeAsStringSync(kThemeDart);
       project = FlutterProject.fromDirectoryTest(projectDir);
@@ -172,8 +196,9 @@ import 'package:foo_project/src/bar.dart' as _i3;
 import 'package:foo_project/src/brightness.dart' as _i4;
 import 'dart:ui' as _i5;
 import 'package:foo_project/src/theme.dart' as _i6;
-import 'package:foo_project/src/wrapper.dart' as _i7;
-import 'package:flutter/widgets.dart' as _i8;
+import 'package:foo_project/src/localizations.dart' as _i7;
+import 'package:foo_project/src/wrapper.dart' as _i8;
+import 'package:flutter/widgets.dart' as _i9;
 
 List<_i1.WidgetPreview> previews() => [
       _i1.WidgetPreview(builder: () => _i2.preview()),
@@ -191,7 +216,8 @@ List<_i1.WidgetPreview> previews() => [
         textScaleFactor: 50,
         theme: _i6.myThemeData(),
         brightness: _i5.Brightness.dark,
-        builder: () => _i7.wrapper(_i8.Builder(builder: _i3.barPreview3())),
+        localizations: _i7.myLocalizations(),
+        builder: () => _i8.wrapper(_i9.Builder(builder: _i3.barPreview3())),
       ),
     ];
 ''';

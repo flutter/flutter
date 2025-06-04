@@ -116,6 +116,7 @@ void main() {
           wrapper: 'testWrapper',
           theme: 'theming',
           brightness: 'Brightness.dark',
+          localizations: 'localizations',
         ),
         PreviewDetailsMatcher(
           functionName: 'MyWidget.preview',
@@ -198,6 +199,7 @@ void main() {
           wrapper: 'testWrapper',
           theme: 'theming',
           brightness: 'Brightness.dark',
+          localizations: 'localizations',
         ),
         PreviewDetailsMatcher(
           functionName: 'MyWidget.preview',
@@ -273,6 +275,7 @@ class PreviewDetailsMatcher extends Matcher {
     this.wrapper,
     this.theme,
     this.brightness,
+    this.localizations,
   }) {
     if (name != null && nameSymbol != null) {
       fail('name and nameSymbol cannot both be provided.');
@@ -292,6 +295,7 @@ class PreviewDetailsMatcher extends Matcher {
   final String? wrapper;
   final String? theme;
   final String? brightness;
+  final String? localizations;
 
   @override
   Description describe(Description description) {
@@ -358,6 +362,11 @@ class PreviewDetailsMatcher extends Matcher {
       actual: item.brightness,
       expected: brightness,
     );
+    checkPropertyMatch(
+      name: PreviewDetails.kLocalizations,
+      actual: item.localizations,
+      expected: localizations,
+    );
     return matches;
   }
 }
@@ -384,8 +393,34 @@ PreviewThemeData theming() => PreviewThemeData(
   cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
 );
 
+PreviewLocalizationsData localizations() {
+  return PreviewLocalizationsData(
+    locale: Locale('en'),
+    localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [
+      Locale('en'), // English
+      Locale('es'), // Spanish
+    ],
+    localeListResolutionCallback:
+        (List<Locale>? locales, Iterable<Locale> supportedLocales) => null,
+    localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => null,
+  );
+}
+
 const String kAttributesPreview = 'Attributes preview';
-@Preview(name: kAttributesPreview, size: Size(100.0, 100), textScaleFactor: 2.0, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
+@Preview(
+  name: kAttributesPreview,
+  size: Size(100.0, 100),
+  textScaleFactor: 2.0,
+  wrapper: testWrapper,
+  theme: theming,
+  brightness: Brightness.dark,
+  localizations: localizations,
+)
 Widget attributesPreview() {
   return Text('Attributes');
 }
