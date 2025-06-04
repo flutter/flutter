@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -234,7 +235,13 @@ void main() {
         '$CleanCommand handles missing delete permissions',
         () async {
           final FileExceptionHandler handler = FileExceptionHandler();
-          final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+
+          // Ensures we handle ErrorHandlingFileSystem appropriately in prod.
+          // See https://github.com/flutter/flutter/issues/108978.
+          final FileSystem fileSystem = ErrorHandlingFileSystem(
+            delegate: MemoryFileSystem.test(opHandle: handler.opHandle),
+            platform: windowsPlatform,
+          );
           final File throwingFile = fileSystem.file('bad')..createSync();
           handler.addError(
             throwingFile,
