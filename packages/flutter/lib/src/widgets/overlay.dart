@@ -2443,10 +2443,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     super.markNeedsLayout();
   }
 
-  // remove semanticsParent and use parent instead.
-  // @override
-  // RenderObject? get semanticsParent => _layoutSurrogate;
-
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     final RenderBox? child = this.child;
