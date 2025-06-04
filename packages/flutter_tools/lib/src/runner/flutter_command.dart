@@ -138,7 +138,7 @@ abstract final class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
-  static const String kAndroidProjectGradleCliArgs = 'android-project-gradle-cli-arg';
+  static const String kAndroidGradleProjectCacheDir = 'android-project-cache-dir';
   static const String kAndroidSkipBuildDependencyValidation =
       'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
@@ -1069,14 +1069,11 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
       abbr: 'P',
     );
-    argParser.addMultiOption(
-      FlutterOptions.kAndroidProjectGradleCliArgs,
+    argParser.addOption(
+      FlutterOptions.kAndroidGradleProjectCacheDir,
       help:
-      'Additional arguments specified as key=value that are passed directly to the gradle '
-          'invocation.',
-      splitCommas: false,
+          'Specifies the project-specific cache directory. Default value is .gradle in the root project directory.',
     );
-    //kAndroidProjectGradleCliArgs = 'android-project-gradle-cli-arg';
   }
 
   void addNativeNullAssertions({bool hide = false}) {
@@ -1376,10 +1373,10 @@ abstract class FlutterCommand extends Command<void> {
             ? stringsArg(FlutterOptions.kAndroidProjectArgs)
             : <String>[];
 
-    final List<String> androidProjectGradleCliArgs =
-    argParser.options.containsKey(FlutterOptions.kAndroidProjectGradleCliArgs)
-        ? stringsArg(FlutterOptions.kAndroidProjectGradleCliArgs)
-        : <String>[];
+    final String? androidGradleProjectCacheDir =
+    argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
+        ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+        : null;
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
@@ -1463,7 +1460,7 @@ abstract class FlutterCommand extends Command<void> {
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
-      androidProjectGradleCliArgs: androidProjectGradleCliArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill:
           argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
               ? stringArg(FlutterOptions.kInitializeFromDill)
