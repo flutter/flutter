@@ -362,6 +362,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
           );
         }
+        _logger.printStatus('webdevfs.connect');
+        final WebDevFS webDevFS = device!.devFS! as WebDevFS;
+        final bool useDebugExtension =
+            device!.device is WebServerDevice && debuggingOptions.startPaused;
+        final Future<ConnectionResult?> webDevFSConnect = webDevFS.connect(useDebugExtension);
         _logger.printStatus('starting app');
         await device!.device!.startApp(
           package,
@@ -373,6 +378,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          webDevFSConnect: webDevFSConnect,
         );
       });
     } on WebSocketException catch (error, stackTrace) {
@@ -759,6 +765,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
+    Future<ConnectionResult?>? webDevFSConnect,
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
@@ -786,11 +793,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     Uri? websocketUri;
     if (supportsServiceProtocol) {
       _logger.printStatus('setting up vmservice');
-      final WebDevFS webDevFS = device!.devFS! as WebDevFS;
-      final bool useDebugExtension =
-          device!.device is WebServerDevice && debuggingOptions.startPaused;
-      _logger.printStatus('webdevfs.connect');
-      _connectionResult = await webDevFS.connect(useDebugExtension);
+      _connectionResult = await webDevFSConnect;
       _logger.printStatus('webdevfs.connected');
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 

@@ -236,16 +236,15 @@ class ChromiumLauncher {
       url,
     ];
 
+    _logger.printError('user data path: ${userDataDir.path}');
     final io.File chromeDebugLogFile = io.File('${userDataDir.path}/chrome_debug.log');
-    final Completer<void> gotLogs = Completer<void>();
     Timer.periodic(const Duration(seconds: 10), (Timer timer) {
       if (chromeDebugLogFile.existsSync()) {
         timer.cancel();
-        _logger.printTrace('${chromeDebugLogFile.path} exists');
-        _logger.printTrace('Chrome debug log output: ${chromeDebugLogFile.readAsStringSync()}');
-        gotLogs.complete();
+        _logger.printError('${chromeDebugLogFile.path} exists');
+        _logger.printError('Chrome debug log output: ${chromeDebugLogFile.readAsStringSync()}');
       } else {
-        _logger.printTrace('${chromeDebugLogFile.path} does not exist yet');
+        _logger.printError('${chromeDebugLogFile.path} does not exist yet');
       }
     });
 
@@ -258,7 +257,7 @@ class ChromiumLauncher {
           _cacheUserSessionInformation(userDataDir, cacheDir);
           // cleanup temp dir
           try {
-            gotLogs.future.then((_) => userDataDir.deleteSync(recursive: true));
+            userDataDir.deleteSync(recursive: true);
           } on FileSystemException {
             // ignore
           }
