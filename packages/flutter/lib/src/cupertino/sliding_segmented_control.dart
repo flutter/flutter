@@ -1342,6 +1342,9 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     context.paintChild(child, childParentData.offset + offset);
   }
 
+  RSuperellipse? _cachedThumb;
+  RSuperellipse? _cachedThumbInflated;
+
   void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
     // Colors extracted from https://developer.apple.com/design/resources/.
     const List<BoxShadow> thumbShadow = <BoxShadow>[
@@ -1352,16 +1355,22 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final RSuperellipse thumbShape = RSuperellipse.fromRectAndRadius(
       thumbRect.shift(offset),
       _kThumbRadius,
-    );
+    ).cacheable(cacheReference: _cachedThumb);
+    _cachedThumb = thumbShape;
+
+    final RSuperellipse thumbInflatedShape = thumbShape
+        .inflate(0.5)
+        .cacheable(cacheReference: _cachedThumbInflated);
+    _cachedThumbInflated = thumbInflatedShape;
 
     for (final BoxShadow shadow in thumbShadow) {
-      context.canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint());
+      context.canvas.drawRSuperellipse(
+        thumbShape.shift(shadow.offset).cacheable(cacheReference: _cachedThumb),
+        shadow.toPaint(),
+      );
     }
 
-    context.canvas.drawRSuperellipse(
-      thumbShape.inflate(0.5),
-      Paint()..color = const Color(0x0A000000),
-    );
+    context.canvas.drawRSuperellipse(thumbInflatedShape, Paint()..color = const Color(0x0A000000));
 
     context.canvas.drawRSuperellipse(thumbShape, Paint()..color = thumbColor);
   }
