@@ -2880,6 +2880,53 @@ void _tests() {
 
     semantics.dispose();
   });
+
+  testWidgets('sliver with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
+    // Construct a widget tree that will end up with a fitted box that applies
+    // a zero transform because it does not actually draw its children.
+    // Assert that this subtree gets dropped (the root node has no children).
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      boilerPlate(
+        slivers: <Widget>[
+          const SliverMainAxisGroup(
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 0,
+                  width: 500,
+                  child: FittedBox(
+                    child: SizedBox(
+                      height: 55,
+                      width: 266,
+                      child: SingleChildScrollView(child: Column()),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]),
+      ],
+    );
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true),
+    );
+
+    final SemanticsNode node = RendererBinding.instance.renderView.debugSemantics!;
+
+    expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
+    expect(node.childrenCount, 1);
+    semantics.dispose();
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
