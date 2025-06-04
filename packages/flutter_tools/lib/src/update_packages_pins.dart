@@ -32,7 +32,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
       '0.19.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'hooks_runner':
       '0.20.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
-  'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
+  'material_color_utilities': '0.13.0', // Keep pinned to latest until 1.0.0.
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
