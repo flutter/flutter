@@ -18,7 +18,8 @@ class _MockLicenseSource implements LicenseSource {
 void main() {
   test('Block comments', () {
     _MockLicenseSource licenseSource = _MockLicenseSource('foo', 'bar', 'baz');
-    List<License> licenses = determineLicensesFor('''
+    List<License> licenses = determineLicensesFor(
+      '''
 /*
  * The authors of this software are Rob Pike and Ken Thompson.
  *              Copyright (c) 2002 by Lucent Technologies.
@@ -37,7 +38,11 @@ void main() {
 #include <string.h>
 
 #include "util/utf.h"
-''', 'foo.h', licenseSource, origin: 'origin');
+''',
+      'foo.h',
+      licenseSource,
+      origin: 'origin',
+    );
     expect(licenses, isNotEmpty);
   });
 }
