@@ -1428,7 +1428,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   // See [_RenderObjectSemantics]'s documentation for detailed explanations on
-  // what this method does
+  // what this method does.
   void flushSemantics() {
     if (_semanticsOwner == null) {
       return;
@@ -1461,7 +1461,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
           // or is hidden by parent through visitChildrenForSemantics. Otherwise,
           // the parent node would have updated this node's parent data and it
-          // the not be dirty.
+          // would not be dirty.
           //
           // Updating the parent data now may create a gap of render object with
           // dirty parent data when this branch later rejoin the rendering tree.
@@ -2011,15 +2011,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// The [parent] of the root node in the render tree is null.
   RenderObject? get parent => _parent;
   RenderObject? _parent;
-
-  /// The semantics parent of this render object in the semantics tree.
-  ///
-  /// This is typically the same as [parent].
-  ///
-  /// [OverlayPortal] overrides this field to change how it forms its
-  /// semantics sub-tree.
-  @visibleForOverriding
-  RenderObject? get semanticsParent => _parent;
 
   /// Called by subclasses when they decide a render object is a child.
   ///
@@ -5426,7 +5417,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         isRoot;
   }
 
-  bool get isRoot => renderObject.semanticsParent == null;
+  bool get isRoot => renderObject.parent == null;
 
   bool get shouldFormSemanticsNode {
     if (configProvider.effective.isSemanticBoundary) {
@@ -6127,8 +6118,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     // node, thus marking this semantics boundary dirty is not enough, it needs
     // to find the first parent semantics boundary that does not have any
     // possible sibling node.
-    while (node.semanticsParent != null &&
-        (mayProduceSiblingNodes || !isEffectiveSemanticsBoundary)) {
+    while (node.parent != null && (mayProduceSiblingNodes || !isEffectiveSemanticsBoundary)) {
       if (node != renderObject && node._semantics.parentDataDirty && !mayProduceSiblingNodes) {
         break;
       }
@@ -6144,7 +6134,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       mayProduceSiblingNodes |=
           node._semantics.configProvider.effective.childConfigurationsDelegate != null;
 
-      node = node.semanticsParent!;
+      node = node.parent!;
       // If node._semantics.built is false, this branch is currently blocked.
       // In that case, it should continue dirty upward until it reach a
       // unblocked semantics boundary because blocked branch will not rebuild
@@ -6170,10 +6160,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
     if (!node._semantics.parentDataDirty) {
       if (renderObject.owner != null) {
-        assert(
-          node._semantics.configProvider.effective.isSemanticBoundary ||
-              node.semanticsParent == null,
-        );
+        assert(node._semantics.configProvider.effective.isSemanticBoundary || node.parent == null);
         if (renderObject.owner!._nodesNeedingSemantics.add(node)) {
           renderObject.owner!.requestVisualUpdate();
         }
