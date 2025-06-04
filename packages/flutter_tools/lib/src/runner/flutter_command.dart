@@ -138,6 +138,7 @@ abstract final class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kAndroidGradleProjectCacheDir = 'android-project-cache-dir';
   static const String kAndroidSkipBuildDependencyValidation =
       'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
@@ -1068,6 +1069,10 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
       abbr: 'P',
     );
+    argParser.addOption(
+      FlutterOptions.kAndroidGradleProjectCacheDir,
+      help: 'Specifies the project-specific cache directory. Defaults to .gradle.',
+    );
   }
 
   void addNativeNullAssertions({bool hide = false}) {
@@ -1367,6 +1372,11 @@ abstract class FlutterCommand extends Command<void> {
             ? stringsArg(FlutterOptions.kAndroidProjectArgs)
             : <String>[];
 
+    final String? androidGradleProjectCacheDir =
+        argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
+            ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+            : null;
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1449,6 +1459,7 @@ abstract class FlutterCommand extends Command<void> {
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill:
           argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
               ? stringArg(FlutterOptions.kInitializeFromDill)

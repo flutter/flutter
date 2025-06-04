@@ -33,6 +33,7 @@ class BuildInfo {
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
     this.androidProjectArgs = const <String>[],
+    this.androidGradleProjectCacheDir,
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -157,6 +158,9 @@ class BuildInfo {
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
   final List<String> androidProjectArgs;
+
+  /// Specifies Gradle's project-specific cache directory.
+  final String? androidGradleProjectCacheDir;
 
   /// The package configuration for the loaded application.
   ///
@@ -367,6 +371,7 @@ class BuildInfo {
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
+      if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
     ];
   }
 }
