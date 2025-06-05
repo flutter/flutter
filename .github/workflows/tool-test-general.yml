@@ -14,11 +14,6 @@ on:
   push:
     branches: [master]
 
-env:
-  ANDROID_TOOLS_VERSION: 13114758
-  ANDROID_PLATFORM: android-36
-  ANDROID_BUILDTOOLS: 36.0.0
-
 jobs:
   Linux_tool-tests-general:
     permissions:
@@ -69,69 +64,27 @@ jobs:
           distribution: 'temurin'
 
       # If running locally; install Android SDK tools - Github runners have everything on them
-      - name: Get Android SDK version
-        id: android-sdk-version
+      - name: Setup Android SDK
         if: env.ACT
-        run: |
-          echo "revision=${{env.ANDROID_TOOLS_VERSION}};${{env.ANDROID_PLATFORM}};build-tools;${{env.ANDROID_BUILDTOOLS}}" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        id: android-sdk-setup
-        if: env.ACT
-        with:
-          path: $HOME/.android/sdk
-          key: ${{ runner.os }}-${{ steps.android-sdk-version.outputs.revision }}
-      - name: Setup Android SDK (cold cache)
-        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit != 'true'
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
         with:
-          packages: 'tools platform-tools platforms;${{env.ANDROID_PLATFORM}} build-tools;${{env.ANDROID_BUILDTOOLS}}'
-          log-accepted-android-sdk-licenses: false
-          cmdline-tools-version: ${{ env.ANDROID_TOOLS_VERSION }}
-      - name: Setup Android SDK (warm cache)
-        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
+          cmdline-tools-version: 13114758
+
+      # If running locally; install Android SDK - Github runners have everything on them
+      - name: install android
+        if: env.ACT
         run: |
-          echo "ANDROID_SDK_ROOT=$HOME/.android/sdk" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$HOME/.android/sdk" >> $GITHUB_ENV
-          echo "$HOME/.android/sdk/cmdline-tools/${{ env.ANDROID_TOOLS_VERSION }}/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.android/sdk/platform-tools" >> "$GITHUB_PATH"
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Add `flutter` to the PATH
         run: |
-          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
-
-      # Get the Flutter revision. This is the key for the cache for artifacts
-      # under bin/cache
-      - name: Get Flutter version
-        id: flutter-revision
-        run: |
-          echo "revision=$(git -C ${{ github.workspace }} rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        id: flutter-artifacts
-        with:
-          path: ${{ github.workspace }}/bin/cache
-          key: ${{ runner.os }}-${{ steps.flutter-revision.outputs.revision }}
-
-      - name: pub deps hash
-        id: pub-deps-hash
-        run: |
-          # Generate stable hash of pubspec.yaml files
-          find dev examples packages -name "pubspec.yaml" -print0 | sort -z | xargs -0 cat | sha256sum  >> "$RUNNER_TEMP/pub_deps_sha"
-          echo "revision=$(cat "$RUNNER_TEMP/pub_deps_sha")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
-        id: pub-cache
-        with:
-          path: |
-            $HOME/.pub-cache
-            ${{ github.workspace }}/**/.dart_tool
-            ${{ github.workspace }}/**/pubspec.lock
-          key: ${{ runner.os }}-pub-${{ steps.pub-deps-hash.outputs.revision }}
+          echo "$PWD/bin" >> "$GITHUB_PATH"
 
       - name: Flutter Doctor
         run: |
           flutter doctor
 
-      - name: update-packages (online)
-        if: steps.pub-cache.outputs.cache-hit != 'true'
+      - name: update-packages
         run: |
           flutter update-packages
 
