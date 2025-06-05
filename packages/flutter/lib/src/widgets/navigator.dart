@@ -79,9 +79,6 @@ typedef RestorableRouteBuilder<T> = Route<T> Function(BuildContext context, Obje
 /// Signature for the [Navigator.popUntil] predicate argument.
 typedef RoutePredicate = bool Function(Route<dynamic> route);
 
-/// Signature for the [Navigator.popUntil] return value predicate argument.
-typedef RouteResultPredicate = Object? Function(Route<dynamic> route);
-
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
@@ -2810,6 +2807,7 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  @optionalTypeArgs
   static void popUntil<T extends Object?>(
     BuildContext context,
     RoutePredicate predicate, [
