@@ -41,7 +41,7 @@ const double _maxDayPickerHeightM2 = _dayPickerRowHeightM2 * (_maxDayPickerRowCo
 const double _maxDayPickerHeightM3 = _dayPickerRowHeightM3 * (_maxDayPickerRowCount + 1);
 
 const double _monthPickerHorizontalPaddingPortraitM3 = 12.0;
-const double _monthPickerHorizontalPaddingM2 = 8.0;
+const double _monthPickerHorizontalPaddingOther = 8.0;
 
 const int _yearPickerColumnCount = 3;
 const double _yearPickerPadding = 16.0;
@@ -1102,7 +1102,7 @@ class _DayPickerState extends State<_DayPicker> {
     final double monthPickerHorizontalPadding =
         Theme.of(context).useMaterial3 && !isLandscapeOrientation
             ? _monthPickerHorizontalPaddingPortraitM3
-            : _monthPickerHorizontalPaddingM2;
+            : _monthPickerHorizontalPaddingOther;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: monthPickerHorizontalPadding),
       child: MediaQuery.withClampedTextScaling(
