@@ -31,9 +31,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('hot reload does not need to sync assets on the first reload', () async {
+    testWithoutContext('hot reload/restart do not need to sync assets on reload', () async {
       final Completer<void> onFirstLoad = Completer<void>();
       final Completer<void> onSecondLoad = Completer<void>();
+      final Completer<void> onThirdLoad = Completer<void>();
 
       flutter.stdout.listen((String line) {
         // If the asset fails to load, this message will be printed instead.
@@ -48,6 +49,9 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         if (line.contains('SECOND DATA')) {
           onSecondLoad.complete();
         }
+        if (line.contains('THIRD DATA')) {
+          onThirdLoad.complete();
+        }
       });
       flutter.stdout.listen(printOnFailure);
       await flutter.run(
@@ -56,39 +60,13 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       );
       await onFirstLoad.future;
 
-      project.uncommentHotReloadPrint();
+      project.replaceHotReloadPrint('SECOND DATA');
       await flutter.hotReload();
       await onSecondLoad.future;
-    });
 
-    testWithoutContext('hot restart does not need to sync assets on the first reload', () async {
-      final Completer<void> onFirstLoad = Completer<void>();
-      final Completer<void> onSecondLoad = Completer<void>();
-
-      flutter.stdout.listen((String line) {
-        // If the asset fails to load, this message will be printed instead.
-        // this indicates that the devFS was not able to locate the asset
-        // after the hot reload.
-        if (line.contains('FAILED TO LOAD')) {
-          fail('Did not load asset: $line');
-        }
-        if (line.contains('LOADED DATA')) {
-          onFirstLoad.complete();
-        }
-        if (line.contains('SECOND DATA')) {
-          onSecondLoad.complete();
-        }
-      });
-      flutter.stdout.listen(printOnFailure);
-      await flutter.run(
-        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
-        additionalCommandArgs: additionalCommandArgs,
-      );
-      await onFirstLoad.future;
-
-      project.uncommentHotReloadPrint();
+      project.replaceHotReloadPrint('THIRD DATA');
       await flutter.hotRestart();
-      await onSecondLoad.future;
+      await onThirdLoad.future;
     });
   });
 }
