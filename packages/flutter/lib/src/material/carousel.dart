@@ -1627,6 +1627,16 @@ class CarouselController extends ScrollController {
   final int initialItem;
 
   /// The current index of the [CarouselView].
+  ///
+  /// This is the index of the item whose leading edge is aligned with the
+  /// start of the viewport.
+  ///
+  /// - **Horizontal carousel**: The item aligned with the **left** edge.
+  /// - **Vertical carousel**: The item aligned with the **top** edge.
+  ///
+  /// **Note**: This property indicates the item at the **start** of the viewport,
+  /// which may not be the item currently in the **center**. This behavior is
+  /// consistent regardless of whether `flexWeights` are used.
   int get currentIndex => _currentIndex;
   int _currentIndex;
 
