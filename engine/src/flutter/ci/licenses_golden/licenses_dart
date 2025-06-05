@@ -1,4 +1,4 @@
-Signature: 2591f3317de57e46f76db0672648ff78
+Signature: 1086e023970dea1623b65fb2052ece9f
 
 ====================================================================================================
 LIBRARY: dart
@@ -4215,6 +4215,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: dart
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/macho_loader.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/macho_loader.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/mappable.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/mappable.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/engine/dart_engine_impl.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/engine/engine.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/engine/engine.h + ../../../flutter/third_party/dart/LICENSE
@@ -4237,6 +4241,10 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_mod
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c
+FILE: ../../../flutter/third_party/dart/runtime/bin/macho_loader.cc
+FILE: ../../../flutter/third_party/dart/runtime/bin/macho_loader.h
+FILE: ../../../flutter/third_party/dart/runtime/bin/mappable.cc
+FILE: ../../../flutter/third_party/dart/runtime/bin/mappable.h
 FILE: ../../../flutter/third_party/dart/runtime/engine/dart_engine_impl.cc
 FILE: ../../../flutter/third_party/dart/runtime/engine/engine.cc
 FILE: ../../../flutter/third_party/dart/runtime/engine/engine.h
@@ -4874,7 +4882,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/239174405ad089da5f6063c8c002efbbd354b0b0
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/d748ebd352c9d38f6c094eef1eba3466f12ce558
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
