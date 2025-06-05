@@ -1079,15 +1079,24 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 @immutable
-class PageTransitionsTheme with Diagnosticable {
+class PageTransitionsTheme extends InheritedTheme with Diagnosticable {
   /// Constructs an object that selects a transition based on the platform.
   ///
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
   /// for [TargetPlatform.android], [TargetPlatform.windows] and [TargetPlatform.linux]
   /// and [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS] and [TargetPlatform.macOS].
   const PageTransitionsTheme({
-    Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders,
-  }) : _builders = builders;
+    super.key,
+    Map<TargetPlatform, PageTransitionsBuilder>? builders,
+    PageTransitionsThemeData? data,
+    Widget? child,
+  }) : assert(
+         data == null || builders == null,
+         'Cannot provide both data and builders parameters.',
+       ),
+       _builders = builders,
+       _data = data,
+       super(child: child ?? const SizedBox.shrink());
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
       <TargetPlatform, PageTransitionsBuilder>{
@@ -1099,8 +1108,37 @@ class PageTransitionsTheme with Diagnosticable {
       };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
-  Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
-  final Map<TargetPlatform, PageTransitionsBuilder> _builders;
+  Map<TargetPlatform, PageTransitionsBuilder> get builders =>
+      _data?.builders ?? _builders ?? _defaultBuilders;
+  final Map<TargetPlatform, PageTransitionsBuilder>? _builders;
+  final PageTransitionsThemeData? _data;
+
+  /// The properties used for all descendant [PageTransitionsTheme] widgets.
+  ///
+  /// If [data] is provided, it will be used. Otherwise, a new [PageTransitionsThemeData]
+  /// will be created using the individual properties or default values.
+  PageTransitionsThemeData get data =>
+      _data ?? PageTransitionsThemeData(builders: _builders ?? _defaultBuilders);
+
+  /// Returns the closest [PageTransitionsThemeData] instance given the build context.
+  static PageTransitionsThemeData of(BuildContext context) {
+    final PageTransitionsTheme? pageTransitionsTheme =
+        context.dependOnInheritedWidgetOfExactType<PageTransitionsTheme>();
+    if (pageTransitionsTheme != null) {
+      return pageTransitionsTheme.data;
+    }
+
+    final Object theme = Theme.of(context).pageTransitionsTheme;
+    // TODO(huycozy): Remove this check when pageTransitionsTheme is a PageTransitionsThemeData in ThemeData.
+    if (theme is PageTransitionsTheme) {
+      return theme.data;
+    } else if (theme is PageTransitionsThemeData) {
+      return theme;
+    } else {
+      // Fallback to default
+      return const PageTransitionsThemeData();
+    }
+  }
 
   /// Delegates to the builder for the current [ThemeData.platform].
   /// If a builder for the current platform is not found, then the
@@ -1133,10 +1171,60 @@ class PageTransitionsTheme with Diagnosticable {
     return matchingBuilder.delegatedTransition;
   }
 
-  // Map the builders to a list with one PageTransitionsBuilder per platform for
-  // the operator == overload.
-  List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
-    return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
+  @override
+  bool updateShouldNotify(covariant PageTransitionsTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return PageTransitionsTheme(data: data, child: child);
+  }
+}
+
+/// Defines the configuration for [PageTransitionsTheme].
+///
+/// This class is used to create a [PageTransitionsTheme] that can be used to
+/// configure the page transitions for different target platforms.
+///
+/// The [builders] parameter can be used to override the default page transition
+/// builders for different target platforms. If null, the default builders will
+/// be used.
+@immutable
+class PageTransitionsThemeData with Diagnosticable {
+  /// Creates a [PageTransitionsThemeData].
+  const PageTransitionsThemeData({Map<TargetPlatform, PageTransitionsBuilder>? builders})
+    : _builders = builders;
+
+  /// The default [PageTransitionsBuilder]s supported by this theme.
+  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
+      <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+      };
+
+  /// The [PageTransitionsBuilder]s supported by this theme.
+  /// If null, falls back to [_defaultBuilders].
+  Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders ?? _defaultBuilders;
+  final Map<TargetPlatform, PageTransitionsBuilder>? _builders;
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  PageTransitionsThemeData copyWith({Map<TargetPlatform, PageTransitionsBuilder>? builders}) {
+    return PageTransitionsThemeData(builders: builders ?? _builders);
+  }
+
+  /// Get a builder for the given [TargetPlatform] and [builders].
+  PageTransitionsBuilder getBuilderByPlatform(TargetPlatform platform) {
+    return builders[platform] ??
+        switch (platform) {
+          TargetPlatform.iOS || TargetPlatform.macOS => const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.android ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.windows ||
+          TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+        };
   }
 
   @override
@@ -1147,26 +1235,42 @@ class PageTransitionsTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    if (other is PageTransitionsTheme && identical(builders, other.builders)) {
-      return true;
-    }
-    return other is PageTransitionsTheme &&
-        listEquals<PageTransitionsBuilder?>(_all(other.builders), _all(builders));
+    return other is PageTransitionsThemeData && identical(builders, other.builders);
   }
 
   @override
-  int get hashCode => Object.hashAll(_all(builders));
+  int get hashCode => Object.hashAll(<Object?>[builders]);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>(
-        'builders',
-        builders,
-        defaultValue: PageTransitionsTheme._defaultBuilders,
-      ),
+      DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>?>('builders', builders),
     );
+  }
+
+  /// Linearly interpolate between two page transitions themes.
+  ///
+  /// If both themes are null, then null is returned. If one theme is null,
+  /// then the other theme is returned. Otherwise, a new theme is created
+  /// with the interpolated values.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
+  static PageTransitionsThemeData? lerp(
+    PageTransitionsThemeData? a,
+    PageTransitionsThemeData? b,
+    double t,
+  ) {
+    if (a == null && b == null) {
+      return null;
+    }
+    if (a == null) {
+      return b;
+    }
+    if (b == null) {
+      return a;
+    }
+    return PageTransitionsThemeData(builders: t < 0.5 ? a.builders : b.builders);
   }
 }
 
