@@ -4294,6 +4294,26 @@ void _testTabs() {
     expect(object.element.getAttribute('role'), 'tab');
   });
 
+  test('tab with tap action', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.tab,
+      hasTap: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
+    expect(object.element.getAttribute('role'), 'tab');
+    expect(object.element.hasAttribute('flt-tappable'), isTrue);
+  });
+
   test('nodes with tab panel role', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
