@@ -301,7 +301,7 @@ class CupertinoSheetTransition extends StatefulWidget {
               animation: radiusAnimation,
               child: child,
               builder: (BuildContext context, Widget? child) {
-                return ClipRRect(
+                return ClipRSuperellipse(
                   borderRadius:
                       !secondaryAnimation.isDismissed
                           ? radiusAnimation.value
@@ -339,7 +339,7 @@ class CupertinoSheetTransition extends StatefulWidget {
         scale: scaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: child,
         ),
@@ -559,7 +559,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: ClipRRect(
+      child: ClipRSuperellipse(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,

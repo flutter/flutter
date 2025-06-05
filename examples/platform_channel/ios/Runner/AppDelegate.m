@@ -6,15 +6,22 @@
 #import <Flutter/Flutter.h>
 #import "GeneratedPluginRegistrant.h"
 
+@interface AppDelegate () <FlutterPluginRegistrant>
+@end
+
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  [GeneratedPluginRegistrant registerWithRegistry:self];
-  NSObject<FlutterPluginRegistrar>* registrar = [self registrarForPlugin:@"battery"];
+  self.pluginRegistrant = self;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
 
+- (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+  [GeneratedPluginRegistrant registerWithRegistry:registry];
+  NSObject<FlutterPluginRegistrar>* registrar = [registry registrarForPlugin:@"samples.flutter.io"];
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
       methodChannelWithName:@"samples.flutter.io/battery"
             binaryMessenger:registrar.messenger];
@@ -39,7 +46,6 @@
       eventChannelWithName:@"samples.flutter.io/charging"
            binaryMessenger:registrar.messenger];
   [chargingChannel setStreamHandler:self];
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (int)getBatteryLevel {

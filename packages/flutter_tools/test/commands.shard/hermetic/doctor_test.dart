@@ -1428,6 +1428,7 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
            extensionDirectory,
            edition: edition,
            fileSystem: globals.fs,
+           platform: globals.platform,
          ),
        );
 
