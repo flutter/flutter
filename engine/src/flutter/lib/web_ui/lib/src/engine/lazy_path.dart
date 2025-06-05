@@ -415,6 +415,7 @@ class LazyPath implements ScenePath, Collectable {
       return _cachedPath!;
     }
     final DisposablePath path = initializer();
+    path.fillType = fillType;
     for (final command in _commands) {
       command.apply(path);
     }
