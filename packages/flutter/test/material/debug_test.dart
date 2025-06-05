@@ -92,7 +92,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          pageTransitionsTheme: const PageTransitionsTheme(
+          pageTransitionsTheme: const PageTransitionsThemeData(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
             },

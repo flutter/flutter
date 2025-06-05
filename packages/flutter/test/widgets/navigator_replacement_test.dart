@@ -203,7 +203,7 @@ void main() {
         const String kHeroTag = 'hero';
         final Widget myApp = MaterialApp(
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
               },

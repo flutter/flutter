@@ -275,7 +275,8 @@ class ThemeData with Diagnosticable {
     Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
-    PageTransitionsTheme? pageTransitionsTheme,
+    // TODO(huycozy): Change the parameter type to PageTransitionsThemeData.
+    Object? pageTransitionsTheme,
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
@@ -395,7 +396,17 @@ class ThemeData with Diagnosticable {
       case TargetPlatform.windows:
         materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
     }
-    pageTransitionsTheme ??= const PageTransitionsTheme();
+
+    // TODO(huycozy): Clean this up once the type of `pageTransitionsTheme` is changed to `PageTransitionsThemeData`.
+    if (pageTransitionsTheme != null) {
+      if (pageTransitionsTheme is PageTransitionsTheme) {
+        pageTransitionsTheme = pageTransitionsTheme.data;
+      } else if (pageTransitionsTheme is! PageTransitionsThemeData) {
+        throw ArgumentError(
+          'pageTransitionsTheme must be either a PageTransitionsThemeData or a PageTransitionsTheme',
+        );
+      }
+    }
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= true;
@@ -585,7 +596,9 @@ class ThemeData with Diagnosticable {
       extensions: _themeExtensionIterableToMap(extensions),
       inputDecorationTheme: inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize,
-      pageTransitionsTheme: pageTransitionsTheme,
+      // TODO(huycozy): Remove this type cast when pageTransitionsTheme is explicitly set to PageTransitionsThemeData.
+      pageTransitionsTheme:
+          (pageTransitionsTheme as PageTransitionsThemeData?) ?? const PageTransitionsThemeData(),
       platform: platform,
       scrollbarTheme: scrollbarTheme,
       splashFactory: splashFactory,
@@ -1000,7 +1013,8 @@ class ThemeData with Diagnosticable {
   /// [MaterialPageRoute.buildTransitions] delegates to a [platform] specific
   /// [PageTransitionsBuilder]. If a matching builder is not found, a builder
   /// whose platform is null is used.
-  final PageTransitionsTheme pageTransitionsTheme;
+  // TODO(huycozy): Change the parameter type to PageTransitionsThemeData.
+  final Object pageTransitionsTheme;
 
   /// The platform the material widgets should adapt to target.
   ///
@@ -1481,7 +1495,8 @@ class ThemeData with Diagnosticable {
     Iterable<ThemeExtension<dynamic>>? extensions,
     InputDecorationTheme? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
-    PageTransitionsTheme? pageTransitionsTheme,
+    // TODO(huycozy): Change the parameter type to PageTransitionsThemeData.
+    Object? pageTransitionsTheme,
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
@@ -1601,7 +1616,19 @@ class ThemeData with Diagnosticable {
       extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
-      pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
+      // TODO(huycozy): Remove this check when pageTransitionsTheme is a PageTransitionsThemeData.
+      pageTransitionsTheme: () {
+        if (pageTransitionsTheme != null) {
+          if (pageTransitionsTheme is PageTransitionsTheme) {
+            return pageTransitionsTheme.data;
+          } else if (pageTransitionsTheme is! PageTransitionsThemeData) {
+            throw ArgumentError(
+              'pageTransitionsTheme must be either a PageTransitionsThemeData or a PageTransitionsTheme',
+            );
+          }
+        }
+        return pageTransitionsTheme as PageTransitionsThemeData? ?? this.pageTransitionsTheme;
+      }(),
       platform: platform ?? this.platform,
       scrollbarTheme: scrollbarTheme ?? this.scrollbarTheme,
       splashFactory: splashFactory ?? this.splashFactory,
@@ -2282,13 +2309,26 @@ class ThemeData with Diagnosticable {
         level: DiagnosticLevel.debug,
       ),
     );
-    properties.add(
-      DiagnosticsProperty<PageTransitionsTheme>(
-        'pageTransitionsTheme',
-        pageTransitionsTheme,
-        level: DiagnosticLevel.debug,
-      ),
-    );
+    // TODO(huycozy): Remove this check when pageTransitionsTheme is a PageTransitionsThemeData.
+    if (pageTransitionsTheme is PageTransitionsTheme) {
+      properties.add(
+        DiagnosticsProperty<PageTransitionsTheme>(
+          'pageTransitionsTheme',
+          pageTransitionsTheme as PageTransitionsTheme?,
+          level: DiagnosticLevel.debug,
+        ),
+      );
+    } else {
+      properties.add(
+        DiagnosticsProperty<PageTransitionsThemeData>(
+          'pageTransitionsTheme',
+          pageTransitionsTheme as PageTransitionsThemeData,
+          defaultValue: defaultData.pageTransitionsTheme,
+          level: DiagnosticLevel.debug,
+        ),
+      );
+    }
+
     properties.add(
       EnumProperty<TargetPlatform>(
         'platform',

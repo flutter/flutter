@@ -1275,7 +1275,7 @@ void main() {
       labelStyle: const TextStyle(color: Colors.black),
     );
 
-    const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
+    const PageTransitionsThemeData pageTransitionTheme = PageTransitionsThemeData(
       builders: <TargetPlatform, PageTransitionsBuilder>{
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
@@ -1426,7 +1426,7 @@ void main() {
       },
       inputDecorationTheme: ThemeData().inputDecorationTheme.copyWith(border: InputBorder.none),
       materialTapTargetSize: MaterialTapTargetSize.padded,
-      pageTransitionsTheme: const PageTransitionsTheme(),
+      pageTransitionsTheme: const PageTransitionsThemeData(),
       platform: TargetPlatform.android,
       scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       splashFactory: InkRipple.splashFactory,
