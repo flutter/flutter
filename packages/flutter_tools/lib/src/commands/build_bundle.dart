@@ -145,6 +145,7 @@ class BuildBundleCommand extends BuildSubCommand {
       mainPath: targetFile,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
+      buildNativeAssets: false,
     );
     return FlutterCommandResult.success();
   }
