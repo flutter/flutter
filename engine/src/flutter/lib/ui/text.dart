@@ -3622,6 +3622,12 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
         byteOffset += FontVariation._kEncodedSize;
       }
     }
+    if (style._foreground != null) {
+      _copyBytes(style._foreground!, _getForegroundPaintByteData());
+    }
+    if (style._background != null) {
+      _copyBytes(style._background!, _getBackgroundPaintByteData());
+    }
 
     _pushStyle(
       encoded,
@@ -3633,9 +3639,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
       style._decorationThickness ?? 0,
       _encodeLocale(style._locale),
       style._background?._objects,
-      style._background?._data,
       style._foreground?._objects,
-      style._foreground?._data,
       Shadow._encodeShadows(style._shadows),
       encodedFontFeatures,
       encodedFontVariations,
@@ -3658,8 +3662,6 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
       Handle,
       Handle,
       Handle,
-      Handle,
-      Handle,
     )
   >(symbol: 'ParagraphBuilder::pushStyle')
   external void _pushStyle(
@@ -3672,9 +3674,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     double decorationThickness,
     String locale,
     List<Object?>? backgroundObjects,
-    ByteData? backgroundData,
     List<Object?>? foregroundObjects,
-    ByteData? foregroundData,
     ByteData shadowsData,
     ByteData? fontFeaturesData,
     ByteData? fontVariationsData,
@@ -3747,6 +3747,17 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'ParagraphBuilder::build')
   external void _build(_NativeParagraph outParagraph);
+
+  void _copyBytes(Paint paint, Uint8List dst) {
+    final Uint8List src = paint._data.buffer.asUint8List();
+    dst.setAll(0, src);
+  }
+
+  @Native<Handle Function(Pointer<Void>)>(symbol: 'ParagraphBuilder::GetForegroundPaintByteData')
+  external Uint8List _getForegroundPaintByteData();
+
+  @Native<Handle Function(Pointer<Void>)>(symbol: 'ParagraphBuilder::GetBackgroundPaintByteData')
+  external Uint8List _getBackgroundPaintByteData();
 
   @override
   String toString() => 'ParagraphBuilder';

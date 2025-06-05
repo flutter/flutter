@@ -747,5 +747,75 @@ TEST(DisplayListMatrixClipState, RRectCoverage) {
       DlRoundRect::MakeRectXY(test, 6.84f, 6.84f), DlMatrix(), cull));
 }
 
+TEST(DisplayListMatrixClipState, TranslateScaleTracking) {
+  const DlRect cull_rect = DlRect::MakeLTRB(0, 0, 100, 100);
+  const DlMatrix matrix = DlMatrix::MakeScale({2.0, 2.0, 1.0});
+
+  DisplayListMatrixClipState state(cull_rect, matrix);
+
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  // Translate has no impact on translate-scale state.
+  state.translate(10, 10);
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  // Scale has no impact on translate-scale state.
+  state.scale(2, 2);
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  // Skew resets translate scale state.
+  state.skew(1.1, 0.5);
+  EXPECT_FALSE(state.IsTranslateScale());
+
+  // Set identity resets translate-scale state.
+  state.setIdentity();
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  // Rotate resets translate-scale state.
+  state.rotate(DlRadians(0.5));
+  EXPECT_FALSE(state.IsTranslateScale());
+  state.setIdentity();
+
+  // Transform re-computes translate scale.
+  state.transform(DlMatrix::MakeTranslateScale({1, 1, 1}, {100, 10, 0}));
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  state.transform(DlMatrix::MakeRotationZ(DlRadians(0.5)));
+  EXPECT_FALSE(state.IsTranslateScale());
+  state.setIdentity();
+
+  // SetTransform recomputes translate-scale state.
+  state.setTransform(DlMatrix::MakeTranslateScale({1, 1, 1}, {100, 10, 0}));
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  state.setTransform(DlMatrix::MakeRotationZ(DlRadians(0.5)));
+  EXPECT_FALSE(state.IsTranslateScale());
+  state.setIdentity();
+
+  // transform2DAffine recomputes translate-scale state.
+  state.transform2DAffine(2, 0, 10, 0, 2, 10);
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  state.transform2DAffine(1, 0.5, 0.5, 1, 0, 0);
+  EXPECT_FALSE(state.IsTranslateScale());
+  state.setIdentity();
+
+  // transformFullPerspective recomputes translate-scale state.
+  state.transformFullPerspective(1, 0, 0, 0,  //
+                                 0, 1, 0, 0,  //
+                                 0, 0, 1, 0,  //
+                                 0, 0, 0, 1   //
+  );
+  EXPECT_TRUE(state.IsTranslateScale());
+
+  state.transformFullPerspective(1, 5.5, 0, 0,  //
+                                 5.5, 1, 0, 0,  //
+                                 0, 0, 1, 0,    //
+                                 0, 0, 0, 1     //
+  );
+  EXPECT_FALSE(state.IsTranslateScale());
+  state.setIdentity();
+}
+
 }  // namespace testing
 }  // namespace flutter

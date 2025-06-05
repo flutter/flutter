@@ -21,10 +21,15 @@ TEST_F(ShellTest, ConvertPaintToDlPaint) {
     Dart_Handle paint_objects =
         Dart_GetField(dart_paint, tonic::ToDart("_objects"));
     Dart_Handle paint_data = Dart_GetField(dart_paint, tonic::ToDart("_data"));
-    Paint ui_paint(paint_objects, paint_data);
+    tonic::DartByteData byte_data(paint_data);
 
-    ui_paint.paint(dl_paint, DisplayListOpFlags::kDrawRectFlags,
-                   DlTileMode::kClamp);
+    const uint8_t* raw_data = static_cast<const uint8_t*>(byte_data.data());
+    std::vector<uint8_t> paint_bytes(byte_data.length_in_bytes());
+    memcpy(paint_bytes.data(), raw_data, byte_data.length_in_bytes());
+
+    CreatePaint(dl_paint, DisplayListOpFlags::kDrawRectFlags,
+                DlTileMode::kClamp, paint_objects, paint_bytes);
+
     message_latch->Signal();
   };
 
