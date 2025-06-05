@@ -15,7 +15,7 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14",
+        "os=Mac-14|Mac-15.5",
         "cpu=arm64"
       ],
       "gclient_variables": {
@@ -64,7 +64,7 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14",
+        "os=Mac-14|Mac-15.5",
         "cpu=arm64"
       ],
       "gclient_variables": {
@@ -115,7 +115,7 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14",
+        "os=Mac-14|Mac-15.5",
         "cpu=arm64"
       ],
       "gclient_variables": {
@@ -164,7 +164,7 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14",
+        "os=Mac-14|Mac-15.5",
         "cpu=arm64"
       ],
       "gclient_variables": {
@@ -265,7 +265,7 @@
       "realm": "production"
     },
     {
-      "source": "out/debug_ddm/artifacts.zip",
+      "source": "out/release_ddm/artifacts.zip",
       "destination": "ios-release-ddm/artifacts.zip",
       "realm": "production"
     }

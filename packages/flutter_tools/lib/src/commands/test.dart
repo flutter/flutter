@@ -715,7 +715,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     testTimeRecorder?.print();
 
     if (result != 0) {
-      throwToolExit(null);
+      throwToolExit(null, exitCode: result);
     }
     return FlutterCommandResult.success();
   }

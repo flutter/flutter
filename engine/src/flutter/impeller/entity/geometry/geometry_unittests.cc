@@ -97,6 +97,373 @@ TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
   ASSERT_FALSE(geometry->CoversArea({}, Rect()));
 }
 
+TEST(EntityGeometryTest, FillArcGeometryCoverage) {
+  Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+  Matrix transform45 = Matrix::MakeTranslation(oval_bounds.GetCenter()) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-oval_bounds.GetCenter());
+
+  {  // Sweeps <=-360 or >=360
+    for (int start = -720; start <= 720; start += 10) {
+      for (int sweep = 360; sweep <= 720; sweep += 30) {
+        std::string label =
+            "start: " + std::to_string(start) + " + " + std::to_string(sweep);
+        auto geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                                Degrees(sweep), false);
+        EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+            << "start: " << start << ", sweep: " << sweep;
+        geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                           Degrees(-sweep), false);
+        EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+            << "start: " << start << ", sweep: " << -sweep;
+        geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                           Degrees(-sweep), true);
+        EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+            << "start: " << start << ", sweep: " << -sweep << ", with center";
+      }
+    }
+  }
+  {  // Sweep from late in one quadrant to earlier in same quadrant
+    for (int start = 60; start < 360; start += 90) {
+      auto geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                              Degrees(330), false);
+      EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+          << "start: " << start << " without center";
+      geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                         Degrees(330), true);
+      EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+          << "start: " << start << " with center";
+    }
+  }
+  {  // Sweep from early in one quadrant backwards to later in same quadrant
+    for (int start = 30; start < 360; start += 90) {
+      auto geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                              Degrees(-330), false);
+      EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+          << "start: " << start << " without center";
+      geometry = Geometry::MakeFilledArc(oval_bounds, Degrees(start),
+                                         Degrees(-330), true);
+      EXPECT_EQ(geometry->GetCoverage({}), oval_bounds)
+          << "start: " << start << " with center";
+    }
+  }
+  {  // Sweep past each quadrant axis individually, no center
+    for (int start = -360; start <= 720; start += 360) {
+      {  // Quadrant 0
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start - 45), Degrees(90), false);
+        Rect expected_bounds = Rect::MakeLTRB(150 + 50 * kSqrt2Over2,  //
+                                              150 - 50 * kSqrt2Over2,  //
+                                              200,                     //
+                                              150 + 50 * kSqrt2Over2);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start - 45;
+      }
+      {  // Quadrant 1
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start + 45), Degrees(90), false);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2,  //
+                                              150 + 50 * kSqrt2Over2,  //
+                                              150 + 50 * kSqrt2Over2,  //
+                                              200);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 45;
+      }
+      {  // Quadrant 2
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start + 135), Degrees(90), false);
+        Rect expected_bounds = Rect::MakeLTRB(100,                     //
+                                              150 - 50 * kSqrt2Over2,  //
+                                              150 - 50 * kSqrt2Over2,  //
+                                              150 + 50 * kSqrt2Over2);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 135;
+      }
+      {  // Quadrant 3
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start + 225), Degrees(90), false);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2,  //
+                                              100,                     //
+                                              150 + 50 * kSqrt2Over2,  //
+                                              150 - 50 * kSqrt2Over2);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 225;
+      }
+    }
+  }
+  {  // Sweep past each quadrant axis individually, including the center
+    for (int start = -360; start <= 720; start += 360) {
+      {  // Quadrant 0
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start - 45), Degrees(90), true);
+        Rect expected_bounds = Rect::MakeLTRB(150,                     //
+                                              150 - 50 * kSqrt2Over2,  //
+                                              200,                     //
+                                              150 + 50 * kSqrt2Over2);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start - 45;
+      }
+      {  // Quadrant 1
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start + 45), Degrees(90), true);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2,  //
+                                              150,                     //
+                                              150 + 50 * kSqrt2Over2,  //
+                                              200);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 45;
+      }
+      {  // Quadrant 2
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start + 135), Degrees(90), true);
+        Rect expected_bounds = Rect::MakeLTRB(100,                     //
+                                              150 - 50 * kSqrt2Over2,  //
+                                              150,                     //
+                                              150 + 50 * kSqrt2Over2);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 135;
+      }
+      {  // Quadrant 3
+        auto geometry = Geometry::MakeFilledArc(
+            oval_bounds, Degrees(start + 225), Degrees(90), true);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2,  //
+                                              100,                     //
+                                              150 + 50 * kSqrt2Over2,  //
+                                              150);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 225;
+      }
+    }
+  }
+  {  // 45 degree tilted full circle
+    auto geometry =
+        Geometry::MakeFilledArc(oval_bounds, Degrees(0), Degrees(360), false);
+    ASSERT_TRUE(oval_bounds.TransformBounds(transform45).Contains(oval_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(oval_bounds));
+  }
+  {  // 45 degree tilted mostly full circle
+    auto geometry =
+        Geometry::MakeFilledArc(oval_bounds, Degrees(3), Degrees(359), false);
+    ASSERT_TRUE(oval_bounds.TransformBounds(transform45).Contains(oval_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(oval_bounds));
+  }
+}
+
+TEST(EntityGeometryTest, StrokeArcGeometryCoverage) {
+  Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+  Rect expanded_bounds = Rect::MakeLTRB(95, 95, 205, 205);
+  Rect squared_bounds = Rect::MakeLTRB(100 - 5 * kSqrt2, 100 - 5 * kSqrt2,
+                                       200 + 5 * kSqrt2, 200 + 5 * kSqrt2);
+  Matrix transform45 = Matrix::MakeTranslation(oval_bounds.GetCenter()) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-oval_bounds.GetCenter());
+
+  StrokeParameters butt_params = {
+      .width = 10.0f,
+      .cap = Cap::kButt,
+  };
+  StrokeParameters square_params = {
+      .width = 10.0f,
+      .cap = Cap::kSquare,
+  };
+
+  {  // Sweeps <=-360 or >=360
+    for (int start = -720; start <= 720; start += 10) {
+      for (int sweep = 360; sweep <= 720; sweep += 30) {
+        std::string label =
+            "start: " + std::to_string(start) + " + " + std::to_string(sweep);
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), butt_params);
+        EXPECT_EQ(geometry->GetCoverage({}), expanded_bounds)
+            << "start: " << start << ", sweep: " << sweep;
+        geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                            Degrees(-sweep), butt_params);
+        EXPECT_EQ(geometry->GetCoverage({}), expanded_bounds)
+            << "start: " << start << ", sweep: " << -sweep;
+        geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                            Degrees(-sweep), square_params);
+        EXPECT_EQ(geometry->GetCoverage({}), expanded_bounds)
+            << "start: " << start << ", sweep: " << -sweep << ", square caps";
+      }
+    }
+  }
+  {  // Sweep from late in one quadrant to earlier in same quadrant
+    for (int start = 60; start < 360; start += 90) {
+      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                               Degrees(330), butt_params);
+      EXPECT_EQ(geometry->GetCoverage({}), expanded_bounds)
+          << "start: " << start << ", butt caps";
+      geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                          Degrees(330), square_params);
+      EXPECT_EQ(geometry->GetCoverage({}), squared_bounds)
+          << "start: " << start << ", square caps";
+    }
+  }
+  {  // Sweep from early in one quadrant backwards to later in same quadrant
+    for (int start = 30; start < 360; start += 90) {
+      auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                               Degrees(-330), butt_params);
+      EXPECT_EQ(geometry->GetCoverage({}), expanded_bounds)
+          << "start: " << start << " without center";
+      geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                          Degrees(-330), square_params);
+      EXPECT_EQ(geometry->GetCoverage({}), squared_bounds)
+          << "start: " << start << " with center";
+    }
+  }
+  {  // Sweep past each quadrant axis individually with butt caps
+    for (int start = -360; start <= 720; start += 360) {
+      {  // Quadrant 0
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start - 45), Degrees(90), butt_params);
+        Rect expected_bounds = Rect::MakeLTRB(150 + 50 * kSqrt2Over2 - 5,  //
+                                              150 - 50 * kSqrt2Over2 - 5,  //
+                                              205,                         //
+                                              150 + 50 * kSqrt2Over2 + 5);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start - 45;
+      }
+      {  // Quadrant 1
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start + 45), Degrees(90), butt_params);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2 - 5,  //
+                                              150 + 50 * kSqrt2Over2 - 5,  //
+                                              150 + 50 * kSqrt2Over2 + 5,  //
+                                              205);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 45;
+      }
+      {  // Quadrant 2
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start + 135), Degrees(90), butt_params);
+        Rect expected_bounds = Rect::MakeLTRB(95,                          //
+                                              150 - 50 * kSqrt2Over2 - 5,  //
+                                              150 - 50 * kSqrt2Over2 + 5,  //
+                                              150 + 50 * kSqrt2Over2 + 5);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 135;
+      }
+      {  // Quadrant 3
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start + 225), Degrees(90), butt_params);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2 - 5,  //
+                                              95,                          //
+                                              150 + 50 * kSqrt2Over2 + 5,  //
+                                              150 - 50 * kSqrt2Over2 + 5);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 225;
+      }
+    }
+  }
+  {  // Sweep past each quadrant axis individually with square caps
+    Scalar pad = 5 * kSqrt2;
+    for (int start = -360; start <= 720; start += 360) {
+      {  // Quadrant 0
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start - 45), Degrees(90), square_params);
+        Rect expected_bounds = Rect::MakeLTRB(150 + 50 * kSqrt2Over2 - pad,  //
+                                              150 - 50 * kSqrt2Over2 - pad,  //
+                                              200 + pad,                     //
+                                              150 + 50 * kSqrt2Over2 + pad);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start - 45;
+      }
+      {  // Quadrant 1
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start + 45), Degrees(90), square_params);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2 - pad,  //
+                                              150 + 50 * kSqrt2Over2 - pad,  //
+                                              150 + 50 * kSqrt2Over2 + pad,  //
+                                              200 + pad);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 45;
+      }
+      {  // Quadrant 2
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start + 135), Degrees(90), square_params);
+        Rect expected_bounds = Rect::MakeLTRB(100 - pad,                     //
+                                              150 - 50 * kSqrt2Over2 - pad,  //
+                                              150 - 50 * kSqrt2Over2 + pad,  //
+                                              150 + 50 * kSqrt2Over2 + pad);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 135;
+      }
+      {  // Quadrant 3
+        auto geometry = Geometry::MakeStrokedArc(
+            oval_bounds, Degrees(start + 225), Degrees(90), square_params);
+        Rect expected_bounds = Rect::MakeLTRB(150 - 50 * kSqrt2Over2 - pad,  //
+                                              100 - pad,                     //
+                                              150 + 50 * kSqrt2Over2 + pad,  //
+                                              150 - 50 * kSqrt2Over2 + pad);
+        EXPECT_RECT_NEAR(geometry->GetCoverage({}).value_or(Rect()),
+                         expected_bounds)
+            << "start: " << start + 225;
+      }
+    }
+  }
+  {  // 45 degree tilted full circle, butt caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(0), Degrees(360), butt_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(expanded_bounds));
+  }
+  {  // 45 degree tilted full circle, square caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(0), Degrees(360), square_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(squared_bounds));
+  }
+  {  // 45 degree tilted mostly full circle, butt caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(3), Degrees(359), butt_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(expanded_bounds));
+  }
+  {  // 45 degree tilted mostly full circle, square caps
+    auto geometry = Geometry::MakeStrokedArc(  //
+        oval_bounds, Degrees(3), Degrees(359), square_params);
+    ASSERT_TRUE(
+        oval_bounds.TransformBounds(transform45).Contains(expanded_bounds));
+
+    EXPECT_TRUE(geometry->GetCoverage(transform45)
+                    .value_or(Rect())
+                    .Contains(squared_bounds));
+  }
+}
+
 TEST(EntityGeometryTest, FillRoundRectGeometryCoversArea) {
   Rect bounds = Rect::MakeLTRB(100, 100, 200, 200);
   RoundRect round_rect =
@@ -939,6 +1306,40 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
           1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_reference.size());
+}
+
+TEST(EntityGeometryTest, RotatedFilledCircleGeometryCoverage) {
+  Point center = Point(50, 50);
+  auto geometry = Geometry::MakeCircle(center, 50);
+  Rect circle_bounds = Rect::MakeLTRB(0, 0, 100, 100);
+  ASSERT_EQ(geometry->GetCoverage({}).value_or(Rect()), circle_bounds);
+
+  Matrix transform45 = Matrix::MakeTranslation(center) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-center);
+
+  EXPECT_TRUE(geometry->GetCoverage(transform45).has_value());
+  Rect bounds = geometry->GetCoverage(transform45).value_or(Rect());
+  EXPECT_TRUE(bounds.Contains(circle_bounds))
+      << "geometry bounds: " << bounds << std::endl
+      << "  circle bounds: " << circle_bounds;
+}
+
+TEST(EntityGeometryTest, RotatedStrokedCircleGeometryCoverage) {
+  Point center = Point(50, 50);
+  auto geometry = Geometry::MakeStrokedCircle(center, 50, 10);
+  Rect circle_bounds = Rect::MakeLTRB(0, 0, 100, 100).Expand(5);
+  ASSERT_EQ(geometry->GetCoverage({}).value_or(Rect()), circle_bounds);
+
+  Matrix transform45 = Matrix::MakeTranslation(center) *
+                       Matrix::MakeRotationZ(Degrees(45)) *
+                       Matrix::MakeTranslation(-center);
+
+  EXPECT_TRUE(geometry->GetCoverage(transform45).has_value());
+  Rect bounds = geometry->GetCoverage(transform45).value_or(Rect());
+  EXPECT_TRUE(bounds.Contains(circle_bounds))
+      << "geometry bounds: " << bounds << std::endl
+      << "  circle bounds: " << circle_bounds;
 }
 
 }  // namespace testing
