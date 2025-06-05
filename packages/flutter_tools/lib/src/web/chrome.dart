@@ -200,6 +200,7 @@ class ChromiumLauncher {
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
+    _logger.printError('Using port: $port');
     _logger.printError('webbrowserflags: $webBrowserFlags');
     final List<String> args = <String>[
       chromeExecutable,
@@ -235,6 +236,13 @@ class ChromiumLauncher {
     _logger.printError('user data path: ${userDataDir.path}');
     final io.File chromeDebugLogFile = io.File('${userDataDir.path}/chrome_debug.log');
     Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+      if (userDataDir.existsSync()) {
+        _logger.printError('user data dir exists');
+        _logger.printError('Contents:');
+        for (final entity in userDataDir.listSync()) {
+          _logger.printError(entity.path);
+        }
+      }
       if (chromeDebugLogFile.existsSync()) {
         timer.cancel();
         _logger.printError('${chromeDebugLogFile.path} exists');
