@@ -233,7 +233,7 @@ struct ProcTable {
     return true;
   }
 
-#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name, nullptr};
+#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name};
   IMPELLER_HPP_EACH_PROC(IMPELLER_HPP_PROC)
 #undef IMPELLER_HPP_PROC
 };

@@ -100,7 +100,7 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            if (plugins.hasPlugin("com.android.application") && hasProperty("android.injected.invoked.from.ide")) {
+            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
                 dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
@@ -109,7 +109,7 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        if (project.hasProperty("android.injected.invoked.from.ide")) {
+        if (isInvokedFromAndroidStudio()) {
             val settingsFile = Paths.get(project.rootDir.absolutePath, "settings.gradle")
             val settingsKtsFile = Paths.get(project.rootDir.absolutePath, "settings.gradle.kts")
             val hasSettings = settingsFile.exists()
@@ -805,4 +805,12 @@ class FlutterPlugin : Plugin<Project> {
             return copyFlutterAssetsTask
         }
     }
+
+    /**
+     * Returns true if the Gradle task is invoked by Android Studio.
+     *
+     * This is true when the property `android.injected.invoked.from.ide` is passed to Gradle.
+     * This property is set by Android Studio when it invokes a Gradle task.
+     */
+    private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
 }
