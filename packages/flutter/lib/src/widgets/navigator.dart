@@ -5634,10 +5634,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void popUntil<T extends Object?>(RoutePredicate predicate, [T? result]) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-    if (candidate == null || predicate(candidate.route)) {
-      return;
-    }
+
     while (candidate != null) {
+      if (predicate(candidate.route)) {
+        return;
+      }
       // Check what would be next if we pop this route
       final _RouteEntry? next = _lastRouteEntryWhereOrNull(
         (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
@@ -5650,7 +5651,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         pop();
       }
 
-      candidate = next;
+      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
 
