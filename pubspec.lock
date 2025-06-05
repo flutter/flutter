@@ -150,10 +150,10 @@ packages:
     dependency: "direct main"
     description:
       name: coverage
-      sha256: "4b8701e48a58f7712492c9b1f7ba0bb9d525644dd66d023b62e1fc8cdb560c8a"
+      sha256: aa07dbe5f2294c827b7edb9a87bba44a9c15a3cc81bc8da2ca19b37322d30080
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.0"
+    version: "1.14.1"
   crypto:
     dependency: "direct main"
     description:
