@@ -14,7 +14,6 @@ import 'package:process/process.dart';
 import './git.dart';
 import './globals.dart';
 import './stdio.dart';
-import './version.dart';
 
 /// Allowed git remote names.
 enum RemoteName { upstream, mirror }
@@ -594,13 +593,14 @@ class FrameworkRepository extends Repository {
     List<String> args, {
     void Function(String)? stdoutCallback,
     void Function(String)? stderrCallback,
+    String? workingDirectory,
   }) async {
-    final String workingDirectory = (await checkoutDirectory).path;
+    final String repoWorkingDirectory = (await checkoutDirectory).path;
 
     return _streamProcess(<String>[
-      fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+      fileSystem.path.join(repoWorkingDirectory, 'bin', 'flutter'),
       ...args,
-    ], workingDirectory: workingDirectory);
+    ], workingDirectory: workingDirectory ?? repoWorkingDirectory);
   }
 
   Future<io.Process> _streamProcess(
@@ -642,14 +642,6 @@ class FrameworkRepository extends Repository {
       cache.deleteSync(recursive: true);
     }
     await _ensureToolReady();
-  }
-
-  Future<Version> flutterVersion() async {
-    // Check version
-    final io.ProcessResult result = await runFlutter(<String>['--version', '--machine']);
-    final Map<String, dynamic> versionJson =
-        jsonDecode(stdoutToString(result.stdout)) as Map<String, dynamic>;
-    return Version.fromString(versionJson['frameworkVersion'] as String);
   }
 
   /// Create a release candidate branch version file.
