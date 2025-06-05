@@ -794,7 +794,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       _wipConnection = await chromeTab.connect();
     }
     Uri? websocketUri;
-    if (connectDebug != null) {
+    if (supportsServiceProtocol) {
+      assert(connectDebug != null);
       _connectionResult = await connectDebug;
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
