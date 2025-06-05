@@ -10,7 +10,7 @@ import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
-import 'widget_preview_scaffold_test_utils.dart';
+import 'utils/widget_preview_scaffold_test_utils.dart';
 
 // Applies localization theming allowing for direct comparison of `themeData` against the theme
 // data retreived from the tree.

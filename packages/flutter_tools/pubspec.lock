@@ -77,10 +77,10 @@ packages:
     dependency: "direct dev"
     description:
       name: checked_yaml
-      sha256: feb6bed21949061731a7a75fc5d2aa727cf160b91af9a3e464c5e3a32e28b5ff
+      sha256: "959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   cli_config:
     dependency: "direct main"
     description:
@@ -141,10 +141,10 @@ packages:
     dependency: "direct main"
     description:
       name: coverage
-      sha256: "4b8701e48a58f7712492c9b1f7ba0bb9d525644dd66d023b62e1fc8cdb560c8a"
+      sha256: aa07dbe5f2294c827b7edb9a87bba44a9c15a3cc81bc8da2ca19b37322d30080
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.0"
+    version: "1.14.1"
   crypto:
     dependency: "direct main"
     description:
@@ -177,14 +177,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
-  data_assets:
-    dependency: "direct main"
-    description:
-      name: data_assets
-      sha256: "3421ffd6559bf8cb40897a2342812abe2aed2097f4d5a3755f03ee842d92caae"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.19.1"
   dds:
     dependency: "direct main"
     description:
