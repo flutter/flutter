@@ -375,18 +375,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   void initState() {
     super.initState();
 
-    _upDragController = AnimationController(
-      duration: const Duration(microseconds: 1),
-      reverseDuration: const Duration(milliseconds: 180),
-      vsync: this,
-    );
-
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
     _setupAnimation();
   }
 
@@ -416,6 +404,11 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
+    );
+    _upDragController = AnimationController(
+      duration: const Duration(microseconds: 1),
+      reverseDuration: const Duration(milliseconds: 180),
+      vsync: this,
     );
     _paddingAnimation = _upDragController.drive(
       Tween<double>(begin: _kTopGapRatio, end: _kMaxTopGapRatio),
