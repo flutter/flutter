@@ -11,10 +11,13 @@ import 'carousel.dart';
 import 'material.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [CarouselView] widgets.
 ///
 /// Descendant widgets obtain the current [CarouselViewThemeData] object using
-/// `CarouselViewTheme.of(context)`. Instances of [CarouselViewThemeData] can be
+/// [CarouselViewTheme.of]. Instances of [CarouselViewThemeData] can be
 /// customized with [CarouselViewThemeData.copyWith].
 ///
 /// Typically a [CarouselViewThemeData] is specified as part of the overall [Theme]
@@ -165,6 +168,12 @@ class CarouselViewTheme extends InheritedTheme {
   /// Returns the configuration [data] from the closest [CarouselViewTheme] ancestor.
   ///
   /// If there is no ancestor, it returns [ThemeData.carouselViewTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// CarouselViewThemeData theme = CarouselViewTheme.of(context);
+  /// ```
   static CarouselViewThemeData of(BuildContext context) {
     final CarouselViewTheme? inheritedTheme =
         context.dependOnInheritedWidgetOfExactType<CarouselViewTheme>();

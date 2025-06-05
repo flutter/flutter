@@ -26,7 +26,6 @@ class SwiftPackageManagerUtils {
           'Failed to enable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
@@ -45,7 +44,6 @@ class SwiftPackageManagerUtils {
           'Failed to disable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
@@ -213,7 +211,13 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
+      className:
+          '${_capitalize(platform)}${_capitalize(iosLanguage)}${_capitalize(dependencyManager)}Plugin',
     );
+  }
+
+  static String _capitalize(String str) {
+    return str[0].toUpperCase() + str.substring(1);
   }
 
   static void addDependency({
@@ -252,7 +256,7 @@ class SwiftPackageManagerUtils {
     pubspec.writeAsStringSync(
       pubspecContent.replaceFirst(
         '\n# The following section is specific to Flutter packages.\nflutter:\n',
-        '\n# The following section is specific to Flutter packages.\nflutter:\n  disable-swift-package-manager: true',
+        '\n# The following section is specific to Flutter packages.\nflutter:\n  config: \n    enable-swift-package-manager: false\n',
       ),
     );
   }
@@ -271,6 +275,7 @@ class SwiftPackageManagerUtils {
                 'integration_test',
                 'integration_test_macos',
               ),
+      className: 'IntegrationTestPlugin',
     );
   }
 
@@ -297,7 +302,7 @@ class SwiftPackageManagerUtils {
       if (swiftPackageMangerEnabled) {
         expectedLines.addAll(<Pattern>[
           RegExp(
-            '${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+            '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           ),
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
@@ -337,6 +342,8 @@ class SwiftPackageManagerUtils {
     bool migrated = false,
   }) {
     final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
+    final String appPlatformDirectoryPath = fileSystem.path.join(appDirectoryPath, platform);
+
     final List<String> unexpectedLines = <String>[];
     if (cocoaPodsPlugin == null && !migrated) {
       unexpectedLines.addAll(<String>[
@@ -353,7 +360,7 @@ class SwiftPackageManagerUtils {
         ]);
       } else {
         unexpectedLines.addAll(<String>[
-          '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+          '${swiftPackagePlugin.pluginName}: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       }
@@ -370,11 +377,13 @@ class SwiftPackageManagerPlugin {
     required this.pluginName,
     required this.pluginPath,
     required this.platform,
+    required this.className,
   });
 
   final String pluginName;
   final String pluginPath;
   final String platform;
+  final String className;
   String get exampleAppPath => fileSystem.path.join(pluginPath, 'example');
   String get exampleAppPlatformPath => fileSystem.path.join(exampleAppPath, platform);
   String get swiftPackagePlatformPath => fileSystem.path.join(pluginPath, platform, pluginName);

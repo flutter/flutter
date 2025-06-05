@@ -80,10 +80,7 @@ const String samplesIndexJson = '''
 ]''';
 
 /// These files are generated for all project types.
-const List<String> flutterPluginsIgnores = <String>[
-  '.flutter-plugins',
-  '.flutter-plugins-dependencies',
-];
+const List<String> flutterPluginsIgnores = <String>['.flutter-plugins-dependencies'];
 
 void main() {
   late Directory tempDir;
@@ -3621,7 +3618,7 @@ void main() {
 
     for (final String templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '12.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '13.0'"));
     }
 
     final CreateCommand command = CreateCommand();
@@ -3637,7 +3634,7 @@ void main() {
     expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'), exists);
     final String rawPodSpec =
         await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '12.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '13.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {

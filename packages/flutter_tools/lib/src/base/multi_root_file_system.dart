@@ -9,10 +9,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 
 /// A [FileSystem] that wraps the [delegate] file system to create an overlay of
-/// files from multiple [roots].
+/// files from multiple [_roots].
 ///
 /// Regular paths or `file:` URIs are resolved directly in the underlying file
-/// system, but URIs that use a special [scheme] are resolved by searching
+/// system, but URIs that use a special [_scheme] are resolved by searching
 /// under a set of given roots in order.
 ///
 /// For example, consider the following inputs:

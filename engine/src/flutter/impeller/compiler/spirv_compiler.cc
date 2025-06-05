@@ -282,6 +282,7 @@ shaderc::CompileOptions SPIRVCompilerOptions::BuildShadercOptions() const {
 
   options.SetAutoBindUniforms(true);
   options.SetAutoMapLocations(true);
+  options.SetPreserveBindings(true);
 
   options.SetOptimizationLevel(optimization_level);
 

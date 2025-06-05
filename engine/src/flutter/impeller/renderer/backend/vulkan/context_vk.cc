@@ -134,7 +134,9 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
-  CommandPoolRecyclerVK::DestroyThreadLocalPools(this);
+  if (command_pool_recycler_) {
+    command_pool_recycler_->DestroyThreadLocalPools();
+  }
 }
 
 Context::BackendType ContextVK::GetBackendType() const {
@@ -205,7 +207,18 @@ void ContextVK::Setup(Settings settings) {
   }
 
   vk::ApplicationInfo application_info;
-  application_info.setApplicationVersion(VK_API_VERSION_1_0);
+
+  // Use the same encoding macro as vulkan versions, but otherwise application
+  // version is intended to be the version of the Impeller engine. This version
+  // information, along with the application name below is provided to allow
+  // IHVs to make optimizations and/or disable functionality based on knowledge
+  // of the engine version (for example, to work around bugs). We don't tie this
+  // to the overall Flutter version as that version is not yet defined when the
+  // engine is compiled. Instead we can manually bump it occassionally.
+  //
+  // variant, major, minor, patch
+  application_info.setApplicationVersion(
+      VK_MAKE_API_VERSION(0, 2, 0, 0) /*version 2.0.0*/);
   application_info.setApiVersion(VK_API_VERSION_1_1);
   application_info.setEngineVersion(VK_API_VERSION_1_0);
   application_info.setPEngineName("Impeller");
@@ -410,7 +423,7 @@ void ContextVK::Setup(Settings settings) {
   }
 
   auto command_pool_recycler =
-      std::make_shared<CommandPoolRecyclerVK>(weak_from_this());
+      std::make_shared<CommandPoolRecyclerVK>(shared_from_this());
   if (!command_pool_recycler) {
     VALIDATION_LOG << "Could not create command pool recycler.";
     return;

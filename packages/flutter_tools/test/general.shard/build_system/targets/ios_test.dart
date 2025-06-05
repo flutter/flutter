@@ -7,13 +7,11 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -33,7 +31,7 @@ final Platform macPlatform = FakePlatform(
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=12.0',
+  '-miphoneos-version-min=13.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -48,32 +46,6 @@ const List<String> _kSharedConfig = <String>[
   '-isysroot',
   'path/to/iPhoneOS.sdk',
 ];
-
-const String _kPluginsFileWithoutDevDependencies = '''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": false
-      }
-    ]
-  }
-}
-''';
-
-const String _kPluginsFileWithDevDependencies = '''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": true
-      }
-    ]
-  }
-}
-''';
 
 void main() {
   late Environment environment;
@@ -132,7 +104,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=12.0',
+            '-miphonesimulator-version-min=13.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',
@@ -240,7 +212,7 @@ void main() {
           .createSync();
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -331,10 +303,7 @@ void main() {
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
       // Project info
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -419,7 +388,7 @@ void main() {
       fileSystem
           .file('pubspec.yaml')
           .writeAsStringSync('name: my_app\nflutter:\n  shaders:\n    - shader.glsl');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -500,7 +469,7 @@ void main() {
 
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
       // Plist file
       fileSystem
@@ -986,6 +955,87 @@ void main() {
       );
     });
 
+    group('CheckForLaunchRootViewControllerAccessDeprecation', () {
+      testWithoutContext('Swift Positive', () async {
+        final File file = fileSystem.file('AppDelegate.swift');
+        file.writeAsStringSync('''
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+
+    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+  }
+}
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
+        expect(
+          logger.warningText,
+          startsWith(
+            'AppDelegate.swift:6: warning: Flutter deprecation: Accessing rootViewController',
+          ),
+        );
+      });
+
+      testWithoutContext('Swift Negative', () async {
+        final File file = fileSystem.file('AppDelegate.swift');
+        file.writeAsStringSync('''
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+  }
+
+  func doIt() {
+    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+  }
+}
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationSwift(logger, file);
+        expect(logger.warningText, equals(''));
+      });
+
+      testWithoutContext('Objc Positive', () async {
+        final File file = fileSystem.file('AppDelegate.m');
+        file.writeAsStringSync('''
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+}
+
+@end
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+        expect(
+          logger.warningText,
+          startsWith('AppDelegate.m:6: warning: Flutter deprecation: Accessing rootViewController'),
+        );
+      });
+
+      testWithoutContext('Objc Negative', () async {
+        final File file = fileSystem.file('AppDelegate.m');
+        file.writeAsStringSync('''
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+}
+
+- (void)doIt {
+ FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+}
+
+@end
+''');
+        await checkForLaunchRootViewControllerAccessDeprecationObjc(logger, file);
+        expect(logger.warningText, equals(''));
+      });
+    });
+
     testWithoutContext('skips thin framework', () async {
       binary.createSync(recursive: true);
 
@@ -1274,161 +1324,6 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
-      },
-    );
-  });
-
-  group('CheckDevDependenciesIos', () {
-    testUsingContext('throws if build mode define missing', () async {
-      environment.defines[kDevDependenciesEnabled] = 'true';
-
-      await expectLater(
-        const CheckDevDependenciesIos().build(environment),
-        throwsA(const TypeMatcher<MissingDefineException>()),
-      );
-    });
-
-    testUsingContext('throws if dev dependencies define missing', () async {
-      const String projectPath = 'path/to/project';
-      fileSystem.directory(projectPath).createSync(recursive: true);
-      environment.defines[kBuildMode] = 'debug';
-
-      await expectLater(
-        const CheckDevDependenciesIos().build(environment),
-        throwsA(const TypeMatcher<MissingDefineException>()),
-      );
-    });
-
-    testUsingContext('does not throw if dev dependencies enabled in debug mode', () async {
-      environment.defines[kBuildMode] = 'debug';
-      environment.defines[kDevDependenciesEnabled] = 'true';
-
-      await const CheckDevDependenciesIos().build(environment);
-    });
-
-    testUsingContext('does not throw if dev dependencies disabled in release mode', () async {
-      const String projectPath = 'path/to/project';
-      fileSystem.directory(projectPath).createSync(recursive: true);
-      environment.defines[kBuildMode] = 'release';
-      environment.defines[kDevDependenciesEnabled] = 'false';
-
-      await const CheckDevDependenciesIos().build(environment);
-    });
-
-    testUsingContext('does not throw if dev dependencies disabled in profile mode', () async {
-      environment.defines[kBuildMode] = 'release';
-      environment.defines[kDevDependenciesEnabled] = 'false';
-
-      await const CheckDevDependenciesIos().build(environment);
-    });
-
-    testUsingContext('does not throw if there are no dependencies', () async {
-      environment.defines[kBuildMode] = 'debug';
-      environment.defines[kDevDependenciesEnabled] = 'false';
-
-      await const CheckDevDependenciesIos().build(environment);
-    });
-
-    testUsingContext('does not throw if there are no dev dependencies', () async {
-      final Directory projectDir = fileSystem.currentDirectory;
-      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
-
-      pluginsFile.writeAsStringSync(_kPluginsFileWithoutDevDependencies);
-
-      environment.defines[kBuildMode] = 'debug';
-      environment.defines[kDevDependenciesEnabled] = 'false';
-
-      await const CheckDevDependenciesIos().build(environment);
-
-      expect(
-        logger.traceText,
-        contains('Ignoring dev dependencies error as the project has no dev dependencies'),
-      );
-    });
-
-    testUsingContext('throws if dev dependencies disabled in debug mode', () async {
-      final Directory projectDir = fileSystem.currentDirectory;
-      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
-
-      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
-
-      environment.defines[kBuildMode] = 'debug';
-      environment.defines[kDevDependenciesEnabled] = 'false';
-
-      await expectLater(
-        const CheckDevDependenciesIos().build(environment),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.toString(),
-            'description',
-            contains('Dev dependencies disabled in debug build'),
-          ),
-        ),
-      );
-    });
-
-    testUsingContext('throws if dev dependencies enabled in release mode', () async {
-      final Directory projectDir = fileSystem.currentDirectory;
-      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
-
-      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
-
-      environment.defines[kBuildMode] = 'release';
-      environment.defines[kDevDependenciesEnabled] = 'true';
-
-      await expectLater(
-        const CheckDevDependenciesIos().build(environment),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.toString(),
-            'description',
-            contains('Dev dependencies enabled in release build'),
-          ),
-        ),
-      );
-    });
-
-    testUsingContext('throws if dev dependencies disabled in profile mode', () async {
-      final Directory projectDir = fileSystem.currentDirectory;
-      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
-
-      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
-
-      environment.defines[kBuildMode] = 'profile';
-      environment.defines[kDevDependenciesEnabled] = 'false';
-
-      await expectLater(
-        const CheckDevDependenciesIos().build(environment),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.toString(),
-            'description',
-            contains('Dev dependencies disabled in profile build'),
-          ),
-        ),
-      );
-    });
-
-    testUsingContext(
-      'assumes project has dev dependencies if .flutter-plugins-dependencies is malformed',
-      () async {
-        final Directory projectDir = fileSystem.currentDirectory;
-        final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('This is not valid JSON');
-        environment.defines[kBuildMode] = 'debug';
-        environment.defines[kDevDependenciesEnabled] = 'false';
-
-        await expectLater(
-          const CheckDevDependenciesIos().build(environment),
-          throwsA(
-            isA<ToolExit>().having(
-              (ToolExit e) => e.toString(),
-              'description',
-              contains('Dev dependencies disabled in debug build'),
-            ),
-          ),
-        );
       },
     );
   });

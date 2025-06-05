@@ -14,7 +14,6 @@ import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
-import 'common.dart';
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
@@ -42,6 +41,15 @@ abstract class DartBuild extends Target {
       final Uri projectUri = environment.projectDir.uri;
       final String? runPackageName =
           packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      if (runPackageName == null) {
+        throw StateError(
+          'Could not determine run package name. '
+          'Project path "${projectUri.toFilePath()}" did not occur as package '
+          'root in package config "${environment.packageConfigPath}". '
+          'Please report a reproduction on '
+          'https://github.com/flutter/flutter/issues/169475.',
+        );
+      }
       final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
@@ -50,7 +58,7 @@ abstract class DartBuild extends Target {
             packageConfig,
             fileSystem,
             environment.logger,
-            runPackageName!,
+            runPackageName,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
@@ -78,7 +86,7 @@ abstract class DartBuild extends Target {
     }
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!await outputDepfile.exists()) {
-      throwToolExit("${outputDepfile.path} doesn't exist.");
+      throw StateError("${outputDepfile.path} doesn't exist.");
     }
   }
 
@@ -91,7 +99,7 @@ abstract class DartBuild extends Target {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
     // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
@@ -121,8 +129,9 @@ abstract class DartBuild extends Target {
 class DartBuildForNative extends DartBuild {
   const DartBuildForNative({@visibleForTesting super.buildRunner});
 
+  // TODO(dcharkes): Add `KernelSnapshot()` for AOT builds only when adding tree-shaking information. https://github.com/dart-lang/native/issues/153
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot()];
+  List<Target> get dependencies => const <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
@@ -178,7 +187,7 @@ class InstallCodeAssets extends Target {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
     // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 
   @override

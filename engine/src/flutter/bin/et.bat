@@ -31,6 +31,9 @@ IF "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
 )
 
 SET dart=%dart_sdk_path%\bin\dart.exe
+IF NOT EXIST "%dart%" (
+    ECHO Error: You must run 'gclient sync -D' before using this tool && EXIT /B 1
+)
 
 cd "%engine_tool_dir%"
 

@@ -49,6 +49,12 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.size].
   size,
 
+  /// Specifies the aspect corresponding to the width of [MediaQueryData.size].
+  width,
+
+  /// Specifies the aspect corresponding to the height of [MediaQueryData.size].
+  height,
+
   /// Specifies the aspect corresponding to [MediaQueryData.orientation].
   orientation,
 
@@ -304,9 +310,7 @@ class MediaQueryData {
           view.platformDispatcher.supportsShowingSystemContextMenu;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
-    final double scaleFactor =
-        platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor;
-    return scaleFactor == 1.0 ? TextScaler.noScaling : TextScaler.linear(scaleFactor);
+    return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
   }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -1306,6 +1310,49 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@endtemplate}
   static Size? maybeSizeOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.size)?.size;
 
+  /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the width of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double widthOf(BuildContext context) => _of(context, _MediaQueryAspect.width).size.width;
+
+  /// Returns width of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the width of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeWidthOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.width)?.size.width;
+
+  /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the height of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double heightOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.height).size.height;
+
+  /// Returns height of [MediaQueryData.size] from the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the height of [MediaQueryData.size] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeHeightOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.height)?.size.height;
+
   /// Returns [MediaQueryData.orientation] for the nearest [MediaQuery] ancestor or
   /// throws an exception, if no such ancestor exists.
   ///
@@ -1776,6 +1823,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
           dependency is _MediaQueryAspect &&
           switch (dependency) {
             _MediaQueryAspect.size => data.size != oldWidget.data.size,
+            _MediaQueryAspect.width => data.size.width != oldWidget.data.size.width,
+            _MediaQueryAspect.height => data.size.height != oldWidget.data.size.height,
             _MediaQueryAspect.orientation => data.orientation != oldWidget.data.orientation,
             _MediaQueryAspect.devicePixelRatio =>
               data.devicePixelRatio != oldWidget.data.devicePixelRatio,
@@ -1968,12 +2017,58 @@ class _UnspecifiedTextScaler implements TextScaler {
   const _UnspecifiedTextScaler();
 
   @override
-  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) =>
+  Never clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) =>
       throw UnimplementedError();
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+}
+
+/// A [TextScaler] that reflects the user's font scale preferences from the
+/// platform's accessibility settings.
+final class SystemTextScaler extends TextScaler {
+  SystemTextScaler._(this._platformDispatcher)
+    : textScaleFactor = _platformDispatcher.textScaleFactor;
+
+  final ui.PlatformDispatcher _platformDispatcher;
+  @override
+  double scale(double fontSize) => _platformDispatcher.scaleFontSize(fontSize);
+
+  /// A value that represents the current user preference for the scaling factor
+  /// for fonts.
+  ///
+  /// This numeric value is typically used to compare [SystemTextScaler]s. Two
+  /// [SystemTextScaler] instances with the same [textScaleFactor] are considered
+  /// equal as their [scale] methods produce the same output when given the same
+  /// input font size. However, [textScaleFactor] should not be used in arithmetic
+  /// operations.
+  // TODO(LongCatIsLooong): consider changing the type to Comparable<OpaqueWrapper>
+  // once  `MediaQueryData.textScaleFactor` is removed:
+  // https://github.com/flutter/flutter/issues/128825.
+  @override
+  final double textScaleFactor;
 
   @override
-  double scale(double fontSize) => throw UnimplementedError();
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return switch (other) {
+      // The system's text scale factor is used for the equality check because the
+      // `scale` function's output monotonically increases with the text scale factor.
+      SystemTextScaler(:final double textScaleFactor) => this.textScaleFactor == textScaleFactor,
+      // When textScaleFactor is 1.0, the two TextScalers are extensionally
+      // equivalent.
+      TextScaler.noScaling => textScaleFactor == 1.0,
+      _ => false,
+    };
+  }
 
   @override
-  double get textScaleFactor => throw UnimplementedError();
+  int get hashCode => textScaleFactor.hashCode;
+
+  @override
+  String toString() =>
+      'SystemTextScaler (${textScaleFactor == 1.0 ? "no scaling" : "${textScaleFactor}x"})';
 }

@@ -31,9 +31,9 @@ UIDartState::Context::Context(
     std::string advisory_script_entrypoint,
     bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+    std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
     bool enable_impeller,
-    bool enable_flutter_gpu,
-    impeller::RuntimeStageBackend runtime_stage_backend)
+    bool enable_flutter_gpu)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
       io_manager(std::move(io_manager)),
@@ -44,9 +44,9 @@ UIDartState::Context::Context(
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
       deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
+      runtime_stage_backend(std::move(runtime_stage_backend)),
       enable_impeller(enable_impeller),
-      enable_flutter_gpu(enable_flutter_gpu),
-      runtime_stage_backend(runtime_stage_backend) {}
+      enable_flutter_gpu(enable_flutter_gpu) {}
 
 UIDartState::UIDartState(
     TaskObserverAdd add_callback,
@@ -59,7 +59,6 @@ UIDartState::UIDartState(
     const UIDartState::Context& context)
     : add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
-      callback_queue_id_(fml::TaskQueueId::kInvalid),
       logger_prefix_(std::move(logger_prefix)),
       is_root_isolate_(is_root_isolate),
       unhandled_exception_callback_(std::move(unhandled_exception_callback)),
@@ -87,10 +86,6 @@ bool UIDartState::IsImpellerEnabled() const {
 
 bool UIDartState::IsFlutterGPUEnabled() const {
   return context_.enable_impeller && context_.enable_flutter_gpu;
-}
-
-impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
-  return context_.runtime_stage_backend;
 }
 
 void UIDartState::DidSetIsolate() {
@@ -180,12 +175,14 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   }
   FML_DCHECK(add_callback_ && remove_callback_);
   if (add) {
+    FML_DCHECK(!callback_queue_id_.has_value());
     callback_queue_id_ =
         add_callback_(reinterpret_cast<intptr_t>(this),
                       [this]() { this->FlushMicrotasksNow(); });
-  } else {
-    remove_callback_(callback_queue_id_, reinterpret_cast<intptr_t>(this));
-    callback_queue_id_ = fml::TaskQueueId::Invalid();
+  } else if (callback_queue_id_.has_value()) {
+    remove_callback_(callback_queue_id_.value(),
+                     reinterpret_cast<intptr_t>(this));
+    callback_queue_id_.reset();
   }
 }
 
@@ -250,6 +247,11 @@ Dart_Isolate UIDartState::CreatePlatformIsolate(Dart_Handle entry_point,
                                                 char** error) {
   FML_UNREACHABLE();
   return nullptr;
+}
+
+/// The runtime stage to use for fragment shaders.
+impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
+  return context_.runtime_stage_backend.get();
 }
 
 }  // namespace flutter

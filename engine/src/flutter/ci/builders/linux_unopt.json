@@ -80,11 +80,11 @@
                 },
                 {
                     "language": "dart",
-                    "name": "test: observatory and service protocol",
-                    "script": "flutter/shell/testing/observatory/test.dart",
+                    "name": "test: service protocol",
+                    "script": "flutter/shell/testing/vm_service/test.dart",
                     "parameters": [
                         "out/ci/host_debug_unopt/flutter_tester",
-                        "flutter/shell/testing/observatory/empty_main.dart"
+                        "flutter/shell/testing/vm_service/empty_main.dart"
                     ]
                 },
                 {

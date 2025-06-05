@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -14,7 +15,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
-import '../safe_browser_api.dart';
 import '../semantics.dart';
 import '../services.dart';
 import '../text/paragraph.dart';
@@ -170,7 +170,12 @@ void _insertEditingElementInView(DomElement element, int viewId) {
     view != null,
     'Could not find View with id $viewId. This should never happen, please file a bug!',
   );
-  view!.dom.textEditingHost.append(element);
+  final host = view!.dom.textEditingHost;
+  // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+  // harmless, but it actually causes focus changes that could break things.
+  if (!host.contains(element)) {
+    host.append(element);
+  }
 }
 
 /// Form that contains all the fields in the same AutofillGroup.
@@ -363,7 +368,11 @@ class EngineAutofillForm {
       mainTextEditingElement.style.pointerEvents = 'all';
     }
 
-    formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
+    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+    // harmless, but it actually causes focus changes that could break things.
+    if (!formElement.contains(mainTextEditingElement)) {
+      formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
+    }
     _insertEditingElementInView(formElement, viewId);
   }
 
@@ -608,24 +617,22 @@ class TextEditingDeltaState {
       // If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
       // and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
       final int deletedLength =
-          newTextEditingDeltaState.oldText.length - newEditingState.text!.length;
+          newTextEditingDeltaState.oldText.length - newEditingState.text.length;
       final bool backwardDeletion = newEditingState.baseOffset != lastEditingState?.baseOffset;
       if (backwardDeletion) {
         newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
       } else {
         // Forward deletion
-        newTextEditingDeltaState.deltaStart = newEditingState.baseOffset!;
+        newTextEditingDeltaState.deltaStart = newEditingState.baseOffset;
         newTextEditingDeltaState.deltaEnd = newTextEditingDeltaState.deltaStart + deletedLength;
       }
     } else if (isTextBeingChangedAtActiveSelection) {
       final bool isPreviousSelectionInverted =
-          lastEditingState!.baseOffset! > lastEditingState.extentOffset!;
+          lastEditingState!.baseOffset > lastEditingState.extentOffset;
       // When a selection of text is replaced by a copy/paste operation we set the starting range
       // of the delta to be the beginning of the selection of the previous editing state.
       newTextEditingDeltaState.deltaStart =
-          isPreviousSelectionInverted
-              ? lastEditingState.extentOffset!
-              : lastEditingState.baseOffset!;
+          isPreviousSelectionInverted ? lastEditingState.extentOffset : lastEditingState.baseOffset;
     }
 
     // If we are composing then set the delta range to the composing region we
@@ -664,7 +671,7 @@ class TextEditingDeltaState {
         newTextEditingDeltaState.deltaText,
         replacementRange,
       );
-      final bool isDeltaVerified = textAfterDelta == newEditingState.text!;
+      final bool isDeltaVerified = textAfterDelta == newEditingState.text;
 
       if (!isDeltaVerified) {
         // 1. Find all matches for deltaText.
@@ -672,7 +679,7 @@ class TextEditingDeltaState {
         // new editing state's text value.
         final bool isPeriodInsertion = newTextEditingDeltaState.deltaText.contains('.');
         final RegExp deltaTextPattern = RegExp(RegExp.escape(newTextEditingDeltaState.deltaText));
-        for (final Match match in deltaTextPattern.allMatches(newEditingState.text!)) {
+        for (final Match match in deltaTextPattern.allMatches(newEditingState.text)) {
           String textAfterMatch;
           int actualEnd;
           final bool isMatchWithinOldTextBounds =
@@ -693,7 +700,7 @@ class TextEditingDeltaState {
             );
           }
 
-          if (textAfterMatch == newEditingState.text!) {
+          if (textAfterMatch == newEditingState.text) {
             newTextEditingDeltaState.deltaStart = match.start;
             newTextEditingDeltaState.deltaEnd = actualEnd;
             break;
@@ -780,15 +787,15 @@ class TextEditingDeltaState {
 /// The current text and selection state of a text field.
 class EditingState {
   EditingState({
-    this.text,
-    int? baseOffset,
-    int? extentOffset,
+    required this.text,
+    required int baseOffset,
+    required int extentOffset,
     this.composingBaseOffset = -1,
     this.composingExtentOffset = -1,
   }) : // Don't allow negative numbers.
-       baseOffset = math.max(0, baseOffset ?? 0),
+       baseOffset = math.max(0, baseOffset),
        // Don't allow negative numbers.
-       extentOffset = math.max(0, extentOffset ?? 0);
+       extentOffset = math.max(0, extentOffset);
 
   /// Creates an [EditingState] instance using values from an editing state Map
   /// coming from Flutter.
@@ -810,20 +817,18 @@ class EditingState {
   /// -1, if so 0 assigned to the [baseOffset] and [extentOffset]. -1 is not a
   /// valid selection range for input DOM elements.
   factory EditingState.fromFrameworkMessage(Map<String, dynamic> flutterEditingState) {
-    final String? text = flutterEditingState.tryString('text');
-
+    final String text = flutterEditingState.readString('text');
     final int selectionBase = flutterEditingState.readInt('selectionBase');
     final int selectionExtent = flutterEditingState.readInt('selectionExtent');
-
-    final int? composingBase = flutterEditingState.tryInt('composingBase');
-    final int? composingExtent = flutterEditingState.tryInt('composingExtent');
+    final int composingBase = flutterEditingState.readInt('composingBase');
+    final int composingExtent = flutterEditingState.readInt('composingExtent');
 
     return EditingState(
       text: text,
       baseOffset: selectionBase,
       extentOffset: selectionExtent,
-      composingBaseOffset: composingBase ?? -1,
-      composingExtentOffset: composingExtent ?? -1,
+      composingBaseOffset: composingBase,
+      composingExtentOffset: composingExtent,
     );
   }
 
@@ -832,35 +837,39 @@ class EditingState {
   ///
   /// [domElement] can be a [InputElement] or a [TextAreaElement] depending on
   /// the [InputType] of the text field.
-  factory EditingState.fromDomElement(DomHTMLElement? domElement) {
-    if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
-      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
+  factory EditingState.fromDomElement(DomHTMLElement domElement) {
+    if (domElement.isA<DomHTMLInputElement>()) {
+      final element = domElement as DomHTMLInputElement;
+      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final selectionStart = element.selectionStart?.toInt() ?? 0;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionEnd?.toInt(),
-          extentOffset: element.selectionStart?.toInt(),
+          baseOffset: selectionEnd,
+          extentOffset: selectionStart,
         );
       } else {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt(),
+          baseOffset: selectionStart,
+          extentOffset: selectionEnd,
         );
       }
-    } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
-      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
+    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
+      final element = domElement as DomHTMLTextAreaElement;
+      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final selectionStart = element.selectionStart?.toInt() ?? 0;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionEnd?.toInt(),
-          extentOffset: element.selectionStart?.toInt(),
+          baseOffset: selectionEnd,
+          extentOffset: selectionStart,
         );
       } else {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt(),
+          baseOffset: selectionStart,
+          extentOffset: selectionEnd,
         );
       }
     } else {
@@ -869,9 +878,9 @@ class EditingState {
   }
 
   // Pick the smallest selection index for base.
-  int get minOffset => math.min(baseOffset ?? 0, extentOffset ?? 0);
+  int get minOffset => math.min(baseOffset, extentOffset);
   // Pick the greatest selection index for extent.
-  int get maxOffset => math.max(baseOffset ?? 0, extentOffset ?? 0);
+  int get maxOffset => math.max(baseOffset, extentOffset);
 
   EditingState copyWith({
     String? text,
@@ -901,13 +910,13 @@ class EditingState {
   };
 
   /// The current text being edited.
-  final String? text;
+  final String text;
 
   /// The offset at which the text selection originates.
-  final int? baseOffset;
+  final int baseOffset;
 
   /// The offset at which the text selection terminates.
-  final int? extentOffset;
+  final int extentOffset;
 
   /// The offset at which [CompositionAwareMixin.composingText] begins, if any.
   final int composingBaseOffset;
@@ -916,7 +925,7 @@ class EditingState {
   final int composingExtentOffset;
 
   /// Whether the current editing state is valid or not.
-  bool get isValid => baseOffset! >= 0 && extentOffset! >= 0;
+  bool get isValid => baseOffset >= 0 && extentOffset >= 0;
 
   @override
   int get hashCode =>
@@ -1266,7 +1275,7 @@ abstract class DefaultTextEditingStrategy
 
   TextEditingDeltaState? _editingDeltaState;
   TextEditingDeltaState get editingDeltaState {
-    _editingDeltaState ??= TextEditingDeltaState(oldText: lastEditingState!.text!);
+    _editingDeltaState ??= TextEditingDeltaState(oldText: lastEditingState!.text);
     return _editingDeltaState!;
   }
 
@@ -1502,14 +1511,14 @@ abstract class DefaultTextEditingStrategy
     // have a baseOffset and extentOffset. If these are set inside of inferDeltaState
     // then the method will incorrectly report a deltaStart and deltaEnd for a non
     // text update delta.
-    final String? eventData = getJsProperty<void>(event, 'data') as String?;
-    final String? inputType = getJsProperty<void>(event, 'inputType') as String?;
+    final String? eventData = (event['data'] as JSString?)?.toDart;
+    final String? inputType = (event['inputType'] as JSString?)?.toDart;
 
     if (inputType != null) {
       final bool isSelectionInverted =
-          lastEditingState!.baseOffset! > lastEditingState!.extentOffset!;
+          lastEditingState!.baseOffset > lastEditingState!.extentOffset;
       final int deltaOffset =
-          isSelectionInverted ? lastEditingState!.baseOffset! : lastEditingState!.extentOffset!;
+          isSelectionInverted ? lastEditingState!.baseOffset : lastEditingState!.extentOffset;
       if (inputType.contains('delete')) {
         // The deltaStart is set in handleChange because there is where we get access
         // to the new selection baseOffset which is our new deltaStart.
@@ -1535,8 +1544,26 @@ abstract class DefaultTextEditingStrategy
     event as DomFocusEvent;
 
     final DomElement? willGainFocusElement = event.relatedTarget as DomElement?;
-    if (willGainFocusElement == null ||
-        _viewForElement(willGainFocusElement) == activeDomElementView) {
+    if (willGainFocusElement == null) {
+      // If the element to gain focus is reported as `null`, it means that the
+      // window/iframe that Flutter runs in is losing focus. In this case, the
+      // engine signals to the framework to close the text input connection,
+      // allowing the focus to move elsewhere.
+      //
+      // This is fixing https://github.com/flutter/flutter/issues/155265.
+      textEditing.sendTextConnectionClosedToFrameworkIfAny();
+    } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
+      // If the focus stays within the same FlutterView, ensure the focus stays
+      // on the input element.
+
+      // TODO(yjbanov): Make text input less grabby. See: https://github.com/flutter/flutter/issues/166857
+      // The motivation/reasoning behind this remains murky.
+      // It's unclear why, if the browser wants to remove focus from the input,
+      // we must insist that it stays on the element. This could lead to
+      // different elements/widgets fighting over who gets the focus, or resist
+      // to user's request to move focus elsewhere, which can be super-annoying
+      // UX. We should reevaluate what it is we're trying to do here. Perhaps
+      // there's a better way.
       moveFocusToActiveDomElement();
     }
   }
