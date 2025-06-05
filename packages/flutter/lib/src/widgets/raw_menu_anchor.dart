@@ -319,7 +319,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// callback can be used to add a delay or an animation before the menu is
   /// hidden.
   ///
-  /// After a close request is intercepted and closing behaviors have finished,
+  /// After a close request is intercepted and closing behaviors have completed,
   /// the `hideOverlay` callback should be called. This callback sets
   /// [MenuController.isOpen] to false and hides the menu overlay widget. If the
   /// [RawMenuAnchor] is used in a themed menu that plays a closing animation,
@@ -330,7 +330,7 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   /// Typically, [onCloseRequested] consists of the following steps:
   ///
-  ///  1. Optionally starts the closing animation and waits for it to complete.
+  ///  1. Optionally start the closing animation and wait for it to complete.
   ///  2. Call `hideOverlay` (whose call chain eventually invokes [onClose]).
   ///
   /// Throughout the closing sequence, menus should typically not be focusable
