@@ -369,7 +369,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         final WebDevFS webDevFS = device!.devFS! as WebDevFS;
         final bool useDebugExtension =
             device!.device is WebServerDevice && debuggingOptions.startPaused;
-        final Future<ConnectionResult?> webDevFSConnect = webDevFS.connect(useDebugExtension);
+        final Future<ConnectionResult?>? connectDebug =
+            supportsServiceProtocol ? webDevFS.connect(useDebugExtension) : null;
         _logger.printStatus('starting app');
         await device!.device!.startApp(
           package,
@@ -381,7 +382,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          webDevFSConnect: webDevFSConnect,
+          connectDebug: connectDebug,
         );
       });
     } on WebSocketException catch (error, stackTrace) {
@@ -773,7 +774,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    Future<ConnectionResult?>? webDevFSConnect,
+    Future<ConnectionResult?>? connectDebug,
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
@@ -800,8 +801,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
     Uri? websocketUri;
     if (supportsServiceProtocol) {
+      assert(connectDebug != null);
       _logger.printStatus('setting up vmservice');
-      _connectionResult = await webDevFSConnect;
+      _connectionResult = await connectDebug;
       _logger.printStatus('webdevfs.connected');
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
