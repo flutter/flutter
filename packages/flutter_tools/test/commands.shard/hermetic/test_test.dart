@@ -58,8 +58,11 @@ void main() {
     );
 
     final Directory package = fs.directory('package');
-    package.childFile('pubspec.yaml').createSync(recursive: true);
-    package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
+
+    package.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_pubspecContents);
+
     writePackageConfigFiles(
       directory: package,
       packages: <String, String>{
@@ -624,32 +627,12 @@ resolution: workspace
           // We expect [isolateSpawningTesterPackageConfigFile] to contain the
           // union of the packages in [_packageConfigContents] and
           // [_flutterToolsPackageConfigContents].
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "integration_test"',
-            ),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "ffi"'),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "test"'),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "test_api"',
-            ),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "test_core"',
-            ),
-            true,
-          );
+          final String configContents = isolateSpawningTesterPackageConfigFile.readAsStringSync();
+          expect(configContents.contains('"name": "integration_test"'), true);
+          expect(configContents.contains('"name": "ffi"'), true);
+          expect(configContents.contains('"name": "test"'), true);
+          expect(configContents.contains('"name": "test_api"'), true);
+          expect(configContents.contains('"name": "test_core"'), true);
         },
       );
       expect(caughtToolExit, true);
@@ -1627,6 +1610,25 @@ resolution: workspace
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
+    },
+  );
+
+  testUsingContext(
+    'The dart test exit code should be forwarded',
+    () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(79);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      expect(
+        () => commandRunner.run(const <String>['test', '--no-pub']),
+        throwsToolExit(exitCode: 79),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     },
   );
 }

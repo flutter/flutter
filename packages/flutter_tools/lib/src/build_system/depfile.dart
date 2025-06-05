@@ -66,16 +66,19 @@ class DepfileService {
   }
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
+    final bool backslash = _fileSystem.path.style.separator == r'\';
     for (final File outputFile in files) {
-      if (_fileSystem.path.style.separator == r'\') {
-        // backslashes and spaces in a depfile have to be escaped if the
-        // platform separator is a backslash.
-        final String path = outputFile.path.replaceAll(r'\', r'\\').replaceAll(r' ', r'\ ');
-        buffer.write(' $path');
+      String path = _fileSystem.path.normalize(outputFile.path);
+      if (backslash) {
+        // Backslashes in a depfile have to be escaped if the platform separator is a backslash.
+        path = path.replaceAll(r'\', r'\\');
       } else {
-        final String path = outputFile.path.replaceAll(r' ', r'\ ');
-        buffer.write(' $path');
+        // Convert all path separators to forward slashes.
+        path = path.replaceAll(r'\', r'/');
       }
+      // Escape spaces.
+      path = path.replaceAll(r' ', r'\ ');
+      buffer.write(' $path');
     }
   }
 
@@ -93,7 +96,8 @@ class DepfileService {
         // The tool doesn't write duplicates to these lists. This call is an attempt to
         // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
-        .map(_fileSystem.file)
+        // Normalize the path before creating a file object.
+        .map((String path) => _fileSystem.file(_fileSystem.path.normalize(path)))
         .toList();
   }
 }

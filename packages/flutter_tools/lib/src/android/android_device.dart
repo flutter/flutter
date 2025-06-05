@@ -207,8 +207,6 @@ class AndroidDevice extends Device {
         }
       case 'x86_64':
         return TargetPlatform.android_x64;
-      case 'x86':
-        return TargetPlatform.android_x86;
       default:
         return TargetPlatform.android_arm;
     }
@@ -221,8 +219,6 @@ class AndroidDevice extends Device {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
         return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android_x86:
-        return buildMode == BuildMode.debug;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -535,10 +531,6 @@ class AndroidDevice extends Device {
     }
 
     final TargetPlatform devicePlatform = await targetPlatform;
-    if (devicePlatform == TargetPlatform.android_x86 && !debuggingOptions.buildInfo.isDebug) {
-      _logger.printError('Profile and release builds are only supported on ARM/x64 targets.');
-      return LaunchResult.failed();
-    }
 
     AndroidApk? builtPackage = package;
     AndroidArch androidArch;
@@ -549,8 +541,6 @@ class AndroidDevice extends Device {
         androidArch = AndroidArch.arm64_v8a;
       case TargetPlatform.android_x64:
         androidArch = AndroidArch.x86_64;
-      case TargetPlatform.android_x86:
-        androidArch = AndroidArch.x86;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
