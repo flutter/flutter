@@ -398,8 +398,16 @@ void testMain() {
 
     group('global click listener for assistive technology', () {
       late DomElement testContainer;
+      late EnginePlatformDispatcher dispatcher;
+      late List<ui.SemanticsActionEvent> dispatchedSemanticsActions;
 
       setUp(() {
+        dispatcher = EnginePlatformDispatcher.instance;
+        dispatchedSemanticsActions = <ui.SemanticsActionEvent>[];
+        dispatcher.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
+          dispatchedSemanticsActions.add(event);
+        };
+
         testContainer = createDomElement('div');
         testContainer.id = 'global-click-test-container';
         domDocument.body!.appendChild(testContainer);
@@ -407,6 +415,7 @@ void testMain() {
 
       tearDown(() {
         testContainer.remove();
+        dispatcher.onSemanticsActionEvent = null;
       });
 
       test('handles clicks on semantic elements without throwing', () {
@@ -481,13 +490,17 @@ void testMain() {
         expect(() => regularElement.dispatchEvent(clickEvent), returnsNormally);
       });
 
-      test('global click listener bridges assistive technology to focus system', () {
+      test('AT activation: focuses UNFOCUSED element', () async {
         // This test simulates what happens when a screen reader activates an element
+        // that is not currently focused.
         final DomElement assistiveTechTarget = createDomElement('div');
-        assistiveTechTarget.id = 'flt-semantic-node-999';
+        assistiveTechTarget.id = 'flt-semantic-node-999'; // Ensure it has a node ID
         assistiveTechTarget.setAttribute('flt-tappable', '');
         assistiveTechTarget.tabIndex = 0;
         testContainer.appendChild(assistiveTechTarget);
+
+        // Ensure the element is not focused initially
+        expect(domDocument.activeElement, isNot(equals(assistiveTechTarget)));
 
         final DomEvent activationEvent = createDomMouseEvent('click', <Object?, Object?>{
           'clientX': 100,
@@ -495,12 +508,87 @@ void testMain() {
           'bubbles': true,
         });
 
-        // This simulates a VoiceOver/screen reader activation
-        // The global click listener should bridge this to Flutter's focus system
-        expect(() => assistiveTechTarget.dispatchEvent(activationEvent), returnsNormally);
+        assistiveTechTarget.dispatchEvent(activationEvent);
 
-        // Verify the element can receive focus (the key behavior for focus restoration)
-        expect(() => assistiveTechTarget.focusWithoutScroll(), returnsNormally);
+        // Verify the element receives DOM focus immediately
+        // This is the primary responsibility of the listener in this scenario.
+        expect(domDocument.activeElement, equals(assistiveTechTarget));
+      });
+
+      test('Regular click: does NOT cause extra focus action for ALREADY FOCUSED element', () async {
+        final DomElement targetElement = createDomElement('div');
+        targetElement.id = 'flt-semantic-node-888';
+        targetElement.setAttribute('flt-tappable', '');
+        targetElement.tabIndex = 0;
+        testContainer.appendChild(targetElement);
+
+        // Manually focus the element first
+        targetElement.focusWithoutScroll();
+        expect(domDocument.activeElement, equals(targetElement));
+        dispatchedSemanticsActions.clear();
+
+        final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+          'clientX': 100,
+          'clientY': 100,
+          'bubbles': true,
+        });
+
+        targetElement.dispatchEvent(clickEvent);
+
+        expect(domDocument.activeElement, equals(targetElement));
+
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          dispatchedSemanticsActions.any(
+            (ui.SemanticsActionEvent event) =>
+                event.type == ui.SemanticsAction.focus && event.nodeId == 888,
+          ),
+          isFalse,
+          reason:
+              'Listener should not cause a new SemanticsAction.focus for an already focused element.',
+        );
+      });
+
+      test('Regular click: does NOT cause extra focus action if CHILD is ALREADY FOCUSED', () async {
+        final DomElement parentElement = createDomElement('div');
+        parentElement.id = 'flt-semantic-node-777';
+        parentElement.setAttribute('flt-tappable', '');
+        parentElement.tabIndex = -1;
+
+        final DomElement childElement = createDomElement('button');
+        childElement.id = 'flt-semantic-node-778';
+        childElement.tabIndex = 0;
+
+        parentElement.appendChild(childElement);
+        testContainer.appendChild(parentElement);
+
+        childElement.focusWithoutScroll();
+        expect(domDocument.activeElement, equals(childElement));
+        dispatchedSemanticsActions.clear();
+
+        final DomEvent clickOnParentEvent = createDomMouseEvent('click', <Object?, Object?>{
+          'clientX': 100,
+          'clientY': 100,
+          'bubbles': true,
+        });
+
+        parentElement.dispatchEvent(clickOnParentEvent);
+
+        expect(domDocument.activeElement, equals(childElement));
+
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          dispatchedSemanticsActions.any(
+            (ui.SemanticsActionEvent event) =>
+                event.type == ui.SemanticsAction.focus &&
+                (event.nodeId == 777 || event.nodeId == 778),
+          ),
+          isFalse,
+          reason:
+              'Listener should not cause a new SemanticsAction.focus if a child is already focused.',
+        );
       });
 
       test('DOM traversal works for nested elements', () {

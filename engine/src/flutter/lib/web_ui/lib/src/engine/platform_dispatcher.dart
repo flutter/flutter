@@ -1348,38 +1348,50 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       }
       // If we found a semantic element, process it for focus
       if (semanticElement != null && nodeId != null) {
-        DomElement? focusableElement = semanticElement;
-        int? focusableNodeId = nodeId;
+        // Check if the target element is already focused - if so, this is likely
+        // a regular click and we don't need to force focus restoration
+        final DomElement? activeElement = domDocument.activeElement;
+        final bool isTargetAlreadyFocused =
+            activeElement != null &&
+            (identical(activeElement, semanticElement) || semanticElement.contains(activeElement));
 
-        // Check if this element is focusable, if not check children
-        final double? tabIndex = semanticElement.tabIndex;
+        // Only force focus if the target wasn't already focused, which indicates
+        // this might be an assistive technology activation that didn't naturally
+        // trigger DOM focus events
+        if (!isTargetAlreadyFocused) {
+          DomElement? focusableElement = semanticElement;
+          int? focusableNodeId = nodeId;
 
-        if (tabIndex == null || tabIndex < 0) {
-          // Look for child elements with tabindex
-          final List<DomElement> children =
-              semanticElement.querySelectorAll('*').cast<DomElement>().toList();
-          for (final DomElement child in children) {
-            final double? childTabIndex = child.tabIndex;
-            if (childTabIndex != null && childTabIndex >= 0) {
-              final String? childId = child.getAttribute('id');
-              if (childId != null && childId.startsWith('flt-semantic-node-')) {
-                final String childNodeIdStr = childId.substring('flt-semantic-node-'.length);
-                final int? parsedChildNodeId = int.tryParse(childNodeIdStr);
-                if (parsedChildNodeId != null) {
-                  focusableElement = child;
-                  focusableNodeId = parsedChildNodeId;
-                  break;
+          // Check if this element is focusable, if not check children
+          final double? tabIndex = semanticElement.tabIndex;
+
+          if (tabIndex == null || tabIndex < 0) {
+            // Look for child elements with tabindex
+            final List<DomElement> children =
+                semanticElement.querySelectorAll('*').cast<DomElement>().toList();
+            for (final DomElement child in children) {
+              final double? childTabIndex = child.tabIndex;
+              if (childTabIndex != null && childTabIndex >= 0) {
+                final String? childId = child.getAttribute('id');
+                if (childId != null && childId.startsWith('flt-semantic-node-')) {
+                  final String childNodeIdStr = childId.substring('flt-semantic-node-'.length);
+                  final int? parsedChildNodeId = int.tryParse(childNodeIdStr);
+                  if (parsedChildNodeId != null) {
+                    focusableElement = child;
+                    focusableNodeId = parsedChildNodeId;
+                    break;
+                  }
                 }
               }
             }
           }
-        }
 
-        // Force DOM focus if we have a focusable element
-        if (focusableElement != null && focusableNodeId != null) {
-          final double? finalTabIndex = focusableElement.tabIndex;
-          if (finalTabIndex != null && finalTabIndex >= 0) {
-            focusableElement.focusWithoutScroll();
+          // Force DOM focus if we have a focusable element
+          if (focusableElement != null && focusableNodeId != null) {
+            final double? finalTabIndex = focusableElement.tabIndex;
+            if (finalTabIndex != null && finalTabIndex >= 0) {
+              focusableElement.focusWithoutScroll();
+            }
           }
         }
       }
