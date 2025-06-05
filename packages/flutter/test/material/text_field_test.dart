@@ -664,6 +664,7 @@ void main() {
   );
 
   testWidgets('suffix has correct semantics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/169499.
     final UniqueKey suffix = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(

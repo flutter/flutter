@@ -4690,8 +4690,8 @@ class _SemanticsConfigurationProvider {
   ///
   /// This is typically use to recalculate certain properties when mutating
   /// [effective] since [effective] may contain stale data from previous update.
-  /// Examples are [SemanticsConfiguration.isBlockingUserActions] or
-  /// [SemanticsConfiguration.elevation]. Otherwise, use [effective] instead.
+  /// Examples are [SemanticsConfiguration.isBlockingUserActions] or. Otherwise,
+  /// use [effective] instead.
   SemanticsConfiguration get original {
     if (_originalConfiguration == null) {
       _effectiveConfiguration = _originalConfiguration = SemanticsConfiguration();
@@ -4822,8 +4822,7 @@ typedef _MergeUpAndSiblingMergeGroups =
 ///
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
 /// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
-/// [_RenderObjectSemantics] that should form a node with elevation adjustments
-/// into [_children].
+/// [_RenderObjectSemantics] that should form a node into [_children].
 ///
 /// At this point, walking the [_children] forms a tree
 /// that exactly resemble the resulting semantics node tree.
