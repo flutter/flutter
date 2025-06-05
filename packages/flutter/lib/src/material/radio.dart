@@ -409,7 +409,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   ///
   /// If null, then it is transparent in all states.
-  final MaterialStateProperty<Color?>? backgroundColor;
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   @override
   State<Radio<T>> createState() => _RadioState<T>();

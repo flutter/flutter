@@ -2135,19 +2135,19 @@ void main() {
                   width: 100,
                   height: 100,
                   color: Colors.white,
-                  child: Radio<int>(
-                    key: radioKey,
-                    value: 0,
-                    fillColor: backgroundColor,
-                    onChanged:
-                        enabled
-                            ? (int? newValue) {
-                              setState(() {
-                                groupValue = newValue;
-                              });
-                            }
-                            : null,
+                  child: RadioGroup<int>(
                     groupValue: groupValue,
+                    onChanged: (int? newValue) {
+                      setState(() {
+                        groupValue = newValue;
+                      });
+                    },
+                    child: Radio<int>(
+                      key: radioKey,
+                      value: 0,
+                      fillColor: backgroundColor,
+                      enabled: enabled,
+                    ),
                   ),
                 );
               },
@@ -2248,18 +2248,20 @@ void main() {
                   width: 100,
                   height: 100,
                   color: Colors.white,
-                  child: Radio<int>(
-                    autofocus: true,
-                    focusNode: focusNode,
-                    key: radioKey,
-                    value: 0,
-                    fillColor: backgroundColor,
+                  child: RadioGroup<int>(
+                    groupValue: groupValue,
                     onChanged: (int? newValue) {
                       setState(() {
                         groupValue = newValue;
                       });
                     },
-                    groupValue: groupValue,
+                    child: Radio<int>(
+                      autofocus: true,
+                      focusNode: focusNode,
+                      key: radioKey,
+                      value: 0,
+                      fillColor: backgroundColor,
+                    ),
                   ),
                 );
               },
