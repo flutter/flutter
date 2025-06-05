@@ -94,10 +94,10 @@ packages:
     dependency: "direct main"
     description:
       name: checked_yaml
-      sha256: feb6bed21949061731a7a75fc5d2aa727cf160b91af9a3e464c5e3a32e28b5ff
+      sha256: "959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   cli_config:
     dependency: "direct main"
     description:
@@ -150,10 +150,10 @@ packages:
     dependency: "direct main"
     description:
       name: coverage
-      sha256: "4b8701e48a58f7712492c9b1f7ba0bb9d525644dd66d023b62e1fc8cdb560c8a"
+      sha256: aa07dbe5f2294c827b7edb9a87bba44a9c15a3cc81bc8da2ca19b37322d30080
       url: "https://pub.dev"
     source: hosted
-    version: "1.14.0"
+    version: "1.14.1"
   crypto:
     dependency: "direct main"
     description:
@@ -294,10 +294,10 @@ packages:
     dependency: "direct main"
     description:
       name: gcloud
-      sha256: c63576bbd60b7dccd1548d51286e1c5b82e26b62440372a09c2aad0785d2e9f4
+      sha256: caa415a0145ec8afac457322872c3e8b38379a88800d2944c53798ea8fbce386
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.18"
+    version: "0.8.19"
   glob:
     dependency: "direct main"
     description:
