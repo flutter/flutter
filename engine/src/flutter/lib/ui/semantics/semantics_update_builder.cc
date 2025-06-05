@@ -32,7 +32,7 @@ SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    NativeSemanticsFlags* flags,
+    Dart_Handle flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -76,7 +76,9 @@ void SemanticsUpdateBuilder::updateNode(
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = flags->GetFlags();
+  auto* flags_object =
+      tonic::DartConverter<flutter::NativeSemanticsFlags*>::FromDart(flags);
+  node.flags = flags_object->GetFlags();
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;
