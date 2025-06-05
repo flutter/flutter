@@ -1691,8 +1691,9 @@ class CompileTest {
     });
   }
 
-  Future<TaskResult> runSwiftUIApp() async {
-    return inDirectory<TaskResult>(testDirectory, () async {
+  Future<List<double>> getMetricsFromXCResults() async {
+    return inDirectory<List<double>>(testDirectory, () async {
+     List<dynamic> resultsJson = <dynamic>[];
       const String resultsBundleName = 'benchmarkResults.xcresult';
       // Get ID from Info.plist
       final ProcessResult plistIDResult = await Process.run(workingDirectory: testDirectory, 'plutil', <String>[
@@ -1705,7 +1706,6 @@ class CompileTest {
       ]);
 
       final String plistID = plistIDResult.stdout.toString().trim();
-      print(plistID);
 
       // Next, get the ActionsInvocationRecord and Extract the testsRef ID
       String testRefID = '';
@@ -1722,7 +1722,6 @@ class CompileTest {
       ]).then((ProcessResult result) {
         final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
         testRefID = actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value'].toString();
-        print(testRefID);
       });
 
       // Next, grab the ActionTestSummary using our testRefID
@@ -1744,6 +1743,7 @@ class CompileTest {
       });
 
       dynamic resultMetricsJSON = '';
+
       // Finally, grab the metrics.
       await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
         'xcresulttool',
@@ -1757,115 +1757,93 @@ class CompileTest {
         '--legacy'
       ]).then((ProcessResult result) {
         resultMetricsJSON = json.decode(result.stdout.toString());
-        print(result.stdout);
-        List<dynamic>? measurements = resultMetricsJSON['performanceMetrics']?['_values'] as List<dynamic>?;
-        print(measurements?[0]['measurements']['_values']);
-        final List<double> extractedLaunchTimes = <double>[];
-        if (measurements != null) {
-          for (var measurementValue in measurements) {
-            if (measurementValue is Map<String, dynamic> &&
-                measurementValue.containsKey('_value')) {
-              final dynamic value = measurementValue['_value'];
-              print(value);
-              if (value is num) {
-                extractedLaunchTimes.add(value.toDouble());
-              } else if (value is String) {
-                try {
-                  extractedLaunchTimes.add(double.parse(value));
-                } catch (e) {
-                  print(
-                      'Could not parse measurement value "$value" as double: $e');
-                }
-              }
-            }
-          }
+        resultsJson = resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values'] as List<dynamic>;
+      });
+     List<double> extractedLaunchTimes = <double>[];
+     resultsJson?.map((dynamic item) => extractedLaunchTimes.add(double.parse(item['_value'] as String))).toList();
+
+      return extractedLaunchTimes;
+    });
+  }
+
+  Future<TaskResult> runSwiftUIApp() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      await Process.run('xcodebuild', <String>['clean', '-allTargets']);
+      final Map<String, String> environment = Platform.environment;
+      final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+      final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      final String? provisioningProfile =
+      environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+
+      /* Compile Time */
+      int releaseSizeInBytes = 0;
+      final Stopwatch watch = Stopwatch();
+
+      watch.start();
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        '-scheme',
+        'hello_world_swiftui',
+        '-target',
+        'hello_world_swiftui',
+        '-sdk',
+        'iphoneos',
+        '-configuration',
+        'Release',
+        '-archivePath',
+        '$testDirectory/hello_world_swiftui',
+        'archive',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      ]).then((ProcessResult results) {
+        watch.stop();
+        print(results.stdout);
+        if (results.exitCode != 0) {
+          print(results.stderr);
         }
       });
 
-      // xcrun xcresulttool get --path benchmarkResults.xcresult --id 0~r6qEAYEdlqicPe-cf-PdzDf-kHV0So2WeoRHNYTKT1Qjk3McJN-y9FbyEUawSwnZgn69hR4WqkEW4lsSTMgmQw== --format json --legacy
-      // print(actionsInvocationRecordJSON);
-      // plutil -extract rootId.hash raw -o - benchmarkResults.xcresult/Info.plist
+      /* App Size */
+      final String appPath =
+          '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
-      //
-      // await Process.run('xcodebuild', <String>['clean', '-allTargets']);
-      // final Map<String, String> environment = Platform.environment;
-      // final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-      // final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-      // final String? provisioningProfile =
-      // environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-      //
-      // /* Compile Time */
-      // int releaseSizeInBytes = 0;
-      // final Stopwatch watch = Stopwatch();
-      //
-      // watch.start();
-      // await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
-      //   '-scheme',
-      //   'hello_world_swiftui',
-      //   '-target',
-      //   'hello_world_swiftui',
-      //   '-sdk',
-      //   'iphoneos',
-      //   '-configuration',
-      //   'Release',
-      //   '-archivePath',
-      //   '$testDirectory/hello_world_swiftui',
-      //   'archive',
-      //   'DEVELOPMENT_TEAM=$developmentTeam',
-      //   'CODE_SIGN_STYLE=$codeSignStyle',
-      //   // 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
-      // ]).then((ProcessResult results) {
-      //   watch.stop();
-      //   print(results.stdout);
-      //   if (results.exitCode != 0) {
-      //     print(results.stderr);
-      //   }
-      // });
-      //
-      // /* App Size */
-      // final String appPath =
-      //     '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
-      //
-      // // Zip up the .app file to get an approximation of the .ipa size.
-      // await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
-      // releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
-      //
-      // /* Time to First Frame */
-      // await Process.run(workingDirectory: testDirectory, 'rm', <String>[
-      //   '-rf',
-      //   '$testDirectory/benchmarkResults.xcresult'
-      // ]).then((ProcessResult results) {
-      //   print(results.stdout);
-      // });
-      //
-      // // Run the benchmarking tests and output the result
-      // await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
-      //   'test',
-      //   '-project',
-      //   'hello_world_swiftui.xcodeproj',
-      //   '-scheme',
-      //   'hello_world_swiftui',
-      //   '-destination',
-      //   'platform=iOS,name=Fluttér 的 iPhone',
-      //   // 'platform=iOS',
-      //   '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
-      //   '-resultBundlePath',
-      //   '$testDirectory/benchmarkResults.xcresult',
-      //   '-verbose',
-      //   'DEVELOPMENT_TEAM=$developmentTeam',
-      //   'CODE_SIGN_STYLE=$codeSignStyle',
-      //   // 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
-      // ]);
-      //
-      //
-      //
-      //
+      // Zip up the .app file to get an approximation of the .ipa size.
+      await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
+      releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
+
+      /* Time to First Frame */
+      await Process.run(workingDirectory: testDirectory, 'rm', <String>[
+        '-rf',
+        '$testDirectory/benchmarkResults.xcresult'
+      ]).then((ProcessResult results) {
+        print(results.stdout);
+      });
+
+      // Run the benchmarking tests and output the result
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        'test',
+        '-project',
+        'hello_world_swiftui.xcodeproj',
+        '-scheme',
+        'hello_world_swiftui',
+        '-destination',
+        'platform=iOS',
+        '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
+        '-resultBundlePath',
+        '$testDirectory/benchmarkResults.xcresult',
+        '-verbose',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      ]);
+
+      final List<double> extractedLaunchTimes = await getMetricsFromXCResults();
+
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
-        // 'release_swiftui_compile_millis': watch.elapsedMilliseconds,
-        // 'release_swiftui_size_bytes': releaseSizeInBytes,
-
-        'time_to_first_frame': 0
+        'release_swiftui_compile_millis': watch.elapsedMilliseconds,
+        'release_swiftui_size_bytes': releaseSizeInBytes,
+        'time_to_first_frame': extractedLaunchTimes.average
       });
       return TaskResult.success(metrics);
     });
