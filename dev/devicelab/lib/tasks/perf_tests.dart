@@ -1838,11 +1838,6 @@ class CompileTest {
           environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
-      final Map<String, String> environment = Platform.environment;
-      final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-      final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-      final String? provisioningProfile =
-      environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
       /* Compile Time */
       int releaseSizeInBytes = 0;
