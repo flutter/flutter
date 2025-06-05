@@ -245,9 +245,9 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 ### Framework team (`team-framework`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-framework+label%3AP0+sort%3Aupdated-asc)
-- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+sort%3Acreated-desc+draft%3Afalse)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-framework%2Cfyi-framework+-label%3Atriaged-framework+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+customer+response%22+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2C%22p%3A%20go_router%22%20label%3AP0%20sort%3Aupdated-desc)
+- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework%2C%22p%3A+go_router%22+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%2C%22p%3A%20go_router%22%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20customer%20response%22%20sort%3Aupdated-desc)
 
 ### Games team (`team-games`)
 
