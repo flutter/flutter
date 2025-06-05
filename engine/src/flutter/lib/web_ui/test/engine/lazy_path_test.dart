@@ -180,7 +180,6 @@ class FakePath implements DisposablePath {
 
   @override
   FakePathMetrics computeMetrics({bool forceClosed = false}) {
-    print('computed');
     final metrics = FakePathMetrics();
     computedMetrics.add(metrics);
     return metrics;
@@ -202,7 +201,6 @@ class FakePathMetricsIterator implements DisposablePathMetricIterator {
 
   @override
   void dispose() {
-    print('disposed');
     isDisposed = true;
   }
 
