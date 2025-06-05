@@ -954,6 +954,8 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external String font;
   external String fontWeight;
   external String direction;
+  external String letterSpacing;
+  external String wordSpacing;
   external set lineWidth(num? value);
 
   @JS('setLineDash')

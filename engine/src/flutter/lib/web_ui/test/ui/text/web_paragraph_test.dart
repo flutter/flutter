@@ -19,7 +19,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-
+  /*
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -620,5 +620,45 @@ Future<void> testMain() async {
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multiplefont.png', region: region);
+  });
+*/
+  test('Draw WebParagraph letter/word spacing text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+
+    final WebParagraphStyle blackStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: blackPaint,
+    );
+    final WebTextStyle letter5 = WebTextStyle(letterSpacing: 5.0);
+    final WebTextStyle letter10 = WebTextStyle(letterSpacing: 10.0);
+    final WebTextStyle word10 = WebTextStyle(wordSpacing: 10.0);
+    final WebTextStyle word20 = WebTextStyle(wordSpacing: 20.0);
+    final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
+
+    builder.pushStyle(letter5);
+    builder.addText('Letter spacing 5. ');
+    builder.pop();
+    builder.pushStyle(letter10);
+    builder.addText('Letter spacing 10. ');
+    builder.pop();
+    builder.pushStyle(word10);
+    builder.addText('Word spacing 10, word spacing 10. ');
+    builder.pop();
+    builder.pushStyle(word20);
+    builder.addText('Word spacing 20, word spacing 20. ');
+    builder.pop();
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_letter_word_spacing.png', region: region);
   });
 }

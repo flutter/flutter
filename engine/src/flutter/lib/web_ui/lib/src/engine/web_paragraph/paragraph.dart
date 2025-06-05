@@ -31,6 +31,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Color? decorationColor,
     ui.TextDecorationStyle? decorationStyle,
     double? decorationThickness,
+    double? letterSpacing,
+    double? wordSpacing,
   }) : _defaultTextStyle = WebTextStyle(
          fontFamily: fontFamily,
          fontSize: fontSize,
@@ -43,6 +45,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          decorationColor: decorationColor,
          decorationStyle: decorationStyle,
          decorationThickness: decorationThickness,
+         letterSpacing: letterSpacing,
+         wordSpacing: wordSpacing,
        ),
        _textDirection = textDirection ?? ui.TextDirection.ltr,
        _textAlign = textAlign ?? ui.TextAlign.start;
@@ -115,6 +119,8 @@ class WebTextStyle implements ui.TextStyle {
     ui.Color? decorationColor,
     ui.TextDecorationStyle? decorationStyle,
     double? decorationThickness,
+    double? letterSpacing,
+    double? wordSpacing,
   }) {
     return WebTextStyle._(
       originalFontFamily: fontFamily ?? 'Arial',
@@ -122,12 +128,14 @@ class WebTextStyle implements ui.TextStyle {
       fontStyle: fontStyle ?? ui.FontStyle.normal,
       fontWeight: fontWeight ?? ui.FontWeight.normal,
       foreground: foreground ?? (ui.Paint()..color = const ui.Color(0xFF000000)),
-      background: background, // ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
+      background: background ?? (ui.Paint()..color = const ui.Color(0xFFFFFFFF)),
       shadows: shadows,
       decoration: decoration,
       decorationColor: decorationColor,
       decorationStyle: decorationStyle,
       decorationThickness: decorationThickness,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
     );
   }
 
@@ -143,6 +151,8 @@ class WebTextStyle implements ui.TextStyle {
     required this.decorationColor,
     required this.decorationStyle,
     required this.decorationThickness,
+    required this.letterSpacing,
+    required this.wordSpacing,
   });
 
   final String? originalFontFamily;
@@ -156,6 +166,8 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Color? decorationColor;
   final ui.TextDecorationStyle? decorationStyle;
   final double? decorationThickness;
+  final double? letterSpacing;
+  final double? wordSpacing;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -174,6 +186,8 @@ class WebTextStyle implements ui.TextStyle {
       decorationColor: other.decorationColor ?? decorationColor,
       decorationStyle: other.decorationStyle ?? decorationStyle,
       decorationThickness: other.decorationThickness ?? decorationThickness,
+      letterSpacing: other.letterSpacing ?? letterSpacing,
+      wordSpacing: other.wordSpacing ?? wordSpacing,
     );
   }
 
@@ -193,7 +207,9 @@ class WebTextStyle implements ui.TextStyle {
         other.decoration == decoration &&
         other.decorationColor == decorationColor &&
         other.decorationStyle == decorationStyle &&
-        other.decorationThickness == decorationThickness;
+        other.decorationThickness == decorationThickness &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing;
   }
 
   @override
@@ -210,6 +226,8 @@ class WebTextStyle implements ui.TextStyle {
       decorationColor,
       decorationStyle,
       decorationThickness,
+      letterSpacing,
+      wordSpacing,
     );
   }
 
@@ -239,6 +257,12 @@ class WebTextStyle implements ui.TextStyle {
             'decorationColor: ${decorationColor != null ? decorationColor.toString() : ""} '
             'decorationStyle: ${decorationStyle != null ? decorationStyle.toString() : ""} '
             'decorationThickness: ${decorationThickness != null ? decorationThickness.toString() : ""} ';
+      }
+      if (letterSpacing != null) {
+        result += 'letterSpacing: $letterSpacing ';
+      }
+      if (wordSpacing != null) {
+        result += 'wordSpacing: $wordSpacing ';
       }
       return true;
     }());
@@ -283,6 +307,14 @@ class WebTextStyle implements ui.TextStyle {
     final String cssFontFamily = engine.canonicalizeFontFamily(originalFontFamily)!;
 
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
+  }
+
+  String buildLetterSpacingString() {
+    return (letterSpacing != null) ? '${letterSpacing}px' : '0px';
+  }
+
+  String buildWordSpacingString() {
+    return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
   }
 
   bool hasElement(StyleElements element) {

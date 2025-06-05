@@ -150,7 +150,10 @@ class TextLayout {
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
       final String text = paragraph.getText(styledBlock.textRange);
 
+      // Setup all the font affecting attributes
       layoutContext.font = styledBlock.textStyle.buildCssFontString();
+      layoutContext.letterSpacing = styledBlock.textStyle.buildLetterSpacingString();
+      layoutContext.wordSpacing = styledBlock.textStyle.buildWordSpacingString();
 
       final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
       styledTextBlocks.add(

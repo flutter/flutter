@@ -43,7 +43,6 @@ class TextPaint {
     TextLine line,
     double x,
     double y,
-    PaintBlock paintBlock,
   ) {
     // We traverse text in visual blocks order (broken by text styles and bidi runs, then reordered)
     for (final LineBlock block in line.visualBlocks) {
@@ -61,7 +60,14 @@ class TextPaint {
         ui.Offset(x, y),
       );
       // Let's draw whatever has to be drawn
-      paintBlock(canvas, block, sourceRect, targetRect);
+      switch (styleElement) {
+        case StyleElements.background:
+          painter.paintBackground(canvas, block, sourceRect, targetRect);
+        case StyleElements.decorations:
+          painter.paintDecorations(canvas, block, sourceRect, targetRect);
+        default:
+          assert(false);
+      }
     }
   }
 
@@ -72,7 +78,6 @@ class TextPaint {
     TextLine line,
     double x,
     double y,
-    PaintCluster paintCluster,
   ) {
     // We traverse clusters in the order of visual blocks (broken by text styles and bidi runs, then reordered)
     // and then in visual order inside blocks
@@ -99,7 +104,20 @@ class TextPaint {
           ),
           ui.Offset(x, y),
         );
-        paintCluster(canvas, clusterText, layout.isDefaultLtr, sourceRect, targetRect);
+        switch (styleElement) {
+          case StyleElements.shadows:
+            painter.paintShadows(canvas, clusterText, layout.isDefaultLtr, sourceRect, targetRect);
+          case StyleElements.text:
+            painter.paintTextCluster(
+              canvas,
+              clusterText,
+              layout.isDefaultLtr,
+              sourceRect,
+              targetRect,
+            );
+          default:
+            assert(false);
+        }
       }
     }
   }
@@ -203,15 +221,15 @@ class TextPaint {
     double y,
   ) {
     WebParagraphDebug.log('paintLineOnCanvasKit.Background: ${line.textRange}');
-    paintByBlocks(StyleElements.background, canvas, layout, line, x, y, painter.paintBackground);
+    paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Shadows: ${line.textRange}');
-    paintByClusters(StyleElements.shadows, canvas, layout, line, x, y, painter.paintShadows);
+    paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    paintByClusters(StyleElements.text, canvas, layout, line, x, y, painter.paintTextCluster);
+    paintByClusters(StyleElements.text, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
-    paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y, painter.paintDecorations);
+    paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
   }
 }

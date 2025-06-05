@@ -198,8 +198,8 @@ class Canvas2DPainter extends Painter {
       paintContext.shadowOffsetY = 0;
 
       // TODO(jlavrova): calculate the shadow bounds properly
-      ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
-      ui.Rect shadowTargetRect = targetRect.inflate(100);
+      final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
+      final ui.Rect shadowTargetRect = targetRect.inflate(100);
 
       final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
