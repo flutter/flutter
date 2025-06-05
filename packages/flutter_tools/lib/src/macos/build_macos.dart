@@ -8,12 +8,12 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart' show HostPlatform;
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -148,7 +148,6 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
-    featureFlags: featureFlags,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
@@ -192,6 +191,14 @@ Future<void> buildMacOS({
     }
   }
 
+  final String arch = switch (globals.os.hostPlatform) {
+    HostPlatform.darwin_arm64 => 'arm64',
+    HostPlatform.darwin_x64 => 'x86_64',
+    _ => throw UnimplementedError('Unsupported platform'),
+  };
+  final String destination =
+      buildInfo.isDebug ? 'platform=macOS,arch=$arch' : 'generic/platform=macOS';
+
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -207,7 +214,7 @@ Future<void> buildMacOS({
         '-derivedDataPath',
         flutterBuildDir.absolute.path,
         '-destination',
-        'platform=macOS',
+        destination,
         'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verboseLogging) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',

@@ -493,7 +493,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
-    this.isExplicitPackageDependenciesEnabled = false,
   });
 
   @override
@@ -530,9 +529,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSwiftPackageManagerEnabled;
 
   @override
-  final bool isExplicitPackageDependenciesEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -548,6 +544,21 @@ class TestFeatureFlags implements FeatureFlags {
       _ => false,
     };
   }
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+  ];
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
