@@ -18,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'curves.dart';
 import 'debug.dart';
 import 'dialog.dart';
@@ -248,22 +249,31 @@ class _TimePickerHeader extends StatelessWidget {
       context,
     ).timeOfDayFormat(alwaysUse24HourFormat: _TimePickerModel.use24HourFormatOf(context));
 
+    final _TimePickerDefaults defaultTheme = _TimePickerModel.defaultThemeOf(context);
+    final Orientation orientation = _TimePickerModel.orientationOf(context);
+    final double dayPeriodHeight =
+        orientation == Orientation.portrait
+            ? defaultTheme.dayPeriodPortraitSize.height
+            : defaultTheme.dayPeriodLandscapeSize.height;
+    final double minInteractiveVerticalPadding =
+        orientation == Orientation.portrait
+            ? math.max(0, 2 * kMinInteractiveDimension - dayPeriodHeight)
+            : math.max(0, kMinInteractiveDimension - dayPeriodHeight);
+
     final _HourDialType hourDialType = _TimePickerModel.hourDialTypeOf(context);
-    final RenderObjectWidget orientationSpecificHeader = switch (_TimePickerModel.orientationOf(
-      context,
-    )) {
+    final RenderObjectWidget orientationSpecificHeader = switch (orientation) {
       Orientation.portrait => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
             padding: EdgeInsetsDirectional.only(
-              bottom: _TimePickerModel.useMaterial3Of(context) ? 20 : 24,
+              bottom:
+                  (_TimePickerModel.useMaterial3Of(context) ? 20 : 24) -
+                  minInteractiveVerticalPadding / 2,
             ),
             child: Text(
               helpText,
-              style:
-                  _TimePickerModel.themeOf(context).helpTextStyle ??
-                  _TimePickerModel.defaultThemeOf(context).helpTextStyle,
+              style: _TimePickerModel.themeOf(context).helpTextStyle ?? defaultTheme.helpTextStyle,
             ),
           ),
           Row(
@@ -295,9 +305,7 @@ class _TimePickerHeader extends StatelessWidget {
           children: <Widget>[
             Text(
               helpText,
-              style:
-                  _TimePickerModel.themeOf(context).helpTextStyle ??
-                  _TimePickerModel.defaultThemeOf(context).helpTextStyle,
+              style: _TimePickerModel.themeOf(context).helpTextStyle ?? defaultTheme.helpTextStyle,
             ),
             Column(
               verticalDirection:
@@ -306,7 +314,7 @@ class _TimePickerHeader extends StatelessWidget {
                       : VerticalDirection.down,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 12,
+              spacing: math.max(0, 16 - minInteractiveVerticalPadding / 2),
               children: <Widget>[
                 Row(
                   // Hour/minutes should not change positions in RTL locales.
@@ -621,18 +629,6 @@ class _DayPeriodControl extends StatelessWidget {
             defaultTheme.dayPeriodShape)
         .copyWith(side: resolvedSide);
 
-    final Widget amButton = _AmPmButton(
-      selected: amSelected,
-      onPressed: () => _setAm(context),
-      label: materialLocalizations.anteMeridiemAbbreviation,
-    );
-
-    final Widget pmButton = _AmPmButton(
-      selected: pmSelected,
-      onPressed: () => _setPm(context),
-      label: materialLocalizations.postMeridiemAbbreviation,
-    );
-
     Size dayPeriodSize;
     final Orientation orientation;
     switch (_TimePickerModel.entryModeOf(context)) {
@@ -650,50 +646,126 @@ class _DayPeriodControl extends StatelessWidget {
     }
 
     final Widget result;
+    bool showSeparator = true;
+    OutlinedBorder amShape = resolvedShape;
+    OutlinedBorder pmShape = resolvedShape;
+
+    // In order to respect Material touch target guidelines, the Semantics for
+    // AM and PM buttons needs to expand out of the bounds of the buttons
+    // (Similarly to Google Agenda).
+    // To achieve this, instead of using a parent Material which clips
+    // the Semantics, each button should manage its own shape.
+    // The logic below "cuts" the given period selector shape in two parts,
+    // one for the AM button, the other for the PM button. Each sub-shape
+    // is obtained by removing some rounded corners from the original shape.
     switch (orientation) {
       case Orientation.portrait:
+        if (resolvedShape is RoundedRectangleBorder && resolvedShape.borderRadius is BorderRadius) {
+          showSeparator = false;
+          final BorderRadius borderRadius = resolvedShape.borderRadius as BorderRadius;
+          amShape = resolvedShape.copyWith(
+            borderRadius: BorderRadius.only(
+              topLeft: borderRadius.topLeft,
+              topRight: borderRadius.topRight,
+            ),
+          );
+          pmShape = resolvedShape.copyWith(
+            borderRadius: BorderRadius.only(
+              bottomLeft: borderRadius.bottomLeft,
+              bottomRight: borderRadius.bottomRight,
+            ),
+          );
+        }
+
+        final Widget amButton = _AmPmButton(
+          selected: amSelected,
+          onPressed: () => _setAm(context),
+          label: materialLocalizations.anteMeridiemAbbreviation,
+          semanticAlignment: Alignment.bottomCenter,
+          shape: amShape,
+        );
+
+        final Widget pmButton = _AmPmButton(
+          selected: pmSelected,
+          onPressed: () => _setPm(context),
+          label: materialLocalizations.postMeridiemAbbreviation,
+          semanticAlignment: Alignment.topCenter,
+          shape: pmShape,
+        );
+
         result = _DayPeriodInputPadding(
-          minSize: dayPeriodSize,
+          minSize: Size(
+            dayPeriodSize.width,
+            math.max(dayPeriodSize.height, 2 * kMinInteractiveDimension),
+          ),
           orientation: orientation,
           child: SizedBox.fromSize(
             size: dayPeriodSize,
-            child: Material(
-              clipBehavior: Clip.antiAlias,
-              color: Colors.transparent,
-              shape: resolvedShape,
-              child: Column(
-                children: <Widget>[
-                  Expanded(child: amButton),
+            child: Column(
+              children: <Widget>[
+                Expanded(child: amButton),
+                if (showSeparator)
                   Container(
                     decoration: BoxDecoration(border: Border(top: resolvedSide)),
                     height: 1,
                   ),
-                  Expanded(child: pmButton),
-                ],
-              ),
+                Expanded(child: pmButton),
+              ],
             ),
           ),
         );
       case Orientation.landscape:
+        if (resolvedShape is RoundedRectangleBorder && resolvedShape.borderRadius is BorderRadius) {
+          showSeparator = false;
+          final BorderRadius borderRadius = resolvedShape.borderRadius as BorderRadius;
+          amShape = resolvedShape.copyWith(
+            borderRadius: BorderRadius.only(
+              topLeft: borderRadius.topLeft,
+              bottomLeft: borderRadius.bottomLeft,
+            ),
+          );
+          pmShape = resolvedShape.copyWith(
+            borderRadius: BorderRadius.only(
+              topRight: borderRadius.topRight,
+              bottomRight: borderRadius.bottomRight,
+            ),
+          );
+        }
+
+        final Widget amButton = _AmPmButton(
+          selected: amSelected,
+          onPressed: () => _setAm(context),
+          label: materialLocalizations.anteMeridiemAbbreviation,
+          semanticAlignment: Alignment.center,
+          shape: amShape,
+        );
+
+        final Widget pmButton = _AmPmButton(
+          selected: pmSelected,
+          onPressed: () => _setPm(context),
+          label: materialLocalizations.postMeridiemAbbreviation,
+          semanticAlignment: Alignment.center,
+          shape: pmShape,
+        );
+
         result = _DayPeriodInputPadding(
-          minSize: dayPeriodSize,
+          minSize: Size(
+            dayPeriodSize.width,
+            math.max(dayPeriodSize.height, kMinInteractiveDimension),
+          ),
           orientation: orientation,
           child: SizedBox(
             height: dayPeriodSize.height,
-            child: Material(
-              clipBehavior: Clip.antiAlias,
-              color: Colors.transparent,
-              shape: resolvedShape,
-              child: Row(
-                children: <Widget>[
-                  Expanded(child: amButton),
+            child: Row(
+              children: <Widget>[
+                Expanded(child: amButton),
+                if (showSeparator)
                   Container(
                     decoration: BoxDecoration(border: Border(left: resolvedSide)),
                     width: 1,
                   ),
-                  Expanded(child: pmButton),
-                ],
-              ),
+                Expanded(child: pmButton),
+              ],
             ),
           ),
         );
@@ -703,11 +775,19 @@ class _DayPeriodControl extends StatelessWidget {
 }
 
 class _AmPmButton extends StatelessWidget {
-  const _AmPmButton({required this.onPressed, required this.selected, required this.label});
+  const _AmPmButton({
+    required this.onPressed,
+    required this.selected,
+    required this.label,
+    required this.semanticAlignment,
+    required this.shape,
+  });
 
   final bool selected;
   final VoidCallback onPressed;
   final String label;
+  final Alignment semanticAlignment;
+  final OutlinedBorder shape;
 
   @override
   Widget build(BuildContext context) {
@@ -728,17 +808,100 @@ class _AmPmButton extends StatelessWidget {
     )?.copyWith(color: resolvedTextColor);
     final TextScaler buttonTextScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0);
 
-    return Material(
-      color: resolvedBackgroundColor,
-      child: InkWell(
-        onTap: onPressed,
-        child: Semantics(
-          checked: selected,
-          inMutuallyExclusiveGroup: true,
-          button: true,
+    return _AmPmSemantics(
+      minSemanticHeight: kMinInteractiveDimension,
+      checked: selected,
+      alignment: semanticAlignment,
+      child: Material(
+        clipBehavior: Clip.antiAlias,
+        color: resolvedBackgroundColor,
+        shape: shape,
+        child: InkWell(
+          onTap: onPressed,
           child: Center(child: Text(label, style: resolvedTextStyle, textScaler: buttonTextScaler)),
         ),
       ),
+    );
+  }
+}
+
+class _AmPmSemantics extends SingleChildRenderObjectWidget {
+  const _AmPmSemantics({
+    super.child,
+    required this.minSemanticHeight,
+    required this.alignment,
+    required this.checked,
+  });
+
+  final double minSemanticHeight;
+  final Alignment alignment;
+  final bool checked;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderAmPmSemantics(minSemanticHeight, alignment, checked);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderAmPmSemantics renderObject) {
+    renderObject.minSemanticHeight = minSemanticHeight;
+    renderObject.alignment = alignment;
+    renderObject.checked = checked;
+  }
+}
+
+class _RenderAmPmSemantics extends RenderProxyBox {
+  _RenderAmPmSemantics(this._minSemanticHeight, this._alignment, this._checked, [RenderBox? child])
+    : super(child);
+
+  double get minSemanticHeight => _minSemanticHeight;
+  double _minSemanticHeight;
+  set minSemanticHeight(double value) {
+    if (_minSemanticHeight == value) {
+      return;
+    }
+    _minSemanticHeight = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  Alignment get alignment => _alignment;
+  Alignment _alignment;
+  set alignment(Alignment value) {
+    if (_alignment == value) {
+      return;
+    }
+    _alignment = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  bool get checked => _checked;
+  bool _checked;
+  set checked(bool value) {
+    if (_checked == value) {
+      return;
+    }
+    _checked = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isChecked = checked;
+    config.isInMutuallyExclusiveGroup = true;
+    config.isButton = true;
+  }
+
+  @override
+  Rect get semanticBounds {
+    if (size.height > minSemanticHeight) {
+      return super.semanticBounds;
+    }
+    final double translateY = (minSemanticHeight - size.height) / 2.0 * -alignment.y;
+    return Rect.fromCenter(
+      center: paintBounds.center + Offset(0, translateY),
+      width: size.width,
+      height: minSemanticHeight,
     );
   }
 }
@@ -1794,6 +1957,11 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     final TextStyle hourMinuteStyle =
         timePickerTheme.hourMinuteTextStyle ?? defaultTheme.hourMinuteTextStyle;
 
+    final double minInteractiveVerticalPadding = math.max(
+      0,
+      2 * kMinInteractiveDimension - defaultTheme.dayPeriodInputSize.height,
+    );
+
     return Padding(
       padding:
           _TimePickerModel.useMaterial3Of(context)
@@ -1804,7 +1972,9 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
         children: <Widget>[
           Padding(
             padding: EdgeInsetsDirectional.only(
-              bottom: _TimePickerModel.useMaterial3Of(context) ? 20 : 24,
+              bottom:
+                  (_TimePickerModel.useMaterial3Of(context) ? 20 : 24) -
+                  minInteractiveVerticalPadding / 2,
             ),
             child: Text(
               widget.helpText,
@@ -1824,74 +1994,77 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                 ),
               ],
               Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  // Hour/minutes should not change positions in RTL locales.
-                  textDirection: TextDirection.ltr,
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _HourTextField(
-                              restorationId: 'hour_text_field',
-                              selectedTime: _selectedTime.value,
-                              style: hourMinuteStyle,
-                              autofocus: widget.autofocusHour,
-                              inputAction: TextInputAction.next,
-                              validator: _validateHour,
-                              onSavedSubmitted: _handleHourSavedSubmitted,
-                              onChanged: _handleHourChanged,
-                              hourLabelText: widget.hourLabelText,
-                            ),
-                          ),
-                          if (!hourHasError.value && !minuteHasError.value)
-                            ExcludeSemantics(
-                              child: Text(
-                                widget.hourLabelText ??
-                                    MaterialLocalizations.of(context).timePickerHourLabel,
-                                style: theme.textTheme.bodySmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(top: minInteractiveVerticalPadding / 2),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // Hour/minutes should not change positions in RTL locales.
+                    textDirection: TextDirection.ltr,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _HourTextField(
+                                restorationId: 'hour_text_field',
+                                selectedTime: _selectedTime.value,
+                                style: hourMinuteStyle,
+                                autofocus: widget.autofocusHour,
+                                inputAction: TextInputAction.next,
+                                validator: _validateHour,
+                                onSavedSubmitted: _handleHourSavedSubmitted,
+                                onChanged: _handleHourChanged,
+                                hourLabelText: widget.hourLabelText,
                               ),
                             ),
-                        ],
+                            if (!hourHasError.value && !minuteHasError.value)
+                              ExcludeSemantics(
+                                child: Text(
+                                  widget.hourLabelText ??
+                                      MaterialLocalizations.of(context).timePickerHourLabel,
+                                  style: theme.textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _MinuteTextField(
-                              restorationId: 'minute_text_field',
-                              selectedTime: _selectedTime.value,
-                              style: hourMinuteStyle,
-                              autofocus: widget.autofocusMinute,
-                              inputAction: TextInputAction.done,
-                              validator: _validateMinute,
-                              onSavedSubmitted: _handleMinuteSavedSubmitted,
-                              minuteLabelText: widget.minuteLabelText,
-                            ),
-                          ),
-                          if (!hourHasError.value && !minuteHasError.value)
-                            ExcludeSemantics(
-                              child: Text(
-                                widget.minuteLabelText ??
-                                    MaterialLocalizations.of(context).timePickerMinuteLabel,
-                                style: theme.textTheme.bodySmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                      _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _MinuteTextField(
+                                restorationId: 'minute_text_field',
+                                selectedTime: _selectedTime.value,
+                                style: hourMinuteStyle,
+                                autofocus: widget.autofocusMinute,
+                                inputAction: TextInputAction.done,
+                                validator: _validateMinute,
+                                onSavedSubmitted: _handleMinuteSavedSubmitted,
+                                minuteLabelText: widget.minuteLabelText,
                               ),
                             ),
-                        ],
+                            if (!hourHasError.value && !minuteHasError.value)
+                              ExcludeSemantics(
+                                child: Text(
+                                  widget.minuteLabelText ??
+                                      MaterialLocalizations.of(context).timePickerMinuteLabel,
+                                  style: theme.textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               if (!use24HourDials &&
