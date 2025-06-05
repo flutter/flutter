@@ -591,8 +591,6 @@ void main() {
   testWidgets('Dropdown form field updates if value set during onChange', (
     WidgetTester tester,
   ) async {
-    final Key buttonKey = UniqueKey();
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? value;
     await tester.pumpWidget(
       StatefulBuilder(
@@ -600,9 +598,7 @@ void main() {
           return MaterialApp(
             home: Material(
               child: Form(
-                key: formKey,
                 child: DropdownButtonFormField<String>(
-                  key: buttonKey,
                   value: value,
                   hint: const Text('Select Value'),
                   items:
