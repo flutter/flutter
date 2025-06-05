@@ -70,60 +70,19 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       await failToEvaluateExpression(flutter);
     });
 
-    testWithoutContext('shows no native javascript objects in static scope', () async {
+    testWithoutContext('can evaluate expressions in library, top level and build method', () async {
       await start(expressionEvaluation: true);
+
+      await evaluateTrivialExpressionsInLibrary(flutter);
+      await evaluateComplexExpressionsInLibrary(flutter);
+      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
+
       await breakInTopLevelFunction(flutter);
       await checkStaticScope(flutter);
-    });
-
-    testWithoutContext('can handle compilation errors', () async {
-      await start(expressionEvaluation: true);
-      await breakInTopLevelFunction(flutter);
       await evaluateErrorExpressions(flutter);
-    });
-
-    testWithoutContext('can evaluate trivial expressions in top level function', () async {
-      await start(expressionEvaluation: true);
-      await breakInTopLevelFunction(flutter);
       await evaluateTrivialExpressions(flutter);
-    });
-
-    testWithoutContext('can evaluate trivial expressions in build method', () async {
-      await start(expressionEvaluation: true);
-      await breakInBuildMethod(flutter);
-      await evaluateTrivialExpressions(flutter);
-    });
-
-    testWithoutContext('can evaluate complex expressions in top level function', () async {
-      await start(expressionEvaluation: true);
-      await breakInTopLevelFunction(flutter);
       await evaluateComplexExpressions(flutter);
-    });
 
-    testWithoutContext('can evaluate complex expressions in build method', () async {
-      await start(expressionEvaluation: true);
-      await breakInBuildMethod(flutter);
-      await evaluateComplexExpressions(flutter);
-    });
-
-    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
-      await start(expressionEvaluation: true);
-      await evaluateTrivialExpressionsInLibrary(flutter);
-    });
-
-    testWithoutContext('can evaluate complex expressions in library without pause', () async {
-      await start(expressionEvaluation: true);
-      await evaluateComplexExpressionsInLibrary(flutter);
-    });
-
-    testWithoutContext('evaluated expression includes web library environment defines', () async {
-      await start(expressionEvaluation: true);
-      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
-    });
-
-    testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
-      await start(expressionEvaluation: true);
-      await breakInTopLevelFunction(flutter);
       // Test that the call comes from some Dart getter called `current` (the
       // location of which will be compiler-specific) and that the lines and
       // file name of the current location is correct and reports a Dart path.
@@ -140,6 +99,10 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         end = stackTrace.indexOf('package:test/main.dart 15:7', end);
         return end != -1;
       });
+
+      await breakInBuildMethod(flutter);
+      await evaluateTrivialExpressions(flutter);
+      await evaluateComplexExpressions(flutter);
     });
   });
 
@@ -190,35 +153,17 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
       await failToEvaluateExpression(flutter);
     });
 
-    testWithoutContext('can evaluate trivial expressions in a test', () async {
+    testWithoutContext('can evaluate expressions in a test', () async {
       await startPaused(expressionEvaluation: true);
+
+      await evaluateTrivialExpressionsInLibrary(flutter);
+      await evaluateComplexExpressionsInLibrary(flutter);
+      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
+
       await breakInMethod(flutter);
       await evaluateTrivialExpressions(flutter);
-    });
-
-    testWithoutContext('can evaluate complex expressions in a test', () async {
-      await startPaused(expressionEvaluation: true);
-      await breakInMethod(flutter);
       await evaluateComplexExpressions(flutter);
-    });
 
-    testWithoutContext('can evaluate trivial expressions in library without pause', () async {
-      await startPaused(expressionEvaluation: true);
-      await evaluateTrivialExpressionsInLibrary(flutter);
-    });
-
-    testWithoutContext('can evaluate complex expressions in library without pause', () async {
-      await startPaused(expressionEvaluation: true);
-      await evaluateComplexExpressionsInLibrary(flutter);
-    });
-    testWithoutContext('evaluated expression includes web library environment defines', () async {
-      await startPaused(expressionEvaluation: true);
-      await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
-    });
-
-    testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
-      await startPaused(expressionEvaluation: true);
-      await breakInMethod(flutter);
       await evaluateStackTraceCurrent(flutter, (String stackTrace) {
         final Iterable<RegExpMatch> matches = stackTraceCurrentRegexp.allMatches(stackTrace);
         if (matches.length != 1) {
