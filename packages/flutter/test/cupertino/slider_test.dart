@@ -242,7 +242,7 @@ void main() {
     await tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
 
     final Size size = tester.getSize(find.byKey(sliderKey));
-    final double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
+    const double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
     expect(startValue, equals(0.0));
     expect(value, equals(finalValue));
     expect(endValue, equals(finalValue));
@@ -302,7 +302,7 @@ void main() {
     await tester.dragFrom(bottomRight - const Offset(unit, unit), const Offset(-delta, 0.0));
 
     final Size size = tester.getSize(find.byKey(sliderKey));
-    final double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
+    const double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
     expect(startValue, equals(0.0));
     expect(value, equals(finalValue));
     expect(endValue, equals(finalValue));

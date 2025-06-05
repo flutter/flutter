@@ -122,7 +122,7 @@ class _AnimatedDigitState extends State<AnimatedDigit> with SingleTickerProvider
   // incoming value into view. See animateValueUpdate().
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).textTheme.displayLarge!;
+    final TextStyle textStyle = Theme.of(context).textTheme.displayLarge;
     return ClipRect(
       child: Stack(
         children: <Widget>[

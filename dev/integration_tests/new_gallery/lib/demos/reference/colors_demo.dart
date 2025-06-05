@@ -161,13 +161,13 @@ class _PaletteTabView extends StatelessWidget {
           for (final int key in primaryKeys)
             DefaultTextStyle(
               style: key > colors.threshold ? whiteTextStyle : blackTextStyle,
-              child: _ColorItem(index: key, color: colors.primary[key]!),
+              child: _ColorItem(index: key, color: colors.primary[key]),
             ),
           if (colors.accent != null)
             for (final int key in accentKeys)
               DefaultTextStyle(
                 style: key > colors.threshold ? whiteTextStyle : blackTextStyle,
-                child: _ColorItem(index: key, color: colors.accent![key]!, prefix: 'A'),
+                child: _ColorItem(index: key, color: colors.accent![key], prefix: 'A'),
               ),
         ],
       ),

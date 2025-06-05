@@ -22,7 +22,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));
-    final ImageFrameBuilder frameBuilder = image.frameBuilder!;
+    final ImageFrameBuilder frameBuilder = image.frameBuilder;
     final BuildContext context = tester.element(find.byType(Image));
 
     const Key key = Key('child');
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Image image = tester.widget<Image>(find.byType(Image));
-    final ImageFrameBuilder frameBuilder = image.frameBuilder!;
+    final ImageFrameBuilder frameBuilder = image.frameBuilder;
     final BuildContext context = tester.element(find.byType(Image));
 
     const Key key = Key('child');

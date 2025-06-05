@@ -295,7 +295,7 @@ class OverlayEntry implements Listenable {
 
 class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
-    required Key super.key,
+    required super.key,
     required this.entry,
     required this.overlayState,
     this.tickerEnabled = true,
@@ -2506,7 +2506,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
     // The `parentUsesSize` flag can be safely ignored since this render box is
     // sized by the parent.
-    _doLayoutFrom(parent!, constraints: constraints);
+    _doLayoutFrom(parent, constraints: constraints);
   }
 
   @override

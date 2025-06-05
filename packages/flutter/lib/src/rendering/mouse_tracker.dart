@@ -76,7 +76,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   const _MouseTrackerUpdateDetails.byNewFrame({
     required this.lastAnnotations,
     required this.nextAnnotations,
-    required PointerEvent this.previousEvent,
+    required this.previousEvent,
   }) : triggeringEvent = null;
 
   /// When device update is triggered by a pointer event.
@@ -87,7 +87,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
     required this.lastAnnotations,
     required this.nextAnnotations,
     this.previousEvent,
-    required PointerEvent this.triggeringEvent,
+    required this.triggeringEvent,
   });
 
   /// The annotations that the device is hovering before the update.
@@ -240,7 +240,7 @@ class MouseTracker extends ChangeNotifier {
     for (final HitTestEntry entry in result.path) {
       final Object target = entry.target;
       if (target is MouseTrackerAnnotation) {
-        annotations[target] = entry.transform!;
+        annotations[target] = entry.transform;
       }
     }
     return annotations;

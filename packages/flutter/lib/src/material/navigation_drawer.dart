@@ -738,7 +738,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   @override
   MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      final TextStyle style = _textTheme.labelLarge!;
+      final TextStyle style = _textTheme.labelLarge;
       return style.apply(
         color: states.contains(MaterialState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)

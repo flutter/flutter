@@ -32,7 +32,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
   }) {
     assert(labelPainter != null);
     assert(textScaleFactor != null && textScaleFactor >= 0);
-    return _pathPainter.getPreferredSize(labelPainter!, textScaleFactor!);
+    return _pathPainter.getPreferredSize(labelPainter, textScaleFactor!);
   }
 
   @override
@@ -60,7 +60,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       labelPainter: labelPainter,
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
-      backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      backgroundPaintColor: sliderTheme.valueIndicatorColor,
       strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
     );
   }
@@ -103,11 +103,11 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     Size? sizeWithOverflow,
   }) {
     return _pathPainter.getHorizontalShift(
-      parentBox: parentBox!,
-      center: center!,
-      labelPainter: labelPainter!,
+      parentBox: parentBox,
+      center: center,
+      labelPainter: labelPainter,
       textScaleFactor: textScaleFactor!,
-      sizeWithOverflow: sizeWithOverflow!,
+      sizeWithOverflow: sizeWithOverflow,
       scale: activationAnimation!.value,
     );
   }
@@ -132,14 +132,14 @@ class RectangularRangeSliderValueIndicatorShape extends RangeSliderValueIndicato
     final Canvas canvas = context.canvas;
     final double scale = activationAnimation!.value;
     _pathPainter.paint(
-      parentBox: parentBox!,
+      parentBox: parentBox,
       canvas: canvas,
       center: center,
       scale: scale,
-      labelPainter: labelPainter!,
+      labelPainter: labelPainter,
       textScaleFactor: textScaleFactor!,
-      sizeWithOverflow: sizeWithOverflow!,
-      backgroundPaintColor: sliderTheme!.valueIndicatorColor!,
+      sizeWithOverflow: sizeWithOverflow,
+      backgroundPaintColor: sliderTheme!.valueIndicatorColor,
       strokePaintColor:
           isOnTop!
               ? sliderTheme.overlappingShapeStrokeColor

@@ -16,7 +16,7 @@ void main() {
         matching: find.widgetWithText(Material, 'TextButton'),
       ),
     );
-    return widget.textStyle!.color!;
+    return widget.textStyle!.color;
   }
 
   testWidgets('The foreground color of the TextButton should be red by default', (

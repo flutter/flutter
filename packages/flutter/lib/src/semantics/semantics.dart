@@ -511,7 +511,7 @@ class CustomSemanticsAction {
   /// The [hint] must not be empty.
   const CustomSemanticsAction.overridingAction({
     required String this.hint,
-    required SemanticsAction this.action,
+    required this.action,
   }) : assert(hint != ''),
        label = null;
 
@@ -4499,7 +4499,7 @@ class SemanticsConfiguration {
   VoidCallback? get onTap => _onTap;
   VoidCallback? _onTap;
   set onTap(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.tap, value!);
+    _addArgumentlessAction(SemanticsAction.tap, value);
     _onTap = value;
   }
 
@@ -4514,7 +4514,7 @@ class SemanticsConfiguration {
   VoidCallback? get onLongPress => _onLongPress;
   VoidCallback? _onLongPress;
   set onLongPress(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.longPress, value!);
+    _addArgumentlessAction(SemanticsAction.longPress, value);
     _onLongPress = value;
   }
 
@@ -4532,7 +4532,7 @@ class SemanticsConfiguration {
   VoidCallback? get onScrollLeft => _onScrollLeft;
   VoidCallback? _onScrollLeft;
   set onScrollLeft(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.scrollLeft, value!);
+    _addArgumentlessAction(SemanticsAction.scrollLeft, value);
     _onScrollLeft = value;
   }
 
@@ -4546,7 +4546,7 @@ class SemanticsConfiguration {
   VoidCallback? get onDismiss => _onDismiss;
   VoidCallback? _onDismiss;
   set onDismiss(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.dismiss, value!);
+    _addArgumentlessAction(SemanticsAction.dismiss, value);
     _onDismiss = value;
   }
 
@@ -4564,7 +4564,7 @@ class SemanticsConfiguration {
   VoidCallback? get onScrollRight => _onScrollRight;
   VoidCallback? _onScrollRight;
   set onScrollRight(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.scrollRight, value!);
+    _addArgumentlessAction(SemanticsAction.scrollRight, value);
     _onScrollRight = value;
   }
 
@@ -4582,7 +4582,7 @@ class SemanticsConfiguration {
   VoidCallback? get onScrollUp => _onScrollUp;
   VoidCallback? _onScrollUp;
   set onScrollUp(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.scrollUp, value!);
+    _addArgumentlessAction(SemanticsAction.scrollUp, value);
     _onScrollUp = value;
   }
 
@@ -4600,7 +4600,7 @@ class SemanticsConfiguration {
   VoidCallback? get onScrollDown => _onScrollDown;
   VoidCallback? _onScrollDown;
   set onScrollDown(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.scrollDown, value!);
+    _addArgumentlessAction(SemanticsAction.scrollDown, value);
     _onScrollDown = value;
   }
 
@@ -4641,7 +4641,7 @@ class SemanticsConfiguration {
   VoidCallback? get onIncrease => _onIncrease;
   VoidCallback? _onIncrease;
   set onIncrease(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.increase, value!);
+    _addArgumentlessAction(SemanticsAction.increase, value);
     _onIncrease = value;
   }
 
@@ -4659,7 +4659,7 @@ class SemanticsConfiguration {
   VoidCallback? get onDecrease => _onDecrease;
   VoidCallback? _onDecrease;
   set onDecrease(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.decrease, value!);
+    _addArgumentlessAction(SemanticsAction.decrease, value);
     _onDecrease = value;
   }
 
@@ -4672,7 +4672,7 @@ class SemanticsConfiguration {
   VoidCallback? get onCopy => _onCopy;
   VoidCallback? _onCopy;
   set onCopy(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.copy, value!);
+    _addArgumentlessAction(SemanticsAction.copy, value);
     _onCopy = value;
   }
 
@@ -4686,7 +4686,7 @@ class SemanticsConfiguration {
   VoidCallback? get onCut => _onCut;
   VoidCallback? _onCut;
   set onCut(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.cut, value!);
+    _addArgumentlessAction(SemanticsAction.cut, value);
     _onCut = value;
   }
 
@@ -4699,7 +4699,7 @@ class SemanticsConfiguration {
   VoidCallback? get onPaste => _onPaste;
   VoidCallback? _onPaste;
   set onPaste(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.paste, value!);
+    _addArgumentlessAction(SemanticsAction.paste, value);
     _onPaste = value;
   }
 
@@ -4715,7 +4715,7 @@ class SemanticsConfiguration {
   VoidCallback? get onShowOnScreen => _onShowOnScreen;
   VoidCallback? _onShowOnScreen;
   set onShowOnScreen(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.showOnScreen, value!);
+    _addArgumentlessAction(SemanticsAction.showOnScreen, value);
     _onShowOnScreen = value;
   }
 
@@ -4850,7 +4850,7 @@ class SemanticsConfiguration {
   VoidCallback? get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
   VoidCallback? _onDidGainAccessibilityFocus;
   set onDidGainAccessibilityFocus(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value!);
+    _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value);
     _onDidGainAccessibilityFocus = value;
   }
 
@@ -4874,7 +4874,7 @@ class SemanticsConfiguration {
   VoidCallback? get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
   VoidCallback? _onDidLoseAccessibilityFocus;
   set onDidLoseAccessibilityFocus(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value!);
+    _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value);
     _onDidLoseAccessibilityFocus = value;
   }
 
@@ -4882,7 +4882,7 @@ class SemanticsConfiguration {
   VoidCallback? get onFocus => _onFocus;
   VoidCallback? _onFocus;
   set onFocus(VoidCallback? value) {
-    _addArgumentlessAction(SemanticsAction.focus, value!);
+    _addArgumentlessAction(SemanticsAction.focus, value);
     _onFocus = value;
   }
 

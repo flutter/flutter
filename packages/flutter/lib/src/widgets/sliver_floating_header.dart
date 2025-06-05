@@ -336,14 +336,14 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
       )) {
         AxisDirection.up => Offset(
           0.0,
-          geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
+          geometry!.paintExtent - childMainAxisPosition(child) - childExtent,
         ),
         AxisDirection.left => Offset(
-          geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
+          geometry!.paintExtent - childMainAxisPosition(child) - childExtent,
           0.0,
         ),
-        AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
-        AxisDirection.down => Offset(0.0, childMainAxisPosition(child!)),
+        AxisDirection.right => Offset(childMainAxisPosition(child), 0.0),
+        AxisDirection.down => Offset(0.0, childMainAxisPosition(child)),
       };
       context.paintChild(child!, offset);
     }

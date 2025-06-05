@@ -588,7 +588,7 @@ class _TestCustomLayerBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Layer paintedLayer = painter(super.paint, context, offset, layer)!;
+    final Layer paintedLayer = painter(super.paint, context, offset, layer);
     paintedLayers.add(paintedLayer);
     layer = paintedLayer as ContainerLayer;
   }

@@ -29,7 +29,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
 
   void onValueChanged(int? newValue) {
     setState(() {
-      currentSegment.value = newValue!;
+      currentSegment.value = newValue;
     });
   }
 

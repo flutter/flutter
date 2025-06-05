@@ -116,7 +116,7 @@ void main() {
     expect(flutterAssetsCallCount, 2);
 
     final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+        const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'});
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) {});
 
     await rootBundle.loadString('test_asset');
@@ -134,7 +134,7 @@ void main() {
         const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'method': 'TextInput.requestElementsInRect',
           'args': null,
-        })!;
+        });
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (
       ByteData? data,
     ) {

@@ -211,7 +211,7 @@ typedef _PerformanceModeCleanupCallback = VoidCallback;
 /// To create a [PerformanceModeRequestHandle], use [SchedulerBinding.requestPerformanceMode].
 /// The component that makes the request is responsible for disposing the handle.
 class PerformanceModeRequestHandle {
-  PerformanceModeRequestHandle._(_PerformanceModeCleanupCallback this._cleanup) {
+  PerformanceModeRequestHandle._(this._cleanup) {
     assert(debugMaybeDispatchCreated('scheduler', 'PerformanceModeRequestHandle', this));
   }
 

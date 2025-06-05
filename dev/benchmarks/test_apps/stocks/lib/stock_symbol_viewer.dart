@@ -21,7 +21,7 @@ class _StockSymbolView extends StatelessWidget {
       changeInPrice = '+$changeInPrice';
     }
 
-    final TextStyle headings = Theme.of(context).textTheme.bodyLarge!;
+    final TextStyle headings = Theme.of(context).textTheme.bodyLarge;
     return Container(
       padding: const EdgeInsets.all(20.0),
       child: Column(

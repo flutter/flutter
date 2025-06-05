@@ -341,7 +341,7 @@ mixin CommandHandlerFactory {
     final GetOffset getOffsetCommand = command as GetOffset;
     final Finder finder = await waitForElement(finderFactory.createFinder(getOffsetCommand.finder));
     final Element element = finder.evaluate().single;
-    final RenderBox box = (element.renderObject as RenderBox?)!;
+    final RenderBox box = (element.renderObject as RenderBox?);
     final Offset localPoint = switch (getOffsetCommand.offsetType) {
       OffsetType.topLeft => Offset.zero,
       OffsetType.topRight => box.size.topRight(Offset.zero),
@@ -384,7 +384,7 @@ mixin CommandHandlerFactory {
     final OffsetLayer offsetLayer = layer! as OffsetLayer;
     final ui.Image image = await offsetLayer.toImage(renderView.paintBounds);
     final ui.ImageByteFormat format = ui.ImageByteFormat.values[screenshotCommand.format.index];
-    final ByteData buffer = (await image.toByteData(format: format))!;
+    final ByteData buffer = (await image.toByteData(format: format));
     return ScreenshotResult(buffer.buffer.asUint8List());
   }
 

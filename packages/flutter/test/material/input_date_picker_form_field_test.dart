@@ -85,7 +85,7 @@ void main() {
   }
 
   TextEditingController textFieldController(WidgetTester tester) {
-    return textField(tester).controller!;
+    return textField(tester).controller;
   }
 
   double textOpacity(WidgetTester tester, String textValue) {

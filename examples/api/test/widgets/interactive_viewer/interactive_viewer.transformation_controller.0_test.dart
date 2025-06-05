@@ -23,7 +23,7 @@ void main() {
 
     // Pans.
     const Offset panStart = Offset(400.0, 300.0);
-    final Offset panEnd = panStart + const Offset(20.0, 20.0);
+    const Offset panEnd = panStart + const Offset(20.0, 20.0);
     final TestGesture gesture = await tester.startGesture(panStart);
     await tester.pump();
     await gesture.moveTo(panEnd);
@@ -38,8 +38,8 @@ void main() {
 
     // Zooms.
     const Offset scaleStart1 = Offset(400.0, 300.0);
-    final Offset scaleStart2 = scaleStart1 + const Offset(10.0, 0.0);
-    final Offset scaleEnd1 = scaleStart1 - const Offset(10.0, 0.0);
+    const Offset scaleStart2 = scaleStart1 + const Offset(10.0, 0.0);
+    const Offset scaleEnd1 = scaleStart1 - const Offset(10.0, 0.0);
     final Offset scaleEnd2 = scaleStart2 + const Offset(10.0, 0.0);
     final TestGesture gesture1 = await tester.createGesture();
     final TestGesture gesture2 = await tester.createGesture();

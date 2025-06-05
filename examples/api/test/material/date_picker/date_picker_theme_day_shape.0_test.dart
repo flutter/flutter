@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test the current day shape decoration.
-    ShapeDecoration dayShapeDecoration = findDayDecoration(tester, '15')!;
+    ShapeDecoration dayShapeDecoration = findDayDecoration(tester, '15');
     expect(dayShapeDecoration.color, todayBackgroundColor);
     expect(
       dayShapeDecoration.shape,
@@ -40,7 +40,7 @@ void main() {
     );
 
     // Test the selected day shape decoration.
-    dayShapeDecoration = findDayDecoration(tester, '20')!;
+    dayShapeDecoration = findDayDecoration(tester, '20');
     expect(dayShapeDecoration.color, theme.colorScheme.primary);
     expect(dayShapeDecoration.shape, dayShape);
 
@@ -49,7 +49,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test the selected day shape decoration.
-    dayShapeDecoration = findDayDecoration(tester, '15')!;
+    dayShapeDecoration = findDayDecoration(tester, '15');
     expect(dayShapeDecoration.color, todayBackgroundColor);
     expect(
       dayShapeDecoration.shape,

@@ -78,7 +78,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
   void _entryModeChanged(TimePickerEntryMode? value) {
     if (value != entryMode) {
       setState(() {
-        entryMode = value!;
+        entryMode = value;
       });
     }
   }
@@ -94,7 +94,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
   void _textDirectionChanged(TextDirection? value) {
     if (value != textDirection) {
       setState(() {
-        textDirection = value!;
+        textDirection = value;
       });
     }
   }
@@ -102,7 +102,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
   void _tapTargetSizeChanged(MaterialTapTargetSize? value) {
     if (value != tapTargetSize) {
       setState(() {
-        tapTargetSize = value!;
+        tapTargetSize = value;
       });
     }
   }

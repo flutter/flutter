@@ -215,7 +215,7 @@ class UnderlineInputBorder extends InputBorder {
     if (a is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -226,7 +226,7 @@ class UnderlineInputBorder extends InputBorder {
     if (b is UnderlineInputBorder) {
       return UnderlineInputBorder(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t)!,
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
@@ -392,7 +392,7 @@ class OutlineInputBorder extends InputBorder {
     if (a is OutlineInputBorder) {
       final OutlineInputBorder outline = a;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         gapPadding: outline.gapPadding,
       );
@@ -405,7 +405,7 @@ class OutlineInputBorder extends InputBorder {
     if (b is OutlineInputBorder) {
       final OutlineInputBorder outline = b;
       return OutlineInputBorder(
-        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
+        borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         gapPadding: outline.gapPadding,
       );

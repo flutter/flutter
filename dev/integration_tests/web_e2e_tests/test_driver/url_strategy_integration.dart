@@ -36,7 +36,7 @@ void main() {
 
     expect(strategy.getPath(), '/');
 
-    final NavigatorState navigator = app.navKey.currentState!;
+    final NavigatorState navigator = app.navKey.currentState;
     navigator.pushNamed('/foo');
     await tester.pump();
     expect(strategy.getPath(), '/foo');

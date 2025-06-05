@@ -58,7 +58,7 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
   // the alignedItem's extent don't trigger an auto-scroll.
   void maybeAutoScrollAlignedItem(RenderSliver alignedItem) {
     final SliverConstraints constraints = alignedItem.constraints;
-    final SliverGeometry geometry = alignedItem.geometry!;
+    final SliverGeometry geometry = alignedItem.geometry;
     final double sliverOffset = constraints.scrollOffset;
 
     if ((scrollController.offset - lastScrollOffset).abs() <= geometry.maxPaintExtent) {

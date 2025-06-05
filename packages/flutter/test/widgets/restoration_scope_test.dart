@@ -161,7 +161,7 @@ void main() {
       final BucketSpyState state = tester.state(find.byType(BucketSpy));
       expect(state.bucket!.restorationId, 'child1');
       expect(state.bucket!.read<int>('foo'), 22);
-      final RestorationBucket bucket = state.bucket!;
+      final RestorationBucket bucket = state.bucket;
 
       // Rename the existing bucket.
       await tester.pumpWidget(
@@ -320,7 +320,7 @@ void main() {
             .containsKey('moving-child'),
         isTrue,
       );
-      final RestorationBucket bucket = state.bucket!;
+      final RestorationBucket bucket = state.bucket;
 
       state.bucket!.write('value', 11);
       manager.doSerialization();

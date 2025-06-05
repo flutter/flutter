@@ -1366,7 +1366,7 @@ class RenderTable extends RenderBox {
               );
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               final double? childBaseline = child.getDistanceToBaseline(
-                textBaseline!,
+                textBaseline,
                 onlyReal: true,
               );
               if (childBaseline != null) {
