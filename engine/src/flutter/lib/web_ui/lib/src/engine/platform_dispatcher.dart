@@ -40,6 +40,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       // EngineFlutterView itself.
       invokeOnMetricsChanged();
     });
+
+    /// Global click listener that bridges assistive technology activations with Flutter's focus system.
+    /// Screen readers don't naturally trigger DOM focus events that Flutter's navigation system expects.
+    _addGlobalClickListener();
   }
 
   late StreamSubscription<int> _onViewDisposedListener;
@@ -1292,6 +1296,98 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   @override
   double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;
+
+  /// Global click listener that bridges assistive technology activations with Flutter's focus system.
+  /// Screen readers don't naturally trigger DOM focus events that Flutter's navigation system expects.
+  // DomEventListener? _globalClickListener;
+
+  void _addGlobalClickListener() {
+    final DomEventListener globalClickListener = createDomEventListener((DomEvent event) {
+      // Find the semantic element by traversing up the DOM tree
+      DomElement? semanticElement;
+      int? nodeId;
+      DomNode? currentNode = event.target as DomNode?;
+
+      // Traverse up the DOM tree to find a semantic element
+      while (currentNode != null) {
+        if (currentNode.isA<DomElement>()) {
+          final DomElement element = currentNode as DomElement;
+
+          // Check if this element has semantic information
+          final String? semanticsId = element.getAttribute('id');
+          if (semanticsId != null && semanticsId.startsWith('flt-semantic-node-')) {
+            final String nodeIdStr = semanticsId.substring('flt-semantic-node-'.length);
+            final int? parsedNodeId = int.tryParse(nodeIdStr);
+            if (parsedNodeId != null) {
+              semanticElement = element;
+              nodeId = parsedNodeId;
+              break;
+            }
+          }
+
+          // Also check for other semantic indicators
+          if (element.hasAttribute('flt-semantics-container') ||
+              element.hasAttribute('flt-semantics') ||
+              element.hasAttribute('flt-tappable')) {
+            semanticElement = element;
+
+            // Try to extract nodeId from id if available
+            final String? elementId = element.getAttribute('id');
+            if (elementId != null && elementId.startsWith('flt-semantic-node-')) {
+              final String nodeIdStr = elementId.substring('flt-semantic-node-'.length);
+              final int? parsedNodeId = int.tryParse(nodeIdStr);
+              if (parsedNodeId != null) {
+                nodeId = parsedNodeId;
+              }
+            }
+            break;
+          }
+        }
+
+        currentNode = currentNode.parentNode;
+      }
+      // If we found a semantic element, process it for focus
+      if (semanticElement != null && nodeId != null) {
+        DomElement? focusableElement = semanticElement;
+        int? focusableNodeId = nodeId;
+
+        // Check if this element is focusable, if not check children
+        final double? tabIndex = semanticElement.tabIndex;
+
+        if (tabIndex == null || tabIndex < 0) {
+          // Look for child elements with tabindex
+          final List<DomElement> children =
+              semanticElement.querySelectorAll('*').cast<DomElement>().toList();
+          for (final DomElement child in children) {
+            final double? childTabIndex = child.tabIndex;
+            if (childTabIndex != null && childTabIndex >= 0) {
+              final String? childId = child.getAttribute('id');
+              if (childId != null && childId.startsWith('flt-semantic-node-')) {
+                final String childNodeIdStr = childId.substring('flt-semantic-node-'.length);
+                final int? parsedChildNodeId = int.tryParse(childNodeIdStr);
+                if (parsedChildNodeId != null) {
+                  focusableElement = child;
+                  focusableNodeId = parsedChildNodeId;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // Force DOM focus if we have a focusable element
+        if (focusableElement != null && focusableNodeId != null) {
+          final double? finalTabIndex = focusableElement.tabIndex;
+          if (finalTabIndex != null && finalTabIndex >= 0) {
+            focusableElement.focusWithoutScroll();
+          }
+        }
+      }
+    });
+
+    // Add the listener to capture phase to ensure it runs before other listeners
+    domDocument.addEventListener('click', globalClickListener, true.toJS);
+  }
 }
 
 bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {

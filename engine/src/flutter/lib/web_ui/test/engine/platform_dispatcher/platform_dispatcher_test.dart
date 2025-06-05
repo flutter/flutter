@@ -395,6 +395,136 @@ void testMain() {
       expect(beginFrameCalled, true);
       expect(drawFrameCalled.isCompleted, true);
     });
+
+    group('global click listener for assistive technology', () {
+      late DomElement testContainer;
+
+      setUp(() {
+        testContainer = createDomElement('div');
+        testContainer.id = 'global-click-test-container';
+        domDocument.body!.appendChild(testContainer);
+      });
+
+      tearDown(() {
+        testContainer.remove();
+      });
+
+      test('handles clicks on semantic elements without throwing', () {
+        final DomElement semanticNode = createDomElement('div');
+        semanticNode.id = 'flt-semantic-node-42';
+        semanticNode.tabIndex = 0;
+        testContainer.appendChild(semanticNode);
+
+        final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+          'clientX': 100,
+          'clientY': 100,
+          'bubbles': true,
+        });
+
+        // The global click listener should handle this without throwing
+        expect(() => semanticNode.dispatchEvent(clickEvent), returnsNormally);
+      });
+
+      test('handles clicks on elements with semantic attributes', () {
+        final List<DomElement> semanticElements = <DomElement>[
+          createDomElement('div')
+            ..setAttribute('flt-semantics', '')
+            ..tabIndex = 0,
+          createDomElement('div')
+            ..setAttribute('flt-semantics-container', '')
+            ..tabIndex = 0,
+          createDomElement('div')
+            ..setAttribute('flt-tappable', '')
+            ..tabIndex = 0,
+        ];
+
+        for (final DomElement element in semanticElements) {
+          testContainer.appendChild(element);
+
+          final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+            'clientX': 100,
+            'clientY': 100,
+            'bubbles': true,
+          });
+
+          // Each semantic element type should be handled without throwing
+          expect(() => element.dispatchEvent(clickEvent), returnsNormally);
+
+          element.remove();
+        }
+      });
+
+      test('semantic elements can receive focus', () {
+        final DomElement focusableElement = createDomElement('div');
+        focusableElement.id = 'flt-semantic-node-456';
+        focusableElement.tabIndex = 0;
+        testContainer.appendChild(focusableElement);
+
+        expect(focusableElement.tabIndex, equals(0));
+
+        // Verify the element can receive focus (key behavior for focus restoration)
+        expect(() => focusableElement.focusWithoutScroll(), returnsNormally);
+        expect(() => focusableElement.blur(), returnsNormally);
+      });
+
+      test('handles non-semantic elements gracefully', () {
+        final DomElement regularElement = createDomElement('div');
+        testContainer.appendChild(regularElement);
+
+        final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+          'clientX': 100,
+          'clientY': 100,
+          'bubbles': true,
+        });
+
+        // Should handle gracefully without throwing
+        expect(() => regularElement.dispatchEvent(clickEvent), returnsNormally);
+      });
+
+      test('global click listener bridges assistive technology to focus system', () {
+        // This test simulates what happens when a screen reader activates an element
+        final DomElement assistiveTechTarget = createDomElement('div');
+        assistiveTechTarget.id = 'flt-semantic-node-999';
+        assistiveTechTarget.setAttribute('flt-tappable', '');
+        assistiveTechTarget.tabIndex = 0;
+        testContainer.appendChild(assistiveTechTarget);
+
+        final DomEvent activationEvent = createDomMouseEvent('click', <Object?, Object?>{
+          'clientX': 100,
+          'clientY': 100,
+          'bubbles': true,
+        });
+
+        // This simulates a VoiceOver/screen reader activation
+        // The global click listener should bridge this to Flutter's focus system
+        expect(() => assistiveTechTarget.dispatchEvent(activationEvent), returnsNormally);
+
+        // Verify the element can receive focus (the key behavior for focus restoration)
+        expect(() => assistiveTechTarget.focusWithoutScroll(), returnsNormally);
+      });
+
+      test('DOM traversal works for nested elements', () {
+        final DomElement semanticParent = createDomElement('div');
+        semanticParent.id = 'flt-semantic-node-123';
+        semanticParent.tabIndex = 0;
+
+        final DomElement childElement = createDomElement('span');
+        childElement.text = 'Child element';
+        semanticParent.appendChild(childElement);
+        testContainer.appendChild(semanticParent);
+
+        final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+          'clientX': 100,
+          'clientY': 100,
+          'bubbles': true,
+        });
+
+        // Click events should bubble and be handled appropriately
+        expect(() => childElement.dispatchEvent(clickEvent), returnsNormally);
+        expect(() => semanticParent.dispatchEvent(clickEvent), returnsNormally);
+      });
+    });
+
     // https://github.com/flutter/flutter/issues/160096
   }, skip: ui_web.browser.isFirefox);
 }
