@@ -65,17 +65,30 @@ void _updateGeneratedXcodePropertiesFile({
   required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
-  final StringBuffer localsBuffer = StringBuffer();
+  final StringBuffer buffer = StringBuffer();
 
-  localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
-  xcodeBuildSettings.forEach(localsBuffer.writeln);
+  buffer.writeln('// This is a generated file; do not edit or check into version control.');
+  xcodeBuildSettings.forEach(buffer.writeln);
+
+  final String newContent = buffer.toString();
+
   final File generatedXcodePropertiesFile =
       useMacOSConfig
           ? project.macos.generatedXcodePropertiesFile
           : project.ios.generatedXcodePropertiesFile;
 
-  generatedXcodePropertiesFile.createSync(recursive: true);
-  generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
+  if (!generatedXcodePropertiesFile.existsSync()) {
+    generatedXcodePropertiesFile.createSync(recursive: true);
+  } else {
+    // Don't overwrite the generated properties if they haven't changed.
+    // This ensures flutter assemble targets aren't invalidated unnecessarily.
+    final String oldContent = generatedXcodePropertiesFile.readAsStringSync();
+    if (oldContent == newContent) {
+      return;
+    }
+  }
+
+  generatedXcodePropertiesFile.writeAsStringSync(newContent);
 }
 
 /// Generate a script to export all the FLUTTER_ environment variables needed
@@ -167,6 +180,9 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final String buildNumber =
       parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
+
+  // The current build mode being targeted.
+  xcodeBuildSettings.add('FLUTTER_CLI_BUILD_MODE=${buildInfo.mode.cliName}');
 
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
   // Set the CONFIGURATION_BUILD_DIR so Xcode knows where to find the app

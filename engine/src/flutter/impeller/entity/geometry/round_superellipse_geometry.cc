@@ -291,37 +291,38 @@ size_t DrawOctantSquareLikeSquircle(Point* output,
   if (reverse_and_flip) {
     transform = transform * kFlip;
   }
+  if (param.se_n < 2) {
+    // It's a square.
+    *output = transform * Point(param.se_a, param.se_a);
+    return 1;
+  }
 
   /* The following figure shows the first quadrant of a square-like rounded
-   * superellipse. The target arc consists of the "stretch" (AB), a
-   * superellipsoid arc (BJ), and a circular arc (JM).
+   * superellipse. The target arc consists a superellipsoid arc (AJ) and a
+   * circular arc (JM).
    *
-   *     straight   superelipse
-   *          ↓     ↓
-   *        A    B       J    circular arc
-   *        ---------...._   ↙
-   *        |    |      /  `⟍ M (where y=x)
-   *        |    |     /    ⟋ ⟍
-   *        |    |    /  ⟋     \
-   *        |    |   / ⟋        |
-   *        |    |  ᜱD          |
-   *        |    | /             |
-   *    ↑   +----+ S             |
-   *    s   |    |               |
-   *    ↓   +----+---------------| A'
+   *              superelipse
+   *        A     ↓            circular arc
+   *        ---------...._J   ↙
+   *        |           /   `⟍ M (where x=y)
+   *        |          /     ⟋ ⟍
+   *        |         /   ⟋     \
+   *        |        / ⟋         |
+   *        |       ᜱD           |
+   *        |     ⟋              |
+   *        |  ⟋                 |
+   *        |⟋                   |
+   *        +--------------------| A'
    *       O
-   *        ← s →
-   *        ←------ size/2 ------→
+   *        ←-------- a ---------→
    */
 
   Point* next = output;
   if (!reverse_and_flip) {
-    // Point A
-    *(next++) = transform * param.edge_mid;
-    // Arc [B, J)
-    next += DrawSuperellipsoidArc(
-        next, param.se_a, param.se_n, param.se_max_theta, reverse_and_flip,
-        transform * Matrix::MakeTranslation(param.se_center));
+    // Arc [A, J)
+    next +=
+        DrawSuperellipsoidArc(next, param.se_a, param.se_n, param.se_max_theta,
+                              reverse_and_flip, transform);
     // Arc [J, M)
     next += DrawCircularArc(
         next, param.circle_start - param.circle_center,
@@ -333,14 +334,12 @@ size_t DrawOctantSquareLikeSquircle(Point* output,
         next, param.circle_start - param.circle_center,
         param.circle_max_angle.radians, reverse_and_flip,
         transform * Matrix::MakeTranslation(param.circle_center));
-    // Arc [J, B)
-    next += DrawSuperellipsoidArc(
-        next, param.se_a, param.se_n, param.se_max_theta, reverse_and_flip,
-        transform * Matrix::MakeTranslation(param.se_center));
-    // Point B
-    *(next++) = transform * (param.se_center + Point{0, param.se_a});
+    // Arc [J, A)
+    next +=
+        DrawSuperellipsoidArc(next, param.se_a, param.se_n, param.se_max_theta,
+                              reverse_and_flip, transform);
     // Point A
-    *(next++) = transform * param.edge_mid;
+    *(next++) = transform * Point(0, param.se_a);
   }
   return next - output;
 }
@@ -461,6 +460,16 @@ bool RoundSuperellipseGeometry::CoversArea(const Matrix& transform,
 
 bool RoundSuperellipseGeometry::IsAxisAlignedRect() const {
   return false;
+}
+
+StrokeRoundSuperellipseGeometry::StrokeRoundSuperellipseGeometry(
+    const RoundSuperellipse& round_superellipse,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      round_superellipse_source_(round_superellipse) {}
+
+const PathSource& StrokeRoundSuperellipseGeometry::GetSource() const {
+  return round_superellipse_source_;
 }
 
 }  // namespace impeller

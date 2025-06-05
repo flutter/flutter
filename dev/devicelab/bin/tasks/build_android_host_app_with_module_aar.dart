@@ -72,13 +72,6 @@ class ModuleTest {
 
       section('Create package with native assets');
 
-      await flutter(
-        'config',
-        options: <String>['--enable-native-assets'],
-        output: stdout,
-        stderr: stderr,
-      );
-
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 
@@ -221,6 +214,17 @@ class ModuleTest {
         return TaskResult.failure('Failed to build editable host .apk');
       }
 
+      section('Flutter build aar succeeds');
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>['aar', '--no-profile'],
+          output: stdout,
+          stderr: stderr,
+        );
+      });
+
       section('Add to existing Android app');
 
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
@@ -244,13 +248,12 @@ class ModuleTest {
       );
 
       // Modify gradle version to the passed in version.
-      // This is somehow the wrong file.
       final File gradleWrapperProperties = File(
         path.join(hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'),
       );
       String propertyContent = await gradleWrapperProperties.readAsString();
       propertyContent = propertyContent.replaceFirst('REPLACEME', gradleVersion);
-      section(propertyContent);
+      section('Modify gradle wrapper file contents');
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
       // Modify AGP version to the passed in version.
@@ -457,7 +460,7 @@ Future<void> main() async {
     combine(<TaskFunction>[
       // 3 tests comes close to timeout.
       // Pre AGP 8.3
-      ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.1.0')).call,
+      ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')).call,
       // Post AGP 8.3 + rc candidates can work
       ModuleTest(gradleVersion: '8.13-rc-1', agpVersion: Version.parse('8.8.1')).call,
     ]),

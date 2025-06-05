@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -180,29 +181,28 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   bool called = false;
-  fl_engine_get_embedder_api(engine)->DispatchSemanticsAction =
-      MOCK_ENGINE_PROC(
-          DispatchSemanticsAction,
-          ([&called](auto engine, uint64_t id, FlutterSemanticsAction action,
-                     const uint8_t* data, size_t data_length) {
-            EXPECT_EQ(id, static_cast<uint64_t>(42));
-            EXPECT_EQ(action, kFlutterSemanticsActionTap);
-            EXPECT_EQ(data_length, static_cast<size_t>(4));
-            EXPECT_EQ(data[0], 't');
-            EXPECT_EQ(data[1], 'e');
-            EXPECT_EQ(data[2], 's');
-            EXPECT_EQ(data[3], 't');
-            called = true;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&called](auto engine, const FlutterSendSemanticsActionInfo* info) {
+        EXPECT_EQ(info->view_id, static_cast<int64_t>(456));
+        EXPECT_EQ(info->node_id, static_cast<uint64_t>(42));
+        EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+        EXPECT_EQ(info->data_length, static_cast<size_t>(4));
+        EXPECT_EQ(info->data[0], 't');
+        EXPECT_EQ(info->data[1], 'e');
+        EXPECT_EQ(info->data[2], 's');
+        EXPECT_EQ(info->data[3], 't');
+        called = true;
 
-            return kSuccess;
-          }));
+        return kSuccess;
+      }));
 
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
   g_autoptr(GBytes) data = g_bytes_new_static("test", 4);
-  fl_engine_dispatch_semantics_action(engine, 42, kFlutterSemanticsActionTap,
-                                      data);
+  fl_engine_dispatch_semantics_action(engine, 456, 42,
+                                      kFlutterSemanticsActionTap, data);
 
   EXPECT_TRUE(called);
 }
@@ -439,6 +439,57 @@ TEST(FlEngineTest, EngineId) {
   EXPECT_EQ(fl_engine_for_id(engine_id), engine);
 }
 
+TEST(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  fl_dart_project_set_ui_thread_policy(
+      project, FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD);
+
+  bool same_task_runner = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&same_task_runner](size_t version, const FlutterRendererConfig* config,
+                           const FlutterProjectArgs* args, void* user_data,
+                           FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        same_task_runner = args->custom_task_runners->platform_task_runner ==
+                           args->custom_task_runners->ui_task_runner;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(same_task_runner);
+}
+
+TEST(FlEngineTest, UIIsolateOnSeparateThread) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  fl_dart_project_set_ui_thread_policy(
+      project, FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD);
+
+  bool separate_thread = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&separate_thread](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        separate_thread = args->custom_task_runners->ui_task_runner == nullptr;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(separate_thread);
+}
+
 TEST(FlEngineTest, Locales) {
   g_autofree gchar* initial_language = g_strdup(g_getenv("LANGUAGE"));
   g_setenv("LANGUAGE", "de:en_US", TRUE);
@@ -652,8 +703,10 @@ TEST(FlEngineTest, AddView) {
         return kSuccess;
       }));
 
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   FlutterViewId view_id =
-      fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_cb, loop);
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
+                         nullptr, add_view_cb, loop);
   EXPECT_GT(view_id, 0);
   EXPECT_TRUE(called);
 
@@ -689,8 +742,10 @@ TEST(FlEngineTest, AddViewError) {
         return kSuccess;
       }));
 
-  FlutterViewId view_id = fl_engine_add_view(engine, 123, 456, 2.0, nullptr,
-                                             add_view_error_cb, loop);
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
+                         nullptr, add_view_error_cb, loop);
   EXPECT_GT(view_id, 0);
 
   // Blocks here until add_view_error_cb is called.
@@ -719,8 +774,10 @@ TEST(FlEngineTest, AddViewEngineError) {
         return kInvalidArguments;
       }));
 
-  FlutterViewId view_id = fl_engine_add_view(engine, 123, 456, 2.0, nullptr,
-                                             add_view_engine_error_cb, loop);
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
+                         nullptr, add_view_engine_error_cb, loop);
   EXPECT_GT(view_id, 0);
 
   // Blocks here until remove_view_engine_error_cb is called.
@@ -975,7 +1032,7 @@ TEST(FlEngineTest, ChildObjects) {
 
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
-  EXPECT_NE(fl_engine_get_renderer(engine), nullptr);
+  EXPECT_NE(fl_engine_get_compositor(engine), nullptr);
   EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);
   EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
   EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);

@@ -1076,4 +1076,58 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('MultiFrameImageStreamCompleter image callback can remove listener', (
+    WidgetTester tester,
+  ) async {
+    final Completer<Codec> completer = Completer<Codec>();
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 1;
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      scale: 1.0,
+    );
+
+    completer.complete(mockCodec);
+    await tester.idle();
+    expect(mockCodec.numFramesAsked, 0);
+
+    late ImageStreamListener streamListener;
+
+    void listener(ImageInfo image, bool synchronousCall) {
+      addTearDown(image.dispose);
+      imageStream.removeListener(streamListener);
+    }
+
+    streamListener = ImageStreamListener(listener);
+    imageStream.addListener(streamListener);
+    await tester.idle();
+    expect(mockCodec.numFramesAsked, 1);
+
+    final FrameInfo frame = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
+    mockCodec.completeNextFrame(frame);
+    await tester.idle();
+    expect(mockCodec.disposed, true);
+  });
+
+  testWidgets('ImageStream that has never had any listeners can be disposed', (
+    WidgetTester tester,
+  ) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 2;
+    mockCodec.repetitionCount = -1;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(mockCodec.disposed, false);
+    imageStream.maybeDispose();
+    expect(mockCodec.disposed, true);
+  });
 }

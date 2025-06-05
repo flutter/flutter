@@ -74,23 +74,42 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   float area = CalculateArea(rgb);
   return area > kSrgbGamutArea;
 }
+
+static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
+  switch (type) {
+    case kRGBA_8888_SkColorType:
+      return impeller::PixelFormat::kR8G8B8A8UNormInt;
+    case kBGRA_8888_SkColorType:
+      return impeller::PixelFormat::kB8G8R8A8UNormInt;
+    case kRGBA_F16_SkColorType:
+      return impeller::PixelFormat::kR16G16B16A16Float;
+    case kBGR_101010x_XR_SkColorType:
+      return impeller::PixelFormat::kB10G10R10XR;
+    default:
+      return std::nullopt;
+  }
+  return std::nullopt;
+}
 }  // namespace
 
 ImageDecoderImpeller::ImageDecoderImpeller(
     const TaskRunners& runners,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     const fml::WeakPtr<IOManager>& io_manager,
-    bool supports_wide_gamut,
+    bool wide_gamut_enabled,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)
     : ImageDecoder(runners, std::move(concurrent_task_runner), io_manager),
-      supports_wide_gamut_(supports_wide_gamut),
+      wide_gamut_enabled_(wide_gamut_enabled),
       gpu_disabled_switch_(gpu_disabled_switch) {
   std::promise<std::shared_ptr<impeller::Context>> context_promise;
   context_ = context_promise.get_future();
   runners_.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [promise = std::move(context_promise), io_manager]() mutable {
-        promise.set_value(io_manager ? io_manager->GetImpellerContext()
-                                     : nullptr);
+        if (io_manager) {
+          promise.set_value(io_manager->GetImpellerContext());
+        } else {
+          promise.set_value(nullptr);
+        }
       }));
 }
 
@@ -160,11 +179,11 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
         base_image_info.makeWH(decode_size.width(), decode_size.height())
             .makeColorType(
                 ChooseCompatibleColorType(base_image_info.colorType()))
-            .makeAlphaType(alpha_type);
+            .makeAlphaType(alpha_type)
+            .makeColorSpace(SkColorSpace::MakeSRGB());
   }
 
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format.has_value()) {
     std::string decode_error(impeller::SPrintF(
         "Codec pixel format is not supported (SkColorType=%d)",
@@ -289,8 +308,7 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info,
     const std::optional<SkImageInfo>& resize_info) {
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     std::string decode_error(impeller::SPrintF(
         "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
@@ -405,7 +423,7 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
     const SkImageInfo& image_info,
     const std::shared_ptr<SkBitmap>& bitmap,
     const std::optional<SkImageInfo>& resize_info,
-    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
+    const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
     result(nullptr, "No Impeller context is available");
@@ -456,8 +474,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
     return std::make_pair(nullptr, "No texture bitmap is available");
   }
   const auto image_info = bitmap->info();
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     std::string decode_error(impeller::SPrintF(
         "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
@@ -526,7 +543,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
        target_size = SkISize::Make(target_width, target_height),  //
        io_runner = runners_.GetIOTaskRunner(),                    //
        result,
-       supports_wide_gamut = supports_wide_gamut_,  //
+       wide_gamut_enabled = wide_gamut_enabled_,  //
        gpu_disabled_switch = gpu_disabled_switch_]() {
 #if FML_OS_IOS_SIMULATOR
         // No-op backend.
@@ -545,7 +562,8 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         // Always decompress on the concurrent runner.
         auto bitmap_result = DecompressTexture(
             raw_descriptor, target_size, max_size_supported,
-            /*supports_wide_gamut=*/supports_wide_gamut,
+            /*supports_wide_gamut=*/wide_gamut_enabled &&
+                context->GetCapabilities()->SupportsExtendedRangeFormats(),
             context->GetCapabilities(), context->GetResourceAllocator());
         if (!bitmap_result.device_buffer) {
           result(nullptr, bitmap_result.decode_error);

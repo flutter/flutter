@@ -34,6 +34,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'icon_data.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 
@@ -43,13 +44,29 @@ typedef ExitWidgetSelectionButtonBuilder =
     Widget Function(
       BuildContext context, {
       required VoidCallback onPressed,
+      required String semanticsLabel,
       required GlobalKey key,
     });
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.moveExitWidgetSelectionButtonBuilder].
 typedef MoveExitWidgetSelectionButtonBuilder =
-    Widget Function(BuildContext context, {required VoidCallback onPressed, bool isLeftAligned});
+    Widget Function(
+      BuildContext context, {
+      required VoidCallback onPressed,
+      required String semanticsLabel,
+      bool usesDefaultAlignment,
+    });
+
+/// Signature for the builder callback used by
+/// [WidgetInspector.tapBehaviorButtonBuilder].
+typedef TapBehaviorButtonBuilder =
+    Widget Function(
+      BuildContext context, {
+      required VoidCallback onPressed,
+      required String semanticsLabel,
+      required bool selectionOnTapEnabled,
+    });
 
 /// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
@@ -1611,7 +1628,7 @@ mixin WidgetInspectorService {
   void _sendInspectEvent(Object? object) {
     inspect(object);
 
-    final _Location? location = _getSelectedSummaryWidgetLocation(null);
+    final _Location? location = _getSelectedWidgetLocation();
     if (location != null) {
       postEvent('navigate', <String, Object>{
         'fileUri': location.file, // URI file path of the location.
@@ -1803,7 +1820,7 @@ mixin WidgetInspectorService {
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
   /// the Dart garbage collector from collecting objects between when
   /// the value is returned over the VM service protocol and when the
-  /// separate observatory protocol command has to be used to retrieve its full
+  /// separate VM service protocol command has to be used to retrieve its full
   /// contents.
   //
   // TODO(jacobr): Replace this with a better solution once
@@ -1973,14 +1990,55 @@ mixin WidgetInspectorService {
     List<DiagnosticsNode> nodes,
     InspectorSerializationDelegate delegate,
   ) {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[
-      for (final DiagnosticsNode child in nodes)
-        if (!delegate.summaryTree || _shouldShowInSummaryTree(child))
-          child
-        else
-          ..._getChildrenFiltered(child, delegate),
-    ];
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+
+    for (final DiagnosticsNode child in nodes) {
+      // Check to see if the current node is enabling or disabling the widget inspector for its
+      // children and update the delegate.
+      final InspectorSerializationDelegate? updatedDelegate =
+          _updateDelegateForWidgetInspectorEnabledState(delegate: delegate, node: child);
+
+      // We don't report the current node if:
+      //   - the current node is a reference to a DisableWidgetInspectorScope
+      //   - the current node is a reference to an EnableWidgetInspectorScope
+      //   - DisableWidgetInspectorScope was previously encountered in a parent node and
+      //     EnableWidgetInspectorScope hasn't been encountered as a descendant
+      //   - we're building a summary tree and the node is filtered
+      final bool inDisableWidgetInspectorScope =
+          (updatedDelegate?.inDisableWidgetInspectorScope ?? false) ||
+          delegate.inDisableWidgetInspectorScope;
+      if (!inDisableWidgetInspectorScope &&
+          (!delegate.summaryTree || _shouldShowInSummaryTree(child))) {
+        children.add(child);
+      } else {
+        children.addAll(_getChildrenFiltered(child, updatedDelegate ?? delegate));
+      }
+    }
     return children;
+  }
+
+  /// Returns a new [InspectorSerializationDelegate] if [node] references either an
+  /// [EnableWidgetInspectorScope] or [DisableWidgetInspectorScope] and the value of
+  /// `delegate.inDisableInspectorWidgetScope` is updated.
+  ///
+  /// If [EnableWidgetInspectorScope] is encountered and `delegate.inDisableInspectorWidgetScope`
+  /// is already false, null is returned.
+  ///
+  /// If [DisableWidgetInspectorScope] is encountered and `delegate.inDisableInspectorWidgetScope`
+  /// is already true, null is returned.
+  InspectorSerializationDelegate? _updateDelegateForWidgetInspectorEnabledState({
+    required InspectorSerializationDelegate delegate,
+    required DiagnosticsNode node,
+  }) {
+    final Object? value = node.value;
+    if (!delegate.inDisableWidgetInspectorScope &&
+        value is _DisableWidgetInspectorScopeProxyElement) {
+      return delegate.copyWith(inDisableWidgetInspectorScope: true);
+    } else if (delegate.inDisableWidgetInspectorScope &&
+        value is _EnableWidgetInspectorScopeProxyElement) {
+      return delegate.copyWith(inDisableWidgetInspectorScope: false);
+    }
+    return null;
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -2068,7 +2126,7 @@ mixin WidgetInspectorService {
       }
       final Object? value = node.value;
       if (value is Element) {
-        final RenderObject? renderObject = value.renderObject;
+        final RenderObject? renderObject = _renderObjectOrNull(value);
         if (renderObject is RenderParagraph) {
           additionalPropertiesJson['textPreview'] = renderObject.text.toPlainText();
         }
@@ -2160,7 +2218,7 @@ mixin WidgetInspectorService {
       return null;
     }
     final RenderObject? renderObject =
-        object is Element ? object.renderObject : (object as RenderObject?);
+        object is Element ? _renderObjectOrNull(object) : (object as RenderObject?);
     if (renderObject == null || !renderObject.attached) {
       return null;
     }
@@ -2224,7 +2282,7 @@ mixin WidgetInspectorService {
           InspectorSerializationDelegate delegate,
         ) {
           final Object? value = node.value;
-          final RenderObject? renderObject = value is Element ? value.renderObject : null;
+          final RenderObject? renderObject = value is Element ? _renderObjectOrNull(value) : null;
           if (renderObject == null) {
             return const <String, Object>{};
           }
@@ -2288,7 +2346,7 @@ mixin WidgetInspectorService {
 
               final ParentData? parentData = renderObject.parentData;
               if (parentData is FlexParentData) {
-                additionalJson['flexFactor'] = parentData.flex!;
+                additionalJson['flexFactor'] = parentData.flex ?? 0;
                 additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
               } else if (parentData is BoxParentData) {
                 final Offset offset = parentData.offset;
@@ -2320,7 +2378,7 @@ mixin WidgetInspectorService {
     final Object? object = toObject(id);
     bool succeed = false;
     if (object != null && object is Element) {
-      final RenderObject? render = object.renderObject;
+      final RenderObject? render = _renderObjectOrNull(object);
       final ParentData? parentData = render?.parentData;
       if (parentData is FlexParentData) {
         parentData.fit = flexFit;
@@ -2338,7 +2396,7 @@ mixin WidgetInspectorService {
     final dynamic object = toObject(id);
     bool succeed = false;
     if (object != null && object is Element) {
-      final RenderObject? render = object.renderObject;
+      final RenderObject? render = _renderObjectOrNull(object);
       final ParentData? parentData = render?.parentData;
       if (parentData is FlexParentData) {
         parentData.flex = factor;
@@ -2362,7 +2420,7 @@ mixin WidgetInspectorService {
     final Object? object = toObject(id);
     bool succeed = false;
     if (object != null && object is Element) {
-      final RenderObject? render = object.renderObject;
+      final RenderObject? render = _renderObjectOrNull(object);
       if (render is RenderFlex) {
         render.mainAxisAlignment = mainAxisAlignment;
         render.crossAxisAlignment = crossAxisAlignment;
@@ -2407,8 +2465,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
-    return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
+  _Location? _getSelectedWidgetLocation() {
+    return _getCreationLocation(_getSelectedWidgetDiagnosticsNode(null)?.value);
   }
 
   DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
@@ -2543,6 +2601,12 @@ mixin WidgetInspectorService {
     _clearStats();
     _resetErrorCount();
   }
+
+  /// Safely get the render object of an [Element].
+  ///
+  /// If the element is not yet mounted, the result will be null.
+  RenderObject? _renderObjectOrNull(Element element) =>
+      element.mounted ? element.renderObject : null;
 }
 
 /// Accumulator for a count associated with a specific source location.
@@ -2740,8 +2804,7 @@ class _WidgetForTypeTests extends Widget {
 /// Select a location on your device or emulator and view what widgets and
 /// render object that best matches the location. An outline of the selected
 /// widget and terse summary information is shown on device with detailed
-/// information is shown in the observatory or in IntelliJ when using the
-/// Flutter Plugin.
+/// information is shown in Flutter DevTools.
 ///
 /// The inspector has a select mode and a view mode.
 ///
@@ -2762,6 +2825,7 @@ class WidgetInspector extends StatefulWidget {
   const WidgetInspector({
     super.key,
     required this.child,
+    required this.tapBehaviorButtonBuilder,
     required this.exitWidgetSelectionButtonBuilder,
     required this.moveExitWidgetSelectionButtonBuilder,
   });
@@ -2784,6 +2848,15 @@ class WidgetInspector extends StatefulWidget {
   /// The button UI should respond to the `leftAligned` argument.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
 
+  /// A builder that is called to create the button that changes the default tap
+  /// behavior when Select Widget mode is enabled.
+  ///
+  /// The `onPressed` callback passed as an argument to the builder should be
+  /// hooked up to the returned widget.
+  ///
+  /// The button UI should respond to the `selectionOnTapEnabled` argument.
+  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
+
   @override
   State<WidgetInspector> createState() => _WidgetInspectorState();
 }
@@ -2803,6 +2876,11 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
+  ValueNotifier<bool> get _selectionOnTapEnabled =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabled;
+
+  bool get _isSelectModeWithSelectionOnTapEnabled => isSelectMode && _selectionOnTapEnabled.value;
+
   @override
   void initState() {
     super.initState();
@@ -2811,6 +2889,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.addListener(
       _selectionInformationChanged,
     );
+    _selectionOnTapEnabled.addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
   }
@@ -2821,6 +2900,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.removeListener(
       _selectionInformationChanged,
     );
+    _selectionOnTapEnabled.removeListener(_selectionInformationChanged);
     super.dispose();
   }
 
@@ -2905,7 +2985,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _inspectAt(Offset position) {
-    if (!isSelectMode) {
+    if (!_isSelectModeWithSelectionOnTapEnabled) {
       return;
     }
 
@@ -2946,7 +3026,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _handleTap() {
-    if (!isSelectMode) {
+    if (!_isSelectModeWithSelectionOnTapEnabled) {
       return;
     }
     if (_lastPointerLocation != null) {
@@ -2969,17 +3049,200 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           onPanUpdate: _handlePanUpdate,
           behavior: HitTestBehavior.opaque,
           excludeFromSemantics: true,
-          child: IgnorePointer(ignoring: isSelectMode, key: _ignorePointerKey, child: widget.child),
+          child: IgnorePointer(
+            ignoring: _isSelectModeWithSelectionOnTapEnabled,
+            key: _ignorePointerKey,
+            child: widget.child,
+          ),
         ),
-        _InspectorOverlay(selection: selection),
+        Positioned.fill(child: _InspectorOverlay(selection: selection)),
         if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
-          _ExitWidgetSelectionButtonGroup(
+          _WidgetInspectorButtonGroup(
+            tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
             exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder!,
             moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
           ),
       ],
     );
   }
+}
+
+/// Enables the Flutter DevTools Widget Inspector for a [Widget] subtree.
+///
+/// The widget inspector is enabled by default, so this widget is only useful if
+/// it is a descendant of [DisableWidgetInspectorScope] in the widget tree.
+///
+/// See also:
+///
+///  * [DisableWidgetInspectorScope], the widget used to enable the inspector for a widget subtree.
+///  * [WidgetInspector], the widget used to provide inspector support for a widget subtree.
+class EnableWidgetInspectorScope extends ProxyWidget {
+  /// Enables the Flutter DevTools Widget Inspector for the [Widget] subtree rooted at [child].
+  const EnableWidgetInspectorScope({super.key, required super.child});
+
+  @override
+  Element createElement() => _EnableWidgetInspectorScopeProxyElement(this);
+}
+
+class _EnableWidgetInspectorScopeProxyElement extends ProxyElement {
+  _EnableWidgetInspectorScopeProxyElement(super.widget);
+
+  @override
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Do nothing.
+  }
+}
+
+/// Disables the Flutter DevTools Widget Inspector for a [Widget] subtree.
+///
+/// This is useful for hiding implementation details of widgets in contexts where the additional
+/// information may be confusing to end users. For example, a widget previewer may display multiple
+/// previews of user defined widgets and decide to only display the user defined widgets in the
+/// inspector while hiding the scaffolding used to host the widgets in the previewer.
+///
+/// See also:
+///
+///  * [EnableWidgetInspectorScope], the widget used to enable the inspector for a widget subtree.
+///  * [WidgetInspector], the widget used to provide inspector support for a widget subtree.
+class DisableWidgetInspectorScope extends ProxyWidget {
+  /// Disables the Flutter DevTools Widget Inspector for the [Widget] subtree rooted at [child].
+  const DisableWidgetInspectorScope({super.key, required super.child});
+
+  @override
+  Element createElement() => _DisableWidgetInspectorScopeProxyElement(this);
+}
+
+class _DisableWidgetInspectorScopeProxyElement extends ProxyElement {
+  _DisableWidgetInspectorScopeProxyElement(super.widget);
+
+  @override
+  void notifyClients(covariant ProxyWidget oldWidget) {
+    // Do nothing.
+  }
+}
+
+/// Defines the visual and behavioral variants for an [InspectorButton].
+enum InspectorButtonVariant {
+  /// A standard button with a filled background and foreground icon.
+  filled,
+
+  /// A button that can be toggled on or off, visually representing its state.
+  ///
+  /// The [InspectorButton.toggledOn] property determines its current state.
+  toggle,
+
+  /// A button that displays only an icon, typically with a transparent background.
+  iconOnly,
+}
+
+/// An abstract base class for creating Material or Cupertino-styled inspector
+/// buttons.
+///
+/// Subclasses are responsible for implementing the design-specific rendering
+/// logic in the [build] method and providing design-specific colors via
+/// [foregroundColor] and [backgroundColor].
+abstract class InspectorButton extends StatelessWidget {
+  /// Creates an inspector button.
+  ///
+  /// This is the base constructor used by named constructors.
+  const InspectorButton({
+    super.key,
+    required this.onPressed,
+    required this.semanticsLabel,
+    required this.icon,
+    this.buttonKey,
+    required this.variant,
+    this.toggledOn,
+  });
+
+  /// Creates an inspector button with the [InspectorButtonVariant.filled] style.
+  ///
+  /// This button typically has a solid background color and a contrasting icon.
+  const InspectorButton.filled({
+    super.key,
+    required this.onPressed,
+    required this.semanticsLabel,
+    required this.icon,
+    this.buttonKey,
+  }) : variant = InspectorButtonVariant.filled,
+       toggledOn = null;
+
+  /// Creates an inspector button with the [InspectorButtonVariant.toggle] style.
+  ///
+  /// This button can be in an "on" or "off" state, visually indicated.
+  /// The [toggledOn] parameter defaults to `true`.
+  const InspectorButton.toggle({
+    super.key,
+    required this.onPressed,
+    required this.semanticsLabel,
+    required this.icon,
+    bool this.toggledOn = true,
+  }) : buttonKey = null,
+       variant = InspectorButtonVariant.toggle;
+
+  /// Creates an inspector button with the [InspectorButtonVariant.iconOnly] style.
+  ///
+  /// This button typically displays only an icon with a transparent background.
+  const InspectorButton.iconOnly({
+    super.key,
+    required this.onPressed,
+    required this.semanticsLabel,
+    required this.icon,
+  }) : buttonKey = null,
+       variant = InspectorButtonVariant.iconOnly,
+       toggledOn = null;
+
+  /// The callback that is called when the button is tapped.
+  final VoidCallback onPressed;
+
+  /// The semantic label for the button, used for accessibility.
+  final String semanticsLabel;
+
+  /// The icon to display within the button.
+  final IconData icon;
+
+  /// An optional key to identify the button widget.
+  final GlobalKey? buttonKey;
+
+  /// The visual and behavioral variant of the button.
+  ///
+  /// See [InspectorButtonVariant] for available styles.
+  final InspectorButtonVariant variant;
+
+  /// For [InspectorButtonVariant.toggle] buttons, this determines if the button
+  /// is currently in the "on" (true) or "off" (false) state.
+  final bool? toggledOn;
+
+  /// The standard height and width for the button.
+  static const double buttonSize = 32.0;
+
+  /// The standard size for the icon when it's not the only element (e.g., in filled or toggle buttons).
+  ///
+  /// For [InspectorButtonVariant.iconOnly], the icon typically takes up the full [buttonSize].
+  static const double buttonIconSize = 18.0;
+
+  /// Gets the appropriate icon size based on the button's [variant].
+  ///
+  /// Returns [buttonSize] if the variant is [InspectorButtonVariant.iconOnly],
+  /// otherwise returns [buttonIconSize].
+  double get iconSizeForVariant {
+    switch (variant) {
+      case InspectorButtonVariant.iconOnly:
+        return buttonSize;
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.toggle:
+        return buttonIconSize;
+    }
+  }
+
+  /// Provides the appropriate foreground color for the button's icon.
+  Color foregroundColor(BuildContext context);
+
+  /// Provides the appropriate background color for the button.
+  Color backgroundColor(BuildContext context);
+
+  @override
+  Widget build(BuildContext context);
 }
 
 /// Mutable selection state of the inspector.
@@ -3332,7 +3595,7 @@ class _InspectorOverlayLayer extends Layer {
     if (!targetRect.hasNaN) {
       final Offset target = Offset(targetRect.left, targetRect.center.dy);
       const double offsetFromWidget = 9.0;
-      final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
+      final double verticalOffset = targetRect.height / 2 + offsetFromWidget;
 
       _paintDescription(
         canvas,
@@ -3449,22 +3712,24 @@ const double _kOffScreenMargin = 1.0;
 
 const TextStyle _messageStyle = TextStyle(color: Color(0xFFFFFFFF), fontSize: 10.0, height: 1.2);
 
-class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
-  const _ExitWidgetSelectionButtonGroup({
+class _WidgetInspectorButtonGroup extends StatefulWidget {
+  const _WidgetInspectorButtonGroup({
     required this.exitWidgetSelectionButtonBuilder,
     required this.moveExitWidgetSelectionButtonBuilder,
+    required this.tapBehaviorButtonBuilder,
   });
 
   final ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder;
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
+  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   @override
-  State<_ExitWidgetSelectionButtonGroup> createState() => _ExitWidgetSelectionButtonGroupState();
+  State<_WidgetInspectorButtonGroup> createState() => _WidgetInspectorButtonGroupState();
 }
 
-class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionButtonGroup> {
-  static const double _kExitWidgetSelectionButtonPadding = 4.0;
+class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup> {
   static const double _kExitWidgetSelectionButtonMargin = 10.0;
+  static const bool _defaultSelectionOnTapEnabled = true;
 
   final GlobalKey _exitWidgetSelectionButtonKey = GlobalKey(
     debugLabel: 'Exit Widget Selection button',
@@ -3472,33 +3737,88 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
 
   String? _tooltipMessage;
 
-  bool _leftAligned = true;
+  /// Indicates whether the button is using the default alignment based on text direction.
+  ///
+  /// For LTR, the default alignment is on the left.
+  /// For RTL, the default alignment is on the right.
+  bool _usesDefaultAlignment = true;
+
+  ValueNotifier<bool> get _selectionOnTapEnabled =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabled;
+
+  Widget? get _moveExitWidgetSelectionButton {
+    final MoveExitWidgetSelectionButtonBuilder? buttonBuilder =
+        widget.moveExitWidgetSelectionButtonBuilder;
+    if (buttonBuilder == null) {
+      return null;
+    }
+
+    final TextDirection textDirection = Directionality.of(context);
+
+    final String buttonLabel =
+        'Move to the ${_usesDefaultAlignment == (textDirection == TextDirection.ltr) ? 'right' : 'left'}';
+
+    return _WidgetInspectorButton(
+      button: buttonBuilder(
+        context,
+        onPressed: () {
+          _changeButtonGroupAlignment();
+          _onTooltipHidden();
+        },
+        semanticsLabel: buttonLabel,
+        usesDefaultAlignment: _usesDefaultAlignment,
+      ),
+      onTooltipVisible: () {
+        _changeTooltipMessage(buttonLabel);
+      },
+      onTooltipHidden: _onTooltipHidden,
+    );
+  }
+
+  Widget get _exitWidgetSelectionButton {
+    const String buttonLabel = 'Exit Select Widget mode';
+    return _WidgetInspectorButton(
+      button: widget.exitWidgetSelectionButtonBuilder(
+        context,
+        onPressed: _exitWidgetSelectionMode,
+        semanticsLabel: buttonLabel,
+        key: _exitWidgetSelectionButtonKey,
+      ),
+      onTooltipVisible: () {
+        _changeTooltipMessage(buttonLabel);
+      },
+      onTooltipHidden: _onTooltipHidden,
+    );
+  }
+
+  Widget? get _tapBehaviorButton {
+    final TapBehaviorButtonBuilder? buttonBuilder = widget.tapBehaviorButtonBuilder;
+    if (buttonBuilder == null) {
+      return null;
+    }
+
+    return _WidgetInspectorButton(
+      button: buttonBuilder(
+        context,
+        onPressed: _changeSelectionOnTapMode,
+        semanticsLabel: 'Change widget selection mode for taps',
+        selectionOnTapEnabled: _selectionOnTapEnabled.value,
+      ),
+      onTooltipVisible: _changeSelectionOnTapTooltip,
+      onTooltipHidden: _onTooltipHidden,
+    );
+  }
+
+  bool get _tooltipVisible => _tooltipMessage != null;
 
   @override
   Widget build(BuildContext context) {
-    final Widget? moveExitWidgetSelectionButton =
-        widget.moveExitWidgetSelectionButtonBuilder != null
-            ? Padding(
-              padding: EdgeInsets.only(
-                left: _leftAligned ? _kExitWidgetSelectionButtonPadding : 0.0,
-                right: _leftAligned ? 0.0 : _kExitWidgetSelectionButtonPadding,
-              ),
-              child: _TooltipGestureDetector(
-                button: widget.moveExitWidgetSelectionButtonBuilder!(
-                  context,
-                  onPressed: () {
-                    _changeButtonGroupAlignment();
-                    _onTooltipHidden();
-                  },
-                  isLeftAligned: _leftAligned,
-                ),
-                onTooltipVisible: () {
-                  _changeTooltipMessage('Move to the ${_leftAligned ? 'right' : 'left'}');
-                },
-                onTooltipHidden: _onTooltipHidden,
-              ),
-            )
-            : null;
+    final Widget selectionModeButtons = Column(
+      children: <Widget>[
+        if (_tapBehaviorButton != null) _tapBehaviorButton!,
+        _exitWidgetSelectionButton,
+      ],
+    );
 
     final Widget buttonGroup = Stack(
       alignment: AlignmentDirectional.topCenter,
@@ -3507,34 +3827,25 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
           painter: _ExitWidgetSelectionTooltipPainter(
             tooltipMessage: _tooltipMessage,
             buttonKey: _exitWidgetSelectionButtonKey,
-            isLeftAligned: _leftAligned,
+            usesDefaultAlignment: _usesDefaultAlignment,
           ),
         ),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (!_leftAligned && moveExitWidgetSelectionButton != null)
-              moveExitWidgetSelectionButton,
-            _TooltipGestureDetector(
-              button: widget.exitWidgetSelectionButtonBuilder(
-                context,
-                onPressed: _exitWidgetSelectionMode,
-                key: _exitWidgetSelectionButtonKey,
-              ),
-              onTooltipVisible: () {
-                _changeTooltipMessage('Exit Select Widget mode');
-              },
-              onTooltipHidden: _onTooltipHidden,
-            ),
-            if (_leftAligned && moveExitWidgetSelectionButton != null)
-              moveExitWidgetSelectionButton,
+            if (_usesDefaultAlignment) selectionModeButtons,
+            if (_moveExitWidgetSelectionButton != null) _moveExitWidgetSelectionButton!,
+            if (!_usesDefaultAlignment) selectionModeButtons,
           ],
         ),
       ],
     );
 
-    return Positioned(
-      left: _leftAligned ? _kExitWidgetSelectionButtonMargin : null,
-      right: _leftAligned ? null : _kExitWidgetSelectionButtonMargin,
+    return Positioned.directional(
+      textDirection: Directionality.of(context),
+      start: _usesDefaultAlignment ? _kExitWidgetSelectionButtonMargin : null,
+      end: _usesDefaultAlignment ? null : _kExitWidgetSelectionButtonMargin,
       bottom: _kExitWidgetSelectionButtonMargin,
       child: buttonGroup,
     );
@@ -3542,12 +3853,31 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
 
   void _exitWidgetSelectionMode() {
     WidgetInspectorService.instance._changeWidgetSelectionMode(false);
+    // Reset to default selection on tap behavior on exit.
+    _changeSelectionOnTapMode(selectionOnTapEnabled: _defaultSelectionOnTapEnabled);
+  }
+
+  void _changeSelectionOnTapMode({bool? selectionOnTapEnabled}) {
+    final bool newValue = selectionOnTapEnabled ?? !_selectionOnTapEnabled.value;
+    _selectionOnTapEnabled.value = newValue;
+    WidgetInspectorService.instance.selection.clear();
+    if (_tooltipVisible) {
+      _changeSelectionOnTapTooltip();
+    }
+  }
+
+  void _changeSelectionOnTapTooltip() {
+    _changeTooltipMessage(
+      _selectionOnTapEnabled.value
+          ? 'Disable widget selection for taps'
+          : 'Enable widget selection for taps',
+    );
   }
 
   void _changeButtonGroupAlignment() {
     if (mounted) {
       setState(() {
-        _leftAligned = !_leftAligned;
+        _usesDefaultAlignment = !_usesDefaultAlignment;
       });
     }
   }
@@ -3565,8 +3895,8 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
   }
 }
 
-class _TooltipGestureDetector extends StatefulWidget {
-  const _TooltipGestureDetector({
+class _WidgetInspectorButton extends StatefulWidget {
+  const _WidgetInspectorButton({
     required this.button,
     required this.onTooltipVisible,
     required this.onTooltipHidden,
@@ -3580,10 +3910,10 @@ class _TooltipGestureDetector extends StatefulWidget {
   static const Duration _tooltipDelayDuration = Duration(milliseconds: 100);
 
   @override
-  State<_TooltipGestureDetector> createState() => _TooltipGestureDetectorState();
+  State<_WidgetInspectorButton> createState() => _WidgetInspectorButtonState();
 }
 
-class _TooltipGestureDetectorState extends State<_TooltipGestureDetector> {
+class _WidgetInspectorButtonState extends State<_WidgetInspectorButton> {
   Timer? _tooltipVisibleTimer;
   Timer? _tooltipHiddenTimer;
 
@@ -3603,18 +3933,18 @@ class _TooltipGestureDetectorState extends State<_TooltipGestureDetector> {
       children: <Widget>[
         GestureDetector(
           onLongPress: () {
-            _tooltipVisibleAfter(_TooltipGestureDetector._tooltipDelayDuration);
+            _tooltipVisibleAfter(_WidgetInspectorButton._tooltipDelayDuration);
             _tooltipHiddenAfter(
-              _TooltipGestureDetector._tooltipShownOnLongPressDuration +
-                  _TooltipGestureDetector._tooltipDelayDuration,
+              _WidgetInspectorButton._tooltipShownOnLongPressDuration +
+                  _WidgetInspectorButton._tooltipDelayDuration,
             );
           },
           child: MouseRegion(
             onEnter: (_) {
-              _tooltipVisibleAfter(_TooltipGestureDetector._tooltipDelayDuration);
+              _tooltipVisibleAfter(_WidgetInspectorButton._tooltipDelayDuration);
             },
             onExit: (_) {
-              _tooltipHiddenAfter(_TooltipGestureDetector._tooltipDelayDuration);
+              _tooltipHiddenAfter(_WidgetInspectorButton._tooltipDelayDuration);
             },
             child: widget.button,
           ),
@@ -3653,12 +3983,12 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
   _ExitWidgetSelectionTooltipPainter({
     required this.tooltipMessage,
     required this.buttonKey,
-    required this.isLeftAligned,
+    required this.usesDefaultAlignment,
   });
 
   final String? tooltipMessage;
   final GlobalKey buttonKey;
-  final bool isLeftAligned;
+  final bool usesDefaultAlignment;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -3700,7 +4030,7 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     final double tooltipHeight = textHeight + (tooltipPadding * 2);
 
     final double tooltipXOffset =
-        isLeftAligned ? 0 - buttonWidth : 0 - (tooltipWidth - buttonWidth);
+        usesDefaultAlignment ? 0 - buttonWidth : 0 - (tooltipWidth - buttonWidth);
     final double tooltipYOffset = 0 - tooltipHeight - tooltipSpacing;
 
     // Draw tooltip background.
@@ -4031,6 +4361,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     this.includeProperties = false,
     required this.service,
     this.addAdditionalPropertiesCallback,
+    this.inDisableWidgetInspectorScope = false,
   });
 
   /// Service used by GUI tools to interact with the [WidgetInspector].
@@ -4057,6 +4388,10 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   final bool expandPropertyValues;
+
+  /// If true, tree nodes will not be reported in responses until an EnableWidgetInspectorScope is
+  /// encountered.
+  final bool inDisableWidgetInspectorScope;
 
   /// Callback to add additional experimental serialization properties.
   ///
@@ -4133,10 +4468,11 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   }
 
   @override
-  DiagnosticsSerializationDelegate copyWith({
+  InspectorSerializationDelegate copyWith({
     int? subtreeDepth,
     bool? includeProperties,
     bool? expandPropertyValues,
+    bool? inDisableWidgetInspectorScope,
   }) {
     return InspectorSerializationDelegate(
       groupName: groupName,
@@ -4147,6 +4483,8 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
       includeProperties: includeProperties ?? this.includeProperties,
       service: service,
       addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
+      inDisableWidgetInspectorScope:
+          inDisableWidgetInspectorScope ?? this.inDisableWidgetInspectorScope,
     );
   }
 }

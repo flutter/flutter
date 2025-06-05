@@ -12,6 +12,13 @@ $ flutter upgrade
 ```
 
 <!--
+INTERNAL NOTE: DO **NOT** READ THIS FILE IN A TEST OR BUILDER.
+
+As an optimization, `CHANGELOG.md`-only PRs skip almost all
+tests, except `Linux analyze`. It is unsafe to read and use
+this file in a test unless it is part of the Linux analyze
+task (and that specific task, with that specific name).
+
 INTERNAL NOTE: PLEASE DON'T JUST PASTE ISSUE TITLES!
 
 Make sure that the text here helps customers understand
@@ -21,9 +28,80 @@ Our goal is to make the list easy for them to scan.
 
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
-
-INTERNAL NOTE
 -->
+## Flutter 3.32 Changes
+
+### [3.32.2](https://github.com/flutter/flutter/releases/tag/3.32.2)
+
+- [flutter/169772](https://github.com/flutter/flutter/pull/169772) - Configuration changes for Flutter's CI to run tests on Linux instead of Windows when not otherwise required.
+- [flutter/169630](https://github.com/flutter/flutter/pull/169630) - Fixes issue where flavored Android packages may not successfully build on Windows repeatedly until the next clean.
+- [flutter/169912](https://github.com/flutter/flutter/pull/169912) - Splits Flutter CI task for publishing API docs into one build step and one deploy step.
+
+### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
+
+- [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fixes flaky crash when targeting web applications via IDEs using the DAP.
+- [flutter/168849](https://github.com/flutter/flutter/issues/168849) - Fixes an issue rendering wide gamut images.
+- [flutter/168846](https://github.com/flutter/flutter/issues/168846) - Fixes an issue displaying the wrong icons in the widget inspector for some apps.
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) - Fixes Flutter Android builds for apps which use plugins with old Android Gradle Plugin versions.
+- [flutter/169101](https://github.com/flutter/flutter/issues/169101) - Reduces the cost of running the (sometimes flaky) Linux fuchsia_test on release branches.
+- [flutter/169318](https://github.com/flutter/flutter/issues/169318) - Fixed a bug where the flutter tool crash reporting did not include what plugins were being used by the current project.
+- [flutter/169160](https://github.com/flutter/flutter/issues/169160) Fixed a bug where `appFlavor` is null after hot restarts or during `flutter test`.
+- [flutter/167011](https://github.com/flutter/flutter/pull/167011) [Android] Fix regression in NDK version checking for projects with old AGP versions.
+- [flutter/168847](https://github.com/flutter/flutter/pull/168847) [Widget Inspector] Fix missing cupertino icon in on-device inspector.
+
+### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
+Initial stable release.
+
+## Flutter 3.29 Changes
+
+### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
+- [flutter/165818](https://github.com/flutter/flutter/pull/165818) - Unset `GIT_DIR` to enable flutter tool calls in githooks.
+- [flutter/163421](https://github.com/flutter/flutter/issues/163421) - Impeller,
+  Android, Fixes Android Emulator crash when navigating to routes with backdrop
+  blurs.
+- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Impeller, All platforms, Text that is scaled over 48x renders incorrectly.
+- [flutter/163627](https://github.com/flutter/flutter/pull/163627) - Fix issue where placeholder types in ARB localizations weren't used for type inference, causing a possible type mismatch with the placeholder field defined in the template.
+- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Update CI configurations and tests to use Xcode 16 and iOS 18 simulator.
+- [flutter/161466](https://github.com/flutter/flutter/pull/161466) - Hot restart can hang on all platforms if "Pause on Unhandled Exceptions" is enabled by the debugger and a call to `compute` or `Isolate.run` has not completed.
+
+### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
+
+- [dart 3.7.2 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#372)
+- [flutter/164958](https://github.com/flutter/flutter/issues/164958) - Impeller, All platforms, Text that is rotated 180 degrees exactly will render as if it is scaled by {-1, 1} instead of {-1, -1}.
+- [flutter/165075](https://github.com/flutter/flutter/pull/165075) - Fixes crashes on Android devices older than API 29 when using Impeller OpenGLES.
+- [flutter/164606](https://github.com/flutter/flutter/issues/164606) Fixes missing glyph error on Android and iOS devices using Impeller.
+- [flutter/164036](https://github.com/flutter/flutter/pull/164036) - On iOS devices Increase number of concurrent background image decode tasks to partially mitigate "Image upload failed due to loss of GPU access" errors.
+- [flutter/163175](https://github.com/flutter/flutter/pull/163175) - Improve performance of CanvasKit rendering for web.
+- [flutter/164628](https://github.com/flutter/flutter/issues/164628) - iOS Fixes crash when allocation of surface for toImage/toImageSync fails.
+- [flutter/164201](https://github.com/flutter/flutter/pull/164201) - Always use Android hardware buffers for platform views when supported.
+- [flutter/164024](https://github.com/flutter/flutter/issues/164024): - Add back an empty io.flutter.app.FlutterApplication for Android apps post v2 embedder migration.
+- [flutter/162198](https://github.com/flutter/flutter/issues/162198) - Fixes double-download of canvaskit.wasm
+- [flutter/164392](https://github.com/flutter/flutter/pull/164392) - All platforms, Fixes a crash that can occur when animating and interacting with a scrollable simultaneously.
+
+### [3.29.1](https://github.com/flutter/flutter/releases/tag/3.29.1)
+
+- [flutter/163830](https://github.com/flutter/flutter/pull/163830) - Fix Tab linear and elastic animation blink.
+- [flutter/164119](https://github.com/flutter/flutter/pull/164119) - Configuration changes to run test on macOS 14 for Flutter's CI.
+- [flutter/164155](https://github.com/flutter/flutter/pull/164155) - Roll .ci.yaml changes into the LUCI configuration only when the master branch is updated.
+- [flutter/164191](https://github.com/flutter/flutter/pull/164191) - Improve safaridriver launch process in Flutter's CI testing for web.
+- [flutter/164193](https://github.com/flutter/flutter/pull/164193) - Provide guided error message when app crashes due to JIT restriction on iPhones.
+- [flutter/164050](https://github.com/flutter/flutter/pull/164050) - Fixes test reorderable_list_test.dart failing for certain ordering seeds, such as 20250221.
+- [flutter/163316](https://github.com/flutter/flutter/pull/163316) - Configuration changes to run test on macOS 14 for Flutter's CI.
+- [flutter/163581](https://github.com/flutter/flutter/pull/163581) - Fix crash when using BackdropFilters in certain GLES drivers.
+- [flutter/163616](https://github.com/flutter/flutter/pull/163616) - Disable Vulkan on known bad Xclipse GPU drivers for Android.
+- [flutter/163666](https://github.com/flutter/flutter/pull/163666) - Always post new task during gesture dispatch to fix jittery scrolling on iOS devices.
+- [flutter/163667](https://github.com/flutter/flutter/pull/163667) - Ensure that OpenGL "flipped" textures do not leak via texture readback.
+- [flutter/163741](https://github.com/flutter/flutter/pull/163741) - Flutter tool respects tracked engine.version.
+- [flutter/163754](https://github.com/flutter/flutter/pull/163754) - Fix text glitch when returning to foreground for Android.
+- [flutter/163058](https://github.com/flutter/flutter/pull/163058) - Fixes jittery glyphs.
+- [flutter/163201](https://github.com/flutter/flutter/pull/163201) - Fixes buttons with icons that ignore foregroundColor.
+- [flutter/163265](https://github.com/flutter/flutter/pull/163265) - Disable Vulkan on known bad exynos SoCs for Android.
+- [flutter/163261](https://github.com/flutter/flutter/pull/163261) - Fixes for Impeller DrawVertices issues involving snapshots with empty sizes.
+- [flutter/163672](https://github.com/flutter/flutter/pull/163672) - Check for tracked engine.version before overriding.
+
+### [3.29.0](https://github.com/flutter/flutter/releases/tag/3.29.0)
+Initial stable release.
+
 ## Flutter 3.27 Changes
 
 ### [3.27.4](https://github.com/flutter/flutter/releases/tag/3.27.4)
@@ -127,7 +205,7 @@ Initial stable release.
 - [flutter/149704](https://github.com/flutter/flutter/issues/149704) - [Impeller] Fixes and issue on iOS where flickering may be occur when translating a blurred rounded rectangle.
 - [flutter/149745](https://github.com/flutter/flutter/issues/149745) - [Impeller] Fixes a segfault on iOS when tessellating empty convex polygons.
 - [flutter/149771](https://github.com/flutter/flutter/issues/149771) - [Impeller] Fixes a rendering error on iOS when advanced blend is double scaled.
-- [flutter/53183](https://github.com/flutter/engine/pull/53183) - Fixes an issue where Linux apps show visual corruption on some frames
+- [flutter/53183](https://github.com/flutter/engine/pull/53183) - Fixes an issue where Linux apps show visual corruption on some frames.
 - [flutter/149856](https://github.com/flutter/flutter/issues/149856) - Clarifies Flutter Fix log on how to update Kotlin Gradle Plugin that was introduced in Flutter 3.19.
 - [flutter/150617](https://github.com/flutter/flutter/pull/150617) - Fixes a bug in `flutter test` where `--flavor` wasn't considered when validating cached assets, causing the flavor-conditional asset bundling feature to not work as expected.
 - [flutter/150724](https://github.com/flutter/flutter/issues/150724) - Fixes an issue on Web+Linux that prevents users from inputting data using the numpad.

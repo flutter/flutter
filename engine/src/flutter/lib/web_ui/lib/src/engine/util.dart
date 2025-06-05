@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -13,7 +14,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
-import 'safe_browser_api.dart';
 import 'services.dart';
 import 'vector_math.dart';
 
@@ -379,25 +379,6 @@ String colorComponentsToCssString(int r, int g, int b, int a) {
   }
 }
 
-/// Determines if the (dynamic) exception passed in is a NS_ERROR_FAILURE
-/// (from Firefox).
-///
-/// NS_ERROR_FAILURE (0x80004005) is the most general of all the (Firefox)
-/// errors and occurs for all errors for which a more specific error code does
-/// not apply. (https://developer.mozilla.org/en-US/docs/Mozilla/Errors)
-///
-/// Other browsers do not throw this exception.
-///
-/// In Flutter, this exception happens when we try to perform some operations on
-/// a Canvas when the application is rendered in a display:none iframe.
-///
-/// We need this in [BitmapCanvas] and [RecordingCanvas] to swallow this
-/// Firefox exception without interfering with others (potentially useful
-/// for the programmer).
-bool isNsErrorFailureException(Object e) {
-  return getJsProperty<dynamic>(e, 'name') == 'NS_ERROR_FAILURE';
-}
-
 /// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
 ///
 /// Generic font families are a fallback mechanism, a means of preserving some
@@ -549,6 +530,57 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
     }
   }
   return true;
+}
+
+/// Determines if lists [a] and [b] are deep equivalent, regardless of their
+/// order.
+///
+/// Returns true if the lists are both null, or if they are both non-null, have
+/// the same length, and contain the same elements regardless of their order.
+/// Returns false otherwise.
+bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
+  if (a == b) {
+    return true;
+  }
+  if ((a?.isEmpty ?? true) && (b?.isEmpty ?? true)) {
+    return true;
+  }
+
+  if ((a == null) != (b == null)) {
+    return false;
+  }
+  // They most both be non-null now, and at least one of them is not empty.
+  if (a!.length != b!.length) {
+    return false;
+  }
+
+  if (a.length == 1) {
+    return a.first == b.first;
+  }
+
+  if (a.length == 2) {
+    return (a.first == b.first && a.last == b.last) || (a.last == b.first && a.first == b.last);
+  }
+
+  // Complex cases.
+  final Map<T, int> wordCounts = <T, int>{};
+  for (final T word in a) {
+    final int count = wordCounts[word] ?? 0;
+    wordCounts[word] = count + 1;
+  }
+
+  for (final T otherWord in b) {
+    final int? count = wordCounts[otherWord];
+    if (count == null || count == 0) {
+      return false;
+    }
+    if (count == 1) {
+      wordCounts.remove(otherWord);
+    } else {
+      wordCounts[otherWord] = count - 1;
+    }
+  }
+  return wordCounts.isEmpty;
 }
 
 // HTML only supports a single radius, but Flutter ImageFilter supports separate
@@ -737,7 +769,7 @@ void drawEllipse(
   double endAngle,
   bool antiClockwise,
 ) {
-  _ellipseFeatureDetected ??= getJsProperty<Object?>(context, 'ellipse') != null;
+  _ellipseFeatureDetected ??= context['ellipse'] != null;
   if (_ellipseFeatureDetected!) {
     context.ellipse(
       centerX,

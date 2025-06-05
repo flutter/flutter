@@ -9,13 +9,13 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 
-class Tessellator;
-
+[[maybe_unused]]
 static constexpr Scalar kMinStrokeSize = 1.0f;
 
 struct GeometryResult {
@@ -52,15 +52,12 @@ class Geometry {
   virtual ~Geometry() {}
 
   static std::unique_ptr<Geometry> MakeFillPath(
-      const Path& path,
+      const flutter::DlPath& path,
       std::optional<Rect> inner_rect = std::nullopt);
 
   static std::unique_ptr<Geometry> MakeStrokePath(
-      const Path& path,
-      Scalar stroke_width = 0.0,
-      Scalar miter_limit = 4.0,
-      Cap stroke_cap = Cap::kButt,
-      Join stroke_join = Join::kMiter);
+      const flutter::DlPath& path,
+      const StrokeParameters& stroke = {});
 
   static std::unique_ptr<Geometry> MakeCover();
 
@@ -70,8 +67,7 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeLine(const Point& p0,
                                             const Point& p1,
-                                            Scalar width,
-                                            Cap cap);
+                                            const StrokeParameters& stroke);
 
   static std::unique_ptr<Geometry> MakeCircle(const Point& center,
                                               Scalar radius);
@@ -79,6 +75,17 @@ class Geometry {
   static std::unique_ptr<Geometry> MakeStrokedCircle(const Point& center,
                                                      Scalar radius,
                                                      Scalar stroke_width);
+
+  static std::unique_ptr<Geometry> MakeFilledArc(const Rect& oval_bounds,
+                                                 Degrees start,
+                                                 Degrees sweep,
+                                                 bool include_center);
+
+  static std::unique_ptr<Geometry> MakeStrokedArc(
+      const Rect& oval_bounds,
+      Degrees start,
+      Degrees sweep,
+      const StrokeParameters& stroke);
 
   static std::unique_ptr<Geometry> MakeRoundRect(const Rect& rect,
                                                  const Size& radii);
@@ -119,7 +126,6 @@ class Geometry {
     return 1.0;
   }
 
- protected:
   static GeometryResult ComputePositionGeometry(
       const ContentContext& renderer,
       const Tessellator::VertexGenerator& generator,

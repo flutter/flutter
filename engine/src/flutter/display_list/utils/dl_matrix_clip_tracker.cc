@@ -89,6 +89,9 @@ void DisplayListMatrixClipState::clipRRect(const DlRoundRect& rrect,
   if (rrect.IsRect()) {
     return clipRect(bounds, op, is_aa);
   }
+  if (rrect.IsOval()) {
+    return clipOval(bounds, op, is_aa);
+  }
   switch (op) {
     case DlClipOp::kIntersect:
       adjustCullRect(bounds, op, is_aa);
@@ -113,6 +116,9 @@ void DisplayListMatrixClipState::clipRSuperellipse(
   DlRect bounds = rse.GetBounds();
   if (rse.IsRect()) {
     return clipRect(bounds, op, is_aa);
+  }
+  if (rse.IsOval()) {
+    return clipOval(bounds, op, is_aa);
   }
   switch (op) {
     case DlClipOp::kIntersect:
@@ -246,24 +252,31 @@ DlRect DisplayListMatrixClipState::GetLocalCullCoverage() const {
 }
 
 bool DisplayListMatrixClipState::rect_covers_cull(const DlRect& content) const {
-  if (content.IsEmpty()) {
+  return TransformedRectCoversBounds(content, matrix_, cull_rect_);
+}
+
+bool DisplayListMatrixClipState::TransformedRectCoversBounds(
+    const DlRect& local_rect,
+    const DlMatrix& matrix,
+    const DlRect& cull_bounds) {
+  if (local_rect.IsEmpty()) {
     return false;
   }
-  if (cull_rect_.IsEmpty()) {
+  if (cull_bounds.IsEmpty()) {
     return true;
   }
-  if (matrix_.IsAligned2D()) {
+  if (matrix.IsAligned2D()) {
     // This transform-to-device calculation is faster and more accurate
     // for rect-to-rect aligned transformations, but not accurate under
     // (non-quadrant) rotations and skews.
-    return content.TransformAndClipBounds(matrix_).Contains(cull_rect_);
+    return local_rect.TransformAndClipBounds(matrix).Contains(cull_bounds);
   }
   DlPoint corners[4];
-  if (!getLocalCullCorners(corners)) {
+  if (!GetLocalCorners(corners, cull_bounds, matrix)) {
     return false;
   }
   for (auto corner : corners) {
-    if (!content.ContainsInclusive(corner)) {
+    if (!local_rect.ContainsInclusive(corner)) {
       return false;
     }
   }
@@ -271,20 +284,27 @@ bool DisplayListMatrixClipState::rect_covers_cull(const DlRect& content) const {
 }
 
 bool DisplayListMatrixClipState::oval_covers_cull(const DlRect& bounds) const {
-  if (bounds.IsEmpty()) {
+  return TransformedOvalCoversBounds(bounds, matrix_, cull_rect_);
+}
+
+bool DisplayListMatrixClipState::TransformedOvalCoversBounds(
+    const DlRect& local_oval_bounds,
+    const DlMatrix& matrix,
+    const DlRect& cull_bounds) {
+  if (local_oval_bounds.IsEmpty()) {
     return false;
   }
-  if (cull_rect_.IsEmpty()) {
+  if (cull_bounds.IsEmpty()) {
     return true;
   }
   DlPoint corners[4];
-  if (!getLocalCullCorners(corners)) {
+  if (!GetLocalCorners(corners, cull_bounds, matrix)) {
     return false;
   }
-  DlPoint center = bounds.GetCenter();
-  DlSize scale = 2.0 / bounds.GetSize();
+  DlPoint center = local_oval_bounds.GetCenter();
+  DlSize scale = 2.0 / local_oval_bounds.GetSize();
   for (auto corner : corners) {
-    if (!bounds.Contains(corner)) {
+    if (!local_oval_bounds.Contains(corner)) {
       return false;
     }
     if (((corner - center) * scale).GetLengthSquared() >= 1.0) {
@@ -296,28 +316,37 @@ bool DisplayListMatrixClipState::oval_covers_cull(const DlRect& bounds) const {
 
 bool DisplayListMatrixClipState::rrect_covers_cull(
     const DlRoundRect& content) const {
-  if (content.IsEmpty()) {
+  return TransformedRRectCoversBounds(content, matrix_, cull_rect_);
+}
+
+bool DisplayListMatrixClipState::TransformedRRectCoversBounds(
+    const DlRoundRect& local_rrect,
+    const DlMatrix& matrix,
+    const DlRect& cull_bounds) {
+  if (local_rrect.IsEmpty()) {
     return false;
   }
-  if (cull_rect_.IsEmpty()) {
+  if (cull_bounds.IsEmpty()) {
     return true;
   }
-  if (content.IsRect()) {
-    return rect_covers_cull(content.GetBounds());
+  if (local_rrect.IsRect()) {
+    return TransformedRectCoversBounds(local_rrect.GetBounds(), matrix,
+                                       cull_bounds);
   }
-  if (content.IsOval()) {
-    return oval_covers_cull(content.GetBounds());
+  if (local_rrect.IsOval()) {
+    return TransformedOvalCoversBounds(local_rrect.GetBounds(), matrix,
+                                       cull_bounds);
   }
-  if (!content.GetRadii().AreAllCornersSame()) {
+  if (!local_rrect.GetRadii().AreAllCornersSame()) {
     return false;
   }
   DlPoint corners[4];
-  if (!getLocalCullCorners(corners)) {
+  if (!GetLocalCorners(corners, cull_bounds, matrix)) {
     return false;
   }
-  auto outer = content.GetBounds();
+  auto outer = local_rrect.GetBounds();
   auto center = outer.GetCenter();
-  auto radii = content.GetRadii().top_left;
+  auto radii = local_rrect.GetRadii().top_left;
   auto inner = outer.GetSize() * 0.5 - radii;
   auto scale = 1.0 / radii;
   for (auto corner : corners) {
@@ -335,25 +364,34 @@ bool DisplayListMatrixClipState::rrect_covers_cull(
 
 bool DisplayListMatrixClipState::rsuperellipse_covers_cull(
     const DlRoundSuperellipse& content) const {
-  if (content.IsEmpty()) {
+  return TransformedRoundSuperellipseCoversBounds(content, matrix_, cull_rect_);
+}
+
+bool DisplayListMatrixClipState::TransformedRoundSuperellipseCoversBounds(
+    const DlRoundSuperellipse& local_rse,
+    const DlMatrix& matrix,
+    const DlRect& cull_bounds) {
+  if (local_rse.IsEmpty()) {
     return false;
   }
-  if (cull_rect_.IsEmpty()) {
+  if (cull_bounds.IsEmpty()) {
     return true;
   }
-  if (content.IsRect()) {
-    return rect_covers_cull(content.GetBounds());
+  if (local_rse.IsRect()) {
+    return TransformedRectCoversBounds(local_rse.GetBounds(), matrix,
+                                       cull_bounds);
   }
-  if (content.IsOval()) {
-    return oval_covers_cull(content.GetBounds());
+  if (local_rse.IsOval()) {
+    return TransformedOvalCoversBounds(local_rse.GetBounds(), matrix,
+                                       cull_bounds);
   }
   DlPoint corners[4];
-  if (!getLocalCullCorners(corners)) {
+  if (!GetLocalCorners(corners, cull_bounds, matrix)) {
     return false;
   }
-  auto outer = content.GetBounds();
+  auto outer = local_rse.GetBounds();
   auto param = impeller::RoundSuperellipseParam::MakeBoundsRadii(
-      outer, content.GetRadii());
+      outer, local_rse.GetRadii());
   for (auto corner : corners) {
     if (!outer.Contains(corner)) {
       return false;
@@ -365,15 +403,17 @@ bool DisplayListMatrixClipState::rsuperellipse_covers_cull(
   return true;
 }
 
-bool DisplayListMatrixClipState::getLocalCullCorners(DlPoint corners[4]) const {
-  if (!is_matrix_invertable()) {
+bool DisplayListMatrixClipState::GetLocalCorners(DlPoint corners[4],
+                                                 const DlRect& rect,
+                                                 const DlMatrix& matrix) {
+  if (!matrix.IsInvertible()) {
     return false;
   }
-  DlMatrix inverse = matrix_.Invert();
-  corners[0] = inverse * cull_rect_.GetLeftTop();
-  corners[1] = inverse * cull_rect_.GetRightTop();
-  corners[2] = inverse * cull_rect_.GetRightBottom();
-  corners[3] = inverse * cull_rect_.GetLeftBottom();
+  DlMatrix inverse = matrix.Invert();
+  corners[0] = inverse * rect.GetLeftTop();
+  corners[1] = inverse * rect.GetRightTop();
+  corners[2] = inverse * rect.GetRightBottom();
+  corners[3] = inverse * rect.GetLeftBottom();
   return true;
 }
 

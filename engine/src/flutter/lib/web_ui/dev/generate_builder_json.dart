@@ -100,7 +100,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
         packageLock,
         'Mac',
         BrowserName.safari,
-        specificOS: 'Mac-13|Mac-14',
+        specificOS: 'Mac-14',
         cpu: 'arm64',
       ),
     ];
@@ -114,7 +114,9 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     String? specificOS,
     String? cpu,
   }) {
-    final filteredSuites = suites.where((suite) => suite.runConfig.browser == browser);
+    final filteredSuites = suites.where(
+      (suite) => suite.enableCi && suite.runConfig.browser == browser,
+    );
     final bundles = filteredSuites.map((suite) => suite.testBundle).toSet();
     return <String, dynamic>{
       'name': '$platform run ${browser.name} suites',
@@ -148,7 +150,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
           'parameters': <String>[
             'test',
             '--copy-artifacts',
-            for (final TestSuite suite in suites) '--suite=${suite.name}',
+            for (final TestSuite suite in filteredSuites) '--suite=${suite.name}',
           ],
           'script': 'flutter/lib/web_ui/dev/felt',
         },

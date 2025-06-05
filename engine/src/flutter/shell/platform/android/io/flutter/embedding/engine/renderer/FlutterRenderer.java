@@ -6,7 +6,6 @@ package io.flutter.embedding.engine.renderer;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -23,6 +22,7 @@ import android.view.Surface;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -186,37 +186,16 @@ public class FlutterRenderer implements TextureRegistry {
    */
   @NonNull
   @Override
-  public SurfaceProducer createSurfaceProducer() {
-    // Prior to Impeller, Flutter on Android *only* ran on OpenGLES (via Skia). That
-    // meant that
-    // plugins (i.e. end-users) either explicitly created a SurfaceTexture (via
-    // createX/registerX) or an ImageTexture (via createX/registerX).
-    //
-    // In an Impeller world, which for the first time uses (if available) a Vulkan
-    // rendering
-    // backend, it is no longer possible (at least not trivially) to render an
-    // OpenGLES-provided
-    // texture (SurfaceTexture) in a Vulkan context.
-    //
-    // This function picks the "best" rendering surface based on the Android
-    // runtime, and
-    // provides a consumer-agnostic SurfaceProducer (which in turn vends a Surface),
-    // and has
-    // plugins (i.e. end-users) use the Surface instead, letting us "hide" the
-    // consumer-side
-    // of the implementation.
-    //
-    // tl;dr: If ImageTexture is available, we use it, otherwise we use a
-    // SurfaceTexture.
-    // Coincidentally, if ImageTexture is available, we are also on an Android
-    // version that is
-    // running Vulkan, so we don't have to worry about it not being supported.
+  public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
     final SurfaceProducer entry;
     if (!debugForceSurfaceProducerGlTextures && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final long id = nextTextureId.getAndIncrement();
       final ImageReaderSurfaceProducer producer = new ImageReaderSurfaceProducer(id);
-      registerImageTexture(id, producer);
-      addOnTrimMemoryListener(producer);
+      boolean reset = lifecycle == SurfaceLifecycle.resetInBackground;
+      registerImageTexture(id, producer, reset);
+      if (reset) {
+        addOnTrimMemoryListener(producer);
+      }
       imageReaderProducers.add(producer);
       Log.v(TAG, "New ImageReaderSurfaceProducer ID: " + id);
       entry = producer;
@@ -282,7 +261,7 @@ public class FlutterRenderer implements TextureRegistry {
     final ImageTextureRegistryEntry entry =
         new ImageTextureRegistryEntry(nextTextureId.getAndIncrement());
     Log.v(TAG, "New ImageTextureEntry ID: " + entry.id());
-    registerImageTexture(entry.id(), entry);
+    registerImageTexture(entry.id(), entry, /*resetOnBackground=*/ false);
     return entry;
   }
 
@@ -429,7 +408,6 @@ public class FlutterRenderer implements TextureRegistry {
   // When we acquire the next image, close any ImageReaders that don't have any
   // more pending images.
   @Keep
-  @TargetApi(API_LEVELS.API_29)
   final class ImageReaderSurfaceProducer
       implements TextureRegistry.SurfaceProducer,
           TextureRegistry.ImageConsumer,
@@ -762,7 +740,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -865,7 +843,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       PerImage r = dequeueImage();
       if (r == null) {
@@ -904,7 +882,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private ImageReader createImageReader33() {
       final ImageReader.Builder builder = new ImageReader.Builder(requestedWidth, requestedHeight);
       // Allow for double buffering.
@@ -921,7 +899,7 @@ public class FlutterRenderer implements TextureRegistry {
       return builder.build();
     }
 
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     private ImageReader createImageReader29() {
       return ImageReader.newInstance(
           requestedWidth,
@@ -1029,7 +1007,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_33)
+    @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
       try {
         SyncFence fence = image.getFence();
@@ -1039,7 +1017,7 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     private void maybeWaitOnFence(Image image) {
       if (image == null) {
         return;
@@ -1058,7 +1036,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(API_LEVELS.API_29)
+    @RequiresApi(API_LEVELS.API_29)
     public Image acquireLatestImage() {
       Image r;
       synchronized (this) {
@@ -1279,25 +1257,23 @@ public class FlutterRenderer implements TextureRegistry {
         displayFeaturesState);
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
-  // TODO(mattcarroll): determine if this is nullable or nonnull
   public Bitmap getBitmap() {
     return flutterJNI.getBitmap();
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   public void dispatchPointerDataPacket(@NonNull ByteBuffer buffer, int position) {
     flutterJNI.dispatchPointerDataPacket(buffer, position);
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   private void registerTexture(long textureId, @NonNull SurfaceTextureWrapper textureWrapper) {
     flutterJNI.registerTexture(textureId, textureWrapper);
   }
 
   private void registerImageTexture(
-      long textureId, @NonNull TextureRegistry.ImageConsumer imageTexture) {
-    flutterJNI.registerImageTexture(textureId, imageTexture);
+      long textureId,
+      @NonNull TextureRegistry.ImageConsumer imageTexture,
+      boolean resetOnBackground) {
+    flutterJNI.registerImageTexture(textureId, imageTexture, resetOnBackground);
   }
 
   @VisibleForTesting
@@ -1305,27 +1281,22 @@ public class FlutterRenderer implements TextureRegistry {
     flutterJNI.scheduleFrame();
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   private void unregisterTexture(long textureId) {
     flutterJNI.unregisterTexture(textureId);
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   public boolean isSoftwareRenderingEnabled() {
     return flutterJNI.getIsSoftwareRenderingEnabled();
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   public void setAccessibilityFeatures(int flags) {
     flutterJNI.setAccessibilityFeatures(flags);
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   public void setSemanticsEnabled(boolean enabled) {
     flutterJNI.setSemanticsEnabled(enabled);
   }
 
-  // TODO(mattcarroll): describe the native behavior that this invokes
   public void dispatchSemanticsAction(
       int nodeId, int action, @Nullable ByteBuffer args, int argsPosition) {
     flutterJNI.dispatchSemanticsAction(nodeId, action, args, argsPosition);
@@ -1346,7 +1317,7 @@ public class FlutterRenderer implements TextureRegistry {
     public int height = 0;
     // The fields prefixed with viewPadding and viewInset are used to calculate the padding,
     // viewPadding, and viewInsets of ViewConfiguration in Dart. This calculation is performed at
-    // https://github.com/flutter/engine/blob/main/lib/ui/hooks.dart#L139-L155.
+    // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/hooks.dart#L159-L175.
     public int viewPaddingTop = 0;
     public int viewPaddingRight = 0;
     public int viewPaddingBottom = 0;

@@ -41,7 +41,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
   auto yuv_to_rgb_filter_contents = FilterContents::MakeYUVToRGBFilter(
       std::move(y_texture), std::move(uv_texture), yuv_color_space);
   impeller::Entity entity;
-  entity.SetBlendMode(impeller::BlendMode::kSource);
+  entity.SetBlendMode(impeller::BlendMode::kSrc);
   auto snapshot = yuv_to_rgb_filter_contents->RenderToSnapshot(
       aiks_context->GetContentContext(),  // renderer
       entity,                             // entity
@@ -101,12 +101,6 @@ bool DlImageImpeller::isTextureBacked() const {
 bool DlImageImpeller::isUIThreadSafe() const {
   // Impeller textures are always thread-safe
   return true;
-}
-
-// |DlImage|
-SkISize DlImageImpeller::dimensions() const {
-  const auto size = texture_ ? texture_->GetSize() : ISize{};
-  return SkISize::Make(size.width, size.height);
 }
 
 // |DlImage|

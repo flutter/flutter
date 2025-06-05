@@ -11,7 +11,7 @@
 //
 // The code that performs the transformations lives in:
 //
-//  - https://github.com/flutter/engine/blob/main/web_sdk/sdk_rewriter.dart
+//  - https://github.com/flutter/flutter/blob/main/engine/src/flutter/web_sdk/sdk_rewriter.dart
 // ignore: unnecessary_library_directive
 library engine;
 
@@ -104,7 +104,9 @@ export 'engine/scene_builder.dart';
 export 'engine/scene_painting.dart';
 export 'engine/scene_view.dart';
 export 'engine/semantics/accessibility.dart';
+export 'engine/semantics/alert.dart';
 export 'engine/semantics/checkable.dart';
+export 'engine/semantics/disable.dart';
 export 'engine/semantics/expandable.dart';
 export 'engine/semantics/focusable.dart';
 export 'engine/semantics/header.dart';
@@ -113,8 +115,11 @@ export 'engine/semantics/image.dart';
 export 'engine/semantics/incrementable.dart';
 export 'engine/semantics/label_and_value.dart';
 export 'engine/semantics/link.dart';
+export 'engine/semantics/list.dart';
 export 'engine/semantics/live_region.dart';
+export 'engine/semantics/menus.dart';
 export 'engine/semantics/platform_view.dart';
+export 'engine/semantics/requirable.dart';
 export 'engine/semantics/route.dart';
 export 'engine/semantics/scrollable.dart';
 export 'engine/semantics/semantics.dart';
@@ -154,4 +159,5 @@ export 'engine/view_embedder/flutter_view_manager.dart';
 export 'engine/view_embedder/global_html_attributes.dart';
 export 'engine/view_embedder/hot_restart_cache_handler.dart';
 export 'engine/view_embedder/style_manager.dart';
+export 'engine/web_paragraph/paragraph.dart';
 export 'engine/window.dart';

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "ვებში ძიება",
   "shareButtonLabel": "გაზიარება...",
   "clearButtonLabel": "გასუფთავება",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "გაუქმება",
+  "backButtonLabel": "უკან"
 }

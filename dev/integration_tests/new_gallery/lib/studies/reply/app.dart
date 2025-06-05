@@ -77,7 +77,7 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
     final ThemeMode galleryThemeMode = GalleryOptions.of(context).themeMode;
     final bool isDark =
         galleryThemeMode == ThemeMode.system
-            ? Theme.of(context).brightness == Brightness.dark
+            ? Theme.brightnessOf(context) == Brightness.dark
             : galleryThemeMode == ThemeMode.dark;
 
     final ThemeData replyTheme =
@@ -150,9 +150,9 @@ class _RestorableEmailState extends RestorableListenable<EmailStore> {
 }
 
 ThemeData _buildReplyLightTheme(BuildContext context) {
-  final ThemeData base = ThemeData.light();
+  final ThemeData base = ThemeData();
   return base.copyWith(
-    bottomAppBarTheme: const BottomAppBarTheme(color: ReplyColors.blue700),
+    bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.blue700),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: ReplyColors.blue700,
       modalBackgroundColor: Colors.white.withOpacity(0.7),
@@ -192,7 +192,7 @@ ThemeData _buildReplyLightTheme(BuildContext context) {
 ThemeData _buildReplyDarkTheme(BuildContext context) {
   final ThemeData base = ThemeData.dark();
   return base.copyWith(
-    bottomAppBarTheme: const BottomAppBarTheme(color: ReplyColors.darkBottomAppBarBackground),
+    bottomAppBarTheme: const BottomAppBarThemeData(color: ReplyColors.darkBottomAppBarBackground),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: ReplyColors.darkDrawerBackground,
       modalBackgroundColor: Colors.black.withOpacity(0.7),

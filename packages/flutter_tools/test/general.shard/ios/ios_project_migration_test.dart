@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/ios/migrations/project_build_location_migratio
 import 'package:flutter_tools/src/ios/migrations/remove_bitcode_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/uiapplicationmain_deprecation_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/uiscenedelegate_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/cocoapods_script_symlink.dart';
@@ -580,18 +581,18 @@ keep this 3
       });
 
       testWithoutContext('skipped if nothing to upgrade', () async {
-        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 13.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
 
         const String appFrameworkInfoPlistContents = '''
   <key>MinimumOSVersion</key>
-  <string>12.0</string>
+  <string>13.0</string>
 ''';
         appFrameworkInfoPlist.writeAsStringSync(appFrameworkInfoPlistContents);
 
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-        const String podfileFileContents = "# platform :ios, '12.0'";
+        const String podfileFileContents = "# platform :ios, '13.0'";
         podfile.writeAsStringSync(podfileFileContents);
         final DateTime podfileLastModified = podfile.lastModifiedSync();
 
@@ -610,7 +611,7 @@ keep this 3
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('Xcode project is migrated to 12', () async {
+      testWithoutContext('Xcode project is migrated to 13', () async {
         xcodeProjectInfoFile.writeAsStringSync('''
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -620,6 +621,7 @@ keep this 3
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 ''');
 
         appFrameworkInfoPlist.writeAsStringSync('''
@@ -635,6 +637,8 @@ keep this 3
   <string>11.0</string>
   <key>MinimumOSVersion</key>
   <string>12.0</string>
+  <key>MinimumOSVersion</key>
+  <string>13.0</string>
 </dict>
 </plist>
 ''');
@@ -644,6 +648,8 @@ keep this 3
 platform :ios, '9.0'
 # platform :ios, '11.0'
 platform :ios, '11.0'
+# platform :ios, '12.0'
+platform :ios, '12.0'
 ''');
 
         final IOSDeploymentTargetMigration iosProjectMigration = IOSDeploymentTargetMigration(
@@ -654,13 +660,14 @@ platform :ios, '11.0'
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 ''');
 
         expect(appFrameworkInfoPlist.readAsStringSync(), '''
@@ -671,24 +678,28 @@ platform :ios, '11.0'
   <key>CFBundleVersion</key>
   <string>1.0</string>
   <key>MinimumOSVersion</key>
-  <string>12.0</string>
+  <string>13.0</string>
   <key>MinimumOSVersion</key>
-  <string>12.0</string>
+  <string>13.0</string>
   <key>MinimumOSVersion</key>
-  <string>12.0</string>
+  <string>13.0</string>
+  <key>MinimumOSVersion</key>
+  <string>13.0</string>
 </dict>
 </plist>
 ''');
 
         expect(podfile.readAsStringSync(), '''
-# platform :ios, '12.0'
-platform :ios, '12.0'
-# platform :ios, '12.0'
-platform :ios, '12.0'
+# platform :ios, '13.0'
+platform :ios, '13.0'
+# platform :ios, '13.0'
+platform :ios, '13.0'
+# platform :ios, '13.0'
+platform :ios, '13.0'
 ''');
-        // Only print once even though 2 lines were changed.
+        // Only print once even though multiple lines were changed.
         expect(
-          'Updating minimum iOS deployment target to 12.0'.allMatches(testLogger.statusText).length,
+          'Updating minimum iOS deployment target to 13.0'.allMatches(testLogger.statusText).length,
           1,
         );
       });
@@ -859,6 +870,59 @@ platform :ios, '12.0'
         expect(testLogger.statusText, isEmpty);
       });
 
+      testWithoutContext('UISceneDelegate migration', () async {
+        const String xmlString = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>MyKey</key>
+    <string>MyValue</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+  </dict>
+</plist>
+''';
+        infoPlistFile.writeAsStringSync(xmlString);
+
+        final UISceneDelegateMigration migration = UISceneDelegateMigration(project, testLogger);
+        await migration.migrate();
+
+        expect(infoPlistFile.readAsStringSync(), '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>MyKey</key>
+    <string>MyValue</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+      <key>UIApplicationSupportsMultipleScenes</key>
+      <false/>
+      <key>UISceneConfigurations</key>
+      <dict>
+        <key>UIWindowSceneSessionRoleApplication</key>
+        <array>
+          <dict>
+            <key>UISceneClassName</key>
+            <string>UIWindowScene</string>
+            <key>UISceneDelegateClassName</key>
+            <string>FlutterSceneDelegate</string>
+            <key>UISceneConfigurationName</key>
+            <string>flutter</string>
+            <key>UISceneStoryboardFile</key>
+            <string>Main</string>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </dict>
+</plist>
+''');
+      });
+
       testWithoutContext('info.plist is migrated', () async {
         const String infoPlistFileContent = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -920,7 +984,7 @@ platform :ios, '12.0'
       });
 
       testWithoutContext('skipped if nothing to upgrade', () async {
-        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
+        const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 13.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 

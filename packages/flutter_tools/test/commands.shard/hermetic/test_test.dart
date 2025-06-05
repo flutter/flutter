@@ -58,15 +58,19 @@ void main() {
     );
 
     final Directory package = fs.directory('package');
-    package.childFile('pubspec.yaml').createSync(recursive: true);
-    package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
-    writePackageConfigFile(
+
+    package.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_pubspecContents);
+
+    writePackageConfigFiles(
       directory: package,
       packages: <String, String>{
         'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
         'integration_test': 'file:///path/to/flutter/packages/integration_test',
       },
       mainLibName: 'my_app',
+      devDependencies: <String>['test_api', 'integration_test'],
     );
     package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
     package
@@ -74,7 +78,7 @@ void main() {
         .childFile('some_integration_test.dart')
         .createSync(recursive: true);
 
-    writePackageConfigFile(
+    writePackageConfigFiles(
       directory: fs.directory(fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools')),
       packages: <String, String>{
         'ffi': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
@@ -120,7 +124,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
     ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: fs.currentDirectory,
         packages: <String, String>{
           'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
@@ -157,6 +161,7 @@ dev_dependencies:
       expect(fakePackageTest.lastArgs, isNot(contains('compact')));
       expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
       expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+      expect(fakePackageTest.lastArgs, isNot(contains('--ignore-timeouts')));
       expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
     },
     overrides: <Type, Generator>{
@@ -358,6 +363,98 @@ dev_dependencies:
   );
 
   testUsingContext(
+    'Coverage provides current library name and workspace names to Coverage Collector by default',
+    () async {
+      final Directory package = fs.currentDirectory;
+      package.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+workspace:
+- child1
+- child2
+''');
+      package.childDirectory('child1').childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: child1
+resolution: workspace
+''');
+      package.childDirectory('child2').childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: child2
+resolution: workspace
+workspace:
+- example
+''');
+      package.childDirectory('child2').childDirectory('example').childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: child2_example
+resolution: workspace
+''');
+
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            method: 'getVM',
+            jsonResponse:
+                (VM.parse(<String, Object>{})!
+                      ..isolates = <IsolateRef>[
+                        IsolateRef.parse(<String, Object>{'id': '1'})!,
+                      ])
+                    .toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'getSourceReport',
+            args: <String, Object>{
+              'isolateId': '1',
+              'reports': <Object>['Coverage'],
+              'forceCompile': true,
+              'reportLines': true,
+              'libraryFilters': <String>[
+                'package:my_app/',
+                'package:child1/',
+                'package:child2/',
+                'package:child2_example/',
+              ],
+              'librariesAlreadyCompiled': <Object>[],
+            },
+            jsonResponse: SourceReport(ranges: <SourceReportRange>[]).toJson(),
+          ),
+        ],
+      );
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--coverage',
+        '--',
+        'test/some_test.dart',
+      ]);
+      expect(fakeVmServiceHost.hasRemainingExpectations, false);
+      expect((testRunner.lastTestWatcher! as CoverageCollector).libraryNames, <String>{
+        'my_app',
+        'child1',
+        'child2',
+        'child2_example',
+      });
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    },
+  );
+
+  testUsingContext(
     'Coverage provides library names matching regexps to Coverage Collector',
     () async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
@@ -519,7 +616,7 @@ dev_dependencies:
         onError: (Object error) async {
           expect(error, isA<ToolExit>());
           // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('the Dart compiler exited unexpectedly.'));
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
           caughtToolExit = true;
 
           final File isolateSpawningTesterPackageConfigFile = fs
@@ -530,32 +627,12 @@ dev_dependencies:
           // We expect [isolateSpawningTesterPackageConfigFile] to contain the
           // union of the packages in [_packageConfigContents] and
           // [_flutterToolsPackageConfigContents].
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "integration_test"',
-            ),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "ffi"'),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains('"name": "test"'),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "test_api"',
-            ),
-            true,
-          );
-          expect(
-            isolateSpawningTesterPackageConfigFile.readAsStringSync().contains(
-              '"name": "test_core"',
-            ),
-            true,
-          );
+          final String configContents = isolateSpawningTesterPackageConfigFile.readAsStringSync();
+          expect(configContents.contains('"name": "integration_test"'), true);
+          expect(configContents.contains('"name": "ffi"'), true);
+          expect(configContents.contains('"name": "test"'), true);
+          expect(configContents.contains('"name": "test_api"'), true);
+          expect(configContents.contains('"name": "test_core"'), true);
         },
       );
       expect(caughtToolExit, true);
@@ -583,6 +660,7 @@ dev_dependencies:
           '--reporter=compact',
           '--file-reporter=json:reports/tests.json',
           '--timeout=100',
+          '--ignore-timeouts',
           '--concurrency=3',
           '--name=name1',
           '--plain-name=name2',
@@ -600,7 +678,7 @@ dev_dependencies:
         onError: (Object error) async {
           expect(error, isA<ToolExit>());
           // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('the Dart compiler exited unexpectedly.'));
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
           caughtToolExit = true;
 
           final File childTestIsolateSpawnerSourceFile = fs
@@ -616,6 +694,7 @@ const List<String> packageTestArgs = <String>[
   '--file-reporter=json:reports/tests.json',
   '--timeout',
   '100',
+  '--ignore-timeouts',
   '--concurrency=3',
   '--name',
   'name1',
@@ -666,7 +745,7 @@ const List<String> packageTestArgs = <String>[
         onError: (Object error) async {
           expect(error, isA<ToolExit>());
           // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('the Dart compiler exited unexpectedly.'));
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
           caughtToolExit = true;
 
           final File childTestIsolateSpawnerSourceFile = fs
@@ -1482,9 +1561,22 @@ dev_dependencies:
       final Directory package = fs.directory('${root}package').absolute;
       package.childFile('pubspec.yaml').createSync(recursive: true);
       package.childFile('pubspec.yaml').writeAsStringSync('''
+name: workspace
 workspace:
   - app/
 ''');
+      writePackageConfigFiles(
+        mainLibName: 'my_app',
+        mainLibRootUri: 'app',
+        directory: package,
+        packages: <String, String>{
+          'workspace': package.path,
+          'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'integration_test': 'file:///path/to/flutter/packages/integration_test',
+        },
+        dependencies: <String>[],
+        devDependencies: <String>['test_api', 'integration_test'],
+      );
 
       final Directory app = package.childDirectory('app');
       app.createSync();
@@ -1518,6 +1610,25 @@ resolution: workspace
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
+    },
+  );
+
+  testUsingContext(
+    'The dart test exit code should be forwarded',
+    () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(79);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      expect(
+        () => commandRunner.run(const <String>['test', '--no-pub']),
+        throwsToolExit(exitCode: 79),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     },
   );
 }
@@ -1562,6 +1673,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
@@ -1611,6 +1723,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,

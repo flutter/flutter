@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ios/mac.dart';
+library;
+
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'build_info.dart';
@@ -17,6 +21,7 @@ import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
+import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
@@ -134,13 +139,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  /// The Flutter generated directory for the Swift Package handling plugin
-  /// dependencies.
-  Directory get flutterPluginSwiftPackageDirectory => ephemeralDirectory
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage');
+  /// The Flutter generated directory for generated Swift packages.
+  Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
-  /// The Flutter generated Swift Package manifest (Package.swift) for plugin
+  /// Flutter plugins that support SwiftPM will be symlinked in this directory to keep all
+  /// Swift packages relative to each other.
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  /// The Flutter generated directory for the Swift package handling plugin
+  /// dependencies.
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory(kFlutterGeneratedPluginSwiftPackageName);
+
+  /// The Flutter generated Swift package manifest (Package.swift) for plugin
   /// dependencies.
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
@@ -149,7 +161,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// project's build settings by checking the contents of the pbxproj.
   bool get flutterPluginSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+        xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
   /// True if this project doesn't have Swift Package Manager disabled in the
@@ -158,11 +170,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// feature is enabled.
   bool get usesSwiftPackageManager {
     if (!featureFlags.isSwiftPackageManagerEnabled) {
-      return false;
-    }
-
-    // The project can disable Swift Package Manager in its pubspec.yaml.
-    if (parent.manifest.disabledSwiftPackageManager) {
       return false;
     }
 
@@ -349,6 +356,51 @@ class IosProject extends XcodeBasedProject {
   // The string starts with `applinks:` and ignores the query param which starts with `?`.
   static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
+  static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
+
+  static const String _lldbInitTemplate = '''
+#
+# Generated file, do not edit.
+#
+
+command script import --relative-to-command-file $_lldbPythonHelperTemplateName
+''';
+
+  static const String _lldbPythonHelperTemplate = r'''
+#
+# Generated file, do not edit.
+#
+
+import lldb
+
+def handle_new_rx_page(frame: lldb.SBFrame, bp_loc, extra_args, intern_dict):
+    """Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages."""
+    base = frame.register["x0"].GetValueAsAddress()
+    page_len = frame.register["x1"].GetValueAsUnsigned()
+
+    # Note: NOTIFY_DEBUGGER_ABOUT_RX_PAGES will check contents of the
+    # first page to see if handled it correctly. This makes diagnosing
+    # misconfiguration (e.g. missing breakpoint) easier.
+    data = bytearray(page_len)
+    data[0:8] = b'IHELPED!'
+
+    error = lldb.SBError()
+    frame.GetThread().GetProcess().WriteMemory(base, data, error)
+    if not error.Success():
+        print(f'Failed to write into {base}[+{page_len}]', error)
+        return
+
+def __lldb_init_module(debugger: lldb.SBDebugger, _):
+    target = debugger.GetDummyTarget()
+    # Caveat: must use BreakpointCreateByRegEx here and not
+    # BreakpointCreateByName. For some reasons callback function does not
+    # get carried over from dummy target for the later.
+    bp = target.BreakpointCreateByRegex("^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$")
+    bp.SetScriptCallbackFunction('{}.handle_new_rx_page'.format(__name__))
+    bp.SetAutoContinue(True)
+    print("-- LLDB integration loaded --")
+''';
+
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
@@ -390,6 +442,10 @@ class IosProject extends XcodeBasedProject {
   /// The 'AppDelegate.swift' file of the host app. This file might not exist if the app project uses Objective-C.
   File get appDelegateSwift =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
+
+  /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjc =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
@@ -610,14 +666,16 @@ class IosProject extends XcodeBasedProject {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    await _regenerateFromTemplateIfNeeded();
+    await _regenerateModuleFromTemplateIfNeeded();
+    await _updateLLDBIfNeeded();
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
     await _updateGeneratedXcodeConfigIfNeeded();
   }
 
-  /// Check if one the [targets] of the project is a watchOS companion app target.
+  /// Check if one the [XcodeProjectInfo.targets] of the project is
+  /// a watchOS companion app target.
   Future<bool> containsWatchCompanion({
     required XcodeProjectInfo projectInfo,
     required BuildInfo buildInfo,
@@ -713,7 +771,45 @@ class IosProject extends XcodeBasedProject {
     }
   }
 
-  Future<void> _regenerateFromTemplateIfNeeded() async {
+  Future<void> _updateLLDBIfNeeded() async {
+    if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
+        globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
+      if (isModule) {
+        // When building a module project for Add-to-App, provide instructions
+        // to manually add the LLDB Init File to their native Xcode project.
+        globals.logger.printWarning(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. '
+          'To ensure debug mode works, please complete one of the following in '
+          'your native Xcode project:\n'
+          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
+          '    ${lldbInitFile.path}\n\n'
+          '  * If you are already using an LLDB Init File, please append the '
+          'following to your LLDB Init File:\n\n'
+          '    command source ${lldbInitFile.path}\n',
+        );
+      }
+      await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
+      await _renderTemplateToFile(
+        _lldbPythonHelperTemplate,
+        null,
+        lldbHelperPythonFile,
+        globals.templateRenderer,
+      );
+    }
+  }
+
+  Future<void> _renderTemplateToFile(
+    String template,
+    Object? context,
+    File file,
+    TemplateRenderer templateRenderer,
+  ) async {
+    final String renderedTemplate = templateRenderer.renderString(template, context);
+    await file.create(recursive: true);
+    await file.writeAsString(renderedTemplate);
+  }
+
+  Future<void> _regenerateModuleFromTemplateIfNeeded() async {
     if (!isModule) {
       return;
     }
@@ -783,6 +879,14 @@ class IosProject extends XcodeBasedProject {
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
+  File get lldbInitFile {
+    return ephemeralDirectory.childFile('flutter_lldbinit');
+  }
+
+  File get lldbHelperPythonFile {
+    return ephemeralDirectory.childFile(_lldbPythonHelperTemplateName);
+  }
+
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
     final Template template = await Template.fromName(
       path,
@@ -800,6 +904,9 @@ class IosProject extends XcodeBasedProject {
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
 
     final String projectName = parent.manifest.appName;

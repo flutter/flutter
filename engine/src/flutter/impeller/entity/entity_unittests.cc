@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "fml/logging.h"
 #include "gtest/gtest.h"
@@ -17,7 +18,6 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/raw_ptr.h"
 #include "impeller/core/texture_descriptor.h"
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
@@ -43,7 +43,6 @@
 #include "impeller/entity/geometry/superellipse_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/sigma.h"
 #include "impeller/geometry/vector.h"
@@ -55,10 +54,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
-#include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
-#include "third_party/skia/include/core/SkTextBlob.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
@@ -112,20 +108,21 @@ TEST_P(EntityTest, GeometryBoundsAreTransformed) {
 }
 
 TEST_P(EntityTest, ThreeStrokesInOnePath) {
-  Path path = PathBuilder{}
-                  .MoveTo({100, 100})
-                  .LineTo({100, 200})
-                  .MoveTo({100, 300})
-                  .LineTo({100, 400})
-                  .MoveTo({100, 500})
-                  .LineTo({100, 600})
-                  .TakePath();
+  flutter::DlPath path = flutter::DlPathBuilder{}
+                             .MoveTo({100, 100})
+                             .LineTo({100, 200})
+                             .MoveTo({100, 300})
+                             .LineTo({100, 400})
+                             .MoveTo({100, 500})
+                             .LineTo({100, 600})
+                             .TakePath();
 
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<SolidColorContents>();
 
-  std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 5.0);
+  std::unique_ptr<Geometry> geom =
+      Geometry::MakeStrokePath(path, {.width = 5.0f});
   contents->SetGeometry(geom.get());
   contents->SetColor(Color::Red());
   entity.SetContents(std::move(contents));
@@ -134,19 +131,20 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
 
 TEST_P(EntityTest, StrokeWithTextureContents) {
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
-  Path path = PathBuilder{}
-                  .MoveTo({100, 100})
-                  .LineTo({100, 200})
-                  .MoveTo({100, 300})
-                  .LineTo({100, 400})
-                  .MoveTo({100, 500})
-                  .LineTo({100, 600})
-                  .TakePath();
+  flutter::DlPath path = flutter::DlPathBuilder{}
+                             .MoveTo({100, 100})
+                             .LineTo({100, 200})
+                             .MoveTo({100, 300})
+                             .LineTo({100, 400})
+                             .MoveTo({100, 500})
+                             .LineTo({100, 600})
+                             .TakePath();
 
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<TiledTextureContents>();
-  std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 100.0);
+  std::unique_ptr<Geometry> geom =
+      Geometry::MakeStrokePath(path, {.width = 100.0f});
   contents->SetGeometry(geom.get());
   contents->SetTexture(bridge);
   contents->SetTileModes(Entity::TileMode::kClamp, Entity::TileMode::kClamp);
@@ -158,36 +156,38 @@ TEST_P(EntityTest, TriangleInsideASquare) {
   auto callback = [&](ContentContext& context, RenderPass& pass) {
     Point offset(100, 100);
 
-    PlaygroundPoint point_a(Point(10, 10) + offset, 20, Color::White());
+    static PlaygroundPoint point_a(Point(10, 10) + offset, 20, Color::White());
     Point a = DrawPlaygroundPoint(point_a);
-    PlaygroundPoint point_b(Point(210, 10) + offset, 20, Color::White());
+    static PlaygroundPoint point_b(Point(210, 10) + offset, 20, Color::White());
     Point b = DrawPlaygroundPoint(point_b);
-    PlaygroundPoint point_c(Point(210, 210) + offset, 20, Color::White());
+    static PlaygroundPoint point_c(Point(210, 210) + offset, 20,
+                                   Color::White());
     Point c = DrawPlaygroundPoint(point_c);
-    PlaygroundPoint point_d(Point(10, 210) + offset, 20, Color::White());
+    static PlaygroundPoint point_d(Point(10, 210) + offset, 20, Color::White());
     Point d = DrawPlaygroundPoint(point_d);
-    PlaygroundPoint point_e(Point(50, 50) + offset, 20, Color::White());
+    static PlaygroundPoint point_e(Point(50, 50) + offset, 20, Color::White());
     Point e = DrawPlaygroundPoint(point_e);
-    PlaygroundPoint point_f(Point(100, 50) + offset, 20, Color::White());
+    static PlaygroundPoint point_f(Point(100, 50) + offset, 20, Color::White());
     Point f = DrawPlaygroundPoint(point_f);
-    PlaygroundPoint point_g(Point(50, 150) + offset, 20, Color::White());
+    static PlaygroundPoint point_g(Point(50, 150) + offset, 20, Color::White());
     Point g = DrawPlaygroundPoint(point_g);
-    Path path = PathBuilder{}
-                    .MoveTo(a)
-                    .LineTo(b)
-                    .LineTo(c)
-                    .LineTo(d)
-                    .Close()
-                    .MoveTo(e)
-                    .LineTo(f)
-                    .LineTo(g)
-                    .Close()
-                    .TakePath();
+    flutter::DlPath path = flutter::DlPathBuilder{}
+                               .MoveTo(a)
+                               .LineTo(b)
+                               .LineTo(c)
+                               .LineTo(d)
+                               .Close()
+                               .MoveTo(e)
+                               .LineTo(f)
+                               .LineTo(g)
+                               .Close()
+                               .TakePath();
 
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
     auto contents = std::make_unique<SolidColorContents>();
-    std::unique_ptr<Geometry> geom = Geometry::MakeStrokePath(path, 20.0);
+    std::unique_ptr<Geometry> geom =
+        Geometry::MakeStrokePath(path, {.width = 20.0});
     contents->SetGeometry(geom.get());
     contents->SetColor(Color::Red());
     entity.SetContents(std::move(contents));
@@ -221,10 +221,15 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
 
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto render_path = [width = width, &context, &pass, &world_matrix](
-                           const Path& path, Cap cap, Join join) {
+                           const flutter::DlPath& path, Cap cap, Join join) {
       auto contents = std::make_unique<SolidColorContents>();
       std::unique_ptr<Geometry> geom =
-          Geometry::MakeStrokePath(path, width, miter_limit, cap, join);
+          Geometry::MakeStrokePath(path, {
+                                             .width = width,
+                                             .cap = cap,
+                                             .join = join,
+                                             .miter_limit = miter_limit,
+                                         });
       contents->SetGeometry(geom.get());
       contents->SetColor(Color::Red());
 
@@ -237,7 +242,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
         auto bounds_contents = std::make_unique<SolidColorContents>();
 
         std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
-            PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath());
+            flutter::DlPath::MakeRect(entity.GetCoverage().value()));
 
         bounds_contents->SetGeometry(geom.get());
         bounds_contents->SetColor(Color::Green().WithAlpha(0.5));
@@ -255,82 +260,106 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     // Cap::kButt demo.
     {
       Point off = Point(0, 0) * padding + margin;
-      PlaygroundPoint point_a(off + a_def, r, Color::Black());
-      PlaygroundPoint point_b(off + b_def, r, Color::White());
+      static PlaygroundPoint point_a(off + a_def, r, Color::Black());
+      static PlaygroundPoint point_b(off + b_def, r, Color::White());
       auto [a, b] = DrawPlaygroundLine(point_a, point_b);
-      PlaygroundPoint point_c(off + c_def, r, Color::Black());
-      PlaygroundPoint point_d(off + d_def, r, Color::White());
+      static PlaygroundPoint point_c(off + c_def, r, Color::Black());
+      static PlaygroundPoint point_d(off + d_def, r, Color::White());
       auto [c, d] = DrawPlaygroundLine(point_c, point_d);
-      render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
+      render_path(flutter::DlPathBuilder{}  //
+                      .MoveTo(a)
+                      .CubicCurveTo(b, d, c)
+                      .TakePath(),
                   Cap::kButt, Join::kBevel);
     }
 
     // Cap::kSquare demo.
     {
       Point off = Point(1, 0) * padding + margin;
-      PlaygroundPoint point_a(off + a_def, r, Color::Black());
-      PlaygroundPoint point_b(off + b_def, r, Color::White());
+      static PlaygroundPoint point_a(off + a_def, r, Color::Black());
+      static PlaygroundPoint point_b(off + b_def, r, Color::White());
       auto [a, b] = DrawPlaygroundLine(point_a, point_b);
-      PlaygroundPoint point_c(off + c_def, r, Color::Black());
-      PlaygroundPoint point_d(off + d_def, r, Color::White());
+      static PlaygroundPoint point_c(off + c_def, r, Color::Black());
+      static PlaygroundPoint point_d(off + d_def, r, Color::White());
       auto [c, d] = DrawPlaygroundLine(point_c, point_d);
-      render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
+      render_path(flutter::DlPathBuilder{}  //
+                      .MoveTo(a)
+                      .CubicCurveTo(b, d, c)
+                      .TakePath(),
                   Cap::kSquare, Join::kBevel);
     }
 
     // Cap::kRound demo.
     {
       Point off = Point(2, 0) * padding + margin;
-      PlaygroundPoint point_a(off + a_def, r, Color::Black());
-      PlaygroundPoint point_b(off + b_def, r, Color::White());
+      static PlaygroundPoint point_a(off + a_def, r, Color::Black());
+      static PlaygroundPoint point_b(off + b_def, r, Color::White());
       auto [a, b] = DrawPlaygroundLine(point_a, point_b);
-      PlaygroundPoint point_c(off + c_def, r, Color::Black());
-      PlaygroundPoint point_d(off + d_def, r, Color::White());
+      static PlaygroundPoint point_c(off + c_def, r, Color::Black());
+      static PlaygroundPoint point_d(off + d_def, r, Color::White());
       auto [c, d] = DrawPlaygroundLine(point_c, point_d);
-      render_path(PathBuilder{}.AddCubicCurve(a, b, d, c).TakePath(),
+      render_path(flutter::DlPathBuilder{}  //
+                      .MoveTo(a)
+                      .CubicCurveTo(b, d, c)
+                      .TakePath(),
                   Cap::kRound, Join::kBevel);
     }
 
     // Join::kBevel demo.
     {
       Point off = Point(0, 1) * padding + margin;
-      PlaygroundPoint point_a = PlaygroundPoint(off + a_def, r, Color::White());
-      PlaygroundPoint point_b = PlaygroundPoint(off + e_def, r, Color::White());
-      PlaygroundPoint point_c = PlaygroundPoint(off + c_def, r, Color::White());
+      static PlaygroundPoint point_a =
+          PlaygroundPoint(off + a_def, r, Color::White());
+      static PlaygroundPoint point_b =
+          PlaygroundPoint(off + e_def, r, Color::White());
+      static PlaygroundPoint point_c =
+          PlaygroundPoint(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
-      render_path(
-          PathBuilder{}.MoveTo(a).LineTo(b).LineTo(c).Close().TakePath(),
-          Cap::kButt, Join::kBevel);
+      render_path(flutter::DlPathBuilder{}  //
+                      .MoveTo(a)
+                      .LineTo(b)
+                      .LineTo(c)
+                      .Close()
+                      .TakePath(),
+                  Cap::kButt, Join::kBevel);
     }
 
     // Join::kMiter demo.
     {
       Point off = Point(1, 1) * padding + margin;
-      PlaygroundPoint point_a(off + a_def, r, Color::White());
-      PlaygroundPoint point_b(off + e_def, r, Color::White());
-      PlaygroundPoint point_c(off + c_def, r, Color::White());
+      static PlaygroundPoint point_a(off + a_def, r, Color::White());
+      static PlaygroundPoint point_b(off + e_def, r, Color::White());
+      static PlaygroundPoint point_c(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
-      render_path(
-          PathBuilder{}.MoveTo(a).LineTo(b).LineTo(c).Close().TakePath(),
-          Cap::kButt, Join::kMiter);
+      render_path(flutter::DlPathBuilder{}  //
+                      .MoveTo(a)
+                      .LineTo(b)
+                      .LineTo(c)
+                      .Close()
+                      .TakePath(),
+                  Cap::kButt, Join::kMiter);
     }
 
     // Join::kRound demo.
     {
       Point off = Point(2, 1) * padding + margin;
-      PlaygroundPoint point_a(off + a_def, r, Color::White());
-      PlaygroundPoint point_b(off + e_def, r, Color::White());
-      PlaygroundPoint point_c(off + c_def, r, Color::White());
+      static PlaygroundPoint point_a(off + a_def, r, Color::White());
+      static PlaygroundPoint point_b(off + e_def, r, Color::White());
+      static PlaygroundPoint point_c(off + c_def, r, Color::White());
       Point a = DrawPlaygroundPoint(point_a);
       Point b = DrawPlaygroundPoint(point_b);
       Point c = DrawPlaygroundPoint(point_c);
-      render_path(
-          PathBuilder{}.MoveTo(a).LineTo(b).LineTo(c).Close().TakePath(),
-          Cap::kButt, Join::kRound);
+      render_path(flutter::DlPathBuilder{}  //
+                      .MoveTo(a)
+                      .LineTo(b)
+                      .LineTo(c)
+                      .Close()
+                      .TakePath(),
+                  Cap::kButt, Join::kRound);
     }
 
     return true;
@@ -340,8 +369,8 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
 
 TEST_P(EntityTest, CubicCurveTest) {
   // Compare with https://fiddle.skia.org/c/b3625f26122c9de7afe7794fcf25ead3
-  Path path =
-      PathBuilder{}
+  flutter::DlPath path =
+      flutter::DlPathBuilder{}
           .MoveTo({237.164, 125.003})
           .CubicCurveTo({236.709, 125.184}, {236.262, 125.358},
                         {235.81, 125.538})
@@ -402,8 +431,8 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
                 Vector3(Point(pass.GetRenderTargetSize().width / 2.0,
                               pass.GetRenderTargetSize().height / 2.0)));
     Matrix result_transform = current_transform * rotation_matrix;
-    Path path =
-        PathBuilder{}.AddRect(Rect::MakeXYWH(-300, -400, 600, 800)).TakePath();
+    flutter::DlPath path =
+        flutter::DlPath::MakeRect(Rect::MakeXYWH(-300, -400, 600, 800));
 
     Entity entity;
     entity.SetTransform(result_transform);
@@ -422,8 +451,8 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
 
 TEST_P(EntityTest, CubicCurveAndOverlapTest) {
   // Compare with https://fiddle.skia.org/c/7a05a3e186c65a8dfb732f68020aae06
-  Path path =
-      PathBuilder{}
+  flutter::DlPath path =
+      flutter::DlPathBuilder{}
           .MoveTo({359.934, 96.6335})
           .CubicCurveTo({358.189, 96.7055}, {356.436, 96.7908},
                         {354.673, 96.8895})
@@ -657,7 +686,7 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
 
 TEST_P(EntityTest, SolidColorContentsStrokeSetStrokeCapsAndJoins) {
   {
-    auto geometry = Geometry::MakeStrokePath(Path{});
+    auto geometry = Geometry::MakeStrokePath(flutter::DlPath{});
     auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     // Defaults.
     ASSERT_EQ(path_geometry->GetStrokeCap(), Cap::kButt);
@@ -665,13 +694,23 @@ TEST_P(EntityTest, SolidColorContentsStrokeSetStrokeCapsAndJoins) {
   }
 
   {
-    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0, 4.0, Cap::kSquare);
+    auto geometry = Geometry::MakeStrokePath(flutter::DlPath{},  //
+                                             {
+                                                 .width = 1.0f,
+                                                 .cap = Cap::kSquare,
+                                                 .miter_limit = 4.0f,
+                                             });
     auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     ASSERT_EQ(path_geometry->GetStrokeCap(), Cap::kSquare);
   }
 
   {
-    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0, 4.0, Cap::kRound);
+    auto geometry = Geometry::MakeStrokePath(flutter::DlPath{},  //
+                                             {
+                                                 .width = 1.0f,
+                                                 .cap = Cap::kRound,
+                                                 .miter_limit = 4.0f,
+                                             });
     auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     ASSERT_EQ(path_geometry->GetStrokeCap(), Cap::kRound);
   }
@@ -679,21 +718,27 @@ TEST_P(EntityTest, SolidColorContentsStrokeSetStrokeCapsAndJoins) {
 
 TEST_P(EntityTest, SolidColorContentsStrokeSetMiterLimit) {
   {
-    auto geometry = Geometry::MakeStrokePath(Path{});
+    auto geometry = Geometry::MakeStrokePath(flutter::DlPath{});
     auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     ASSERT_FLOAT_EQ(path_geometry->GetMiterLimit(), 4);
   }
 
   {
-    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0,
-                                             /*miter_limit=*/8.0);
+    auto geometry = Geometry::MakeStrokePath(flutter::DlPath{},  //
+                                             {
+                                                 .width = 1.0f,
+                                                 .miter_limit = 8.0f,
+                                             });
     auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     ASSERT_FLOAT_EQ(path_geometry->GetMiterLimit(), 8);
   }
 
   {
-    auto geometry = Geometry::MakeStrokePath(Path{}, 1.0,
-                                             /*miter_limit=*/-1.0);
+    auto geometry = Geometry::MakeStrokePath(flutter::DlPath{},  //
+                                             {
+                                                 .width = 1.0f,
+                                                 .miter_limit = -1.0f,
+                                             });
     auto path_geometry = static_cast<StrokePathGeometry*>(geometry.get());
     ASSERT_FLOAT_EQ(path_geometry->GetMiterLimit(), 4);
   }
@@ -716,36 +761,36 @@ TEST_P(EntityTest, BlendingModeOptions) {
       case BlendMode::kClear:
         blend_mode_names.push_back("Clear");
         blend_mode_values.push_back(BlendMode::kClear);
-      case BlendMode::kSource:
+      case BlendMode::kSrc:
         blend_mode_names.push_back("Source");
-        blend_mode_values.push_back(BlendMode::kSource);
-      case BlendMode::kDestination:
+        blend_mode_values.push_back(BlendMode::kSrc);
+      case BlendMode::kDst:
         blend_mode_names.push_back("Destination");
-        blend_mode_values.push_back(BlendMode::kDestination);
-      case BlendMode::kSourceOver:
+        blend_mode_values.push_back(BlendMode::kDst);
+      case BlendMode::kSrcOver:
         blend_mode_names.push_back("SourceOver");
-        blend_mode_values.push_back(BlendMode::kSourceOver);
-      case BlendMode::kDestinationOver:
+        blend_mode_values.push_back(BlendMode::kSrcOver);
+      case BlendMode::kDstOver:
         blend_mode_names.push_back("DestinationOver");
-        blend_mode_values.push_back(BlendMode::kDestinationOver);
-      case BlendMode::kSourceIn:
+        blend_mode_values.push_back(BlendMode::kDstOver);
+      case BlendMode::kSrcIn:
         blend_mode_names.push_back("SourceIn");
-        blend_mode_values.push_back(BlendMode::kSourceIn);
-      case BlendMode::kDestinationIn:
+        blend_mode_values.push_back(BlendMode::kSrcIn);
+      case BlendMode::kDstIn:
         blend_mode_names.push_back("DestinationIn");
-        blend_mode_values.push_back(BlendMode::kDestinationIn);
-      case BlendMode::kSourceOut:
+        blend_mode_values.push_back(BlendMode::kDstIn);
+      case BlendMode::kSrcOut:
         blend_mode_names.push_back("SourceOut");
-        blend_mode_values.push_back(BlendMode::kSourceOut);
-      case BlendMode::kDestinationOut:
+        blend_mode_values.push_back(BlendMode::kSrcOut);
+      case BlendMode::kDstOut:
         blend_mode_names.push_back("DestinationOut");
-        blend_mode_values.push_back(BlendMode::kDestinationOut);
-      case BlendMode::kSourceATop:
+        blend_mode_values.push_back(BlendMode::kDstOut);
+      case BlendMode::kSrcATop:
         blend_mode_names.push_back("SourceATop");
-        blend_mode_values.push_back(BlendMode::kSourceATop);
-      case BlendMode::kDestinationATop:
+        blend_mode_values.push_back(BlendMode::kSrcATop);
+      case BlendMode::kDstATop:
         blend_mode_names.push_back("DestinationATop");
-        blend_mode_values.push_back(BlendMode::kDestinationATop);
+        blend_mode_values.push_back(BlendMode::kDstATop);
       case BlendMode::kXor:
         blend_mode_names.push_back("Xor");
         blend_mode_values.push_back(BlendMode::kXor);
@@ -809,11 +854,11 @@ TEST_P(EntityTest, BlendingModeOptions) {
     BlendMode selected_mode = blend_mode_values[current_blend_index];
 
     Point a, b, c, d;
-    PlaygroundPoint point_a(Point(400, 100), 20, Color::White());
-    PlaygroundPoint point_b(Point(200, 300), 20, Color::White());
+    static PlaygroundPoint point_a(Point(400, 100), 20, Color::White());
+    static PlaygroundPoint point_b(Point(200, 300), 20, Color::White());
     std::tie(a, b) = DrawPlaygroundLine(point_a, point_b);
-    PlaygroundPoint point_c(Point(470, 190), 20, Color::White());
-    PlaygroundPoint point_d(Point(270, 390), 20, Color::White());
+    static PlaygroundPoint point_c(Point(470, 190), 20, Color::White());
+    static PlaygroundPoint point_d(Point(270, 390), 20, Color::White());
     std::tie(c, d) = DrawPlaygroundLine(point_c, point_d);
 
     bool result = true;
@@ -822,7 +867,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
                                       pass.GetRenderTargetSize().height),
                        Color(), BlendMode::kClear);
     result = result && draw_rect(Rect::MakeLTRB(a.x, a.y, b.x, b.y), color1,
-                                 BlendMode::kSourceOver);
+                                 BlendMode::kSrcOver);
     result = result && draw_rect(Rect::MakeLTRB(c.x, c.y, d.x, d.y), color2,
                                  selected_mode);
     return result;
@@ -840,7 +885,7 @@ TEST_P(EntityTest, BezierCircleScaled) {
 
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-    auto path = PathBuilder{}
+    auto path = flutter::DlPathBuilder{}
                     .MoveTo({97.325, 34.818})
                     .CubicCurveTo({98.50862885295136, 34.81812293973836},
                                   {99.46822048142015, 33.85863261475589},
@@ -1003,7 +1048,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       auto fill = std::make_shared<SolidColorContents>();
       fill->SetColor(input_color);
       solid_color_input =
-          Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath());
+          Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
 
       fill->SetGeometry(solid_color_input.get());
 
@@ -1051,7 +1096,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // unfiltered input.
     Entity cover_entity;
     std::unique_ptr<Geometry> geom =
-        Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath());
+        Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
     auto contents = std::make_shared<SolidColorContents>();
     contents->SetColor(cover_color);
     contents->SetGeometry(geom.get());
@@ -1064,10 +1109,9 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     std::optional<Rect> target_contents_coverage =
         target_contents->GetCoverage(entity);
     if (target_contents_coverage.has_value()) {
-      std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
-          PathBuilder{}
-              .AddRect(target_contents->GetCoverage(entity).value())
-              .TakePath());
+      std::unique_ptr<Geometry> geom =
+          Geometry::MakeFillPath(flutter::DlPath::MakeRect(
+              target_contents->GetCoverage(entity).value()));
       auto contents = std::make_shared<SolidColorContents>();
       contents->SetColor(bounds_color);
       contents->SetGeometry(geom.get());
@@ -1163,7 +1207,7 @@ TEST_P(EntityTest, MorphologyFilter) {
     // unfiltered input.
     Entity cover_entity;
     std::unique_ptr<Geometry> geom =
-        Geometry::MakeFillPath(PathBuilder{}.AddRect(input_rect).TakePath());
+        Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
     auto cover_contents = std::make_shared<SolidColorContents>();
     cover_contents->SetColor(cover_color);
     cover_contents->SetGeometry(geom.get());
@@ -1174,9 +1218,7 @@ TEST_P(EntityTest, MorphologyFilter) {
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
     std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
-        PathBuilder{}
-            .AddRect(contents->GetCoverage(entity).value())
-            .TakePath());
+        flutter::DlPath::MakeRect(contents->GetCoverage(entity).value()));
     auto bounds_contents = std::make_shared<SolidColorContents>();
     bounds_contents->SetColor(bounds_color);
     bounds_contents->SetGeometry(bounds_geom.get());
@@ -1192,7 +1234,7 @@ TEST_P(EntityTest, MorphologyFilter) {
 
 TEST_P(EntityTest, SetBlendMode) {
   Entity entity;
-  ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSourceOver);
+  ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSrcOver);
   entity.SetBlendMode(BlendMode::kClear);
   ASSERT_EQ(entity.GetBlendMode(), BlendMode::kClear);
 }
@@ -1206,8 +1248,13 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   {
     auto geometry = Geometry::MakeStrokePath(
-        PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath(), 4.0, 4.0,
-        Cap::kButt, Join::kBevel);
+        flutter::DlPath::MakeLine({0, 0}, {10, 10}),  //
+        {
+            .width = 4.0f,
+            .cap = Cap::kButt,
+            .join = Join::kBevel,
+            .miter_limit = 4.0f,
+        });
 
     Entity entity;
     auto contents = std::make_unique<SolidColorContents>();
@@ -1224,8 +1271,13 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   // Cover the Cap::kSquare case.
   {
     auto geometry = Geometry::MakeStrokePath(
-        PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath(), 4.0, 4.0,
-        Cap::kSquare, Join::kBevel);
+        flutter::DlPath::MakeLine({0, 0}, {10, 10}),  //
+        {
+            .width = 4.0,
+            .cap = Cap::kSquare,
+            .join = Join::kBevel,
+            .miter_limit = 4.0,
+        });
 
     Entity entity;
     auto contents = std::make_unique<SolidColorContents>();
@@ -1243,8 +1295,13 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   // Cover the Join::kMiter case.
   {
     auto geometry = Geometry::MakeStrokePath(
-        PathBuilder{}.AddLine({0, 0}, {10, 10}).TakePath(), 4.0, 2.0,
-        Cap::kSquare, Join::kMiter);
+        flutter::DlPath::MakeLine({0, 0}, {10, 10}),  //
+        {
+            .width = 4.0f,
+            .cap = Cap::kSquare,
+            .join = Join::kMiter,
+            .miter_limit = 2.0f,
+        });
 
     Entity entity;
     auto contents = std::make_unique<SolidColorContents>();
@@ -1262,7 +1319,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
 TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
   auto fill = std::make_shared<SolidColorContents>();
   auto geom = Geometry::MakeFillPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
   fill->SetGeometry(geom.get());
   fill->SetColor(Color::CornflowerBlue());
   auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
@@ -1293,8 +1350,7 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
     auto fill = std::make_shared<SolidColorContents>();
     fill->SetColor(Color::CornflowerBlue());
     auto expected = Rect::MakeLTRB(100, 110, 200, 220);
-    auto geom =
-        Geometry::MakeFillPath(PathBuilder{}.AddRect(expected).TakePath());
+    auto geom = Geometry::MakeFillPath(flutter::DlPath::MakeRect(expected));
     fill->SetGeometry(geom.get());
 
     auto coverage = fill->GetCoverage({});
@@ -1306,7 +1362,7 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   {
     auto fill = std::make_shared<SolidColorContents>();
     auto geom = Geometry::MakeFillPath(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(100, 110, 200, 220)).TakePath());
+        flutter::DlPath::MakeRect(Rect::MakeLTRB(100, 110, 200, 220)));
     fill->SetColor(Color::CornflowerBlue());
     fill->SetGeometry(geom.get());
 
@@ -1324,7 +1380,7 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   {
     auto fill = std::make_shared<SolidColorContents>();
     auto geom = Geometry::MakeFillPath(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(100, 110, 200, 220)).TakePath());
+        flutter::DlPath::MakeRect(Rect::MakeLTRB(100, 110, 200, 220)));
     fill->SetColor(Color::WhiteTransparent());
     fill->SetGeometry(geom.get());
 
@@ -1340,6 +1396,9 @@ TEST_P(EntityTest, RRectShadowTest) {
     static float blur_radius = 100;
     static bool show_coverage = false;
     static Color coverage_color = Color::Green().WithAlpha(0.2);
+    static PlaygroundPoint top_left_point(Point(200, 200), 30, Color::White());
+    static PlaygroundPoint bottom_right_point(Point(600, 400), 30,
+                                              Color::White());
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
@@ -1352,15 +1411,13 @@ TEST_P(EntityTest, RRectShadowTest) {
     }
     ImGui::End();
 
-    PlaygroundPoint top_left_point(Point(200, 200), 30, Color::White());
-    PlaygroundPoint bottom_right_point(Point(600, 400), 30, Color::White());
     auto [top_left, bottom_right] =
         DrawPlaygroundLine(top_left_point, bottom_right_point);
     auto rect =
         Rect::MakeLTRB(top_left.x, top_left.y, bottom_right.x, bottom_right.y);
 
     auto contents = std::make_unique<SolidRRectBlurContents>();
-    contents->SetRRect(rect, {corner_radius, corner_radius});
+    contents->SetShape(rect, corner_radius);
     contents->SetColor(color);
     contents->SetSigma(Radius(blur_radius));
 
@@ -1373,7 +1430,7 @@ TEST_P(EntityTest, RRectShadowTest) {
     if (show_coverage && coverage.has_value()) {
       auto bounds_contents = std::make_unique<SolidColorContents>();
       auto geom = Geometry::MakeFillPath(
-          PathBuilder{}.AddRect(entity.GetCoverage().value()).TakePath());
+          flutter::DlPath::MakeRect(entity.GetCoverage().value()));
       bounds_contents->SetGeometry(geom.get());
       bounds_contents->SetColor(coverage_color.Premultiply());
       Entity bounds_entity;
@@ -1390,7 +1447,7 @@ TEST_P(EntityTest, ColorMatrixFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto fill = std::make_shared<SolidColorContents>();
   auto geom = Geometry::MakeFillPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
   fill->SetGeometry(geom.get());
   fill->SetColor(Color::Coral());
 
@@ -1477,7 +1534,7 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
 TEST_P(EntityTest, LinearToSrgbFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto geom = Geometry::MakeFillPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
   auto fill = std::make_shared<SolidColorContents>();
   fill->SetGeometry(geom.get());
   fill->SetColor(Color::MintCream());
@@ -1531,7 +1588,7 @@ TEST_P(EntityTest, SrgbToLinearFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto fill = std::make_shared<SolidColorContents>();
   auto geom = Geometry::MakeFillPath(
-      PathBuilder{}.AddRect(Rect::MakeXYWH(0, 0, 300, 400)).TakePath());
+      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
   fill->SetGeometry(geom.get());
   fill->SetColor(Color::DeepPink());
 
@@ -1851,7 +1908,8 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
 
   auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
       uniform_data, GetContentContext()->GetTransientsBuffer(),
-      runtime_stage->GetUniforms()[0]);
+      runtime_stage->GetUniforms()[0],
+      GetContentContext()->GetTransientsBuffer().GetMinimumUniformAlignment());
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -1895,7 +1953,7 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorClearBlend) {
 TEST_P(EntityTest, ColorFilterWithForegroundColorSrcBlend) {
   auto image = CreateTextureForFixture("boston.jpg");
   auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kSource, FilterInput::Make({image}), Color::Red());
+      BlendMode::kSrc, FilterInput::Make({image}), Color::Red());
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     Entity entity;
@@ -1911,7 +1969,7 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorSrcBlend) {
 TEST_P(EntityTest, ColorFilterWithForegroundColorDstBlend) {
   auto image = CreateTextureForFixture("boston.jpg");
   auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kDestination, FilterInput::Make({image}), Color::Red());
+      BlendMode::kDst, FilterInput::Make({image}), Color::Red());
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     Entity entity;
@@ -1927,7 +1985,7 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorDstBlend) {
 TEST_P(EntityTest, ColorFilterWithForegroundColorSrcInBlend) {
   auto image = CreateTextureForFixture("boston.jpg");
   auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kSourceIn, FilterInput::Make({image}), Color::Red());
+      BlendMode::kSrcIn, FilterInput::Make({image}), Color::Red());
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     Entity entity;
@@ -1941,13 +1999,18 @@ TEST_P(EntityTest, ColorFilterWithForegroundColorSrcInBlend) {
 }
 
 TEST_P(EntityTest, CoverageForStrokePathWithNegativeValuesInTransform) {
-  auto arrow_head = PathBuilder{}
+  auto arrow_head = flutter::DlPathBuilder{}
                         .MoveTo({50, 120})
                         .LineTo({120, 190})
                         .LineTo({190, 120})
                         .TakePath();
-  auto geometry = Geometry::MakeStrokePath(arrow_head, 15.0, 4.0, Cap::kRound,
-                                           Join::kRound);
+  auto geometry = Geometry::MakeStrokePath(arrow_head,  //
+                                           {
+                                               .width = 15.0f,
+                                               .cap = Cap::kRound,
+                                               .join = Join::kRound,
+                                               .miter_limit = 4.0f,
+                                           });
 
   auto transform = Matrix::MakeTranslation({300, 300}) *
                    Matrix::MakeRotationZ(Radians(kPiOver2));
@@ -1972,9 +2035,8 @@ TEST_P(EntityTest, SolidColorContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 
   // Create stroked path that required alpha coverage.
-  geom = Geometry::MakeStrokePath(
-      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
-      /*stroke_width=*/0.05);
+  geom = Geometry::MakeStrokePath(flutter::DlPath::MakeLine({0, 0}, {100, 100}),
+                                  {.width = 0.05});
   contents.SetGeometry(geom.get());
   contents.SetColor(Color::CornflowerBlue());
 
@@ -1994,8 +2056,8 @@ TEST_P(EntityTest, ConicalGradientContentsIsOpaque) {
 
   // Create stroked path that required alpha coverage.
   geom = Geometry::MakeStrokePath(
-      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
-      /*stroke_width=*/0.05);
+      flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
+      {.width = 0.05f});
   contents.SetGeometry(geom.get());
   contents.SetColors({Color::CornflowerBlue()});
 
@@ -2018,8 +2080,8 @@ TEST_P(EntityTest, LinearGradientContentsIsOpaque) {
 
   // Create stroked path that required alpha coverage.
   geom = Geometry::MakeStrokePath(
-      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
-      /*stroke_width=*/0.05);
+      flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
+      {.width = 0.05f});
   contents.SetGeometry(geom.get());
   contents.SetColors({Color::CornflowerBlue()});
 
@@ -2042,8 +2104,8 @@ TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
 
   // Create stroked path that required alpha coverage.
   geom = Geometry::MakeStrokePath(
-      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
-      /*stroke_width=*/0.05);
+      flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
+      {.width = 0.05});
   contents.SetGeometry(geom.get());
   contents.SetColors({Color::CornflowerBlue()});
 
@@ -2066,8 +2128,8 @@ TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
 
   // Create stroked path that required alpha coverage.
   geom = Geometry::MakeStrokePath(
-      PathBuilder{}.AddLine({0, 0}, {100, 100}).TakePath(),
-      /*stroke_width=*/0.05);
+      flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
+      {.width = 0.05f});
   contents.SetGeometry(geom.get());
   contents.SetColors({Color::CornflowerBlue()});
 
@@ -2107,18 +2169,18 @@ TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
   dst_contents->SetColor(Color::Blue());
 
   auto contents = ColorFilterContents::MakeBlend(
-      BlendMode::kSourceOver, {FilterInput::Make(dst_contents, false),
-                               FilterInput::Make(src_contents, false)});
+      BlendMode::kSrcOver, {FilterInput::Make(dst_contents, false),
+                            FilterInput::Make(src_contents, false)});
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
 }
 
 TEST_P(EntityTest, TextContentsCeilsGlyphScaleToDecimal) {
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f), 0.43f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f), 0.53f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f), 2.1f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f), 0.0f);
-  ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f), 48.0f);
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.4321111f), Rational(43, 100));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.5321111f), Rational(53, 100));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(2.1f), Rational(21, 10));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(0.0f), Rational(0, 1));
+  ASSERT_EQ(TextFrame::RoundScaledFontSize(100000000.0f), Rational(48, 1));
 }
 
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
@@ -2208,7 +2270,7 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   RenderTarget target;
   testing::MockRenderPass mock_pass(GetContext(), target);
 
-  auto get_result = [this, &mock_pass](const Path& path) {
+  auto get_result = [this, &mock_pass](const flutter::DlPath& path) {
     auto geometry = Geometry::MakeFillPath(
         path, /* inner rect */ Rect::MakeLTRB(0, 0, 100, 100));
     return geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
@@ -2217,22 +2279,19 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   // Convex path
   {
     GeometryResult result =
-        get_result(PathBuilder{}
-                       .AddRect(Rect::MakeLTRB(0, 0, 100, 100))
-                       .SetConvexity(Convexity::kConvex)
-                       .TakePath());
+        get_result(flutter::DlPath::MakeRect(Rect::MakeLTRB(0, 0, 100, 100)));
     EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal);
   }
 
   // Concave path
   {
-    Path path = PathBuilder{}
-                    .MoveTo({0, 0})
-                    .LineTo({100, 0})
-                    .LineTo({100, 100})
-                    .LineTo({50, 50})
-                    .Close()
-                    .TakePath();
+    flutter::DlPath path = flutter::DlPathBuilder{}
+                               .MoveTo({0, 0})
+                               .LineTo({100, 0})
+                               .LineTo({100, 100})
+                               .LineTo({51, 50})
+                               .Close()
+                               .TakePath();
     GeometryResult result = get_result(path);
     EXPECT_EQ(result.mode, GeometryResult::Mode::kNonZero);
   }
@@ -2253,11 +2312,9 @@ TEST_P(EntityTest, FailOnValidationError) {
 }
 
 TEST_P(EntityTest, CanComputeGeometryForEmptyPathsWithoutCrashing) {
-  PathBuilder builder = {};
-  builder.AddRect(Rect::MakeLTRB(0, 0, 0, 0));
-  Path path = builder.TakePath();
+  flutter::DlPath path = flutter::DlPath::MakeRect(Rect::MakeLTRB(0, 0, 0, 0));
 
-  EXPECT_TRUE(path.GetBoundingBox()->IsEmpty());
+  EXPECT_TRUE(path.GetBounds().IsEmpty());
 
   auto geom = Geometry::MakeFillPath(path);
 
@@ -2275,11 +2332,9 @@ TEST_P(EntityTest, CanComputeGeometryForEmptyPathsWithoutCrashing) {
 }
 
 TEST_P(EntityTest, CanRenderEmptyPathsWithoutCrashing) {
-  PathBuilder builder = {};
-  builder.AddRect(Rect::MakeLTRB(0, 0, 0, 0));
-  Path path = builder.TakePath();
+  flutter::DlPath path = flutter::DlPath::MakeRect(Rect::MakeLTRB(0, 0, 0, 0));
 
-  EXPECT_TRUE(path.GetBoundingBox()->IsEmpty());
+  EXPECT_TRUE(path.GetBounds().IsEmpty());
 
   auto contents = std::make_shared<SolidColorContents>();
   std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
@@ -2414,19 +2469,15 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     auto rse = RoundSuperellipse::MakeRectRadii(
         RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}), radii);
 
-    Path path;
+    flutter::DlPath path;
     std::unique_ptr<Geometry> geom;
     if (style_index == 0) {
       geom = std::make_unique<RoundSuperellipseGeometry>(
           RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}),
           radii);
     } else {
-      path = PathBuilder{}
-                 .SetConvexity(Convexity::kConvex)
-                 .AddRoundSuperellipse(rse)
-                 .SetBounds(rse.GetBounds())
-                 .TakePath();
-      geom = Geometry::MakeStrokePath(path, /*stroke_width=*/2);
+      path = flutter::DlPath::MakeRoundSuperellipse(rse);
+      geom = Geometry::MakeStrokePath(path, {.width = 2.0f});
     }
 
     auto contents = std::make_shared<SolidColorContents>();
@@ -2473,12 +2524,12 @@ APPLY_COLOR_FILTER_GRADIENT_TEST(Conical);
 APPLY_COLOR_FILTER_GRADIENT_TEST(Sweep);
 
 TEST_P(EntityTest, GiantStrokePathAllocation) {
-  PathBuilder builder{};
+  flutter::DlPathBuilder builder;
   for (int i = 0; i < 10000; i++) {
     builder.LineTo(Point(i, i));
   }
-  Path path = builder.TakePath();
-  auto geom = Geometry::MakeStrokePath(path, /*stroke_width=*/10);
+  flutter::DlPath path = builder.TakePath();
+  auto geom = Geometry::MakeStrokePath(path, {.width = 10.0f});
 
   ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
   Entity entity;
@@ -2504,64 +2555,11 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
        result.vertex_buffer.vertex_buffer.GetRange().offset));
 
   std::vector<Point> expected = {
-      Point(1019.46, 1026.54),  //
-      Point(1026.54, 1019.46),  //
-      Point(1020.45, 1027.54),  //
-      Point(1027.54, 1020.46),  //
-      Point(1020.46, 1027.53)   //
-  };
-
-  Point point = written_data[kPointArenaSize - 2];
-  EXPECT_NEAR(point.x, expected[0].x, 0.1);
-  EXPECT_NEAR(point.y, expected[0].y, 0.1);
-
-  point = written_data[kPointArenaSize - 1];
-  EXPECT_NEAR(point.x, expected[1].x, 0.1);
-  EXPECT_NEAR(point.y, expected[1].y, 0.1);
-
-  point = written_data[kPointArenaSize];
-  EXPECT_NEAR(point.x, expected[2].x, 0.1);
-  EXPECT_NEAR(point.y, expected[2].y, 0.1);
-
-  point = written_data[kPointArenaSize + 1];
-  EXPECT_NEAR(point.x, expected[3].x, 0.1);
-  EXPECT_NEAR(point.y, expected[3].y, 0.1);
-
-  point = written_data[kPointArenaSize + 2];
-  EXPECT_NEAR(point.x, expected[4].x, 0.1);
-  EXPECT_NEAR(point.y, expected[4].y, 0.1);
-}
-
-TEST_P(EntityTest, GiantLineStripPathAllocation) {
-  PathBuilder builder{};
-  for (int i = 0; i < 10000; i++) {
-    builder.LineTo(Point(i, i));
-  }
-  Path path = builder.TakePath();
-
-  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
-  Entity entity;
-
-  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                        GetContext()->GetIdleWaiter());
-  auto tessellator = Tessellator();
-
-  auto vertex_buffer = tessellator.GenerateLineStrip(path, *host_buffer, 1.0);
-
-  // Validate the buffer data overflowed the small buffer
-  EXPECT_GT(vertex_buffer.vertex_count, kPointArenaSize);
-
-  // Validate that there are no uninitialized points near the gap.
-  Point* written_data = reinterpret_cast<Point*>(
-      (vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
-       vertex_buffer.vertex_buffer.GetRange().offset));
-
-  std::vector<Point> expected = {
-      Point(4093, 4093),  //
-      Point(4094, 4094),  //
-      Point(4095, 4095),  //
-      Point(4096, 4096),  //
-      Point(4097, 4097)   //
+      Point(2043.46, 2050.54),  //
+      Point(2050.54, 2043.46),  //
+      Point(2044.46, 2051.54),  //
+      Point(2051.54, 2044.46),  //
+      Point(2045.46, 2052.54)   //
   };
 
   Point point = written_data[kPointArenaSize - 2];

@@ -118,9 +118,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   FlutterVersion get flutterVersion => _injectedFlutterVersion ?? globals.flutterVersion;
   final FlutterVersion? _injectedFlutterVersion;
 
-  @override
-  bool get reportNullSafety => false;
-
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
       if (boolArg('debug')) await getBuildInfo(forcedBuildMode: BuildMode.debug),
@@ -372,6 +369,27 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
     }
 
+    if (!project.isModule && buildInfos.any((BuildInfo info) => info.isDebug)) {
+      // Add-to-App must manually add the LLDB Init File to their native Xcode
+      // project, so provide the files and instructions.
+      final File lldbInitSourceFile = project.ios.lldbInitFile;
+      final File lldbInitTargetFile = outputDirectory.childFile(lldbInitSourceFile.basename);
+      final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
+      lldbInitSourceFile.copySync(lldbInitTargetFile.path);
+      lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
+      globals.printStatus(
+        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
+        'ensure debug mode works, please complete one of the following in your '
+        'native Xcode project:\n'
+        '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
+        'Test actions, set LLDB Init File to: \n\n'
+        '    ${lldbInitTargetFile.path}\n\n'
+        '  * If you are already using an LLDB Init File, please append the '
+        'following to your LLDB Init File:\n\n'
+        '    command source ${lldbInitTargetFile.path}\n',
+      );
+    }
+
     return FlutterCommandResult.success();
   }
 
@@ -423,7 +441,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.platform              = :ios, '12.0'
+  s.platform              = :ios, '13.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';

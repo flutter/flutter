@@ -134,6 +134,33 @@ void main() {
     expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157579
+  testWidgets('prevents default action of mousedown events', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    final web.HTMLElement element =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+
+    for (int i = 0; i <= 4; i++) {
+      final web.MouseEvent event = web.MouseEvent(
+        'mousedown',
+        web.MouseEventInit(button: i, clientX: 200, clientY: 300, cancelable: true),
+      );
+      element.dispatchEvent(event);
+      expect(event.defaultPrevented, isTrue);
+    }
+  });
 }
 
 void removeAllStyleElements() {
@@ -187,19 +214,16 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
   List<SelectionEvent> events = <SelectionEvent>[];
 
   @override
-  Size get size => _size;
-  Size _size = Size.zero;
-
-  @override
   List<Rect> get boundingBoxes => _boundingBoxes;
   final List<Rect> _boundingBoxes = <Rect>[];
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    _size = Size(constraints.maxWidth, constraints.maxHeight);
-    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
-    return _size;
+  void performLayout() {
+    _boundingBoxes.add(Offset.zero & (size = computeDryLayout(constraints)));
   }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);

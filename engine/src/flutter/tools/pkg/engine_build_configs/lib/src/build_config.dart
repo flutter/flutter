@@ -7,7 +7,7 @@ import 'package:platform/platform.dart';
 
 // This library parses Engine builder config data out of the "Engine v2" build
 // config JSON files with the format described at:
-//   https://github.com/flutter/engine/blob/main/ci/builders/README.md
+//   https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/README.md
 
 /// Base class for all nodes in the build config.
 sealed class BuildConfigBase {

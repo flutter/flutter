@@ -508,10 +508,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
-  /// We must avoid disposing a completer if it has never had a listener, even
-  /// if all [keepAlive] handles get disposed.
-  bool _hadAtLeastOneListener = false;
-
   /// Whether the future listeners added to this completer are initial listeners.
   ///
   /// This can be set to true when an [ImageStream] adds its initial listeners to
@@ -537,7 +533,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
-    _hadAtLeastOneListener = true;
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
@@ -671,10 +666,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   void onDisposed() {}
 
   /// Disposes this [ImageStreamCompleter] unless:
-  ///   1. It has never had a listener
-  ///   2. It is already disposed
-  ///   3. It has listeners.
-  ///   4. It has active "keep alive" handles.
+  ///
+  ///   1. It is already disposed
+  ///   2. It has listeners.
+  ///   3. It has active "keep alive" handles.
   @nonVirtual
   void maybeDispose() {
     _maybeDispose();
@@ -682,7 +677,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
   @mustCallSuper
   void _maybeDispose() {
-    if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
+    if (_disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
       return;
     }
 
@@ -1047,6 +1042,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _frameDuration = _nextFrame!.duration;
       _nextFrame!.image.dispose();
       _nextFrame = null;
+      if (_codec == null) {
+        // codec was disposed during _emitFrame
+        return;
+      }
       final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
       if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
         _decodeNextFrameAndSchedule();
@@ -1108,7 +1107,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _nextFrame!.image.dispose();
       _nextFrame = null;
 
-      _codec!.dispose();
+      _codec?.dispose();
       _codec = null;
       return;
     }

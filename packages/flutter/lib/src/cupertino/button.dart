@@ -90,6 +90,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -125,6 +126,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(minimumSize == null || minSize == null),
@@ -154,6 +156,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -258,6 +261,25 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the widget.
+  ///
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.focused].
+  ///
+  /// If null, then [MouseCursor.defer] is used when the button is disabled.
+  /// When the button is enabled, [SystemMouseCursors.click] is used on Web
+  /// and [MouseCursor.defer] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
+  final MouseCursor? mouseCursor;
+
   final _CupertinoButtonStyle _style;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
@@ -297,6 +319,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   late bool isFocused;
 
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return !states.contains(WidgetState.disabled) && kIsWeb
+            ? SystemMouseCursors.click
+            : MouseCursor.defer;
+      });
+
   @override
   void initState() {
     super.initState();
@@ -329,8 +358,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   bool _buttonHeldDown = false;
+  bool _tapInProgress = false;
 
   void _handleTapDown(TapDownDetails event) {
+    setState(() {
+      _tapInProgress = true;
+    });
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
@@ -338,6 +371,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapUp(TapUpDetails event) {
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -350,19 +386,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapCancel() {
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
     }
   }
 
-  void _handTapMove(TapMoveDetails event) {
+  void _handleTapMove(TapMoveDetails event) {
     final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
     final bool buttonShouldHeldDown = renderObject.paintBounds
         .inflate(CupertinoButton.tapMoveSlop())
         .contains(localPosition);
-    if (buttonShouldHeldDown != _buttonHeldDown) {
+    if (_tapInProgress && buttonShouldHeldDown != _buttonHeldDown) {
       _buttonHeldDown = buttonShouldHeldDown;
       _animate();
     }
@@ -459,9 +498,38 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       size:
           textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
     );
+
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+
+    final Set<WidgetState> states = <WidgetState>{
+      if (!enabled) WidgetState.disabled,
+      if (_tapInProgress) WidgetState.pressed,
+      if (isFocused) WidgetState.focused,
+    };
+    final MouseCursor effectiveMouseCursor =
+        WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+        _defaultCursor.resolve(states);
+
+    final ShapeDecoration shapeDecoration = ShapeDecoration(
+      shape: RoundedSuperellipseBorder(
+        side:
+            enabled && isFocused
+                ? BorderSide(
+                  color: effectiveFocusOutlineColor,
+                  width: 3.5,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                )
+                : BorderSide.none,
+        borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
+      ),
+      color:
+          backgroundColor != null && !enabled
+              ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+              : backgroundColor,
+    );
+
     return MouseRegion(
-      cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: effectiveMouseCursor,
       child: FocusableActionDetector(
         actions: _actionMap,
         focusNode: widget.focusNode,
@@ -478,7 +546,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 instance.onTapDown = enabled ? _handleTapDown : null;
                 instance.onTapUp = enabled ? _handleTapUp : null;
                 instance.onTapCancel = enabled ? _handleTapCancel : null;
-                instance.onTapMove = enabled ? _handTapMove : null;
+                instance.onTapMove = enabled ? _handleTapMove : null;
                 instance.gestureSettings = gestureSettings;
               },
             ),
@@ -508,24 +576,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border:
-                        enabled && isFocused
-                            ? Border.fromBorderSide(
-                              BorderSide(
-                                color: effectiveFocusOutlineColor,
-                                width: 3.5,
-                                strokeAlign: BorderSide.strokeAlignOutside,
-                              ),
-                            )
-                            : null,
-                    borderRadius:
-                        widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
-                    color:
-                        backgroundColor != null && !enabled
-                            ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                            : backgroundColor,
-                  ),
+                  decoration: shapeDecoration,
                   child: Padding(
                     padding: widget.padding ?? kCupertinoButtonPadding[widget.sizeStyle]!,
                     child: Align(

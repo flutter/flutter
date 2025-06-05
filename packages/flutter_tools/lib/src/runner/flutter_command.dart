@@ -17,11 +17,9 @@ import '../base/io.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/generate_synthetic_packages.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -140,6 +138,7 @@ abstract final class FlutterOptions {
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
+  static const String kAndroidGradleProjectCacheDir = 'android-project-cache-dir';
   static const String kAndroidSkipBuildDependencyValidation =
       'android-skip-build-dependency-validation';
   static const String kInitializeFromDill = 'initialize-from-dill';
@@ -168,9 +167,6 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The option name for a custom VM Service port.
   static const String vmServicePortOption = 'vm-service-port';
-
-  /// The option name for a custom VM Service port.
-  static const String observatoryPortOption = 'observatory-port';
 
   /// The option name for a custom DevTools server address.
   static const String kDevToolsServerAddress = 'devtools-server-address';
@@ -374,6 +370,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
       help: 'Enables new module format that supports hot reload.',
+      defaultsTo: true,
       hide: !verboseHelp,
     );
     argParser.addOption(
@@ -519,16 +516,6 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
     );
     argParser.addOption(
-      observatoryPortOption,
-      help:
-          '(deprecated; use host-vmservice-port instead) '
-          'Listen to the given port for a Dart VM Service connection.\n'
-          'Specifying port 0 (the default) will find a random free port.\n '
-          'if the Dart Development Service (DDS) is enabled, this will not be the port '
-          'of the VmService instance advertised on the command line.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
       'device-vmservice-port',
       help:
           'Look for vmservice connections only from the specified port.\n'
@@ -608,14 +595,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addServeObservatoryOptions({required bool verboseHelp}) {
-    argParser.addFlag(
-      'serve-observatory',
-      hide: !verboseHelp,
-      help: 'Serve the legacy Observatory developer tooling through the VM service.',
-    );
-  }
-
   late final bool enableDds = () {
     bool ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
@@ -646,12 +625,10 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get _hostVmServicePortProvided =>
       (argResults?.wasParsed(vmServicePortOption) ?? false) ||
-      (argResults?.wasParsed(observatoryPortOption) ?? false) ||
       (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort =
-        stringArg(vmServicePortOption) ?? stringArg(observatoryPortOption);
+    final String? vmServicePort = stringArg(vmServicePortOption);
     final String? hostPort = stringArg('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
@@ -697,7 +674,6 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     if ((argResults?.wasParsed(vmServicePortOption) ?? false) &&
-        (argResults?.wasParsed(observatoryPortOption) ?? false) &&
         (argResults?.wasParsed('host-vmservice-port') ?? false)) {
       throwToolExit(
         'Only one of "--vm-service-port" and '
@@ -864,9 +840,6 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
-
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
 
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false) &&
@@ -1095,6 +1068,10 @@ abstract class FlutterCommand extends Command<void> {
           'project via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
       splitCommas: false,
       abbr: 'P',
+    );
+    argParser.addOption(
+      FlutterOptions.kAndroidGradleProjectCacheDir,
+      help: 'Specifies the project-specific cache directory. Defaults to .gradle.',
     );
   }
 
@@ -1354,10 +1331,9 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // TODO(natebiggs): Delete this when new DDC module system is the default.
-    if (argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload)) {
-      extraFrontEndOptions.addAll(<String>['--dartdevc-canary', '--dartdevc-module-format=ddc']);
-    }
+    final bool webEnableHotReload =
+        argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
+        boolArg(FlutterOptions.kWebExperimentalHotReload);
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
@@ -1395,6 +1371,11 @@ abstract class FlutterCommand extends Command<void> {
         argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
             ? stringsArg(FlutterOptions.kAndroidProjectArgs)
             : <String>[];
+
+    final String? androidGradleProjectCacheDir =
+        argParser.options.containsKey(FlutterOptions.kAndroidGradleProjectCacheDir)
+            ? stringArg(FlutterOptions.kAndroidGradleProjectCacheDir)
+            : null;
 
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
@@ -1438,6 +1419,18 @@ abstract class FlutterCommand extends Command<void> {
     final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
     final String? flavor = cliFlavor ?? defaultFlavor;
 
+    if (globals.platform.environment[kAppFlavor] != null) {
+      throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
+    }
+    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
+      throwToolExit(
+        '$kAppFlavor is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+      );
+    }
+    if (flavor != null) {
+      dartDefines.add('$kAppFlavor=$flavor');
+    }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
 
     return BuildInfo(
@@ -1466,6 +1459,7 @@ abstract class FlutterCommand extends Command<void> {
       androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill:
           argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
               ? stringArg(FlutterOptions.kInitializeFromDill)
@@ -1474,6 +1468,7 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
+      webEnableHotReload: webEnableHotReload,
     );
   }
 
@@ -1541,8 +1536,6 @@ abstract class FlutterCommand extends Command<void> {
         if (_usesFatalWarnings) {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
-        // Prints the welcome message if needed.
-        globals.flutterUsage.printWelcome();
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
         if (commandPath != null) {
@@ -1854,32 +1847,10 @@ abstract class FlutterCommand extends Command<void> {
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        analytics: analytics,
-        projectDir: project.directory,
-        packageConfigPath: packageConfigPath(),
-        generateDartPluginRegistry: true,
-      );
-
       await pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
-      );
-
-      await generateLocalizationsSyntheticPackage(
-        environment: environment,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
       );
     }
 
@@ -1899,11 +1870,11 @@ abstract class FlutterCommand extends Command<void> {
     return runCommand();
   }
 
-  /// Whether to run [regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
+  /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
   ///
   /// By default `true`, but sub-commands that do _meta_ builds (make multiple different
   /// builds sequentially in one-go) may choose to override this and provide `false`, instead
-  /// calling [regeneratePlatformSpecificTooling] manually when applicable.
+  /// calling [FlutterProject.regeneratePlatformSpecificTooling] manually when applicable.
   @visibleForOverriding
   bool get regeneratePlatformSpecificToolingDuringVerify => true;
 
@@ -1928,9 +1899,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(
-      releaseMode: featureFlags.isExplicitPackageDependenciesEnabled && releaseMode,
-    );
+    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.
@@ -2088,7 +2057,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;

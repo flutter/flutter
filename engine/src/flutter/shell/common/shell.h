@@ -39,6 +39,7 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/resource_cache_limit_calculator.h"
 #include "flutter/shell/common/shell_io_manager.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/context.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
@@ -130,7 +131,8 @@ class Shell final : public PlatformView::Delegate,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-      impeller::RuntimeStageBackend runtime_stage_type)>
+      const std::shared_future<impeller::RuntimeStageBackend>&
+          runtime_stage_backend)>
       EngineCreateCallback;
 
   //----------------------------------------------------------------------------
@@ -260,7 +262,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   /// @return     A weak pointer to the engine.
   ///
-  fml::WeakPtr<Engine> GetEngine();
+  fml::TaskRunnerAffineWeakPtr<Engine> GetEngine();
 
   //----------------------------------------------------------------------------
   /// @brief      Platform views may only be accessed on the platform task
@@ -470,7 +472,8 @@ class Shell final : public PlatformView::Delegate,
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::atomic<bool> route_messages_through_platform_thread_ = false;
 
-  fml::WeakPtr<Engine> weak_engine_;  // to be shared across threads
+  fml::TaskRunnerAffineWeakPtr<Engine>
+      weak_engine_;  // to be shared across threads
   fml::TaskRunnerAffineWeakPtr<Rasterizer>
       weak_rasterizer_;  // to be shared across threads
   fml::WeakPtr<PlatformView>
@@ -605,7 +608,8 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<PointerDataPacket> packet) override;
 
   // |PlatformView::Delegate|
-  void OnPlatformViewDispatchSemanticsAction(int32_t node_id,
+  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                             int32_t node_id,
                                              SemanticsAction action,
                                              fml::MallocMapping args) override;
 
@@ -666,6 +670,7 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void OnEngineUpdateSemantics(
+      int64_t view_id,
       SemanticsNodeUpdates update,
       CustomAccessibilityActionUpdates actions) override;
 

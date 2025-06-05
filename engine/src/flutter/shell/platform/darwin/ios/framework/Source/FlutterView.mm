@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
 FLUTTER_ASSERT_ARC
@@ -33,10 +34,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (UIScreen*)screen {
-  if (@available(iOS 13.0, *)) {
-    return self.window.windowScene.screen;
-  }
-  return UIScreen.mainScreen;
+  return self.window.windowScene.screen;
 }
 
 - (MTLPixelFormat)pixelFormat {
@@ -52,6 +50,12 @@ FLUTTER_ASSERT_ARC
 }
 - (BOOL)isWideGamutSupported {
   FML_DCHECK(self.screen);
+
+  // Wide Gamut is not supported for iOS Extensions due to memory limitations
+  // (see https://github.com/flutter/flutter/issues/165086).
+  if (FlutterSharedApplication.isAppExtension) {
+    return NO;
+  }
 
   // This predicates the decision on the capabilities of the iOS device's
   // display.  This means external displays will not support wide gamut if the

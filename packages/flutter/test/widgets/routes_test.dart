@@ -766,6 +766,55 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
+    testWidgets(
+      'delegated transitions are removed when secondary animation is dismissed and next route is removed',
+      (WidgetTester tester) async {
+        final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: navigator,
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            home: const Text('home'),
+          ),
+        );
+
+        // Push first page with custom transition builder.
+        final Route<void> firstRoute = CupertinoSheetRoute<void>(
+          builder: (_) {
+            return const Text('Page One');
+          },
+        );
+
+        navigator.currentState!.push(firstRoute);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page One'), findsOneWidget);
+        final Finder cupertinoSheetDelegatedTransitionFinder = find.ancestor(
+          of: find.ancestor(
+            of: find.byType(ClipRSuperellipse),
+            matching: find.byType(AnimatedBuilder),
+          ),
+          matching: find.byType(ScaleTransition),
+        );
+        expect(cupertinoSheetDelegatedTransitionFinder, findsOneWidget);
+
+        navigator.currentState!.pop();
+        await tester.pumpAndSettle();
+
+        // Verify home is still visible without transitions.
+        expect(find.text('home'), findsOneWidget);
+
+        // Verify the delegated transition is removed.
+        expect(cupertinoSheetDelegatedTransitionFinder, findsNothing);
+      },
+    );
+
     testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (
       WidgetTester tester,
     ) async {
@@ -2462,6 +2511,135 @@ void main() {
         tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
         moreOrLessEquals(xLocationIntervalTwelve, epsilon: 0.1),
       );
+    });
+
+    testWidgets('ModalRoute.isFirstOf only rebuilds when first route state changes', (
+      WidgetTester tester,
+    ) async {
+      int buildCount = 0;
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+
+      Widget buildCounter(BuildContext context) {
+        buildCount++;
+        final bool isFirst = ModalRoute.isFirstOf(context) ?? false;
+        return Text('isFirst: $isFirst');
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+      );
+
+      expect(buildCount, 1);
+      expect(find.text('isFirst: true'), findsOneWidget);
+
+      // Push a new route - first route should remain first
+      navigator.currentState!.push<void>(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('New Route')),
+      );
+      await tester.pumpAndSettle();
+
+      // Should not rebuild because isFirst hasn't changed
+      expect(buildCount, 1);
+    });
+
+    testWidgets('ModalRoute.isActiveOf only rebuilds when route active state changes', (
+      WidgetTester tester,
+    ) async {
+      int buildCount = 0;
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+
+      Widget buildCounter(BuildContext context) {
+        buildCount++;
+        final bool isActive = ModalRoute.isActiveOf(context) ?? false;
+        return Text('isActive: $isActive');
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+      );
+
+      expect(buildCount, 1);
+      expect(find.text('isActive: true'), findsOneWidget);
+
+      // Push a new route - first route should remain active
+      navigator.currentState!.push<void>(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('New Route')),
+      );
+      await tester.pumpAndSettle();
+
+      // Should not rebuild because isActive hasn't changed
+      expect(buildCount, 1);
+    });
+
+    testWidgets('ModalRoute.opaqueOf only rebuilds when route opaque state changes', (
+      WidgetTester tester,
+    ) async {
+      int buildCount = 0;
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+
+      Widget buildCounter(BuildContext context) {
+        buildCount++;
+        final bool isOpaque = ModalRoute.opaqueOf(context) ?? false;
+        return Text('isOpaque: $isOpaque');
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+      );
+
+      expect(buildCount, 1);
+      expect(find.text('isOpaque: true'), findsOneWidget);
+
+      // Push a new route - first route should remain opaque
+      navigator.currentState!.push<void>(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('New Route')),
+      );
+      await tester.pumpAndSettle();
+
+      // Should not rebuild because isOpaque hasn't changed
+      expect(buildCount, 1);
+    });
+
+    testWidgets('ModalRoute.popDispositionOf rebuilds when PopEntry affects pop disposition', (
+      WidgetTester tester,
+    ) async {
+      int buildCount = 0;
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+
+      Widget buildCounter(BuildContext context) {
+        buildCount++;
+        final RoutePopDisposition? popDisposition = ModalRoute.popDispositionOf(context);
+        return Text('popDisposition: ${popDisposition?.name}');
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(navigatorKey: navigator, home: Builder(builder: buildCounter)),
+      );
+
+      expect(buildCount, 1);
+      expect(find.text('popDisposition: bubble'), findsOneWidget);
+
+      // Change PopScope's canPop to false
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigator,
+          home: PopScope(canPop: false, child: Builder(builder: buildCounter)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Should rebuild because popDisposition changed to doNotPop
+      expect(buildCount, 2);
+      expect(find.text('popDisposition: doNotPop'), findsOneWidget);
+
+      // Push a new route - should change from bubble to pop
+      navigator.currentState!.push<void>(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('New Route')),
+      );
+      await tester.pumpAndSettle();
+
+      // Shouldn't rebuild because popDisposition hasn't changed
+      expect(buildCount, 2);
     });
   });
 

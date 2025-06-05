@@ -9,7 +9,6 @@
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
-#include "impeller/core/platform.h"
 #include "impeller/renderer/context.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -42,9 +41,14 @@ std::shared_ptr<impeller::Context> Context::GetDefaultContext(
   }
 
   auto dart_state = flutter::UIDartState::Current();
-  if (!dart_state->IsImpellerEnabled()) {
+  if (!dart_state->IsFlutterGPUEnabled()) {
     out_error =
-        "Flutter GPU requires the Impeller rendering backend to be enabled.";
+        "Flutter GPU must be enabled via the Flutter GPU manifest "
+        "setting. This can be done either via command line argument "
+        "--enable-flutter-gpu or "
+        "by adding the FLTEnableFlutterGPU key set to true on iOS or "
+        "io.flutter.embedding.android.EnableFlutterGPU metadata key to true on "
+        "Android.";
     return nullptr;
   }
   // Grab the Impeller context from the IO manager.
@@ -116,7 +120,7 @@ extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
 
 extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
     flutter::gpu::Context* wrapper) {
-  return impeller::DefaultUniformAlignment();
+  return wrapper->GetContext()->GetCapabilities()->GetMinimumUniformAlignment();
 }
 
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(

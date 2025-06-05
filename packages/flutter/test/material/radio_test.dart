@@ -63,15 +63,39 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: theme,
-        child: Material(
-          child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2, onChanged: null)),
-        ),
+        child: Material(child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2))),
       ),
     );
 
     await tester.tap(find.byKey(key));
 
     expect(log, isEmpty);
+  });
+
+  testWidgets('Radio disabled', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final List<int?> log = <int?>[];
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: Material(
+          child: Center(
+            child: Radio<int>(
+              key: key,
+              value: 1,
+              groupValue: 2,
+              enabled: false,
+              onChanged: log.add,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+
+    expect(log, equals(<int>[]));
   });
 
   testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
@@ -127,13 +151,7 @@ void main() {
         data: theme,
         child: Material(
           child: Center(
-            child: Radio<int>(
-              key: key,
-              value: 1,
-              groupValue: null,
-              onChanged: log.add,
-              toggleable: true,
-            ),
+            child: Radio<int>(key: key, value: 1, onChanged: log.add, toggleable: true),
           ),
         ),
       ),
@@ -291,10 +309,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(
-        data: theme,
-        child: const Material(child: Radio<int>(value: 1, groupValue: 2, onChanged: null)),
-      ),
+      Theme(data: theme, child: const Material(child: Radio<int>(value: 1, groupValue: 2))),
     );
 
     expect(
@@ -343,10 +358,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(
-        data: theme,
-        child: const Material(child: Radio<int>(value: 2, groupValue: 2, onChanged: null)),
-      ),
+      Theme(data: theme, child: const Material(child: Radio<int>(value: 2, groupValue: 2))),
     );
 
     expect(
@@ -458,7 +470,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           body: RepaintBoundary(
             key: painterKey,
@@ -622,7 +633,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         theme: theme,
@@ -802,7 +813,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 0;
     const Key radioKey = Key('radio');
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
         theme: theme,
@@ -1092,7 +1103,7 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: Radio<int>(value: 1, onChanged: null, groupValue: 2),
+                child: Radio<int>(value: 1, groupValue: 2),
               ),
             ),
           ),
@@ -1335,7 +1346,7 @@ void main() {
 
     int? groupValue = 0;
     const Key radioKey = Key('radio');
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     Widget buildApp() {
       return MaterialApp(
         theme: theme,
@@ -1567,7 +1578,7 @@ void main() {
         home: const Material(
           child: Tooltip(
             message: longPressTooltip,
-            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+            child: Radio<bool>(value: true, groupValue: false),
           ),
         ),
       ),
@@ -1597,7 +1608,7 @@ void main() {
           child: Tooltip(
             triggerMode: TooltipTriggerMode.tap,
             message: tapTooltip,
-            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+            child: Radio<bool>(value: true, groupValue: false),
           ),
         ),
       ),
@@ -1658,7 +1669,7 @@ void main() {
   });
 
   testWidgets('Material3 - Radio button default colors', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     Widget buildRadio({bool enabled = true, bool selected = true}) {
       return MaterialApp(
         theme: theme,
@@ -1815,7 +1826,7 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
     Widget buildRadio({bool enabled = true, bool focused = false, bool selected = true}) {
       return MaterialApp(
@@ -2023,7 +2034,7 @@ void main() {
   ) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     Finder findRadio() {
       return find.byWidgetPredicate((Widget widget) => widget is Radio<bool>);

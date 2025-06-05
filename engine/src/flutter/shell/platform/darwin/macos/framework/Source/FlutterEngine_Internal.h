@@ -17,6 +17,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -218,6 +219,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 @property(nonatomic, readonly) FlutterKeyboardManager* keyboardManager;
 
 /**
+ * Returns text input plugin for the engine.
+ */
+@property(nonatomic, readonly) FlutterTextInputPlugin* textInputPlugin;
+
+/**
  * Returns an array of screen objects representing all of the screens available on the system.
  */
 - (NSArray<NSScreen*>*)screens;
@@ -232,10 +238,6 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
-@end
-
-@interface FlutterEngine (Tests)
-- (nonnull FlutterThreadSynchronizer*)testThreadSynchronizer;
 @end
 
 NS_ASSUME_NONNULL_END

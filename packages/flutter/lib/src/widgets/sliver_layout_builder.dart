@@ -29,12 +29,15 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   const SliverLayoutBuilder({super.key, required super.builder});
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
+  RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> createRenderObject(
+    BuildContext context,
+  ) => _RenderSliverLayoutBuilder();
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver
     with
         RenderObjectWithChildMixin<RenderSliver>,
+        RenderObjectWithLayoutCallbackMixin,
         RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
@@ -44,7 +47,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver
 
   @override
   void performLayout() {
-    rebuildIfNecessary();
+    runLayoutCallback();
     child?.layout(constraints, parentUsesSize: true);
     geometry = child?.geometry ?? SliverGeometry.zero;
   }

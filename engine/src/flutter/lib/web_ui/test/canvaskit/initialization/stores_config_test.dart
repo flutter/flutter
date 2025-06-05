@@ -17,7 +17,7 @@ void testMain() {
   group('initializeEngineServices', () {
     test('stores user configuration', () async {
       final JsFlutterConfiguration config = JsFlutterConfiguration();
-      (config as JSObject)
+      config
         // `canvasKitBaseUrl` is required for the test to actually run.
         ..['canvasKitBaseUrl'] = '/canvaskit/'.toJS
         // A property under test, that we'll try to read later.
@@ -26,7 +26,7 @@ void testMain() {
         ..['nonexistentProperty'] = 32.0.toJS;
 
       // Remove window.flutterConfiguration (if it's there)
-      (domWindow as JSObject)['flutterConfiguration'] = null;
+      config['flutterConfiguration'] = null;
 
       // TODO(web): Replace the above nullification by the following assertion
       // when wasm and JS tests initialize their config the same way:

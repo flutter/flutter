@@ -780,7 +780,7 @@ class PaintingContext extends ClipContext {
     final Matrix4 effectiveTransform =
         Matrix4.translationValues(offset.dx, offset.dy, 0.0)
           ..multiply(transform)
-          ..translate(-offset.dx, -offset.dy);
+          ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;
@@ -1088,6 +1088,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   bool _shouldMergeDirtyNodes = false;
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
+  /// The [RenderObject]s representing relayout boundaries which need to be laid out
+  /// in the next [flushLayout] pass.
+  ///
+  /// Relayout boundaries are added when they are marked for layout.
+  /// Subclasses of [PipelineOwner] may use them to invalidate caches or
+  /// otherwise make performance optimizations. Since nodes may be marked for
+  /// layout at any time, they are best checked during [flushLayout].
+  ///
+  /// Relayout boundaries owned by child [PipelineOwner]s are not included here.
+  ///
+  /// Boundaries appear in an arbitrary order, and may appear multiple times.
+  @protected
+  @nonVirtual
+  Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
+
   /// Whether this pipeline is currently in the layout phase.
   ///
   /// Specifically, whether [flushLayout] is currently running.
@@ -1231,6 +1246,19 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
+
+  /// The [RenderObject]s which need to be painted in the next [flushPaint] pass.
+  ///
+  /// [RenderObject]s marked with [RenderObject.isRepaintBoundary] are added
+  /// when they are marked needing paint. Subclasses of [PipelineOwner] may use them
+  /// to invalidate caches or otherwise make performance optimizations.
+  /// Since nodes may be marked for layout at any time, they are best checked during
+  /// [flushPaint].
+  ///
+  /// Marked children of child [PipelineOwner]s are not included here.
+  @protected
+  @nonVirtual
+  Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
   /// Whether this pipeline is currently in the paint phase.
   ///
@@ -2021,7 +2049,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    _cleanChildRelayoutBoundary(child);
+    if (!(_isRelayoutBoundary ?? true)) {
+      child._isRelayoutBoundary = null;
+    }
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
@@ -2309,7 +2339,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _owner = owner;
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _relayoutBoundary != null) {
+    if (_needsLayout && _isRelayoutBoundary != null) {
       // Don't enter this block if we've never laid out at all;
       // scheduleInitialLayout() will handle it
       _needsLayout = false;
@@ -2365,33 +2395,35 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   bool _needsLayout = true;
 
-  /// The nearest relayout boundary enclosing this render object, if known.
+  /// Whether this [RenderObject] is a known relayout boundary.
   ///
-  /// When a render object is marked as needing layout, its parent may
-  /// as a result also need to be marked as needing layout.
-  /// For details, see [markNeedsLayout].
-  /// A render object where relayout does not require relayout of the parent
-  /// (because its size cannot change on relayout, or because
-  /// its parent does not use the child's size for its own layout)
-  /// is a "relayout boundary".
+  /// A relayout boundary is a [RenderObject] whose parent does not rely on the
+  /// child [RenderObject]'s size in its own layout algorithm. In other words,
+  /// if a [RenderObject]'s [performLayout] implementation does not ask the child
+  /// for its size at all, **the child** is a relayout boundary.
   ///
-  /// This property is set in [layout], and consulted by [markNeedsLayout] in
-  /// deciding whether to recursively mark the parent as also needing layout.
+  /// The type of "size" is typically defined by the coordinate system a
+  /// [RenderObject] subclass uses. For instance, [RenderSliver]s produce
+  /// [SliverGeometry] and [RenderBox]es produce [Size]. A parent [RenderObject]
+  /// may not read the child's size but still depend on the child's layout (using
+  /// a [RenderBox] child's baseline location, for example), this flag does not
+  /// reflect such dependencies and the [RenderObject] subclass must handle those
+  /// cases in its own implementation. See [RenderBox.markNeedsLayout] for an
+  /// example.
   ///
-  /// This property is initially null, and becomes null again if this
-  /// render object is removed from the tree (with [dropChild]);
-  /// it remains null until the first layout of this render object
-  /// after it was most recently added to the tree.
-  /// This property can also be null while an ancestor in the tree is
-  /// currently doing layout, until this render object itself does layout.
+  /// Relayout boundaries enable an important layout optimization: the parent not
+  /// depending on the size of a child means the child changing size does not
+  /// affect the layout of the parent. When a relayout boundary is marked as
+  /// needing layout, its parent does not have to be marked as dirty, hence the
+  /// name. For details, see [markNeedsLayout].
   ///
-  /// When not null, the relayout boundary is either this render object itself
-  /// or one of its ancestors, and all the render objects in the ancestry chain
-  /// up through that ancestor have the same [_relayoutBoundary].
-  /// Equivalently: when not null, the relayout boundary is either this render
-  /// object itself or the same as that of its parent.  (So [_relayoutBoundary]
-  /// is one of `null`, `this`, or `parent!._relayoutBoundary!`.)
-  RenderObject? _relayoutBoundary;
+  /// This flag is typically set in [RenderObject.layout], and consulted by
+  /// [markNeedsLayout] in deciding whether to recursively mark the parent as
+  /// also needing layout.
+  ///
+  /// The flag is initially set to `null` when [layout] has yet been called, and
+  /// reset to `null` when the parent drops this child via [dropChild].
+  bool? _isRelayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
@@ -2430,20 +2462,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   static bool debugCheckingIntrinsics = false;
 
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    if (_relayoutBoundary == null) {
-      // We don't know where our relayout boundary is yet.
-      return true;
-    }
-    RenderObject node = this;
-    while (node != _relayoutBoundary) {
-      assert(node._relayoutBoundary == _relayoutBoundary);
-      assert(node.parent != null);
-      node = node.parent!;
-      if ((!node._needsLayout) && (!node._debugDoingThisLayout)) {
+    for (
+      RenderObject? node = this;
+      node != null && node._isRelayoutBoundary != null;
+      node = node.parent
+    ) {
+      final bool alreadyMarkedNeedsLayout = node._needsLayout || node._debugDoingThisLayout;
+      if (!alreadyMarkedNeedsLayout) {
         return false;
       }
+      if (node._isRelayoutBoundary!) {
+        return true;
+      }
     }
-    assert(node._relayoutBoundary == node);
     return true;
   }
 
@@ -2491,30 +2522,18 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       assert(_debugRelayoutBoundaryAlreadyMarkedNeedsLayout());
       return;
     }
-    if (_relayoutBoundary == null) {
-      _needsLayout = true;
-      if (parent != null) {
-        // _relayoutBoundary is cleaned by an ancestor in RenderObject.layout.
-        // Conservatively mark everything dirty until it reaches the closest
-        // known relayout boundary.
-        markParentNeedsLayout();
-      }
-      return;
-    }
-    if (_relayoutBoundary != this) {
+    _needsLayout = true;
+    if (owner case final PipelineOwner owner? when (_isRelayoutBoundary ?? false)) {
+      assert(() {
+        if (debugPrintMarkNeedsLayoutStacks) {
+          debugPrintStack(label: 'markNeedsLayout() called for $this');
+        }
+        return true;
+      }());
+      owner._nodesNeedingLayout.add(this);
+      owner.requestVisualUpdate();
+    } else if (parent != null) {
       markParentNeedsLayout();
-    } else {
-      _needsLayout = true;
-      if (owner != null) {
-        assert(() {
-          if (debugPrintMarkNeedsLayoutStacks) {
-            debugPrintStack(label: 'markNeedsLayout() called for $this');
-          }
-          return true;
-        }());
-        owner!._nodesNeedingLayout.add(this);
-        owner!.requestVisualUpdate();
-      }
     }
   }
 
@@ -2553,38 +2572,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markParentNeedsLayout();
   }
 
-  /// Set [_relayoutBoundary] to null throughout this render object's subtree,
-  /// stopping at relayout boundaries.
-  // This is a static method to reduce closure allocation with visitChildren.
-  static void _cleanChildRelayoutBoundary(RenderObject child) {
-    if (child._relayoutBoundary != child) {
-      child.visitChildren(_cleanChildRelayoutBoundary);
-      child._relayoutBoundary = null;
-    }
-  }
-
-  // This is a static method to reduce closure allocation with visitChildren.
-  static void _propagateRelayoutBoundaryToChild(RenderObject child) {
-    if (child._relayoutBoundary == child) {
-      return;
-    }
-    final RenderObject? parentRelayoutBoundary = child.parent?._relayoutBoundary;
-    assert(parentRelayoutBoundary != null);
-    assert(parentRelayoutBoundary != child._relayoutBoundary);
-    child._setRelayoutBoundary(parentRelayoutBoundary!);
-  }
-
-  /// Set [_relayoutBoundary] to [value] throughout this render object's
-  /// subtree, including this render object but stopping at relayout boundaries
-  /// thereafter.
-  void _setRelayoutBoundary(RenderObject value) {
-    assert(value != _relayoutBoundary);
-    // This may temporarily break the _relayoutBoundary invariant at children;
-    // the visitChildren restores the invariant.
-    _relayoutBoundary = value;
-    visitChildren(_propagateRelayoutBoundaryToChild);
-  }
-
   /// Bootstrap the rendering pipeline by scheduling the very first layout.
   ///
   /// Requires this render object to be attached and that this render object
@@ -2594,10 +2581,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialLayout() {
     assert(!_debugDisposed);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingLayout);
-    assert(_relayoutBoundary == null);
-    _relayoutBoundary = this;
+    assert(_isRelayoutBoundary == null);
+    _isRelayoutBoundary = true;
     assert(() {
       _debugCanParentUseSize = false;
       return true;
@@ -2608,7 +2595,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == this);
+    assert((_isRelayoutBoundary ?? false) || this is RenderObjectWithLayoutCallbackMixin);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2711,14 +2698,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     );
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
-    final bool isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
-    final RenderObject relayoutBoundary = isRelayoutBoundary ? this : parent!._relayoutBoundary!;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     }());
 
+    _isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     if (!_needsLayout && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
@@ -2733,25 +2718,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         _debugDoingThisResize = false;
         return true;
       }());
-
-      if (relayoutBoundary != _relayoutBoundary) {
-        _setRelayoutBoundary(relayoutBoundary);
-      }
-
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
         FlutterTimeline.finishSync();
       }
       return;
     }
     _constraints = constraints;
-
-    if (_relayoutBoundary != null && relayoutBoundary != _relayoutBoundary) {
-      // The local relayout boundary has changed, must notify children in case
-      // they also need updating. Otherwise, they will be confused about what
-      // their actual relayout boundary is later.
-      visitChildren(_cleanChildRelayoutBoundary);
-    }
-    _relayoutBoundary = relayoutBoundary;
 
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2877,6 +2849,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// parentUsesSize ensures that this render object will undergo layout if the
   /// child undergoes layout. Otherwise, the child can change its layout
   /// information without informing this render object.
+  ///
+  /// Some special [RenderObject] subclasses (such as the one used by
+  /// [OverlayPortal.overlayChildLayoutBuilder]) call [applyPaintTransform] in
+  /// their [performLayout] implementation. To ensure such [RenderObject]s get
+  /// the up-to-date paint transform, [RenderObject] subclasses should typically
+  /// update the paint transform (as reported by [applyPaintTransform]) in this
+  /// method instead of [paint].
   @protected
   void performLayout();
 
@@ -3077,8 +3056,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsCompositingBitsUpdate = true;
-    if (parent is RenderObject) {
-      final RenderObject parent = this.parent!;
+    final RenderObject? parent = this.parent;
+    if (parent != null) {
       if (parent._needsCompositingBitsUpdate) {
         return;
       }
@@ -3089,9 +3068,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
     }
     // parent is fine (or there isn't one), but we are dirty
-    if (owner != null) {
-      owner!._nodesNeedingCompositingBitsUpdate.add(this);
-    }
+    owner?._nodesNeedingCompositingBitsUpdate.add(this);
   }
 
   late bool _needsCompositing; // initialized in the constructor
@@ -3299,7 +3276,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     RenderObject? node = parent;
-    while (node is RenderObject) {
+    while (node != null) {
       if (node.isRepaintBoundary) {
         if (node._layerHandle.layer == null) {
           // Looks like the subtree here has never been painted. Let it handle itself.
@@ -3324,7 +3301,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialPaint(ContainerLayer rootLayer) {
     assert(rootLayer.attached);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layerHandle.layer == null);
@@ -3342,7 +3319,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDisposed);
     assert(rootLayer.attached);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layerHandle.layer != null); // use scheduleInitialPaint the first time
@@ -3391,8 +3368,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        if (parent is RenderObject) {
-          final RenderObject parent = this.parent!;
+        final RenderObject? parent = this.parent;
+        if (parent != null) {
           bool visitedByParent = false;
           parent.visitChildren((RenderObject child) {
             if (child == this) {
@@ -3496,8 +3473,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Applies the transform that would be applied when painting the given child
   /// to the given matrix.
   ///
-  /// Used by coordinate conversion functions to translate coordinates local to
-  /// one render object into coordinates local to another render object.
+  /// Used by coordinate conversion functions ([getTransformTo], for example) to
+  /// translate coordinates local to one render object into coordinates local to
+  /// another render object.
   ///
   /// Some RenderObjects will provide a zeroed out matrix in this method,
   /// indicating that the child should not paint anything or respond to hit
@@ -3669,7 +3647,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialSemantics() {
     assert(!_debugDisposed);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingSemantics);
     assert(_semantics.parentDataDirty || !_semantics.built);
     assert(owner!._semanticsOwner != null);
@@ -3867,13 +3845,20 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
-      if (_relayoutBoundary != null && _relayoutBoundary != this) {
-        int count = 1;
-        RenderObject? target = parent;
-        while (target != null && target != _relayoutBoundary) {
-          target = target.parent;
-          count += 1;
+
+      int count = 0;
+      for (
+        RenderObject? node = this;
+        node != null && !(node._isRelayoutBoundary ?? false);
+        node = node.parent
+      ) {
+        if (node._isRelayoutBoundary == null) {
+          count = -1;
+          break;
         }
+        count += 1;
+      }
+      if (count > 0) {
         header += ' relayoutBoundary=up$count';
       }
       if (_needsLayout) {
@@ -4005,14 +3990,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    if (parent is RenderObject) {
-      parent!.showOnScreen(
-        descendant: descendant ?? this,
-        rect: rect,
-        duration: duration,
-        curve: curve,
-      );
-    }
+    parent?.showOnScreen(
+      descendant: descendant ?? this,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
   }
 
   /// Adds a debug representation of a [RenderObject] optimized for including in
@@ -4125,6 +4108,77 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
     return child != null
         ? <DiagnosticsNode>[child!.toDiagnosticsNode(name: 'child')]
         : <DiagnosticsNode>[];
+  }
+}
+
+/// A mixin for managing [RenderObject] with a [layoutCallback], which will be
+/// invoked during this [RenderObject]'s layout process if scheduled using
+/// [scheduleLayoutCallback].
+///
+/// A layout callback is typically a callback that mutates the [RenderObject]'s
+/// render subtree during the [RenderObject]'s layout process. When an ancestor
+/// [RenderObject] chooses to skip laying out this [RenderObject] in its
+/// [performLayout] implementation (for example, for performance reasons, an
+/// [Overlay] may skip laying out an offstage [OverlayEntry] while keeping it in
+/// the tree), normally the [layoutCallback] will not be invoked because the
+/// [layout] method will not be called. This can be undesirable when the
+/// [layoutCallback] involves rebuilding dirty widgets (most notably, the
+/// [LayoutBuilder] widget). Unlike render subtrees, typically all dirty widgets
+/// (even off-screen ones) in a widget tree must be rebuilt. This mixin makes
+/// sure once scheduled, the [layoutCallback] method will be invoked even if it's
+/// skipped by an ancestor [RenderObject], unless this [RenderObject] has never
+/// been laid out.
+///
+/// Subclasses must not invoke the layout callback directly. Instead, call
+/// [runLayoutCallback] in the [performLayout] implementation.
+///
+/// See also:
+///
+///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
+mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
+  // The initial value of this flag must be set to true to prevent the layout
+  // callback from being scheduled when the subtree has never been laid out (in
+  // which case the `constraints` or any other layout information is unknown).
+  bool _needsRebuild = true;
+
+  /// The layout callback to be invoked during [performLayout].
+  ///
+  /// This method should not be invoked directly. Instead, call
+  /// [runLayoutCallback] in the [performLayout] implementation. This callback
+  /// will be invoked using [invokeLayoutCallback].
+  @visibleForOverriding
+  void layoutCallback();
+
+  /// Invokes [layoutCallback] with [invokeLayoutCallback].
+  ///
+  /// This method must be called in [performLayout], typically as early as
+  /// possible before any layout work is done, to avoid re-dirtying any child
+  /// [RenderObject]s.
+  @mustCallSuper
+  void runLayoutCallback() {
+    assert(debugDoingThisLayout);
+    invokeLayoutCallback((_) => layoutCallback());
+    _needsRebuild = false;
+  }
+
+  /// Informs the framework that the layout callback has been updated and must be
+  /// invoked again when this [RenderObject] is ready for layout, even when an
+  /// ancestor [RenderObject] chooses to skip laying out this render subtree.
+  @mustCallSuper
+  void scheduleLayoutCallback() {
+    if (_needsRebuild) {
+      assert(debugNeedsLayout);
+      return;
+    }
+    _needsRebuild = true;
+    // This ensures that the layout callback will be run even if an ancestor
+    // chooses to not lay out this subtree (for example, obstructed OverlayEntries
+    // with `maintainState` set to true), to maintain the widget tree integrity
+    // (making sure global keys are unique, for example).
+    owner?._nodesNeedingLayout.add(this);
+    // In an active tree, markNeedsLayout is needed to inform the layout boundary
+    // that its child size may change.
+    super.markNeedsLayout();
   }
 }
 
@@ -4769,19 +4823,19 @@ typedef _MergeUpAndSiblingMergeGroups =
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
 /// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
 /// [_RenderObjectSemantics] that should form a node with elevation adjustments
-/// into [_childrenAndElevationAdjustments].
+/// into [_children].
 ///
-/// At this point, walking the [_childrenAndElevationAdjustments] forms a tree
+/// At this point, walking the [_children] forms a tree
 /// that exactly resemble the resulting semantics node tree.
 ///
 /// ### Phase 3
 ///
-/// Walks the [_childrenAndElevationAdjustments] and calculate their
+/// Walks the [_children] and calculate their
 /// [_SemanticsGeometry] based on renderObject relationship.
 ///
 /// ### Phase 4
 ///
-/// Walks the [_childrenAndElevationAdjustments] and produce semantics node for
+/// Walks the [_children] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
 /// Phase 2, 3, 4 each depends on previous step to finished updating the the
@@ -4796,7 +4850,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   bool _hasSiblingConflict = false;
   bool? _blocksPreviousSibling;
-  double elevationAdjustment = 0.0;
+
   // TODO(chunhtai): Figure out what to do when incomplete fragments are asked
   // to form a semantics node.
   //
@@ -4833,10 +4887,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Fragments that will merge up to parent rendering object semantics.
   final List<_SemanticsFragment> mergeUp = <_SemanticsFragment>[];
 
-  /// A map that record immediate child [_RenderObjectSemantics]s that will form
-  /// semantics nodes with their elevation adjustments.
-  final Map<_RenderObjectSemantics, double> _childrenAndElevationAdjustments =
-      <_RenderObjectSemantics, double>{};
+  /// A list to store immediate child [_RenderObjectSemantics]s that will form
+  /// semantics nodes.
+  final List<_RenderObjectSemantics> _children = <_RenderObjectSemantics>[];
 
   /// Merge groups that will form additional sibling nodes.
   final List<List<_SemanticsFragment>> siblingMergeGroups = <List<_SemanticsFragment>>[];
@@ -4953,7 +5006,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// Updates the [parentData] for the [_RenderObjectSemantics]s in the
   /// rendering subtree and forms a [_RenderObjectSemantics] tree where children
-  /// are stored in [_childrenAndElevationAdjustments].
+  /// are stored in [_children].
   ///
   /// This method does the the phase 1 and 2 of the four phases documented on
   /// [_RenderObjectSemantics].
@@ -4969,7 +5022,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
   /// should form a node. i.e. [shouldFormSemanticsNode] is true. Stores the
   /// [_RenderObjectSemantics] that should form a node with elevation adjustments
-  /// into [_childrenAndElevationAdjustments].
+  /// into [_children].
   void updateChildren() {
     assert(parentData != null || isRoot, 'parent data can only be null for root rendering object');
     configProvider.reset();
@@ -5003,7 +5056,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     siblingMergeGroups.addAll(result.$2);
 
     // Construct tree for nodes that will form semantics nodes.
-    _childrenAndElevationAdjustments.clear();
+    _children.clear();
     if (contributesToSemanticsTree) {
       _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
       siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
@@ -5023,16 +5076,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           in result.$1.whereType<_RenderObjectSemantics>()) {
         assert(childSemantics.contributesToSemanticsTree);
         if (childSemantics.shouldFormSemanticsNode) {
-          _childrenAndElevationAdjustments[childSemantics] = 0.0;
+          _children.add(childSemantics);
         } else {
-          final Map<_RenderObjectSemantics, double> passUpChildren =
-              childSemantics._childrenAndElevationAdjustments;
-          for (final _RenderObjectSemantics passUpChild in passUpChildren.keys) {
-            final double passUpElevationAdjustment =
-                passUpChildren[passUpChild]! + childSemantics.configProvider.original.elevation;
-            _childrenAndElevationAdjustments[passUpChild] = passUpElevationAdjustment;
-            passUpChild.elevationAdjustment = passUpElevationAdjustment;
-          }
+          _children.addAll(childSemantics._children);
           siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
         }
       }
@@ -5212,7 +5258,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   /// Updates the [geometry] for this [_RenderObjectSemantics]s and its subtree
-  /// in [_childrenAndElevationAdjustments].
+  /// in [_children].
   ///
   /// This method does the the phase 3 of the four phases documented on
   /// [_RenderObjectSemantics].
@@ -5233,7 +5279,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void _updateChildGeometry() {
     assert(geometry != null);
-    for (final _RenderObjectSemantics child in _childrenAndElevationAdjustments.keys) {
+    for (final _RenderObjectSemantics child in _children) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: geometry!.paintClipRect,
         parentSemanticsClipRect: geometry!.semanticsClipRect,
@@ -5282,7 +5328,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       // update for semantics nodes generated in this render object semantics.
       //
       // Therefore, we only need to update the subtree.
-      _buildSemanticsSubtree(usedSemanticsIds: <int>{}, elevationAdjustment: 0.0);
+      _buildSemanticsSubtree(usedSemanticsIds: <int>{});
     }
   }
 
@@ -5332,11 +5378,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Builds the semantics subtree under the [cachedSemanticsNode].
   void _buildSemanticsSubtree({
     required Set<int> usedSemanticsIds,
-    required double elevationAdjustment,
     List<SemanticsNode>? semanticsNodes,
   }) {
     final List<SemanticsNode> children = <SemanticsNode>[];
-    for (final _RenderObjectSemantics child in _childrenAndElevationAdjustments.keys) {
+    for (final _RenderObjectSemantics child in _children) {
       assert(child.shouldFormSemanticsNode);
       // Cached semantics node may be part of sibling merging group prior
       // to this update. In this case, the semantics node may continue to
@@ -5371,11 +5416,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _updateSemanticsNodeGeometry();
 
     _mergeSiblingGroup(usedSemanticsIds);
-    _buildSemanticsSubtree(
-      semanticsNodes: semanticsNodes,
-      usedSemanticsIds: usedSemanticsIds,
-      elevationAdjustment: elevationAdjustment,
-    );
+    _buildSemanticsSubtree(semanticsNodes: semanticsNodes, usedSemanticsIds: usedSemanticsIds);
   }
 
   SemanticsNode _createSemanticsNode() {
@@ -5453,12 +5494,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
     final _SemanticsGeometry nodeGeometry = geometry!;
-    node.elevationAdjustment = elevationAdjustment;
-    if (elevationAdjustment != 0.0) {
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        config.elevation = configProvider.original.elevation + elevationAdjustment;
-      });
-    }
     final bool isSemanticsHidden =
         configProvider.original.isHidden ||
         (!(parentData?.mergeIntoParent ?? false) && nodeGeometry.hidden);
@@ -5558,7 +5593,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       node._semantics.geometry = null;
       node._semantics.parentData = null;
       node._semantics._blocksPreviousSibling = null;
-      node._semantics.elevationAdjustment = 0.0;
       // Since this node is a semantics boundary, the produced sibling nodes will
       // be attached to the parent semantics boundary. Thus, these sibling nodes
       // will not be carried to the next loop.
@@ -5634,7 +5668,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Removes any cache stored in this object as if it is newly created.
   void clear() {
     built = false;
-    elevationAdjustment = 0.0;
     cachedSemanticsNode = null;
     parentData = null;
     geometry = null;
@@ -5642,7 +5675,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _containsIncompleteFragment = false;
     mergeUp.clear();
     siblingMergeGroups.clear();
-    _childrenAndElevationAdjustments.clear();
+    _children.clear();
     semanticsNodes.clear();
     configProvider.clear();
   }

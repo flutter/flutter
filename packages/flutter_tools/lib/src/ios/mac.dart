@@ -18,13 +18,13 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
@@ -42,6 +42,7 @@ import 'migrations/project_build_location_migration.dart';
 import 'migrations/remove_bitcode_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/uiapplicationmain_deprecation_migration.dart';
+import 'migrations/uiscenedelegate_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
@@ -152,6 +153,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     IOSDeploymentTargetMigration(app.project, globals.logger),
     XcodeProjectObjectVersionMigration(app.project, globals.logger),
     HostAppInfoPlistMigration(app.project, globals.logger),
+    UISceneDelegateMigration(app.project, globals.logger),
     XcodeScriptBuildPhaseMigration(app.project, globals.logger),
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
@@ -164,10 +166,17 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
-      features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
+    LLDBInitMigration(
+      app.project,
+      buildInfo,
+      globals.logger,
+      deviceID: deviceID,
+      fileSystem: globals.fs,
+      environmentType: environmentType,
+    ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -272,6 +281,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
   }
 
@@ -406,6 +418,8 @@ Future<XcodeBuildResult> buildXcodeProject({
 
       Future<void> listenToScriptOutputLine() async {
         final List<String> lines = await scriptOutputPipeFile!.readAsLines();
+        bool inWarningBlock = false;
+        bool inNoteBlock = false;
         for (final String line in lines) {
           if (line == 'done' || line == 'all done') {
             buildSubStatus?.stop();
@@ -414,6 +428,25 @@ Future<XcodeBuildResult> buildXcodeProject({
               return;
             }
           } else {
+            if (!globals.logger.isVerbose) {
+              if (line.contains('error:')) {
+                globals.printError(line);
+              } else if (line.contains('warning:')) {
+                globals.printWarning(line);
+                inWarningBlock = true;
+              } else if (inNoteBlock) {
+                globals.printWarning(line);
+                inNoteBlock = false;
+              } else if (inWarningBlock) {
+                if (line.startsWith(RegExp(r'\s+?note[:]'))) {
+                  // Xcode doesn't echo this, so we don't.
+                  inNoteBlock = true;
+                }
+                inWarningBlock = false;
+              }
+              continue;
+            }
+
             initialBuildStatus?.cancel();
             initialBuildStatus = null;
             buildSubStatus = globals.logger.startProgress(
@@ -701,7 +734,7 @@ Future<void> diagnoseXcodeBuildFailure(
   }
 }
 
-/// xcodebuild <buildaction> parameter (see man xcodebuild for details).
+/// `xcodebuild <buildaction>` parameter (see `man xcodebuild` for details).
 ///
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
@@ -965,7 +998,8 @@ Future<bool> _handleIssues(
         'to learn more about understanding Podlock dependency tree. \n\n'
         'You can also disable Swift Package Manager for the project by adding the '
         'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  "disable-swift-package-manager: true"\n',
+        '  config:'
+        '    enable-swift-package-manager: false\n',
       );
     }
   } else if (missingModules.isNotEmpty) {

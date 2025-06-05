@@ -8,6 +8,8 @@ import static android.os.Looper.getMainLooper;
 import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -38,7 +40,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterLoaderTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -66,7 +67,8 @@ public class FlutterLoaderTest {
   @Test
   public void unsatisfiedLinkErrorPathDoesNotExist() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    ctx.getApplicationInfo().nativeLibraryDir = "/path/that/doesnt/exist";
+    String path = "/path/that/doesnt/exist";
+    ctx.getApplicationInfo().nativeLibraryDir = path;
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
     Mockito.doThrow(new UnsatisfiedLinkError("couldn't find \"libflutter.so\""))
@@ -74,11 +76,41 @@ public class FlutterLoaderTest {
         .loadLibrary(ctx);
     try {
       flutterLoader.startInitialization(ctx);
-    } catch (UnsupportedOperationException e) {
+      flutterLoader.ensureInitializationComplete(ctx, null);
+      shadowOf(getMainLooper()).idle();
+      fail(); // Should not get here.
+    } catch (RuntimeException re) {
+      Throwable e = re.getCause();
+      assertNotNull(e);
+      assertNotNull(e.getMessage());
       assertTrue(
           e.getMessage()
               .contains(
-                  "and the native libraries directory (with path /path/that/doesnt/exist) does not exist."));
+                  "and the native libraries directory (with path " + path + ") does not exist"));
+    }
+  }
+
+  @Test
+  public void unsatisfiedLinkErrorContainsSplitDirs() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    ctx.getApplicationInfo().nativeLibraryDir = "/path/that/doesnt/exist";
+    String splitDir = "/path/to/split/dir";
+    ctx.getApplicationInfo().splitSourceDirs = new String[] {splitDir, "/other/split/path/dir"};
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+
+    Mockito.doThrow(new UnsatisfiedLinkError("couldn't find \"libflutter.so\""))
+        .when(mockFlutterJNI)
+        .loadLibrary(ctx);
+    try {
+      flutterLoader.startInitialization(ctx);
+      flutterLoader.ensureInitializationComplete(ctx, null);
+      shadowOf(getMainLooper()).idle();
+      fail(); // Should not get here.
+    } catch (RuntimeException re) {
+      Throwable e = re.getCause();
+      assertNotNull(e);
+      assertNotNull(e.getMessage());
+      assertTrue(e.getMessage().contains(splitDir));
     }
   }
 
@@ -287,6 +319,35 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itSetsEnableFlutterGPUFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableFlutterGPU", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    final String enableImpellerArg = "--enable-flutter-gpu";
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(enableImpellerArg));
+  }
+
+  @Test
   public void itSetsEnableSurfaceControlFromMetaData() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
@@ -313,6 +374,35 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(disabledControlArg));
+  }
+
+  @Test
+  public void itSetsShaderInitModeFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    final String shaderModeArg = "--impeller-lazy-shader-mode";
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(shaderModeArg));
   }
 
   @Test

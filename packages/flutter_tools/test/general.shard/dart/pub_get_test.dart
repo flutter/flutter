@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
@@ -752,7 +753,7 @@ exit code: 66
           '--example',
         ],
         onRun:
-            (_) => writePackageConfigFile(
+            (_) => writePackageConfigFiles(
               directory: fileSystem.currentDirectory,
               mainLibName: 'my_app',
             ),
@@ -908,7 +909,7 @@ exit code: 66
           'PUB_ENVIRONMENT': 'flutter_cli:flutter_tests',
         },
         onRun:
-            (_) => writePackageConfigFile(
+            (_) => writePackageConfigFiles(
               directory: fileSystem.currentDirectory,
               mainLibName: 'my_app',
             ),
@@ -986,25 +987,30 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'package_config_subset file is generated from packages and not timestamp',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Pub pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-        platform: FakePlatform(
-          environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-        ),
-      );
-      fileSystem.file('version').createSync();
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
+  testUsingContext('can use generate: true within a workspace', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Pub pub = Pub.test(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+      platform: FakePlatform(
+        environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
+      ),
+    );
+
+    final Directory pkg = fileSystem.directory('workspace_pkg')..createSync(recursive: true);
+    fileSystem.file('version').createSync();
+    pkg.childFile('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+      flutter:
+        generate: true
+      ''');
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
       {"configVersion": 2,"packages": [
         {
           "name": "flutter_tools",
@@ -1015,21 +1021,11 @@ exit code: 66
       ],"generated":"some-time"}
 ''');
 
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests,
-      );
-
-      expect(
-        fileSystem.file('.dart_tool/package_config_subset').readAsStringSync(),
-        'flutter_tools\n'
-        '2.7\n'
-        'file:///\n'
-        'file:///lib/\n'
-        '2\n',
-      );
-    },
-  );
+    await expectLater(
+      pub.get(project: FlutterProject.fromDirectoryTest(pkg), context: PubContext.flutterTests),
+      completes,
+    );
+  });
 
   testWithoutContext('Pub error handling', () async {
     final BufferLogger logger = BufferLogger.test();

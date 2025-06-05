@@ -926,17 +926,18 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
       }));
 
   // Simulate raster thread.
-  std::thread([&metrics_sent_latch, &view]() {
+  std::thread frame_thread([&metrics_sent_latch, &view]() {
     metrics_sent_latch.Wait();
     // Frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnFrameGenerated(500, 500));
     view->OnFramePresented();
-  }).detach();
+  });
 
   // Start the window resize. This sends the new window metrics
   // and then blocks polling run loop until another thread completes the window
   // resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  frame_thread.join();
 }
 
 // Verify that an empty frame completes a view resize.
@@ -987,17 +988,18 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
   view_modifier.SetSurface(std::move(surface));
 
   // Simulate raster thread.
-  std::thread([&metrics_sent_latch, &view]() {
+  std::thread frame_thread([&metrics_sent_latch, &view]() {
     metrics_sent_latch.Wait();
 
     // Empty frame generated and presented from the raster thread.
     EXPECT_TRUE(view->OnEmptyFrameGenerated());
     view->OnFramePresented();
-  }).detach();
+  });
 
   // Start the window resize. This sends the new window metrics
   // and then blocks until another thread completes the window resize.
   EXPECT_TRUE(view->OnWindowSizeChanged(500, 500));
+  frame_thread.join();
 }
 
 // A window resize can be interleaved between a frame generation and
@@ -1668,5 +1670,38 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
   }
 }
 
+TEST(FlutterWindowsViewTest, FocusTriggersWindowFocus) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  EXPECT_CALL(*window_binding_handler, Focus()).WillOnce(Return(true));
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::move(window_binding_handler));
+  EXPECT_TRUE(view->Focus());
+}
+
+TEST(FlutterWindowsViewTest, OnFocusTriggersSendFocusViewEvent) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::move(window_binding_handler));
+
+  EngineModifier modifier(engine.get());
+  bool received_focus_event = false;
+  modifier.embedder_api().SendViewFocusEvent = MOCK_ENGINE_PROC(
+      SendViewFocusEvent, [&](FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                              FlutterViewFocusEvent const* event) {
+        EXPECT_EQ(event->state, FlutterViewFocusState::kFocused);
+        EXPECT_EQ(event->direction, FlutterViewFocusDirection::kUndefined);
+        EXPECT_EQ(event->view_id, view->view_id());
+        EXPECT_EQ(event->struct_size, sizeof(FlutterViewFocusEvent));
+        received_focus_event = true;
+        return kSuccess;
+      });
+  view->OnFocus(FlutterViewFocusState::kFocused,
+                FlutterViewFocusDirection::kUndefined);
+  EXPECT_TRUE(received_focus_event);
+}
 }  // namespace testing
 }  // namespace flutter

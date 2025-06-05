@@ -81,7 +81,7 @@ export class FlutterEntrypointLoader {
    * which is bound to the correct instance of the FlutterEntrypointLoader by
    * the FlutterLoader object.
    *
-   * @param {Function} engineInitializer @see https://github.com/flutter/engine/blob/main/lib/web_ui/lib/src/engine/js_interop/js_loader.dart#L42
+   * @param {Function} engineInitializer @see https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart#L42
    */
   didCreateEngineInitializer(engineInitializer) {
     if (typeof this._didCreateEngineInitializerResolve === "function") {
@@ -174,7 +174,17 @@ export class FlutterEntrypointLoader {
         importsPromise = Promise.resolve({});
       }
       const compiledDartApp = await compiledDartAppPromise;
-      const dartApp = await compiledDartApp.instantiate(await importsPromise);
+      const dartApp = await compiledDartApp.instantiate(await importsPromise, {
+        loadDynamicModule: async (wasmUri, mjsUri) => {
+          const wasmBytes = fetch(resolveUrlWithSegments(entrypointBaseUrl, wasmUri));
+          let mjsRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, mjsUri);
+          if (this._ttPolicy != null) {
+            mjsRuntimeUri = this._ttPolicy.createScriptURL(mjsRuntimeUri);
+          }
+          const mjsModule = import(mjsRuntimeUri);
+          return [await wasmBytes, await mjsModule];
+        }
+      });
       await dartApp.invokeMain();
     }
   }

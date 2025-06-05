@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../dom.dart';
 import '../semantics.dart';
 import '../util.dart';
 
@@ -100,14 +99,7 @@ class SemanticRouteBase extends SemanticRole {
 ///   * [RouteName], which provides a description for this route in the absence
 ///     of an explicit route label set on the route itself.
 class SemanticRoute extends SemanticRouteBase {
-  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object) {
-    // Lacking any more specific information, ARIA role "dialog" is the
-    // closest thing to Flutter's route. This can be revisited if better
-    // options become available, especially if the framework volunteers more
-    // specific information about the route. Other attributes in the vicinity
-    // of routes include: "alertdialog", `aria-modal`, "menu", "tooltip".
-    setAriaRole('dialog');
-  }
+  SemanticRoute(SemanticsObject object) : super(EngineSemanticsRole.route, object);
 }
 
 /// Indicates the container as a pop dialog.
@@ -137,7 +129,7 @@ class SemanticDialog extends SemanticRouteBase {
 /// Setting this role will also set aria-modal to true, which helps screen
 /// reader better understand this section of screen.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 ///
 /// See also:
 ///

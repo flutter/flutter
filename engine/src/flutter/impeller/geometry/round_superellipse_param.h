@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_ROUND_SUPERELLIPSE_PARAM_H_
 #define FLUTTER_IMPELLER_GEOMETRY_ROUND_SUPERELLIPSE_PARAM_H_
 
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/geometry/point.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/rounding_radii.h"
@@ -19,6 +20,9 @@ struct RoundSuperellipseParam {
   //
   // This structure is used to define an octant of an arbitrary rounded
   // superellipse.
+  //
+  // A `se_n` of 0 means that the radius is 0, and this octant is a square
+  // of size `se_a` at `offset` and all other fields are ignored.
   struct Octant {
     // The offset of the square-like rounded superellipse's center from the
     // origin.
@@ -26,18 +30,11 @@ struct RoundSuperellipseParam {
     // All other coordinates in this structure are relative to this point.
     Point offset;
 
-    // The coordinate of the midpoint of the top edge, relative to the `offset`
-    // point.
-    //
-    // This is the starting point of the octant curve.
-    Point edge_mid;
-
-    // The coordinate of the superellipse's center, relative to the `offset`
-    // point.
-    Point se_center;
     // The semi-axis length of the superellipse.
     Scalar se_a;
     // The degree of the superellipse.
+    //
+    // If this value is 0, then this octant is a square of size `se_a`.
     Scalar se_n;
     // The range of the parameter "theta" used to define the superellipse curve.
     //
@@ -103,11 +100,18 @@ struct RoundSuperellipseParam {
       const Rect& bounds,
       const RoundingRadii& radii);
 
+  [[nodiscard]] static RoundSuperellipseParam MakeBoundsRadius(
+      const Rect& bounds,
+      Scalar radius);
+
   // Returns whether this rounded superellipse contains the point.
   //
   // This method does not perform any prescreening such as comparing the point
   // with the bounds, which is recommended for callers.
   bool Contains(const Point& point) const;
+
+  // Dispatch the path operations of this rounded superellipse to the receiver.
+  void Dispatch(PathReceiver& receiver) const;
 
   // A factor used to calculate the "gap", defined as the distance from the
   // midpoint of the curved corners to the nearest sides of the bounding box.
