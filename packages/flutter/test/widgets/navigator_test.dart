@@ -1268,7 +1268,6 @@ void main() {
   testWidgets('popUntil with a return value', (WidgetTester tester) async {
     bool? firstReturnValue;
     bool? secondReturnValue;
-    bool? thirdReturnValue;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1294,7 +1293,7 @@ void main() {
                     (BuildContext context) => OnTapPage(
                       id: 'A',
                       onTap: () async {
-                        secondReturnValue = await Navigator.pushNamed(context, '/B');
+                        firstReturnValue = await Navigator.pushNamed(context, '/B');
                       },
                     ),
                 settings: settings,
@@ -1305,27 +1304,11 @@ void main() {
                     (BuildContext context) => OnTapPage(
                       id: 'B',
                       onTap: () async {
-                        thirdReturnValue = await Navigator.pushNamed(context, '/C');
-                      },
-                    ),
-                settings: settings,
-              );
-            case '/C':
-              return MaterialPageRoute<bool>(
-                builder:
-                    (BuildContext context) => OnTapPage(
-                      id: 'C',
-                      onTap: () async {
-                        Navigator.popUntil(context, (Route<dynamic> route) => route.isFirst, (
-                          Route<dynamic> route,
-                        ) {
-                          if (route.settings.name == '/B') {
-                            return true;
-                          } else if (route.settings.name == '/A') {
-                            return false;
-                          }
-                          return null;
-                        });
+                        Navigator.popUntil<bool>(
+                          context,
+                          (Route<dynamic> route) => route.isFirst,
+                          true,
+                        );
                       },
                     ),
                 settings: settings,
@@ -1347,14 +1330,11 @@ void main() {
 
     await tester.tap(find.text('B'));
     await tester.pumpAndSettle();
-
-    await tester.tap(find.text('C'));
-    await tester.pumpAndSettle();
     expect(find.text('/'), findsOneWidget);
 
-    expect(firstReturnValue, isNull);
-    expect(secondReturnValue, isFalse);
-    expect(thirdReturnValue, isTrue);
+    // Only the first return value should be set.
+    expect(firstReturnValue, isTrue);
+    expect(secondReturnValue, isNull);
   });
 
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
