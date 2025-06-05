@@ -357,10 +357,8 @@ abstract class DisposablePathConstructors {
 
 class LazyPath implements ScenePath, Collectable {
   factory LazyPath(DisposablePathConstructors constructors) =>
-      LazyPath._(constructors, () => constructors.createNew());
-  LazyPath._(this.constructors, this.initializer)
-    : _fillType = ui.PathFillType.nonZero,
-      _commands = [];
+      LazyPath._(constructors, ui.PathFillType.nonZero, () => constructors.createNew());
+  LazyPath._(this.constructors, this._fillType, this.initializer) : _commands = [];
   LazyPath.fromLazyPath(LazyPath other)
     : _fillType = other._fillType,
       constructors = other.constructors,
@@ -370,6 +368,7 @@ class LazyPath implements ScenePath, Collectable {
     final pathCopy = LazyPath.fromLazyPath(basePath);
     return LazyPath._(
       pathCopy.constructors,
+      pathCopy._fillType,
       () => pathCopy.builtPath.shift(offset) as DisposablePath,
     );
   }
@@ -377,6 +376,7 @@ class LazyPath implements ScenePath, Collectable {
     final pathCopy = LazyPath.fromLazyPath(basePath);
     return LazyPath._(
       pathCopy.constructors,
+      pathCopy._fillType,
       () => pathCopy.builtPath.transform(matrix4) as DisposablePath,
     );
   }
@@ -385,6 +385,7 @@ class LazyPath implements ScenePath, Collectable {
     final pathCopy2 = LazyPath.fromLazyPath(path2);
     return LazyPath._(
       pathCopy1.constructors,
+      pathCopy1._fillType,
       () =>
           pathCopy1.constructors.combinePaths(operation, pathCopy1.builtPath, pathCopy2.builtPath),
     );
@@ -397,6 +398,7 @@ class LazyPath implements ScenePath, Collectable {
   }) {
     return LazyPath._(
       constructors,
+      pathMetric.iterator.path._fillType,
       () => pathMetric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo),
     );
   }
@@ -423,7 +425,7 @@ class LazyPath implements ScenePath, Collectable {
       return _cachedPath!;
     }
     final DisposablePath path = initializer();
-    path.fillType = fillType;
+    path.fillType = _fillType;
     for (final command in _commands) {
       command.apply(path);
     }
@@ -581,7 +583,7 @@ class LazyPath implements ScenePath, Collectable {
   @override
   void reset() {
     _commands.clear();
-    fillType = ui.PathFillType.nonZero;
+    _fillType = ui.PathFillType.nonZero;
     _cachedPath?.dispose();
     _cachedPath = null;
     initializer = constructors.createNew;
