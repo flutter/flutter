@@ -5,6 +5,17 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "dart.lineLength": 80,
+    "editor.rulers": [80],
+    "editor.formatOnSave": true,
+    "dart.previewFlutterUiGuides": true,
+    "dart.previewFlutterUiGuidesCustomTracking": true,
+    "dart.closingLabels": true,
+    "dart.analysisExcludedFolders": [
+        "build",
+        ".dart_tool",
+        ".pub"
+    ]
 }
 
