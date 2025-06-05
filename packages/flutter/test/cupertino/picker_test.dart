@@ -335,6 +335,52 @@ void main() {
     );
 
     testWidgets(
+      'does not trigger haptics when scrolling by tapping on the item',
+      (WidgetTester tester) async {
+        final List<int> selectedItems = <int>[];
+        final List<MethodCall> systemCalls = <MethodCall>[];
+
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+          MethodCall methodCall,
+        ) async {
+          systemCalls.add(methodCall);
+          return null;
+        });
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoPicker(
+              itemExtent: 100.0,
+              onSelectedItemChanged: (int index) {
+                selectedItems.add(index);
+              },
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: SizedBox(width: 400.0, height: 100.0, child: Text(index.toString())),
+                );
+              }),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('2'), warnIfMissed: false); // has an IgnorePointer
+        await tester.pumpAndSettle(const Duration(milliseconds: 10));
+
+        // Expect that the item changed, but haptics were not triggered.
+        expect(selectedItems, <int>[1, 2]);
+        expect(systemCalls, isEmpty);
+
+        await tester.drag(find.text('2'), const Offset(0.0, -30.0), warnIfMissed: false);
+        await tester.pumpAndSettle(const Duration(milliseconds: 10));
+        // Expect that moving within the item does not trigger haptics after animating scroll.
+        expect(selectedItems, <int>[1, 2]);
+        expect(systemCalls, isEmpty);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets(
       'do not trigger haptic effects on non-iOS devices',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];

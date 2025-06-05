@@ -216,8 +216,11 @@ class CupertinoPicker extends StatefulWidget {
 }
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
-  int? _lastHapticIndex;
+  // Initial value set to skip haptic feedback for the first item.
+  late int _lastHapticIndex = _effectiveController.initialItem;
+  int? _lastMiddlePosition;
   FixedExtentScrollController? _controller;
+  bool _skipHapticFeedback = false;
 
   FixedExtentScrollController get _effectiveController => widget.scrollController ?? _controller!;
 
@@ -256,9 +259,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   void _handleHapticFeedback(int index) {
-    // Skip haptic feedback on the first item.
-    if (_lastHapticIndex == null) {
-      _lastHapticIndex = index;
+    if (_skipHapticFeedback) {
       return;
     }
     switch (defaultTargetPlatform) {
@@ -280,20 +281,33 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void _handleScroll() {
     final int index = _effectiveController.selectedItem;
 
-    final double currentItemOffset = _effectiveController.offset / widget.itemExtent - index;
-    // Check if the current scroll offset is passing through the center point of an item
-    // This happens when the fractional part is very close to 0.0.
-    if (currentItemOffset.abs() <= 0.1) {
+    // This switches from the current index to the next index
+    // when we pass the middle of the item.
+    final double fractionalOffset = _effectiveController.offset / widget.itemExtent;
+    final int currentPosition = fractionalOffset.floor();
+
+    final double currentItemOffset = fractionalOffset - index;
+    // Check that we either passed in the middle of the new item or
+    // that we are very close.
+    // The second check is to avoid the rounding error when the
+    // scroll position is very close to the middle of the item,
+    // but not exactly in the middle.
+    if (currentPosition != _lastMiddlePosition || currentItemOffset.abs() <= 0.1) {
       _handleHapticFeedback(index);
     }
+
+    _lastMiddlePosition = currentPosition;
   }
 
-  void _handleChildTap(int index) {
-    _effectiveController.animateToItem(
+  Future<void> _handleChildTap(int index) async {
+    _skipHapticFeedback = true;
+    await _effectiveController.animateToItem(
       index,
       duration: _kCupertinoPickerTapToScrollDuration,
       curve: _kCupertinoPickerTapToScrollCurve,
     );
+    _skipHapticFeedback = false;
+    _lastHapticIndex = _effectiveController.selectedItem;
   }
 
   /// Draws the selectionOverlay.
