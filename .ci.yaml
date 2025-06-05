@@ -85,7 +85,6 @@ platform_properties:
   # other linux_android_emu test targets depend on an API 36 AVD due to a potential issue with
   # virtual display on API 36: https://github.com/flutter/flutter/issues/170024.
   linux_android_emu_vulkan_stable:
-    bringup: true
     properties:
       contexts: >-
         [
@@ -1658,6 +1657,7 @@ targets:
 
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
