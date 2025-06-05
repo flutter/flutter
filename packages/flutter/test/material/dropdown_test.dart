@@ -588,6 +588,55 @@ void main() {
     expect(value, equals('three'));
   });
 
+  testWidgets('Dropdown form field updates if value set during onChange', (
+    WidgetTester tester,
+  ) async {
+    final Key buttonKey = UniqueKey();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? value;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Material(
+              child: Form(
+                key: formKey,
+                child: DropdownButtonFormField<String>(
+                  key: buttonKey,
+                  value: value,
+                  hint: const Text('Select Value'),
+                  items:
+                      menuItems.map((String val) {
+                        return DropdownMenuItem<String>(value: val, child: Text(val));
+                      }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      // Set back to initial instead of the new value.
+                      value = null;
+                    });
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(value, equals(null));
+
+    await tester.tap(find.text('Select Value'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    // The value should be set to null because of the onChanged callback.
+    // The dropdown should go back to the initial state.
+    expect(value, equals(null));
+    expect(find.text('Select Value'), findsOneWidget);
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
