@@ -32,21 +32,18 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('hot reload works without error', () async {
+    testWithoutContext('single and multiple hot reloads', () async {
       await runFlutterWithDevice(
         flutter,
         chrome: chrome,
         additionalCommandArgs: additionalCommandArgs,
       );
-      await flutter.hotReload();
-    });
 
-    testWithoutContext('multiple overlapping hot reload are debounced and queued', () async {
-      await runFlutterWithDevice(
-        flutter,
-        chrome: chrome,
-        additionalCommandArgs: additionalCommandArgs,
-      );
+      // Hot reload works without error.
+      await flutter.hotReload();
+
+      // Multiple overlapping hot reloads are debounced and queued.
+
       // Capture how many *real* hot reloads occur.
       int numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
