@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'globals.dart' show ConductorException, releaseCandidateBranchRegex;
-
-import 'proto/conductor_state.pbenum.dart';
+import 'globals.dart' show ConductorException;
 
 /// Possible string formats that `flutter --version` can return.
 enum VersionType {
@@ -221,50 +219,6 @@ class Version {
   final int? commits;
 
   final VersionType type;
-
-  /// Validate that the parsed version is valid.
-  ///
-  /// Will throw a [ConductorException] if the version is not possible given the
-  /// [candidateBranch] and [incrementLetter].
-  void ensureValid(String candidateBranch, ReleaseType releaseType) {
-    final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
-    if (branchMatch == null) {
-      throw ConductorException(
-        'Candidate branch $candidateBranch does not match the pattern '
-        '${releaseCandidateBranchRegex.pattern}',
-      );
-    }
-
-    // These groups are required in the pattern, so these match groups should
-    // not be null
-    final String branchX = branchMatch.group(1)!;
-    if (x != int.tryParse(branchX)) {
-      throw ConductorException(
-        'Parsed version $this has a different x value than candidate '
-        'branch $candidateBranch',
-      );
-    }
-    final String branchY = branchMatch.group(2)!;
-    if (y != int.tryParse(branchY)) {
-      throw ConductorException(
-        'Parsed version $this has a different y value than candidate '
-        'branch $candidateBranch',
-      );
-    }
-
-    // stable type versions don't have an m field set
-    if (type != VersionType.stable &&
-        releaseType != ReleaseType.STABLE_HOTFIX &&
-        releaseType != ReleaseType.STABLE_INITIAL) {
-      final String branchM = branchMatch.group(3)!;
-      if (m != int.tryParse(branchM)) {
-        throw ConductorException(
-          'Parsed version $this has a different m value than candidate '
-          'branch $candidateBranch with type $type',
-        );
-      }
-    }
-  }
 
   @override
   String toString() {

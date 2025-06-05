@@ -29,7 +29,6 @@ import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -124,7 +123,6 @@ class ResidentWebRunner extends ResidentRunner {
            platform: platform,
            outputPreferences: outputPreferences,
          ),
-         dartBuilder: hookRunner,
        );
 
   final FileSystem _fileSystem;
@@ -713,11 +711,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
-        flutterHookResult: await dartBuilder?.runHooks(
-          targetPlatform: TargetPlatform.web_javascript,
-          environment: environment,
-          logger: _logger,
-        ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
