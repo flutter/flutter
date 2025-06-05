@@ -83,7 +83,7 @@ class DlVertices {
       uint32_t mask = 0;
 
       inline Flags operator|(const Flags& rhs) const {
-        return {.mask = (mask | rhs.mask)};
+        return Flags{.mask = (mask | rhs.mask)};
       }
 
       inline Flags& operator|=(const Flags& rhs) {

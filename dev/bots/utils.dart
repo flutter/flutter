@@ -107,9 +107,17 @@ const int kCSIIntermediateRangeEnd = 0x2F;
 const int kCSIFinalRangeStart = 0x40;
 const int kCSIFinalRangeEnd = 0x7E;
 
+int get terminalColumns {
+  try {
+    return stdout.terminalColumns;
+  } catch (e) {
+    return 40;
+  }
+}
+
 String get redLine {
   if (hasColor) {
-    return '$red${'━' * stdout.terminalColumns}$reset';
+    return '$red${'━' * terminalColumns}$reset';
   }
   return '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 }
@@ -168,7 +176,7 @@ void foundError(List<String> messages) {
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
-  final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
+  final int width = math.max(15, (hasColor ? terminalColumns : 80) - 1);
   final String title = 'ERROR #${_errorMessages.length + 1}';
   print('$red╔═╡$bold$title$reset$red╞═${"═" * (width - 4 - title.length)}');
   for (final String message in messages.expand((String line) => line.split('\n'))) {
@@ -258,7 +266,7 @@ void _printQuietly(Object? message) {
     final int start = line.lastIndexOf(_lineBreak) + 1;
     int index = start;
     int length = 0;
-    while (index < line.length && length < stdout.terminalColumns) {
+    while (index < line.length && length < terminalColumns) {
       if (line.codeUnitAt(index) == kESC) {
         // 0x1B
         index += 1;
