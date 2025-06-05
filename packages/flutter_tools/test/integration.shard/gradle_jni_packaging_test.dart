@@ -89,25 +89,26 @@ Directory createProjectWithThirdpartyLib(Directory workingDir) {
     'app',
   ], workingDirectory: workingDir.path);
 
-  // Generate a prebuilt x86 artifact by building a debug APK and extracting the valid x86 libflutter.so.
-  // This is the most straightforward way to obtain a valid x86 library for testing.
+  // Generate a prebuilt x86_64 artifact by building a debug APK and extracting the valid libflutter.so.
+  // This is the most straightforward way to obtain a valid library (*.so) for testing.
+  // Any architecture can be used, because gradle does not check the architecture of the library – it only checks that it is a valid shared object file.
   processManager.runSync(<String>[
     flutterBin,
     'build',
     'apk',
     '--debug',
     '--target-platform',
-    'android-x86',
+    'android-x64',
   ], workingDirectory: appDir.path);
 
-  final File x86FlutterLib = appDir.childFile(
-    'build/app/intermediates/stripped_native_libs/debug/stripDebugDebugSymbols/out/lib/x86/libflutter.so',
+  final File prebuiltFlutterLib = appDir.childFile(
+    'build/app/intermediates/stripped_native_libs/debug/stripDebugDebugSymbols/out/lib/x86_64/libflutter.so',
   );
 
-  // Copies prebuilt x86 debug library to directory from which gradle will pick it up during release build.
+  // Copies prebuilt debug library to directory from which gradle will pick it up during release build.
   final Directory x86Dir = appDir.childDirectory('android/app/src/main/jniLibs/x86');
   x86Dir.createSync(recursive: true);
-  x86FlutterLib.copySync(x86Dir.childFile('libflutter.so').path);
+  prebuiltFlutterLib.copySync(x86Dir.childFile('libflutter.so').path);
 
   return appDir;
 }
