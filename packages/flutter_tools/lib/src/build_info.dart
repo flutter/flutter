@@ -33,6 +33,7 @@ class BuildInfo {
     List<String>? extraGenSnapshotOptions,
     List<String>? fileSystemRoots,
     this.androidProjectArgs = const <String>[],
+    this.androidGradleProjectCacheDir,
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
@@ -157,6 +158,9 @@ class BuildInfo {
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
   final List<String> androidProjectArgs;
+
+  /// Specifies Gradle's project-specific cache directory.
+  final String? androidGradleProjectCacheDir;
 
   /// The package configuration for the loaded application.
   ///
@@ -367,6 +371,7 @@ class BuildInfo {
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
+      if (androidGradleProjectCacheDir != null) '--project-cache-dir=$androidGradleProjectCacheDir',
     ];
   }
 }
@@ -590,33 +595,6 @@ enum TargetPlatform {
     }
   }
 
-  String get osName {
-    switch (this) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-        return 'linux';
-      case TargetPlatform.darwin:
-        return 'macos';
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-        return 'windows';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        return 'android';
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-        return 'fuchsia';
-      case TargetPlatform.ios:
-        return 'ios';
-      case TargetPlatform.tester:
-        return 'flutter-tester';
-      case TargetPlatform.web_javascript:
-        return 'web';
-    }
-  }
-
   String get simpleName {
     switch (this) {
       case TargetPlatform.linux_x64:
@@ -737,15 +715,6 @@ DarwinArch getDarwinArchForName(String arch) {
     'x86_64' => DarwinArch.x86_64,
     _ => throw Exception('Unsupported MacOS arch name "$arch"'),
   };
-}
-
-List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
-  const List<DarwinArch> defaultDarwinArchitectures = <DarwinArch>[
-    DarwinArch.x86_64,
-    DarwinArch.arm64,
-  ];
-  return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
-      defaultDarwinArchitectures;
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
@@ -983,6 +952,20 @@ const String kSdkRoot = 'SdkRoot';
 
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
+
+/// Whether to enable Native Assets.
+///
+/// If true, native assets are built and the mapping for native assets lookup
+/// at runtime is embedded in the kernel file.
+///
+/// If false, native assets are not built, and an empty mapping is embedded in
+/// the kernel file. Used for targets that trigger kernel builds but
+/// are not OS/architecture specific.
+///
+/// Supported values are 'true' and 'false'.
+///
+/// Defaults to 'true'.
+const String kNativeAssets = 'NativeAssets';
 
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
