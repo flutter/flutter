@@ -20,6 +20,8 @@ void main() {
 
 const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 100);
 
+const ui.Rect kWideRegion = ui.Rect.fromLTRB(0, 0, 1000, 100);
+
 void testMain() {
   group('Font fallbacks', () {
     setUpUnitTests(
@@ -43,6 +45,7 @@ void testMain() {
         <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
             as JsFlutterConfiguration?,
       );
+      renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'en';
       renderer.fontCollection.fontFallbackManager!.debugOnLoadFontFamily =
           (String family) => downloadedFontFamilies.add(family);
       savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
@@ -97,6 +100,41 @@ void testMain() {
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
       await matchGoldenFile('ui_font_fallback_arabic.png', region: kDefaultRegion);
+      // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
+    });
+
+    test('will download Noto Sans JP if Japanese text is added in ja', () async {
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+
+      renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'ja';
+
+      // Creating this paragraph should cause us to start to download the
+      // fallback font.
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText('表紙がゆっくりと開き始める。ページの間から淡い光が漏れ出る、');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+
+      expect(
+        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+        contains(startsWith('Noto Sans JP')),
+      );
+
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
+
+      pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.pushStyle(ui.TextStyle(fontSize: 32));
+      pb.addText('表紙がゆっくりと開き始める。ページの間から淡い光が漏れ出る、');
+      pb.pop();
+      final ui.Paragraph paragraph = pb.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+      canvas.drawParagraph(paragraph, ui.Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile('ui_font_fallback_jp.png', region: kWideRegion);
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     });
 
