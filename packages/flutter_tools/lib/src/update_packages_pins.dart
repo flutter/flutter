@@ -22,14 +22,14 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'archive': '3.6.1', // https://github.com/flutter/flutter/issues/115660
   'code_assets':
-      '0.19.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.19.3', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
   'hooks':
-      '0.19.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.19.3', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'hooks_runner':
-      '0.20.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.21.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
 };
 
