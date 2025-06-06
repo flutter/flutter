@@ -293,6 +293,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     // scroll position is very close to the middle of the item,
     // but not exactly in the middle.
     if (currentPosition != _lastMiddlePosition || currentItemOffset.abs() <= 0.1) {
+      // Middle is checked with currentPosition, but we pass the real index
+      // to avoid multiple haptics for the same item and to avoid
+      // calling haptic feedback when overscrolling.
       _handleHapticFeedback(index);
     }
 
