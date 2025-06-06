@@ -1,4 +1,4 @@
-Signature: 36480ac5dce672fd707075e9b57c1ef5
+Signature: 5d2a6018aed55b67bf6189f800d5f9b9
 
 ====================================================================================================
 LIBRARY: etc1
@@ -435,6 +435,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/fontconfig.md
+FILE: ../../../flutter/third_party/skia/relnotes/macos1015.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
