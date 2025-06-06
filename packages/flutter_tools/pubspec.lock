@@ -101,10 +101,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: "2d1f99d221a174275a7992152039264dcb69521bb61fb541544187b0eeeda018"
+      sha256: d1bacf6f0c507acc817e053f8186b79a600eeed78dbd04edcb8c5a8a07a37e1f
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.0"
+    version: "0.19.3"
   code_builder:
     dependency: "direct main"
     description:
@@ -301,18 +301,18 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: c29b5d113b093995426c9d2d4ce157902f04d426d9fb44206f88d2da7ae3e0f2
+      sha256: "6fa18c99c5fd6456c3edd99e3f857099c8748eb2062bb8374970f7896858512b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.1"
+    version: "0.19.3"
   hooks_runner:
     dependency: "direct main"
     description:
       name: hooks_runner
-      sha256: a0f1aa2ef80eb8a9c5d8335d613c0a16d0a3b038098151430ce2e884804244ca
+      sha256: "4b1db0e99d4a1a92c14691ab6b61c9b1ce348a1a1d6fe9cca9252cd85f89eeac"
       url: "https://pub.dev"
     source: hosted
-    version: "0.20.0"
+    version: "0.21.0"
   html:
     dependency: "direct main"
     description:

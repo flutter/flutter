@@ -59,6 +59,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName,
+            includeDevDependencies: false,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
