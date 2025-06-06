@@ -45,7 +45,6 @@ void main() {
           final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
             flutterBin,
             workingDirectoryPath,
-            iosLanguage: iosLanguage,
             platform: platformName,
             usesSwiftPackageManager: true,
             options: <String>['--platforms=$platformName'],
@@ -318,7 +317,6 @@ void main() {
       final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
         flutterBin,
         workingDirectoryPath,
-        iosLanguage: 'swift',
         platform: platformName,
         usesSwiftPackageManager: true,
         options: <String>['--platforms=$platformName'],
@@ -395,7 +393,6 @@ void main() {
         final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
           flutterBin,
           workingDirectoryPath,
-          iosLanguage: 'swift',
           platform: platformName,
           usesSwiftPackageManager: true,
           options: <String>['--platforms=$platformName'],
@@ -454,7 +451,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--template=module'],
@@ -546,7 +542,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>[],
@@ -630,7 +625,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
@@ -695,7 +689,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'macos',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=macos'],
@@ -762,7 +755,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
@@ -843,7 +835,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],

@@ -51,21 +51,18 @@ class SwiftPackageManagerUtils {
     String flutterBin,
     String workingDirectory, {
     required String platform,
-    required String iosLanguage,
     required List<String> options,
     bool usesSwiftPackageManager = false,
   }) async {
     final String appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
-    final String appName = '${platform}_${iosLanguage}_${appTemplateType}_app';
+    final String appName = '${platform}_${appTemplateType}_app';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
       '--org',
       'io.flutter.devicelab',
-      '-i',
-      iosLanguage,
       ...options,
       appName,
     ], workingDirectory: workingDirectory);
