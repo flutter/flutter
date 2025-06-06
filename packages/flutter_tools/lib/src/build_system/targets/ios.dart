@@ -640,10 +640,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[
-    const DebugUniversalFramework(),
-    ...super.dependencies,
-  ];
+  List<Target> get dependencies => <Target>[const DebugUniversalFramework(), ...super.dependencies];
 }
 
 /// IosAssetBundle with debug symbols, used for Profile and Release builds.
