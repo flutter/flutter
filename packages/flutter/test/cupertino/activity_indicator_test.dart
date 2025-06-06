@@ -155,6 +155,64 @@ void main() {
       ),
     );
   });
+
+  group('CupertinoLinearActivityIndicator', () {
+    testWidgets('It should draw the linear activity indicator', (WidgetTester tester) async {
+      await tester.pumpWidget(const Center(child: CupertinoLinearActivityIndicator(progress: 0.2)));
+
+      expect(
+        find.byType(CupertinoLinearActivityIndicator),
+        paints
+          ..rrect(
+            color: CupertinoColors.systemFill,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 800, 4.5),
+              const Radius.circular(2.25),
+            ),
+          )
+          ..rrect(
+            color: CupertinoColors.activeBlue,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 160, 4.5),
+              const Radius.circular(2.25),
+            ),
+          ),
+      );
+    });
+
+    testWidgets('It should draw the linear activity indicator with custom height and color', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Center(
+          child: CupertinoLinearActivityIndicator(
+            progress: 0.5,
+            height: 10,
+            color: CupertinoColors.activeGreen,
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoLinearActivityIndicator),
+        paints
+          ..rrect(
+            color: CupertinoColors.systemFill,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 800, 10),
+              const Radius.circular(5),
+            ),
+          )
+          ..rrect(
+            color: CupertinoColors.activeGreen,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 400, 10),
+              const Radius.circular(5),
+            ),
+          ),
+      );
+    });
+  });
 }
 
 Widget buildCupertinoActivityIndicator([bool? animating]) {
