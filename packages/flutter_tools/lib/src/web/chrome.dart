@@ -240,7 +240,7 @@ class ChromiumLauncher {
     _logger.printError('user data path: ${userDataDir.path}');
     final io.File chromeDebugLogFile = io.File('${userDataDir.path}/Default/chrome_debug.log');
     // bool printedUserDataDir = false;
-    Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+    Timer.periodic(const Duration(seconds: 60), (Timer timer) {
       // if (!printedUserDataDir && userDataDir.existsSync()) {
       //   _logger.printError('user data dir exists');
       //   _logger.printError('Contents:');
