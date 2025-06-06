@@ -33,10 +33,9 @@ FLUTTER_ASSERT_ARC
 - (void)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
-  id appDelegate = FlutterSharedApplication.application.delegate;
-  if ([appDelegate respondsToSelector:@selector(lifeCycleDelegate)]) {
-    FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate = [appDelegate lifeCycleDelegate];
-    [lifeCycleDelegate application:FlutterSharedApplication.application
+  NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
+  if ([appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
+    [appDelegate application:FlutterSharedApplication.application
         performActionForShortcutItem:shortcutItem
                    completionHandler:completionHandler];
   }
