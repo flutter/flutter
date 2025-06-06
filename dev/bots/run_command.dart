@@ -143,21 +143,6 @@ Future<Command> startCommand(
   );
 }
 
-/// Represents the type definition of the [runCommand] function for injection purposes.
-typedef RunCommandCallable =
-    Future<CommandResult> Function(
-      String executable,
-      List<String> arguments, {
-      String? workingDirectory,
-      Map<String, String>? environment,
-      bool expectNonZeroExit,
-      int? expectedExitCode,
-      String? failureMessage,
-      OutputMode outputMode,
-      bool Function(String line)? removeLine,
-      void Function(String line, io.Process process)? outputListener,
-    });
-
 /// Runs the `executable` and waits until the process exits.
 ///
 /// If the process exits with a non-zero exit code and `expectNonZeroExit` is
