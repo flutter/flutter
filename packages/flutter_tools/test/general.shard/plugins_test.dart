@@ -2522,7 +2522,7 @@ flutter:
       );
 
       testUsingContext(
-        'excludes dev dependencies from iOS plugin registrant',
+        'includes dev dependencies from iOS plugin registrant',
         () async {
           createPlugin(
             name: testPluginName,
@@ -2556,7 +2556,7 @@ flutter:
             releaseMode: true,
           );
           expect(generatedPluginRegistrantImpl, exists);
-          expect(generatedPluginRegistrantImpl.readAsStringSync(), isNot(contains(devDepImport)));
+          expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2602,7 +2602,7 @@ flutter:
       );
 
       testUsingContext(
-        'excludes dev dependencies from MacOS plugin registrant',
+        'includes dev dependencies from MacOS plugin registrant',
         () async {
           createPlugin(
             name: testPluginName,
@@ -2641,7 +2641,7 @@ flutter:
           expect(generatedPluginRegistrant, exists);
           expect(
             generatedPluginRegistrant.readAsStringSync(),
-            isNot(contains(expectedDevDepRegistration)),
+            contains(expectedDevDepRegistration),
           );
         },
         overrides: <Type, Generator>{

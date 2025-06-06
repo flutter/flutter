@@ -1255,36 +1255,47 @@ Future<void> injectPlugins(
   bool windowsPlatform = false,
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
-  List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> filteredPlugins;
   if (releaseMode) {
-    plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+    filteredPlugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+  } else {
+    filteredPlugins = plugins;
   }
 
-  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
-    plugins,
+  final Map<String, List<Plugin>> filteredPluginsByPlatform = _resolvePluginImplementations(
+    filteredPlugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
   );
 
   if (androidPlatform) {
-    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!);
-  }
-  if (iosPlatform) {
-    await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+    await _writeAndroidPluginRegistrant(
+      project,
+      filteredPluginsByPlatform[AndroidPlugin.kConfigKey]!,
+    );
   }
   if (linuxPlatform) {
-    await _writeLinuxPluginFiles(project, pluginsByPlatform[LinuxPlugin.kConfigKey]!);
-  }
-  if (macOSPlatform) {
-    await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+    await _writeLinuxPluginFiles(project, filteredPluginsByPlatform[LinuxPlugin.kConfigKey]!);
   }
   if (windowsPlatform) {
     await writeWindowsPluginFiles(
       project,
-      pluginsByPlatform[WindowsPlugin.kConfigKey]!,
+      filteredPluginsByPlatform[WindowsPlugin.kConfigKey]!,
       globals.templateRenderer,
     );
   }
+
   if (iosPlatform || macOSPlatform) {
+    final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
+      plugins,
+      pluginResolutionType: _PluginResolutionType.nativeOrDart,
+    );
+    if (iosPlatform) {
+      await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+    }
+    if (macOSPlatform) {
+      await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+    }
     final DarwinDependencyManagement darwinDependencyManagerSetup =
         darwinDependencyManagement ??
         DarwinDependencyManagement(
