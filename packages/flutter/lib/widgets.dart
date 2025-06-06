@@ -19,6 +19,7 @@ export 'foundation.dart' show UniqueKey;
 export 'rendering.dart' show TextSelectionHandleType;
 export 'src/widgets/actions.dart';
 export 'src/widgets/adapter.dart';
+export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_scroll_view.dart';
 export 'src/widgets/animated_size.dart';
@@ -179,3 +180,4 @@ export 'src/widgets/widget_inspector.dart';
 export 'src/widgets/widget_span.dart';
 export 'src/widgets/widget_state.dart';
 export 'src/widgets/will_pop_scope.dart';
+

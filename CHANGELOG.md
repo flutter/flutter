@@ -29,6 +29,10 @@ Our goal is to make the list easy for them to scan.
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
+## NEXT
+
+* Added `AdaptiveButton` widget that renders a `CupertinoButton` on iOS and an `ElevatedButton` on other platforms.
+
 ## Flutter 3.32 Changes
 
 ### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
