@@ -28,8 +28,6 @@ void main() {
     await processManager.run(<String>[
       flutterBin,
       'create',
-      '-t',
-      'module',
       projectName,
     ], workingDirectory: tempDir.path);
     final String projectPath = tempDir.childDirectory(projectName).path;
@@ -41,6 +39,7 @@ void main() {
       '--target-platform=android-arm',
       '--obfuscate',
       '--split-debug-info=foo/',
+      '--ci',
     ], workingDirectory: projectPath);
 
     final File outputApkDirectory = fileSystem.file(
@@ -49,12 +48,15 @@ void main() {
         'build',
         'app',
         'outputs',
-        'flutter-apk',
+        'apk',
+        'release',
         'app-release.apk',
       ),
     );
 
     expect(outputApkDirectory, exists);
+    // Expect "hello_world" is not present in the compiled output.
+    // This fails without the --obfuscate flag.
     expect(_containsSymbol(outputApkDirectory, 'lib/armeabi-v7a/libapp.so', projectName), false);
   });
 
@@ -66,6 +68,7 @@ void main() {
       '-t',
       'module',
       moduleName,
+      '--ci',
     ], workingDirectory: tempDir.path);
     final String projectPath = tempDir.childDirectory(moduleName).path;
 
@@ -97,6 +100,8 @@ void main() {
     );
 
     expect(outputAarDirectory, exists);
+    // Expect "hello_module" is not present in the compiled output.
+    // This fails without the --obfuscate flag.
     expect(_containsSymbol(outputAarDirectory, 'jni/armeabi-v7a/libapp.so', moduleName), false);
   });
 }
