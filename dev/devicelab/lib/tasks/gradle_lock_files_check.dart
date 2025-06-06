@@ -30,12 +30,7 @@ Future<void> runGradleLockFilesCheck({
   print('Running gradle lockfiles check');
 
   try {
-    await execFn(
-      'git',
-      <String>['stash'],
-      canFail: true,
-      workingDirectory: flutterDirectory.path,
-    );
+    await execFn('git', <String>['stash'], canFail: true, workingDirectory: flutterDirectory.path);
 
     await execFn(
       _dartCommand,
@@ -86,7 +81,7 @@ Future<void> runGradleLockFilesCheck({
     await execFn(
       'git',
       <String>['stash', 'pop'],
-      // Must be  false in case there is no stash to pop (no changes stashed in the first place).
+      // Must be false in case there is no stash to pop (no changes stashed in the first place).
       canFail: false,
       workingDirectory: flutterDirectory.path,
     );
@@ -100,10 +95,7 @@ Set<String> _getFileChangesFromGitStatus(String currentGitState) {
   return fileChanges;
 }
 
-Future<String> _getGitStatusOutput({
-  required bool printOutput,
-  EvalFunction evalFn = eval,
-}) async {
+Future<String> _getGitStatusOutput({required bool printOutput, EvalFunction evalFn = eval}) async {
   final String gitStatusOutput = await evalFn(
     'git',
     <String>['status', '--porcelain', '--untracked-files=all'],

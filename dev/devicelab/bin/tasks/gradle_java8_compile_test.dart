@@ -103,6 +103,5 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
     } catch (e) {
       return TaskResult.failure(e.toString());
     }
-   });
+  });
 }
-
