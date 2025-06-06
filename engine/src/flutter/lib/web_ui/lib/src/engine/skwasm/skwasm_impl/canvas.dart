@@ -143,8 +143,7 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    path as SkwasmPath;
-    canvasClipPath(_handle, path.handle, doAntiAlias);
+    canvasClipPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, doAntiAlias);
   }
 
   @override
@@ -238,9 +237,8 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    path as SkwasmPath;
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPath(_handle, path.handle, paintHandle);
+    canvasDrawPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, paintHandle);
     paintDispose(paintHandle);
   }
 
@@ -391,10 +389,9 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
-    path as SkwasmPath;
     canvasDrawShadow(
       _handle,
-      path.handle,
+      ((path as LazyPath).builtPath as SkwasmPath).handle,
       elevation,
       EngineFlutterDisplay.instance.devicePixelRatio,
       color.value,
