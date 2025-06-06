@@ -38,30 +38,5 @@ void main() {
     expect(lastWidget.progress, 0.6);
     expect(lastWidget.height, 4.5);
     expect(lastWidget.color, CupertinoColors.activeGreen);
-    // expect(
-    //   firstIndicator,
-    //   paints..rrect(
-    //     color: CupertinoColors.systemFill,
-    //     rrect: RRect.fromRectAndRadius(
-    //       const Rect.fromLTWH(0.0, 0.0, 784, 4.5),
-    //       const Radius.circular(2.25),
-    //     ),
-    //   ),
-    // );
-    // expect(firstIndicator, isNot(paints..rrect(color: CupertinoColors.activeBlue)));
-
-    // final Finder secondIndicator = find.byType(CupertinoLinearActivityIndicator).at(1);
-    // expect(tester.widget<CupertinoLinearActivityIndicator>(secondIndicator).progress, 0.2);
-    // expect(
-    //   secondIndicator,
-    //   paints..rrect(
-    //     color: CupertinoColors.systemFill,
-    //     rrect: RRect.fromRectAndRadius(
-    //       const Rect.fromLTWH(0.0, 0.0, 784, 4.5),
-    //       const Radius.circular(2.25),
-    //     ),
-    //   ),
-    // );
-    // expect(secondIndicator, paints..rrect(color: const Color(0xff123456)));
   });
 }
