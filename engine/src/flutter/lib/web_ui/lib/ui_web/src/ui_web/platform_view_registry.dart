@@ -13,8 +13,12 @@ typedef ParameterizedPlatformViewFactory = Object Function(int viewId, {Object? 
 typedef PlatformViewFactory = Object Function(int viewId);
 
 /// The platform view registry for this app.
-PlatformViewRegistry get platformViewRegistry => _platformViewRegistry ??= PlatformViewRegistry();
-PlatformViewRegistry? _platformViewRegistry;
+PlatformViewRegistry get platformViewRegistry =>
+    _platformViewRegistryOverride ?? _defaultPlatformViewRegistry;
+
+final PlatformViewRegistry _defaultPlatformViewRegistry = PlatformViewRegistry();
+
+PlatformViewRegistry? _platformViewRegistryOverride;
 
 /// Overrides the platform view registry.
 ///
@@ -24,7 +28,7 @@ PlatformViewRegistry? _platformViewRegistry;
 /// This is intended for tests only.
 @visibleForTesting
 void debugOverridePlatformViewRegistry(PlatformViewRegistry? value) {
-  _platformViewRegistry = value;
+  _platformViewRegistryOverride = value;
 }
 
 /// A registry for factories that create platform views.

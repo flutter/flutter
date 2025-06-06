@@ -12,13 +12,14 @@ void main() {
 
 void testMain() {
   test('platformViewRegistry can be overridden', () {
+    final PlatformViewRegistry defaultRegistry = platformViewRegistry;
     final PlatformViewRegistry overrideRegistry = MockPlatformViewRegistry();
 
     debugOverridePlatformViewRegistry(overrideRegistry);
     expect(platformViewRegistry, overrideRegistry);
 
     debugOverridePlatformViewRegistry(null);
-    expect(platformViewRegistry, isNot(overrideRegistry));
+    expect(platformViewRegistry, defaultRegistry);
   });
 }
 
