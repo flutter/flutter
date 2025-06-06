@@ -220,7 +220,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   late int _lastHapticIndex = _effectiveController.initialItem;
   int? _lastMiddlePosition;
   FixedExtentScrollController? _controller;
-  bool _skipHapticFeedback = false;
+  bool _enableHapticFeedback = true;
 
   FixedExtentScrollController get _effectiveController => widget.scrollController ?? _controller!;
 
@@ -259,7 +259,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   void _handleHapticFeedback(int index) {
-    if (_skipHapticFeedback) {
+    if (!_enableHapticFeedback) {
       return;
     }
     switch (defaultTargetPlatform) {
@@ -300,13 +300,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   Future<void> _handleChildTap(int index) async {
-    _skipHapticFeedback = true;
+    _enableHapticFeedback = false;
     await _effectiveController.animateToItem(
       index,
       duration: _kCupertinoPickerTapToScrollDuration,
       curve: _kCupertinoPickerTapToScrollCurve,
     );
-    _skipHapticFeedback = false;
+    _enableHapticFeedback = true;
     _lastHapticIndex = _effectiveController.selectedItem;
   }
 
