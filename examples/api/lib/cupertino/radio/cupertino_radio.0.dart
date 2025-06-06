@@ -37,33 +37,25 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListSection(
-      children: <Widget>[
-        CupertinoListTile(
-          title: const Text('Lafayette'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.lafayette,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+    return RadioGroup<SingingCharacter>(
+      groupValue: _character,
+      onChanged: (SingingCharacter? value) {
+        setState(() {
+          _character = value;
+        });
+      },
+      child: CupertinoListSection(
+        children: const <Widget>[
+          CupertinoListTile(
+            title: Text('Lafayette'),
+            leading: CupertinoRadio<SingingCharacter>(value: SingingCharacter.lafayette),
           ),
-        ),
-        CupertinoListTile(
-          title: const Text('Thomas Jefferson'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.jefferson,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+          CupertinoListTile(
+            title: Text('Thomas Jefferson'),
+            leading: CupertinoRadio<SingingCharacter>(value: SingingCharacter.jefferson),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
