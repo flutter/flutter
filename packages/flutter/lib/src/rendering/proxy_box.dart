@@ -4543,6 +4543,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (config.validationResult != _properties.validationResult) {
       config.validationResult = _properties.validationResult;
     }
+    if (_properties.minValue != null) {
+      config.minValue = _properties.minValue;
+    }
+    if (_properties.maxValue != null) {
+      config.maxValue = _properties.maxValue;
+    }
 
     if (_properties.inputType != null) {
       config.inputType = _properties.inputType!;

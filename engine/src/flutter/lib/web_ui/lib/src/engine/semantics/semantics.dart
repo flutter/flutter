@@ -35,6 +35,7 @@ import 'list.dart';
 import 'live_region.dart';
 import 'menus.dart';
 import 'platform_view.dart';
+import 'progress_bar.dart';
 import 'requirable.dart';
 import 'route.dart';
 import 'scrollable.dart';
@@ -265,6 +266,8 @@ class SemanticsNodeUpdate {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -377,6 +380,12 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final String minValue;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final String maxValue;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -480,6 +489,12 @@ enum EngineSemanticsRole {
 
   /// An item in a [list].
   listItem,
+
+  /// A graphic object that shows progress with a numeric number.
+  progressBar,
+
+  /// A graphic object that spins to indicate the application is busy.
+  loadingSpinner,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1422,6 +1437,32 @@ class SemanticsObject {
     _dirtyFields |= _validationResultIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  String? get minValue => _minValue;
+  String? _minValue;
+
+  static const int _minValueIndex = 1 << 28;
+
+  /// Whether the [minValue] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isMinValueDirty => _isDirty(_minValueIndex);
+  void _markMinValueDirty() {
+    _dirtyFields |= _minValueIndex;
+  }
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+
+  static const int _maxValueIndex = 1 << 29;
+
+  /// Whether the [maxValue] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isMaxValueDirty => _isDirty(_maxValueIndex);
+  void _markMaxValueDirty() {
+    _dirtyFields |= _maxValueIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1727,6 +1768,16 @@ class SemanticsObject {
       _markValidationResultDirty();
     }
 
+    if (_minValue != update.minValue) {
+      _minValue = update.minValue;
+      _markMinValueDirty();
+    }
+
+    if (_maxValue != update.maxValue) {
+      _maxValue = update.maxValue;
+      _markMaxValueDirty();
+    }
+
     role = update.role;
 
     inputType = update.inputType;
@@ -1962,6 +2013,10 @@ class SemanticsObject {
         return EngineSemanticsRole.list;
       case ui.SemanticsRole.listItem:
         return EngineSemanticsRole.listItem;
+      case ui.SemanticsRole.loadingSpinner:
+        return EngineSemanticsRole.loadingSpinner;
+      case ui.SemanticsRole.progressBar:
+        return EngineSemanticsRole.progressBar;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
@@ -1969,8 +2024,6 @@ class SemanticsObject {
       case ui.SemanticsRole.comboBox:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
-      case ui.SemanticsRole.loadingSpinner:
-      case ui.SemanticsRole.progressBar:
       case ui.SemanticsRole.hotKey:
       case ui.SemanticsRole.none:
       // fallback to checking semantics properties.
@@ -2037,6 +2090,8 @@ class SemanticsObject {
       EngineSemanticsRole.menuItemRadio => SemanticMenuItemRadio(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
+      EngineSemanticsRole.progressBar => SemanticsProgressBar(this),
+      EngineSemanticsRole.loadingSpinner => SementicsLoadingSpinner(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }
