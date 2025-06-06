@@ -44,8 +44,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   late StreamSubscription<int> _onViewDisposedListener;
 
-  final Arena frameArena = Arena();
-
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
@@ -262,7 +260,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
-    frameArena.collect();
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -743,7 +740,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // order to perform golden tests in Flutter framework because on the HTML
     // renderer, golden tests render to DOM and then take a browser screenshot,
     // https://github.com/flutter/flutter/issues/137073.
-    if (shouldRender) {
+    if (shouldRender || renderer.rendererTag == 'html') {
       await renderer.renderScene(scene, target);
     }
   }
