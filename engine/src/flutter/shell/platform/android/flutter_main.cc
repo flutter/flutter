@@ -65,6 +65,23 @@ static constexpr const char* kBLC[] = {
     "exynos9810"   //
 };
 
+// Workaround for crashes in Vivante GL driver on Android.
+//
+// See:
+//   * https://github.com/flutter/flutter/issues/167850
+//   * http://crbug.com/141785
+#ifdef FML_OS_ANDROID
+bool IsVivante() {
+  char product_model[PROP_VALUE_MAX];
+  __system_property_get("ro.hardware.egl", product_model);
+  return strcmp(product_model, "VIVANTE") == 0;
+}
+#else
+bool IsVivante() {
+  return false;
+}
+#endif  // FML_OS_ANDROID
+
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings,
@@ -308,7 +325,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     // Even if this check returns true, Impeller may determine it cannot use
     // Vulkan for some other reason, such as a missing required extension or
     // feature. In these cases it will use OpenGLES.
-    if (api_level < kMinimumAndroidApiLevelForImpeller) {
+    if (api_level < kMinimumAndroidApiLevelForImpeller && !IsVivante()) {
       return AndroidRenderingAPI::kSkiaOpenGLES;
     }
     char product_model[PROP_VALUE_MAX];
