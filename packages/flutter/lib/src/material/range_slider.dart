@@ -1189,8 +1189,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   bool get shouldAlwaysShowValueIndicator =>
       _sliderTheme.showValueIndicator == ShowValueIndicator.alwaysVisible;
   bool get shouldShowValueIndicatorWhenDragged => switch (_sliderTheme.showValueIndicator!) {
-    ShowValueIndicator.onlyForDiscrete => isDiscrete && _active,
-    ShowValueIndicator.onlyForContinuous => !isDiscrete && _active,
+    ShowValueIndicator.onlyForDiscrete => isDiscrete,
+    ShowValueIndicator.onlyForContinuous => !isDiscrete,
     ShowValueIndicator.alwaysVisible ||
     ShowValueIndicator.always ||
     ShowValueIndicator.onDrag => true,
