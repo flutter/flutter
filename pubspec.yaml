@@ -199,7 +199,7 @@ dependencies:
   webkit_inspection_protocol: 1.2.1
   webview_flutter: 4.9.0
   webview_flutter_android: 3.16.9
-  webview_flutter_platform_interface: 2.13.0
+  webview_flutter_platform_interface: 2.13.1
   webview_flutter_wkwebview: 3.22.0
   xdg_directories: 1.1.0
   xml: 6.5.0
@@ -214,4 +214,4 @@ dependencies:
   quiver: 3.2.2
   yaml_edit: 2.2.2
 
-# PUBSPEC CHECKSUM: 51a6er
+# PUBSPEC CHECKSUM: vtsl7j
