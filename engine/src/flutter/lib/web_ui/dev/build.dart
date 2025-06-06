@@ -25,18 +25,12 @@ const Map<String, String> targetAliases = <String, String>{
 
 class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {
-    argParser.addFlag(
+    argParser.addMultiOption(
       'watch',
       abbr: 'w',
       help:
           'Run the build in watch mode so it rebuilds whenever a change is '
           'made. Disabled by default.',
-    );
-    argParser.addMultiOption(
-      'watch-dir',
-      abbr: 'd',
-      help: 'Watch the specified directory for changes.',
-      defaultsTo: ['lib'],
       valueHelp: 'lib, flutter_js, skwasm',
     );
     argParser.addFlag(
@@ -73,9 +67,9 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
   @override
   String get description => 'Build the Flutter web engine.';
 
-  bool get isWatchMode => boolArg('watch');
+  bool get isWatchMode => argResults?.wasParsed('watch') ?? false;
 
-  List<String> get watchDirs => argResults?['watch-dir'] as List<String>;
+  List<String> get watchDirs => argResults?['watch'] as List<String>? ?? <String>['lib'];
 
   bool get host => boolArg('host');
 
