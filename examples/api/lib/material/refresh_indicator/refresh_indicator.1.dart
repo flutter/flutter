@@ -32,6 +32,7 @@ class RefreshIndicatorExample extends StatelessWidget {
       appBar: AppBar(title: const Text('RefreshIndicator Sample')),
       body: RefreshIndicator(
         color: Colors.white,
+        dragSensitivity: .7,
         backgroundColor: Colors.blue,
         onRefresh: () async {
           // Replace this delay with the code to be executed during refresh

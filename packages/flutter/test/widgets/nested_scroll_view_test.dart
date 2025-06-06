@@ -13,6 +13,13 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
+bool refreshCalled = false;
+
+Future<void> refresh() {
+  refreshCalled = true;
+  return Future<void>.value();
+}
+
 class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({super.parent});
 
@@ -3418,6 +3425,107 @@ void main() {
       ),
       areCreateAndDispose,
     );
+  });
+
+  testWidgets('NestedScrollView with RefreshIndicator - default sensitivity', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                title: Text('Nested Scroll View'),
+                pinned: true,
+                expandedHeight: 200.0,
+              ),
+            ];
+          },
+          body: RefreshIndicator(
+            onRefresh: refresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('NestedScrollView with RefreshIndicator - increased sensitivity', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                title: Text('Nested Scroll View'),
+                pinned: true,
+                expandedHeight: 200.0,
+              ),
+            ];
+          },
+          body: RefreshIndicator(
+            onRefresh: refresh,
+            dragSensitivity: 1.5,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 250.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('NestedScrollView with RefreshIndicator - decreased sensitivity', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                title: Text('Nested Scroll View'),
+                pinned: true,
+                expandedHeight: 200.0,
+              ),
+            ];
+          },
+          body: RefreshIndicator(
+            onRefresh: refresh,
+            dragSensitivity: 0.5,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 400.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
   });
 }
 
