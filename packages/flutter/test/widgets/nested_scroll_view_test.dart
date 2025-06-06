@@ -3427,7 +3427,9 @@ void main() {
     );
   });
 
-  testWidgets('NestedScrollView with RefreshIndicator - default sensitivity', (WidgetTester tester) async {
+  testWidgets('NestedScrollView with RefreshIndicator - default sensitivity', (
+    WidgetTester tester,
+  ) async {
     refreshCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -3460,7 +3462,9 @@ void main() {
     expect(refreshCalled, true);
   });
 
-  testWidgets('NestedScrollView with RefreshIndicator - increased sensitivity', (WidgetTester tester) async {
+  testWidgets('NestedScrollView with RefreshIndicator - increased sensitivity', (
+    WidgetTester tester,
+  ) async {
     refreshCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -3494,7 +3498,9 @@ void main() {
     expect(refreshCalled, true);
   });
 
-  testWidgets('NestedScrollView with RefreshIndicator - decreased sensitivity', (WidgetTester tester) async {
+  testWidgets('NestedScrollView with RefreshIndicator - decreased sensitivity', (
+    WidgetTester tester,
+  ) async {
     refreshCalled = false;
     await tester.pumpWidget(
       MaterialApp(
