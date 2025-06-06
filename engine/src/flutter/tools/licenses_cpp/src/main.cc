@@ -17,6 +17,10 @@ ABSL_FLAG(std::optional<std::string>,
           data_dir,
           std::nullopt,
           "[REQUIRED] The directory with the licenses.");
+ABSL_FLAG(std::optional<std::string>,
+          licenses_path,
+          std::nullopt,
+          "[REQUIRED] The path to write the licenses collection to.");
 ABSL_FLAG(int, v, 0, "Set the verbosity of logs.");
 
 int main(int argc, char** argv) {
@@ -29,8 +33,15 @@ int main(int argc, char** argv) {
 
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
   std::optional<std::string> data_dir = absl::GetFlag(FLAGS_working_dir);
-  if (working_dir.has_value() && data_dir.has_value()) {
-    return LicenseChecker::Run(working_dir.value(), data_dir.value());
+  std::optional<std::string> licenses_path = absl::GetFlag(FLAGS_licenses_path);
+  if (working_dir.has_value() && data_dir.has_value() && licenses_path.has_value()) {
+    std::ofstream licenses;
+    licenses.open(licenses_path.value());
+    if (licenses.bad()) {
+      std::cerr << "Unable to write to '" << licenses_path << "'.";
+      return 1;
+    }
+    return LicenseChecker::Run(working_dir.value(), licenses, data_dir.value());
   }
 
   if (!working_dir.has_value()) {

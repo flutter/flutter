@@ -5,6 +5,7 @@
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
 #include <unistd.h>
+#include <iostream>
 #include <filesystem>
 #include <vector>
 
@@ -95,6 +96,7 @@ bool IsStdoutTerminal() {
 }  // namespace
 
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
+                                              std::ostream& licenses,
                                               const Data& data) {
   std::vector<absl::Status> errors;
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
@@ -144,6 +146,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                         if (RE2::PartialMatch(comment, pattern, &match)) {
                           did_find_copyright = true;
                           VLOG(1) << comment;
+                          licenses << "engine\n\n" << comment << "\n";
                         }
                       });
       if (!did_find_copyright) {
@@ -161,6 +164,7 @@ std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
 }
 
 int LicenseChecker::Run(std::string_view working_dir,
+                        std::ostream& licenses,
                         std::string_view data_dir) {
   absl::StatusOr<Data> data = Data::Open(data_dir);
   if (!data.ok()) {
@@ -168,7 +172,7 @@ int LicenseChecker::Run(std::string_view working_dir,
               << std::endl;
     return 1;
   }
-  std::vector<absl::Status> errors = Run(working_dir, data.value());
+  std::vector<absl::Status> errors = Run(working_dir, licenses, data.value());
   for (const absl::Status& status : errors) {
     std::cerr << status << std::endl;
   }
