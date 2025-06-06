@@ -212,10 +212,11 @@ packages:
   dwds:
     dependency: "direct main"
     description:
-      path: "/Users/srujzs/webdev/webdev/dwds"
-      relative: false
-    source: path
-    version: "24.3.11-wip"
+      name: dwds
+      sha256: "063ca26b035fa80b7b66664d9efbc5d2acb45e139a452d59b0fe6df61a96f443"
+      url: "https://pub.dev"
+    source: hosted
+    version: "24.3.10"
   extension_discovery:
     dependency: "direct main"
     description:

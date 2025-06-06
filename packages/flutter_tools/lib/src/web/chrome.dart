@@ -239,13 +239,26 @@ class ChromiumLauncher {
 
     _logger.printError('user data path: ${userDataDir.path}');
     final io.File chromeDebugLogFile = io.File('${userDataDir.path}/chrome_debug.log');
+    bool printedUserDataDir = false;
     Timer.periodic(const Duration(seconds: 10), (Timer timer) {
-      if (userDataDir.existsSync()) {
+      if (!printedUserDataDir && userDataDir.existsSync()) {
         _logger.printError('user data dir exists');
         _logger.printError('Contents:');
-        for (final entity in userDataDir.listSync()) {
-          _logger.printError(entity.path);
+        void printDirectory(Directory dir) {
+          _logger.printError('Entering ${dir.path}');
+          for (final FileSystemEntity e in dir.listSync()) {
+            final FileStat stat = e.statSync();
+            if (stat.type == FileSystemEntityType.directory) {
+              printDirectory(e as Directory);
+            } else {
+              _logger.printError('Not directory: ${e.path}');
+            }
+          }
+          _logger.printError('Exiting ${dir.path}');
         }
+
+        printDirectory(userDataDir);
+        printedUserDataDir = true;
       }
       if (chromeDebugLogFile.existsSync()) {
         timer.cancel();
