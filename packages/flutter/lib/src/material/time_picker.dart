@@ -646,9 +646,10 @@ class _DayPeriodControl extends StatelessWidget {
     }
 
     final Widget result;
-    bool showSeparator = true;
     OutlinedBorder amShape = resolvedShape;
     OutlinedBorder pmShape = resolvedShape;
+    final bool hasRoundedBorder =
+        resolvedShape is RoundedRectangleBorder && resolvedShape.borderRadius is BorderRadius;
 
     // In order to respect Material touch target guidelines, the Semantics for
     // AM and PM buttons needs to expand out of the bounds of the buttons
@@ -660,8 +661,7 @@ class _DayPeriodControl extends StatelessWidget {
     // is obtained by removing some rounded corners from the original shape.
     switch (orientation) {
       case Orientation.portrait:
-        if (resolvedShape is RoundedRectangleBorder && resolvedShape.borderRadius is BorderRadius) {
-          showSeparator = false;
+        if (hasRoundedBorder) {
           final BorderRadius borderRadius = resolvedShape.borderRadius as BorderRadius;
           amShape = resolvedShape.copyWith(
             borderRadius: BorderRadius.only(
@@ -703,22 +703,11 @@ class _DayPeriodControl extends StatelessWidget {
           orientation: orientation,
           child: SizedBox.fromSize(
             size: minInteractiveSize,
-            child: Column(
-              children: <Widget>[
-                Expanded(child: amButton),
-                if (showSeparator)
-                  Container(
-                    decoration: BoxDecoration(border: Border(top: resolvedSide)),
-                    height: 1,
-                  ),
-                Expanded(child: pmButton),
-              ],
-            ),
+            child: Column(children: <Widget>[Expanded(child: amButton), Expanded(child: pmButton)]),
           ),
         );
       case Orientation.landscape:
-        if (resolvedShape is RoundedRectangleBorder && resolvedShape.borderRadius is BorderRadius) {
-          showSeparator = false;
+        if (hasRoundedBorder) {
           final BorderRadius borderRadius = resolvedShape.borderRadius as BorderRadius;
           amShape = resolvedShape.copyWith(
             borderRadius: BorderRadius.only(
@@ -764,17 +753,7 @@ class _DayPeriodControl extends StatelessWidget {
           orientation: orientation,
           child: SizedBox(
             height: minInteractiveSize.height,
-            child: Row(
-              children: <Widget>[
-                Expanded(child: amButton),
-                if (showSeparator)
-                  Container(
-                    decoration: BoxDecoration(border: Border(left: resolvedSide)),
-                    width: 1,
-                  ),
-                Expanded(child: pmButton),
-              ],
-            ),
+            child: Row(children: <Widget>[Expanded(child: amButton), Expanded(child: pmButton)]),
           ),
         );
     }
