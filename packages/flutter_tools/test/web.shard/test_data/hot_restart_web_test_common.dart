@@ -84,31 +84,9 @@ Future<void> _testProject(
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('$testName: hot restart works without error', () async {
-    flutter.stdout.listen(printOnFailure);
-    await flutter.run(
-      device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: <String>[
-        '--verbose',
-        if (useDDCLibraryBundleFormat)
-          '--web-experimental-hot-reload'
-        else
-          '--no-web-experimental-hot-reload',
-      ],
-    );
-    await flutter.hotRestart();
-  });
-
   testWithoutContext(
-    '$testName: newly added code executes during hot restart - canvaskit',
+    '$testName: hot restart works without error and newly added code executes',
     () async {
-      final Completer<void> completer = Completer<void>();
-      final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
-        printOnFailure(line);
-        if (line.contains('(((((RELOAD WORKED)))))')) {
-          completer.complete();
-        }
-      });
       await flutter.run(
         device: GoogleChromeDevice.kChromeDeviceId,
         additionalCommandArgs: <String>[
@@ -119,6 +97,16 @@ Future<void> _testProject(
             '--no-web-experimental-hot-reload',
         ],
       );
+      // hot restart works without error
+      await flutter.hotRestart();
+
+      final Completer<void> completer = Completer<void>();
+      final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+        printOnFailure(line);
+        if (line.contains('(((((RELOAD WORKED)))))')) {
+          completer.complete();
+        }
+      });
       project.uncommentHotReloadPrint();
       try {
         await flutter.hotRestart();
@@ -127,7 +115,5 @@ Future<void> _testProject(
         await subscription.cancel();
       }
     },
-    // Skipped for https://github.com/flutter/flutter/issues/110879.
-    skip: true,
   );
 }

@@ -95,6 +95,9 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  printProgress('Release branch validation');
+  await verifyReleaseBranchState(flutterRoot);
+
   printProgress('TargetPlatform tool/framework consistency');
   await verifyTargetPlatform(flutterRoot);
 
@@ -298,6 +301,15 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
     parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
   );
   return _Line(lineNumber, content);
+}
+
+Future<void> verifyReleaseBranchState(String workringDirerctory) async {
+  final ProcessResult result = await Process.run(dart, <String>[
+    'bin/check_engine_version.dart',
+  ], workingDirectory: path.join(workringDirerctory, 'dev', 'tools'));
+  if (result.exitCode != 0) {
+    foundError(<String>['${result.stderr}']);
+  }
 }
 
 Future<void> verifyTargetPlatform(String workingDirectory) async {

@@ -918,7 +918,9 @@ class WebDevFS implements DevFS {
 
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
-  /// Only calls [AppConnection.runMain] on the subsequent connections.
+  /// Only calls [AppConnection.runMain] on the subsequent connections. This
+  /// should be called before the browser is launched to make sure the listener
+  /// is registered early enough.
   Future<ConnectionResult?> connect(
     bool useDebugExtension, {
     @visibleForTesting VmServiceFactory vmServiceFactory = createVmServiceDelegate,

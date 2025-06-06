@@ -1844,6 +1844,8 @@ class _PersistentNavigationBar extends StatelessWidget {
         backLabel != null &&
         !CupertinoSheetRoute.hasParentSheet(context)) {
       leading = CupertinoNavigationBarBackButton._assemble(backChevron, backLabel);
+    } else {
+      leading = Align(widthFactor: 1.0, child: leading);
     }
 
     Widget paddedToolbar = NavigationToolbar(

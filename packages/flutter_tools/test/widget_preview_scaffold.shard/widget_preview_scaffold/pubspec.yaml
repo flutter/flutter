@@ -53,7 +53,7 @@ dependencies:
   url_launcher_web: 2.4.1
   url_launcher_windows: 3.1.4
   vector_math: 2.2.0
-  vm_service: 15.0.1
+  vm_service: 15.0.2
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
@@ -61,4 +61,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: rkqek9
+# PUBSPEC CHECKSUM: qqjk1

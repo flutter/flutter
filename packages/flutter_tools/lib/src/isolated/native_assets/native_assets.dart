@@ -212,8 +212,9 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.runPackageName,
-    this.pubspecPath,
-  );
+    this.pubspecPath, {
+    required this.includeDevDependencies,
+  });
 
   final String pubspecPath;
   final String packageConfigPath;
@@ -221,6 +222,9 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final FileSystem fileSystem;
   final Logger logger;
   final String runPackageName;
+
+  /// Include the dev dependencies of [runPackageName].
+  final bool includeDevDependencies;
 
   late final logging.Logger _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -252,6 +256,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     packageConfig,
     Uri.file(packageConfigPath),
     runPackageName,
+    includeDevDependencies: includeDevDependencies,
   );
 
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
