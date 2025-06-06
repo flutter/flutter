@@ -97,6 +97,11 @@ enum class SemanticsRole : int32_t {
   kRadioGroup = 25,
   kStatus = 26,
   kAlert = 27,
+  kComplementary = 28,
+  kContentInfo = 29,
+  kMain = 30,
+  kNavigation = 31,
+  kRegion = 32,
 };
 
 /// C/C++ representation of `SemanticsValidationResult` defined in
