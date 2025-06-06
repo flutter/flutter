@@ -677,11 +677,16 @@ class _DayPeriodControl extends StatelessWidget {
           );
         }
 
+        final Size minInteractiveSize = Size(
+          dayPeriodSize.width,
+          math.max(dayPeriodSize.height, 2 * kMinInteractiveDimension),
+        );
+
         final Widget amButton = _AmPmButton(
           selected: amSelected,
           onPressed: () => _setAm(context),
           label: materialLocalizations.anteMeridiemAbbreviation,
-          semanticAlignment: Alignment.bottomCenter,
+          padding: EdgeInsets.only(top: (minInteractiveSize.height - dayPeriodSize.height) / 2),
           shape: amShape,
         );
 
@@ -689,18 +694,15 @@ class _DayPeriodControl extends StatelessWidget {
           selected: pmSelected,
           onPressed: () => _setPm(context),
           label: materialLocalizations.postMeridiemAbbreviation,
-          semanticAlignment: Alignment.topCenter,
+          padding: EdgeInsets.only(bottom: (minInteractiveSize.height - dayPeriodSize.height) / 2),
           shape: pmShape,
         );
 
         result = _DayPeriodInputPadding(
-          minSize: Size(
-            dayPeriodSize.width,
-            math.max(dayPeriodSize.height, 2 * kMinInteractiveDimension),
-          ),
+          minSize: minInteractiveSize,
           orientation: orientation,
           child: SizedBox.fromSize(
-            size: dayPeriodSize,
+            size: minInteractiveSize,
             child: Column(
               children: <Widget>[
                 Expanded(child: amButton),
@@ -732,11 +734,18 @@ class _DayPeriodControl extends StatelessWidget {
           );
         }
 
+        final Size minInteractiveSize = Size(
+          dayPeriodSize.width,
+          math.max(dayPeriodSize.height, kMinInteractiveDimension),
+        );
+
         final Widget amButton = _AmPmButton(
           selected: amSelected,
           onPressed: () => _setAm(context),
           label: materialLocalizations.anteMeridiemAbbreviation,
-          semanticAlignment: Alignment.center,
+          padding: EdgeInsets.symmetric(
+            vertical: (minInteractiveSize.height - dayPeriodSize.height) / 2,
+          ),
           shape: amShape,
         );
 
@@ -744,18 +753,17 @@ class _DayPeriodControl extends StatelessWidget {
           selected: pmSelected,
           onPressed: () => _setPm(context),
           label: materialLocalizations.postMeridiemAbbreviation,
-          semanticAlignment: Alignment.center,
+          padding: EdgeInsets.symmetric(
+            vertical: (minInteractiveSize.height - dayPeriodSize.height) / 2,
+          ),
           shape: pmShape,
         );
 
         result = _DayPeriodInputPadding(
-          minSize: Size(
-            dayPeriodSize.width,
-            math.max(dayPeriodSize.height, kMinInteractiveDimension),
-          ),
+          minSize: minInteractiveSize,
           orientation: orientation,
           child: SizedBox(
-            height: dayPeriodSize.height,
+            height: minInteractiveSize.height,
             child: Row(
               children: <Widget>[
                 Expanded(child: amButton),
@@ -779,14 +787,14 @@ class _AmPmButton extends StatelessWidget {
     required this.onPressed,
     required this.selected,
     required this.label,
-    required this.semanticAlignment,
+    required this.padding,
     required this.shape,
   });
 
   final bool selected;
   final VoidCallback onPressed;
   final String label;
-  final Alignment semanticAlignment;
+  final EdgeInsets padding;
   final OutlinedBorder shape;
 
   @override
@@ -808,100 +816,24 @@ class _AmPmButton extends StatelessWidget {
     )?.copyWith(color: resolvedTextColor);
     final TextScaler buttonTextScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0);
 
-    return _AmPmSemantics(
-      minSemanticHeight: kMinInteractiveDimension,
+    return Semantics(
       checked: selected,
-      alignment: semanticAlignment,
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        color: resolvedBackgroundColor,
-        shape: shape,
-        child: InkWell(
-          onTap: onPressed,
-          child: Center(child: Text(label, style: resolvedTextStyle, textScaler: buttonTextScaler)),
+      inMutuallyExclusiveGroup: true,
+      button: true,
+      child: Padding(
+        padding: padding,
+        child: Material(
+          clipBehavior: Clip.antiAlias,
+          color: resolvedBackgroundColor,
+          shape: shape,
+          child: InkWell(
+            onTap: onPressed,
+            child: Center(
+              child: Text(label, style: resolvedTextStyle, textScaler: buttonTextScaler),
+            ),
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _AmPmSemantics extends SingleChildRenderObjectWidget {
-  const _AmPmSemantics({
-    super.child,
-    required this.minSemanticHeight,
-    required this.alignment,
-    required this.checked,
-  });
-
-  final double minSemanticHeight;
-  final Alignment alignment;
-  final bool checked;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderAmPmSemantics(minSemanticHeight, alignment, checked);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, covariant _RenderAmPmSemantics renderObject) {
-    renderObject.minSemanticHeight = minSemanticHeight;
-    renderObject.alignment = alignment;
-    renderObject.checked = checked;
-  }
-}
-
-class _RenderAmPmSemantics extends RenderProxyBox {
-  _RenderAmPmSemantics(this._minSemanticHeight, this._alignment, this._checked, [RenderBox? child])
-    : super(child);
-
-  double get minSemanticHeight => _minSemanticHeight;
-  double _minSemanticHeight;
-  set minSemanticHeight(double value) {
-    if (_minSemanticHeight == value) {
-      return;
-    }
-    _minSemanticHeight = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  Alignment get alignment => _alignment;
-  Alignment _alignment;
-  set alignment(Alignment value) {
-    if (_alignment == value) {
-      return;
-    }
-    _alignment = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  bool get checked => _checked;
-  bool _checked;
-  set checked(bool value) {
-    if (_checked == value) {
-      return;
-    }
-    _checked = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.isChecked = checked;
-    config.isInMutuallyExclusiveGroup = true;
-    config.isButton = true;
-  }
-
-  @override
-  Rect get semanticBounds {
-    if (size.height > minSemanticHeight) {
-      return super.semanticBounds;
-    }
-    final double translateY = (minSemanticHeight - size.height) / 2.0 * -alignment.y;
-    return Rect.fromCenter(
-      center: paintBounds.center + Offset(0, translateY),
-      width: size.width,
-      height: minSemanticHeight,
     );
   }
 }

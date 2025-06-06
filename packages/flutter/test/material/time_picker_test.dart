@@ -2402,8 +2402,10 @@ void main() {
     (WidgetTester tester) async {
       addTearDown(tester.view.reset);
 
-      final Finder amButtonFinder =
-          find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_AmPmButton').first;
+      final Finder amMaterialFinder = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_AmPmButton').first,
+        matching: find.byType(Material),
+      );
       final Finder timeControlFinder =
           find.ancestor(of: find.text('7'), matching: find.byType(Row)).first;
 
@@ -2418,7 +2420,7 @@ void main() {
 
       const double dayPeriodPortraitGap = 12.0; // From Material spec.
       expect(
-        tester.getBottomLeft(timeControlFinder).dx - tester.getBottomRight(amButtonFinder).dx,
+        tester.getBottomLeft(timeControlFinder).dx - tester.getBottomRight(amMaterialFinder).dx,
         dayPeriodPortraitGap,
       );
 
@@ -2440,7 +2442,7 @@ void main() {
 
       const double dayPeriodLandscapeGap = 16.0; // From Material spec.
       expect(
-        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(amButtonFinder).dy,
+        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(amMaterialFinder).dy,
         dayPeriodLandscapeGap,
       );
     },
