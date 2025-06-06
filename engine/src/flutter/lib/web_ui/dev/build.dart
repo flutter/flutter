@@ -109,23 +109,20 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
     if (isWatchMode) {
       print('Initial build done!');
-      final Iterable<Future<void>> watchers = watchDirs
-          .map((dir) {
-            final FilePath watchPath = FilePath.fromWebUi(dir);
-            print('Watching directory: ${watchPath.relativeToCwd}/');
-            return watchPath;
-          })
-          .map(
-            (FilePath watchPath) =>
-                PipelineWatcher(
-                  dir: watchPath.absolute,
-                  pipeline: buildPipeline,
-                  // Ignore font files that are copied whenever tests run.
-                  ignore: (WatchEvent event) => event.path.endsWith('.ttf'),
-                ).start(),
-          );
+      final List<String> absoluteWatchDirs = watchDirs.map((String dir) {
+        final FilePath watchPath = FilePath.fromWebUi(dir);
+        print('Watching directory: ${watchPath.relativeToCwd}/');
+        return watchPath.absolute;
+      }).toList();
 
-      await Future.wait(watchers);
+      final PipelineWatcher watcher = PipelineWatcher(
+        dirs: absoluteWatchDirs,
+        pipeline: buildPipeline,
+        // Ignore font files that are copied whenever tests run.
+        ignore: (WatchEvent event) => event.path.endsWith('.ttf'),
+      );
+
+      await watcher.start();
     }
     return true;
   }
