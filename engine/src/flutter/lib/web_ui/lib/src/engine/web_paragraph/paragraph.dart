@@ -150,19 +150,19 @@ extension type ClusterRange._(ui.TextRange _range) {
 
 class StyledTextRange {
   StyledTextRange(int start, int end, this.textStyle)
-    : _clusterRange = ClusterRange(start: start, end: end);
+    : _textRange = ui.TextRange(start: start, end: end);
 
-  ClusterRange _clusterRange;
+  ui.TextRange _textRange;
   final WebTextStyle textStyle;
 
-  int get start => _clusterRange.start;
-  int get end => _clusterRange.end;
+  int get start => _textRange.start;
+  int get end => _textRange.end;
 
   void extendRangeTo(int end) {
-    _clusterRange = ClusterRange(start: _clusterRange.start, end: end);
+    _textRange = ui.TextRange(start: _textRange.start, end: end);
   }
 
-  String textInside(String text) => _clusterRange.textInside(text);
+  String textInside(String text) => _textRange.textInside(text);
 }
 
 class WebStrutStyle implements ui.StrutStyle {
