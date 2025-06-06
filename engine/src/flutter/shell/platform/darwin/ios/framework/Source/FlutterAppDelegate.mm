@@ -7,6 +7,7 @@
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
@@ -26,7 +27,6 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   NSObject<FlutterPluginRegistrant>* _strongRegistrant;
 }
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
-@property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
 @end
 
