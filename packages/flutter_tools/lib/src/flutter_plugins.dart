@@ -1286,6 +1286,8 @@ Future<void> injectPlugins(
   }
 
   if (iosPlatform || macOSPlatform) {
+    // iOS and macOS doesn't yet support filtering out dev dependencies.
+    // See https://github.com/flutter/flutter/issues/163874.
     final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
       plugins,
       pluginResolutionType: _PluginResolutionType.nativeOrDart,
