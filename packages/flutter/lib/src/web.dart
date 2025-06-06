@@ -42,6 +42,10 @@ extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external String get height;
   external set width(String value);
   external String get width;
+  @JS('object-fit')
+  external set objectFit(String value);
+  @JS('object-fit')
+  external String get objectFit;
 }
 
 extension type CSSStyleSheet._(JSObject _) implements JSObject {
@@ -144,3 +148,5 @@ extension type XMLHttpRequest._(JSObject _) implements XMLHttpRequestEventTarget
 }
 
 extension type XMLHttpRequestEventTarget._(JSObject _) implements EventTarget, JSObject {}
+
+enum CSSObjectFit { fill, contain, cover, fitWidth, fitHeight, none, scaleDown }
