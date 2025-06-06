@@ -31,6 +31,7 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/vertices.h"
+#include "flutter/lib/ui/semantics/semantics_flags.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/semantics/semantics_update_builder.h"
 #include "flutter/lib/ui/semantics/string_attribute.h"
@@ -94,6 +95,7 @@ typedef CanvasPath Path;
   V(IsolateNameServerNatives::RemovePortNameMapping)               \
   V(NativeStringAttribute::initLocaleStringAttribute)              \
   V(NativeStringAttribute::initSpellOutStringAttribute)            \
+  V(NativeSemanticsFlags::initSemanticsFlags)                      \
   V(PlatformConfigurationNativeApi::DefaultRouteName)              \
   V(PlatformConfigurationNativeApi::ScheduleFrame)                 \
   V(PlatformConfigurationNativeApi::EndWarmUpFrame)                \

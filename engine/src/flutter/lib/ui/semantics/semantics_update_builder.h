@@ -31,7 +31,7 @@ class SemanticsUpdateBuilder
 
   void updateNode(
       int id,
-      int flags,
+      Dart_Handle flags,
       int actions,
       int maxValueLength,
       int currentValueLength,
