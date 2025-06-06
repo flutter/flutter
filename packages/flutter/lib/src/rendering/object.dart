@@ -780,7 +780,7 @@ class PaintingContext extends ClipContext {
     final Matrix4 effectiveTransform =
         Matrix4.translationValues(offset.dx, offset.dy, 0.0)
           ..multiply(transform)
-          ..translate(-offset.dx, -offset.dy);
+          ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;
@@ -2049,7 +2049,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    child._isRelayoutBoundary = false;
     assert(() {
       child._debugLaidOutByThisParentBefore = false;
       return true;
@@ -2536,18 +2535,15 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsLayout = true;
-    if (_isRelayoutBoundary) {
-      if (owner == null) {
-        return;
-      }
+    if (owner case final PipelineOwner owner? when _isRelayoutBoundary) {
       assert(() {
         if (debugPrintMarkNeedsLayoutStacks) {
           debugPrintStack(label: 'markNeedsLayout() called for $this');
         }
         return true;
       }());
-      owner!._nodesNeedingLayout.add(this);
-      owner!.requestVisualUpdate();
+      owner._nodesNeedingLayout.add(this);
+      owner.requestVisualUpdate();
     } else if (parent != null) {
       markParentNeedsLayout();
     }
@@ -2714,13 +2710,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     );
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
-    final bool isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     }());
 
+    _isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
+    assert(() {
+      _debugLaidOutByThisParentBefore = true;
+      return true;
+    }());
     if (!_needsLayout && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
@@ -2735,19 +2734,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         _debugDoingThisResize = false;
         return true;
       }());
-
       if (!kReleaseMode && debugProfileLayoutsEnabled) {
         FlutterTimeline.finishSync();
       }
       return;
     }
     _constraints = constraints;
-
-    _isRelayoutBoundary = isRelayoutBoundary;
-    assert(() {
-      _debugLaidOutByThisParentBefore = true;
-      return true;
-    }());
 
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -3876,6 +3868,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
           target = target.parent;
           count += 1;
         }
+        count += 1;
+      }
+      if (count > 0) {
         header += ' relayoutBoundary=up$count';
       }
       if (_needsLayout) {
@@ -4840,19 +4835,19 @@ typedef _MergeUpAndSiblingMergeGroups =
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
 /// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
 /// [_RenderObjectSemantics] that should form a node with elevation adjustments
-/// into [_childrenAndElevationAdjustments].
+/// into [_children].
 ///
-/// At this point, walking the [_childrenAndElevationAdjustments] forms a tree
+/// At this point, walking the [_children] forms a tree
 /// that exactly resemble the resulting semantics node tree.
 ///
 /// ### Phase 3
 ///
-/// Walks the [_childrenAndElevationAdjustments] and calculate their
+/// Walks the [_children] and calculate their
 /// [_SemanticsGeometry] based on renderObject relationship.
 ///
 /// ### Phase 4
 ///
-/// Walks the [_childrenAndElevationAdjustments] and produce semantics node for
+/// Walks the [_children] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
 /// Phase 2, 3, 4 each depends on previous step to finished updating the the
@@ -4867,7 +4862,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   bool _hasSiblingConflict = false;
   bool? _blocksPreviousSibling;
-  double elevationAdjustment = 0.0;
+
   // TODO(chunhtai): Figure out what to do when incomplete fragments are asked
   // to form a semantics node.
   //
@@ -4904,10 +4899,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Fragments that will merge up to parent rendering object semantics.
   final List<_SemanticsFragment> mergeUp = <_SemanticsFragment>[];
 
-  /// A map that record immediate child [_RenderObjectSemantics]s that will form
-  /// semantics nodes with their elevation adjustments.
-  final Map<_RenderObjectSemantics, double> _childrenAndElevationAdjustments =
-      <_RenderObjectSemantics, double>{};
+  /// A list to store immediate child [_RenderObjectSemantics]s that will form
+  /// semantics nodes.
+  final List<_RenderObjectSemantics> _children = <_RenderObjectSemantics>[];
 
   /// Merge groups that will form additional sibling nodes.
   final List<List<_SemanticsFragment>> siblingMergeGroups = <List<_SemanticsFragment>>[];
@@ -5019,7 +5013,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// Updates the [parentData] for the [_RenderObjectSemantics]s in the
   /// rendering subtree and forms a [_RenderObjectSemantics] tree where children
-  /// are stored in [_childrenAndElevationAdjustments].
+  /// are stored in [_children].
   ///
   /// This method does the the phase 1 and 2 of the four phases documented on
   /// [_RenderObjectSemantics].
@@ -5035,7 +5029,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
   /// should form a node. i.e. [shouldFormSemanticsNode] is true. Stores the
   /// [_RenderObjectSemantics] that should form a node with elevation adjustments
-  /// into [_childrenAndElevationAdjustments].
+  /// into [_children].
   void updateChildren() {
     assert(parentData != null || isRoot, 'parent data can only be null for root rendering object');
     configProvider.reset();
@@ -5069,7 +5063,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     siblingMergeGroups.addAll(result.$2);
 
     // Construct tree for nodes that will form semantics nodes.
-    _childrenAndElevationAdjustments.clear();
+    _children.clear();
     if (contributesToSemanticsTree) {
       _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
       siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
@@ -5089,16 +5083,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           in result.$1.whereType<_RenderObjectSemantics>()) {
         assert(childSemantics.contributesToSemanticsTree);
         if (childSemantics.shouldFormSemanticsNode) {
-          _childrenAndElevationAdjustments[childSemantics] = 0.0;
+          _children.add(childSemantics);
         } else {
-          final Map<_RenderObjectSemantics, double> passUpChildren =
-              childSemantics._childrenAndElevationAdjustments;
-          for (final _RenderObjectSemantics passUpChild in passUpChildren.keys) {
-            final double passUpElevationAdjustment =
-                passUpChildren[passUpChild]! + childSemantics.configProvider.original.elevation;
-            _childrenAndElevationAdjustments[passUpChild] = passUpElevationAdjustment;
-            passUpChild.elevationAdjustment = passUpElevationAdjustment;
-          }
+          _children.addAll(childSemantics._children);
           siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
         }
       }
@@ -5278,7 +5265,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   /// Updates the [geometry] for this [_RenderObjectSemantics]s and its subtree
-  /// in [_childrenAndElevationAdjustments].
+  /// in [_children].
   ///
   /// This method does the the phase 3 of the four phases documented on
   /// [_RenderObjectSemantics].
@@ -5299,7 +5286,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void _updateChildGeometry() {
     assert(geometry != null);
-    for (final _RenderObjectSemantics child in _childrenAndElevationAdjustments.keys) {
+    for (final _RenderObjectSemantics child in _children) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: geometry!.paintClipRect,
         parentSemanticsClipRect: geometry!.semanticsClipRect,
@@ -5348,7 +5335,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       // update for semantics nodes generated in this render object semantics.
       //
       // Therefore, we only need to update the subtree.
-      _buildSemanticsSubtree(usedSemanticsIds: <int>{}, elevationAdjustment: 0.0);
+      _buildSemanticsSubtree(usedSemanticsIds: <int>{});
     }
   }
 
@@ -5398,11 +5385,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Builds the semantics subtree under the [cachedSemanticsNode].
   void _buildSemanticsSubtree({
     required Set<int> usedSemanticsIds,
-    required double elevationAdjustment,
     List<SemanticsNode>? semanticsNodes,
   }) {
     final List<SemanticsNode> children = <SemanticsNode>[];
-    for (final _RenderObjectSemantics child in _childrenAndElevationAdjustments.keys) {
+    for (final _RenderObjectSemantics child in _children) {
       assert(child.shouldFormSemanticsNode);
       // Cached semantics node may be part of sibling merging group prior
       // to this update. In this case, the semantics node may continue to
@@ -5437,11 +5423,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _updateSemanticsNodeGeometry();
 
     _mergeSiblingGroup(usedSemanticsIds);
-    _buildSemanticsSubtree(
-      semanticsNodes: semanticsNodes,
-      usedSemanticsIds: usedSemanticsIds,
-      elevationAdjustment: elevationAdjustment,
-    );
+    _buildSemanticsSubtree(semanticsNodes: semanticsNodes, usedSemanticsIds: usedSemanticsIds);
   }
 
   SemanticsNode _createSemanticsNode() {
@@ -5519,12 +5501,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
     final _SemanticsGeometry nodeGeometry = geometry!;
-    node.elevationAdjustment = elevationAdjustment;
-    if (elevationAdjustment != 0.0) {
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        config.elevation = configProvider.original.elevation + elevationAdjustment;
-      });
-    }
     final bool isSemanticsHidden =
         configProvider.original.isHidden ||
         (!(parentData?.mergeIntoParent ?? false) && nodeGeometry.hidden);
@@ -5624,7 +5600,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       node._semantics.geometry = null;
       node._semantics.parentData = null;
       node._semantics._blocksPreviousSibling = null;
-      node._semantics.elevationAdjustment = 0.0;
       // Since this node is a semantics boundary, the produced sibling nodes will
       // be attached to the parent semantics boundary. Thus, these sibling nodes
       // will not be carried to the next loop.
@@ -5700,7 +5675,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Removes any cache stored in this object as if it is newly created.
   void clear() {
     built = false;
-    elevationAdjustment = 0.0;
     cachedSemanticsNode = null;
     parentData = null;
     geometry = null;
@@ -5708,7 +5682,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _containsIncompleteFragment = false;
     mergeUp.clear();
     siblingMergeGroups.clear();
-    _childrenAndElevationAdjustments.clear();
+    _children.clear();
     semanticsNodes.clear();
     configProvider.clear();
   }

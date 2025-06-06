@@ -43,7 +43,6 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
-synthetic-package: false
 required-resource-attributes: false
 nullable-getter: false
 ''');
@@ -53,7 +52,6 @@ nullable-getter: false
       logger: BufferLogger.test(),
       fileSystem: fileSystem,
       defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-      defaultSyntheticPackage: true,
     );
 
     expect(options.arbDir, Uri.parse('arb').path);
@@ -65,15 +63,15 @@ nullable-getter: false
     expect(options.header, 'HEADER');
     expect(options.useDeferredLoading, true);
     expect(options.preferredSupportedLocales, <String>['en_US']);
-    expect(options.syntheticPackage, false);
     expect(options.requiredResourceAttributes, false);
     expect(options.nullableGetter, false);
   });
 
-  testWithoutContext('parseLocalizationsOptions uses defaultSyntheticPackage = true', () async {
+  testWithoutContext('parseLocalizationsOptions refuses synthetic-package: true', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 arb-dir: arb
+synthetic-package: true
 template-arb-file: example.arb
 output-localization-file: bar
 untranslated-messages-file: untranslated
@@ -82,27 +80,26 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
-# Intentionally omitted
-# synthetic-package: ...
 required-resource-attributes: false
 nullable-getter: false
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
-      file: configFile,
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-      defaultSyntheticPackage: true,
+    expect(
+      () => parseLocalizationsOptionsFromYAML(
+        file: configFile,
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      ),
+      throwsToolExit(message: 'synthetic-package'),
     );
-
-    expect(options.syntheticPackage, true);
   });
 
-  testWithoutContext('parseLocalizationsOptions uses defaultSyntheticPackage = false', () async {
+  testWithoutContext('parseLocalizationsOptions warns on synthetic-package: false', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 arb-dir: arb
+synthetic-package: false
 template-arb-file: example.arb
 output-localization-file: bar
 untranslated-messages-file: untranslated
@@ -111,21 +108,22 @@ header-file: header
 header: HEADER
 use-deferred-loading: true
 preferred-supported-locales: en_US
-# Intentionally omitted
-# synthetic-package: ...
 required-resource-attributes: false
 nullable-getter: false
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
-      file: configFile,
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-      defaultSyntheticPackage: false,
+    final BufferLogger logger = BufferLogger.test();
+    expect(
+      () => parseLocalizationsOptionsFromYAML(
+        file: configFile,
+        logger: logger,
+        fileSystem: fileSystem,
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+      ),
+      returnsNormally,
     );
 
-    expect(options.syntheticPackage, false);
+    expect(logger.warningText, contains('synthetic-package'));
   });
 
   testWithoutContext(
@@ -141,7 +139,6 @@ preferred-supported-locales: ['en_US', 'de']
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-        defaultSyntheticPackage: true,
       );
 
       expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
@@ -162,7 +159,6 @@ use-deferred-loading: string
           logger: BufferLogger.test(),
           fileSystem: fileSystem,
           defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-          defaultSyntheticPackage: true,
         ),
         throwsException,
       );
@@ -181,7 +177,6 @@ template-arb-file: {name}_en.arb
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-        defaultSyntheticPackage: true,
       ),
       throwsToolExit(),
     );
