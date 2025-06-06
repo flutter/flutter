@@ -180,7 +180,7 @@ void main() {
       );
     });
 
-    testWidgets('It should draw the linear activity indicator with custom height and color', (
+    testWidgets('It should draw the linear activity indicator with a custom height and color', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
