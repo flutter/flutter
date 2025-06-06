@@ -14,7 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, DisposablePath {
+class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -234,7 +234,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
       SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 
   @override
-  SkwasmPathMetrics computeMetrics({bool forceClosed = false}) {
+  ui.PathMetrics computeMetrics({bool forceClosed = false}) {
     return SkwasmPathMetrics(path: this, forceClosed: forceClosed);
   }
 
@@ -247,15 +247,5 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
     final String svgString = utf8.decode(characters);
     skStringFree(skString);
     return svgString;
-  }
-}
-
-class SkwasmPathConstructors implements DisposablePathConstructors {
-  @override
-  SkwasmPath createNew() => SkwasmPath();
-
-  @override
-  SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
-    return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 }
