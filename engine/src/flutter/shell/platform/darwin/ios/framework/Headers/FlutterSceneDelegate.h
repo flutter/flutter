@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This class is typically specified as the UISceneDelegate in the Info.plist.
  */
+FLUTTER_DARWIN_EXPORT
 @interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
 @property(nonatomic, strong, nullable) UIWindow* window;
 @end
