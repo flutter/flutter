@@ -61,8 +61,6 @@ class CupertinoIndicatorExample extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // Cupertino activity indicator with custom radius and disabled
-                // animation.
                 CupertinoLinearActivityIndicator(progress: 0.6, color: CupertinoColors.activeGreen),
                 SizedBox(height: 10),
                 Text('Color: green', textAlign: TextAlign.center),
