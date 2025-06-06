@@ -7,6 +7,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+// This makes sure that the FlutterSceneDelegate symbol is exported.
 @interface SceneDelegate : FlutterSceneDelegate
 @end
 
