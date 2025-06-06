@@ -1011,11 +1011,11 @@ void main() {
     expect(flying(tester, find.text('custom')), findsOneWidget);
 
     checkOpacity(tester, flying(tester, find.text('custom')), 0.8948725312948227);
-    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 0.0));
+    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 13.5));
 
     await tester.pump(const Duration(milliseconds: 150));
     checkOpacity(tester, flying(tester, find.text('custom')), 0.0);
-    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 0.0));
+    expect(tester.getTopLeft(flying(tester, find.text('custom'))), const Offset(16.0, 13.5));
   });
 
   testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
