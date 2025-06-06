@@ -114,11 +114,16 @@ group("flutter") {
         "//flutter/impeller/compiler:impellerc",
         "//flutter/impeller/tessellator:tessellator_shared",
 
-        # tools
-        "//flutter/tools/licenses_cpp",
-        "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
+        # path_ops
         "//flutter/tools/path_ops",
       ]
+
+      if (host_os == "linux" || host_os == "mac") {
+        public_deps += [
+          "//flutter/tools/licenses_cpp",
+          "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
+        ]
+      }
 
       if (host_os == "linux") {
         public_deps += [
