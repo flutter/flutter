@@ -354,18 +354,13 @@ class SemanticTextField extends SemanticRole {
     if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
       input.type = 'password';
     } else {
-      switch (semanticsObject.inputType) {
-        case ui.SemanticsInputType.search:
-          input.type = 'search';
-        case ui.SemanticsInputType.email:
-          input.type = 'email';
-        case ui.SemanticsInputType.url:
-          input.type = 'url';
-        case ui.SemanticsInputType.phone:
-          input.type = 'tel';
-        default:
-          input.type = 'text';
-      }
+      input.type = switch (semanticsObject.inputType) {
+        ui.SemanticsInputType.search => 'search',
+        ui.SemanticsInputType.email => 'email',
+        ui.SemanticsInputType.url => 'url',
+        ui.SemanticsInputType.phone => 'tel',
+        _ => 'text',
+      };
     }
   }
 
