@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show ProcessException;
+
+import 'package:collection/collection.dart';
 import 'package:flutter_devicelab/framework/utils.dart' show flutterDirectory;
 import 'package:flutter_devicelab/tasks/gradle_lock_files_check.dart';
 
@@ -10,22 +13,56 @@ import '../common.dart';
 const String _dartCommand = 'dart';
 const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
 
-class MockExec {
-  String? lastExecutable;
-  List<String>? lastArguments;
-  bool? lastCanFail;
-  String? lastWorkingDirectory;
+class MockCall {
 
-  int _nextResult = 0;
-  Exception? _nextException;
+  MockCall(this.executable, List<String> args, this.canFail,
+      this.workingDirectory)
+      : arguments = List<String>.unmodifiable(args);
+  final String executable;
+  final List<String> arguments;
+  final bool canFail;
+  final String? workingDirectory;
 
-  void setNextResult(int result) {
-    _nextResult = result;
-    _nextException = null;
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is MockCall &&
+        other.executable == executable &&
+        const DeepCollectionEquality().equals(other.arguments, arguments) &&
+        other.canFail == canFail &&
+        other.workingDirectory == workingDirectory;
   }
 
-  void setNextException(Exception exception) {
-    _nextException = exception;
+  @override
+  int get hashCode =>
+      Object.hash(
+        executable,
+        const DeepCollectionEquality().hash(arguments),
+        canFail,
+        workingDirectory,
+      );
+
+  @override
+  String toString() {
+    return 'MockCall(executable: $executable, arguments: $arguments, canFail: $canFail, workingDirectory: $workingDirectory)';
+  }
+}
+
+class MockExec {
+  final List<MockCall> calls = <MockCall>[];
+  final List<dynamic> _responses = <dynamic>[];
+  int _responseIndex = 0;
+
+  void addResponse(dynamic response) {
+    _responses.add(response);
+  }
+
+  void reset() {
+    calls.clear();
+    _responses.clear();
+    _responseIndex = 0;
   }
 
   Future<int> call(
@@ -37,14 +74,30 @@ class MockExec {
         StringBuffer? output,
         StringBuffer? stderr,
       }) async {
-    lastExecutable = executable;
-    lastArguments = arguments;
-    lastCanFail = canFail;
-    lastWorkingDirectory = workingDirectory;
-    if (_nextException != null) {
-      throw _nextException!;
+    calls.add(MockCall(
+        executable, List<String>.from(arguments), canFail, workingDirectory));
+
+    if (_responseIndex < _responses.length) {
+      final dynamic response = _responses[_responseIndex++];
+      if (response is Exception) {
+        throw response;
+      }
+      if (response is int) {
+        if (!canFail && response != 0) {
+          throw ProcessException(executable, arguments,
+              'MockProcessException: Command failed with exit code $response',
+              response);
+        }
+        return response;
+      }
+      throw StateError('Unexpected response type in MockExec: ${response
+          .runtimeType}, value: $response');
     }
-    return _nextResult;
+    if (!canFail) {
+      throw ProcessException(executable, arguments,
+          'MockProcessException: Command failed with exit code 0 (default)');
+    }
+    return 0;
   }
 }
 
@@ -65,6 +118,16 @@ class MockEval {
 
   void setNextException(Exception exception) {
     _nextException = exception;
+  }
+
+  void reset() {
+    lastExecutable = null;
+    lastArguments = null;
+    lastCanFail = null;
+    lastPrintStdout = null;
+    lastPrintStderr = null;
+    _nextResult = '';
+    _nextException = null;
   }
 
   Future<String> call(
@@ -99,6 +162,19 @@ Matcher _throwsExceptionWithMessage(String messageSubstring) {
   ));
 }
 
+Matcher _throwsProcessExceptionWithCode(int exitCode) {
+  return throwsA(isA<ProcessException>().having(
+        (e) => e.errorCode,
+    'errorCode',
+    exitCode,
+  ).having(
+        (e) => e.message,
+    'message',
+    contains('MockProcessException'),
+  ));
+}
+
+
 void main() {
   late MockExec mockExec;
   late MockEval mockEval;
@@ -108,10 +184,19 @@ void main() {
     mockEval = MockEval();
   });
 
+  tearDown(() {
+    mockExec.reset();
+    mockEval.reset();
+  });
+
   group('runGradleLockFilesCheck', () {
-    test('succeeds when no lockfile changes are detected', () async {
-      mockExec.setNextResult(0);
-      mockEval.setNextResult(' M cache/somefile.txt\n?? ignored.txt\n');
+    test(
+        'succeeds when no lockfile changes are detected and pop succeeds', () async {
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(0); // dart script
+      mockExec.addResponse(0); // git stash pop
+      mockEval.setNextResult(
+          ' M cache/somefile.txt\n?? ignored.txt\n'); // git status
 
       await expectLater(
         runGradleLockFilesCheck(
@@ -122,22 +207,26 @@ void main() {
         completes,
       );
 
-      expect(mockExec.lastExecutable, _dartCommand);
-      expect(mockExec.lastArguments, contains(_scriptFilePath));
-      expect(mockExec.lastArguments, contains('--no-gradle-generation'));
-      expect(mockExec.lastCanFail, isTrue);
-      expect(mockExec.lastWorkingDirectory, flutterDirectory.path);
+      expect(mockExec.calls.length, 3);
+      expect(mockExec.calls[0],
+          MockCall('git', <String>['stash'], true, flutterDirectory.path));
+      expect(mockExec.calls[1], MockCall(
+          _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
+          true, flutterDirectory.path));
+      expect(mockExec.calls[2], MockCall('git', <String>['stash', 'pop'], false,
+          flutterDirectory.path));
 
       expect(mockEval.lastExecutable, 'git');
       expect(mockEval.lastArguments, contains('status'));
-      expect(mockEval.lastCanFail, isTrue);
-      expect(mockEval.lastPrintStdout, isFalse);
-      expect(mockEval.lastPrintStderr, isFalse);
     });
 
-    test('throws an exception when lockfile changes are detected', () async {
-      mockExec.setNextResult(0);
-      mockEval.setNextResult(' M path/to/file.lockfile\n?? another.lockfile\n');
+    test(
+        'throws an exception when lockfile changes are detected and pop succeeds', () async {
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(0); // dart script
+      mockExec.addResponse(0); // git stash pop (succeeds)
+      mockEval.setNextResult(
+          ' M path/to/file.lockfile\n?? another.lockfile\n'); // git status
 
       await expectLater(
         runGradleLockFilesCheck(
@@ -145,13 +234,21 @@ void main() {
           evalFn: mockEval.call,
           shouldPrintOutput: false,
         ),
-        _throwsExceptionWithMessage('Gradle lockfiles are not up to date, or new/modified lockfiles are not staged.'),
+        _throwsExceptionWithMessage('Gradle lockfiles are not up to date'),
       );
+
+      expect(mockExec.calls.length, 3);
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
     });
 
-    test('exception message contains details of changed lockfiles and instructions', () async {
-      mockExec.setNextResult(0);
-      mockEval.setNextResult(' M path/to/file.lockfile\n?? another.lockfile\n');
+    test(
+        'exception message contains details when lockfile changes are detected and pop succeeds', () async {
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(0); // dart script
+      mockExec.addResponse(0); // git stash pop (succeeds)
+      mockEval.setNextResult(
+          ' M path/to/file.lockfile\n?? another.lockfile\n'); // git status
 
       try {
         await runGradleLockFilesCheck(
@@ -164,14 +261,20 @@ void main() {
         final String errorMessage = e.toString();
         expect(errorMessage, contains('  M path/to/file.lockfile'));
         expect(errorMessage, contains('  ?? another.lockfile'));
-        expect(errorMessage, contains("Please run `dart tools/bin/generate_gradle_lockfiles.dart` locally"));
-        expect(errorMessage, contains('then `git add` the files listed below'));
+        expect(errorMessage,
+            contains("Please run `$_dartCommand $_scriptFilePath` locally"));
       }
+      expect(mockExec.calls.length, 3);
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
     });
 
-    test('throws if the dart command execution itself fails', () async {
-      final Exception testException = Exception('Dart script execution failed');
-      mockExec.setNextException(testException);
+    test(
+        'throws if the dart command execution itself fails and pop succeeds', () async {
+      final Exception dartException = Exception('Dart script execution failed');
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(dartException); // dart script fails
+      mockExec.addResponse(0); // git stash pop (succeeds)
 
       await expectLater(
         runGradleLockFilesCheck(
@@ -181,13 +284,26 @@ void main() {
         ),
         _throwsExceptionWithMessage('Dart script execution failed'),
       );
-      expect(mockExec.lastExecutable, _dartCommand);
+
+      expect(mockExec.calls.length, 3); // stash, dart, pop
+      expect(mockExec.calls[0],
+          MockCall('git', <String>['stash'], true, flutterDirectory.path));
+      expect(mockExec.calls[1], MockCall(
+          _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
+          true, flutterDirectory.path));
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
+      expect(mockEval.lastExecutable, isNull);
     });
 
-    test('throws if git status command execution fails', () async {
-      mockExec.setNextResult(0);
-      final Exception testException = Exception('Git status command failed');
-      mockEval.setNextException(testException);
+    test(
+        'throws if git status command execution fails and pop succeeds', () async {
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(0); // dart script
+      mockExec.addResponse(0); // git stash pop (succeeds)
+      final Exception gitStatusException = Exception(
+          'Git status command failed');
+      mockEval.setNextException(gitStatusException);
 
       await expectLater(
         runGradleLockFilesCheck(
@@ -197,8 +313,99 @@ void main() {
         ),
         _throwsExceptionWithMessage('Git status command failed'),
       );
-      expect(mockExec.lastExecutable, _dartCommand);
+      expect(mockExec.calls.length, 3); // stash, dart, pop
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
       expect(mockEval.lastExecutable, 'git');
+    });
+
+    test(
+        'handles failure of initial git stash command, pop succeeds, original exception seen', () async {
+      final Exception stashException = Exception('Initial git stash failed');
+      mockExec.addResponse(stashException); // git stash fails
+      // dart script is not called
+      mockExec.addResponse(0); // git stash pop (succeeds in finally)
+
+      await expectLater(
+        runGradleLockFilesCheck(
+          execFn: mockExec.call,
+          evalFn: mockEval.call,
+          shouldPrintOutput: false,
+        ),
+        _throwsExceptionWithMessage('Initial git stash failed'),
+      );
+      expect(mockExec.calls.length, 2); // stash, pop
+      expect(mockExec.calls[0],
+          MockCall('git', <String>['stash'], true, flutterDirectory.path));
+      expect(mockExec.calls[1], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
+      expect(mockEval.lastExecutable, isNull);
+    });
+
+    test(
+        'throws ProcessException if git stash pop fails when try block succeeded', () async {
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(0); // dart script
+      mockExec.addResponse(
+          1); // git stash pop fails (returns 1, canFail=false -> ProcessException)
+      mockEval.setNextResult(''); // git status clean
+
+      await expectLater(
+        runGradleLockFilesCheck(
+          execFn: mockExec.call,
+          evalFn: mockEval.call,
+          shouldPrintOutput: false,
+        ),
+        _throwsProcessExceptionWithCode(1),
+      );
+      expect(mockExec.calls.length, 3);
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
+    });
+
+    test(
+        'throws ProcessException from git stash pop, masking try block lockfile exception', () async {
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(0); // dart script
+      mockExec.addResponse(
+          1); // git stash pop fails (returns 1, canFail=false -> ProcessException)
+      mockEval.setNextResult(
+          ' M path/to/file.lockfile\n'); // git status shows lockfile changes
+
+      await expectLater(
+        runGradleLockFilesCheck(
+          execFn: mockExec.call,
+          evalFn: mockEval.call,
+          shouldPrintOutput: false,
+        ),
+        _throwsProcessExceptionWithCode(
+            1), // Exception from pop should mask the lockfile one.
+      );
+      expect(mockExec.calls.length, 3);
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
+    });
+
+    test(
+        'throws ProcessException from git stash pop, masking try block dart script exception', () async {
+      final Exception dartException = Exception('Dart script execution failed');
+      mockExec.addResponse(0); // git stash
+      mockExec.addResponse(dartException); // dart script fails
+      mockExec.addResponse(
+          1); // git stash pop fails (returns 1, canFail=false -> ProcessException)
+
+      await expectLater(
+        runGradleLockFilesCheck(
+          execFn: mockExec.call,
+          evalFn: mockEval.call,
+          shouldPrintOutput: false,
+        ),
+        _throwsProcessExceptionWithCode(
+            1), // Exception from pop should mask the dart script one.
+      );
+      expect(mockExec.calls.length, 3); // stash, dart, pop
+      expect(mockExec.calls[2], MockCall(
+          'git', <String>['stash', 'pop'], false, flutterDirectory.path));
     });
   });
 }

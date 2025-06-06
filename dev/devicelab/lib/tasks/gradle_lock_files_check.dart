@@ -29,49 +29,68 @@ Future<void> runGradleLockFilesCheck({
 }) async {
   print('Running gradle lockfiles check');
 
-  await execFn(
-    _dartCommand,
-    <String>[_scriptFilePath, '--no-gradle-generation'],
-    canFail: true,
-    workingDirectory: flutterDirectory.path,
-  );
+  try {
+    await execFn(
+      'git',
+      <String>['stash'],
+      canFail: true,
+      workingDirectory: flutterDirectory.path,
+    );
 
-  final String gitStatus = await _getGitStatusOutput(
-    evalFn: evalFn,
-    printOutput: shouldPrintOutput,
-  );
-  final Set<String> fileChanges = _getFileChangesFromGitStatus(gitStatus);
-  final Set<String> filesNeedTracking = <String>{};
+    await execFn(
+      _dartCommand,
+      <String>[_scriptFilePath, '--no-gradle-generation'],
+      canFail: true,
+      workingDirectory: flutterDirectory.path,
+    );
 
-  if (fileChanges.isNotEmpty) {
-    for (final String fileChange in fileChanges) {
-      if (fileChange.endsWith('.lockfile')) {
-        filesNeedTracking.add(fileChange);
+    final String gitStatus = await _getGitStatusOutput(
+      evalFn: evalFn,
+      printOutput: shouldPrintOutput,
+    );
+    final Set<String> fileChanges = _getFileChangesFromGitStatus(gitStatus);
+    final Set<String> filesNeedTracking = <String>{};
+
+    if (fileChanges.isNotEmpty) {
+      for (final String fileChange in fileChanges) {
+        if (fileChange.endsWith('.lockfile')) {
+          filesNeedTracking.add(fileChange);
+        }
       }
     }
+
+    if (filesNeedTracking.isEmpty) {
+      print('Gradle lock files are up to date and correctly staged.');
+      return;
+    }
+
+    final StringBuffer message = StringBuffer();
+    message.writeln(
+      'Gradle lockfiles are not up to date, or new/modified lockfiles are not staged.',
+    );
+
+    message.writeln(
+      "\nPlease run `$_dartCommand $_scriptFilePath` locally (if you haven't already),",
+    );
+    message.writeln(
+      'then `git add` the files listed below and commit the changes to your pull request.',
+    );
+
+    for (final String file in filesNeedTracking) {
+      message.writeln('  $file');
+    }
+    throw Exception(message.toString());
+  } catch (e) {
+    rethrow;
+  } finally {
+    await execFn(
+      'git',
+      <String>['stash', 'pop'],
+      // Must be  false in case there is no stash to pop (no changes stashed in the first place).
+      canFail: false,
+      workingDirectory: flutterDirectory.path,
+    );
   }
-
-  if (filesNeedTracking.isEmpty) {
-    print('Gradle lock files are up to date and correctly staged.');
-    return;
-  }
-
-  final StringBuffer message = StringBuffer();
-  message.writeln(
-    'Gradle lockfiles are not up to date, or new/modified lockfiles are not staged.',
-  );
-
-  message.writeln(
-    "\nPlease run `$_dartCommand $_scriptFilePath` locally (if you haven't already),",
-  );
-  message.writeln(
-    'then `git add` the files listed below and commit the changes to your pull request.',
-  );
-
-  for (final String file in filesNeedTracking) {
-    message.writeln('  $file');
-  }
-  throw Exception(message.toString());
 }
 
 Set<String> _getFileChangesFromGitStatus(String currentGitState) {
