@@ -215,14 +215,14 @@ void main() {
       //  * dart build output should depend on C source
       //  * installation output should depend on shared library from dart build
 
-      final File dartHookResult = iosEnvironment.buildDir.childFile(
-        DartBuild.dartHookResultFilename,
+      final File dartBuildResult = iosEnvironment.buildDir.childFile(
+        DartBuild.dartBuildResultFilename,
       );
       final File buildDepsFile = iosEnvironment.buildDir.childFile(DartBuild.depFilename);
       expect(buildDepsFile, exists);
       expect(
         buildDepsFile.readAsStringSync(),
-        stringContainsInOrder(<String>[dartHookResult.path, ':', 'src/foo.c']),
+        stringContainsInOrder(<String>[dartBuildResult.path, ':', 'src/foo.c']),
       );
 
       final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(
