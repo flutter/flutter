@@ -95,3 +95,4 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
     }
   });
 }
+

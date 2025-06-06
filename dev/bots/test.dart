@@ -61,7 +61,7 @@ import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_framework_coverage_tests.dart';
 import 'suite_runners/run_framework_tests.dart';
 import 'suite_runners/run_fuchsia_precache.dart';
-import 'suite_runners/run_gradle_lock_files_check.dart';
+import '../devicelab/lib/tasks/run_gradle_lock_files_check.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_test_harness_tests.dart';
 import 'suite_runners/run_verify_binaries_codesigned_tests.dart';

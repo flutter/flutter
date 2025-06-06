@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import '../run_command.dart';
-import '../utils.dart';
+import '../framework/utils.dart';
 
 const String _dartCommand = 'dart';
 const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
@@ -17,35 +16,29 @@ const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
 /// to ensure Gradle lockfiles are consistent. It then checks `git status` for
 /// any `.lockfile` files that are modified, new, or deleted but not staged.
 ///
-///
 /// Parameters:
-///  - `runCommand`: Callable to execute shell commands. Defaults to `runCommand`.
-///  - `outputMode`: Command output mode. Defaults to `OutputMode.print`.
 ///  - `flutterRootOverride`: Optional Flutter root path. Defaults to `flutterRoot`.
 ///
 /// Throws an [Exception] if:
-///  - `git status` fails.
+///  - `git status` fails (in a way that `eval` cannot recover output).
 ///  - Unstaged or modified `.lockfile` files are present.
 Future<void> runGradleLockFilesCheck({
-  RunCommandCallable runCommand = runCommand,
-  OutputMode outputMode = OutputMode.print,
-  String? flutterRootOverride,
+  ExecFunction execFn = exec,
+  EvalFunction evalFn = eval,
+  bool shouldPrintOutput = true,
 }) async {
-  final String effectiveFlutterRoot = flutterRootOverride ?? flutterRoot;
-  printProgress('${green}Running gradle lockfiles check$reset');
+  print('Running gradle lockfiles check');
 
-  await runCommand(
+  await execFn(
     _dartCommand,
     <String>[_scriptFilePath, '--no-gradle-generation'],
-    workingDirectory: effectiveFlutterRoot,
-    expectNonZeroExit: false,
-    outputMode: outputMode,
+    canFail: true,
+    workingDirectory: flutterDirectory.path,
   );
 
   final String gitStatus = await _getGitStatusOutput(
-    workingDirectory: effectiveFlutterRoot,
-    runCommand: runCommand,
-    outputMode: outputMode,
+    evalFn: evalFn,
+    printOutput: shouldPrintOutput,
   );
   final Set<String> fileChanges = _getFileChangesFromGitStatus(gitStatus);
   final Set<String> filesNeedTracking = <String>{};
@@ -59,13 +52,13 @@ Future<void> runGradleLockFilesCheck({
   }
 
   if (filesNeedTracking.isEmpty) {
-    printProgress('${green}Gradle lock files are up to date and correctly staged.$reset');
+    print('Gradle lock files are up to date and correctly staged.');
     return;
   }
 
   final StringBuffer message = StringBuffer();
   message.writeln(
-    '${red}Gradle lockfiles are not up to date, or new/modified lockfiles are not staged.$reset',
+    'Gradle lockfiles are not up to date, or new/modified lockfiles are not staged.',
   );
 
   message.writeln(
@@ -89,22 +82,15 @@ Set<String> _getFileChangesFromGitStatus(String currentGitState) {
 }
 
 Future<String> _getGitStatusOutput({
-  required String workingDirectory,
-  required RunCommandCallable runCommand,
-  OutputMode outputMode = OutputMode.print,
+  required bool printOutput,
+  EvalFunction evalFn = eval,
 }) async {
-  final CommandResult result = await runCommand(
+  final String gitStatusOutput = await evalFn(
     'git',
     <String>['status', '--porcelain', '--untracked-files=all'],
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: false,
-    outputMode: outputMode,
+    canFail: true,
+    printStdout: printOutput,
+    printStderr: printOutput,
   );
-
-  final String? flattenedStdout = result.flattenedStdout;
-  if (flattenedStdout == null) {
-    throw Exception('Could not get git status output.');
-  }
-
-  return flattenedStdout;
+  return gitStatusOutput;
 }
