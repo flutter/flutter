@@ -2291,32 +2291,6 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux gradle_lock_files_check
-    recipe: flutter/flutter_drone
-    timeout: 60
-    bringup: true
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:21"}
-        ]
-      shard: gradle_lock_files_check
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
-      test_timeout_secs: "3600" # https://github.com/flutter/flutter/issues/162714
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-      - DEPS
-      - /**/*.gradle
-      - /**/*.gradle.kts
-      - /**/gradle-wrapper.properties
-      - /**/*.lockfile
-
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
     timeout: 60
