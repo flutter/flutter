@@ -247,20 +247,15 @@ class FontFallbackManager {
   }
 
   NotoFont _selectFont(List<NotoFont> fonts) {
-    NotoFont? bestFont;
-    // Priority is given to fonts that match the language
-    switch (_language) {
-      case 'zh-Hans' || 'zh-CN' || 'zh-SG' || 'zh-MY':
-        bestFont = fonts.firstWhereOrNull(_isNotoSansSC);
-      case 'zh-Hant' || 'zh-TW' || 'zh-MO':
-        bestFont = fonts.firstWhereOrNull(_isNotoSansTC);
-      case 'zh-HK':
-        bestFont = fonts.firstWhereOrNull(_isNotoSansHK);
-      case 'ja':
-        bestFont = fonts.firstWhereOrNull(_isNotoSansJP);
-      case 'ko':
-        bestFont = fonts.firstWhereOrNull(_isNotoSansKR);
-    }
+    // Priority is given to fonts that match the language.
+    NotoFont? bestFont = switch (_language) {
+      'zh-Hans' || 'zh-CN' || 'zh-SG' || 'zh-MY' => fonts.firstWhereOrNull(_isNotoSansSC),
+      'zh-Hant' || 'zh-TW' || 'zh-MO' => fonts.firstWhereOrNull(_isNotoSansTC),
+      'zh-HK' => fonts.firstWhereOrNull(_isNotoSansHK),
+      'ja' => fonts.firstWhereOrNull(_isNotoSansJP),
+      'ko' => fonts.firstWhereOrNull(_isNotoSansKR),
+      _ => null,
+    };
 
     if (bestFont != null) {
       return bestFont;

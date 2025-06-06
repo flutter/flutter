@@ -144,19 +144,15 @@ String textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection) 
     case ui.TextAlign.justify:
       return 'justify';
     case ui.TextAlign.end:
-      switch (textDirection) {
-        case ui.TextDirection.ltr:
-          return 'end';
-        case ui.TextDirection.rtl:
-          return 'left';
-      }
+      return switch (textDirection) {
+        ui.TextDirection.ltr => 'end',
+        ui.TextDirection.rtl => 'left',
+      };
     case ui.TextAlign.start:
-      switch (textDirection) {
-        case ui.TextDirection.ltr:
-          return ''; // it's the default
-        case ui.TextDirection.rtl:
-          return 'right';
-      }
+      return switch (textDirection) {
+        ui.TextDirection.ltr => '', // it's the default
+        ui.TextDirection.rtl => 'right',
+      };
     case null:
       // If align is not specified return default.
       return '';
