@@ -4690,7 +4690,7 @@ class _SemanticsConfigurationProvider {
   ///
   /// This is typically use to recalculate certain properties when mutating
   /// [effective] since [effective] may contain stale data from previous update.
-  /// Examples are [SemanticsConfiguration.isBlockingUserActions] or. Otherwise,
+  /// An example is [SemanticsConfiguration.isBlockingUserActions]. Otherwise,
   /// use [effective] instead.
   SemanticsConfiguration get original {
     if (_originalConfiguration == null) {
