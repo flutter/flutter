@@ -52,10 +52,7 @@ class TextLayout {
   void extractClusterTexts() {
     // Walk through all the styled text ranges
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
-      final String text = paragraph.text!.substring(
-        styledBlock.textRange.start,
-        styledBlock.textRange.end,
-      );
+      final String text = styledBlock.textInside(paragraph.text!);
       layoutContext.font =
           '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
       layoutContext.fillStyle = styledBlock.textStyle.color;
@@ -176,7 +173,7 @@ class TextLayout {
     for (final bidiRun in bidiRuns) {
       final ClusterRange intesection1 = intersect(bidiRun.clusterRange, textRange);
       final ClusterRange intesection2 = intersect(bidiRun.clusterRange, whitespaces);
-      if (intesection1.width <= 0 && intesection2.width <= 0) {
+      if (intesection1.size <= 0 && intesection2.size <= 0) {
         if (logicalLevels.isNotEmpty) {
           // No more runs for this line
           break;

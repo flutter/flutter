@@ -204,7 +204,7 @@ class TextWrapper {
         final TextLine line = _layout.lines[i];
         final String text = _text.substring(line.textRange.start, line.textRange.end);
         final String whitespaces =
-            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
+            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.size}' : 'no';
         final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
           '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
