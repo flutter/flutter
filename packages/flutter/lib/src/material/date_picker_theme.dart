@@ -931,9 +931,9 @@ class DatePickerThemeData with Diagnosticable {
     );
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
-        'inputDecorationTheme',
-        inputDecorationTheme,
+      DiagnosticsProperty<InputDecorationThemeData>(
+        'inputDecorationTheme.data',
+        inputDecorationTheme?.data,
         defaultValue: null,
       ),
     );
