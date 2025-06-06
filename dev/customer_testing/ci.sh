@@ -29,7 +29,7 @@ cd "$(script_location)"
 # largely not needed to run the flutter/tests tests.
 #
 # However, we do need to update this directory.
-dart pub get
+flutter pub get
 
 # Run the cross-platform script.
 ../../bin/dart run ci.dart
