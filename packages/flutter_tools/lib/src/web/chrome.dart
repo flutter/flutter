@@ -238,28 +238,28 @@ class ChromiumLauncher {
     ];
 
     _logger.printError('user data path: ${userDataDir.path}');
-    final io.File chromeDebugLogFile = io.File('${userDataDir.path}/chrome_debug.log');
-    bool printedUserDataDir = false;
+    final io.File chromeDebugLogFile = io.File('${userDataDir.path}/Default/chrome_debug.log');
+    // bool printedUserDataDir = false;
     Timer.periodic(const Duration(seconds: 10), (Timer timer) {
-      if (!printedUserDataDir && userDataDir.existsSync()) {
-        _logger.printError('user data dir exists');
-        _logger.printError('Contents:');
-        void printDirectory(Directory dir) {
-          _logger.printError('Entering ${dir.path}');
-          for (final FileSystemEntity e in dir.listSync()) {
-            final FileStat stat = e.statSync();
-            if (stat.type == FileSystemEntityType.directory) {
-              printDirectory(e as Directory);
-            } else {
-              _logger.printError('Not directory: ${e.path}');
-            }
-          }
-          _logger.printError('Exiting ${dir.path}');
-        }
+      // if (!printedUserDataDir && userDataDir.existsSync()) {
+      //   _logger.printError('user data dir exists');
+      //   _logger.printError('Contents:');
+      //   void printDirectory(Directory dir) {
+      //     _logger.printError('Entering ${dir.path}');
+      //     for (final FileSystemEntity e in dir.listSync()) {
+      //       final FileStat stat = e.statSync();
+      //       if (stat.type == FileSystemEntityType.directory) {
+      //         printDirectory(e as Directory);
+      //       } else {
+      //         _logger.printError('Not directory: ${e.path}');
+      //       }
+      //     }
+      //     _logger.printError('Exiting ${dir.path}');
+      //   }
 
-        printDirectory(userDataDir);
-        printedUserDataDir = true;
-      }
+      //   printDirectory(userDataDir);
+      //   printedUserDataDir = true;
+      // }
       if (chromeDebugLogFile.existsSync()) {
         timer.cancel();
         _logger.printError('${chromeDebugLogFile.path} exists');
