@@ -851,7 +851,7 @@ See the link below for more information:
         globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
-  File get localPropertiesFile => _flutterLibGradleRoot.parent.childFile('local.properties');
+  File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
 
   Directory get pluginRegistrantHost =>
       _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
