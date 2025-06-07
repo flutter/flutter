@@ -122,7 +122,7 @@ typedef RawMenuAnchorChildBuilder =
 /// This signature is used by the `showOverlay` argument in
 /// [RawMenuAnchor.onOpenRequested]. See [RawMenuAnchor.onOpenRequested] for
 /// more information.
-typedef RawMenuAnchorShowOverlayCallback = void Function({Offset? position});
+typedef RawMenuAnchorShowOverlayCallback = void Function();
 
 /// Signature for a callback that hides the menu overlay of a [RawMenuAnchor].
 ///
@@ -145,7 +145,7 @@ typedef RawMenuAnchorOpenRequestedCallback =
 typedef RawMenuAnchorCloseRequestedCallback =
     void Function(RawMenuAnchorHideOverlayCallback hideOverlay);
 
-// An [InheritedWidget] used to notify anchor descendants when a menu opens
+// An InheritedWidget used to notify anchor descendants when a menu opens
 // and closes, and to pass the anchor's controller to descendants.
 class _MenuControllerScope extends InheritedWidget {
   const _MenuControllerScope({
@@ -258,13 +258,14 @@ class RawMenuAnchor extends StatefulWidget {
   /// triggers [onOpen].
   ///
   /// The default implementation of [onOpenRequested] calls `showOverlay`
-  /// synchronously, thereby calling [onOpen] synchronously. In this case, the
+  /// synchronously, thereby calling [onOpen] synchronously. In this case,
   /// [onOpen] is called regardless of whether the menu overlay is already
   /// showing.
   ///
   /// Custom implementations of [onOpenRequested] can delay the call to
   /// `showOverlay` or not call it at all, in which case [onOpen] will not be
-  /// called.
+  /// called. Calling `showOverlay` after disposal is a no-op, and will not
+  /// trigger [onOpen].
   ///
   /// A typical usage is to respond when the menu first becomes interactive,
   /// such as by setting focus to a menu item.
@@ -272,8 +273,8 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when the menu overlay is hidden.
   ///
-  /// When [MenuController.close] is called, [onCloseRequested] is invoked with a
-  /// `hideOverlay` callback that, when called, hides the menu overlay and
+  /// When [MenuController.close] is called, [onCloseRequested] is invoked with
+  /// a `hideOverlay` callback that, when called, hides the menu overlay and
   /// triggers [onClose].
   ///
   /// The default implementation of [onCloseRequested] calls `hideOverlay`
@@ -283,7 +284,8 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   /// Custom implementations of [onCloseRequested] can delay the call to
   /// `hideOverlay` or not call it at all, in which case [onClose] will not be
-  /// called.
+  /// called. Calling `hideOverlay` after disposal is a no-op, and will not
+  /// trigger [onClose].
   final VoidCallback? onClose;
 
   /// Called when a request is made to open the menu.
@@ -424,7 +426,7 @@ class RawMenuAnchor extends StatefulWidget {
     Offset? position,
     RawMenuAnchorShowOverlayCallback showOverlay,
   ) {
-    showOverlay(position: position);
+    showOverlay();
   }
 
   static void _defaultOnCloseRequested(RawMenuAnchorHideOverlayCallback hideOverlay) {
@@ -699,6 +701,11 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   @override
   void open({Offset? position}) {
     assert(menuController._anchor == this);
+    if (!mounted) {
+      // If we're not mounted, then we can't open the menu.
+      return;
+    }
+
     if (isOpen) {
       // The menu is already open, but we need to move to another location, so
       // close it first.
@@ -710,7 +717,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     // Close all siblings.
     _parent?.closeChildren();
     assert(!_overlayController.isShowing);
-
+    _menuPosition = position;
     _parent?._childChangedOpenState();
     _overlayController.show();
 
@@ -719,11 +726,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
 
     widget.onOpen?.call();
-    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      setState(() {
-        // Mark dirty to notify MenuController dependents.
-      });
-    }
+    setState(() {
+      // Mark dirty to notify MenuController dependents.
+    });
   }
 
   @override
@@ -759,8 +764,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleOpenRequest({ui.Offset? position}) {
-    widget.onOpenRequested(position, ({Offset? position}) {
-      _menuPosition = position;
+    widget.onOpenRequested(position, () {
       open(position: position);
     });
   }
@@ -778,7 +782,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         widget.onCloseRequested(close);
-      }, debugLabel: 'MenuAnchor.handleCloseRequest');
+      }, debugLabel: 'RawMenuAnchor.handleCloseRequest');
     }
   }
 

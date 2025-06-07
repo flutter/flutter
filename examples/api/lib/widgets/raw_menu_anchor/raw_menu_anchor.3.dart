@@ -123,9 +123,9 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _handleMenuOpenRequest(Offset? position, void Function({Offset? position}) showOverlay) {
+  void _handleMenuOpenRequest(Offset? position, void Function() showOverlay) {
     // Mount or reposition the menu before animating the menu open.
-    showOverlay(position: position);
+    showOverlay();
 
     if (animationStatus.isForwardOrCompleted) {
       // If the menu is already open or opening, the animation is already
@@ -147,12 +147,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
     menuController.closeChildren();
 
     // Animate the menu out of view.
-    animationController.reverse().whenComplete(() {
-      if (mounted) {
-        // Hide the menu after the closing animation completes.
-        hideOverlay();
-      }
-    });
+    animationController.reverse().whenComplete(hideOverlay);
   }
 
   @override

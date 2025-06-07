@@ -2291,7 +2291,7 @@ void main() {
             onOpen: () {
               onOpenCalled += 1;
             },
-            onOpenRequested: (ui.Offset? position, void Function({Offset? position}) showMenu) {
+            onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showMenu) {
               onOpenRequestedCalled += 1;
             },
             menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
@@ -2318,7 +2318,7 @@ void main() {
         App(
           Menu(
             controller: controller,
-            onOpenRequested: (ui.Offset? position, void Function({Offset? position}) showOverlay) {
+            onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
               menuPosition = position;
             },
             menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
@@ -2358,7 +2358,7 @@ void main() {
             onOpen: () {
               onOpenCalled += 1;
             },
-            onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+            onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
               onOpenRequestedCalled += 1;
               showMenuOverlay = showOverlay;
             },
@@ -2404,9 +2404,9 @@ void main() {
         App(
           Menu(
             controller: controller,
-            onOpenRequested: (ui.Offset? position, void Function({Offset? position}) showOverlay) {
+            onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
               Timer(const Duration(milliseconds: 100), () {
-                showOverlay(position: position ?? const Offset(30, 30));
+                showOverlay();
               });
             },
             overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
@@ -2431,7 +2431,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 101));
 
       expect(find.byKey(Tag.a.key), findsOneWidget);
-      expect(tester.getTopLeft(find.byKey(Tag.a.key)), const Offset(30, 30));
+      expect(tester.getTopLeft(find.byKey(Tag.a.key)), Offset.zero);
 
       controller.open(position: const Offset(50, 50));
       await tester.pump();
@@ -2447,7 +2447,7 @@ void main() {
         App(
           Menu(
             controller: controller,
-            onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+            onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
               showMenuOverlay = showOverlay;
             },
             overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
@@ -2475,8 +2475,7 @@ void main() {
         App(
           Menu(
             controller: controller,
-
-            onCloseRequested: (VoidCallback hideOverlay) {
+            onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
               onCloseRequestedCalled += 1;
             },
             menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
@@ -2509,7 +2508,7 @@ void main() {
             onClose: () {
               onCloseCalled += 1;
             },
-            onCloseRequested: (VoidCallback hideOverlay) {
+            onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
               Timer(const Duration(milliseconds: 100), hideOverlay);
             },
             menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
@@ -2542,7 +2541,7 @@ void main() {
         App(
           Menu(
             controller: controller,
-            onCloseRequested: (VoidCallback hideOverlay) {
+            onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
               Timer(const Duration(milliseconds: 100), hideOverlay);
             },
             overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
@@ -2579,7 +2578,7 @@ void main() {
         App(
           Menu(
             controller: controller,
-            onCloseRequested: (VoidCallback hideOverlay) {
+            onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
               hideMenuOverlay = hideOverlay;
             },
             overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
@@ -2614,21 +2613,21 @@ void main() {
       await tester.pumpWidget(
         App(
           Menu(
-            onCloseRequested: (VoidCallback hideOverlay) {
+            onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
               topCloseRequests += 1;
               Timer(const Duration(milliseconds: 100), hideOverlay);
             },
             menuPanel: Panel(
               children: <Widget>[
                 Menu(
-                  onCloseRequested: (VoidCallback hideOverlay) {
+                  onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
                     middleCloseRequests += 1;
                   },
                   menuPanel: Panel(
                     children: <Widget>[
                       Menu(
                         controller: controller,
-                        onCloseRequested: (VoidCallback hideOverlay) {
+                        onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
                           bottomCloseRequests += 1;
                           Timer(const Duration(milliseconds: 10), hideOverlay);
                         },
@@ -2703,7 +2702,7 @@ void main() {
       await tester.pumpWidget(
         App(
           Menu(
-            onCloseRequested: (VoidCallback hideOverlay) {
+            onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
               closeRequests += 1;
               hideOverlay();
             },
@@ -2750,14 +2749,11 @@ void main() {
           data: mediaQueryData.copyWith(size: size),
           child: App(
             Menu(
-              onOpenRequested: (
-                ui.Offset? position,
-                void Function({Offset? position}) showOverlay,
-              ) {
+              onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
                 onOpenRequestedCalled += 1;
                 showOverlay();
               },
-              onCloseRequested: (void Function() hideOverlay) {
+              onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
                 onCloseRequestedCalled += 1;
                 hideOverlay();
               },
@@ -2796,11 +2792,11 @@ void main() {
           SingleChildScrollView(
             controller: scrollController,
             child: Menu(
-              onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+              onOpenRequested: (ui.Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
                 onOpenRequestedCalled += 1;
                 showOverlay();
               },
-              onCloseRequested: (VoidCallback hideOverlay) {
+              onCloseRequested: (RawMenuAnchorHideOverlayCallback hideOverlay) {
                 onCloseRequestedCalled += 1;
                 hideOverlay();
               },
@@ -3173,7 +3169,7 @@ class Menu extends StatefulWidget {
     Offset? position,
     RawMenuAnchorShowOverlayCallback showOverlay,
   ) {
-    showOverlay(position: position);
+    showOverlay();
   }
 
   static void _defaultOnCloseRequested(RawMenuAnchorHideOverlayCallback hideOverlay) {

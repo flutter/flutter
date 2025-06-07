@@ -46,9 +46,9 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     super.dispose();
   }
 
-  void _handleMenuOpenRequest(Offset? position, void Function({Offset? position}) showOverlay) {
+  void _handleMenuOpenRequest(Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
     // Mount or reposition the menu before animating the menu open.
-    showOverlay(position: position);
+    showOverlay();
 
     if (_animationStatus.isForwardOrCompleted) {
       // If the menu is already open or opening, the animation is already
@@ -67,12 +67,7 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     }
 
     // Animate the menu out of view.
-    animationController.reverse().whenComplete(() {
-      if (mounted) {
-        // Hide the menu after the menu has closed
-        hideOverlay();
-      }
-    });
+    animationController.reverse().whenComplete(hideOverlay);
   }
 
   @override
