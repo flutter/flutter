@@ -597,11 +597,9 @@ class BallisticScrollActivity extends ScrollActivity {
         AnimationController.unbounded(
             debugLabel: kDebugMode ? objectRuntimeType(this, 'BallisticScrollActivity') : null,
             vsync: vsync,
-          )
-          ..addListener(_tick)
-          ..animateWith(
-            simulation,
-          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+          )..addListener(_tick);
+    //no cascade notation when triggering the animateWith, to ensure _controller is initialized before we run the animation
+    _controller.animateWith(simulation).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late AnimationController _controller;
