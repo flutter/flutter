@@ -453,7 +453,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     //if (!project.android.isSupportedVersion) {
     //  _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
     //}
-    print('### Debug: buildGradleApp is called!');
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, _logger),
