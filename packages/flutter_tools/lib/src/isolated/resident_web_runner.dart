@@ -360,6 +360,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
           );
         }
+        final WebDevFS webDevFS = device!.devFS! as WebDevFS;
+        final bool useDebugExtension =
+            device!.device is WebServerDevice && debuggingOptions.startPaused;
+        // Listen for connected apps early and then await this `Future` later
+        // when we attach.
+        final Future<ConnectionResult?>? connectDebug =
+            supportsServiceProtocol ? webDevFS.connect(useDebugExtension) : null;
         await device!.device!.startApp(
           package,
           mainPath: target,
@@ -369,6 +376,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          connectDebug: connectDebug,
         );
       });
     } on WebSocketException catch (error, stackTrace) {
@@ -755,6 +763,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
+    Future<ConnectionResult?>? connectDebug,
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
@@ -779,10 +788,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
     Uri? websocketUri;
     if (supportsServiceProtocol) {
-      final WebDevFS webDevFS = device!.devFS! as WebDevFS;
-      final bool useDebugExtension =
-          device!.device is WebServerDevice && debuggingOptions.startPaused;
-      _connectionResult = await webDevFS.connect(useDebugExtension);
+      assert(connectDebug != null);
+      _connectionResult = await connectDebug;
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event) {

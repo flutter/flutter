@@ -14,6 +14,11 @@ on:
   push:
     branches: [master]
 
+env:
+  ANDROID_TOOLS_VERSION: 13114758
+  ANDROID_PLATFORM: android-36
+  ANDROID_BUILDTOOLS: 36.0.0
+
 jobs:
   Linux_tool-tests-general:
     permissions:
@@ -31,6 +36,7 @@ jobs:
           fetch-tags: true
           # Checkout the PR; not the merge commit - we need to describe tags
           ref: ${{ github.event.pull_request.head.sha }}
+          path: 'flutter'
 
       # Real checkout on github actions for post submit
       - name: Checkout code (non-act push)
@@ -41,16 +47,20 @@ jobs:
           fetch-tags: true
           # Checkout the PR; not the merge commit - we need to describe tags
           ref: ${{ github.event.pull_request.head.sha }}
+          path: 'flutter'
 
       # Fake checkout if running locally
       - name: Checkout code (act local)
         uses: actions/checkout@v4
         if: env.ACT
+        with:
+          path: 'flutter'
 
       # If this is a branch / pr NOT on fluter/flutter, set the remote upstream
       # so the flutter tool can figure out the version
       - name: Set upstream (if not flutter/flutter)
         if: github.repository != 'flutter/flutter' && !env.ACT
+        working-directory: ${{ github.workspace }}/flutter
         run: |
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch --all --tags
@@ -64,30 +74,87 @@ jobs:
           distribution: 'temurin'
 
       # If running locally; install Android SDK tools - Github runners have everything on them
-      - name: Setup Android SDK
-        if: env.ACT
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
-        with:
-          cmdline-tools-version: 13114758
-
-      # If running locally; install Android SDK - Github runners have everything on them
-      - name: install android
+      - name: Set Android SDK environment variable
         if: env.ACT
         run: |
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          echo "ANDROID_SDK_ROOT=$GITHUB_WORKSPACE/.android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$GITHUB_WORKSPACE/.android/sdk" >> $GITHUB_ENV
+      - name: Get Android SDK version
+        id: android-sdk-version
+        if: env.ACT
+        run: |
+          echo "revision=${{env.ANDROID_TOOLS_VERSION}};${{env.ANDROID_PLATFORM}};build-tools;${{env.ANDROID_BUILDTOOLS}}" >> "$GITHUB_OUTPUT"
+      - name: Android SDK Cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        id: android-sdk-setup
+        if: env.ACT
+        with:
+          path: ${{ github.workspace }}/.android/sdk
+          key: ${{ runner.os }}-${{ steps.android-sdk-version.outputs.revision }}
+      - name: Setup Android SDK (cold cache)
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit != 'true'
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          packages: 'tools platform-tools platforms;${{env.ANDROID_PLATFORM}} build-tools;${{env.ANDROID_BUILDTOOLS}}'
+          log-accepted-android-sdk-licenses: false
+          cmdline-tools-version: ${{ env.ANDROID_TOOLS_VERSION }}
+      - name: Setup Android SDK (warm cache)
+        if: env.ACT && steps.android-sdk-setup.outputs.cache-hit == 'true'
+        run: |
+          echo "$GITHUB_WORKSPACE/.android/sdk/cmdline-tools/${{ env.ANDROID_TOOLS_VERSION }}/bin" >> "$GITHUB_PATH"
+          echo "$GITHUB_WORKSPACE/.android/sdk/platform-tools" >> "$GITHUB_PATH"
 
       - name: Add `flutter` to the PATH
         run: |
-          echo "$PWD/bin" >> "$GITHUB_PATH"
+          echo "$GITHUB_WORKSPACE/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Setup PUB_CACHE environment variable
+        run: |
+          echo "PUB_CACHE=$GITHUB_WORKSPACE/.pub-cache" >> $GITHUB_ENV
+
+      # Get the Flutter revision. This is the key for the cache for artifacts
+      # under bin/cache
+      - name: Get Flutter version
+        id: flutter-revision
+        working-directory: ${{ github.workspace }}/flutter
+        run: |
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Flutter artifacts cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        id: flutter-artifacts
+        with:
+          path: ${{ github.workspace }}/flutter/bin/cache
+          key: ${{ runner.os }}-flutter-${{ steps.flutter-revision.outputs.revision }}
+
+      - name: pub deps hash
+        id: pub-deps-hash
+        working-directory: ${{ github.workspace }}/flutter
+        run: |
+          # Generate stable hash of pubspec.yaml files
+          find dev examples packages -name "pubspec.yaml" -print0 | sort -z | xargs -0 cat | sha256sum  >> "$RUNNER_TEMP/pub_deps_sha"
+          echo "revision=$(cat "$RUNNER_TEMP/pub_deps_sha")" >> "$GITHUB_OUTPUT"
+      - name: pub package cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        id: pub-cache
+        with:
+          path: |
+            ${{ github.workspace }}/.pub-cache
+            ${{ github.workspace }}/flutter/**/.dart_tool
+            ${{ github.workspace }}/flutter/**/pubspec.lock
+          key: ${{ runner.os }}-pub-${{ steps.pub-deps-hash.outputs.revision }}
 
       - name: Flutter Doctor
+        working-directory: ${{ github.workspace }}/flutter
         run: |
           flutter doctor
 
-      - name: update-packages
+      - name: update-packages (online)
+        if: steps.pub-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ github.workspace }}/flutter
         run: |
           flutter update-packages
 
       - name: Tool Test
+        working-directory: ${{ github.workspace }}/flutter
         run: |
           SHARD=tool_tests SUBSHARD=general dart --enable-asserts dev/bots/test.dart

@@ -31,6 +31,7 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/vertices.h"
+#include "flutter/lib/ui/semantics/semantics_flags.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/semantics/semantics_update_builder.h"
 #include "flutter/lib/ui/semantics/string_attribute.h"
@@ -84,6 +85,7 @@ typedef CanvasPath Path;
   /* Other */                                                      \
   V(FontCollection::LoadFontFromList)                              \
   V(ImageDescriptor::initEncoded)                                  \
+  V(ImageFilter::equals)                                           \
   V(ImmutableBuffer::init)                                         \
   V(ImmutableBuffer::initFromAsset)                                \
   V(ImmutableBuffer::initFromFile)                                 \
@@ -93,6 +95,7 @@ typedef CanvasPath Path;
   V(IsolateNameServerNatives::RemovePortNameMapping)               \
   V(NativeStringAttribute::initLocaleStringAttribute)              \
   V(NativeStringAttribute::initSpellOutStringAttribute)            \
+  V(NativeSemanticsFlags::initSemanticsFlags)                      \
   V(PlatformConfigurationNativeApi::DefaultRouteName)              \
   V(PlatformConfigurationNativeApi::ScheduleFrame)                 \
   V(PlatformConfigurationNativeApi::EndWarmUpFrame)                \
@@ -209,7 +212,6 @@ typedef CanvasPath Path;
   V(ImageFilter, initComposeFilter)              \
   V(ImageFilter, initShader)                     \
   V(ImageFilter, initMatrix)                     \
-  V(ImageFilter, equals)                         \
   V(ImageShader, dispose)                        \
   V(ImageShader, initWithImage)                  \
   V(ImmutableBuffer, dispose)                    \
