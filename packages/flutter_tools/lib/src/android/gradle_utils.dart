@@ -1080,6 +1080,7 @@ void updateLocalProperties({
     changeIfNecessary('flutter.versionCode', buildNumber);
   }
 
+  print('### Debug: localProperties should be updated: $changed to ${localProperties.path}');
   if (changed) {
     settings.writeContents(localProperties);
   }
