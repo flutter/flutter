@@ -13,7 +13,11 @@ void main() {
     expect(find.byType(Divider), findsOneWidget);
 
     // Divider is positioned horizontally.
-    final Offset container = tester.getBottomLeft(find.byType(ColoredBox).first);
+    final Offset container = tester.getBottomLeft(
+      find
+          .descendant(of: find.byType(example.DividerExample), matching: find.byType(ColoredBox))
+          .first,
+    );
     expect(container.dy, tester.getTopLeft(find.byType(Divider)).dy);
 
     final Offset subheader = tester.getTopLeft(find.text('Subheader'));
