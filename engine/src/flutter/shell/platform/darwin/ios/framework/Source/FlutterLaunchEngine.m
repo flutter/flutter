@@ -22,6 +22,9 @@
 
 - (FlutterEngine*)engine {
   if (!_didTakeEngine && !_engine) {
+    NSLog(@"Using FlutterAppDelegate as a FlutterPluginRegistry is deprecated.\n"
+          @"Use `FlutterAppDelegate.pluginRegistrant` and `FlutterPluginRegistrant` instead.\n"
+          @"See https://docs.flutter.dev/release/breaking-changes/uiscenedelegate.");
     // `allowHeadlessExecution` is set to `YES` since that has always been the
     // default behavior. Technically, someone could have set it to `NO` in their
     // nib and it would be ignored here. There is no documented usage of this
