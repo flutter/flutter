@@ -87,22 +87,22 @@ static String getFlutterRoot(Project project) {
 void addAarTask(Project project, component) {
     String variantName = component.name.capitalize()
     String taskName = "assembleAar$variantName"
-    project.tasks.register(taskName) {
-        // This check is required to be able to configure the archives before `publish` runs.
+    project.tasks.register(taskName) { task ->
+        // Only proceed if the task was explicitly requested on the command line
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
         }
 
-        // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
+        // Create a default MavenPublication for the given component
         project.publishing.publications.create(component.name, MavenPublication) { pub ->
-            groupId = "${pub.groupId}"
-            artifactId = "${pub.artifactId}_${pub.name}"
-            version = "${pub.version}"
-            from component
+            pub.groupId = "${project.group}"
+            pub.artifactId = "${pub.name}_${component.name}"
+            pub.version = "${project.version}"
+            pub.from(component)
         }
 
-        // Generate the Maven artifacts.
-        finalizedBy "publish"
+        // Ensure this task triggers the 'publish' task afterward
+        task.finalizedBy("publish")
     }
 }
 
