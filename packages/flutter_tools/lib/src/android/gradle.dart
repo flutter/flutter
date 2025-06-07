@@ -449,9 +449,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
-    if (!project.android.isSupportedVersion) {
-      _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
-    }
+    // This check seems to be legacy
+    //if (!project.android.isSupportedVersion) {
+    //  _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
+    //}
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, _logger),
