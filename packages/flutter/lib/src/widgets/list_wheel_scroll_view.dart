@@ -31,7 +31,7 @@ import 'scrollable.dart';
 /// The behavior of reporting the selected item index in a [ListWheelScrollView].
 ///
 /// This determines when the `onSelectedItemChanged` callback is called.
-enum ListWheelChangeReportingBehavior {
+enum ChangeReportingBehavior {
   /// Report the selected item index only when the scroll view stops scrolling.
   onScrollEnd,
 
@@ -596,7 +596,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.changeReportingBehavior = ListWheelChangeReportingBehavior.onScrollUpdate,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required List<Widget> children,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -632,7 +632,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.changeReportingBehavior = ListWheelChangeReportingBehavior.onScrollUpdate,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.childDelegate,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -737,8 +737,8 @@ class ListWheelScrollView extends StatefulWidget {
   /// The behavior of reporting the selected item index.
   ///
   /// This determines when the [onSelectedItemChanged] callback is called.
-  /// Defaults to [ListWheelChangeReportingBehavior.onScrollUpdate].
-  final ListWheelChangeReportingBehavior changeReportingBehavior;
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
 
   @override
   State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
@@ -784,7 +784,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
       return false;
     }
 
-    if (widget.changeReportingBehavior == ListWheelChangeReportingBehavior.onScrollEnd) {
+    if (widget.changeReportingBehavior == ChangeReportingBehavior.onScrollEnd) {
       if (notification is ScrollEndNotification) {
         _reportSelectedItemChanged(notification);
       }

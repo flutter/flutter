@@ -1240,7 +1240,7 @@ void main() {
             onSelectedItemChanged: (int index) {
               selectedItems.add(index);
             },
-            changeReportingBehavior: ListWheelChangeReportingBehavior.onScrollEnd,
+            changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
             children: List<Widget>.generate(10, (int index) {
               return const Placeholder();
             }),
