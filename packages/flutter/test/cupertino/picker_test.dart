@@ -352,7 +352,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CupertinoPicker(
             itemExtent: 100.0,
-            legacyChangeReportingBehavior: false,
+            changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
             onSelectedItemChanged: (int index) {
               selectedItems.add(index);
             },
