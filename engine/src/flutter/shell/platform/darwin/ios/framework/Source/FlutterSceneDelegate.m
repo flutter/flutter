@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneDelegate.h"
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
@@ -26,6 +27,17 @@ FLUTTER_ASSERT_ARC
     self.window.rootViewController = appDelegate.window.rootViewController;
     appDelegate.window = self.window;
     [self.window makeKeyAndVisible];
+  }
+}
+
+- (void)windowScene:(UIWindowScene*)windowScene
+    performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+               completionHandler:(void (^)(BOOL succeeded))completionHandler {
+  NSObject<UIApplicationDelegate>* appDelegate = FlutterSharedApplication.application.delegate;
+  if ([appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
+    [appDelegate application:FlutterSharedApplication.application
+        performActionForShortcutItem:shortcutItem
+                   completionHandler:completionHandler];
   }
 }
 

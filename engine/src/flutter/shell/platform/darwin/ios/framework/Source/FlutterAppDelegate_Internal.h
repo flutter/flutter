@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERAPPDELEGATE_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
 @interface FlutterAppDelegate ()
 
