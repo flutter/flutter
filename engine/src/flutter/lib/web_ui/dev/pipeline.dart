@@ -185,17 +185,19 @@ typedef WatchEventPredicate = bool Function(WatchEvent event);
 /// The [ignore] callback can be used to customize the watching behavior to
 /// ignore certain files.
 class PipelineWatcher {
-  PipelineWatcher({required this.dir, required this.pipeline, this.ignore})
-    : watcher = DirectoryWatcher(dir);
+  PipelineWatcher({String? dir, List<String>? dirs, required this.pipeline, this.ignore})
+    : assert(dir != null || (dirs != null && dirs.isNotEmpty), 'Either dir or non-empty dirs must be provided'),
+      _dirs = dirs ?? [dir!],
+      watcher = dirs == null ? DirectoryWatcher(dir!) : null;
 
-  /// The path of the directory to watch for changes.
-  final String dir;
+  /// The directories to watch for changes.
+  final List<String> _dirs;
 
   /// The pipeline to be executed when an event is fired by the watcher.
   final Pipeline pipeline;
 
-  /// Used to watch a directory for any file system changes.
-  final DirectoryWatcher watcher;
+  /// Used to watch a directory for any file system changes (legacy single directory mode).
+  final DirectoryWatcher? watcher;
 
   /// A callback that determines whether to rerun the pipeline or not for a
   /// given [WatchEvent] instance.
@@ -203,7 +205,16 @@ class PipelineWatcher {
 
   /// Activates the watcher.
   Future<void> start() async {
-    watcher.events.listen(_onEvent);
+    if (watcher != null) {
+      // Legacy single directory mode
+      watcher!.events.listen(_onEvent);
+    } else {
+      // Multiple directories mode
+      for (final String dir in _dirs) {
+        final DirectoryWatcher dirWatcher = DirectoryWatcher(dir);
+        dirWatcher.events.listen((WatchEvent event) => _onEvent(event, fromDir: dir));
+      }
+    }
 
     // Listen to the `q` key stroke to stop the pipeline.
     print("Press 'q' to exit felt");
@@ -232,12 +243,13 @@ class PipelineWatcher {
   int _pipelineRunCount = 0;
   Timer? _scheduledPipeline;
 
-  void _onEvent(WatchEvent event) {
+  void _onEvent(WatchEvent event, {String? fromDir}) {
     if (ignore?.call(event) ?? false) {
       return;
     }
 
-    final String relativePath = path.relative(event.path, from: dir);
+    final String baseDir = fromDir ?? _dirs.first;
+    final String relativePath = path.relative(event.path, from: baseDir);
     print('- [${event.type}] $relativePath');
 
     _pipelineRunCount++;

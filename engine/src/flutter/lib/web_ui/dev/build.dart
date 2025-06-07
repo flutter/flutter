@@ -29,12 +29,13 @@ const Map<String, String> targetAliases = <String, String>{
 
 class BuildCommand extends Command<bool> with ArgUtils<bool> {
   BuildCommand() {
-    argParser.addFlag(
+    argParser.addMultiOption(
       'watch',
       abbr: 'w',
       help:
           'Run the build in watch mode so it rebuilds whenever a change is '
           'made. Disabled by default.',
+      valueHelp: 'lib, flutter_js, skwasm',
     );
     argParser.addFlag(
       'host',
@@ -70,7 +71,9 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
   @override
   String get description => 'Build the Flutter web engine.';
 
-  bool get isWatchMode => boolArg('watch');
+  bool get isWatchMode => argResults?.wasParsed('watch') ?? false;
+
+  List<String> get watchDirs => argResults?['watch'] as List<String>? ?? <String>['lib'];
 
   bool get host => boolArg('host');
 
@@ -97,7 +100,6 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
     if (embedDwarf && runtimeMode != RuntimeMode.debug) {
       throw ToolExit('Embedding DWARF data requires debug runtime mode.');
     }
-    final FilePath libPath = FilePath.fromWebUi('lib');
     final List<PipelineStep> steps = <PipelineStep>[
       GnPipelineStep(host: host, runtimeMode: runtimeMode, embedDwarf: embedDwarf),
       NinjaPipelineStep(
@@ -111,13 +113,20 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
     if (isWatchMode) {
       print('Initial build done!');
-      print('Watching directory: ${libPath.relativeToCwd}/');
-      await PipelineWatcher(
-        dir: libPath.absolute,
+      final List<String> absoluteWatchDirs = watchDirs.map((String dir) {
+        final FilePath watchPath = FilePath.fromWebUi(dir);
+        print('Watching directory: ${watchPath.relativeToCwd}/');
+        return watchPath.absolute;
+      }).toList();
+
+      final PipelineWatcher watcher = PipelineWatcher(
+        dirs: absoluteWatchDirs,
         pipeline: buildPipeline,
         // Ignore font files that are copied whenever tests run.
         ignore: (WatchEvent event) => event.path.endsWith('.ttf'),
-      ).start();
+      );
+
+      await watcher.start();
     }
     return true;
   }
