@@ -14,7 +14,7 @@ void main() {
     final Finder homePage = find.byType(example.HomePage);
     expect(homePage, findsOneWidget);
 
-    final PageTransitionsTheme theme = Theme.of(tester.element(homePage)).pageTransitionsTheme;
+    final PageTransitionsThemeData theme = PageTransitionsTheme.of(tester.element(homePage));
     expect(theme.builders, isNotNull);
 
     // Check defined page transitions builder for each platform.

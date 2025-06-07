@@ -20,7 +20,7 @@ class PageTransitionsThemeApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        pageTransitionsTheme: PageTransitionsTheme(
+        pageTransitionsTheme: PageTransitionsThemeData(
           builders: Map<TargetPlatform, PageTransitionsBuilder>.fromIterable(
             TargetPlatform.values,
             value: (_) => const FadeForwardsPageTransitionsBuilder(),

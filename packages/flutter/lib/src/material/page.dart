@@ -99,15 +99,8 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   PageTransitionsBuilder? _getPageTransitionBuilder(BuildContext context) {
     final TargetPlatform platform = Theme.of(context).platform;
-    final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
-    return pageTransitionsTheme.builders[platform] ??
-        switch (platform) {
-          TargetPlatform.iOS || TargetPlatform.macOS => const CupertinoPageTransitionsBuilder(),
-          TargetPlatform.android ||
-          TargetPlatform.fuchsia ||
-          TargetPlatform.windows ||
-          TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
-        };
+    final PageTransitionsThemeData theme = PageTransitionsTheme.of(context);
+    return theme.getBuilderByPlatform(platform);
   }
 
   // The transitionDuration is used to create the AnimationController which is only
@@ -148,11 +141,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     bool allowSnapshotting,
     Widget? child,
   ) {
-    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    final PageTransitionsThemeData theme = PageTransitionsTheme.of(context);
     final TargetPlatform platform = Theme.of(context).platform;
-    final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(
-      platform,
-    );
+    final PageTransitionsBuilder builder = theme.getBuilderByPlatform(platform);
+    final DelegatedTransitionBuilder? themeDelegatedTransition = builder.delegatedTransition;
     return themeDelegatedTransition != null
         ? themeDelegatedTransition(context, animation, secondaryAnimation, allowSnapshotting, child)
         : null;
@@ -201,8 +193,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
+    final PageTransitionsThemeData theme = PageTransitionsTheme.of(context);
+    final TargetPlatform platform = Theme.of(context).platform;
+    final PageTransitionsBuilder builder = theme.getBuilderByPlatform(platform);
+    return builder.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
 

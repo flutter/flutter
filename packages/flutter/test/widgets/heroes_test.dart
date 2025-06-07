@@ -921,7 +921,7 @@ Future<void> main() async {
         MaterialApp(
           routes: routes,
           theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsThemeData(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
               },
@@ -1160,7 +1160,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          pageTransitionsTheme: const PageTransitionsTheme(
+          pageTransitionsTheme: const PageTransitionsThemeData(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
             },
