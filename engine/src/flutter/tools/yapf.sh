@@ -39,12 +39,12 @@ YAPF_DIR="$(cd "$SRC_DIR/flutter/third_party/yapf"; pwd -P)"
 
 # TODO: https://github.com/flutter/flutter/issues/158384
 # Migrate to a supported Python formatter.
-if command -v python3.10 &> /dev/null; then
-  PYTHON_EXEC="python3.10"
-elif command -v python3.11 &> /dev/null; then
-  PYTHON_EXEC="python3.11"
-elif command -v python3.12 &> /dev/null; then
+if command -v python3.12 &>/dev/null; then
   PYTHON_EXEC="python3.12"
+elif command -v python3.11 &>/dev/null; then
+  PYTHON_EXEC="python3.11"
+elif command -v python3.10 &>/dev/null; then
+  PYTHON_EXEC="python3.10"
 else
   python3 -c "
 import sys
