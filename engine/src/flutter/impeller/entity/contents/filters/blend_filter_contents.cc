@@ -243,9 +243,14 @@ static std::optional<Entity> AdvancedBlend(
   if (!command_buffer) {
     return std::nullopt;
   }
-  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Advanced Blend Filter", ISize(subpass_coverage.GetSize()),
-      command_buffer, callback);
+  fml::StatusOr<RenderTarget> render_target =
+      renderer.MakeSubpass("Advanced Blend Filter",            //
+                           ISize(subpass_coverage.GetSize()),  //
+                           command_buffer,                     //
+                           callback,                           //
+                           /*msaa_enabled=*/false,             //
+                           /*depth_stencil_enabled=*/false     //
+      );
   if (!render_target.ok()) {
     return std::nullopt;
   }
@@ -631,9 +636,14 @@ static std::optional<Entity> PipelineBlend(
     return std::nullopt;
   }
 
-  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Pipeline Blend Filter", ISize(subpass_coverage.GetSize()),
-      command_buffer, callback);
+  fml::StatusOr<RenderTarget> render_target =
+      renderer.MakeSubpass("Pipeline Blend Filter",            //
+                           ISize(subpass_coverage.GetSize()),  //
+                           command_buffer,                     //
+                           callback,                           //
+                           /*msaa_enabled=*/false,             //
+                           /*depth_stencil_enabled=*/false     //
+      );
 
   if (!render_target.ok()) {
     return std::nullopt;
@@ -857,7 +867,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     if (!foreground_texture) {
       return std::nullopt;
     }
-    auto blit_pass = cmd_buffer->CreateBlitPass();
+    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
     auto buffer_view = renderer.GetTransientsBuffer().Emplace(
         foreground_color->Premultiply().ToR8G8B8A8(), /*alignment=*/4);
 
@@ -867,9 +877,14 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     }
   }
 
-  auto render_target =
-      renderer.MakeSubpass("FramebufferBlend", dst_snapshot->texture->GetSize(),
-                           cmd_buffer, subpass_callback);
+  fml::StatusOr<RenderTarget> render_target =
+      renderer.MakeSubpass("FramebufferBlend",                //
+                           dst_snapshot->texture->GetSize(),  //
+                           cmd_buffer,                        //
+                           subpass_callback,                  //
+                           /*msaa_enabled=*/true,             //
+                           /*depth_stencil_enabled=*/true     //
+      );
 
   if (!render_target.ok()) {
     return std::nullopt;
