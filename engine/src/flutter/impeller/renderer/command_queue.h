@@ -37,7 +37,8 @@ class CommandQueue {
   ///        potentially on a different thread.
   virtual fml::Status Submit(
       const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-      const CompletionCallback& completion_callback = {});
+      const CompletionCallback& completion_callback = {},
+      bool block_on_schedule = false);
 
  private:
   CommandQueue(const CommandQueue&) = delete;
