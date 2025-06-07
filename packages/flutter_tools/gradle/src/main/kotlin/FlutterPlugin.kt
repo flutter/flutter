@@ -111,14 +111,14 @@ class FlutterPlugin : Plugin<Project> {
 
         if (isInvokedFromAndroidStudio()) {
             rootProject.file("local.properties")
-            val settingsFile = project.rootDir.file("settings.gradle")
-            val settingsKtsFile = project.rootDir.file("settings.gradle.kts")
+            val settingsFile = project.rootDir.toPath().resolve("settings.gradle")
+            val settingsKtsFile = project.rootDir.toPath().resolve("settings.gradle.kts")
             val hasSettings = settingsFile.exists()
             val hasSettingsKts = settingsKtsFile.exists()
-            val hasPubspec = project.rootDir.file("pubspec.yaml").exists()
-            val hasParentSettings = project.rootDir.parentFile.file("settings.gradle").exists()
-            val hasParentSettingsKts = project.rootDir.parentFile.file("settings.gradle.kts").exists()
-            val hasParentPubspec = project.rootDir.parentFile.file("pubspec.yaml").exists()
+            val hasPubspec = project.rootDir.toPath().resolve("pubspec.yaml").exists()
+            val hasParentSettings = project.rootDir.parentFile.toPath().resolve("settings.gradle").exists()
+            val hasParentSettingsKts = project.rootDir.parentFile.toPath().resolve("settings.gradle.kts").exists()
+            val hasParentPubspec = project.rootDir.parentFile.toPath().resolve("pubspec.yaml").exists()
 
             if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
                 val file = if (hasSettings) settingsFile else settingsKtsFile
