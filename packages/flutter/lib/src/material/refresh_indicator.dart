@@ -160,6 +160,7 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.dragSensitivity = 1.0,
   }) : _indicatorType = _IndicatorType.material,
        onStatusChange = null,
        assert(elevation >= 0.0);
@@ -194,6 +195,7 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.dragSensitivity = 1.0,
   }) : _indicatorType = _IndicatorType.adaptive,
        onStatusChange = null,
        assert(elevation >= 0.0);
@@ -212,6 +214,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.dragSensitivity = 1.0,
   }) : _indicatorType = _IndicatorType.noSpinner,
        // The following parameters aren't used because [_IndicatorType.noSpinner] is being used,
        // which involves showing no spinner, hence the following parameters are useless since
@@ -293,6 +296,11 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// By default, the value of [strokeWidth] is 2.0 pixels.
   final double strokeWidth;
+
+  /// Defines the sensitivity of the `RefreshIndicator`.
+  ///
+  /// The default value is 1.0, which means normal sensitivity.
+  final double dragSensitivity;
 
   final _IndicatorType _indicatorType;
 
@@ -515,6 +523,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   void _checkDragOffset(double containerExtent) {
+    containerExtent = MediaQuery.of(context).size.height * widget.dragSensitivity;
     assert(_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed);
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     if (_status == RefreshIndicatorStatus.armed) {
