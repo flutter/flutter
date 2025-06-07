@@ -60,7 +60,7 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     animationController.forward();
   }
 
-  void _handleMenuCloseRequest(VoidCallback hideOverlay) {
+  void _handleMenuCloseRequest(RawMenuAnchorHideOverlayCallback hideOverlay) {
     if (!_animationStatus.isForwardOrCompleted) {
       // If the menu is already closed or closing, do nothing.
       return;

@@ -123,7 +123,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _handleMenuOpenRequest(Offset? position, void Function() showOverlay) {
+  void _handleMenuOpenRequest(Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
     // Mount or reposition the menu before animating the menu open.
     showOverlay();
 
@@ -137,7 +137,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
     animationController.forward();
   }
 
-  void _handleMenuCloseRequest(VoidCallback hideOverlay) {
+  void _handleMenuCloseRequest(RawMenuAnchorHideOverlayCallback hideOverlay) {
     if (!animationStatus.isForwardOrCompleted) {
       // If the menu is already closed or closing, do nothing.
       return;
