@@ -1227,6 +1227,52 @@ void main() {
       expect(selectedItems, <int>[1, 2, 1]);
     });
 
+    testWidgets('onSelectedItemChanged with new change reporting behavior', (
+      WidgetTester tester,
+    ) async {
+      final List<int> selectedItems = <int>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            itemExtent: 100.0,
+            onSelectedItemChanged: (int index) {
+              selectedItems.add(index);
+            },
+            changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
+            children: List<Widget>.generate(10, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      final TestGesture scrollGesture = await tester.startGesture(const Offset(10.0, 10.0));
+      // Item 0 is still closest to the center. No updates.
+      await scrollGesture.moveBy(const Offset(0.0, -49.0));
+      expect(selectedItems.isEmpty, true);
+
+      // Now item 1 is closest to the center.
+      await scrollGesture.moveBy(const Offset(0.0, -1.0));
+      expect(selectedItems, <int>[]);
+
+      // Now item 1 is still closest to the center for another full itemExtent (100px).
+      await scrollGesture.moveBy(const Offset(0.0, -99.0));
+      expect(selectedItems, <int>[]);
+
+      await scrollGesture.moveBy(const Offset(0.0, -1.0));
+      await scrollGesture.up();
+      expect(selectedItems, <int>[2]);
+
+      await scrollGesture.down(const Offset(10.0, 10.0));
+      await scrollGesture.moveBy(const Offset(0.0, 100.0));
+      expect(selectedItems, <int>[2]);
+
+      await scrollGesture.up();
+      expect(selectedItems, <int>[2, 1]);
+    });
+
     testWidgets('onSelectedItemChanged reports only in valid range', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
 
