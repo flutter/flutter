@@ -15,6 +15,25 @@ void main() {
   runApp(const RawMenuAnchorSubmenuAnimationApp());
 }
 
+/// Signature for the function that builds a [Menu]'s contents.
+///
+/// The [animationStatus] parameter indicates the current state of the menu
+/// animation, which can be used to adjust the appearance of the menu panel.
+typedef MenuPanelBuilder = Widget Function(BuildContext context, AnimationStatus animationStatus);
+
+/// Signature for the function that builds a [Menu]'s anchor button.
+///
+/// The [MenuController] can be used to open and close the menu.
+///
+/// The [animationStatus] indicates the current state of the menu animation,
+/// which can be used to adjust the appearance of the menu panel.
+typedef MenuButtonBuilder =
+    Widget Function(
+      BuildContext context,
+      MenuController controller,
+      AnimationStatus animationStatus,
+    );
+
 class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
   const RawMenuAnchorSubmenuAnimationExample({super.key});
 
@@ -38,7 +57,7 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
                       ),
                     );
                   },
-                  builder: (
+                  buttonBuilder: (
                     BuildContext context,
                     MenuController controller,
                     AnimationStatus animationStatus,
@@ -67,7 +86,11 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
           ),
         );
       },
-      builder: (BuildContext context, MenuController controller, AnimationStatus animationStatus) {
+      buttonBuilder: (
+        BuildContext context,
+        MenuController controller,
+        AnimationStatus animationStatus,
+      ) {
         return FilledButton(
           onPressed: () {
             if (animationStatus.isForwardOrCompleted) {
@@ -84,9 +107,9 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
 }
 
 class Menu extends StatefulWidget {
-  const Menu({super.key, required this.panelBuilder, required this.builder});
-  final Widget Function(BuildContext, AnimationStatus) panelBuilder;
-  final Widget Function(BuildContext, MenuController, AnimationStatus) builder;
+  const Menu({super.key, required this.panelBuilder, required this.buttonBuilder});
+  final MenuPanelBuilder panelBuilder;
+  final MenuButtonBuilder buttonBuilder;
 
   @override
   State<Menu> createState() => MenuState();
@@ -197,7 +220,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
           );
         },
         builder: (BuildContext context, MenuController controller, Widget? child) {
-          return widget.builder(context, controller, animationStatus);
+          return widget.buttonBuilder(context, controller, animationStatus);
         },
       ),
     );
