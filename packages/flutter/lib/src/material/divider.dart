@@ -107,10 +107,11 @@ class Divider extends StatelessWidget {
   /// {@endtemplate}
   final double? endIndent;
 
+  /// {@template flutter.material.Divider.radius}
   /// The amount of radius for the border of the divider.
   ///
-  /// {@template flutter.material.Divider.radius}
-  /// If this is null, then the default radius of [BoxDecoration] will be used.
+  /// If this is null, then [DividerThemeData.radius] is used. If that is
+  /// also null, then the default radius of [BoxDecoration] is used.
   /// {@endtemplate}
   final BorderRadiusGeometry? radius;
 
@@ -199,7 +200,7 @@ class Divider extends StatelessWidget {
           height: thickness,
           margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
-            borderRadius: radius,
+            borderRadius: radius ?? dividerTheme.radius ?? defaults.radius,
             border: Border(bottom: createBorderSide(context, color: color, width: thickness)),
           ),
         ),
@@ -324,7 +325,7 @@ class VerticalDivider extends StatelessWidget {
           width: thickness,
           margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
-            borderRadius: radius,
+            borderRadius: radius ?? dividerTheme.radius ?? defaults.radius,
             border: Border(left: Divider.createBorderSide(context, color: color, width: thickness)),
           ),
         ),
