@@ -28,6 +28,17 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scrollable.dart';
 
+/// The behavior of reporting the selected item index in a [ListWheelScrollView].
+///
+/// This determines when the `onSelectedItemChanged` callback is called.
+enum ListWheelChangeReportingBehavior {
+  /// Report the selected item index only when the scroll view stops scrolling.
+  onScrollEnd,
+
+  /// Report the selected item index on every scroll update.
+  onScrollUpdate,
+}
+
 /// A delegate that supplies children for [ListWheelScrollView].
 ///
 /// [ListWheelScrollView] lazily constructs its children during layout to avoid
@@ -548,17 +559,6 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       toleranceFor(position).velocity * velocity.sign,
     );
   }
-}
-
-/// The behavior of reporting the selected item index in a [ListWheelScrollView].
-///
-/// This determines when the [onSelectedItemChanged] callback is called.
-enum ListWheelChangeReportingBehavior {
-  /// Report the selected item index only when the scroll view stops scrolling.
-  onScrollEnd,
-
-  /// Report the selected item index on every scroll update.
-  onScrollUpdate,
 }
 
 /// A box in which children on a wheel can be scrolled.
