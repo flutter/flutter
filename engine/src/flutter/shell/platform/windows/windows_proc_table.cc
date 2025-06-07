@@ -67,4 +67,25 @@ HCURSOR WindowsProcTable::SetCursor(HCURSOR cursor) const {
   return ::SetCursor(cursor);
 }
 
+int WindowsProcTable::GetSystemMetrics(int nIndex) const {
+  return ::GetSystemMetrics(nIndex);
+}
+
+BOOL WindowsProcTable::EnumDisplayDevices(LPCWSTR lpDevice,
+                                          DWORD iDevNum,
+                                          PDISPLAY_DEVICE lpDisplayDevice,
+                                          DWORD dwFlags) const {
+  return ::EnumDisplayDevices(lpDevice, iDevNum, lpDisplayDevice, dwFlags);
+}
+
+BOOL WindowsProcTable::EnumDisplaySettings(LPCWSTR lpszDeviceName,
+                                           DWORD iModeNum,
+                                           DEVMODE* lpDevMode) const {
+  return ::EnumDisplaySettings(lpszDeviceName, iModeNum, lpDevMode);
+}
+
+HMONITOR WindowsProcTable::MonitorFromPoint(POINT pt, DWORD dwFlags) const {
+  return ::MonitorFromPoint(pt, dwFlags);
+}
+
 }  // namespace flutter
