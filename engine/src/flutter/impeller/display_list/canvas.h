@@ -199,6 +199,12 @@ class Canvas {
                 const Paint& paint,
                 bool reuse_depth = false);
 
+  void DrawDashedLine(const Point& p0,
+                      const Point& p1,
+                      Scalar on_length,
+                      Scalar off_length,
+                      const Paint& paint);
+
   void DrawRect(const Rect& rect, const Paint& paint);
 
   void DrawOval(const Rect& rect, const Paint& paint);

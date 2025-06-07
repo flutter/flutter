@@ -846,4 +846,17 @@ const PathSource& StrokeDiffRoundRectGeometry::GetSource() const {
   return source_;
 }
 
+StrokeDashedLineGeometry::StrokeDashedLineGeometry(
+    Point p0,
+    Point p1,
+    Scalar on_length,
+    Scalar off_length,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      source_(p0, p1, on_length, off_length) {}
+
+const PathSource& StrokeDashedLineGeometry::GetSource() const {
+  return source_;
+}
+
 }  // namespace impeller
