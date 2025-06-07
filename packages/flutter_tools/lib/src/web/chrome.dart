@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -199,6 +200,8 @@ class ChromiumLauncher {
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
+    _logger.printError('Using port: $port');
+    _logger.printError('webbrowserflags: $webBrowserFlags');
     final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
@@ -228,9 +231,43 @@ class ChromiumLauncher {
         '--no-sandbox',
         '--window-size=2400,1800',
       ],
+      '--enable-logging',
+      '--v=stderr',
       ...webBrowserFlags,
       url,
     ];
+
+    _logger.printError('user data path: ${userDataDir.path}');
+    final io.File chromeDebugLogFile = io.File('${userDataDir.path}/Default/chrome_debug.log');
+    // bool printedUserDataDir = false;
+    Timer.periodic(const Duration(seconds: 60), (Timer timer) {
+      // if (!printedUserDataDir && userDataDir.existsSync()) {
+      //   _logger.printError('user data dir exists');
+      //   _logger.printError('Contents:');
+      //   void printDirectory(Directory dir) {
+      //     _logger.printError('Entering ${dir.path}');
+      //     for (final FileSystemEntity e in dir.listSync()) {
+      //       final FileStat stat = e.statSync();
+      //       if (stat.type == FileSystemEntityType.directory) {
+      //         printDirectory(e as Directory);
+      //       } else {
+      //         _logger.printError('Not directory: ${e.path}');
+      //       }
+      //     }
+      //     _logger.printError('Exiting ${dir.path}');
+      //   }
+
+      //   printDirectory(userDataDir);
+      //   printedUserDataDir = true;
+      // }
+      if (chromeDebugLogFile.existsSync()) {
+        timer.cancel();
+        _logger.printError('${chromeDebugLogFile.path} exists');
+        _logger.printError('Chrome debug log output: ${chromeDebugLogFile.readAsStringSync()}');
+      } else {
+        _logger.printError('${chromeDebugLogFile.path} does not exist yet');
+      }
+    });
 
     final Process process = await _spawnChromiumProcess(args, chromeExecutable);
 
