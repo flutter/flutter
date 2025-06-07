@@ -8,6 +8,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
@@ -1753,6 +1754,81 @@ class CompileTest {
     });
   }
 
+  Future<List<double>> getMetricsFromXCResults() async {
+    return inDirectory<List<double>>(testDirectory, () async {
+     List<dynamic> resultsJson = <dynamic>[];
+      const String resultsBundleName = 'benchmarkResults.xcresult';
+      // Get ID from Info.plist
+      final ProcessResult plistIDResult = await Process.run(workingDirectory: testDirectory, 'plutil', <String>[
+        '-extract',
+        'rootId.hash',
+        'raw',
+        '-o',
+        '-',
+        '$resultsBundleName/Info.plist'
+      ]);
+
+      final String plistID = plistIDResult.stdout.toString().trim();
+
+      // Next, get the ActionsInvocationRecord and Extract the testsRef ID
+      String testRefID = '';
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        resultsBundleName,
+        '--id',
+        plistID,
+        '--format',
+        'json',
+        '--legacy'
+      ]).then((ProcessResult result) {
+        final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
+        testRefID = actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value'].toString();
+      });
+
+      // Next, grab the ActionTestSummary using our testRefID
+      String actionTestSummaryID = '';
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        resultsBundleName,
+        '--id',
+        testRefID,
+        '--format',
+        'json',
+        '--legacy'
+      ]).then((ProcessResult result) {
+        final dynamic actionTestSummaryJSON = json.decode(result.stdout.toString());
+        actionTestSummaryID = actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
+            .toString();
+      });
+
+      dynamic resultMetricsJSON = '';
+
+      // Finally, grab the metrics.
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
+        'xcresulttool',
+        'get',
+        '--path',
+        resultsBundleName,
+        '--id',
+        actionTestSummaryID,
+        '--format',
+        'json',
+        '--legacy'
+      ]).then((ProcessResult result) {
+        resultMetricsJSON = json.decode(result.stdout.toString());
+        resultsJson = resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values'] as List<dynamic>;
+      });
+     List<double> extractedLaunchTimes = <double>[];
+     resultsJson?.map((dynamic item) => extractedLaunchTimes.add(double.parse(item['_value'] as String))).toList();
+
+      return extractedLaunchTimes;
+    });
+  }
+
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Map<String, String> environment = Platform.environment;
@@ -1763,6 +1839,7 @@ class CompileTest {
 
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
+      /* Compile Time */
       int releaseSizeInBytes = 0;
       final Stopwatch watch = Stopwatch();
 
@@ -1791,6 +1868,7 @@ class CompileTest {
         }
       });
 
+      /* App Size */
       final String appPath =
           '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
@@ -1798,10 +1876,39 @@ class CompileTest {
       await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
+      /* Time to First Frame */
+      await Process.run(workingDirectory: testDirectory, 'rm', <String>[
+        '-rf',
+        '$testDirectory/benchmarkResults.xcresult'
+      ]).then((ProcessResult results) {
+        print(results.stdout);
+      });
+
+      // Run the benchmarking tests and output the result
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        'test',
+        '-project',
+        'hello_world_swiftui.xcodeproj',
+        '-scheme',
+        'hello_world_swiftui',
+        '-destination',
+        'platform=iOS',
+        '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
+        '-resultBundlePath',
+        '$testDirectory/benchmarkResults.xcresult',
+        '-verbose',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      ]);
+
+      final List<double> extractedLaunchTimes = await getMetricsFromXCResults();
+
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
         'release_swiftui_compile_millis': watch.elapsedMilliseconds,
         'release_swiftui_size_bytes': releaseSizeInBytes,
+        'time_to_first_frame': extractedLaunchTimes.average
       });
       return TaskResult.success(metrics);
     });
@@ -2388,3 +2495,133 @@ String? _findDarwinAppInBuildDirectory(String searchDirectory) {
   }
   return null;
 }
+
+// A class to hold the extracted IDs
+class XcresultIds {
+  final String? rootId;
+  final String? testPlanSummariesId;
+
+  XcresultIds({this.rootId, this.testPlanSummariesId});
+
+  @override
+  String toString() {
+    return 'XcresultIds(rootId: $rootId, testPlanSummariesId: $testPlanSummariesId)';
+  }
+}
+
+// Future<XcresultIds> extractXcresultIds(String xcresultPath) async {
+//   String? rootId;
+//   String? testPlanSummariesId;
+//
+//   // --- Step 1: Get the Root ID from Info.plist ---
+//   try {
+//     // Construct the path to Info.plist within the .xcresult bundle
+//     final infoPlistPath = '$xcresultPath/Info.plist';
+//
+//     // Command 1: Convert Info.plist to JSON and extract the Root ID
+//     // Equivalent to: plutil -convert json -o - benchmarkResults.xcresult/Info.plist | jq -r '.rootId.hash'
+//     final plutilResult = await Process.run(
+//       'plutil',
+//       ['-convert', 'json', '-o', '-', infoPlistPath],
+//       runInShell: true, // Useful if plutil is not directly in PATH for the Dart process
+//     );
+//
+//     if (plutilResult.exitCode == 0) {
+//       final Map<String, dynamic> infoPlistJson = json.decode(plutilResult.stdout);
+//       // Navigate to the rootId.hash
+//       if (infoPlistJson.containsKey('rootId') &&
+//           infoPlistJson['rootId'] is Map &&
+//           infoPlistJson['rootId'].containsKey('hash')) {
+//         rootId = infoPlistJson['rootId']['hash'] as String?;
+//       } else {
+//         print('Error: Could not find rootId.hash in Info.plist JSON.');
+//         // Fallback for slightly different Info.plist structures if needed
+//         // For example, some might have a simpler structure or different key names.
+//         // This part might need adjustment based on the exact Info.plist format if the above fails.
+//       }
+//     } else {
+//       print('Error running plutil: ${plutilResult.stderr}');
+//       return XcresultIds(rootId: null, testPlanSummariesId: null);
+//     }
+//
+//     if (rootId == null) {
+//       print('Failed to extract Root ID.');
+//       return XcresultIds(rootId: null, testPlanSummariesId: null);
+//     }
+//     print('Extracted ROOT_ID: $rootId');
+//
+//     // --- Step 2: Get the ActionsInvocationRecord and Extract the testsRef ID ---
+//     // Equivalent to: xcrun xcresulttool get --path benchmarkResults.xcresult --id "$ROOT_ID" --format json | jq -r '.actions._values[0].actionResult.testsRef.id._value'
+//     final xcresulttoolGetRecordResult = await Process.run(
+//       'xcrun',
+//       ['xcresulttool', 'get', '--path', xcresultPath, '--id', rootId, '--format', 'json'],
+//       runInShell: true,
+//     );
+//
+//     if (xcresulttoolGetRecordResult.exitCode == 0) {
+//       final Map<String, dynamic> actionsInvocationRecordJson = jsonDecode(xcresulttoolGetRecordResult.stdout);
+//
+//       // Navigate to actions._values[0].actionResult.testsRef.id._value
+//       // This path assumes a specific structure, error handling is important here.
+//       if (actionsInvocationRecordJson.containsKey('actions') &&
+//           actionsInvocationRecordJson['actions'] is Map &&
+//           actionsInvocationRecordJson['actions'].containsKey('_values') &&
+//           actionsInvocationRecordJson['actions']['_values'] is List &&
+//           (actionsInvocationRecordJson['actions']['_values'] as List).isNotEmpty) {
+//
+//         final firstAction = (actionsInvocationRecordJson['actions']['_values'] as List)[0];
+//         if (firstAction is Map &&
+//             firstAction.containsKey('actionResult') &&
+//             firstAction['actionResult'] is Map &&
+//             firstAction['actionResult'].containsKey('testsRef') &&
+//             firstAction['actionResult']['testsRef'] is Map &&
+//             firstAction['actionResult']['testsRef'].containsKey('id') &&
+//             firstAction['actionResult']['testsRef']['id'] is Map &&
+//             firstAction['actionResult']['testsRef']['id'].containsKey('_value')) {
+//
+//           testPlanSummariesId = firstAction['actionResult']['testsRef']['id']['_value'] as String?;
+//         } else {
+//           print('Error: Could not find the path to testsRef ID in ActionsInvocationRecord JSON.');
+//         }
+//       } else {
+//         print('Error: "actions._values" array is missing or empty in ActionsInvocationRecord JSON.');
+//       }
+//
+//     } else {
+//       print('Error running xcresulttool get for ActionsInvocationRecord: ${xcresulttoolGetRecordResult.stderr}');
+//       return XcresultIds(rootId: rootId, testPlanSummariesId: null);
+//     }
+//
+//     if (testPlanSummariesId != null) {
+//       print('Extracted TEST_PLAN_SUMMARIES_ID: $testPlanSummariesId');
+//     } else {
+//       print('Failed to extract Test Plan Summaries ID.');
+//     }
+//
+//   } catch (e) {
+//     print('An exception occurred: $e');
+//   }
+//
+//   return XcresultIds(rootId: rootId, testPlanSummariesId: testPlanSummariesId);
+// }
+//
+// Future<void> main() async {
+//   // Replace with the actual path to your .xcresult bundle
+//   final String xcresultFilePath = 'benchmarkResults.xcresult';
+//
+//   print('Starting extraction for: $xcresultFilePath');
+//   final ids = await extractXcresultIds(xcresultFilePath);
+//
+//   if (ids.rootId != null && ids.testPlanSummariesId != null) {
+//     print('\nSuccessfully extracted IDs:');
+//     print('Root ID: ${ids.rootId}');
+//     print('Test Plan Summaries ID: ${ids.testPlanSummariesId}');
+//     // You can now use these IDs for further xcresulttool get calls
+//   } else {
+//     print('\nExtraction failed or some IDs are missing.');
+//     if (ids.rootId == null) print('Root ID could not be determined.');
+//     if (ids.testPlanSummariesId == null) print('Test Plan Summaries ID could not be determined.');
+//   }
+// }
+
+
