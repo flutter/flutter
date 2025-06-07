@@ -4,6 +4,45 @@
 
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
+namespace {
+std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
+    const flutter::SemanticsFlags& source) {
+  return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
+      .has_checked_state = source.hasCheckedState,
+      .is_checked = source.isChecked,
+      .is_selected = source.isSelected,
+      .is_button = source.isButton,
+      .is_text_field = source.isTextField,
+      .is_focused = source.isFocused,
+      .has_enabled_state = source.hasEnabledState,
+      .is_enabled = source.isEnabled,
+      .is_in_mutually_exclusive_group = source.isInMutuallyExclusiveGroup,
+      .is_header = source.isHeader,
+      .is_obscured = source.isObscured,
+      .scopes_route = source.scopesRoute,
+      .names_route = source.namesRoute,
+      .is_hidden = source.isHidden,
+      .is_image = source.isImage,
+      .is_live_region = source.isLiveRegion,
+      .has_toggled_state = source.hasToggledState,
+      .is_toggled = source.isToggled,
+      .has_implicit_scrolling = source.hasImplicitScrolling,
+      .is_multiline = source.isMultiline,
+      .is_read_only = source.isReadOnly,
+      .is_focusable = source.isFocusable,
+      .is_link = source.isLink,
+      .is_slider = source.isSlider,
+      .is_keyboard_key = source.isKeyboardKey,
+      .is_check_state_mixed = source.isCheckStateMixed,
+      .has_expanded_state = source.hasExpandedState,
+      .is_expanded = source.isExpanded,
+      .has_selected_state = source.hasSelectedState,
+      .has_required_state = source.hasRequiredState,
+      .is_required = source.isRequired,
+  });
+}
+}  // namespace
+
 namespace flutter {
 
 EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
@@ -26,6 +65,9 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
   };
 }
 
+// This function is for backward compatibility and contains only a subset of
+// the flags. New flags will be added only to `FlutterSemanticsFlags`, not
+// `FlutterSemanticsFlag`.
 FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   int result = 0;
 
@@ -192,6 +234,7 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     const SemanticsNodeUpdates& nodes,
     const CustomAccessibilityActionUpdates& actions) {
   nodes_.reserve(nodes.size());
+  flags_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());
   action_pointers_.reserve(actions.size());
@@ -238,6 +281,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       CreateStringAttributes(node.increasedValueAttributes);
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
+  flags_.emplace_back(ConvertToFlutterSemanticsFlags(node.flags));
 
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
@@ -279,6 +323,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
+      flags_.back().get(),
   });
 }
 
