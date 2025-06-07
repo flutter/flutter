@@ -701,7 +701,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   @override
   void open({Offset? position}) {
     if (!mounted) {
-      // If we're not mounted, then we can't open the menu.
       return;
     }
 
