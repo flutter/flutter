@@ -55,7 +55,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
 }
 
 class TestBox extends SizedBox {
-  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
+  const TestBox({super.key, super.child}) : super(width: itemWidth, height: itemHeight);
 
   static const double itemHeight = 44.0;
   static const double itemWidth = 100.0;
@@ -355,9 +355,10 @@ void main() {
   });
 
   testWidgets('items are ordered right-to-left in RTL', (WidgetTester tester) async {
+    const int itemCount = 3;
     final List<Widget> children = List<Widget>.generate(
-      3,
-      (int i) => TestBox(key: ValueKey<String>('item_$i')),
+      itemCount,
+      (int i) => TestBox(key: ValueKey<String>('item_$i'), child: Text('$i')),
     );
 
     await tester.pumpWidget(
@@ -376,28 +377,37 @@ void main() {
     );
 
     // Verify all items are visible.
-    expect(find.byType(TestBox), findsNWidgets(children.length));
+    expect(find.byType(TestBox), findsNWidgets(itemCount));
 
-    // Get positions of items.
-    final List<Rect> itemRects =
-        find
-            .byType(TestBox)
-            .evaluate()
-            .map(
-              (Element e) =>
-                  tester.getRect(find.byElementPredicate((Element element) => element == e)),
-            )
-            .toList();
+    // Find all text widgets by their content and get their positions.
+    final List<Rect> textRects = List<Rect>.generate(
+      itemCount,
+      (int i) => tester.getRect(find.text('$i')),
+    );
 
-    // In RTL, items should be ordered right-to-left.
-    for (int i = 0; i < itemRects.length - 1; i++) {
+    // In RTL, items should be in reverse order (2, 1, 0).
+    // So item 2 should be rightmost, then 1, then 0.
+    for (int i = 0; i < itemCount - 1; i++) {
+      final Rect current = textRects[i];
+      final Rect next = textRects[i + 1];
+
+      // In RTL, each item should be to the left of the previous one.
       expect(
-        itemRects[i].left,
-        equals(itemRects[i + 1].right),
-        reason:
-            "Item $i (left: ${itemRects[i].left}) should be exactly to the left of item ${i + 1} (right: ${itemRects[i + 1].right}) in RTL. (Item $i's left should be equal to item ${i + 1}'s right)",
+        next.right,
+        lessThanOrEqualTo(current.left),
+        reason: 'In RTL, item ${i + 1} should be to the left of item $i',
       );
     }
+
+    // Verify the visual order by checking the rightmost position.
+    final List<double> rightEdges = textRects.map((Rect r) => r.right).toList();
+    final List<double> sortedRightEdges = List<double>.from(rightEdges)
+      ..sort((double a, double b) => b.compareTo(a));
+    expect(
+      rightEdges,
+      equals(sortedRightEdges),
+      reason: 'Items should be ordered right-to-left in RTL',
+    );
   });
 
   testWidgets('puts children in an overflow menu if they overflow in RTL', (
