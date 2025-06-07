@@ -829,6 +829,14 @@ public class FlutterRenderer implements TextureRegistry {
       return pir.reader.getSurface();
     }
 
+    // POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously
+    // unretrieved Surface
+    // by calling `SurfaceProducer.getSurface`.
+    @Override
+    public void invalidateSurface() {
+      createNewReader = true;
+    }
+
     @Override
     public void scheduleFrame() {
       if (VERBOSE_LOGS) {
@@ -855,17 +863,24 @@ public class FlutterRenderer implements TextureRegistry {
 
     private PerImageReader getActiveReader() {
       synchronized (lock) {
-        if (createNewReader) {
-          createNewReader = false;
-          // Create a new ImageReader and add it to the queue.
-          ImageReader reader = createImageReader();
-          if (VERBOSE_LOGS) {
-            Log.i(
-                TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        // POTENTIAL FIX #2 (does not fix camera issue): We should never return an invalid Surface.
+        if (!createNewReader) {
+          // Verify we don't need a new ImageReader anyway because its Surface has been invalidated.
+          PerImageReader lastPerImageReader = imageReaderQueue.peekLast();
+          Surface lastImageReaderSurface = lastPerImageReader.reader.getSurface();
+          boolean lastImageReaderHasValidSurface = lastImageReaderSurface.isValid();
+          if (lastImageReaderHasValidSurface) {
+            return lastPerImageReader;
           }
-          return getOrCreatePerImageReader(reader);
         }
-        return imageReaderQueue.peekLast();
+
+        createNewReader = false;
+        // Create a new ImageReader and add it to the queue.
+        ImageReader reader = createImageReader();
+        if (VERBOSE_LOGS) {
+          Log.i(TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        }
+        return getOrCreatePerImageReader(reader);
       }
     }
 

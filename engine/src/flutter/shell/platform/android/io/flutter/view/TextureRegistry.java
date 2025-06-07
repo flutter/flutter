@@ -139,6 +139,12 @@ public interface TextureRegistry {
     Surface getSurface();
 
     /**
+     * POTENTIAL FIX #1 (fixes camera issue): Provide a way to force retrieving a previously
+     * unretrieved Surface by calling `SurfaceProducer.getSurface`.
+     */
+    void invalidateSurface();
+
+    /**
      * Sets a callback that is notified when a previously created {@link Surface} returned by {@link
      * SurfaceProducer#getSurface()} is no longer valid due to being destroyed, or a new surface is
      * now available (after the previous one was destroyed) for rendering.
