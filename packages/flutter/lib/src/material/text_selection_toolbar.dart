@@ -533,131 +533,138 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     return (index > _lastIndexThatFits) == overflowOpen;
   }
 
-  // Decide which children will be painted, set their shouldPaint, and set the
-  // offset that painted children will be placed at.
-  void _placeChildren() {
+  /// Horizontal layout.
+  Size _placeChildrenHorizontally() {
     Size nextSize = Size.zero;
     final RenderBox navButton = firstChild!;
     final bool isRtl = textDirection == TextDirection.rtl;
 
-    if (!overflowOpen) {
-      // Horizontal layout
-      final List<RenderBox> paintedContentItems = <RenderBox>[];
-      bool navButtonIsPainted = false;
+    final List<RenderBox> paintedContentItems = <RenderBox>[];
+    bool navButtonIsPainted = false;
 
-      double totalHorizontalWidth = 0;
-      double maxHorizontalHeight = 0;
+    double totalHorizontalWidth = 0;
+    double maxHorizontalHeight = 0;
 
-      // First pass: calculate dimensions and collect items.
-      int childIdx = 0;
-      RenderBox? current = firstChild;
-      while (current != null) {
-        final ToolbarItemsParentData childParentData =
-            current.parentData! as ToolbarItemsParentData;
-        if (_shouldPaintChild(current, childIdx)) {
-          childParentData.shouldPaint = true;
-          totalHorizontalWidth += current.size.width;
-          maxHorizontalHeight = math.max(maxHorizontalHeight, current.size.height);
+    // First pass: calculate dimensions and collect items.
+    int childIdx = 0;
+    RenderBox? current = firstChild;
+    while (current != null) {
+      final ToolbarItemsParentData childParentData = current.parentData! as ToolbarItemsParentData;
+      if (_shouldPaintChild(current, childIdx)) {
+        childParentData.shouldPaint = true;
+        totalHorizontalWidth += current.size.width;
+        maxHorizontalHeight = math.max(maxHorizontalHeight, current.size.height);
 
-          if (current == navButton) {
-            navButtonIsPainted = true;
-          } else {
-            paintedContentItems.add(current);
-          }
-        } else {
-          childParentData.shouldPaint = false;
-        }
-        current = childParentData.nextSibling;
-        childIdx++;
-      }
-
-      // Position items based on text direction.
-      double currentX = 0.0;
-
-      if (isRtl) {
-        // In RTL, we want the nav button on the left and items right-aligned.
-        if (navButtonIsPainted) {
-          final ToolbarItemsParentData navParentData =
-              navButton.parentData! as ToolbarItemsParentData;
-          navParentData.offset = Offset.zero;
-          currentX += navButton.size.width;
-        }
-
-        // Position content items from right to left.
-        double rightEdge = totalHorizontalWidth;
-        for (final RenderBox item in paintedContentItems) {
-          rightEdge -= item.size.width;
-          final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
-          itemParentData.offset = Offset(rightEdge, 0.0);
-        }
-      } else {
-        // LTR: Place content items first, then nav button.
-        // First position all content items from left to right.
-        for (final RenderBox item in paintedContentItems) {
-          final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
-          itemParentData.offset = Offset(currentX, 0.0);
-          currentX += item.size.width;
-        }
-
-        // Then place the nav button at the end.
-        if (navButtonIsPainted) {
-          final ToolbarItemsParentData navParentData =
-              navButton.parentData! as ToolbarItemsParentData;
-          navParentData.offset = Offset(currentX, 0.0);
-        }
-      }
-
-      nextSize = Size(totalHorizontalWidth, maxHorizontalHeight);
-    } else {
-      // Vertical layout (overflow menu).
-      double currentY = 0.0;
-      double maxItemWidth = 0.0;
-
-      final ToolbarItemsParentData navButtonParentData =
-          navButton.parentData! as ToolbarItemsParentData;
-      if (_shouldPaintChild(navButton, 0)) {
-        navButtonParentData.shouldPaint = true;
-        if (!isAbove) {
-          navButtonParentData.offset = Offset.zero;
-          currentY += navButton.size.height;
-          maxItemWidth = math.max(maxItemWidth, navButton.size.width);
-        }
-      } else {
-        navButtonParentData.shouldPaint = false;
-      }
-
-      int childIdx = 0;
-      RenderBox? current = firstChild;
-      while (current != null) {
-        final ToolbarItemsParentData childParentData =
-            current.parentData! as ToolbarItemsParentData;
         if (current == navButton) {
-          current = childParentData.nextSibling;
-          childIdx++;
-          continue;
-        }
-
-        if (_shouldPaintChild(current, childIdx)) {
-          childParentData.shouldPaint = true;
-          childParentData.offset = Offset(0.0, currentY);
-          currentY += current.size.height;
-          maxItemWidth = math.max(maxItemWidth, current.size.width);
+          navButtonIsPainted = true;
         } else {
-          childParentData.shouldPaint = false;
+          paintedContentItems.add(current);
         }
-        current = childParentData.nextSibling;
-        childIdx++;
+      } else {
+        childParentData.shouldPaint = false;
+      }
+      current = childParentData.nextSibling;
+      childIdx++;
+    }
+
+    // Position items based on text direction.
+    double currentX = 0.0;
+
+    if (isRtl) {
+      // In RTL, we want the nav button on the left and items right-aligned.
+      if (navButtonIsPainted) {
+        final ToolbarItemsParentData navParentData =
+            navButton.parentData! as ToolbarItemsParentData;
+        navParentData.offset = Offset.zero;
+        currentX += navButton.size.width;
       }
 
-      if (isAbove && navButtonParentData.shouldPaint) {
-        navButtonParentData.offset = Offset(0.0, currentY);
+      // Position content items from right to left.
+      double rightEdge = totalHorizontalWidth;
+      for (final RenderBox item in paintedContentItems) {
+        rightEdge -= item.size.width;
+        final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
+        itemParentData.offset = Offset(rightEdge, 0.0);
+      }
+    } else {
+      // LTR: Place content items first, then nav button.
+      // First position all content items from left to right.
+      for (final RenderBox item in paintedContentItems) {
+        final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
+        itemParentData.offset = Offset(currentX, 0.0);
+        currentX += item.size.width;
+      }
+
+      // Then place the nav button at the end.
+      if (navButtonIsPainted) {
+        final ToolbarItemsParentData navParentData =
+            navButton.parentData! as ToolbarItemsParentData;
+        navParentData.offset = Offset(currentX, 0.0);
+      }
+    }
+
+    nextSize = Size(totalHorizontalWidth, maxHorizontalHeight);
+
+    return nextSize;
+  }
+
+  /// Vertical layout (overflow menu).
+  Size _placeChildrenVertically() {
+    Size nextSize = Size.zero;
+    final RenderBox navButton = firstChild!;
+
+    double currentY = 0.0;
+    double maxItemWidth = 0.0;
+
+    final ToolbarItemsParentData navButtonParentData =
+        navButton.parentData! as ToolbarItemsParentData;
+    if (_shouldPaintChild(navButton, 0)) {
+      navButtonParentData.shouldPaint = true;
+      if (!isAbove) {
+        navButtonParentData.offset = Offset.zero;
         currentY += navButton.size.height;
         maxItemWidth = math.max(maxItemWidth, navButton.size.width);
       }
-      nextSize = Size(maxItemWidth, currentY);
+    } else {
+      navButtonParentData.shouldPaint = false;
     }
 
-    size = nextSize;
+    int childIdx = 0;
+    RenderBox? current = firstChild;
+    while (current != null) {
+      final ToolbarItemsParentData childParentData = current.parentData! as ToolbarItemsParentData;
+      if (current == navButton) {
+        current = childParentData.nextSibling;
+        childIdx++;
+        continue;
+      }
+
+      if (_shouldPaintChild(current, childIdx)) {
+        childParentData.shouldPaint = true;
+        childParentData.offset = Offset(0.0, currentY);
+        currentY += current.size.height;
+        maxItemWidth = math.max(maxItemWidth, current.size.width);
+      } else {
+        childParentData.shouldPaint = false;
+      }
+      current = childParentData.nextSibling;
+      childIdx++;
+    }
+
+    if (isAbove && navButtonParentData.shouldPaint) {
+      navButtonParentData.offset = Offset(0.0, currentY);
+      currentY += navButton.size.height;
+      maxItemWidth = math.max(maxItemWidth, navButton.size.width);
+    }
+    nextSize = Size(maxItemWidth, currentY);
+
+    return nextSize;
+  }
+
+  // Decide which children will be painted, set their shouldPaint, and set the
+  // offset that painted children will be placed at.
+  void _placeChildren() {
+    size = overflowOpen ? _placeChildrenVertically() : _placeChildrenHorizontally();
   }
 
   // Horizontally expand the children when the menu overflows so they can react to
