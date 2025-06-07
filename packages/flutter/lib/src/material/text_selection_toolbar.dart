@@ -591,39 +591,19 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
           itemParentData.offset = Offset(rightEdge, 0.0);
         }
       } else {
-        if (isRtl) {
-          // In RTL, we want the nav button on the left and items right-aligned.
-          if (navButtonIsPainted) {
-            final ToolbarItemsParentData navParentData =
-                navButton.parentData! as ToolbarItemsParentData;
-            navParentData.offset = Offset.zero;
-            currentX += navButton.size.width;
-          }
+        // LTR: Place content items first, then nav button.
+        // First position all content items from left to right.
+        for (final RenderBox item in paintedContentItems) {
+          final ToolbarItemsParentData itemParentData = item.parentData! as ToolbarItemsParentData;
+          itemParentData.offset = Offset(currentX, 0.0);
+          currentX += item.size.width;
+        }
 
-          // Position content items from right to left.
-          double rightEdge = totalHorizontalWidth;
-          for (final RenderBox item in paintedContentItems) {
-            rightEdge -= item.size.width;
-            final ToolbarItemsParentData itemParentData =
-                item.parentData! as ToolbarItemsParentData;
-            itemParentData.offset = Offset(rightEdge, 0.0);
-          }
-        } else {
-          // LTR: Place content items first, then nav button.
-          // First position all content items from left to right.
-          for (final RenderBox item in paintedContentItems) {
-            final ToolbarItemsParentData itemParentData =
-                item.parentData! as ToolbarItemsParentData;
-            itemParentData.offset = Offset(currentX, 0.0);
-            currentX += item.size.width;
-          }
-
-          // Then place the nav button at the end.
-          if (navButtonIsPainted) {
-            final ToolbarItemsParentData navParentData =
-                navButton.parentData! as ToolbarItemsParentData;
-            navParentData.offset = Offset(currentX, 0.0);
-          }
+        // Then place the nav button at the end.
+        if (navButtonIsPainted) {
+          final ToolbarItemsParentData navParentData =
+              navButton.parentData! as ToolbarItemsParentData;
+          navParentData.offset = Offset(currentX, 0.0);
         }
       }
 
