@@ -149,6 +149,16 @@ class FlutterPlugin : Plugin<Project> {
                 reset()
                 isUniversalApk = false
             }
+        } else {
+            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                buildType.ndk.abiFilters.clear()
+                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
+                    val abiValue: String =
+                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                            ?: throw GradleException("Invalid platform: $platform")
+                    buildType.ndk.abiFilters.add(abiValue)
+                })
+            }
         }
         val propDeferredComponentNames = "deferred-component-names"
         val deferredComponentNamesValue: String? =
