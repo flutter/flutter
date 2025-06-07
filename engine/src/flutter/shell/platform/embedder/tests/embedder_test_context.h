@@ -36,6 +36,8 @@ using LogMessageCallback =
 using ChannelUpdateCallback = std::function<void(const FlutterChannelUpdate*)>;
 using ViewFocusChangeRequestCallback =
     std::function<void(const FlutterViewFocusChangeRequest*)>;
+using ResizeViewCallback =
+    std::function<void(int64_t view_id, double width, double height)>;
 
 struct AOTDataDeleter {
   void operator()(FlutterEngineAOTData aot_data) {
@@ -99,6 +101,8 @@ class EmbedderTestContext {
   void SetViewFocusChangeRequestCallback(
       const ViewFocusChangeRequestCallback& callback);
 
+  void SetResizeViewCallback(const ResizeViewCallback& callback);
+
   std::future<sk_sp<SkImage>> GetNextSceneImage();
 
   EmbedderTestCompositor& GetCompositor();
@@ -139,6 +143,7 @@ class EmbedderTestContext {
   SemanticsActionCallback update_semantics_custom_action_callback_;
   ChannelUpdateCallback channel_update_callback_;
   ViewFocusChangeRequestCallback view_focus_change_request_callback_;
+  ResizeViewCallback resize_view_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
   LogMessageCallback log_message_callback_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
@@ -165,6 +170,8 @@ class EmbedderTestContext {
   FlutterChannelUpdateCallback GetChannelUpdateCallbackHook();
 
   FlutterViewFocusChangeRequestCallback GetViewFocusChangeRequestCallbackHook();
+
+  FlutterResizeViewCallback GetResizeViewCallbackHook();
 
   void SetupAOTMappingsIfNecessary();
 

@@ -112,6 +112,12 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
+void PlatformViewEmbedder::ResizeView(int64_t view_id,
+                                      double width,
+                                      double height) {
+  platform_dispatch_table_.resize_view_callback(view_id, width, height);
+}
+
 void PlatformViewEmbedder::UpdateSemantics(
     int64_t view_id,
     flutter::SemanticsNodeUpdates update,

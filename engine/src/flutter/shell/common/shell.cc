@@ -1379,6 +1379,22 @@ void Shell::OnAnimatorDrawLastLayerTrees(
 }
 
 // |Engine::Delegate|
+void Shell::OnEngineResizeView(int64_t view_id, double width, double height) {
+  FML_DCHECK(is_set_up_);
+
+  if (!task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread()) {
+    FML_LOG(INFO) << "Resize view is only supported when UI thread and "
+                     "platform thread are merged";
+    return;
+  }
+
+  fml::WeakPtr<PlatformView> view = platform_view_->GetWeakPtr();
+  if (view) {
+    view->ResizeView(view_id, width, height);
+  }
+}
+
+// |Engine::Delegate|
 void Shell::OnEngineUpdateSemantics(int64_t view_id,
                                     SemanticsNodeUpdates update,
                                     CustomAccessibilityActionUpdates actions) {
