@@ -29,5 +29,6 @@
   "shareButtonLabel": "Jaga …",
   "clearButtonLabel": "Kustutamine",
   "cancelButtonLabel": "Tühista",
-  "backButtonLabel": "Tagasi"
+  "backButtonLabel": "Tagasi",
+  "translateButtonLabel": "Translate"
 }

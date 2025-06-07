@@ -49,5 +49,6 @@
   "searchWebButtonLabel": "البحث على الويب",
   "shareButtonLabel": "مشاركة…",
   "cancelButtonLabel": "الإلغاء",
-  "backButtonLabel": "رجوع"
+  "backButtonLabel": "رجوع",
+  "translateButtonLabel": "Translate"
 }

@@ -29,5 +29,6 @@
   "searchWebButtonLabel": "Vebdə axtarın",
   "shareButtonLabel": "Paylaşın...",
   "cancelButtonLabel": "Ləğv edin",
-  "backButtonLabel": "Geri"
+  "backButtonLabel": "Geri",
+  "translateButtonLabel": "Translate"
 }

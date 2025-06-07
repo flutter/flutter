@@ -39,5 +39,6 @@
   "shareButtonLabel": "Zdieľať…",
   "clearButtonLabel": "Vymazať",
   "cancelButtonLabel": "Zrušiť",
-  "backButtonLabel": "Späť"
+  "backButtonLabel": "Späť",
+  "translateButtonLabel": "Translate"
 }

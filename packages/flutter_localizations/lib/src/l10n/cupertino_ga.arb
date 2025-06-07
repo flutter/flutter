@@ -44,5 +44,6 @@
   "modalBarrierDismissLabel": "Ruaig",
   "menuDismissLabel": "Ruaig an roghchlár",
   "cancelButtonLabel": "Cealaigh",
-  "backButtonLabel": "Siar"
+  "backButtonLabel": "Siar",
+  "translateButtonLabel": "Translate"
 }

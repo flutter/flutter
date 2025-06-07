@@ -29,5 +29,6 @@
   "modalBarrierDismissLabel": "འདོར་བ།",
   "menuDismissLabel": "ཐོ་གཞུང་འདོར་བ།",
   "cancelButtonLabel": "ཕྱིར་འཐེན།",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "translateButtonLabel": "Translate"
 }

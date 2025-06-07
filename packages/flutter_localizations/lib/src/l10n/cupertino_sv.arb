@@ -29,5 +29,6 @@
   "shareButtonLabel": "Dela …",
   "clearButtonLabel": "Rensa",
   "cancelButtonLabel": "Avbryt",
-  "backButtonLabel": "Tillbaka"
+  "backButtonLabel": "Tillbaka",
+  "translateButtonLabel": "Translate"
 }
