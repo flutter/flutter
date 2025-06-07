@@ -1389,6 +1389,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         );
         _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
         onSemanticsOwnerCreated?.call();
+        flushSemantics();
       }
     } else if (_semanticsOwner != null) {
       _semanticsOwner?.dispose();
