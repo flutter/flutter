@@ -321,24 +321,6 @@ static gboolean present_layers(FlCompositorOpenGL* self,
 
   fl_compositor_opengl_unblock_main_thread(self);
 
-  g_autoptr(GPtrArray) framebuffers =
-      g_ptr_array_new_with_free_func(g_object_unref);
-  for (size_t i = 0; i < layers_count; ++i) {
-    const FlutterLayer* layer = layers[i];
-    switch (layer->type) {
-      case kFlutterLayerContentTypeBackingStore: {
-        const FlutterBackingStore* backing_store = layer->backing_store;
-        FlFramebuffer* framebuffer =
-            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-        g_ptr_array_add(framebuffers, g_object_ref(framebuffer));
-      } break;
-      case kFlutterLayerContentTypePlatformView: {
-        // TODO(robert-ancell) Not implemented -
-        // https://github.com/flutter/flutter/issues/41724
-      } break;
-    }
-  }
-
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
   if (engine == nullptr) {
     return TRUE;
@@ -348,68 +330,57 @@ static gboolean present_layers(FlCompositorOpenGL* self,
   if (renderable == nullptr) {
     return TRUE;
   }
+  fl_renderable_make_current(renderable);
 
-  if (view_id == flutter::kFlutterImplicitViewId) {
-    // Store for rendering later
-    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
-                        g_ptr_array_ref(framebuffers));
-  } else {
-    // Composite into a single framebuffer.
-    if (framebuffers->len > 1) {
-      size_t width = 0, height = 0;
-
-      for (guint i = 0; i < framebuffers->len; i++) {
+  g_autoptr(GPtrArray) framebuffers =
+      g_ptr_array_new_with_free_func(g_object_unref);
+  for (size_t i = 0; i < layers_count; ++i) {
+    const FlutterLayer* layer = layers[i];
+    switch (layer->type) {
+      case kFlutterLayerContentTypeBackingStore: {
+        const FlutterBackingStore* backing_store = layer->backing_store;
         FlFramebuffer* framebuffer =
-            FL_FRAMEBUFFER(g_ptr_array_index(framebuffers, i));
-
-        size_t w = fl_framebuffer_get_width(framebuffer);
-        size_t h = fl_framebuffer_get_height(framebuffer);
-        if (w > width) {
-          width = w;
-        }
-        if (h > height) {
-          height = h;
-        }
-      }
-
-      FlFramebuffer* view_framebuffer =
-          fl_framebuffer_new(self->general_format, width, height);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                        fl_framebuffer_get_id(view_framebuffer));
-      render(self, framebuffers, width, height);
-      g_ptr_array_set_size(framebuffers, 0);
-      g_ptr_array_add(framebuffers, view_framebuffer);
+            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
+        g_ptr_array_add(framebuffers,
+                        fl_framebuffer_create_sibling(framebuffer));
+      } break;
+      case kFlutterLayerContentTypePlatformView: {
+        // TODO(robert-ancell) Not implemented -
+        // https://github.com/flutter/flutter/issues/41724
+      } break;
     }
-
-    // Read back pixel values.
-    FlFramebuffer* framebuffer =
-        FL_FRAMEBUFFER(g_ptr_array_index(framebuffers, 0));
-    size_t width = fl_framebuffer_get_width(framebuffer);
-    size_t height = fl_framebuffer_get_height(framebuffer);
-    size_t data_length = width * height * 4;
-    g_autofree uint8_t* data = static_cast<uint8_t*>(malloc(data_length));
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
-    glReadPixels(0, 0, width, height, self->general_format, GL_UNSIGNED_BYTE,
-                 data);
-
-    // Write into a texture in the views context.
-    fl_renderable_make_current(renderable);
-    g_autoptr(FlFramebuffer) view_framebuffer =
-        fl_framebuffer_new(self->general_format, width, height);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                      fl_framebuffer_get_id(view_framebuffer));
-    glBindTexture(GL_TEXTURE_2D,
-                  fl_framebuffer_get_texture_id(view_framebuffer));
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, data);
-
-    g_autoptr(GPtrArray) secondary_framebuffers =
-        g_ptr_array_new_with_free_func(g_object_unref);
-    g_ptr_array_add(secondary_framebuffers, g_object_ref(view_framebuffer));
-    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
-                        g_ptr_array_ref(secondary_framebuffers));
   }
 
+  // Size is the first layer, or the previous size if no layers.
+  FlFramebuffer* framebuffer = FL_FRAMEBUFFER((g_hash_table_lookup(
+      self->framebuffers_by_view_id, GINT_TO_POINTER(view_id))));
+  double width, height;
+  if (layers_count > 0) {
+    width = layers[0]->size.width;
+    height = layers[0]->size.height;
+  } else {
+    if (framebuffer == nullptr) {
+      // Nothing to render.
+      return TRUE;
+    }
+    width = fl_framebuffer_get_width(framebuffer);
+    height = fl_framebuffer_get_height(framebuffer);
+  }
+
+  // Reallocate framebuffer if size changed.
+  if (framebuffer == nullptr ||
+      fl_framebuffer_get_width(framebuffer) != width ||
+      fl_framebuffer_get_height(framebuffer) != height) {
+    framebuffer = fl_framebuffer_new(self->general_format, width, height);
+    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
+                        framebuffer);
+  }
+
+  // Composite into a single framebuffer.
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
+  render(self, framebuffers, width, height);
+
+  // Schedule to draw from this framebuffer.
   fl_renderable_redraw(renderable);
 
   return TRUE;
@@ -594,9 +565,9 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 }
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
-  self->framebuffers_by_view_id = g_hash_table_new_full(
-      g_direct_hash, g_direct_equal, nullptr,
-      reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
+  self->framebuffers_by_view_id =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
+                            reinterpret_cast<GDestroyNotify>(g_object_unref));
   g_mutex_init(&self->present_mutex);
   g_cond_init(&self->present_condition);
 }
@@ -623,9 +594,11 @@ void fl_compositor_opengl_render(FlCompositorOpenGL* self,
                background_color->blue, background_color->alpha);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  GPtrArray* framebuffers = reinterpret_cast<GPtrArray*>((g_hash_table_lookup(
+  FlFramebuffer* framebuffer = FL_FRAMEBUFFER((g_hash_table_lookup(
       self->framebuffers_by_view_id, GINT_TO_POINTER(view_id))));
-  if (framebuffers != nullptr) {
+  if (framebuffer != nullptr) {
+    g_autoptr(GPtrArray) framebuffers = g_ptr_array_new();
+    g_ptr_array_add(framebuffers, framebuffer);
     render(self, framebuffers, width, height);
   }
 
