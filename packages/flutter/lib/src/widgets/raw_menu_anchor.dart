@@ -779,7 +779,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       widget.onCloseRequested(close);
     } else {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        widget.onCloseRequested(close);
+        if (mounted) {
+          widget.onCloseRequested(close);
+        }
       }, debugLabel: 'RawMenuAnchor.handleCloseRequest');
     }
   }
