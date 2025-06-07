@@ -4690,8 +4690,8 @@ class _SemanticsConfigurationProvider {
   ///
   /// This is typically use to recalculate certain properties when mutating
   /// [effective] since [effective] may contain stale data from previous update.
-  /// Examples are [SemanticsConfiguration.isBlockingUserActions] or
-  /// [SemanticsConfiguration.elevation]. Otherwise, use [effective] instead.
+  /// An example is [SemanticsConfiguration.isBlockingUserActions]. Otherwise,
+  /// use [effective] instead.
   SemanticsConfiguration get original {
     if (_originalConfiguration == null) {
       _effectiveConfiguration = _originalConfiguration = SemanticsConfiguration();
@@ -4822,8 +4822,7 @@ typedef _MergeUpAndSiblingMergeGroups =
 ///
 /// Merge all fragments from [mergeUp] and decide which [_RenderObjectSemantics]
 /// should form a node, i.e. [shouldFormSemanticsNode] is true. Stores the
-/// [_RenderObjectSemantics] that should form a node with elevation adjustments
-/// into [_children].
+/// [_RenderObjectSemantics] that should form a node into [_children].
 ///
 /// At this point, walking the [_children] forms a tree
 /// that exactly resemble the resulting semantics node tree.
@@ -5279,15 +5278,34 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void _updateChildGeometry() {
     assert(geometry != null);
+    final _SemanticsGeometry parentGeometry = geometry!;
     for (final _RenderObjectSemantics child in _children) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
-        parentPaintClipRect: geometry!.paintClipRect,
-        parentSemanticsClipRect: geometry!.semanticsClipRect,
+        parentPaintClipRect: parentGeometry.paintClipRect,
+        parentSemanticsClipRect: parentGeometry.semanticsClipRect,
         parentTransform: null,
         parent: this,
         child: child,
       );
       child._updateGeometry(newGeometry: childGeometry);
+    }
+    for (final _RenderObjectSemantics explicitSiblingChild in siblingMergeGroups
+        .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
+        .whereType<_RenderObjectSemantics>()
+        .expand(
+          (_RenderObjectSemantics siblingChild) =>
+              siblingChild.shouldFormSemanticsNode
+                  ? <_RenderObjectSemantics>[siblingChild]
+                  : siblingChild._children,
+        )) {
+      final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
+        parentPaintClipRect: parentGeometry.paintClipRect,
+        parentSemanticsClipRect: parentGeometry.semanticsClipRect,
+        parentTransform: parentGeometry.transform,
+        parent: this,
+        child: explicitSiblingChild,
+      );
+      explicitSiblingChild._updateGeometry(newGeometry: childGeometry);
     }
   }
 
@@ -5433,13 +5451,27 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     for (final List<_SemanticsFragment> group in siblingMergeGroups) {
       SemanticsConfiguration? configuration;
       SemanticsNode? node;
+      final List<_RenderObjectSemantics> explicitChildren = <_RenderObjectSemantics>[];
       for (final _SemanticsFragment fragment in group) {
+        if (fragment is _RenderObjectSemantics) {
+          if (fragment.shouldFormSemanticsNode) {
+            explicitChildren.add(fragment);
+            assert(fragment.configToMergeUp == null);
+            continue;
+          }
+          explicitChildren.addAll(fragment._children);
+        }
         if (fragment.configToMergeUp != null) {
           fragment.mergesToSibling = true;
           node ??= fragment.owner.cachedSemanticsNode;
           configuration ??= SemanticsConfiguration();
           configuration.absorb(fragment.configToMergeUp!);
         }
+      }
+      final List<SemanticsNode> childrenNodes = <SemanticsNode>[];
+      for (final _RenderObjectSemantics explicitChild in explicitChildren) {
+        explicitChild._buildSemantics(usedSemanticsIds: usedSemanticsIds);
+        childrenNodes.addAll(explicitChild.semanticsNodes);
       }
       // Can be null if all fragments in switchableFragments are marked as explicit.
       if (configuration != null) {
@@ -5453,7 +5485,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
             fragment.owner.cachedSemanticsNode = node;
           }
         }
-        node.updateWith(config: configuration);
+        node.updateWith(config: configuration, childrenInInversePaintOrder: childrenNodes);
         _producedSiblingNodesAndOwners[node] = group;
         semanticsNodes.add(node);
 
