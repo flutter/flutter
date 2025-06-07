@@ -1032,6 +1032,7 @@ void updateLocalProperties({
   BuildInfo? buildInfo,
   bool requireAndroidSdk = true,
 }) {
+  print('### Debug: updateLocalProperties is called!');
   if (requireAndroidSdk && globals.androidSdk == null) {
     exitWithNoSdkMessage();
   }
@@ -1080,6 +1081,7 @@ void updateLocalProperties({
     changeIfNecessary('flutter.versionCode', buildNumber);
   }
 
+  print('### Debug: localProperties should be updated: $changed');
   if (changed) {
     settings.writeContents(localProperties);
   }
