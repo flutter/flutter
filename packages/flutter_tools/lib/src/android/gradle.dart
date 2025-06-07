@@ -1069,21 +1069,21 @@ String _calculateSha(File file) {
   return _hex(sha1.convert(bytes).bytes);
 }
 
-void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) {
-  analytics.send(
-    Event.flutterBuildInfo(
-      label: 'unsupported-project',
-      buildType: 'gradle',
-      error: 'gradle-plugin',
-    ),
-  );
-
-  throwToolExit(
-    '${terminal.warningMark} Your app is using an unsupported Gradle project. '
-    'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
-    'and then move the dart code, assets and pubspec.yaml to the new project.',
-  );
-}
+//void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) {
+//  analytics.send(
+//    Event.flutterBuildInfo(
+//      label: 'unsupported-project',
+//      buildType: 'gradle',
+//      error: 'gradle-plugin',
+//    ),
+//  );
+//
+//  throwToolExit(
+//    '${terminal.warningMark} Your app is using an unsupported Gradle project. '
+//    'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
+//    'and then move the dart code, assets and pubspec.yaml to the new project.',
+//  );
+//}
 
 /// Returns `true` if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
