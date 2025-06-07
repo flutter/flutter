@@ -89,6 +89,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.legacyChangeReportingBehavior = true,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required List<Widget> children,
@@ -129,6 +130,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.legacyChangeReportingBehavior = true,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required NullableIndexedWidgetBuilder itemBuilder,
@@ -186,6 +188,14 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
+
+  /// Whether to use the legacy change reporting behavior.
+  ///
+  /// If `true`, the picker will report changes to the selected item
+  /// immediately as the user scrolls.
+  /// If `false`, the picker will report changes to the selected item
+  /// only when the scroll ends.
+  final bool legacyChangeReportingBehavior;
 
   /// An option callback when the currently centered item changes.
   ///
@@ -357,6 +367,10 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: widget.onSelectedItemChanged,
                 dragStartBehavior: DragStartBehavior.down,
+                changeReportingBehavior:
+                    widget.legacyChangeReportingBehavior
+                        ? ListWheelChangeReportingBehavior.onScrollUpdate
+                        : ListWheelChangeReportingBehavior.onScrollEnd,
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
                   onTappedChild: _handleChildTap,
