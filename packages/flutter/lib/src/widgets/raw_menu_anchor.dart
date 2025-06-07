@@ -263,7 +263,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// showing.
   ///
   /// Custom implementations of [onOpenRequested] can delay the call to
-  /// `showOverlay` or not call it at all, in which case [onOpen] will not be
+  /// `showOverlay`, or not call it at all, in which case [onOpen] will not be
   /// called. Calling `showOverlay` after disposal is a no-op, and will not
   /// trigger [onOpen].
   ///
@@ -292,8 +292,8 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   /// This callback is triggered every time [MenuController.open] is called,
   /// even when the menu overlay is already showing. As a result, this callback
-  /// can be used to observe when a menu is repositioned, or when a menu is
-  /// reopened during a closing animation.
+  /// can be used to trigger opening animations or observe when a menu is
+  /// repositioned.
   ///
   /// After an open request is intercepted, the `showOverlay` callback should be
   /// called when the menu overlay (the widget built by [overlayBuilder]) is
@@ -323,8 +323,8 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   /// This callback is triggered every time [MenuController.close] is called,
   /// regardless of whether the overlay is already hidden. As a result, this
-  /// callback can be used to add a delay or an animation before the menu is
-  /// hidden.
+  /// callback can be used to add a delay or a closing animation before the menu
+  /// is hidden.
   ///
   /// After a close request is intercepted and closing behaviors have completed,
   /// the `hideOverlay` callback should be called. This callback sets
@@ -700,7 +700,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void open({Offset? position}) {
-    assert(menuController._anchor == this);
     if (!mounted) {
       // If we're not mounted, then we can't open the menu.
       return;
