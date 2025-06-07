@@ -459,15 +459,26 @@ class CupertinoPageTransition extends StatefulWidget {
     bool allowSnapshotting,
     Widget? child,
   ) {
-    final CurvedAnimation animation = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.easeInToLinear,
-    );
-    final Animation<Offset> delegatedPositionAnimation = animation.drive(_kMiddleLeftTween);
-    animation.dispose();
+    final bool? linearTransition = ModalRoute.of(context)?.popGestureInProgress;
+
+    final Animation<Offset> delegatedPositionAnimation;
+
+    if (linearTransition ?? false) {
+      delegatedPositionAnimation = secondaryAnimation.drive(_kMiddleLeftTween);
+    } else {
+      final CurvedAnimation animation = CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      );
+
+      delegatedPositionAnimation = animation.drive(_kMiddleLeftTween);
+
+      animation.dispose();
+    }
 
     assert(debugCheckHasDirectionality(context));
+
     final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(
       position: delegatedPositionAnimation,
