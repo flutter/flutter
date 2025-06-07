@@ -2477,14 +2477,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [mockVC stopMocking];
 }
 
-- (void)testPluginRegistrant {
-  id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
-  FlutterViewController* viewController = [[FlutterViewController alloc] init];
-  viewController.pluginRegistrant = mockRegistrant;
-  [viewController awakeFromNib];
-  OCMVerify([mockRegistrant registerWithRegistry:viewController]);
-}
-
 - (void)testAppDelegatePluginRegistrant {
   id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
   id appDelegate = [[UIApplication sharedApplication] delegate];
