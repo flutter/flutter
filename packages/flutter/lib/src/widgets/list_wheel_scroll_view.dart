@@ -550,6 +550,17 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
   }
 }
 
+/// The behavior of reporting the selected item index in a [ListWheelScrollView].
+///
+/// This determines when the [onSelectedItemChanged] callback is called.
+enum ListWheelChangeReportingBehavior {
+  /// Report the selected item index only when the scroll view stops scrolling.
+  onScrollEnd,
+
+  /// Report the selected item index on every scroll update.
+  onScrollUpdate,
+}
+
 /// A box in which children on a wheel can be scrolled.
 ///
 /// This widget is similar to a [ListView] but with the restriction that all
@@ -585,6 +596,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.changeReportingBehavior = ListWheelChangeReportingBehavior.onScrollUpdate,
     required List<Widget> children,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -620,6 +632,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.changeReportingBehavior = ListWheelChangeReportingBehavior.onScrollUpdate,
     required this.childDelegate,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective > 0),
@@ -721,6 +734,12 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// The behavior of reporting the selected item index.
+  ///
+  /// This determines when the [onSelectedItemChanged] callback is called.
+  /// Defaults to [ListWheelChangeReportingBehavior.onScrollUpdate].
+  final ListWheelChangeReportingBehavior changeReportingBehavior;
+
   @override
   State<ListWheelScrollView> createState() => _ListWheelScrollViewState();
 }
@@ -748,17 +767,30 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     super.dispose();
   }
 
+  void _reportSelectedItemChanged(ScrollNotification notification) {
+    final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
+    final int currentItemIndex = metrics.itemIndex;
+    if (currentItemIndex != _lastReportedItemIndex) {
+      _lastReportedItemIndex = currentItemIndex;
+      final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
+      widget.onSelectedItemChanged!(trueIndex);
+    }
+  }
+
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth == 0 &&
-        widget.onSelectedItemChanged != null &&
-        notification is ScrollUpdateNotification &&
-        notification.metrics is FixedExtentMetrics) {
-      final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
-      final int currentItemIndex = metrics.itemIndex;
-      if (currentItemIndex != _lastReportedItemIndex) {
-        _lastReportedItemIndex = currentItemIndex;
-        final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
-        widget.onSelectedItemChanged!(trueIndex);
+    if (widget.onSelectedItemChanged == null ||
+        notification.depth != 0 ||
+        notification.metrics is! FixedExtentMetrics) {
+      return false;
+    }
+
+    if (widget.changeReportingBehavior == ListWheelChangeReportingBehavior.onScrollEnd) {
+      if (notification is ScrollEndNotification) {
+        _reportSelectedItemChanged(notification);
+      }
+    } else {
+      if (notification is ScrollUpdateNotification) {
+        _reportSelectedItemChanged(notification);
       }
     }
     return false;
