@@ -139,129 +139,75 @@ Future<void> main() async {
         await _tryMacOSLint(macOSPodspecPath, <String>['--allow-warnings', '--use-libraries']);
       });
 
-      section('Create Objective-C application');
+      section('Create iOS application');
 
-      const String objcAppName = 'test_app_objc';
+      const String iosAppName = 'test_app';
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>[
-            '--org',
-            'io.flutter.devicelab',
-            '--platforms=ios',
-            '--ios-language=objc',
-            objcAppName,
-          ],
+          options: <String>['--org', 'io.flutter.devicelab', '--platforms=ios,macos', iosAppName],
         );
       });
 
-      section('Build Objective-C application with Swift and Objective-C plugins as libraries');
+      section('Build iOS application with Swift and Objective-C plugins as frameworks');
 
-      final String objcAppPath = path.join(tempDir.path, objcAppName);
-      final File objcPubspec = File(path.join(objcAppPath, 'pubspec.yaml'));
-      String pubspecContent = objcPubspec.readAsStringSync();
+      final String appPath = path.join(tempDir.path, iosAppName);
+
+      final File pubspec = File(path.join(appPath, 'pubspec.yaml'));
+
+      String pubspecContent = pubspec.readAsStringSync();
       // Add (randomly selected) first-party plugins that support iOS and macOS.
       // Add the new plugins we just made.
       pubspecContent = pubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  $objcPluginName:\n    path: $objcPluginPath\n  $swiftPluginName:\n    path: $swiftPluginPath\n  url_launcher: 6.0.16\n  url_launcher_macos:\n',
       );
-      objcPubspec.writeAsStringSync(pubspecContent, flush: true);
+      pubspec.writeAsStringSync(pubspecContent, flush: true);
 
-      await inDirectory(objcAppPath, () async {
-        await flutter(
-          'build',
-          options: <String>['ios', '--no-codesign'],
-          // TODO(jmagman): Make Objective-C applications handle Swift libraries https://github.com/flutter/flutter/issues/16049
-          canFail: true,
-        );
-      });
-
-      final File objcPodfile = File(path.join(objcAppPath, 'ios', 'Podfile'));
-      String objcPodfileContent = objcPodfile.readAsStringSync();
-      if (objcPodfileContent.contains('use_frameworks!')) {
-        return TaskResult.failure(
-          'Expected default Objective-C Podfile to not contain use_frameworks',
-        );
-      }
-      _validateIosPodfile(objcAppPath);
-
-      section('Build Objective-C application with Swift and Objective-C plugins as frameworks');
-
-      objcPodfileContent = 'use_frameworks!\n$objcPodfileContent';
-      objcPodfile.writeAsStringSync(objcPodfileContent, flush: true);
-
-      await inDirectory(objcAppPath, () async {
+      await inDirectory(appPath, () async {
         await flutter('build', options: <String>['ios', '--no-codesign']);
       });
 
-      section('Create Swift application');
-
-      const String swiftAppName = 'test_app_swift';
-      await inDirectory(tempDir, () async {
-        await flutter(
-          'create',
-          options: <String>[
-            '--org',
-            'io.flutter.devicelab',
-            '--platforms=ios,macos',
-            '--ios-language=swift',
-            swiftAppName,
-          ],
-        );
-      });
-
-      section('Build Swift iOS application with Swift and Objective-C plugins as frameworks');
-
-      final String swiftAppPath = path.join(tempDir.path, swiftAppName);
-
-      final File swiftPubspec = File(path.join(swiftAppPath, 'pubspec.yaml'));
-      swiftPubspec.writeAsStringSync(pubspecContent, flush: true);
-
-      await inDirectory(swiftAppPath, () async {
-        await flutter('build', options: <String>['ios', '--no-codesign']);
-      });
-
-      final File swiftPodfile = File(path.join(swiftAppPath, 'ios', 'Podfile'));
-      String swiftPodfileContent = swiftPodfile.readAsStringSync();
-      if (!swiftPodfileContent.contains('use_frameworks!')) {
-        return TaskResult.failure('Expected default Swift Podfile to contain use_frameworks');
+      final File iosPodfile = File(path.join(appPath, 'ios', 'Podfile'));
+      String iosPodfileContent = iosPodfile.readAsStringSync();
+      if (!iosPodfileContent.contains('use_frameworks!')) {
+        return TaskResult.failure('Expected default Podfile to contain use_frameworks');
       }
 
-      section('Build Swift iOS application with Swift and Objective-C plugins as libraries');
+      section('Build iOS application with Swift and Objective-C plugins as libraries');
 
-      swiftPodfileContent = swiftPodfileContent.replaceAll('use_frameworks!', '');
-      swiftPodfile.writeAsStringSync(swiftPodfileContent, flush: true);
+      iosPodfileContent = iosPodfileContent.replaceAll('use_frameworks!', '');
+      iosPodfile.writeAsStringSync(iosPodfileContent, flush: true);
 
-      await inDirectory(swiftAppPath, () async {
+      await inDirectory(appPath, () async {
         await flutter('build', options: <String>['ios', '--no-codesign']);
       });
 
-      _validateIosPodfile(swiftAppPath);
+      _validateIosPodfile(appPath);
 
-      section('Build Swift macOS application with plugins as frameworks');
-      await inDirectory(swiftAppPath, () async {
+      section('Build macOS application with plugins as frameworks');
+      await inDirectory(appPath, () async {
         await flutter('build', options: <String>['macos']);
       });
 
-      final File macOSPodfile = File(path.join(swiftAppPath, 'macos', 'Podfile'));
+      final File macOSPodfile = File(path.join(appPath, 'macos', 'Podfile'));
       String macosPodfileContent = macOSPodfile.readAsStringSync();
       if (!macosPodfileContent.contains('use_frameworks!')) {
-        return TaskResult.failure('Expected default Swift Podfile to contain use_frameworks');
+        return TaskResult.failure('Expected default Podfile to contain use_frameworks');
       }
 
-      _validateMacOSPodfile(swiftAppPath);
+      _validateMacOSPodfile(appPath);
 
-      section('Build Swift macOS application with plugins as libraries');
+      section('Build macOS application with plugins as libraries');
 
       macosPodfileContent = macosPodfileContent.replaceAll('use_frameworks!', '');
       macOSPodfile.writeAsStringSync(macosPodfileContent, flush: true);
 
-      await inDirectory(swiftAppPath, () async {
+      await inDirectory(appPath, () async {
         await flutter('build', options: <String>['macos']);
       });
 
-      _validateMacOSPodfile(swiftAppPath);
+      _validateMacOSPodfile(appPath);
 
       section('Remove iOS support from plugin');
 
@@ -280,14 +226,14 @@ Future<void> main() async {
       pluginPubspecContent = pluginPubspecContent.replaceFirst(iosPlatformMap, '');
       pluginPubspec.writeAsStringSync(pluginPubspecContent, flush: true);
 
-      await inDirectory(swiftAppPath, () async {
+      await inDirectory(appPath, () async {
         await flutter('clean');
         await flutter('build', options: <String>['ios', '--no-codesign']);
       });
 
       section('Validate plugin without iOS platform');
 
-      final File podfileLockFile = File(path.join(swiftAppPath, 'ios', 'Podfile.lock'));
+      final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
       final String podfileLockOutput = podfileLockFile.readAsStringSync();
       if (!podfileLockOutput.contains(':path: ".symlinks/plugins/url_launcher_ios/ios"') ||
           !podfileLockOutput.contains(':path: Flutter')
@@ -299,7 +245,7 @@ Future<void> main() async {
         return TaskResult.failure('Podfile.lock does not contain expected pods');
       }
 
-      final String pluginSymlinks = path.join(swiftAppPath, 'ios', '.symlinks', 'plugins');
+      final String pluginSymlinks = path.join(appPath, 'ios', '.symlinks', 'plugins');
 
       checkDirectoryExists(path.join(pluginSymlinks, 'url_launcher_ios', 'ios'));
 

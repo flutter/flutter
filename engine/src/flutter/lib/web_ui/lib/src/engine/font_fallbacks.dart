@@ -247,9 +247,22 @@ class FontFallbackManager {
   }
 
   NotoFont _selectFont(List<NotoFont> fonts) {
+    // Priority is given to fonts that match the language.
+    NotoFont? bestFont = switch (_language) {
+      'zh-Hans' || 'zh-CN' || 'zh-SG' || 'zh-MY' => fonts.firstWhereOrNull(_isNotoSansSC),
+      'zh-Hant' || 'zh-TW' || 'zh-MO' => fonts.firstWhereOrNull(_isNotoSansTC),
+      'zh-HK' => fonts.firstWhereOrNull(_isNotoSansHK),
+      'ja' => fonts.firstWhereOrNull(_isNotoSansJP),
+      'ko' => fonts.firstWhereOrNull(_isNotoSansKR),
+      _ => null,
+    };
+
+    if (bestFont != null) {
+      return bestFont;
+    }
+
     int maxCodePointsCovered = -1;
-    final List<NotoFont> bestFonts = <NotoFont>[];
-    NotoFont? bestFont;
+    final List<NotoFont> bestFonts = [];
 
     for (final NotoFont font in fonts) {
       if (font.coverCount > maxCodePointsCovered) {
@@ -268,49 +281,19 @@ class FontFallbackManager {
       }
     }
 
-    NotoFont? bestFontForLanguage;
     if (bestFonts.length > 1) {
-      // If the list of best fonts are all CJK fonts, choose the best one based
-      // on user preferred language. Otherwise just choose the first font.
-      if (bestFonts.every(
-        (NotoFont font) =>
-            _isNotoSansSC(font) ||
-            _isNotoSansTC(font) ||
-            _isNotoSansHK(font) ||
-            _isNotoSansJP(font) ||
-            _isNotoSansKR(font),
-      )) {
-        if (_language == 'zh-Hans' ||
-            _language == 'zh-CN' ||
-            _language == 'zh-SG' ||
-            _language == 'zh-MY') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansSC);
-        } else if (_language == 'zh-Hant' || _language == 'zh-TW' || _language == 'zh-MO') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansTC);
-        } else if (_language == 'zh-HK') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansHK);
-        } else if (_language == 'ja') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansJP);
-        } else if (_language == 'ko') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansKR);
-        } else {
-          // Default to `Noto Sans SC` when the user preferred language is not CJK.
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansSC);
-        }
+      // To be predictable, if there is a tie for best font, choose a font
+      // from this list first, then just choose the first font.
+      if (bestFonts.contains(_notoSymbols)) {
+        bestFont = _notoSymbols;
       } else {
-        // To be predictable, if there is a tie for best font, choose a font
-        // from this list first, then just choose the first font.
-        if (bestFonts.contains(_notoSymbols)) {
-          bestFont = _notoSymbols;
-        } else {
-          final notoSansSC = bestFonts.firstWhereOrNull(_isNotoSansSC);
-          if (notoSansSC != null) {
-            bestFont = notoSansSC;
-          }
+        final notoSansSC = bestFonts.firstWhereOrNull(_isNotoSansSC);
+        if (notoSansSC != null) {
+          bestFont = notoSansSC;
         }
       }
     }
-    return bestFontForLanguage ?? bestFont!;
+    return bestFont!;
   }
 
   late final List<FallbackFontComponent> fontComponents = _decodeFontComponents(encodedFontSets);
