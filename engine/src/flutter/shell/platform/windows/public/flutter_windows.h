@@ -28,6 +28,10 @@ typedef struct FlutterDesktopViewController* FlutterDesktopViewControllerRef;
 struct FlutterDesktopView;
 typedef struct FlutterDesktopView* FlutterDesktopViewRef;
 
+// Opaque reference to a Flutter's ID3D11Device.
+struct FlutterID3D11Device;
+typedef struct FlutterID3D11Device* FlutterID3D11DeviceRef;
+
 // Opaque reference to a Flutter engine instance.
 struct FlutterDesktopEngine;
 typedef struct FlutterDesktopEngine* FlutterDesktopEngineRef;
@@ -243,6 +247,10 @@ FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // Returns the DXGI adapter used for rendering or nullptr in case of error.
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
+    FlutterDesktopViewRef view);
+
+// Returns the ID3D11Device used for rendering or nullptr in case of error.
+FLUTTER_EXPORT FlutterID3D11DeviceRef FlutterDesktopPluginViewGetID3D11Device(
     FlutterDesktopViewRef view);
 
 // Called to pass an external window message to the engine for lifecycle
