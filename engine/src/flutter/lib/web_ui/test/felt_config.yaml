@@ -65,7 +65,10 @@ run-configs:
   - name: chrome-experimental-webparagraph
     browser: chrome
     browser-flags:
-      - --enable-features=ExtendedTextMetrics
+      - --enable-experimental-web-platform-features
+      # This is supposed to be the right flag, but for some reason it doesn't work at the moment so
+      # we are using the more general one above.
+      # - --enable-features=ExtendedTextMetrics
     canvaskit-variant: experimentalWebParagraph
 
   - name: chrome
