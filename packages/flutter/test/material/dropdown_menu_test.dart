@@ -4138,6 +4138,27 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+
+    // The overwrite of menuStyle is different when a width is provided but maximumSize is not,
+    // So it needs to be tested separately.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            width: 200.0,
+            dropdownMenuEntries: menuChildren,
+            menuStyle: const MenuStyle(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 200.0);
+
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/164905.
