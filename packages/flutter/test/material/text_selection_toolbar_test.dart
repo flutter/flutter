@@ -375,10 +375,10 @@ void main() {
       ),
     );
 
-    // Verify all items are visible
+    // Verify all items are visible.
     expect(find.byType(TestBox), findsNWidgets(children.length));
 
-    // Get positions of items
+    // Get positions of items.
     final List<Rect> itemRects =
         find
             .byType(TestBox)
@@ -389,7 +389,7 @@ void main() {
             )
             .toList();
 
-    // In RTL, items should be ordered right-to-left
+    // In RTL, items should be ordered right-to-left.
     for (int i = 0; i < itemRects.length - 1; i++) {
       expect(
         itemRects[i].left,
@@ -410,7 +410,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Directionality(
-            textDirection: TextDirection.rtl, // this makes the difference
+            textDirection: TextDirection.rtl, // this makes the difference.
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setter) {
                 setState = setter;
@@ -441,7 +441,7 @@ void main() {
     // Tap the overflow button to show the overflow menu.
     await tester.tap(findOverflowButton());
     await tester.pumpAndSettle();
-    expect(find.byType(TestBox), findsOneWidget); // Only one item in the overflow menu
+    expect(find.byType(TestBox), findsOneWidget); // Only one item in the overflow menu.
     expect(findOverflowButton(), findsOneWidget);
 
     // Tap the overflow button again to hide the overflow menu.
