@@ -682,25 +682,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return textureId;
   }
 
-  /**
-   * Translates an original touch event to have the same locations as the ones that Flutter
-   * calculates (because original + flutter's - original = flutter's).
-   *
-   * @param originalEvent The saved original input event.
-   * @param pointerCoords The coordinates that Flutter thinks the touch is happening at.
-   */
-  private static void translateMotionEvent(
-      MotionEvent originalEvent, PointerCoords[] pointerCoords) {
-    if (pointerCoords.length < 1) {
-      return;
-    }
-
-    float xOffset = pointerCoords[0].x - originalEvent.getX();
-    float yOffset = pointerCoords[0].y - originalEvent.getY();
-
-    originalEvent.offsetLocation(xOffset, yOffset);
-  }
-
   @VisibleForTesting
   public MotionEvent toMotionEvent(
       float density, PlatformViewsChannel.PlatformViewTouch touch, boolean usingVirtualDiplay) {
@@ -717,18 +698,30 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         parsePointerCoordsList(touch.rawPointerCoords, density)
             .toArray(new PointerCoords[touch.pointerCount]);
 
-    if (!usingVirtualDiplay && trackedEvent != null) {
-      // We have the original event, deliver it after offsetting as it will pass the verifiable
-      // input check.
-      translateMotionEvent(trackedEvent, pointerCoords);
-      return trackedEvent;
-    }
     // We are in virtual display mode or don't have a reference to the original MotionEvent.
     // In this case we manually recreate a MotionEvent to be delivered. This MotionEvent
     // will fail the verifiable input check.
     PointerProperties[] pointerProperties =
         parsePointerPropertiesList(touch.rawPointerPropertiesList)
             .toArray(new PointerProperties[touch.pointerCount]);
+
+    if (!usingVirtualDiplay && trackedEvent != null) {
+      return MotionEvent.obtain(
+          trackedEvent.getDownTime(),
+          trackedEvent.getEventTime(),
+          touch.action,
+          touch.pointerCount,
+          pointerProperties,
+          pointerCoords,
+          trackedEvent.getMetaState(),
+          trackedEvent.getButtonState(),
+          trackedEvent.getXPrecision(),
+          trackedEvent.getYPrecision(),
+          trackedEvent.getDeviceId(),
+          trackedEvent.getEdgeFlags(),
+          trackedEvent.getSource(),
+          trackedEvent.getFlags());
+    }
 
     // TODO (kaushikiska) : warn that we are potentially using an untracked
     // event in the platform views.
