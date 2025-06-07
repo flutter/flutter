@@ -95,7 +95,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     Color trackBorderColor = const Color(0x00000000),
     TextDirection? textDirection,
     double thickness = _kScrollbarThickness,
-    EdgeInsets padding = EdgeInsets.zero,
+    EdgeInsetsGeometry padding = EdgeInsets.zero,
     double mainAxisMargin = 0.0,
     double crossAxisMargin = 0.0,
     Radius? radius,
@@ -290,9 +290,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Defaults to [EdgeInsets.zero]. Offsets from all four directions must be
   /// greater than or equal to zero.
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
+  EdgeInsetsGeometry get padding => _padding;
+  EdgeInsetsGeometry _padding;
+  set padding(EdgeInsetsGeometry value) {
     if (padding == value) {
       return;
     }
@@ -397,8 +397,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
 
   double get _leadingTrackMainAxisOffset => switch (_resolvedOrientation) {
-    ScrollbarOrientation.left || ScrollbarOrientation.right => padding.top,
-    ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.left,
+    ScrollbarOrientation.left || ScrollbarOrientation.right => padding.resolve(textDirection).top,
+    ScrollbarOrientation.top || ScrollbarOrientation.bottom => padding.resolve(textDirection).left,
   };
 
   Rect? _thumbRect;
@@ -567,7 +567,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = crossAxisMargin + padding.left;
+        x = crossAxisMargin + padding.resolve(textDirection).left;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
@@ -575,7 +575,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = size.width - thickness - crossAxisMargin - padding.right;
+        x = size.width - thickness - crossAxisMargin - padding.resolve(textDirection).right;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset;
@@ -584,7 +584,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = crossAxisMargin + padding.top;
+        y = crossAxisMargin + padding.resolve(textDirection).top;
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
@@ -592,7 +592,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        y = size.height - thickness - crossAxisMargin - padding.resolve(textDirection).bottom;
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
@@ -1318,7 +1318,7 @@ class RawScrollbar extends StatefulWidget {
   /// When null, the inherited [MediaQueryData.padding] is used.
   ///
   /// Defaults to null.
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
