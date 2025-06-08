@@ -1890,4 +1890,305 @@ void main() {
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(16.0, 16.0));
   });
+
+  testWidgets('SwitchListTile isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double switchTop = 130.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme:
+            themeDataIsThreeLine != null
+                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+                : null,
+        home: Material(
+          child: ListTileTheme(
+            data:
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            child: ListView(
+              children: <Widget>[
+                SwitchListTile(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                  value: false,
+                  onChanged: null,
+                ),
+                SwitchListTile(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                  value: false,
+                  onChanged: null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(0)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, switchTop, 60.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(1)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, height + 16, 60.0, 40.0),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(0)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, 8.0, 60.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(1)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, height + 8.0, 60.0, 40.0),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
+  });
+
+  testWidgets('SwitchListTile.adaptive isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double switchTop = 130.0;
+
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
+        key: UniqueKey(),
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          listTileTheme:
+              themeDataIsThreeLine != null
+                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+                  : null,
+        ),
+        home: Material(
+          child: ListTileTheme(
+            data:
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            child: ListView(
+              children: <Widget>[
+                SwitchListTile.adaptive(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                  value: false,
+                  onChanged: null,
+                ),
+                SwitchListTile.adaptive(
+                  isThreeLine: isThreeLine,
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                  value: false,
+                  onChanged: null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectTwoLine() {
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(0)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, switchTop, 60.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(1)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, height + 16, 60.0, 40.0),
+      );
+    }
+
+    void expectThreeLine() {
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(0)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, 8.0, 60.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(SwitchListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(Switch).at(1)),
+        const Rect.fromLTWH(800.0 - 60.0 - 24.0, height + 8.0, 60.0, 40.0),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    expectTwoLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
+    );
+    expectTwoLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    expectThreeLine();
+
+    await tester.pumpWidget(
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
+    );
+    expectThreeLine();
+  });
+
+  testWidgets('Material3 - SwitchListTile activeThumbColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: SwitchListTile(
+                value: true,
+                selected: true,
+                onChanged: (_) {},
+                activeColor: Colors.red[500],
+                activeThumbColor: Colors.yellow[500],
+                activeTrackColor: Colors.green[500],
+                title: const Text('title'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(color: Colors.green[500])
+        ..rrect()
+        ..rrect(color: Colors.yellow[500]),
+    );
+    final RenderParagraph title = tester.renderObject(
+      find.descendant(of: find.byType(ListTile), matching: find.text('title')),
+    );
+    expect(title.text.style!.color, Colors.yellow[500]);
+  });
+
+  testWidgets('Material3 - SwitchListTile.adaptive activeThumbColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: SwitchListTile.adaptive(
+                value: true,
+                selected: true,
+                onChanged: (_) {},
+                activeColor: Colors.red[500],
+                activeThumbColor: Colors.yellow[500],
+                activeTrackColor: Colors.green[500],
+                title: const Text('title'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(color: Colors.green[500])
+        ..rrect()
+        ..rrect(color: Colors.yellow[500]),
+    );
+    final RenderParagraph title = tester.renderObject(
+      find.descendant(of: find.byType(ListTile), matching: find.text('title')),
+    );
+    expect(title.text.style!.color, Colors.yellow[500]);
+  });
 }

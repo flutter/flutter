@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 #import "flutter/testing/testing.h"
 
 @interface TestDisplayLink : FlutterDisplayLink

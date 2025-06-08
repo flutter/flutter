@@ -1604,39 +1604,32 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInputViewsHasNonNilInputDelegate {
-  if (@available(iOS 13.0, *)) {
-    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-    [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
-    [inputView setTextInputClient:123];
-    [inputView reloadInputViews];
-    [inputView becomeFirstResponder];
-    NSAssert(inputView.isFirstResponder, @"inputView is not first responder");
-    inputView.inputDelegate = nil;
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+  NSAssert(inputView.isFirstResponder, @"inputView is not first responder");
+  inputView.inputDelegate = nil;
 
-    FlutterTextInputView* mockInputView = OCMPartialMock(inputView);
-    [mockInputView setTextInputState:@{
-      @"text" : @"COMPOSING",
-      @"composingBase" : @1,
-      @"composingExtent" : @3
-    }];
-    OCMVerify([mockInputView setInputDelegate:[OCMArg isNotNil]]);
-    [inputView removeFromSuperview];
-  }
+  FlutterTextInputView* mockInputView = OCMPartialMock(inputView);
+  [mockInputView
+      setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
+  OCMVerify([mockInputView setInputDelegate:[OCMArg isNotNil]]);
+  [inputView removeFromSuperview];
 }
 
 - (void)testInputViewsDoNotHaveUITextInteractions {
-  if (@available(iOS 13.0, *)) {
-    FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-    BOOL hasTextInteraction = NO;
-    for (id interaction in inputView.interactions) {
-      hasTextInteraction = [interaction isKindOfClass:[UITextInteraction class]];
-      if (hasTextInteraction) {
-        break;
-      }
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  BOOL hasTextInteraction = NO;
+  for (id interaction in inputView.interactions) {
+    hasTextInteraction = [interaction isKindOfClass:[UITextInteraction class]];
+    if (hasTextInteraction) {
+      break;
     }
-    XCTAssertFalse(hasTextInteraction);
   }
+  XCTAssertFalse(hasTextInteraction);
 }
 
 #pragma mark - UITextInput methods - Tests

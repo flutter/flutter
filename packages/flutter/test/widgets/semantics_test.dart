@@ -765,6 +765,47 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('MergeSemantics merges CustomSemanticsActions from its children', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MergeSemantics(
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action1'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action2'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(MergeSemantics)),
+      matchesSemantics(
+        customActions: <CustomSemanticsAction>[
+          const CustomSemanticsAction(label: 'action1'),
+          const CustomSemanticsAction(label: 'action2'),
+        ],
+      ),
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 

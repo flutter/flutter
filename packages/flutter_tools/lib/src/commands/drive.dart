@@ -81,20 +81,20 @@ class DriveCommand extends RunCommandBase {
     addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
     argParser
       ..addFlag(
-        'keep-app-running',
+        _kKeepAppRunning,
         help:
             'Will keep the Flutter application running when done testing.\n'
             'By default, "flutter drive" stops the application after tests are finished, '
-            'and "--keep-app-running" overrides this. On the other hand, if "--use-existing-app" '
+            'and "--$_kKeepAppRunning" overrides this. On the other hand, if "--use-existing-app" '
             'is specified, then "flutter drive" instead defaults to leaving the application '
-            'running, and "--no-keep-app-running" overrides it.',
+            'running, and "--no-$_kKeepAppRunning" overrides it.',
       )
       ..addOption(
-        'use-existing-app',
+        _kUseExistingApp,
         help:
             'Connect to an already running instance via the given Dart VM Service URL. '
             'If this option is given, the application will not be automatically started, '
-            'and it will only be stopped if "--no-keep-app-running" is explicitly set.',
+            'and it will only be stopped if "--no-$_kKeepAppRunning" is explicitly set.',
         valueHelp: 'url',
       )
       ..addOption(
@@ -140,11 +140,12 @@ class DriveCommand extends RunCommandBase {
       )
       ..addOption(
         'browser-dimension',
-        defaultsTo: '1600,1024',
+        defaultsTo: '1600x1024',
         help:
             'The dimension of the browser when running a Flutter Web test. '
-            'This will affect screenshot and all offset-related actions.',
-        valueHelp: 'width,height',
+            'Format is "width x height[@dpr]" where dpr is optional device pixel ratio. '
+            'This will affect screenshot dimensions and all offset-related actions.',
+        valueHelp: '1600x1024[@1]',
       )
       ..addFlag(
         'android-emulator',
@@ -184,6 +185,9 @@ class DriveCommand extends RunCommandBase {
         valueHelp: '360',
       );
   }
+
+  static const String _kKeepAppRunning = 'keep-app-running';
+  static const String _kUseExistingApp = 'use-existing-app';
 
   final Signals signals;
 
@@ -326,7 +330,7 @@ class DriveCommand extends RunCommandBase {
 
     bool screenshotTaken = false;
     try {
-      if (stringArg('use-existing-app') == null) {
+      if (stringArg(_kUseExistingApp) == null) {
         await driverService.start(
           buildInfo,
           device,
@@ -341,9 +345,9 @@ class DriveCommand extends RunCommandBase {
           },
         );
       } else {
-        final Uri? uri = Uri.tryParse(stringArg('use-existing-app')!);
+        final Uri? uri = Uri.tryParse(stringArg(_kUseExistingApp)!);
         if (uri == null) {
-          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
+          throwToolExit('Invalid VM Service URI: ${stringArg(_kUseExistingApp)}');
         }
         await driverService.reuseApplication(uri, device, debuggingOptions);
       }
@@ -355,7 +359,7 @@ class DriveCommand extends RunCommandBase {
         chromeBinary: stringArg('chrome-binary'),
         headless: boolArg('headless'),
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
-        browserDimension: stringArg('browser-dimension')!.split(','),
+        browserDimension: stringArg('browser-dimension')!.split(RegExp('[,x@]')),
         browserName: stringArg('browser-name'),
         driverPort:
             stringArg('driver-port') != null ? int.tryParse(stringArg('driver-port')!) : null,
@@ -381,7 +385,7 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArg('keep-app-running')) {
+      if (_keepAppRunningWhenComplete) {
         _logger.printStatus('Leaving the application running.');
       } else {
         await driverService.stop(userIdentifier: userIdentifier);
@@ -399,6 +403,23 @@ class DriveCommand extends RunCommandBase {
     }
 
     return FlutterCommandResult.success();
+  }
+
+  /// Whether, based on the arguments passed, the app should be stopped upon
+  /// completion.
+  ///
+  /// Interprets the results of `--keep-app-running` and `--use-existing-app`.
+  bool get _keepAppRunningWhenComplete {
+    if (boolArg(_kKeepAppRunning)) {
+      // --keep-app-running
+      return true;
+    } else if (argResults!.wasParsed(_kKeepAppRunning)) {
+      // --no-keep-app-running
+      return false;
+    } else {
+      // Default --keep-app-running to whether --use-existing-app was used.
+      return argResults!.wasParsed(_kUseExistingApp);
+    }
   }
 
   int? get _timeoutSeconds {

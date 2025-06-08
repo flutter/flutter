@@ -122,7 +122,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _CupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter: _CupertinoTextSelectionHandlePainter(
+        CupertinoTheme.of(context).selectionHandleColor,
+      ),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -139,9 +141,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         return Transform(
           transform:
               Matrix4.identity()
-                ..translate(desiredSize.width / 2, desiredSize.height / 2)
+                ..translateByDouble(desiredSize.width / 2, desiredSize.height / 2, 0, 1)
                 ..rotateZ(math.pi)
-                ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
+                ..translateByDouble(-desiredSize.width / 2, -desiredSize.height / 2, 0, 1),
           child: handle,
         );
       // iOS should draw an invisible box so the handle can still receive gestures
@@ -264,7 +266,7 @@ class _CupertinoTextSelectionControlsToolbarState
     final double anchorX = clampDouble(
       widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
       _kArrowScreenPadding + mediaQueryPadding.left,
-      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
+      MediaQuery.widthOf(context) - mediaQueryPadding.right - _kArrowScreenPadding,
     );
 
     final double topAmountInEditableRegion =

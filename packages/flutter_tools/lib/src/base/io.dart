@@ -169,7 +169,7 @@ void restoreExitFunction() {
 /// non-existent signals throws an exception.
 ///
 /// This class does NOT implement io.ProcessSignal, because that class uses
-/// private fields. This means it cannot be used with, e.g., [Process.killPid].
+/// private fields. This means it cannot be used with, e.g., [io.Process.killPid].
 /// Alternative implementations of the relevant methods that take
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
@@ -225,7 +225,7 @@ class ProcessSignal {
 
 /// A [ProcessSignal] that is only available on Posix platforms.
 ///
-/// Listening to a [_PosixProcessSignal] is a no-op on Windows.
+/// Listening to a [PosixProcessSignal] is a no-op on Windows.
 @visibleForTesting
 class PosixProcessSignal extends ProcessSignal {
   const PosixProcessSignal(super.wrappedSignal, {@visibleForTesting super.platform});
@@ -482,8 +482,8 @@ void resetNetworkInterfaceLister() {
   _networkInterfaceListerOverride = null;
 }
 
-/// This calls [NetworkInterface.list] from `dart:io` unless it is overridden by
-/// [setNetworkInterfaceLister] for a test. If it is overridden for a test,
+/// This calls [io.NetworkInterface.list] from `dart:io` unless it is overridden
+/// by [setNetworkInterfaceLister] for a test. If it is overridden for a test,
 /// it should be reset with [resetNetworkInterfaceLister].
 Future<List<NetworkInterface>> listNetworkInterfaces({
   bool includeLoopback = false,

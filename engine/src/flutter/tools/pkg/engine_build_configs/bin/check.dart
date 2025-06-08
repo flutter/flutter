@@ -137,6 +137,12 @@ void run(
   statusPrint('All build names must have a conforming prefix', success: buildNameErrors.isEmpty);
   indentedPrint(buildNameErrors);
 
+  // Check for duplicate archive paths in order to prevent builders from
+  // overwriting each other's artifacts in cloud storage.
+  final List<String> duplicateArchives = checkForDuplicateArchives(configs);
+  statusPrint('Archive paths must be unique', success: duplicateArchives.isEmpty);
+  indentedPrint(duplicateArchives);
+
   // If we have a successfully parsed .ci.yaml, perform additional checks.
   if (ciConfig == null) {
     return;
@@ -223,6 +229,28 @@ List<String> checkForDuplicateConfigs(Map<String, BuilderConfig> configs) {
       errors.add('${build.name} is duplicated in $name\n');
     } else {
       builds.add(build.name);
+    }
+  });
+  return errors;
+}
+
+// This check ensures that json files do not duplicate archive paths.
+List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
+  final RegExp zipPathPattern = RegExp(r'zip_archives/(.*\.zip)$');
+  final List<String> errors = <String>[];
+  final Set<String> archivePaths = <String>{};
+  _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
+    for (final BuildArchive archive in build.archives) {
+      for (final String path in archive.includePaths) {
+        final RegExpMatch? match = zipPathPattern.firstMatch(path);
+        if (match == null) {
+          continue;
+        }
+        final String zipPath = match.group(1)!;
+        if (!archivePaths.add(zipPath)) {
+          errors.add('$zipPath is duplicated in $name\n');
+        }
+      }
     }
   });
   return errors;

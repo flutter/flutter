@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
-export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
+export 'package:code_assets/code_assets.dart' show CodeAsset, DynamicLoadingBundled;
 
-/// Mocks all logic instead of using `package:native_assets_builder`, which
+/// Mocks all logic instead of using `package:hooks_runner`, which
 /// relies on doing process calls to `pub` and the local file system.
 class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunner {
   FakeFlutterNativeAssetsBuildRunner({
@@ -46,7 +47,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
             ..setupShared(
               packageRoot: Uri.parse('$package/'),
               packageName: package,
-              outputDirectory: Uri.parse('build-out-dir'),
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
               outputFile: Uri.file('output.json'),
             )
@@ -76,7 +76,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
             ..setupShared(
               packageRoot: Uri.parse('$package/'),
               packageName: package,
-              outputDirectory: Uri.parse('build-out-dir'),
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
               outputFile: Uri.file('output.json'),
             )

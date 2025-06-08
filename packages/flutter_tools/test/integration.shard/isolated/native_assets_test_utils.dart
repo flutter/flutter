@@ -214,7 +214,8 @@ FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
   const String builderSource = r'''
 
 import 'package:logging/logging.dart';
-import 'package:native_assets_cli/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:code_assets/code_assets.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {

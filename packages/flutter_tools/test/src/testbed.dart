@@ -64,32 +64,34 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Testing that a filesystem operation works as expected:
 ///
-///     void main() {
-///       group('Example', () {
-///         Testbed testbed;
+/// ```dart
+/// void main() {
+///   group('Example', () {
+///     Testbed testbed;
 ///
-///         setUp(() {
-///           testbed = Testbed(setUp: () {
-///             globals.fs.file('foo').createSync()
-///           });
-///         })
-///
-///         test('Can delete a file', () => testbed.run(() {
-///           expect(globals.fs.file('foo').existsSync(), true);
-///           globals.fs.file('foo').deleteSync();
-///           expect(globals.fs.file('foo').existsSync(), false);
-///         }));
+///     setUp(() {
+///       testbed = Testbed(setUp: () {
+///         globals.fs.file('foo').createSync()
 ///       });
-///     }
+///     })
+///
+///     test('Can delete a file', () => testbed.run(() {
+///       expect(globals.fs.file('foo').existsSync(), true);
+///       globals.fs.file('foo').deleteSync();
+///       expect(globals.fs.file('foo').existsSync(), false);
+///     }));
+///   });
+/// }
+/// ```
 ///
 /// For a more detailed example, see the code in test_compiler_test.dart.
-class Testbed {
+class TestBed {
   /// Creates a new [TestBed]
   ///
   /// `overrides` provides more overrides in addition to the test defaults.
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
-  Testbed({FutureOr<void> Function()? setup, Map<Type, Generator>? overrides})
+  TestBed({FutureOr<void> Function()? setup, Map<Type, Generator>? overrides})
     : _setup = setup,
       _overrides = overrides;
 
