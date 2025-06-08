@@ -113,34 +113,34 @@ class FlutterPlugin : Plugin<Project> {
             rootProject.file("local.properties")
             val settingsFile =
                 project.rootDir
-                .toPath()
-                .resolve("settings.gradle")
+                    .toPath()
+                    .resolve("settings.gradle")
             val settingsKtsFile =
                 project.rootDir
-                .toPath()
-                .resolve("settings.gradle.kts")
+                    .toPath()
+                    .resolve("settings.gradle.kts")
             val hasSettings = settingsFile.exists()
             val hasSettingsKts = settingsKtsFile.exists()
             val hasPubspec =
                 project.rootDir
-                .toPath()
-                .resolve("pubspec.yaml")
-                .exists()
+                    .toPath()
+                    .resolve("pubspec.yaml")
+                    .exists()
             val hasParentSettings =
                 project.rootDir.parentFile
-                .toPath()
-                .resolve("settings.gradle")
-                .exists()
+                    .toPath()
+                    .resolve("settings.gradle")
+                    .exists()
             val hasParentSettingsKts =
                 project.rootDir.parentFile
-                .toPath()
-                .resolve("settings.gradle.kts")
-                .exists()
+                    .toPath()
+                    .resolve("settings.gradle.kts")
+                    .exists()
             val hasParentPubspec =
                 project.rootDir.parentFile
-                .toPath()
-                .resolve("pubspec.yaml")
-                .exists()
+                    .toPath()
+                    .resolve("pubspec.yaml")
+                    .exists()
 
             if ((hasSettings || hasSettingsKts) && !hasPubspec && !(hasParentSettings || hasParentSettingsKts) && hasParentPubspec) {
                 val file = if (hasSettings) settingsFile else settingsKtsFile
