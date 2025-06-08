@@ -150,6 +150,16 @@ String generateDDCLibraryBundleBootstrapScript({
   return '''
 console.log('logging start of bootstrap');
 console.error('starting bootstrap');
+console.error(document.currentScript.src);
+var xhr = new XMLHttpRequest();
+xhr.open("GET", document.currentScript.src);
+xhr.onreadystatechange = function () {
+  if (this.readyState == 4 && this.status == 200 || this.status == 304) {
+    console.log('first bootstrap contents:');
+    console.log(xhr.responseText);
+  }
+};
+xhr.send();
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
 // Save the current directory so we can access it in a closure.
 var _currentDirectory = (function () {
@@ -476,6 +486,15 @@ String generateDDCLibraryBundleMainModule({
 
 (function() {
   console.error('executing secondary bootstrap');
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", document.currentScript.src);
+  xhr.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200 || this.status == 304) {
+      console.log('secondary bootstrap contents:');
+      console.log(xhr.responseText);
+    }
+  };
+  xhr.send();
   let appName = "org-dartlang-app:/$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();

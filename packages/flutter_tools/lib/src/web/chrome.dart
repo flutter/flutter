@@ -261,7 +261,6 @@ class ChromiumLauncher {
       //   printedUserDataDir = true;
       // }
       if (chromeDebugLogFile.existsSync()) {
-        timer.cancel();
         _logger.printError('${chromeDebugLogFile.path} exists');
         _logger.printError('Chrome debug log output: ${chromeDebugLogFile.readAsStringSync()}');
       } else {
