@@ -1297,6 +1297,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               : bottomScrollOffset;
     }
 
+    // If the target is not null and within the scrollable range, animate to it.
     if (target != null && target <= position.maxScrollExtent) {
       position.animateTo(
         target,
