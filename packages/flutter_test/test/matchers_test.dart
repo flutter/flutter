@@ -1702,6 +1702,151 @@ void main() {
     expect(message, contains('Container'));
     expect(message, contains('is not enough'));
   });
+
+  testWidgets(
+    'finds matching candidates for all of the finders in the findersList, but at locations that is not compatible with the ascending order of the findersList: 1',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            const Text('foo', textDirection: TextDirection.ltr),
+            Container(),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      );
+
+      late TestFailure failure;
+      try {
+        expect(
+          find.bySubtype<Widget>(),
+          findsAscendinglyOrderedWidgets(<Finder>[
+            find.text('foo'),
+            find.byType(CircularProgressIndicator),
+            find.byType(Container),
+          ]),
+        );
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+      expect(failure, isNotNull);
+      final String message = failure.message!;
+      expect(
+        message,
+        contains(
+          'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+        ),
+      );
+      expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+      expect(message, contains('Text("foo"'));
+      expect(message, contains('Container'));
+      expect(message, contains('CircularProgressIndicator'));
+      expect(
+        message,
+        contains(
+          'means all were found but in locations that are not compatible with the ascending order of the findersList',
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'finds matching candidates for all of the finders in the findersList, but at locations that is not compatible with the ascending order of the findersList: 2',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            const Text('foo', textDirection: TextDirection.ltr),
+            const Text('foo', textDirection: TextDirection.ltr),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      );
+
+      late TestFailure failure;
+      try {
+        expect(
+          find.bySubtype<Widget>(),
+          findsAscendinglyOrderedWidgets(<Finder>[
+            find.text('foo'),
+            find.byType(CircularProgressIndicator),
+            find.text('foo'),
+          ]),
+        );
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+      expect(failure, isNotNull);
+      final String message = failure.message!;
+      expect(
+        message,
+        contains(
+          'Expected: at least one matching candidate for each finder in the findersList at a location that is compatible with the ascending order of the findersList\n',
+        ),
+      );
+      expect(message, contains('Actual: _SubtypeWidgetFinder<Widget>:'));
+      expect(message, stringContainsInOrder(['Text("foo"', 'Text("foo"']));
+      expect(message, contains('CircularProgressIndicator'));
+      expect(
+        message,
+        contains(
+          'means all were found but in locations that are not compatible with the ascending order of the findersList',
+        ),
+      );
+    },
+  );
+
+  testWidgets(
+    'finds matching candidates for all of the finders in the findersList at locations that is compatible with the ascending order of the findersList',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            const Text('foo', textDirection: TextDirection.ltr),
+            const CircularProgressIndicator(),
+            Container(),
+          ],
+        ),
+      );
+
+      expect(
+        find.bySubtype<Widget>(),
+        findsAscendinglyOrderedWidgets(<Finder>[
+          find.text('foo'),
+          find.byType(CircularProgressIndicator),
+          find.byType(Container),
+        ]),
+      );
+    },
+  );
+
+  testWidgets(
+    'finds matching candidates for all of the finders in the findersList at locations that is compatible with the ascending order of the findersList when the findersList contains more than one finder that finds the same things',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            Container(),
+            const Text('foo', textDirection: TextDirection.ltr),
+            Container(),
+            const Text('foo', textDirection: TextDirection.ltr),
+            Container(),
+          ],
+        ),
+      );
+
+      expect(
+        find.bySubtype<Widget>(),
+        findsAscendinglyOrderedWidgets(<Finder>[
+          find.byType(Container),
+          find.text('foo'),
+          find.byType(Container),
+          find.text('foo'),
+          find.byType(Container),
+        ]),
+      );
+    },
+  );
 }
 
 enum _ComparatorBehavior { returnTrue, returnFalse, throwTestFailure }

@@ -9,6 +9,7 @@ import 'dart:convert' show LineSplitter;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Card;
 import 'package:flutter/rendering.dart';
@@ -1192,16 +1193,43 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
 
   @override
   bool matches(covariant FinderBase<dynamic> finder, Map<dynamic, dynamic> matchState) {
+    int lastFoundLocation = -1;
+    final List<dynamic> finderfound = finder.evaluate().toList();
     for (int i = 0; i < findersList.length; i++) {
       final Iterator<Element> expected = findersList.elementAt(i).evaluate().iterator;
       if (!expected.moveNext()) {
-        matchState[findersList.elementAt(i)] = false;
+        matchState[findersList.elementAt(i)] = <bool>[false, false];
       } else {
-        matchState[findersList.elementAt(i)] = true;
+        final int howManyFinderThatFindTheSameThingAlreadyDone =
+            matchState.keys
+                .where(
+                  (dynamic e) =>
+                      // I need to compare Finders to find the Finders that finds the same things
+                      findersList.elementAt(i).describeMatch(Plurality.zero) ==
+                          e.describeMatch(Plurality.zero) ||
+                      findersList.elementAt(i).describeMatch(Plurality.one) ==
+                          e.describeMatch(Plurality.one) ||
+                      findersList.elementAt(i).describeMatch(Plurality.many) ==
+                          e.describeMatch(Plurality.many),
+                )
+                .length;
+        for (int k = 0; k < howManyFinderThatFindTheSameThingAlreadyDone; k++) {
+          expected.moveNext();
+        }
+        final int indexOfCurrrent = finderfound.indexWhere((dynamic e) {
+          return expected.current == e;
+        }, lastFoundLocation + 1);
+        if (indexOfCurrrent < lastFoundLocation + 1) {
+          matchState[findersList.elementAt(i)] = <bool>[true, false];
+        } else {
+          matchState[findersList.elementAt(i)] = <bool>[true, true];
+        }
+        lastFoundLocation = indexOfCurrrent;
       }
     }
     final Iterable<MapEntry<dynamic, dynamic>> found = matchState.entries.where(
-      (MapEntry<dynamic, dynamic> me) => me.value as bool,
+      (MapEntry<dynamic, dynamic> me) =>
+          me.value.elementAt(0) as bool && me.value.elementAt(1) as bool,
     );
     if (found.length != findersList.length) {
       return false;
@@ -1217,14 +1245,20 @@ class _FindsAscendinglyOrderedWidgets extends Matcher {
     bool verbose,
   ) {
     final Iterable<MapEntry<dynamic, dynamic>> found = matchState.entries.where(
-      (MapEntry<dynamic, dynamic> me) => me.value as bool,
+      (MapEntry<dynamic, dynamic> me) => me.value.elementAt(0) as bool,
     );
     if (found.isEmpty) {
       return mismatchDescription.add('means none were found but some were expected');
     } else if (found.length == 1) {
       return mismatchDescription.add('means one was found but some were expected');
     } else {
-      return mismatchDescription.add('is not enough');
+      if (found.length != matchState.length) {
+        return mismatchDescription.add('is not enough');
+      } else {
+        return mismatchDescription.add(
+          'means all were found but in locations that are not compatible with the ascending order of the findersList',
+        );
+      }
     }
   }
 }
