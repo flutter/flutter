@@ -72,11 +72,13 @@ Future<void> testMain() async {
       children: <SemanticsNodeUpdate>[
         tester1.updateNode(
           id: 1,
-          isFocusable: true,
+          flags: const ui.SemanticsFlags(
+            isFocusable: true,
+            hasEnabledState: true,
+            isEnabled: true,
+            isButton: true,
+          ),
           hasTap: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isButton: true,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
       ],
