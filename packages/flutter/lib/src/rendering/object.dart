@@ -331,7 +331,6 @@ class PaintingContext extends ClipContext {
   ///
   /// It's fragile to hold a reference to the recorder
   /// returned by this getter as it can change at any time.
-  @override
   ui.PictureRecorder get recorder {
     if (_recorder == null) {
       _startRecording();
