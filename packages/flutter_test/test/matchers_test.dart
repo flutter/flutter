@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-const SemanticsFlags allFlags = SemanticsFlags(
+SemanticsFlags allFlags = SemanticsFlags(
   hasCheckedState: true,
   isChecked: true,
   isSelected: true,
@@ -1135,7 +1135,7 @@ void main() {
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1239,7 +1239,7 @@ void main() {
       }
 
       final SemanticsData emptyData = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1358,7 +1358,7 @@ void main() {
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
