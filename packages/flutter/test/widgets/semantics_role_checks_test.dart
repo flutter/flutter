@@ -284,7 +284,32 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(Checkbox), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, radio group can nest', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: Material(
+            child: RadioGroup<int>(
+              groupValue: 0,
+              onChanged: (int? value) {},
+              child: Column(
+                children: <Widget>[
+                  RadioGroup<String>(
+                    groupValue: 'string',
+                    onChanged: (String? value) {},
+                    child: const Radio<String>(value: 'string'),
+                  ),
+                  const Radio<int>(value: 0),
+                  const Radio<int>(value: 1),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
     });
   });
 

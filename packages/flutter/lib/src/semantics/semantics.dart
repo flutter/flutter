@@ -239,6 +239,11 @@ sealed class _DebugSemanticsRoleChecks {
     bool hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
+      if (data.role == SemanticsRole.radioGroup) {
+        // Children under sub radio groups don't belong to this radio group.
+        return error == null;
+      }
+
       if (!data.flagsCollection.isInMutuallyExclusiveGroup) {
         node.visitChildren(validateRadioGroupChildren);
         return error == null;
