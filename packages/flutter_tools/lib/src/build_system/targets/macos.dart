@@ -67,7 +67,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
     _removeDenylistedFiles(environment.outputDir);
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory('${FlutterDarwinPlatform.macos.frameworkName}.framework')
+        .childDirectory(FlutterDarwinPlatform.macos.frameworkPath)
         .childDirectory('Versions')
         .childDirectory('A')
         .childFile(FlutterDarwinPlatform.macos.frameworkName);

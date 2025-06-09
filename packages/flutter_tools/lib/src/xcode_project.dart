@@ -14,7 +14,6 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
-import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -940,7 +939,7 @@ class MacOSProject extends XcodeBasedProject {
   bool existsSync() => hostAppRoot.existsSync();
 
   @override
-  Directory get hostAppRoot => parent.directory.childDirectory(FlutterDarwinPlatform.macos.name);
+  Directory get hostAppRoot => parent.directory.childDirectory('macos');
 
   /// The xcfilelist used to track the inputs for the Flutter script phase in
   /// the Xcode build.

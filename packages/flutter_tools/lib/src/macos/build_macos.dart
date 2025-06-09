@@ -200,7 +200,7 @@ Future<void> buildMacOS({
   final String destination =
       buildInfo.isDebug
           ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
-          : XcodeSdk.MacOSX.generticPlatform;
+          : XcodeSdk.MacOSX.genericPlatform;
 
   try {
     result = await globals.processUtils.stream(

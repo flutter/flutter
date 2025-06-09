@@ -15,11 +15,9 @@ import 'base/logger.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/process.dart';
-import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -466,11 +464,7 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
   @override
   List<String> getLicenseDirs() {
     if (_platform.isMacOS || ignorePlatformFiltering) {
-      return <String>[
-        FlutterDarwinPlatform.ios.artifactName(BuildMode.debug),
-        FlutterDarwinPlatform.ios.artifactName(BuildMode.profile),
-        FlutterDarwinPlatform.ios.artifactName(BuildMode.release),
-      ];
+      return const <String>['ios', 'ios-profile', 'ios-release'];
     }
     return const <String>[];
   }
@@ -817,13 +811,13 @@ List<List<String>> _getWindowsDesktopBinaryDirs(String arch) {
   ];
 }
 
-List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
-  <String>['darwin-x64', 'darwin-x64/${FlutterDarwinPlatform.macos.artifactZip}'],
+const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
+  <String>['darwin-x64', 'darwin-x64/framework.zip'],
   <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
-  <String>['darwin-x64-profile', 'darwin-x64-profile/${FlutterDarwinPlatform.macos.artifactZip}'],
+  <String>['darwin-x64-profile', 'darwin-x64-profile/framework.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/artifacts.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/gen_snapshot.zip'],
-  <String>['darwin-x64-release', 'darwin-x64-release/${FlutterDarwinPlatform.macos.artifactZip}'],
+  <String>['darwin-x64-release', 'darwin-x64-release/framework.zip'],
   <String>['darwin-x64-release', 'darwin-x64-release/artifacts.zip'],
   <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
 ];
@@ -855,10 +849,10 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-x64-release/windows-x64', 'android-x64-release/windows-x64.zip'],
 ];
 
-List<List<String>> _iosBinaryDirs = <List<String>>[
-  <String>['ios', 'ios/${FlutterDarwinPlatform.ios.artifactZip}'],
-  <String>['ios-profile', 'ios-profile/${FlutterDarwinPlatform.ios.artifactZip}'],
-  <String>['ios-release', 'ios-release/${FlutterDarwinPlatform.ios.artifactZip}'],
+const List<List<String>> _iosBinaryDirs = <List<String>>[
+  <String>['ios', 'ios/artifacts.zip'],
+  <String>['ios-profile', 'ios-profile/artifacts.zip'],
+  <String>['ios-release', 'ios-release/artifacts.zip'],
 ];
 
 const List<List<String>> _androidBinaryDirs = <List<String>>[

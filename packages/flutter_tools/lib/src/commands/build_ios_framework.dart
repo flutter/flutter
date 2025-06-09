@@ -445,10 +445,10 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/${FlutterDarwinPlatform.ios.artifactZip}' }
   s.documentation_url     = 'https://docs.flutter.dev'
   s.platform              = :ios, '${FlutterDarwinPlatform.ios.deploymentTarget()}'
-  s.vendored_frameworks   = 'Flutter.xcframework'
+  s.vendored_frameworks   = '${FlutterDarwinPlatform.ios.xcframeworkPath}'
 end
 ''';
 

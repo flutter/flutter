@@ -41,7 +41,6 @@ class SwiftPackageManager {
     FlutterDarwinPlatform platform,
     XcodeBasedProject project,
   ) async {
-
     final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
     ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
     symlinkDirectory.createSync(recursive: true);

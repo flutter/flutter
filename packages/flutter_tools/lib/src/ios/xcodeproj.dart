@@ -206,7 +206,7 @@ class XcodeProjectInterpreter {
         XcodeSdk.IPhoneSimulator.platformName,
       ],
       '-destination',
-      if (deviceId != null) 'id=$deviceId' else buildContext.sdk.generticPlatform,
+      if (deviceId != null) 'id=$deviceId' else buildContext.sdk.genericPlatform,
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(buildDir)}',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
@@ -414,7 +414,7 @@ enum XcodeSdk {
 
   final EnvironmentType? sdkType;
 
-  String get generticPlatform => 'generic/platform=$name';
+  String get genericPlatform => 'generic/platform=$displayName';
 }
 
 @immutable

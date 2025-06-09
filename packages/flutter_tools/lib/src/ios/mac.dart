@@ -377,9 +377,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (deviceID != null) {
     buildCommands.add('id=$deviceID');
   } else if (environmentType == EnvironmentType.physical) {
-    buildCommands.add(XcodeSdk.IPhoneOS.generticPlatform);
+    buildCommands.add(XcodeSdk.IPhoneOS.genericPlatform);
   } else {
-    buildCommands.add(XcodeSdk.IPhoneSimulator.generticPlatform);
+    buildCommands.add(XcodeSdk.IPhoneSimulator.genericPlatform);
   }
 
   if (activeArch != null) {

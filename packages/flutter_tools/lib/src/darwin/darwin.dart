@@ -51,6 +51,7 @@ enum FlutterDarwinPlatform {
   final Artifact xcframeworkArtifact;
   final List<XcodeSdk> sdks;
 
+  /// Minimum supported version for the platform.
   Version deploymentTarget() {
     switch (this) {
       case FlutterDarwinPlatform.ios:
@@ -60,10 +61,15 @@ enum FlutterDarwinPlatform {
     }
   }
 
+  /// Artifact name for the platform and [mode].
+  ///
+  /// e.g. (`ios`, `ios-profile`, `ios-release`, `darwin-x64`, `darwin-x64-profile`,
+  /// `darwin-x64-release`).
   String artifactName(BuildMode mode) {
     return mode == BuildMode.debug ? _artifactName : '$_artifactName-${mode.cliName}';
   }
 
+  /// Minimum supported Swift package version for the platform.
   SwiftPackageSupportedPlatform get supportedPackagePlatform {
     return SwiftPackageSupportedPlatform(
       platform: swiftPackagePlatform,
@@ -71,16 +77,27 @@ enum FlutterDarwinPlatform {
     );
   }
 
+  /// Framework name with the `.framework` extension.
+  ///
+  /// e.g. (`Flutter.framework`, `FlutterMacOS.framework`).
+  String get frameworkPath => '$frameworkName.framework';
+
+  /// Framework name with the `.xcframework` extension.
+  ///
+  /// e.g. (`Flutter.xcframework`, `FlutterMacOS.xcframework`).
+  String get xcframeworkPath => '$frameworkName.xcframework';
+
+  /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
-    if (targetPlatform == TargetPlatform.ios) {
-      return ios;
-    }
-    if (targetPlatform == TargetPlatform.darwin) {
-      return macos;
+    for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
+      if (targetPlatform == darwinPlatform.targetPlatform) {
+        return darwinPlatform;
+      }
     }
     return null;
   }
 
+  /// Returns corresponding [XcodeBasedProject] for the platform.
   XcodeBasedProject xcodeProject(FlutterProject project) {
     switch (this) {
       case FlutterDarwinPlatform.ios:
