@@ -59,11 +59,11 @@ except ImportError:
 
 # TODO: https://github.com/flutter/flutter/issues/158384
 # Migrate to a supported Python formatter.
-if command -v python3.10 &>/dev/null && (python3.10 -c $has_lib2to3_check_script || exit 1); then
+if command -v python3.10 &>/dev/null && (python3.10 -c "$has_lib2to3_check_script" || exit 1); then
   PYTHON_EXEC="python3.10"
-elif command -v python3.11 &>/dev/null && (python3.11 -c $has_lib2to3_check_script || exit 1); then
+elif command -v python3.11 &>/dev/null && (python3.11 -c "$has_lib2to3_check_script" || exit 1); then
   PYTHON_EXEC="python3.11"
-elif command -v python3.12 &>/dev/null && (python3.12 -c $has_lib2to3_check_script || exit 1); then
+elif command -v python3.12 &>/dev/null && (python3.12 -c "$has_lib2to3_check_script" || exit 1); then
   PYTHON_EXEC="python3.12"
 else
   python3 -c "
