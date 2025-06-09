@@ -198,6 +198,12 @@ class PreviewCodeGenerator {
             key: PreviewDetails.kBrightness,
             expression: preview.brightness,
           ),
+          ...?_generateCodeFromAnalyzerExpression(
+            allocator: allocator,
+            key: PreviewDetails.kLocalizations,
+            expression: preview.localizations,
+            isCallback: true,
+          ),
           _kBuilderProperty: previewWidget,
         });
   }

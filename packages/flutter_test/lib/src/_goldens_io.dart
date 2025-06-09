@@ -285,42 +285,6 @@ ByteData _invert(ByteData imageBytes) {
   return bytes;
 }
 
-/// An unsupported [WebGoldenComparator] that exists for API compatibility.
-@Deprecated(
-  'Use GoldenFileComparator instead. '
-  'This feature was deprecated after v3.28.0-0.1.pre.',
-)
-class DefaultWebGoldenComparator extends WebGoldenComparator {
-  /// This is provided to prevent warnings from the analyzer.
-  @Deprecated(
-    'Use a GoldenFileComparator implementation instead. '
-    'This feature was deprecated after v3.28.0-0.1.pre.',
-  )
-  DefaultWebGoldenComparator(Uri _) {
-    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
-  }
-
-  @override
-  Future<bool> compare(double width, double height, Uri golden) {
-    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
-  }
-
-  @override
-  Future<void> update(double width, double height, Uri golden) {
-    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
-  }
-
-  @override
-  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
-    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
-  }
-
-  @override
-  Future<void> updateBytes(Uint8List bytes, Uri golden) {
-    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
-  }
-}
-
 /// Reads the red value out of a 32 bit rgba pixel.
 int _readRed(int pixel) => (pixel >> 24) & 0xff;
 
