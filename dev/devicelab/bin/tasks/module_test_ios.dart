@@ -18,18 +18,6 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    // TODO(matanlurey): Remove after default.
-    // https://github.com/flutter/flutter/issues/160257
-    section('Opt-in to --explicit-package-dependencies');
-    await flutter('config', options: <String>['--explicit-package-dependencies']);
-
-    // Update pod repo.
-    await eval(
-      'pod',
-      <String>['repo', 'update'],
-      environment: <String, String>{'LANG': 'en_US.UTF-8'},
-    );
-
     // This variable cannot be `late`, as we reference it in the `finally` block
     // which may execute before this field has been initialized.
     String? simulatorDeviceId;
@@ -269,7 +257,7 @@ dependencies:
       });
 
       await inDirectory(projectDir, () async {
-        await flutter('pub', options: <String>['get']);
+        await flutter('build', options: <String>['ios', '--config-only']);
       });
 
       section('Add to existing iOS Objective-C app');
@@ -287,7 +275,13 @@ dependencies:
         section('Validate iOS Objective-C host app Podfile');
 
         final File podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
-        String podfileContent = await podfile.readAsString();
+        final String correctPodfileContents = await podfile.readAsString();
+        final File podfileMissingPostInstall = File(
+          path.join(objectiveCHostApp.path, 'PodfileMissingPostInstall'),
+        );
+
+        podfile.writeAsStringSync(podfileMissingPostInstall.readAsStringSync());
+
         final String podFailure = await eval(
           'pod',
           <String>['install'],
@@ -301,18 +295,12 @@ dependencies:
             !podFailure.contains(
               'Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins',
             )) {
-          print(podfileContent);
+          print(podfile.readAsStringSync());
           throw TaskResult.failure(
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );
         }
-        podfileContent = '''
-$podfileContent
-
-post_install do |installer|
-  flutter_post_install(installer)
-end
-          ''';
+        String podfileContent = correctPodfileContents;
         await podfile.writeAsString(podfileContent, flush: true);
 
         await exec(

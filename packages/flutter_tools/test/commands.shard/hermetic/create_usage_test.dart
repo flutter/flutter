@@ -33,11 +33,10 @@ class FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
@@ -228,7 +227,7 @@ void main() {
         final CreateCommand command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
+        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
         expect(
           (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
           'swift',
@@ -237,7 +236,7 @@ void main() {
         await runner.run(<String>[
           'create',
           '--no-pub',
-          '--template=app',
+          '--template=plugin',
           '--ios-language=objc',
           'testy',
         ]);

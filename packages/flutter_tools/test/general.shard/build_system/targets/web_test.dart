@@ -32,6 +32,12 @@ const List<String> _kDart2jsLinuxArgs = <String>[
   '--invoker=flutter_tool',
 ];
 
+const List<String> _kStandardFlutterWebDefines = <String>[
+  '-DFLUTTER_WEB_USE_SKIA=true',
+  '-DFLUTTER_WEB_USE_SKWASM=false',
+  '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
+];
+
 const List<String> _kDart2WasmLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
   'compile',
@@ -514,16 +520,20 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with csp',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '--csp',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -534,16 +544,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '--csp',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -555,20 +556,21 @@ name: foo
   );
 
   test(
-    'Dart2JSTarget ignores frontend server starter path option when calling dart2js',
+    'Dart2JSTarget calls dart2js with expected args with minify false',
     () => testbed.run(() async {
-      environment.defines[kBuildMode] = 'profile';
-      environment.defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart';
+      environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -579,15 +581,46 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
+            environment.buildDir.childFile('main.dart.js').absolute.path,
+            environment.buildDir.childFile('app.dill').absolute.path,
+          ],
+        ),
+      );
+
+      await Dart2JSTarget(const JsCompilerConfig(minify: false)).build(environment);
+    }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
+  );
+
+  test(
+    'Dart2JSTarget ignores frontend server starter path option when calling dart2js',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'profile';
+      environment.defines[kFrontendServerStarterPath] = 'path/to/frontend_server_starter.dart';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ...common,
+            environment.buildDir.childFile('app.dill').absolute.path,
+            '--packages=/.dart_tool/package_config.json',
+            '--cfe-only',
+            environment.buildDir.childFile('main.dart').absolute.path,
+          ],
+        ),
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -603,17 +636,20 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '--enable-experiment=non-nullable',
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '--enable-experiment=non-nullable',
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -624,16 +660,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '--enable-experiment=non-nullable',
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -648,16 +675,19 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in profile mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -668,15 +698,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -691,16 +713,19 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -711,14 +736,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -733,17 +751,20 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release mode with native null assertions',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--native-null-assertions',
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--native-null-assertions',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -754,15 +775,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--native-null-assertions',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -779,16 +792,19 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O3',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -799,14 +815,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-O3',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -823,16 +832,19 @@ name: foo
     'Dart2JSTarget produces expected depfile',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -846,14 +858,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -880,18 +885,21 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -902,16 +910,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -927,15 +926,18 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.defines[WebCompilerConfig.kSourceMapsEnabled] = 'true';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.product=true',
+        ..._kStandardFlutterWebDefines,
+        '-O4',
+        '--minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -946,13 +948,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.product=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -968,18 +964,21 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -990,17 +989,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -1016,18 +1005,21 @@ name: foo
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'debug';
       environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '--enable-asserts',
+        '-O1',
+        '--no-minify',
+        '-o',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '--enable-asserts',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -1038,17 +1030,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-DFOO=bar',
-            '-DBAZ=qux',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '--enable-asserts',
-            '-O1',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -1063,15 +1045,18 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with dump-info',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+      ];
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
+            ...common,
             '-o',
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
@@ -1083,14 +1068,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
+            ...common,
             '--stage=dump-info-all',
             '-o',
             environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -1109,16 +1087,22 @@ name: foo
     'Dart2JSTarget calls dart2js with expected args with no-frequency-based-minification',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'profile';
+
+      final List<String> common = <String>[
+        ..._kDart2jsLinuxArgs,
+        '-Ddart.vm.profile=true',
+        ..._kStandardFlutterWebDefines,
+        '--no-source-maps',
+        '-O4',
+        '--no-minify',
+        '--no-frequency-based-minification',
+        '-o',
+      ];
+
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-source-maps',
-            '-o',
+            ...common,
             environment.buildDir.childFile('app.dill').absolute.path,
             '--packages=/.dart_tool/package_config.json',
             '--cfe-only',
@@ -1129,16 +1113,7 @@ name: foo
       processManager.addCommand(
         FakeCommand(
           command: <String>[
-            ..._kDart2jsLinuxArgs,
-            '-Ddart.vm.profile=true',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
-            '--no-minify',
-            '--no-source-maps',
-            '-O4',
-            '--no-frequency-based-minification',
-            '-o',
+            ...common,
             environment.buildDir.childFile('main.dart.js').absolute.path,
             environment.buildDir.childFile('app.dill').absolute.path,
           ],
@@ -1251,6 +1226,7 @@ name: foo
       JsCompilerConfig(optimizationLevel: 0),
       JsCompilerConfig(noFrequencyBasedMinification: true),
       JsCompilerConfig(sourceMaps: false),
+      JsCompilerConfig(minify: false),
 
       // All properties non-default
       JsCompilerConfig(

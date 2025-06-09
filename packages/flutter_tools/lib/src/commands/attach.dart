@@ -142,7 +142,6 @@ class AttachCommand extends FlutterCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
-    addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
@@ -207,8 +206,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     return uri;
   }
-
-  bool get serveObservatory => boolArg('serve-observatory');
 
   String? get appId {
     return stringArg('app-id');
@@ -487,7 +484,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDds: enableDds,
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
-      serveObservatory: serveObservatory,
       usingCISystem: usingCISystem,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),

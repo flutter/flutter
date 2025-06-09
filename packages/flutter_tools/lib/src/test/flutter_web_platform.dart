@@ -283,7 +283,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures ?? true);
+      assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
@@ -296,7 +296,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures ?? true);
+      assert(buildInfo.canaryFeatures);
     }
     final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
@@ -999,6 +999,7 @@ class _BrowserEnvironment implements Environment {
   @override
   final bool supportsDebugging = true;
 
+  // TODO(bkonyi): update package:test_core to no longer reference Observatory.
   @override
   final Uri? observatoryUrl;
 

@@ -2004,7 +2004,7 @@ Future<void> runCarouselTest({
     MaterialApp(
       home: Scaffold(
         body:
-            (flexWeights.isEmpty)
+            flexWeights.isEmpty
                 ? CarouselView(
                   scrollDirection: scrollDirection,
                   reverse: reverse,
