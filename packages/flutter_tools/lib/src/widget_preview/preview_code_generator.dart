@@ -27,8 +27,6 @@ class PreviewCodeGenerator {
   /// project.
   final FlutterProject widgetPreviewScaffoldProject;
 
-  late final String generatedPreviewFilePath = fs.path.join('lib', 'src', 'generated_preview.dart');
-
   static const String _kBuilderType = 'Builder';
   static const String _kBuilderLibraryUri = 'package:flutter/widgets.dart';
   static const String _kBuilderProperty = 'builder';
@@ -36,6 +34,9 @@ class PreviewCodeGenerator {
   static const String _kPreviewsFunctionName = 'previews';
   static const String _kWidgetPreviewClass = 'WidgetPreview';
   static const String _kWidgetPreviewLibraryUri = 'widget_preview.dart';
+
+  static String getGeneratedPreviewFilePath(FileSystem fs) =>
+      fs.path.join('lib', 'src', 'generated_preview.dart');
 
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
   /// [previews].
@@ -97,7 +98,7 @@ class PreviewCodeGenerator {
       ]),
     );
     final File generatedPreviewFile = fs.file(
-      widgetPreviewScaffoldProject.directory.uri.resolve(generatedPreviewFilePath),
+      widgetPreviewScaffoldProject.directory.uri.resolve(getGeneratedPreviewFilePath(fs)),
     );
     generatedPreviewFile.writeAsStringSync(
       // Format the generated file for readability, particularly during feature development.

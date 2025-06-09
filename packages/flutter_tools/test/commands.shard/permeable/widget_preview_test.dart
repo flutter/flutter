@@ -222,7 +222,7 @@ List<_i1.WidgetPreview> previews() => [
 ''';
 
     testUsingContext(
-      'start finds existing previews and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
         final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
@@ -234,7 +234,7 @@ List<_i1.WidgetPreview> previews() => [
             .writeAsStringSync(samplePreviewFile);
 
         final File generatedFile = widgetPreviewScaffoldDir.childFile(
-          PreviewCodeGenerator.generatedPreviewFilePath,
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
 
         await startWidgetPreview(rootProject: rootProject);
@@ -254,7 +254,7 @@ List<_i1.WidgetPreview> previews() => [
     );
 
     testUsingContext(
-      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
         final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
@@ -266,7 +266,7 @@ List<_i1.WidgetPreview> previews() => [
             .writeAsStringSync(samplePreviewFile);
 
         final File generatedFile = widgetPreviewScaffoldDir.childFile(
-          PreviewCodeGenerator.generatedPreviewFilePath,
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
 
         // Try to execute using the CWD.
@@ -292,7 +292,7 @@ List<_i1.WidgetPreview> previews() => [
     );
 
     testUsingContext(
-      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);

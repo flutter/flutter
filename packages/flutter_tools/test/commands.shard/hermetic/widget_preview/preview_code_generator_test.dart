@@ -139,13 +139,14 @@ void main() {
     late PreviewCodeGenerator codeGenerator;
     late FlutterProject project;
     late PreviewDetector previewDetector;
+    late FileSystem fs;
 
     setUp(() async {
       Cache.flutterRoot = getFlutterRoot();
       // Note: we don't use a MemoryFileSystem since we don't have a way to
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
-      final FileSystem fs = LocalFileSystem.test(signals: Signals.test());
+      fs = LocalFileSystem.test(signals: Signals.test());
       final BufferLogger logger = BufferLogger.test();
       FlutterManifest.empty(logger: logger);
       final Directory projectDir =
@@ -187,11 +188,11 @@ void main() {
     });
 
     testUsingContext(
-      'correctly generates ${PreviewCodeGenerator.generatedPreviewFilePath}',
+      'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         // Check that the generated preview file doesn't exist yet.
         final File generatedPreviewFile = project.directory.childFile(
-          PreviewCodeGenerator.generatedPreviewFilePath,
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
         expect(generatedPreviewFile, isNot(exists));
         final PreviewDependencyGraph details = await previewDetector.findPreviewFunctions(

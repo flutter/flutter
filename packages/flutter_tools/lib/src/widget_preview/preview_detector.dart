@@ -53,7 +53,6 @@ extension on String {
   bool get isDartFile => endsWith('.dart');
   bool get isPubspec => endsWith('pubspec.yaml');
   bool get doesContainDartTool => contains('.dart_tool');
-  bool get isGeneratedPreviewFile => endsWith(PreviewCodeGenerator.generatedPreviewFilePath);
 }
 
 extension on ParsedUnitResult {
@@ -367,7 +366,7 @@ class PreviewDetector {
       }
       // Only trigger a reload when changes to Dart sources are detected. We
       // ignore the generated preview file to avoid getting stuck in a loop.
-      if (!eventPath.isDartFile || eventPath.isGeneratedPreviewFile) {
+      if (!eventPath.isDartFile || eventPath.doesContainDartTool) {
         return;
       }
 
@@ -420,6 +419,7 @@ class PreviewDetector {
       logger.printStatus('Updated previews for ${location.uri}: ${fileDetails.filePreviews}');
       _dependencyGraph[location] = fileDetails;
     } else {
+      // Why is this working with an empty file system on Linux?
       final PreviewPath removedPath = _dependencyGraph.keys.firstWhere(
         (PreviewPath element) => element.path == eventPath,
       );
