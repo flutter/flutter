@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/dashed_line_path_source.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/stroke_parameters.h"
@@ -124,6 +125,25 @@ class StrokeDiffRoundRectGeometry final : public StrokePathSourceGeometry {
 
  private:
   const DiffRoundRectPathSource source_;
+};
+
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a |DlPath| object using the
+///        |StrokePathSourceGeometry| base class and a |DlPath| object
+///        to perform path iteration.
+class StrokeDashedLineGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokeDashedLineGeometry(Point p0,
+                           Point p1,
+                           Scalar on_length,
+                           Scalar off_length,
+                           const StrokeParameters& parameters);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const DashedLinePathSource source_;
 };
 
 }  // namespace impeller
