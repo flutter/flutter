@@ -45,6 +45,23 @@ namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
+// Workaround for crashes in Vivante GL driver on Android.
+//
+// See:
+//   * https://github.com/flutter/flutter/issues/167850
+//   * http://crbug.com/141785
+#ifdef FML_OS_ANDROID
+bool IsVivante() {
+  char product_model[PROP_VALUE_MAX];
+  __system_property_get("ro.hardware.egl", product_model);
+  return strcmp(product_model, "VIVANTE") == 0;
+}
+#else
+bool IsVivante() {
+  return false;
+}
+#endif  // FML_OS_ANDROID
+
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings,
@@ -106,6 +123,8 @@ void FlutterMain::Init(JNIEnv* env,
 
   AndroidRenderingAPI android_rendering_api =
       SelectedRenderingAPI(settings, api_level);
+
+#if !SLIMPELLER
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
@@ -117,6 +136,7 @@ void FlutterMain::Init(JNIEnv* env,
       settings.enable_impeller = true;
       break;
   }
+#endif  // !SLIMPELLER
 
 #if FLUTTER_RELEASE
   // On most platforms the timeline is always disabled in release mode.
@@ -147,11 +167,15 @@ void FlutterMain::Init(JNIEnv* env,
   }
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
+    fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
+    fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
+                                                               callback);
+    return queue_id;
   };
 
-  settings.task_observer_remove = [](intptr_t key) {
-    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
+    fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
+                                                                  key);
   };
 
   settings.log_message_callback = [](const std::string& tag,
@@ -243,6 +267,7 @@ bool FlutterMain::Register(JNIEnv* env) {
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     const flutter::Settings& settings,
     int api_level) {
+#if !SLIMPELLER
   if (settings.enable_software_rendering) {
     if (settings.enable_impeller) {
       FML_CHECK(!settings.enable_impeller)
@@ -266,11 +291,14 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
 #endif
 
   if (settings.enable_impeller &&
-      api_level >= kMinimumAndroidApiLevelForImpeller) {
+      api_level >= kMinimumAndroidApiLevelForImpeller && !IsVivante()) {
     return AndroidRenderingAPI::kImpellerAutoselect;
   }
 
   return AndroidRenderingAPI::kSkiaOpenGLES;
+#else
+  return AndroidRenderingAPI::kImpellerAutoselect;
+#endif  // !SLIMPELLER
 }
 
 }  // namespace flutter

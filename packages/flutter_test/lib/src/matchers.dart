@@ -275,9 +275,7 @@ Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
 ///
 /// If `withScaleFactor` is specified and non-null, this matcher also asserts
 /// that the [TextScaler]'s' `textScaleFactor` equals `withScaleFactor`.
-Matcher isSystemTextScaler({double? withScaleFactor}) {
-  return _IsSystemTextScaler(withScaleFactor);
-}
+Matcher isSystemTextScaler({double? withScaleFactor}) => _IsSystemTextScaler(withScaleFactor);
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
@@ -781,8 +779,6 @@ Matcher matchesSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
@@ -979,8 +975,6 @@ Matcher containsSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
@@ -1352,26 +1346,19 @@ class _IsSystemTextScaler extends Matcher {
 
   final double? expectedUserTextScaleFactor;
 
-  // TODO(LongCatIsLooong): update the runtime type after introducing _SystemTextScaler.
-  static final Type _expectedRuntimeType = (const TextScaler.linear(2)).runtimeType;
-
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is! TextScaler) {
-      return failWithDescription(matchState, '${item.runtimeType} is not a TextScaler');
-    }
-    if (!identical(item.runtimeType, _expectedRuntimeType)) {
-      return failWithDescription(matchState, '${item.runtimeType} is not a system TextScaler');
-    }
-    final double actualTextScaleFactor = item.textScaleFactor;
-    if (expectedUserTextScaleFactor != null &&
-        expectedUserTextScaleFactor != actualTextScaleFactor) {
-      return failWithDescription(
-        matchState,
-        'expecting a scale factor of $expectedUserTextScaleFactor, but got $actualTextScaleFactor',
-      );
-    }
-    return true;
+    return switch (item) {
+      SystemTextScaler(:final double textScaleFactor)
+          when expectedUserTextScaleFactor != null &&
+              expectedUserTextScaleFactor != textScaleFactor =>
+        failWithDescription(
+          matchState,
+          'expecting a scale factor of $expectedUserTextScaleFactor, but got $textScaleFactor',
+        ),
+      SystemTextScaler() => true,
+      _ => failWithDescription(matchState, '${item.runtimeType} is not a SystemTextScaler'),
+    };
   }
 
   @override
@@ -1379,7 +1366,7 @@ class _IsSystemTextScaler extends Matcher {
     final String scaleFactorExpectation =
         expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
     return description.add(
-      'A TextScaler that reflects the font scale settings in the system user preference ($_expectedRuntimeType$scaleFactorExpectation)',
+      'A SystemTextScaler that reflects the font scale settings in the system user preference $scaleFactorExpectation',
     );
   }
 
@@ -2508,8 +2495,6 @@ class _MatchesSemanticsData extends Matcher {
     required this.textDirection,
     required this.rect,
     required this.size,
-    required this.elevation,
-    required this.thickness,
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
@@ -2663,8 +2648,6 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection? textDirection;
   final Rect? rect;
   final Size? size;
-  final double? elevation;
-  final double? thickness;
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
@@ -2765,12 +2748,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (size != null) {
       description.add(' with size: $size');
-    }
-    if (elevation != null) {
-      description.add(' with elevation: $elevation');
-    }
-    if (thickness != null) {
-      description.add(' with thickness: $thickness');
     }
     if (platformViewId != null) {
       description.add(' with platformViewId: $platformViewId');
@@ -2910,12 +2887,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (size != null && size != data.rect.size) {
       return failWithDescription(matchState, 'size was: ${data.rect.size}');
-    }
-    if (elevation != null && elevation != data.elevation) {
-      return failWithDescription(matchState, 'elevation was: ${data.elevation}');
-    }
-    if (thickness != null && thickness != data.thickness) {
-      return failWithDescription(matchState, 'thickness was: ${data.thickness}');
     }
     if (platformViewId != null && platformViewId != data.platformViewId) {
       return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');

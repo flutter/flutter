@@ -32,7 +32,7 @@ SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    int flags,
+    Dart_Handle flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -48,8 +48,6 @@ void SemanticsUpdateBuilder::updateNode(
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     std::string identifier,
     std::string label,
     const std::vector<NativeStringAttribute*>& labelAttributes,
@@ -78,7 +76,9 @@ void SemanticsUpdateBuilder::updateNode(
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = flags;
+  auto* flags_object =
+      tonic::DartConverter<flutter::NativeSemanticsFlags*>::FromDart(flags);
+  node.flags = flags_object->GetFlags();
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;
@@ -92,8 +92,6 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollExtentMin = scrollExtentMin;
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
-  node.elevation = elevation;
-  node.thickness = thickness;
   node.identifier = std::move(identifier);
   node.label = std::move(label);
   pushStringAttributes(node.labelAttributes, labelAttributes);

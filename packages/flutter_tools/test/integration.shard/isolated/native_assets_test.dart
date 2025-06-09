@@ -14,11 +14,12 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:hooks/hooks.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart' show fileSystem, flutterBin, platform;
@@ -51,10 +52,6 @@ void main() {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
-
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
 
   for (final String device in devices) {
     for (final String buildMode in buildModes) {
@@ -454,7 +451,7 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 /// This inspects the build configuration to see if the C compiler was configured.
 void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir = appDirectory.childDirectory(
-    '.dart_tool/native_assets_builder/$packageName/',
+    '.dart_tool/hooks_runner/$packageName/',
   );
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     // We only want to look at build/link hook invocation directories. The

@@ -14,7 +14,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -31,10 +31,12 @@
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
+#include "impeller/entity/contents/solid_rsuperellipse_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
+#include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -43,13 +45,10 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
-#include "impeller/entity/geometry/round_rect_geometry.h"
-#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/rstransform.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -176,6 +175,25 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
 }
 
 }  // namespace
+
+std::shared_ptr<SolidRRectLikeBlurContents>
+Canvas::RRectBlurShape::BuildBlurContent() {
+  return std::make_shared<SolidRRectBlurContents>();
+}
+
+Geometry& Canvas::RRectBlurShape::BuildGeometry(Rect rect, Scalar radius) {
+  return geom_.emplace(rect, Size{radius, radius});
+}
+
+std::shared_ptr<SolidRRectLikeBlurContents>
+Canvas::RSuperellipseBlurShape::BuildBlurContent() {
+  return std::make_shared<SolidRSuperellipseBlurContents>();
+}
+
+Geometry& Canvas::RSuperellipseBlurShape::BuildGeometry(Rect rect,
+                                                        Scalar radius) {
+  return geom_.emplace(rect, radius);
+}
 
 Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
@@ -315,9 +333,7 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
     FillPathGeometry geom(path);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokePathGeometry geom(path.GetPath(), paint.stroke_width,
-                            paint.stroke_miter, paint.stroke_cap,
-                            paint.stroke_join);
+    StrokePathGeometry geom(path, paint.stroke);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }
@@ -334,9 +350,7 @@ void Canvas::DrawPaint(const Paint& paint) {
 // Optimization: if the texture has a color filter that is a simple
 // porter-duff blend or matrix filter, then instead of performing a save layer
 // we should swap out the shader for the porter duff blend shader and avoid a
-// saveLayer. This can only be done for imageRects without a strict source
-// rect, as the porter duff shader does not support this feature. This
-// optimization is important for Flame.
+// saveLayer. This optimization is important for Flame.
 bool Canvas::AttemptColorFilterOptimization(
     const std::shared_ptr<Texture>& image,
     Rect source,
@@ -344,11 +358,10 @@ bool Canvas::AttemptColorFilterOptimization(
     const Paint& paint,
     const SamplerDescriptor& sampler,
     SourceRectConstraint src_rect_constraint) {
-  if (src_rect_constraint == SourceRectConstraint::kStrict ||  //
-      !paint.color_filter ||                                   //
-      paint.image_filter != nullptr ||                         //
-      paint.invert_colors ||                                   //
-      paint.mask_blur_descriptor.has_value() ||                //
+  if (!paint.color_filter ||                     //
+      paint.image_filter != nullptr ||           //
+      paint.invert_colors ||                     //
+      paint.mask_blur_descriptor.has_value() ||  //
       !IsPipelineBlendOrMatrixFilter(paint.color_filter)) {
     return false;
   }
@@ -362,7 +375,9 @@ bool Canvas::AttemptColorFilterOptimization(
         /*destination=*/dest,
         /*color=*/skia_conversions::ToColor(blend_filter->color()),
         /*blend_mode=*/blend_filter->mode(),
-        /*desc=*/sampler);
+        /*desc=*/sampler,
+        /*use_strict_src_rect=*/src_rect_constraint ==
+            SourceRectConstraint::kStrict);
 
     auto atlas_contents = std::make_shared<AtlasContents>();
     atlas_contents->SetGeometry(&geometry);
@@ -375,6 +390,12 @@ bool Canvas::AttemptColorFilterOptimization(
 
     AddRenderEntityToCurrentPass(entity);
   } else {
+    // src_rect_constraint is only supported in the porter-duff mode
+    // for now.
+    if (src_rect_constraint == SourceRectConstraint::kStrict) {
+      return false;
+    }
+
     const flutter::DlMatrixColorFilter* matrix_filter =
         paint.color_filter->asMatrix();
 
@@ -384,7 +405,9 @@ bool Canvas::AttemptColorFilterOptimization(
         /*destination=*/dest,
         /*color=*/Color::Khaki(),            // ignored
         /*blend_mode=*/BlendMode::kSrcOver,  // ignored
-        /*desc=*/sampler);
+        /*desc=*/sampler,
+        /*use_strict_src_rect=*/src_rect_constraint ==
+            SourceRectConstraint::kStrict);
 
     auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
     atlas_contents->SetGeometry(&geometry);
@@ -406,6 +429,22 @@ bool Canvas::AttemptColorFilterOptimization(
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Size corner_radii,
                                      const Paint& paint) {
+  RRectBlurShape rrect_shape;
+  return AttemptDrawBlurredRRectLike(rect, corner_radii, paint, rrect_shape);
+}
+
+bool Canvas::AttemptDrawBlurredRSuperellipse(const Rect& rect,
+                                             Size corner_radii,
+                                             const Paint& paint) {
+  RSuperellipseBlurShape rsuperellipse_shape;
+  return AttemptDrawBlurredRRectLike(rect, corner_radii, paint,
+                                     rsuperellipse_shape);
+}
+
+bool Canvas::AttemptDrawBlurredRRectLike(const Rect& rect,
+                                         Size corner_radii,
+                                         const Paint& paint,
+                                         RRectLikeBlurShape& shape) {
   if (paint.style != Paint::Style::kFill) {
     return false;
   }
@@ -427,6 +466,7 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
   if (fabsf(corner_radii.width - corner_radii.height) > kEhCloseEnough) {
     return false;
   }
+  Scalar corner_radius = corner_radii.width;
 
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
@@ -486,12 +526,13 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
     Save(1u);
   }
 
-  auto draw_blurred_rrect = [this, &rect, &corner_radii, &rrect_paint]() {
-    auto contents = std::make_shared<SolidRRectBlurContents>();
+  auto draw_blurred_rrect = [this, &rect, corner_radius, &rrect_paint,
+                             &shape]() {
+    auto contents = shape.BuildBlurContent();
 
     contents->SetColor(rrect_paint.color);
     contents->SetSigma(rrect_paint.mask_blur_descriptor->sigma);
-    contents->SetRRect(rect, corner_radii);
+    contents->SetShape(rect, corner_radius);
 
     Entity blurred_rrect_entity;
     blurred_rrect_entity.SetTransform(GetCurrentTransform());
@@ -516,19 +557,19 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
       entity.SetTransform(GetCurrentTransform());
       entity.SetBlendMode(rrect_paint.blend_mode);
 
-      RoundRectGeometry geom(rect, corner_radii);
+      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, rrect_paint,
                                               /*reuse_depth=*/true);
       break;
     }
     case FilterContents::BlurStyle::kOuter: {
-      RoundRectGeometry geom(rect, corner_radii);
+      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
       ClipGeometry(geom, Entity::ClipOperation::kDifference);
       draw_blurred_rrect();
       break;
     }
     case FilterContents::BlurStyle::kInner: {
-      RoundRectGeometry geom(rect, corner_radii);
+      Geometry& geom = shape.BuildGeometry(rect, corner_radius);
       ClipGeometry(geom, Entity::ClipOperation::kIntersect);
       draw_blurred_rrect();
       break;
@@ -548,8 +589,7 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke_width,
-                                                 paint.stroke_cap);
+  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
   if (renderer_.GetContext()->GetFlags().antialiased_lines &&
       !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
@@ -564,11 +604,6 @@ void Canvas::DrawLine(const Point& p0,
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
-  if (paint.style == Paint::Style::kStroke) {
-    DrawPath(flutter::DlPath(PathBuilder{}.AddRect(rect)), paint);
-    return;
-  }
-
   if (AttemptDrawBlurredRRect(rect, {}, paint)) {
     return;
   }
@@ -577,8 +612,13 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  RectGeometry geom(rect);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  if (paint.style == Paint::Style::kStroke) {
+    StrokeRectGeometry geom(rect, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    FillRectGeometry geom(rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
 }
 
 void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
@@ -587,15 +627,9 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   // assert prevents.
   if (rect.IsSquare() && (paint.style == Paint::Style::kFill ||
                           (paint.style == Paint::Style::kStroke &&
-                           paint.stroke_width < rect.GetWidth()))) {
+                           paint.stroke.width < rect.GetWidth()))) {
     // Circles have slightly less overhead and can do stroking
     DrawCircle(rect.GetCenter(), rect.GetWidth() * 0.5f, paint);
-    return;
-  }
-
-  if (paint.style == Paint::Style::kStroke) {
-    // No stroked ellipses yet
-    DrawPath(flutter::DlPath(PathBuilder{}.AddOval(rect)), paint);
     return;
   }
 
@@ -607,7 +641,72 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  EllipseGeometry geom(rect);
+  if (paint.style == Paint::Style::kStroke) {
+    StrokeEllipseGeometry geom(rect, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    EllipseGeometry geom(rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
+}
+
+void Canvas::DrawArc(const Rect& oval_bounds,
+                     Degrees start,
+                     Degrees sweep,
+                     bool use_center,
+                     const Paint& paint) {
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kFill) {
+    ArcGeometry geom(oval_bounds, start, sweep, use_center);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
+  }
+
+  if (paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
+    // This is a special case for rendering arcs whose stroke width is so large
+    // you are effectively drawing a sector of a circle.
+    // https://github.com/flutter/flutter/issues/158567
+    Rect expanded_rect = oval_bounds.Expand(Size(paint.stroke.width * 0.5f));
+
+    ArcGeometry geom(expanded_rect, start, sweep, /*include_center=*/true);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    return;
+  }
+
+  // Use_center incurs lots of extra work for stroking an arc, including:
+  // - It introduces segments to/from the center point (not too hard).
+  // - It introduces joins on those segments (a bit more complicated).
+  // - Even if the sweep is >=360 degrees, we still draw the segment to
+  //   the center and it basically looks like a pie cut into the complete
+  //   boundary circle, as if the slice were cut, but not extracted
+  //   (hard to express as a continuous kTriangleStrip).
+  if (!use_center) {
+    if (std::abs(sweep.degrees) >= 360.0f) {
+      return DrawOval(oval_bounds, paint);
+    }
+
+    // Our fast stroking code only works for circular bounds as it assumes
+    // that the inner and outer radii can be scaled along each angular step
+    // of the arc - which is not true for elliptical arcs where the inner
+    // and outer samples are perpendicular to the traveling direction of the
+    // elliptical curve which may not line up with the center of the bounds.
+    //
+    // TODO(flar): It also only supports Butt and Square caps for now.
+    // See https://github.com/flutter/flutter/issues/169400
+    if (oval_bounds.IsSquare() && paint.stroke.cap != Cap::kRound) {
+      ArcGeometry geom(oval_bounds, start, sweep, paint.stroke);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+      return;
+    }
+  }
+
+  flutter::DlPathBuilder builder;
+  builder.AddArc(oval_bounds, start, sweep, use_center);
+
+  ArcStrokePathGeometry geom(builder.TakePath(), oval_bounds, paint.stroke);
   AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 
@@ -630,35 +729,55 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
     }
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
-                  .AddRoundRect(round_rect)
-                  .SetBounds(rect)
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kFill) {
+    FillRoundRectGeometry geom(round_rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    StrokeRoundRectGeometry geom(round_rect, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
 }
 
-void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
-                                   const Paint& paint) {
-  if (paint.style == Paint::Style::kFill) {
-    // TODO(dkwingsmt): Investigate if RSE can use the `AttemptDrawBlurredRRect`
-    // optimization at some point, such as a large enough mask radius.
-    // https://github.com/flutter/flutter/issues/163893
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
+void Canvas::DrawDiffRoundRect(const RoundRect& outer,
+                               const RoundRect& inner,
+                               const Paint& paint) {
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
 
-    RoundSuperellipseGeometry geom(rse.GetBounds(), rse.GetRadii());
+  if (paint.style == Paint::Style::kFill) {
+    FillDiffRoundRectGeometry geom(outer, inner);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    StrokeDiffRoundRectGeometry geom(outer, inner, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
+}
+
+void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
+                                   const Paint& paint) {
+  auto& rect = round_superellipse.GetBounds();
+  auto& radii = round_superellipse.GetRadii();
+  if (radii.AreAllCornersSame() &&
+      AttemptDrawBlurredRSuperellipse(rect, radii.top_left, paint)) {
     return;
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
-                  .AddRoundSuperellipse(rse)
-                  .SetBounds(rse.GetBounds())
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
+
+  if (paint.style == Paint::Style::kFill) {
+    RoundSuperellipseGeometry geom(rect, radii);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    StrokeRoundSuperellipseGeometry geom(round_superellipse, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  }
 }
 
 void Canvas::DrawCircle(const Point& center,
@@ -676,7 +795,7 @@ void Canvas::DrawCircle(const Point& center,
   entity.SetBlendMode(paint.blend_mode);
 
   if (paint.style == Paint::Style::kStroke) {
-    CircleGeometry geom(center, radius, paint.stroke_width);
+    CircleGeometry geom(center, radius, paint.stroke.width);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
     CircleGeometry geom(center, radius);
@@ -851,7 +970,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  RectGeometry out_rect(Rect{});
+  FillRectGeometry out_rect(Rect{});
 
   entity.SetContents(paint.WithFilters(
       paint.mask_blur_descriptor->CreateMaskBlur(texture_contents, &out_rect)));
@@ -1544,13 +1663,10 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   text_contents->SetScale(max_scale);
   text_contents->SetColor(paint.color);
   text_contents->SetOffset(position);
-  text_contents->SetTextProperties(paint.color,                           //
-                                   paint.style == Paint::Style::kStroke,  //
-                                   paint.stroke_width,                    //
-                                   paint.stroke_cap,                      //
-                                   paint.stroke_join,                     //
-                                   paint.stroke_miter                     //
-  );
+  text_contents->SetTextProperties(paint.color,
+                                   paint.style == Paint::Style::kStroke
+                                       ? std::optional(paint.stroke)
+                                       : std::nullopt);
 
   entity.SetTransform(GetCurrentTransform() *
                       Matrix::MakeTranslation(position));
@@ -1601,7 +1717,7 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
     // If there's a mask blur and we need to apply the color filter on the GPU,
     // we need to be careful to only apply the color filter to the source
     // colors. CreateMaskBlur is able to handle this case.
-    RectGeometry out_rect(Rect{});
+    FillRectGeometry out_rect(Rect{});
     auto filter_contents = paint.mask_blur_descriptor->CreateMaskBlur(
         contents, needs_color_filter ? paint.color_filter : nullptr,
         needs_color_filter ? paint.invert_colors : false, &out_rect);
