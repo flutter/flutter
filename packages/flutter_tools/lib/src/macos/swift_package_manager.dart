@@ -167,15 +167,15 @@ class SwiftPackageManager {
     }
 
     final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
-    final String oldFlutterDarwinPlatform = defaultPlatform.format();
-    final String newFlutterDarwinPlatform =
+    final String oldSupportedPlatform = defaultPlatform.format();
+    final String newSupportedPlatform =
         SwiftPackageSupportedPlatform(
           platform: packagePlatform,
           version: projectDeploymentTargetVersion,
         ).format();
 
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
-      manifestContents.replaceFirst(oldFlutterDarwinPlatform, newFlutterDarwinPlatform),
+      manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
     );
   }
 }

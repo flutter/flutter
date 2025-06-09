@@ -427,11 +427,11 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.cliName}';
+      final String artifactsMode = FlutterDarwinPlatform.ios.artifactName(mode);
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
-  s.name                  = 'Flutter'
+  s.name                  = '${FlutterDarwinPlatform.ios.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
