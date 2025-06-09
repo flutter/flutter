@@ -556,9 +556,6 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
-/// How a device is connected.
-enum DeviceConnectionInterface { attached, wireless }
-
 /// Returns the `DeviceConnectionInterface` enum based on its string name.
 DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
   return switch (name) {
@@ -903,22 +900,6 @@ class _NoMemoryInfo implements MemoryInfo {
 
   @override
   Map<String, Object> toJson() => <String, Object>{};
-}
-
-enum ImpellerStatus {
-  platformDefault._(null),
-  enabled._(true),
-  disabled._(false);
-
-  const ImpellerStatus._(this.asBool);
-
-  factory ImpellerStatus.fromBool(bool? b) => switch (b) {
-    true => enabled,
-    false => disabled,
-    null => platformDefault,
-  };
-
-  final bool? asBool;
 }
 
 class LaunchResult {

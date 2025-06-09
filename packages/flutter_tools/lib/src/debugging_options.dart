@@ -4,9 +4,27 @@
 
 import 'package:meta/meta.dart';
 
-import 'build_info.dart';
-import 'device.dart';
+import 'build_info.dart' show BuildInfo, EnvironmentType;
 import 'web/compile.dart' show WebRendererMode;
+
+enum ImpellerStatus {
+  platformDefault._(null),
+  enabled._(true),
+  disabled._(false);
+
+  const ImpellerStatus._(this.asBool);
+
+  factory ImpellerStatus.fromBool(bool? b) => switch (b) {
+    true => enabled,
+    false => disabled,
+    null => platformDefault,
+  };
+
+  final bool? asBool;
+}
+
+/// How a device is connected.
+enum DeviceConnectionInterface { attached, wireless }
 
 @immutable
 class DebuggingOptions {

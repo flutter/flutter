@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/debugging_options.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:test/fake.dart';
 

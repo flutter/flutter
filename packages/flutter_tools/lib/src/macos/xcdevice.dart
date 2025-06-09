@@ -18,7 +18,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../device.dart';
+import '../debugging_options.dart';
 import '../globals.dart' as globals;
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';

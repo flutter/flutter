@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../convert.dart';
 import '../debugging_options.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';

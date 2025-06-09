@@ -17,7 +17,7 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../device.dart';
+import '../debugging_options.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;

@@ -22,6 +22,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;

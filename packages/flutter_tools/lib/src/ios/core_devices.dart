@@ -11,7 +11,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../device.dart';
+import '../debugging_options.dart';
 import '../macos/xcode.dart';
 
 /// A wrapper around the `devicectl` command line tool.
