@@ -5,6 +5,7 @@
 import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
@@ -197,14 +198,29 @@ interface class FlutterTestRunner {
     required FlutterProject flutterProject,
     required File isolateSpawningTesterPackageConfigFile,
   }) async {
-    final File projectPackageConfigFile = globals.fs
+    final File packageConfigFile = globals.fs
         .directory(flutterProject.directory.path)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
-    final PackageConfig projectPackageConfig = PackageConfig.parseBytes(
-      projectPackageConfigFile.readAsBytesSync(),
-      projectPackageConfigFile.uri,
-    );
+    PackageConfig? projectPackageConfig;
+    if (await packageConfigFile.exists()) {
+      projectPackageConfig = PackageConfig.parseBytes(
+        packageConfigFile.readAsBytesSync(),
+        Uri.file(flutterProject.directory.path),
+      );
+    } else {
+      // We can't use this directly, but need to manually check
+      // `flutterProject.directory.path` first, as `findPackageConfig` is from a
+      // different package which does not use package:file. This inhibits
+      // mocking the file system.
+      projectPackageConfig = await findPackageConfig(
+        globals.fs.directory(flutterProject.directory.path),
+      );
+    }
+
+    if (projectPackageConfig == null) {
+      throwToolExit('Could not find package config for ${flutterProject.directory.path}.');
+    }
 
     // The flutter_tools package_config.json is guaranteed to include
     // package:ffi and package:test_core.
@@ -238,7 +254,6 @@ interface class FlutterTestRunner {
     required List<String> packageTestArgs,
     required bool autoUpdateGoldenFiles,
     required File childTestIsolateSpawnerSourceFile,
-    required File childTestIsolateSpawnerDillFile,
   }) {
     final Map<String, String> testConfigPaths = <String, String>{};
 
@@ -659,7 +674,6 @@ class SpawnPlugin extends PlatformPlugin {
       packageTestArgs: packageTestArgs,
       autoUpdateGoldenFiles: updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
-      childTestIsolateSpawnerDillFile: childTestIsolateSpawnerDillFile,
     );
 
     _generateRootTestIsolateSpawnerSourceFile(

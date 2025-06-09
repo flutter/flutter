@@ -285,6 +285,7 @@ struct ContentContext::Pipelines {
   Variants<RadialGradientSSBOFillPipeline> radial_gradient_ssbo_fill;
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
   Variants<RRectBlurPipeline> rrect_blur;
+  Variants<RSuperellipseBlurPipeline> rsuperellipse_blur;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
@@ -685,6 +686,8 @@ ContentContext::ContentContext(
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
+    pipelines_->rsuperellipse_blur.CreateDefault(*context_,
+                                                 options_trianglestrip);
     pipelines_->texture_strict_src.CreateDefault(*context_, options);
     pipelines_->tiled_texture.CreateDefault(*context_, options,
                                             {supports_decal});
@@ -1085,6 +1088,11 @@ PipelineRef ContentContext::GetConicalGradientFillPipeline(
 PipelineRef ContentContext::GetRRectBlurPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->rrect_blur, opts);
+}
+
+PipelineRef ContentContext::GetRSuperellipseBlurPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->rsuperellipse_blur, opts);
 }
 
 PipelineRef ContentContext::GetSweepGradientFillPipeline(

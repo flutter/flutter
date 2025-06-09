@@ -425,7 +425,7 @@ void main() {
     // didChangeAccessibilityFeatures
     tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(routeBuildCount, equals(1));
     expect(dependentBuildCount, equals(5));
@@ -443,7 +443,7 @@ void main() {
         ),
       ),
     );
-    expect(textScaler, TextScaler.noScaling);
+    expect(textScaler, isSystemTextScaler(withScaleFactor: 1.0));
   });
 
   testWidgets('MaterialApp.navigatorKey', (WidgetTester tester) async {

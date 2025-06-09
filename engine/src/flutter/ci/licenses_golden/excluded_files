@@ -35,6 +35,7 @@
 ../../../flutter/display_list/effects/dl_image_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_mask_filter_unittests.cc
 ../../../flutter/display_list/geometry/dl_geometry_types_unittests.cc
+../../../flutter/display_list/geometry/dl_path_builder_unittests.cc
 ../../../flutter/display_list/geometry/dl_path_unittests.cc
 ../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
@@ -174,7 +175,6 @@
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_source_unittests.cc
-../../../flutter/impeller/geometry/path_unittests.cc
 ../../../flutter/impeller/geometry/rational_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc
@@ -191,6 +191,7 @@
 ../../../flutter/impeller/renderer/backend/gles/test
 ../../../flutter/impeller/renderer/backend/gles/unique_handle_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/metal/allocator_mtl_unittests.mm
+../../../flutter/impeller/renderer/backend/metal/context_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/swapchain_transients_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/texture_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk_unittests.cc
@@ -348,6 +349,7 @@
 ../../../flutter/shell/platform/darwin/common/availability_version_check_unittests.cc
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
+../../../flutter/shell/platform/darwin/common/framework/Source/framework_common_swift_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_context_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/ios/ios_surface_noop_unittests.mm
 ../../../flutter/shell/platform/darwin/macos/README.md
@@ -1065,10 +1067,10 @@
 ../../../flutter/third_party/boringssl/src/crypto/test
 ../../../flutter/third_party/boringssl/src/crypto/thread_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/trust_token/trust_token_test.cc
-../../../flutter/third_party/boringssl/src/crypto/x509/tab_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/test
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/x509/x509_time_test.cc
+../../../flutter/third_party/boringssl/src/crypto/xwing/xwing_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/blowfish/blowfish_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cast/cast_test.cc
 ../../../flutter/third_party/boringssl/src/decrepit/cfb/cfb_test.cc
@@ -1728,7 +1730,7 @@
 ../../../flutter/third_party/expat/.mailmap
 ../../../flutter/third_party/expat/Brewfile
 ../../../flutter/third_party/expat/README.md
-../../../flutter/third_party/expat/appveyor.yml
+../../../flutter/third_party/expat/SECURITY.md
 ../../../flutter/third_party/expat/expat/.clang-format
 ../../../flutter/third_party/expat/expat/.gitignore
 ../../../flutter/third_party/expat/expat/AUTHORS
@@ -1746,6 +1748,8 @@
 ../../../flutter/third_party/expat/expat/conftools/ax-append-link-flags.m4
 ../../../flutter/third_party/expat/expat/conftools/ax-check-compile-flag.m4
 ../../../flutter/third_party/expat/expat/conftools/ax-check-link-flag.m4
+../../../flutter/third_party/expat/expat/conftools/ax-cxx-compile-stdcxx-11.m4
+../../../flutter/third_party/expat/expat/conftools/ax-cxx-compile-stdcxx.m4
 ../../../flutter/third_party/expat/expat/conftools/ax-require-defined.m4
 ../../../flutter/third_party/expat/expat/conftools/expat.m4
 ../../../flutter/third_party/expat/expat/conftools/expatcfg-compiler-supports-visibility.m4
@@ -1757,12 +1761,14 @@
 ../../../flutter/third_party/expat/expat/gennmtab/.gitignore
 ../../../flutter/third_party/expat/expat/lib/.gitignore
 ../../../flutter/third_party/expat/expat/lib/libexpat.def.cmake
+../../../flutter/third_party/expat/expat/m4/.gitignore
 ../../../flutter/third_party/expat/expat/memory-sanitizer-blacklist.txt
 ../../../flutter/third_party/expat/expat/tests
 ../../../flutter/third_party/expat/expat/win32/.gitignore
 ../../../flutter/third_party/expat/expat/win32/MANIFEST.txt
 ../../../flutter/third_party/expat/expat/win32/README.txt
 ../../../flutter/third_party/expat/expat/win32/expat.iss
+../../../flutter/third_party/expat/expat/win32/version.rc.cmake
 ../../../flutter/third_party/expat/expat/xmlwf/.gitignore
 ../../../flutter/third_party/expat/expat/xmlwf/xmlwf_helpgen.py
 ../../../flutter/third_party/expat/testdata
@@ -3009,7 +3015,6 @@
 ../../../flutter/third_party/skia/PRESUBMIT_test_mocks.py
 ../../../flutter/third_party/skia/README
 ../../../flutter/third_party/skia/README.chromium
-../../../flutter/third_party/skia/WORKSPACE.bazel
 ../../../flutter/third_party/skia/bazel
 ../../../flutter/third_party/skia/bench
 ../../../flutter/third_party/skia/codereview.settings
@@ -3056,7 +3061,6 @@
 ../../../flutter/third_party/skia/gn/run_sksllex.py
 ../../../flutter/third_party/skia/gn/skqp_gn_args.py
 ../../../flutter/third_party/skia/gn/toolchain/num_cpus.py
-../../../flutter/third_party/skia/go_repositories.bzl
 ../../../flutter/third_party/skia/include/BUILD.bazel
 ../../../flutter/third_party/skia/include/OWNERS
 ../../../flutter/third_party/skia/include/android/BUILD.bazel
@@ -3150,7 +3154,6 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
-../../../flutter/third_party/skia/modules/skcapture/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium
@@ -3209,6 +3212,7 @@
 ../../../flutter/third_party/skia/src/android/BUILD.bazel
 ../../../flutter/third_party/skia/src/base/BUILD.bazel
 ../../../flutter/third_party/skia/src/base/README.md
+../../../flutter/third_party/skia/src/capture/BUILD.bazel
 ../../../flutter/third_party/skia/src/codec/BUILD.bazel
 ../../../flutter/third_party/skia/src/core/BUILD.bazel
 ../../../flutter/third_party/skia/src/effects/BUILD.bazel
@@ -3285,9 +3289,7 @@
 ../../../flutter/third_party/skia/third_party/README
 ../../../flutter/third_party/skia/third_party/etc1/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/etc1/README.google
-../../../flutter/third_party/skia/third_party/expat/include/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/freetype2
-../../../flutter/third_party/skia/third_party/harfbuzz/BUILD.bazel
 ../../../flutter/third_party/skia/third_party/harfbuzz/README
 ../../../flutter/third_party/skia/third_party/icu
 ../../../flutter/third_party/skia/third_party/libgrapheme/generate_headers.py
@@ -3675,6 +3677,7 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.google.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.gpio/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.i2c/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.interconnect/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.khadas.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.mailbox/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/meta.json
@@ -3733,6 +3736,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.test/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
@@ -3764,10 +3768,12 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.cpu.ctrl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gpio/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.hrtimer/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.mailbox/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/meta.json
@@ -3803,6 +3809,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.endpoint/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.phy/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.request/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
@@ -3848,6 +3855,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.stackmigrationdeprecated/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.broker/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/meta.json
