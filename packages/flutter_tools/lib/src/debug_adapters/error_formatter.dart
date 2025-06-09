@@ -20,7 +20,7 @@ typedef _OutputSender =
 /// code faint) if the client indicated support.
 ///
 /// Lines that look like stack frames will be marked so they can be parsed by
-/// the base adapter and attached as [Source]s to allow them to be clickable
+/// the base adapter and attached as `Source`s to allow them to be clickable
 /// in the client.
 class FlutterErrorFormatter {
   final List<_BatchedOutput> batchedOutput = <_BatchedOutput>[];

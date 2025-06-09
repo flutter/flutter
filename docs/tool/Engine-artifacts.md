@@ -56,10 +56,12 @@ stateDiagram-v2
 On Cocoon (Flutter's internal CI/CD) we _often_ set
 `FLUTTER_PREBUILT_ENGINE_VERSION` to the following:
 
-| Branch                    | Presubmit    | Merge Queue        | Postsubmit         |
-| ------------------------- | ------------ | ------------------ | ------------------ |
-| `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_ |
-| `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | `commit.sha`       |
+| Branch                    | Presubmit    | Merge Queue        | Postsubmit                        |
+| ------------------------- | ------------ | ------------------ | --------------------------------- |
+| `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_                |
+| `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | `commit.sha`                      |
+| `stable` or `beta`        | N/A[^3]      | N/A[^1]            | N/A[^3]                           |
+| _anything else_[^2]       | `commit.sha` | _Uses normal flow_ | _Uses postsubmit engine artifacts_ |
 
 > IMPORTANT: `engine.version` is intentionally ignored in release candidate
 > post-submit builds.
@@ -70,12 +72,12 @@ On Cocoon (Flutter's internal CI/CD) we _often_ set
 > ./bin/internal/last_engine_commit.sh > ./bin/internal/engine.version
 > ```
 >
-> For release candidates that branch from [`flutter/recipes`](https://flutter.googlesource.com/recipes)
-> as of [`b0ccfb53801abc9b0aa93e7cca3a3841513c3086`](https://flutter.googlesource.com/recipes/+/b0ccfb53801abc9b0aa93e7cca3a3841513c3086) (May 6 2025), the packaging release process will refuse to let you publish a
-> release with an out of date `engine.version`. For older releases, validation
-> must be done manually.
+> As of [`b0ccfb53801abc9b0aa93e7cca3a3841513c3086`](https://flutter.googlesource.com/recipes/+/b0ccfb53801abc9b0aa93e7cca3a3841513c3086) (May 6 2025), the packaging release process will refuse to let you publish a
+> release with an out of date `engine.version`.
 
-[^1]: Release candidates do not use a merge queue.
+[^1]: Does not use a merge queue.
+[^2]: I.e. experimental branches that do not fall into one of the above.
+[^3]: Only updated through `flutter-x.x-candidate.x` branches.
 
 ## References
 

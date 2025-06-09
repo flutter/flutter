@@ -82,7 +82,7 @@ gclient sync
 
 ### Xcode [Objective-C++]
 
-On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/products.xcodeproj`).
+On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/flutter_engine.xcodeproj`).
 
 ### VSCode with C/C++ Intellisense [C/C++]
 

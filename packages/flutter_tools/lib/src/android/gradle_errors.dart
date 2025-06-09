@@ -19,7 +19,8 @@ class GradleHandledError {
   const GradleHandledError({required this.test, required this.handler, this.eventLabel});
 
   /// The test function.
-  /// Returns [true] if the current error message should be handled.
+  ///
+  /// Returns `true` if the current error message should be handled.
   final GradleErrorTest test;
 
   /// The handler function.
@@ -30,7 +31,7 @@ class GradleHandledError {
   })
   handler;
 
-  /// The [BuildEvent] label is named gradle-[eventLabel].
+  /// The build event label is named gradle-[eventLabel].
   /// If not empty, the build event is logged along with
   /// additional metadata such as the attempt number.
   final String? eventLabel;
@@ -57,9 +58,10 @@ GradleErrorTest _lineMatcher(List<String> errorMessages) {
 ///
 /// The handlers are executed in the order in which they appear in the list.
 ///
-/// Only the first error handler for which the [test] function returns [true]
-/// is handled. As a result, sort error handlers based on how strict the [test]
-/// function is to eliminate false positives.
+/// Only the first error handler for which the
+/// [GradleHandledError.test] function returns `true` is handled.
+/// As a result, sort error handlers based on how strict
+/// the [GradleHandledError.test] function is to eliminate false positives.
 final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   licenseNotAcceptedHandler,
   networkErrorHandler,

@@ -35,56 +35,31 @@ void main() {
     await tester.pumpWidget(const example.RadioListTileApp());
 
     expect(find.byType(RadioListTile<example.Groceries>), findsNWidgets(3));
-    final Finder radioListTile = find.byType(RadioListTile<example.Groceries>);
 
     //  Initially the first radio is checked.
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(0)).groupValue,
-      example.Groceries.pickles,
+    RadioGroup<example.Groceries> group = tester.widget<RadioGroup<example.Groceries>>(
+      find.byType(RadioGroup<example.Groceries>),
     );
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(1)).groupValue,
-      example.Groceries.pickles,
-    );
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(2)).groupValue,
-      example.Groceries.pickles,
-    );
+    expect(group.groupValue, example.Groceries.pickles);
 
     // Tap the second radio.
     await tester.tap(find.byType(Radio<example.Groceries>).at(1));
     await tester.pumpAndSettle();
 
     // The second radio is checked.
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(0)).groupValue,
-      example.Groceries.tomato,
+    group = tester.widget<RadioGroup<example.Groceries>>(
+      find.byType(RadioGroup<example.Groceries>),
     );
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(1)).groupValue,
-      example.Groceries.tomato,
-    );
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(2)).groupValue,
-      example.Groceries.tomato,
-    );
+    expect(group.groupValue, example.Groceries.tomato);
 
     // Tap the third radio.
     await tester.tap(find.byType(Radio<example.Groceries>).at(2));
     await tester.pumpAndSettle();
 
     // The third radio is checked.
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(0)).groupValue,
-      example.Groceries.lettuce,
+    group = tester.widget<RadioGroup<example.Groceries>>(
+      find.byType(RadioGroup<example.Groceries>),
     );
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(1)).groupValue,
-      example.Groceries.lettuce,
-    );
-    expect(
-      tester.widget<RadioListTile<example.Groceries>>(radioListTile.at(2)).groupValue,
-      example.Groceries.lettuce,
-    );
+    expect(group.groupValue, example.Groceries.lettuce);
   });
 }

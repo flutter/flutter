@@ -361,9 +361,9 @@ const AndroidAotBundle androidx64ReleaseBundle = AndroidAotBundle(androidx64Rele
 
 // Rule that copies split aot library files to the intermediate dirs of each deferred component.
 class AndroidAotDeferredComponentsBundle extends Target {
-  /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
+  /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [BuildInfo.mode].
   ///
-  /// If [components] is not provided, it will be read from the pubspec.yaml manifest.
+  /// If [components] is not provided, it will be read from the `pubspec.yaml` manifest.
   AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components})
     : _components = components;
 
