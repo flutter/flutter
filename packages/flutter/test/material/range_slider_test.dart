@@ -3574,6 +3574,40 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
   });
+
+  testWidgets('Value indicator appears on tap', (WidgetTester tester) async {
+    final ThemeData theme = buildTheme();
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+    const RangeValues discreteValues = RangeValues(20, 40);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: RangeSlider(
+            labels: RangeLabels(
+              discreteValues.start.round().toString(),
+              discreteValues.end.round().toString(),
+            ),
+            values: discreteValues,
+            divisions: 5,
+            max: 100,
+            onChanged: (RangeValues values) {},
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(RangeSlider));
+    await tester.pumpAndSettle();
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..paragraph(),
+    );
+  });
 }
 
 // A value indicator shape to log labelPainter text.

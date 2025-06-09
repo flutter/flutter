@@ -344,7 +344,7 @@ void main() {
       );
 
   // Changes made in https://github.com/flutter/flutter/pull/162223
-  const SliderThemeData(showValueIndicator: ShowValueIndicator.onDrag);
+  const SliderThemeData(showValueIndicator: ShowValueIndicator.always);
 
   // Changes made in https://github.com/flutter/flutter/pull/166382
   Switch(activeColor: Colors.red, value: false, onChanged: null);
