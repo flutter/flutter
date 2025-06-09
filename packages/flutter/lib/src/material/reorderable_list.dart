@@ -7,7 +7,6 @@
 /// @docImport 'card.dart';
 library;
 
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
@@ -119,7 +118,6 @@ class ReorderableListView extends StatefulWidget {
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length,
-       childCount = children.length,
        separatorBuilder = null;
 
   /// Creates a reorderable list from widget items that are created on demand.
@@ -187,7 +185,6 @@ class ReorderableListView extends StatefulWidget {
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
-       childCount = itemCount,
        separatorBuilder = null;
 
   /// Creates a reorderable list from widget items that are created on demand,
@@ -207,9 +204,6 @@ class ReorderableListView extends StatefulWidget {
   /// The `separatorBuilder` callback will be called with indices greater than
   /// or equal to zero and less than `itemCount - 1`. It builds the separator
   /// widgets which appear between the items.
-  ///
-  /// The `itemCount` argument is the number of actual data items in the list.
-  /// The total number of children in the list view will be greater due to the separators.
   ///
   /// All other parameters function similarly to [ReorderableListView.builder].
   ///
@@ -264,7 +258,6 @@ class ReorderableListView extends StatefulWidget {
            return separatorBuilder(context, itemIndex);
          }
        }),
-       childCount = _computeActualChildCount(itemCount),
        itemExtent = null,
        itemExtentBuilder = null,
        prototypeItem = null;
@@ -272,21 +265,8 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
 
-  /// The number of data items in the list.
-  ///
-  /// If this widget is a [ReorderableListView.separated], this is the number
-  /// of data items in the list, not the number of children.
-  /// For example, if there is a list with 10 items and 9 separators, this will be 10.
-  ///
-  /// This value must be a non-negative integer. When zero, nothing is displayed and
-  /// the widget occupies no space.
+  /// {@macro flutter.widgets.reorderable_list.itemCount}
   final int itemCount;
-
-  /// When using the [ReorderableListView.separated] constructor, this is the total
-  /// number of children in the list, including items and separators.
-  /// When using [ReorderableListView] or the [ReorderableListView.builder] constructor, this is the number of items
-  /// in the list.
-  final int childCount;
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
   final ReorderCallback onReorder;
@@ -421,11 +401,6 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// Null if this is not a `ReorderableListView.separated`.
   final IndexedWidgetBuilder? separatorBuilder;
-
-  /// Helper method to compute the actual child count for [ReorderableListView.separated].
-  static int _computeActualChildCount(int itemCount) {
-    return math.max(0, itemCount * 2 - 1);
-  }
 
   @override
   State<ReorderableListView> createState() => _ReorderableListViewState();
@@ -610,36 +585,36 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             itemExtentBuilder: widget.itemExtentBuilder,
             prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
-            onReorder: (int oldCombinedIndex, int newCombinedIndex) {
+            onReorder: (int oldIndex, int newIndex) {
               if (widget.separatorBuilder != null) {
-                // oldCombinedIndex will be an even index (item) because separators are not draggable.
-                final int oldItemIndex = oldCombinedIndex ~/ 2;
-                // newCombinedIndex is the slot where it's dropped.
+                // oldIndex will be an even index (item) because separators are not draggable.
+                final int oldItemIndex = oldIndex ~/ 2;
+                // newIndex is the slot where it's dropped.
                 // The target item slot index determines the new index in the user's item list.
-                final int targetItemSlotIndex = (newCombinedIndex + 1) ~/ 2;
+                final int targetItemSlotIndex = (newIndex + 1) ~/ 2;
                 widget.onReorder(oldItemIndex, targetItemSlotIndex);
               } else {
-                widget.onReorder(oldCombinedIndex, newCombinedIndex);
+                widget.onReorder(oldIndex, newIndex);
               }
             },
-            onReorderStart: (int combinedIndex) {
+            onReorderStart: (int index) {
               _dragging.value = true;
               if (widget.separatorBuilder != null) {
                 // Should only be called for items (even indices).
                 // SliverReorderableList ensures this by only allowing draggable items.
-                assert(combinedIndex.isEven, 'onReorderStart should only be called for items.');
-                widget.onReorderStart?.call(combinedIndex ~/ 2);
+                assert(index.isEven, 'onReorderStart should only be called for items.');
+                widget.onReorderStart?.call(index ~/ 2);
               } else {
-                widget.onReorderStart?.call(combinedIndex);
+                widget.onReorderStart?.call(index);
               }
             },
-            onReorderEnd: (int combinedIndex) {
+            onReorderEnd: (int index) {
               _dragging.value = false;
               if (widget.separatorBuilder != null) {
-                // combinedIndex is the final index of the dragged item. It must be an item.
-                widget.onReorderEnd?.call(combinedIndex ~/ 2);
+                // index is the final index of the dragged item. It must be an item.
+                widget.onReorderEnd?.call(index ~/ 2);
               } else {
-                widget.onReorderEnd?.call(combinedIndex);
+                widget.onReorderEnd?.call(index);
               }
             },
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
