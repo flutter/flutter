@@ -14,7 +14,7 @@ enum FlutterDarwinPlatform {
     name: 'ios',
     frameworkName: 'Flutter',
     targetPlatform: TargetPlatform.ios,
-    packagePlatform: SwiftPackagePlatform.ios,
+    swiftPackagePlatform: SwiftPackagePlatform.ios,
     artifactName: 'ios',
     artifactZip: 'artifacts.zip',
     xcframeworkArtifact: Artifact.flutterXcframework,
@@ -24,7 +24,7 @@ enum FlutterDarwinPlatform {
     name: 'macos',
     frameworkName: 'FlutterMacOS',
     targetPlatform: TargetPlatform.darwin,
-    packagePlatform: SwiftPackagePlatform.macos,
+    swiftPackagePlatform: SwiftPackagePlatform.macos,
     artifactName: 'darwin-x64',
     artifactZip: 'framework.zip',
     xcframeworkArtifact: Artifact.flutterMacOSXcframework,
@@ -35,7 +35,7 @@ enum FlutterDarwinPlatform {
     required this.name,
     required this.frameworkName,
     required this.targetPlatform,
-    required this.packagePlatform,
+    required this.swiftPackagePlatform,
     required String artifactName,
     required this.artifactZip,
     required this.xcframeworkArtifact,
@@ -45,7 +45,7 @@ enum FlutterDarwinPlatform {
   final String name;
   final String frameworkName;
   final TargetPlatform targetPlatform;
-  final SwiftPackagePlatform packagePlatform;
+  final SwiftPackagePlatform swiftPackagePlatform;
   final String _artifactName;
   final String artifactZip;
   final Artifact xcframeworkArtifact;
@@ -65,7 +65,10 @@ enum FlutterDarwinPlatform {
   }
 
   SwiftPackageSupportedPlatform get supportedPackagePlatform {
-    return SwiftPackageSupportedPlatform(platform: packagePlatform, version: deploymentTarget());
+    return SwiftPackageSupportedPlatform(
+      platform: swiftPackagePlatform,
+      version: deploymentTarget(),
+    );
   }
 
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {

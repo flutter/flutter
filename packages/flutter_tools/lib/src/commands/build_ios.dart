@@ -25,7 +25,6 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 

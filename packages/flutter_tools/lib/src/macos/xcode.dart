@@ -18,7 +18,6 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../darwin/darwin.dart';
 import '../ios/xcodeproj.dart';
 
 Version get xcodeRequiredVersion => Version(14, null, null);

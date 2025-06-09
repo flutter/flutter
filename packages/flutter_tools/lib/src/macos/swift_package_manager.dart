@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/template.dart';
 import '../base/version.dart';
@@ -143,7 +142,7 @@ class SwiftPackageManager {
   }) {
     final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
     final SwiftPackageSupportedPlatform defaultPlatform = platform.supportedPackagePlatform;
-    final SwiftPackagePlatform packagePlatform = platform.packagePlatform;
+    final SwiftPackagePlatform packagePlatform = platform.swiftPackagePlatform;
 
     if (projectDeploymentTargetVersion == null ||
         projectDeploymentTargetVersion <= defaultPlatform.version ||
