@@ -141,9 +141,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         return Transform(
           transform:
               Matrix4.identity()
-                ..translate(desiredSize.width / 2, desiredSize.height / 2)
+                ..translateByDouble(desiredSize.width / 2, desiredSize.height / 2, 0, 1)
                 ..rotateZ(math.pi)
-                ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
+                ..translateByDouble(-desiredSize.width / 2, -desiredSize.height / 2, 0, 1),
           child: handle,
         );
       // iOS should draw an invisible box so the handle can still receive gestures

@@ -57,7 +57,7 @@ const double _kBorderOutlineStrokeWidth = 0.3;
 const List<double> _kDarkGradientOpacities = <double>[0.14, 0.29];
 const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 
-/// A macOS-style radio button.
+/// A widget that builds a [RawRadio] with a macOS-style UI.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group are
@@ -103,8 +103,16 @@ class CupertinoRadio<T> extends StatefulWidget {
   const CupertinoRadio({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    @Deprecated(
+      'Use a RadioGroup ancestor to manage group value instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.groupValue,
+    @Deprecated(
+      'Use RadioGroup to handle value change instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -114,15 +122,21 @@ class CupertinoRadio<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.useCheckmarkStyle = false,
+    this.enabled,
+    this.groupRegistry,
   });
 
   /// {@macro flutter.widget.RawRadio.value}
   final T value;
 
-  /// {@macro flutter.widget.RawRadio.groupValue}
+  /// {@macro flutter.material.Radio.groupValue}
+  @Deprecated(
+    'Use a RadioGroup ancestor to manage group value instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
   final T? groupValue;
 
-  /// {@macro flutter.widget.RawRadio.onChanged}
+  /// {@macro flutter.material.Radio.onChanged}
   ///
   /// For example:
   ///
@@ -137,6 +151,10 @@ class CupertinoRadio<T> extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  @Deprecated(
+    'Use RadioGroup to handle value change instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
   final ValueChanged<T?>? onChanged;
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
@@ -194,6 +212,15 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@macro flutter.widget.RawRadio.groupRegistry}
+  ///
+  /// Unless provided, the [BuildContext] will be used to look up the ancestor
+  /// [RadioGroupRegistry].
+  final RadioGroupRegistry<T>? groupRegistry;
+
+  /// {@macro flutter.material.Radio.enabled}
+  final bool? enabled;
+
   @override
   State<CupertinoRadio<T>> createState() => _CupertinoRadioState<T>();
 }
@@ -201,6 +228,27 @@ class CupertinoRadio<T> extends StatefulWidget {
 class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
   FocusNode? _internalFocusNode;
+
+  bool get _enabled =>
+      widget.enabled ??
+      (widget.onChanged != null ||
+          widget.groupRegistry != null ||
+          RadioGroup.maybeOf<T>(context) != null);
+
+  _RadioRegistry<T>? _internalRadioRegistry;
+  RadioGroupRegistry<T> get _effectiveRegistry {
+    if (widget.groupRegistry != null) {
+      return widget.groupRegistry!;
+    }
+
+    final RadioGroupRegistry<T>? inheritedRegistry = RadioGroup.maybeOf<T>(context);
+    if (inheritedRegistry != null) {
+      return inheritedRegistry;
+    }
+
+    // Handles deprecated API.
+    return _internalRadioRegistry ??= _RadioRegistry<T>(this);
+  }
 
   @override
   void dispose() {
@@ -210,6 +258,14 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      !(widget.enabled ?? false) ||
+          widget.onChanged != null ||
+          widget.groupRegistry != null ||
+          RadioGroup.maybeOf<T>(context) != null,
+      'Radio is enabled but has no CupertinoRadio.onChange, '
+      'CupertinoRadio.groupRegistry, or RadioGroup above',
+    );
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
@@ -220,12 +276,12 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
 
     return RawRadio<T>(
       value: widget.value,
-      groupValue: widget.groupValue,
-      onChanged: widget.onChanged,
+      groupRegistry: _effectiveRegistry,
       mouseCursor: effectiveMouseCursor,
       toggleable: widget.toggleable,
       focusNode: _effectiveFocusNode,
       autofocus: widget.autofocus,
+      enabled: _enabled,
       builder: (BuildContext context, ToggleableStateMixin state) {
         return _RadioPaint(
           activeColor: widget.activeColor,
@@ -233,13 +289,31 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
           fillColor: widget.fillColor,
           focusColor: widget.focusColor,
           useCheckmarkStyle: widget.useCheckmarkStyle,
-          isActive: widget.onChanged != null,
+          isActive: _enabled,
           toggleableState: state,
           focused: _effectiveFocusNode.hasFocus,
         );
       },
     );
   }
+}
+
+/// A registry for deprecated API.
+// TODO(chunhtai): Remove this once deprecated API is removed.
+class _RadioRegistry<T> extends RadioGroupRegistry<T> {
+  _RadioRegistry(this.state);
+  final _CupertinoRadioState<T> state;
+  @override
+  T? get groupValue => state.widget.groupValue;
+
+  @override
+  ValueChanged<T?> get onChanged => state.widget.onChanged!;
+
+  @override
+  void registerClient(RadioClient<T> radio) {}
+
+  @override
+  void unregisterClient(RadioClient<T> radio) {}
 }
 
 class _RadioPaint extends StatefulWidget {

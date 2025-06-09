@@ -121,7 +121,7 @@ class GradientRotation extends GradientTransform {
     final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
 
     return Matrix4.identity()
-      ..translate(originX, originY)
+      ..translateByDouble(originX, originY, 0, 1)
       ..rotateZ(radians);
   }
 

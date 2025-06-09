@@ -95,7 +95,7 @@ class IconButtonTheme extends InheritedTheme {
   /// The configuration of this theme.
   final IconButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [IconButtonThemeData] from the closest ancestor [IconButtonTheme].
   ///
   /// If there is no enclosing [IconButtonTheme] widget, then
   /// [ThemeData.iconButtonTheme] is used.

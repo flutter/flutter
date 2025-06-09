@@ -4,6 +4,7 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "live_objects.h"
 #include "third_party/skia/include/core/SkBBHFactory.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -14,10 +15,12 @@ using namespace Skwasm;
 SkRTreeFactory bbhFactory;
 
 SKWASM_EXPORT SkPictureRecorder* pictureRecorder_create() {
+  livePictureRecorderCount++;
   return new SkPictureRecorder();
 }
 
 SKWASM_EXPORT void pictureRecorder_dispose(SkPictureRecorder* recorder) {
+  livePictureRecorderCount--;
   delete recorder;
 }
 
@@ -29,6 +32,7 @@ SKWASM_EXPORT SkCanvas* pictureRecorder_beginRecording(
 
 SKWASM_EXPORT SkPicture* pictureRecorder_endRecording(
     SkPictureRecorder* recorder) {
+  livePictureCount++;
   return recorder->finishRecordingAsPicture().release();
 }
 
@@ -37,6 +41,7 @@ SKWASM_EXPORT void picture_getCullRect(SkPicture* picture, SkRect* outRect) {
 }
 
 SKWASM_EXPORT void picture_dispose(SkPicture* picture) {
+  livePictureCount--;
   picture->unref();
 }
 

@@ -811,8 +811,8 @@ void main() {
     await tester.tap(find.byType(Icon));
     await tester.pumpAndSettle();
 
-    final Finder clipRRectFinder = find.byType(ClipRRect);
-    expect(clipRRectFinder, findsNothing);
+    expect(find.byType(ClipRSuperellipse), findsNothing);
+    expect(find.byType(ClipRRect), findsNothing);
   });
 
   testWidgets('Sheet transition does not interfere after popping', (WidgetTester tester) async {
@@ -1306,38 +1306,54 @@ void main() {
     });
   });
 
-  testWidgets('CupertinoSheetTransition handles SystemUiOverlayStyle changes', (
-    WidgetTester tester,
-  ) async {
-    final AnimationController controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      vsync: const TestVSync(),
-    );
-    addTearDown(controller.dispose);
-
-    final Animation<double> secondaryAnimation = Tween<double>(
-      begin: 1,
-      end: 0,
-    ).animate(controller);
+  testWidgets('CupertinoSheet causes SystemUiOverlayStyle changes', (WidgetTester tester) async {
+    final GlobalKey scaffoldKey = GlobalKey();
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: AnimatedBuilder(
-          animation: controller,
-          builder: (BuildContext context, Widget? child) {
-            return CupertinoSheetTransition(
-              primaryRouteAnimation: controller,
-              secondaryRouteAnimation: secondaryAnimation,
-              linearTransition: false,
-              child: const SizedBox(),
-            );
-          },
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          navigationBar: const CupertinoNavigationBar(middle: Text('SystemUiOverlayStyle')),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Text('Page 2'));
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
 
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
     expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
     expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
+
+    // Returning to the previous page reverts the system UI.
+    Navigator.of(scaffoldKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
   });
 
   testWidgets(

@@ -19,6 +19,7 @@ platform_properties:
         {
           "sdk_version": "16f6"
         }
+
   mac_arm64:
     properties:
       contexts: >-
@@ -36,6 +37,7 @@ platform_properties:
         {
           "sdk_version": "16f6"
         }
+
   mac_benchmark:
     properties:
       contexts: >-
@@ -55,6 +57,7 @@ platform_properties:
         {
           "sdk_version": "16f6"
         }
+
   mac_x64:
     properties:
       contexts: >-
@@ -72,6 +75,7 @@ platform_properties:
         {
           "sdk_version": "16f6"
         }
+
   mac_build_test:
     properties:
       contexts: >-
@@ -107,6 +111,7 @@ platform_properties:
         {
           "sdk_version": "16f6"
         }
+
   mac_x64_ios:
     properties:
       contexts: >-
@@ -125,6 +130,7 @@ platform_properties:
         {
           "sdk_version": "16f6"
         }
+
   mac_arm64_ios:
     properties:
       contexts: >-

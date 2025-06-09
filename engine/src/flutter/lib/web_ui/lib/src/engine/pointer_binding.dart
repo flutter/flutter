@@ -69,16 +69,12 @@ int _nthButton(int n) => 0x1 << n;
 @visibleForTesting
 int convertButtonToButtons(int button) {
   assert(button >= 0, 'Unexpected negative button $button.');
-  switch (button) {
-    case 0:
-      return _kPrimaryMouseButton;
-    case 1:
-      return _kMiddleMouseButton;
-    case 2:
-      return _kSecondaryMouseButton;
-    default:
-      return _nthButton(button);
-  }
+  return switch (button) {
+    0 => _kPrimaryMouseButton,
+    1 => _kMiddleMouseButton,
+    2 => _kSecondaryMouseButton,
+    _ => _nthButton(button),
+  };
 }
 
 /// Wrapping the Safari iOS workaround that adds a dummy event listener
@@ -1119,16 +1115,12 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   }
 
   ui.PointerDeviceKind _pointerTypeToDeviceKind(String pointerType) {
-    switch (pointerType) {
-      case 'mouse':
-        return ui.PointerDeviceKind.mouse;
-      case 'pen':
-        return ui.PointerDeviceKind.stylus;
-      case 'touch':
-        return ui.PointerDeviceKind.touch;
-      default:
-        return ui.PointerDeviceKind.unknown;
-    }
+    return switch (pointerType) {
+      'mouse' => ui.PointerDeviceKind.mouse,
+      'pen' => ui.PointerDeviceKind.stylus,
+      'touch' => ui.PointerDeviceKind.touch,
+      _ => ui.PointerDeviceKind.unknown,
+    };
   }
 
   int _getPointerId(DomPointerEvent event) {

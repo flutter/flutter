@@ -138,7 +138,7 @@ class GroupedValidator extends DoctorValidator {
 }
 
 class ValidationResult {
-  /// [ValidationResult.type] should only equal [ValidationResult.success]
+  /// [ValidationResult.type] should only equal [ValidationType.success]
   /// if no [messages] are hints or errors.
   ValidationResult(this.type, this.messages, {this.statusInfo});
 

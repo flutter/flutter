@@ -13,6 +13,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/geometry/dl_rtree.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
@@ -1790,7 +1791,8 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {32.3f, 14.615f},    //
                              {32.3f, 19.34f});
   path_builder1.Close();
-  DlPath dl_path1 = DlPath(path_builder1, DlPathFillType::kNonZero);
+  path_builder1.SetFillType(DlPathFillType::kNonZero);
+  DlPath dl_path1 = path_builder1.TakePath();
 
   DlPathBuilder path_builder2;
   path_builder2.MoveTo({37.5f, 19.33f});
@@ -1803,7 +1805,8 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {37.495f, 11.756f},  //
                              {37.5f, 19.33f});
   path_builder2.Close();
-  DlPath dl_path2 = DlPath(path_builder2, DlPathFillType::kNonZero);
+  path_builder2.SetFillType(DlPathFillType::kNonZero);
+  DlPath dl_path2 = path_builder2.TakePath();
 
   DisplayListBuilder builder;
   DlPaint paint = DlPaint(DlColor::kWhite()).setAntiAlias(true);
@@ -4877,7 +4880,7 @@ TEST_F(DisplayListTest, ClipPathNonCulling) {
   path_builder.LineTo({1000.0f, 0.0f});
   path_builder.LineTo({0.0f, 1000.0f});
   path_builder.Close();
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   // Double checking that the path does indeed contain the clip. But,
   // sadly, the Builder will not check paths for coverage to this level

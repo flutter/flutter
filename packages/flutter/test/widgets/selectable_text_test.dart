@@ -5582,8 +5582,9 @@ void main() {
   });
 
   group('context menu', () {
+    // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(
-      'iOS uses the system context menu by default if supported',
+      'iOS does not use the system context menu by default even when supported',
       (WidgetTester tester) async {
         tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         addTearDown(() {
@@ -5591,20 +5592,18 @@ void main() {
           tester.view.reset();
         });
 
-        final TextEditingController controller = TextEditingController(text: 'one two three');
-        addTearDown(controller.dispose);
         await tester.pumpWidget(
           // Don't wrap with the global View so that the change to
           // platformDispatcher is read.
           wrapWithView: false,
           View(
             view: tester.view,
-            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+            child: const MaterialApp(home: Material(child: SelectableText('one two three'))),
           ),
         );
 
         // No context menu shown.
-        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(SystemContextMenu), findsNothing);
 
         // Double tap to select the first word and show the menu.
@@ -5613,8 +5612,8 @@ void main() {
         await tester.tapAt(textOffsetToPosition(tester, 1));
         await tester.pump(SelectionOverlay.fadeDuration);
 
-        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
-        expect(find.byType(SystemContextMenu), findsOneWidget);
+        expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+        expect(find.byType(SystemContextMenu), findsNothing);
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),

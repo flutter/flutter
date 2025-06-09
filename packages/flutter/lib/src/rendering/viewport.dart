@@ -2087,7 +2087,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     // Hit test logic relies on this always providing an invertible matrix.
     final Offset offset = paintOffsetOf(child as RenderSliver);
-    transform.translate(offset.dx, offset.dy);
+    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 
   @override

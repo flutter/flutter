@@ -164,7 +164,6 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
     case null:
       return targetPlatform;
   }
@@ -334,8 +333,6 @@ abstract class Artifacts {
   /// all artifacts.
   ///
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
-  ///
-  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
   @visibleForTesting
   factory Artifacts.test({FileSystem? fileSystem}) {
     return _TestArtifacts(fileSystem ?? MemoryFileSystem.test());
@@ -490,7 +487,7 @@ class CachedArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
@@ -513,7 +510,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.ios:
@@ -899,7 +895,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
@@ -1167,7 +1162,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
@@ -1350,7 +1345,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
@@ -1579,7 +1573,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:

@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 
 #include "flutter/impeller/geometry/round_superellipse.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
 
@@ -690,6 +691,23 @@ TEST(RoundSuperellipseTest, SlimDiagnalContains) {
   CHECK_DIAGNAL_POINTS(Point(21.05, -20.92));
   CHECK_DIAGNAL_POINTS(Point(40.0, 5.68));
 #undef CHECK_POINT_AND_MIRRORS
+}
+
+TEST(RoundSuperellipseTest, PointsOutsideOfSharpCorner) {
+  Rect bounds = Rect::MakeLTRB(196.0f, 0.0f, 294.0f, 28.0f);
+  // Regression test for a case where RoundSuperellipseParam::Contains
+  // previously failed. Although the bounding rect filter of
+  // `RoundSuperellipse::Contains` would reject this point, this test ensures
+  // the internal logic of RoundSuperellipseParam::Contains is now correct.
+  auto rr = RoundSuperellipseParam::MakeBoundsRadii(
+      bounds, {
+                  .top_left = Size(0.0, 0.0),
+                  .top_right = Size(3.0, 3.0),
+                  .bottom_left = Size(0.0, 0.0),
+                  .bottom_right = Size(3.0, 3.0),
+              });
+
+  EXPECT_FALSE(rr.Contains(Point{147.0, 14.0}));
 }
 
 }  // namespace testing

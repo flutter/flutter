@@ -22,7 +22,7 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 /**
  * FlCompositorOpenGL:
  *
- * #FlCompositorOpenGL is an abstract class that allows Flutter to draw pixels.
+ * #FlCompositorOpenGL is class that implements compositing using OpenGL.
  */
 
 /**
@@ -34,15 +34,6 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
  * Returns: a new #FlCompositorOpenGL.
  */
 FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine);
-
-/**
- * fl_compositor_opengl_setup:
- * @compositor: an #FlCompositorOpenGL.
- *
- * Creates OpenGL resources required before rendering. Requires an active
- * context.
- */
-void fl_compositor_opengl_setup(FlCompositorOpenGL* compositor);
 
 /**
  * fl_compositor_opengl_render:

@@ -66,6 +66,10 @@ config("skia_public") {
   if (is_mac || is_ios) {
     cflags_objcc += [ "-Wno-unguarded-availability" ]
   }
+
+  if (is_qnx) {
+    defines += [ "SKRP_CPU_SCALAR" ]
+  }
 }
 
 # Skia internal APIs, used by Skia itself and a few test tools.
@@ -712,7 +716,9 @@ skia_component("skia") {
     }
   } else {
     sources += [ "$_skia_root/src/ports/SkOSFile_posix.cpp" ]
-    libs += [ "dl" ]
+    if (!is_qnx) {
+      libs += [ "dl" ]
+    }
   }
 
   if (is_android) {
@@ -725,7 +731,7 @@ skia_component("skia") {
     ]
   }
 
-  if (is_linux || is_wasm) {
+  if (is_linux || is_wasm || is_qnx) {
     sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
     if (skia_use_egl) {
       libs += [ "GLESv2" ]
