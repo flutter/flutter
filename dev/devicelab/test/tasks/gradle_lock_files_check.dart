@@ -1,7 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:io' show ProcessException;
 
 import 'package:collection/collection.dart';
@@ -186,11 +182,11 @@ void main() {
     mockEval.reset();
   });
 
-  group('runGradleLockFilesCheck finally block behavior', () {
-    test('completes successfully when git stash pop fails with "No stash entries found"', () async {
+  group('runGradleLockFilesCheck', () {
+    test('succeeds', () async {
       mockEval.nextResult = '';
       mockExec.addResponse(0);
-      mockExec.addResponse(1);
+      mockExec.addResponse(0);
 
       await runGradleLockFilesCheck(
         execFn: mockExec.call,
@@ -199,98 +195,175 @@ void main() {
       );
 
       expect(mockExec.calls, <MockCall>[
-        MockCall(_dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'], false, flutterDirectory.path),
-        MockCall('git', <String>['stash', 'pop'], true, flutterDirectory.path),
+        MockCall(
+          _dartCommand,
+          <String>[_scriptFilePath, '--no-gradle-generation'],
+          false,
+          flutterDirectory.path,
+        ),
+        MockCall(
+          'git',
+          <String>['stash', 'pop'],
+          true,
+          flutterDirectory.path,
+        ),
       ]);
+
       expect(mockEval.lastExecutable, 'git');
-      expect(mockEval.lastArguments, <String>['status', '--porcelain', '--untracked-files=all']);
+      expect(mockEval.lastArguments,
+          <String>['status', '--porcelain', '--untracked-files=all']);
+      expect(mockEval.lastCanFail, false);
     });
 
-    test('rethrows ProcessException when git stash pop fails with "No such file or directory"', () async {
-      mockEval.nextResult = '';
-
+    test(
+        'throws Exception for gradle changes when there are lockfile modifications', () async {
+      mockEval.nextResult = ' M  path/to/some.lockfile';
       mockExec.addResponse(0);
-      final noSuchFileException = ProcessException(
-          'git', <String>['stash', 'pop'], 'No such file or directory, errno = 2', 2
-      );
-      mockExec.addResponse(noSuchFileException);
+      mockExec.addResponse(0);
 
       await expectLater(
-            () => runGradleLockFilesCheck(
-          execFn: mockExec.call,
-          evalFn: mockEval.call,
-          shouldPrintOutput: false,
-        ),
-        throwsA(
-            isA<ProcessException>()
-                .having((ProcessException e) => e.executable, 'executable', 'git')
-                .having((ProcessException e) => e.arguments, 'arguments', <String>['stash', 'pop'])
-                .having((ProcessException e) => e.message, 'message', contains('No such file or directory'))
-                .having((ProcessException e) => e.errorCode, 'errorCode', 2)
+            () =>
+            runGradleLockFilesCheck(
+              execFn: mockExec.call,
+              evalFn: mockEval.call,
+              shouldPrintOutput: false,
+            ),
+        _throwsExceptionWithMessage(
+          'Gradle lockfiles are not up to date, or new/modified lockfiles are not staged.',
         ),
       );
 
       expect(mockExec.calls, <MockCall>[
-        MockCall(_dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'], false, flutterDirectory.path),
-        MockCall('git', <String>['stash', 'pop'], true, flutterDirectory.path),
+        MockCall(
+          _dartCommand,
+          <String>[_scriptFilePath, '--no-gradle-generation'],
+          false,
+          flutterDirectory.path,
+        ),
+        MockCall(
+          'git',
+          <String>['stash', 'pop'],
+          true,
+          flutterDirectory.path,
+        ),
       ]);
+
       expect(mockEval.lastExecutable, 'git');
-      expect(mockEval.lastArguments, <String>['status', '--porcelain', '--untracked-files=all']);
+      expect(mockEval.lastArguments,
+          <String>['status', '--porcelain', '--untracked-files=all']);
     });
 
-    test('rethrows ProcessException when git restore . fails with "No such file or directory"', () async {
-      mockEval.nextResult = 'No local changes to save';
+    group('finally block behavior', () {
+      test(
+          'rethrows ProcessException when git stash pop fails with "No such file or directory"', () async {
+        mockEval.nextResult = '';
+        mockExec.addResponse(0);
+        final noSuchFileException = ProcessException(
+            'git', <String>['stash', 'pop'],
+            'No such file or directory, errno = 2', 2
+        );
+        mockExec.addResponse(noSuchFileException);
 
-      mockExec.addResponse(0);
-      final noSuchFileException = ProcessException(
-          'git', <String>['restore', '.'], 'No such file or directory, errno = 2', 2
-      );
-      mockExec.addResponse(noSuchFileException);
-      
-      await expectLater(
-            () => runGradleLockFilesCheck(
-          execFn: mockExec.call,
-          evalFn: mockEval.call,
-          shouldPrintOutput: false,
-        ),
-        throwsA(
-            isA<ProcessException>()
-                .having((ProcessException e) => e.executable, 'executable', 'git')
-                .having((ProcessException e) => e.arguments, 'arguments', <String>['restore', '.'])
-                .having((ProcessException e) => e.message, 'message', contains('No such file or directory'))
-                .having((ProcessException e) => e.errorCode, 'errorCode', 2)
-        ),
-      );
+        await expectLater(
+              () =>
+              runGradleLockFilesCheck(
+                execFn: mockExec.call,
+                evalFn: mockEval.call,
+                shouldPrintOutput: false,
+              ),
+          throwsA(
+              isA<ProcessException>()
+                  .having((ProcessException e) => e.executable, 'executable',
+                  'git')
+                  .having((ProcessException e) => e.arguments, 'arguments',
+                  <String>['stash', 'pop'])
+                  .having((ProcessException e) => e.message, 'message',
+                  contains('No such file or directory'))
+                  .having((ProcessException e) => e.errorCode, 'errorCode', 2)
+          ),
+        );
 
-      expect(mockExec.calls, <MockCall>[
-        MockCall(_dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'], false, flutterDirectory.path),
-        MockCall('git', <String>['restore', '.'], true, flutterDirectory.path),
-      ]);
-      expect(mockEval.lastExecutable, 'git');
-      expect(mockEval.lastArguments, <String>['status', '--porcelain', '--untracked-files=all']);
-    });
+        expect(mockExec.calls, <MockCall>[
+          MockCall(
+              _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
+              false, flutterDirectory.path),
+          MockCall(
+              'git', <String>['stash', 'pop'], true, flutterDirectory.path),
+        ]);
+        expect(mockEval.lastExecutable, 'git');
+        expect(mockEval.lastArguments,
+            <String>['status', '--porcelain', '--untracked-files=all']);
+      });
 
-    test('original try block exception propagates if git stash pop fails gracefully', () async {
-      mockEval.nextResult = 'No local changes to save\n  M  some.lockfile';
+      test(
+          'rethrows ProcessException when git restore . fails with "No such file or directory"', () async {
+        mockEval.nextResult = 'No local changes to save';
 
-      mockExec.addResponse(0);
-      mockExec.addResponse(1);
+        mockExec.addResponse(0);
+        final noSuchFileException = ProcessException(
+            'git', <String>['restore', '.'],
+            'No such file or directory, errno = 2', 2
+        );
+        mockExec.addResponse(noSuchFileException);
 
-      await expectLater(
-            () => runGradleLockFilesCheck(
-          execFn: mockExec.call,
-          evalFn: mockEval.call,
-          shouldPrintOutput: false,
-        ),
-        _throwsExceptionWithMessage('Gradle lockfiles are not up to date'),
-      );
+        await expectLater(
+              () =>
+              runGradleLockFilesCheck(
+                execFn: mockExec.call,
+                evalFn: mockEval.call,
+                shouldPrintOutput: false,
+              ),
+          throwsA(
+              isA<ProcessException>()
+                  .having((ProcessException e) => e.executable, 'executable',
+                  'git')
+                  .having((ProcessException e) => e.arguments, 'arguments',
+                  <String>['restore', '.'])
+                  .having((ProcessException e) => e.message, 'message',
+                  contains('No such file or directory'))
+                  .having((ProcessException e) => e.errorCode, 'errorCode', 2)
+          ),
+        );
 
-      expect(mockExec.calls, <MockCall>[
-        MockCall(_dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'], false, flutterDirectory.path),
-        MockCall('git', <String>['restore', '.'], true, flutterDirectory.path),
-      ]);
-      expect(mockEval.lastExecutable, 'git');
-      expect(mockEval.lastArguments, <String>['status', '--porcelain', '--untracked-files=all']);
+        expect(mockExec.calls, <MockCall>[
+          MockCall(
+              _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
+              false, flutterDirectory.path),
+          MockCall(
+              'git', <String>['restore', '.'], true, flutterDirectory.path),
+        ]);
+        expect(mockEval.lastExecutable, 'git');
+        expect(mockEval.lastArguments,
+            <String>['status', '--porcelain', '--untracked-files=all']);
+      });
+
+      test(
+          'original try block exception propagates if git stash pop fails gracefully', () async {
+        mockEval.nextResult = 'No local changes to save\n  M  some.lockfile';
+        mockExec.addResponse(0);
+        mockExec.addResponse(1);
+
+        await expectLater(
+              () =>
+              runGradleLockFilesCheck(
+                execFn: mockExec.call,
+                evalFn: mockEval.call,
+                shouldPrintOutput: false,
+              ),
+          _throwsExceptionWithMessage('Gradle lockfiles are not up to date'),
+        );
+
+        expect(mockExec.calls, <MockCall>[
+          MockCall(
+              _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
+              false, flutterDirectory.path),
+          MockCall(
+              'git', <String>['restore', '.'], true, flutterDirectory.path),
+        ]);
+        expect(mockEval.lastExecutable, 'git');
+        expect(mockEval.lastArguments,
+            <String>['status', '--porcelain', '--untracked-files=all']);
+      });
     });
   });
 }
