@@ -138,6 +138,11 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.status => _noLiveRegion,
     SemanticsRole.list => _noCheckRequired,
     SemanticsRole.listItem => _semanticsListItem,
+    SemanticsRole.complementary => _semanticsComplementary,
+    SemanticsRole.contentInfo => _semanticsContentInfo,
+    SemanticsRole.main => _semanticsMain,
+    SemanticsRole.navigation => _semanticsNavigation,
+    SemanticsRole.region => _semanticsRegion,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
@@ -352,6 +357,108 @@ sealed class _DebugSemanticsRoleChecks {
         'Please assign the ${SemanticsRole.list} to node ${parent.id}',
       );
     }
+    return null;
+  }
+
+  static bool _isLandmarkRole(SemanticsData nodeData) =>
+      nodeData.role == SemanticsRole.complementary ||
+      nodeData.role == SemanticsRole.contentInfo ||
+      nodeData.role == SemanticsRole.main ||
+      nodeData.role == SemanticsRole.navigation ||
+      nodeData.role == SemanticsRole.region;
+
+  static bool _isSameRoleExisted(SemanticsNode semanticsNode) {
+    final Map<int, SemanticsNode> treeNodes = semanticsNode.owner!._nodes;
+    int sameRoleCount = 0;
+    for (final int id in treeNodes.keys) {
+      if (treeNodes[id]?.getSemanticsData().role == semanticsNode.role) {
+        sameRoleCount++;
+        if (sameRoleCount > 1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static FlutterError? _semanticsComplementary(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
+        return FlutterError(
+          'The complementary landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The complementary landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsContentInfo(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
+        return FlutterError(
+          'The contentInfo landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The contentInfo landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsMain(SemanticsNode node) {
+    SemanticsNode? currentNode = node.parent;
+    while (currentNode != null) {
+      if (_isLandmarkRole(currentNode.getSemanticsData())) {
+        return FlutterError(
+          'The main landmark role should not contained within any other landmark roles.',
+        );
+      }
+      currentNode = currentNode.parent;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The main landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsNavigation(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (_isSameRoleExisted(node) && data.label.isEmpty) {
+      return FlutterError(
+        'The navigation landmark role should have a unique label as it is used more than once.',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsRegion(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (data.label.isEmpty) {
+      return FlutterError(
+        'A region role should include a label that describes the purpose of the content.',
+      );
+    }
+
     return null;
   }
 }
@@ -2801,7 +2908,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node is tagged with `tag`.
   bool isTagged(SemanticsTag tag) => tags != null && tags!.contains(tag);
 
-  SemanticsFlags _flags = SemanticsFlags.kNone;
+  SemanticsFlags _flags = SemanticsFlags.none;
 
   /// Semantics flags.
   SemanticsFlags get flagsCollection => _flags;
@@ -3392,7 +3499,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     builder.updateNode(
       id: id,
-      flags: data.flags,
+      flags: data.flagsCollection,
       actions: data.actions,
       rect: data.rect,
       identifier: data.identifier,
@@ -5630,7 +5737,7 @@ class SemanticsConfiguration {
 
   // INTERNAL FLAG MANAGEMENT
 
-  SemanticsFlags _flags = SemanticsFlags.kNone;
+  SemanticsFlags _flags = SemanticsFlags.none;
 
   bool get _hasExplicitRole {
     if (_role != SemanticsRole.none) {
