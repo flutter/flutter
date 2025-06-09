@@ -232,7 +232,6 @@ final class RunTarget {
       // -----------------------------------------------------------------------
       // ANDROID
       TargetPlatform.androidUnspecified => 'android_$mode',
-      TargetPlatform.androidX86 => 'android_${mode}_x86',
       TargetPlatform.androidX64 => 'android_${mode}_x64',
       TargetPlatform.androidArm64 => 'android_${mode}_arm64',
 
