@@ -3073,8 +3073,6 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar does not enter infinite animation loop when target exceeds maxScrollExtent and prevents buttons from being tapped',
     (WidgetTester tester) async {
-      setWindowToPortrait(tester);
-
       const double largeTitleHeight = 52.0;
 
       final ScrollController scrollController = ScrollController();
