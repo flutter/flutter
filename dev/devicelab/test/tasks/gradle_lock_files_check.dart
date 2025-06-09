@@ -151,10 +151,10 @@ class MockEval {
     lastPrintStdout = printStdout;
     lastPrintStderr = printStderr;
 
-    if (_nextException != null) {
-      throw _nextException!;
+    if (nextException != null) {
+      throw nextException!;
     }
-    return _nextResult;
+    return nextResult;
   }
 }
 
