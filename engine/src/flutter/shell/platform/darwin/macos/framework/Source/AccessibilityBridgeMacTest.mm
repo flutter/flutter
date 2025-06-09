@@ -178,7 +178,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
 
   FlutterSemanticsNode2 node2;
   node2.id = 2;
-  node1.flags2 = &flags;
+  node2.flags2 = &flags;
   node2.actions = static_cast<FlutterSemanticsAction>(0);
   node2.text_selection_base = -1;
   node2.text_selection_extent = -1;

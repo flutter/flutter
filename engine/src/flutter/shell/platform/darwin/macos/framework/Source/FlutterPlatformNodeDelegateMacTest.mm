@@ -159,6 +159,8 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{};
+  root.flags2 = &flags;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -173,6 +175,8 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode2 child1;
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{};
+  child1.flags2 = &child_flags;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -334,6 +338,8 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   double transformFactor = 0.5;
 
   FlutterSemanticsNode2 child1;
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
+  child1.flags2 = &child_flags;
   child1.id = 1;
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.label = "";
