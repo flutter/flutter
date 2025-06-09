@@ -590,15 +590,13 @@ class MediaQueryData {
   final bool boldText;
 
   /// Whether accessibility announcements (like [SemanticsService.announce])
-  /// are allowed on the current platform.
+  /// are supported on the current platform.
   ///
-  /// Returns `false` on Android, where platform announcements are deprecated
-  /// by the underlying platform.
+  /// Returns `false` on platforms where announcements are deprecated or
+  /// unsupported by the underlying platform.
   ///
-  /// Returns `true` on all other platforms (iOS, web, desktop) where such
-  /// announcements are generally supported without discouragement.
-  ///
-  /// Use this flag to conditionally avoid making announcements on Android.
+  /// Returns `true` on platforms where such announcements are
+  /// generally supported without discouragement. (iOS, web etc)
   ///
   /// See also:
   ///
@@ -1743,7 +1741,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.announce] property of the ancestor [MediaQuery]
-  /// changes.
+  /// changes. This is especially important for announce because announce has a
+  /// low frequency change rate. The performance difference between rebuilding
+  /// for all media query data changes and only rebuilding for announce is a
+  /// dramatic difference.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
   static bool announceOf(BuildContext context) => maybeAnnounceOf(context) ?? false;
