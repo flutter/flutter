@@ -60,7 +60,7 @@ void _tests() {
           SliverSemantics(
             label: 'test1',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -137,11 +137,11 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             label: 'test1',
-            sliver: SliverSemantics(
+            child: SliverSemantics(
               key: key,
               container: true,
               label: 'test2a',
-              sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+              child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             ),
           ),
         ],
@@ -177,14 +177,14 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             label: 'test1',
-            sliver: SliverSemantics(
+            child: SliverSemantics(
               container: true,
               label: 'middle',
-              sliver: SliverSemantics(
+              child: SliverSemantics(
                 key: key,
                 container: true,
                 label: 'test2b',
-                sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
               ),
             ),
           ),
@@ -235,7 +235,7 @@ void _tests() {
           slivers: <Widget>[
             SliverSemantics(
               label: 'test1',
-              sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+              child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             ),
           ],
         ),
@@ -255,7 +255,7 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             label: 'test1',
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -279,7 +279,7 @@ void _tests() {
             SliverSemantics(
               label: 'test1',
               textDirection: TextDirection.ltr,
-              sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+              child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             ),
           ],
         ),
@@ -324,7 +324,7 @@ void _tests() {
           SliverSemantics(
             label: 'test1',
             textDirection: TextDirection.rtl,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -366,7 +366,7 @@ void _tests() {
             label: 'label',
             hint: 'hint',
             value: 'value',
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -408,15 +408,15 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   hint: 'hint one',
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
                 SliverSemantics(
                   hint: 'hint two',
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
               ],
             ),
@@ -459,7 +459,7 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildListDelegate(<Widget>[
                 Semantics(hint: 'hint one', child: const SizedBox(height: 10.0)),
                 Semantics(hint: 'hint two', child: const SizedBox(height: 10.0)),
@@ -504,15 +504,15 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   value: 'value one',
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
                 SliverSemantics(
                   value: 'value two',
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
               ],
             ),
@@ -557,7 +557,7 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildListDelegate(<Widget>[
                 Semantics(value: 'value one', child: const SizedBox(height: 10.0)),
                 Semantics(value: 'value two', child: const SizedBox(height: 10.0)),
@@ -604,15 +604,15 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   hint: 'hint',
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
                 SliverSemantics(
                   value: 'value',
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
               ],
             ),
@@ -655,7 +655,7 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildListDelegate(<Widget>[
                 Semantics(hint: 'hint', child: const SizedBox(height: 10.0)),
                 Semantics(value: 'value', child: const SizedBox(height: 10.0)),
@@ -700,15 +700,15 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   container: true,
-                  sliver: const SliverToBoxAdapter(child: Text('child 1')),
+                  child: const SliverToBoxAdapter(child: Text('child 1')),
                 ),
                 SliverSemantics(
                   container: true,
-                  sliver: const SliverToBoxAdapter(child: Text('child 2')),
+                  child: const SliverToBoxAdapter(child: Text('child 2')),
                 ),
               ],
             ),
@@ -753,7 +753,7 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildListDelegate(<Widget>[
                 Semantics(container: true, child: const Text('child 1')),
                 Semantics(container: true, child: const Text('child 2')),
@@ -825,7 +825,7 @@ void _tests() {
             onDidLoseAccessibilityFocus:
                 () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
             onFocus: () => performedActions.add(SemanticsAction.focus),
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
                 return Card(
                   child: Padding(
@@ -973,7 +973,7 @@ void _tests() {
             liveRegion: true,
             expanded: true,
             isRequired: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
                 return Card(
                   child: Padding(
@@ -1030,7 +1030,7 @@ void _tests() {
             key: const Key('b'),
             container: true,
             scopesRoute: false,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
                 return Card(
                   child: Padding(
@@ -1075,7 +1075,7 @@ void _tests() {
           SliverSemantics(
             key: const Key('c'),
             toggled: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
                 return Card(
                   child: Padding(
@@ -1146,7 +1146,7 @@ void _tests() {
             liveRegion: true,
             expanded: true,
             isRequired: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
                 return Card(
                   child: Padding(
@@ -1221,7 +1221,7 @@ void _tests() {
           SliverSemantics(
             tooltip: 'test1',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1251,7 +1251,7 @@ void _tests() {
           SliverSemantics(
             container: true,
             onTap: () => performedActions.add('first'),
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1296,7 +1296,7 @@ void _tests() {
           SliverSemantics(
             container: true,
             onTap: () => performedActions.add('second'),
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1318,7 +1318,7 @@ void _tests() {
             container: true,
             onTap: () => performedActions.add('second'),
             onLongPress: () => performedActions.add('longPress'),
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1363,7 +1363,7 @@ void _tests() {
           SliverSemantics(
             container: true,
             onTap: () => performedActions.add('second'),
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1384,7 +1384,7 @@ void _tests() {
             container: true,
             onTap: () {},
             onTapHint: 'test',
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1402,7 +1402,7 @@ void _tests() {
             container: true,
             onLongPress: () {},
             onLongPressHint: 'foo',
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1427,7 +1427,7 @@ void _tests() {
               const CustomSemanticsAction(label: 'foo'): () {},
               const CustomSemanticsAction(label: 'bar'): () {},
             },
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1458,7 +1458,7 @@ void _tests() {
             decreasedValue: '9s',
             onIncrease: () => () {},
             onDecrease: () => () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1503,10 +1503,10 @@ void _tests() {
             label: 'label',
             excludeSemantics: true,
             textDirection: TextDirection.ltr,
-            sliver: SliverSemantics(
+            child: SliverSemantics(
               label: 'other label',
               textDirection: TextDirection.ltr,
-              sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+              child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             ),
           ),
         ],
@@ -1551,32 +1551,32 @@ void _tests() {
           SliverSemantics(
             sortKey: const CustomSortKey(0.0),
             explicitChildNodes: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   sortKey: const CustomSortKey(3.0),
-                  sliver: const SliverToBoxAdapter(child: Text('Label 1')),
+                  child: const SliverToBoxAdapter(child: Text('Label 1')),
                 ),
                 SliverSemantics(
                   sortKey: const CustomSortKey(2.0),
-                  sliver: const SliverToBoxAdapter(child: Text('Label 2')),
+                  child: const SliverToBoxAdapter(child: Text('Label 2')),
                 ),
                 SliverSemantics(
                   sortKey: const CustomSortKey(1.0),
                   explicitChildNodes: true,
-                  sliver: SliverCrossAxisGroup(
+                  child: SliverCrossAxisGroup(
                     slivers: <Widget>[
                       SliverSemantics(
                         sortKey: const OrdinalSortKey(3.0),
-                        sliver: const SliverToBoxAdapter(child: Text('Label 3')),
+                        child: const SliverToBoxAdapter(child: Text('Label 3')),
                       ),
                       SliverSemantics(
                         sortKey: const OrdinalSortKey(2.0),
-                        sliver: const SliverToBoxAdapter(child: Text('Label 4')),
+                        child: const SliverToBoxAdapter(child: Text('Label 4')),
                       ),
                       SliverSemantics(
                         sortKey: const OrdinalSortKey(1.0),
-                        sliver: const SliverToBoxAdapter(child: Text('Label 5')),
+                        child: const SliverToBoxAdapter(child: Text('Label 5')),
                       ),
                     ],
                   ),
@@ -1639,15 +1639,15 @@ void _tests() {
             slivers: <Widget>[
               SliverSemantics(
                 sortKey: const CustomSortKey(3.0),
-                sliver: const SliverToBoxAdapter(child: Text('Label 1')),
+                child: const SliverToBoxAdapter(child: Text('Label 1')),
               ),
               SliverSemantics(
                 sortKey: const CustomSortKey(1.0),
-                sliver: const SliverToBoxAdapter(child: Text('Label 2')),
+                child: const SliverToBoxAdapter(child: Text('Label 2')),
               ),
               SliverSemantics(
                 sortKey: const CustomSortKey(2.0),
-                sliver: const SliverToBoxAdapter(child: Text('Label 3')),
+                child: const SliverToBoxAdapter(child: Text('Label 3')),
               ),
             ],
           ),
@@ -1738,7 +1738,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1757,7 +1757,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onTap: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1775,7 +1775,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1794,7 +1794,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onDismiss: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1812,7 +1812,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1831,7 +1831,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onLongPress: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1849,7 +1849,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1868,7 +1868,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onScrollLeft: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1886,7 +1886,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1905,7 +1905,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onScrollRight: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1923,7 +1923,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1942,7 +1942,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onScrollUp: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1960,7 +1960,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1979,7 +1979,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onScrollDown: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -1997,7 +1997,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2016,7 +2016,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onIncrease: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2034,7 +2034,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2053,7 +2053,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onDecrease: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2071,7 +2071,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2090,7 +2090,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onCopy: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2108,7 +2108,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2127,7 +2127,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onCut: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2145,7 +2145,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2164,7 +2164,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onPaste: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2182,7 +2182,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2201,7 +2201,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onSetSelection: (TextSelection _) {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2219,7 +2219,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2238,7 +2238,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onDidGainAccessibilityFocus: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2260,7 +2260,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2279,7 +2279,7 @@ void _tests() {
             label: 'foo',
             textDirection: TextDirection.ltr,
             onDidLoseAccessibilityFocus: () {},
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2301,7 +2301,7 @@ void _tests() {
             container: true,
             label: 'foo',
             textDirection: TextDirection.ltr,
-            sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
           ),
         ],
       ),
@@ -2324,19 +2324,19 @@ void _tests() {
           SliverSemantics(
             blockUserActions: true,
             explicitChildNodes: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   key: key1,
                   label: 'label1',
                   onTap: () {},
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
                 SliverSemantics(
                   key: key2,
                   label: 'label2',
                   onTap: () {},
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
               ],
             ),
@@ -2367,7 +2367,7 @@ void _tests() {
           SliverSemantics(
             blockUserActions: true,
             explicitChildNodes: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildListDelegate(<Widget>[
                 Semantics(
                   key: key1,
@@ -2407,18 +2407,18 @@ void _tests() {
           SliverSemantics(
             key: key,
             container: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   blockUserActions: true,
                   label: 'label1',
                   onTap: () {},
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
                 SliverSemantics(
                   label: 'label2',
                   onLongPress: () {},
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
               ],
             ),
@@ -2443,7 +2443,7 @@ void _tests() {
           SliverSemantics(
             key: key,
             container: true,
-            sliver: SliverList(
+            child: SliverList(
               delegate: SliverChildListDelegate(<Widget>[
                 Semantics(
                   blockUserActions: true,
@@ -2475,18 +2475,18 @@ void _tests() {
           SliverSemantics(
             key: key,
             container: true,
-            sliver: SliverMainAxisGroup(
+            child: SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverSemantics(
                   blockUserActions: true,
                   label: 'label1',
                   onTap: () {},
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
                 SliverSemantics(
                   label: 'label2',
                   onTap: () {},
-                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                  child: const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 ),
               ],
             ),
@@ -2514,7 +2514,7 @@ void _tests() {
               key: key,
               container: true,
               explicitChildNodes: true, // This is needed to pass the test in this scenario why?
-              sliver: SliverList(
+              child: SliverList(
                 delegate: SliverChildListDelegate(<Widget>[
                   // The widgets in this list merge into one node in this test scenario but not the pure sliver one above why?
                   Semantics(
@@ -2556,7 +2556,7 @@ void _tests() {
             SliverSemantics(
               key: key,
               validationResult: result,
-              sliver: SliverToBoxAdapter(
+              child: SliverToBoxAdapter(
                 child: Text('Validation result $result', textDirection: TextDirection.ltr),
               ),
             ),
@@ -2602,9 +2602,9 @@ void _tests() {
           slivers: <Widget>[
             SliverSemantics(
               validationResult: outer,
-              sliver: SliverSemantics(
+              child: SliverSemantics(
                 validationResult: inner,
-                sliver: SliverToBoxAdapter(
+                child: SliverToBoxAdapter(
                   child: Text(
                     key: key,
                     'Outer = $outer; inner = $inner',
@@ -2681,7 +2681,7 @@ void _tests() {
     // Default: not a heading.
     expect(
       SliverSemantics(
-        sliver: const SliverToBoxAdapter(child: Text('dummy text')),
+        child: const SliverToBoxAdapter(child: Text('dummy text')),
       ).properties.headingLevel,
       isNull,
     );
@@ -2690,7 +2690,7 @@ void _tests() {
     for (int level = 1; level <= 6; level++) {
       final SliverSemantics semantics = SliverSemantics(
         headingLevel: level,
-        sliver: const SliverToBoxAdapter(child: Text('dummy text')),
+        child: const SliverToBoxAdapter(child: Text('dummy text')),
       );
       expect(semantics.properties.headingLevel, level);
     }
@@ -2700,7 +2700,7 @@ void _tests() {
       expect(
         () => SliverSemantics(
           headingLevel: badLevel,
-          sliver: const SliverToBoxAdapter(child: Text('dummy text')),
+          child: const SliverToBoxAdapter(child: Text('dummy text')),
         ),
         throwsAssertionError,
       );
@@ -2720,7 +2720,7 @@ void _tests() {
             SliverSemantics(
               key: key,
               headingLevel: level,
-              sliver: SliverToBoxAdapter(
+              child: SliverToBoxAdapter(
                 child: Text('Heading level $level', textDirection: TextDirection.ltr),
               ),
             ),
@@ -2790,7 +2790,7 @@ void _tests() {
                 SliverSemantics(
                   key: ValueKey<String>('heading-$level'),
                   headingLevel: level,
-                  sliver: SliverToBoxAdapter(child: Text('Heading level $level')),
+                  child: SliverToBoxAdapter(child: Text('Heading level $level')),
                 ),
               const SliverToBoxAdapter(child: Text('This is not a heading')),
             ],

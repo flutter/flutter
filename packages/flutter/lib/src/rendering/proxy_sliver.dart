@@ -494,6 +494,7 @@ class RenderSliverSemanticsAnnotations extends RenderProxySliver with SemanticsA
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
     bool blockUserActions = false,
+    Locale? localeForSubtree,
     TextDirection? textDirection,
   }) : super(child) {
     initSemanticsAnnotations(
@@ -502,6 +503,7 @@ class RenderSliverSemanticsAnnotations extends RenderProxySliver with SemanticsA
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
       blockUserActions: blockUserActions,
+      localeForSubtree: localeForSubtree,
       textDirection: textDirection,
     );
   }
