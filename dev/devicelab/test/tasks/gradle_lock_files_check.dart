@@ -21,9 +21,8 @@ class MockCall {
   final bool canFail;
   final String? workingDirectory;
 
-  MockCall(this.executable, List<String> args, this.canFail,
-      this.workingDirectory)
-      : arguments = List<String>.unmodifiable(args);
+  MockCall(this.executable, List<String> args, this.canFail, this.workingDirectory)
+    : arguments = List<String>.unmodifiable(args);
 
   @override
   bool operator ==(Object other) {
@@ -66,14 +65,15 @@ class MockExec {
     _responseIndex = 0;
   }
 
-  Future<int> call(String executable,
-      List<String> arguments, {
-        Map<String, String>? environment,
-        bool canFail = false,
-        String? workingDirectory,
-        StringBuffer? output,
-        StringBuffer? stderr,
-      }) async {
+  Future<int> call(
+    String executable,
+    List<String> arguments, {
+    Map<String, String>? environment,
+    bool canFail = false,
+    String? workingDirectory,
+    StringBuffer? output,
+    StringBuffer? stderr,
+  }) async {
     calls.add(MockCall(executable, List<String>.from(arguments), canFail, workingDirectory));
 
     if (_responseIndex < _responses.length) {
@@ -83,14 +83,18 @@ class MockExec {
       }
       if (response is int) {
         if (!canFail && response != 0) {
-          throw ProcessException(executable, arguments,
-              'MockProcessException: Command failed with exit code $response',
-              response);
+          throw ProcessException(
+            executable,
+            arguments,
+            'MockProcessException: Command failed with exit code $response',
+            response,
+          );
         }
         return response;
       }
-      throw StateError('Unexpected response type in MockExec: ${response
-          .runtimeType}, value: $response');
+      throw StateError(
+        'Unexpected response type in MockExec: ${response.runtimeType}, value: $response',
+      );
     }
     return 0;
   }
@@ -128,16 +132,17 @@ class MockEval {
     _nextException = null;
   }
 
-  Future<String> call(String executable,
-      List<String> arguments, {
-        Map<String, String>? environment,
-        bool canFail = false,
-        String? workingDirectory,
-        StringBuffer? stdout,
-        StringBuffer? stderr,
-        bool printStdout = true,
-        bool printStderr = true,
-      }) async {
+  Future<String> call(
+    String executable,
+    List<String> arguments, {
+    Map<String, String>? environment,
+    bool canFail = false,
+    String? workingDirectory,
+    StringBuffer? stdout,
+    StringBuffer? stderr,
+    bool printStdout = true,
+    bool printStderr = true,
+  }) async {
     lastExecutable = executable;
     lastArguments = arguments;
     lastCanFail = canFail;
@@ -242,7 +247,7 @@ void main() {
       () async {
         mockExec.addResponse(0); // git stash
         mockExec.addResponse(0); // dart script
-        mockExec.addResponse(0); // git stash pop (succeeds)
+        mockExec.addResponse(0); // git stash pop  (succeeds)
         mockEval.nextResult = ' M path/to/file.lockfile\n?? another.lockfile\n'; // git status
 
         try {
