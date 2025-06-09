@@ -357,7 +357,7 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
 
   @override
   cb.Expression visitNamedType(analyzer.NamedType node) {
-    return cb.refer(node.name2.lexeme, _elementToLibraryIdentifier(node.element2!));
+    return cb.refer(node.name2.lexeme, _elementToLibraryIdentifier(node.element2));
   }
 
   @override
