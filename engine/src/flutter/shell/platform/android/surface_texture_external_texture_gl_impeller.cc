@@ -55,6 +55,7 @@ void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
 
 void SurfaceTextureExternalTextureGLImpeller::Detach() {
   SurfaceTextureExternalTexture::Detach();
+  texture_->Leak();
   texture_.reset();
 }
 
