@@ -88,18 +88,16 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
           );
         });
       });
-      return TaskResult.success(null);
+
+      section('Gradle lockfiles check');
+      try {
+        await runGradleLockFilesCheck();
+        return TaskResult.success(null);
+      } catch (e) {
+        return TaskResult.failure(e.toString());
+      }
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
-      return TaskResult.failure(e.toString());
-    }
-  });
-  await task(() async {
-    section('Gradle lockfiles check');
-    try {
-      await runGradleLockFilesCheck();
-      return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
     }
