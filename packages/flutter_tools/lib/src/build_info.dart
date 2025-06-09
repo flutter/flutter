@@ -440,7 +440,15 @@ enum BuildMode {
   /// Whether this mode is using the precompiled runtime.
   bool get isPrecompiled => !isJit;
 
+  /// Name formatted in snake case.
+  ///
+  /// (e.g. debug, profile, release, jit_release)
   String get cliName => snakeCase(name);
+
+  /// Name formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, JitRelease)
+  String get uppercaseName => sentenceCase(name);
 
   @override
   String toString() => cliName;

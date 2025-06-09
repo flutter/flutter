@@ -359,4 +359,27 @@ void main() {
       <String>['1232,456', '2'],
     );
   });
+
+  testWithoutContext('BuildMode names', () {
+    for (final BuildMode buildMode in BuildMode.values) {
+      switch (buildMode) {
+        case BuildMode.debug:
+          expect(buildMode.cliName, 'debug');
+          expect(buildMode.uppercaseName, 'Debug');
+          expect(getFriendlyModeName(buildMode), 'debug');
+        case BuildMode.profile:
+          expect(buildMode.cliName, 'profile');
+          expect(buildMode.uppercaseName, 'Profile');
+          expect(getFriendlyModeName(buildMode), 'profile');
+        case BuildMode.release:
+          expect(buildMode.cliName, 'release');
+          expect(buildMode.uppercaseName, 'Release');
+          expect(getFriendlyModeName(buildMode), 'release');
+        case BuildMode.jitRelease:
+          expect(buildMode.cliName, 'jit_release');
+          expect(buildMode.uppercaseName, 'JitRelease');
+          expect(getFriendlyModeName(buildMode), 'jit release');
+      }
+    }
+  });
 }
