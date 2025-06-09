@@ -1487,7 +1487,7 @@ class FakeDevice extends Fake implements Device {
   Category get category => Category.mobile;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   Future<bool> get isLocalEmulator async => false;

@@ -180,6 +180,17 @@ void main() {
     expect(await device.isLocalEmulator, true);
   });
 
+  testWithoutContext('isSupported is false for x86 devices', () async {
+    final FakeProcessManager processManager = FakeProcessManager.list(const <FakeCommand>[
+      FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [x86]',
+      ),
+    ]);
+    final AndroidDevice device = setUpAndroidDevice(processManager: processManager);
+    expect(await device.isSupported(), false);
+  });
+
   testWithoutContext('isSupportedForProject is true on module project', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml')

@@ -193,7 +193,8 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
-    switch (await _getProperty('ro.product.cpu.abi')) {
+    final String? abi = await _getProperty('ro.product.cpu.abi');
+    switch (abi) {
       case 'arm64-v8a':
         // Perform additional verification for 64 bit ABI. Some devices,
         // like the Kindle Fire 8, misreport the abilist. We might not
@@ -205,10 +206,10 @@ class AndroidDevice extends Device {
         } else {
           return TargetPlatform.android_arm;
         }
-      case 'x86_64':
-        return TargetPlatform.android_x64;
-      default:
+      case 'armeabi-v7a':
         return TargetPlatform.android_arm;
+      default:
+        throw UnsupportedError('Unsupported Android architecture: $abi');
     }
   }();
 
@@ -851,7 +852,14 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async {
+    try {
+      await targetPlatform;
+      return true;
+    } on UnsupportedError {
+      return false;
+    }
+  }
 
   @override
   bool get supportsScreenshot => true;

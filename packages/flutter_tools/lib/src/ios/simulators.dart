@@ -412,7 +412,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     if (!globals.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
@@ -431,8 +431,8 @@ class IOSSimulator extends Device {
   String? _supportMessage;
 
   @override
-  String supportMessage() {
-    if (isSupported()) {
+  Future<String> supportMessage() async {
+    if (await isSupported()) {
       return 'Supported';
     }
 
