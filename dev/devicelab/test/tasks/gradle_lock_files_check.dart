@@ -203,7 +203,10 @@ void main() {
       );
 
       expect(mockExec.calls.length, 3);
-      expect(mockExec.calls[0], MockCall('git', const <String>['stash'], true, flutterDirectory.path));
+      expect(
+        mockExec.calls[0],
+        MockCall('git', const <String>['stash'], true, flutterDirectory.path),
+      );
       expect(
         mockExec.calls[1],
         MockCall(
@@ -289,7 +292,10 @@ void main() {
       );
 
       expect(mockExec.calls.length, 3); // stash, dart, pop
-      expect(mockExec.calls[0], MockCall('git', const <String>['stash'], true, flutterDirectory.path));
+      expect(
+        mockExec.calls[0],
+        MockCall('git', const <String>['stash'], true, flutterDirectory.path),
+      );
       expect(
         mockExec.calls[1],
         MockCall(
@@ -346,7 +352,10 @@ void main() {
           _throwsExceptionWithMessage('Initial git stash failed'),
         );
         expect(mockExec.calls.length, 2); // stash, pop
-        expect(mockExec.calls[0], MockCall('git', const <String>['stash'], true, flutterDirectory.path));
+        expect(
+          mockExec.calls[0],
+          MockCall('git', const <String>['stash'], true, flutterDirectory.path),
+        );
         expect(
           mockExec.calls[1],
           MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
