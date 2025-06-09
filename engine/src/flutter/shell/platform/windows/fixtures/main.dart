@@ -433,7 +433,7 @@ Future<void> sendSemanticsTreeInfo() async {
     transform[10] = 1;
     builder.updateNode(
       id: nodeId,
-      flags: 0,
+      flags: ui.SemanticsFlags.none,
       actions: 0,
       maxValueLength: 0,
       currentValueLength: 0,
@@ -446,8 +446,6 @@ Future<void> sendSemanticsTreeInfo() async {
       scrollExtentMax: 0,
       scrollExtentMin: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
-      elevation: 0,
-      thickness: 0,
       identifier: 'identifier',
       label: 'label',
       labelAttributes: const <ui.StringAttribute>[],

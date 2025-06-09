@@ -35,7 +35,6 @@ void main() {
           FakeFlutterProject()
             ..manifest = flutterManifest
             ..directory = directory
-            ..flutterPluginsFile = directory.childFile('.flutter-plugins')
             ..flutterPluginsDependenciesFile = directory.childFile('.flutter-plugins-dependencies')
             ..dartPluginRegistrant = directory.childFile('dart_plugin_registrant.dart');
       writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
@@ -1484,9 +1483,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
-
-  @override
-  late File flutterPluginsFile;
 
   @override
   late File flutterPluginsDependenciesFile;

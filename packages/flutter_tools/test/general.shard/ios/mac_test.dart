@@ -836,9 +836,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late FlutterManifest manifest;
 
   @override
-  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
-
-  @override
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   @override

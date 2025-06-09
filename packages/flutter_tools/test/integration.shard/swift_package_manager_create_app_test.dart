@@ -31,7 +31,6 @@ void main() {
             final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
               flutterBin,
               workingDirectoryPath,
-              iosLanguage: iosLanguage,
               platform: platformName,
               options: <String>['--platforms=$platformName'],
             );
@@ -100,7 +99,6 @@ void main() {
             final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
               flutterBin,
               workingDirectoryPath,
-              iosLanguage: iosLanguage,
               platform: platformName,
               options: <String>['--platforms=$platformName'],
             );
