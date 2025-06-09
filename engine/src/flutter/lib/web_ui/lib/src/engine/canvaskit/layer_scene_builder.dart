@@ -109,9 +109,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<ClipPathEngineLayer>(
-      ClipPathEngineLayer(path as LazyPath, clipBehavior),
-    );
+    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as LazyPath, clipBehavior));
   }
 
   @override
