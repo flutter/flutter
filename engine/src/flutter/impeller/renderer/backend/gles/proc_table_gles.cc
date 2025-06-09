@@ -141,7 +141,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     DiscardFramebufferEXT.Reset();
   }
 
-  if (!description_->HasExtension("ANGLE_framebuffer_blit")) {
+  if (!description_->HasExtension("GL_ANGLE_framebuffer_blit")) {
     BlitFramebufferANGLE.Reset();
   }
 

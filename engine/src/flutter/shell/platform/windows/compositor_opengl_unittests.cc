@@ -47,7 +47,7 @@ const unsigned char* MockGetString(GLenum name) {
 
 const unsigned char* MockGetStringi(GLenum name, int index) {
   if (name == GL_EXTENSIONS) {
-    return reinterpret_cast<const unsigned char*>("ANGLE_framebuffer_blit");
+    return reinterpret_cast<const unsigned char*>("GL_ANGLE_framebuffer_blit");
   } else {
     return reinterpret_cast<const unsigned char*>("");
   }
