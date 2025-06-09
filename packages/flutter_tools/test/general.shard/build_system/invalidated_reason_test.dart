@@ -16,8 +16,11 @@ void main() {
       ..data.add('c.dart');
     final InvalidatedReason outputMissing = InvalidatedReason(InvalidatedReasonKind.outputMissing)
       ..data.add('d.dart');
-    final InvalidatedReason outputSetChanged = InvalidatedReason(
-      InvalidatedReasonKind.outputSetChanged,
+    final InvalidatedReason outputSetRemoval = InvalidatedReason(
+      InvalidatedReasonKind.outputSetRemoval,
+    )..data.add('e.dart');
+    final InvalidatedReason outputSetAddition = InvalidatedReason(
+      InvalidatedReasonKind.outputSetAddition,
     )..data.add('e.dart');
 
     expect(inputChanged.toString(), 'The following inputs have updated contents: a.dart');
@@ -25,8 +28,12 @@ void main() {
     expect(inputMissing.toString(), 'The following inputs were missing: c.dart');
     expect(outputMissing.toString(), 'The following outputs were missing: d.dart');
     expect(
-      outputSetChanged.toString(),
+      outputSetRemoval.toString(),
       'The following outputs were removed from the output set: e.dart',
+    );
+    expect(
+      outputSetAddition.toString(),
+      'The following outputs were added to the output set: e.dart',
     );
   });
 }

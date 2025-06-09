@@ -24,11 +24,11 @@ void main() {
       processManager: FakeProcessManager.any(),
     );
 
-    expect(const GenerateLocalizationsTarget().canSkip(environment), true);
+    expect(await const GenerateLocalizationsTarget().canSkip(environment), true);
 
     environment.projectDir.childFile('l10n.yaml').createSync();
 
-    expect(const GenerateLocalizationsTarget().canSkip(environment), false);
+    expect(await const GenerateLocalizationsTarget().canSkip(environment), false);
   });
 
   testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {

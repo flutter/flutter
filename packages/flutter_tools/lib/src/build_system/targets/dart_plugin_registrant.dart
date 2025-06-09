@@ -46,7 +46,7 @@ class DartPluginRegistrantTarget extends Target {
   }
 
   @override
-  bool canSkip(Environment environment) {
+  Future<bool> canSkip(Environment environment) async {
     if (!environment.generateDartPluginRegistry) {
       return true;
     }

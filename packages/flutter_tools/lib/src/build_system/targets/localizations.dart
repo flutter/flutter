@@ -37,7 +37,7 @@ class GenerateLocalizationsTarget extends Target {
   List<String> get depfiles => <String>['gen_localizations.d'];
 
   @override
-  bool canSkip(Environment environment) {
+  Future<bool> canSkip(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     return !configFile.existsSync();
   }
