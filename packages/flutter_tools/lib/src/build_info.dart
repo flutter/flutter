@@ -255,7 +255,6 @@ class BuildInfo {
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => mode.cliName;
-  String get friendlyModeName => getFriendlyModeName(mode);
 
   /// the flavor name in the output apk files is lower-cased (see Flutter Gradle Plugin),
   /// so the lower cased flavor name is used to compute the output file name
@@ -440,15 +439,25 @@ enum BuildMode {
   /// Whether this mode is using the precompiled runtime.
   bool get isPrecompiled => !isJit;
 
-  /// Name formatted in snake case.
+  /// [name] formatted in snake case.
   ///
   /// (e.g. debug, profile, release, jit_release)
   String get cliName => snakeCase(name);
 
-  /// Name formatted in sentence case.
+  /// [cliName] formatted in sentence case.
   ///
-  /// (e.g. Debug, Profile, Release, JitRelease)
-  String get uppercaseName => sentenceCase(name);
+  /// (e.g. Debug, Profile, Release, Jit_release)
+  String get uppercaseName => sentenceCase(cliName);
+
+  /// [cliName] with `_` replaced with a space.
+  ///
+  /// (e.g. debug, profile, release, jit release)
+  String get friendlyName => cliName.replaceAll('_', ' ');
+
+  /// [friendlyName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit release)
+  String get uppercaseFriendlyName => sentenceCase(friendlyName);
 
   @override
   String toString() => cliName;
@@ -545,10 +554,6 @@ String? validatedBuildNameForPlatform(
     return buildName;
   }
   return buildName;
-}
-
-String getFriendlyModeName(BuildMode mode) {
-  return snakeCase(mode.cliName).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.

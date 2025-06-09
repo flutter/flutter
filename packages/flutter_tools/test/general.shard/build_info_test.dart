@@ -366,19 +366,23 @@ void main() {
         case BuildMode.debug:
           expect(buildMode.cliName, 'debug');
           expect(buildMode.uppercaseName, 'Debug');
-          expect(getFriendlyModeName(buildMode), 'debug');
+          expect(buildMode.friendlyName, 'debug');
+          expect(buildMode.uppercaseFriendlyName, 'Debug');
         case BuildMode.profile:
           expect(buildMode.cliName, 'profile');
           expect(buildMode.uppercaseName, 'Profile');
-          expect(getFriendlyModeName(buildMode), 'profile');
+          expect(buildMode.friendlyName, 'profile');
+          expect(buildMode.uppercaseFriendlyName, 'Profile');
         case BuildMode.release:
           expect(buildMode.cliName, 'release');
           expect(buildMode.uppercaseName, 'Release');
-          expect(getFriendlyModeName(buildMode), 'release');
+          expect(buildMode.friendlyName, 'release');
+          expect(buildMode.uppercaseFriendlyName, 'Release');
         case BuildMode.jitRelease:
           expect(buildMode.cliName, 'jit_release');
-          expect(buildMode.uppercaseName, 'JitRelease');
-          expect(getFriendlyModeName(buildMode), 'jit release');
+          expect(buildMode.uppercaseName, 'Jit_release');
+          expect(buildMode.friendlyName, 'jit release');
+          expect(buildMode.uppercaseFriendlyName, 'Jit release');
       }
     }
   });
