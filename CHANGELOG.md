@@ -31,6 +31,12 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 ## Flutter 3.32 Changes
 
+### [3.32.2](https://github.com/flutter/flutter/releases/tag/3.32.2)
+
+- [flutter/169772](https://github.com/flutter/flutter/pull/169772) - Configuration changes for Flutter's CI to run tests on Linux instead of Windows when not otherwise required.
+- [flutter/169630](https://github.com/flutter/flutter/pull/169630) - Fixes issue where flavored Android packages may not successfully build on Windows repeatedly until the next clean.
+- [flutter/169912](https://github.com/flutter/flutter/pull/169912) - Splits Flutter CI task for publishing API docs into one build step and one deploy step.
+
 ### [3.32.1](https://github.com/flutter/flutter/releases/tag/3.32.1)
 
 - [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fixes flaky crash when targeting web applications via IDEs using the DAP.

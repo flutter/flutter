@@ -16,7 +16,7 @@ dependencies:
   dwds: 24.3.10
   code_builder: 4.10.1
   completion: 1.0.1
-  coverage: 1.14.0
+  coverage: 1.14.1
   crypto: 3.0.6
   ffi: 2.1.4
   file: 7.0.1
@@ -56,10 +56,9 @@ dependencies:
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 0.20.0
-  hooks: 0.19.1
-  code_assets: 0.19.0
-  data_assets: 0.19.1
+  hooks_runner: 0.21.0
+  hooks: 0.19.3
+  code_assets: 0.19.3
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -67,7 +66,7 @@ dependencies:
   test_api: 0.7.6
   test_core: 0.6.11
 
-  vm_service: 15.0.1
+  vm_service: 15.0.2
 
   standard_message_codec: 0.0.1+4
 
@@ -118,7 +117,7 @@ dev_dependencies:
   collection: 1.19.1
   file_testing: 3.0.2
 
-  checked_yaml: 2.0.3
+  checked_yaml: 2.0.4
   js: 0.7.2
   json_annotation: 4.9.0
   node_preamble: 2.0.2
@@ -127,5 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-
-# PUBSPEC CHECKSUM: 6ciq64
+# PUBSPEC CHECKSUM: npsc0d
