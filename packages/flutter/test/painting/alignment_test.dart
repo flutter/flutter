@@ -338,4 +338,16 @@ void main() {
     expect(const AlignmentGeometry.xy(4, 5), const Alignment(4, 5));
     expect(const AlignmentGeometry.directional(4, 5), const AlignmentDirectional(4, 5));
   });
+
+  test('AlignmentGeometry static members', () {
+    expect(AlignmentGeometry.topLeft, Alignment.topLeft);
+    expect(AlignmentGeometry.topCenter, Alignment.topCenter);
+    expect(AlignmentGeometry.topRight, Alignment.topRight);
+    expect(AlignmentGeometry.centerLeft, Alignment.centerLeft);
+    expect(AlignmentGeometry.center, Alignment.center);
+    expect(AlignmentGeometry.centerRight, Alignment.centerRight);
+    expect(AlignmentGeometry.bottomLeft, Alignment.bottomLeft);
+    expect(AlignmentGeometry.bottomCenter, Alignment.bottomCenter);
+    expect(AlignmentGeometry.bottomRight, Alignment.bottomRight);
+  });
 }

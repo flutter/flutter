@@ -121,6 +121,11 @@ class _MenuAnchorScope extends InheritedWidget {
 /// [MenuBar], used in situations where a [MenuBar] isn't appropriate, or to
 /// construct widgets or screen regions that have submenus.
 ///
+/// To programmatically control a [MenuAnchor], like opening or closing it, or checking its state,
+/// you can get its associated [MenuController]. Use `MenuController.maybeOf(BuildContext context)`
+/// to retrieve the controller for the closest [MenuAnchor] ancestor of a given [BuildContext].
+/// More detailed usage of [MenuController] is available in its class documentation.
+///
 /// {@tool dartpad}
 /// This example shows how to use a [MenuAnchor] to wrap a button and open a
 /// cascading menu from the button.
@@ -1253,8 +1258,8 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// To indicate returning to an indeterminate state, [onChanged] will be
   /// called with null.
   ///
-  /// If true, [onChanged] can be called with [value] when selected while
-  /// [groupValue] != [value], or with null when selected again while
+  /// If true, [onChanged] is called with [value] when selected while
+  /// [groupValue] != [value], and with null when selected again while
   /// [groupValue] == [value].
   ///
   /// If false, [onChanged] will be called with [value] when it is selected

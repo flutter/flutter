@@ -111,7 +111,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
         'when running "flutter drive" to establish a baseline, and then subequent '
         '"flutter drive" instances will be tested against that (local) golden.\n'
         '\n'
-        'See the documentation at dev/tools/android_engine_test/README.md for '
+        'See the documentation at dev/integration_tests/android_engine_test/README.md for '
         'details.',
       );
     }

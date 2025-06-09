@@ -6,7 +6,6 @@ package io.flutter.plugin.platform;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.SparseArray;
@@ -43,6 +42,10 @@ import java.util.List;
  *
  * <p>Each {@link io.flutter.embedding.engine.FlutterEngine} has a single platform views controller.
  * A platform views controller can be attached to at most one Flutter view.
+ * [PlatformViewsController2] is intentionally a different class from [PlatformViewsController] in
+ * order to separate out the complexity of the first 3 platform view implementations (Virtual
+ * Display, Texture Layer, and Hybrid Composition). From the 4th platform view implementation,
+ * Hybrid Composition++.
  */
 public class PlatformViewsController2 implements PlatformViewsAccessibilityDelegate {
   private static final String TAG = "PlatformViewsController2";
@@ -520,7 +523,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -542,7 +544,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // NOT called from UI thread.
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -551,7 +552,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // NOT called from UI thread.
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void applyTransactions() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -562,7 +562,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     pendingTransactions.clear();
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
@@ -592,7 +591,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void showOverlaySurface() {
     if (overlaySurfaceControl == null) {
@@ -603,7 +601,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.apply();
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void hideOverlaySurface() {
     if (overlaySurfaceControl == null) {

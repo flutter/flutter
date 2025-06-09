@@ -173,7 +173,8 @@ class _FlutterProject {
       '# The following section is specific to Flutter packages.\n'
           'flutter:\n'
           '\n'
-          '  disable-swift-package-manager: true\n',
+          '  config:\n'
+          '    enable-swift-package-manager: false\n',
     );
     await pubspec.writeAsString(content, flush: true);
   }
@@ -405,6 +406,16 @@ public class $pluginClass: NSObject, FlutterPlugin {
     required String template,
     Map<String, String>? environment,
   }) async {
+    final bool isDarwin = target == 'ios' || target == 'macos';
+    if (template != 'plugin' && isDarwin) {
+      // ios-language option is only supported for plugins. Remove the -i flag and the next parameter, "swift" or
+      // "objc". This isn't proper arg parsing (for example doesn't handle -i=objc, but good enough for these tests
+      // since they blow up if -i is passed incorrectly.
+      final int indexOfIOSLanguage = options.indexOf('-i');
+      if (indexOfIOSLanguage != -1) {
+        options.removeRange(indexOfIOSLanguage, indexOfIOSLanguage + 2);
+      }
+    }
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -420,7 +431,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     });
 
     final _FlutterProject project = _FlutterProject(directory, name);
-    if (template == 'plugin' && (target == 'ios' || target == 'macos')) {
+    if (template == 'plugin' && isDarwin) {
       project._reduceDarwinPluginMinimumVersion(name, target);
     }
     return project;
@@ -480,7 +491,7 @@ end
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString =
-        target == 'ios' ? "s.platform = :ios, '12.0'" : "s.platform = :osx, '10.11'";
+        target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
