@@ -98,7 +98,7 @@ void main() {
       logger: BufferLogger.test(),
     );
 
-    // Compute a unique hash of this build's particular environment. See class [Environment].
+    // A unique hash of this build's particular environment. See class [Environment].
     const String buildPrefix = '6666cd76f96956469e7be39d750cc7d9';
 
     final File txt1 = buildDir.childDirectory(buildPrefix).childFile('1.txt')

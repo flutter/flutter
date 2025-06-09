@@ -1272,10 +1272,10 @@ enum InvalidatedReasonKind {
   /// An output file that is expected is missing.
   outputMissing,
 
-  /// The set of expected output files changed.
+  /// An output file was added to the set of expected output files.
   outputSetAddition,
 
-  /// The set of expected output files changed.
+  /// An output file was removed from the set of expected output files.
   outputSetRemoval,
 
   /// The build key changed
