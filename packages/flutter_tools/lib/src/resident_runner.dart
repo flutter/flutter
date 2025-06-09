@@ -29,6 +29,7 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
+import 'debugging_options.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;

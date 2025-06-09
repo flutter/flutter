@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
+import '../debugging_options.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart' as globals;

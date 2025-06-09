@@ -13,6 +13,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'build_info.dart';
 import 'convert.dart';
+import 'debugging_options.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';

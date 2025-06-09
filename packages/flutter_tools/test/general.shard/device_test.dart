@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/debugging_options.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -699,7 +700,7 @@ void main() {
         startPaused: true,
         disableServiceAuthCodes: true,
         enableDds: false,
-        dartEntrypointArgs: <String>['a', 'b'],
+        dartEntrypointArgs: const <String>['a', 'b'],
         dartFlags: 'c',
         deviceVmServicePort: 1234,
         enableImpeller: ImpellerStatus.enabled,

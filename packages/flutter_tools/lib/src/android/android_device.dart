@@ -17,6 +17,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/debugging_options.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_devtools_handler.dart';

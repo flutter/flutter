@@ -11,7 +11,7 @@ import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
-import '../device.dart';
+import '../debugging_options.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 

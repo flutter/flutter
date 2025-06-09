@@ -21,6 +21,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;

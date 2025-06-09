@@ -23,12 +23,12 @@ import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
+import '../debugging_options.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
-
 import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
