@@ -61,9 +61,6 @@ public class FlutterShellArgs {
   public static final String ARG_VERBOSE_LOGGING = "--verbose-logging";
   public static final String ARG_KEY_VM_SERVICE_PORT = "vm-service-port";
   public static final String ARG_VM_SERVICE_PORT = "--vm-service-port=";
-  // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-  // See https://github.com/dart-lang/sdk/issues/50233
-  public static final String ARG_KEY_OBSERVATORY_PORT = "observatory-port";
   public static final String ARG_KEY_DART_FLAGS = "dart-flags";
   public static final String ARG_DART_FLAGS = "--dart-flags";
 
@@ -83,13 +80,6 @@ public class FlutterShellArgs {
     int vmServicePort = intent.getIntExtra(ARG_KEY_VM_SERVICE_PORT, 0);
     if (vmServicePort > 0) {
       args.add(ARG_VM_SERVICE_PORT + Integer.toString(vmServicePort));
-    } else {
-      // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-      // See https://github.com/dart-lang/sdk/issues/50233
-      vmServicePort = intent.getIntExtra(ARG_KEY_OBSERVATORY_PORT, 0);
-      if (vmServicePort > 0) {
-        args.add(ARG_VM_SERVICE_PORT + Integer.toString(vmServicePort));
-      }
     }
     if (intent.getBooleanExtra(ARG_KEY_DISABLE_SERVICE_AUTH_CODES, false)) {
       args.add(ARG_DISABLE_SERVICE_AUTH_CODES);

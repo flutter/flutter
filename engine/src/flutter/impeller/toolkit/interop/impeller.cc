@@ -1141,6 +1141,13 @@ void ImpellerParagraphStyleSetTextDirection(
 }
 
 IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetTextDecoration(
+    ImpellerParagraphStyle paragraph_style,
+    const ImpellerTextDecoration* decoration) {
+  GetPeer(paragraph_style)->SetTextDecoration(*decoration);
+}
+
+IMPELLER_EXTERN_C
 void ImpellerParagraphStyleSetMaxLines(ImpellerParagraphStyle paragraph_style,
                                        uint32_t max_lines) {
   GetPeer(paragraph_style)->SetMaxLines(max_lines);
@@ -1150,6 +1157,12 @@ IMPELLER_EXTERN_C
 void ImpellerParagraphStyleSetLocale(ImpellerParagraphStyle paragraph_style,
                                      const char* locale) {
   GetPeer(paragraph_style)->SetLocale(ReadString(locale));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetEllipsis(ImpellerParagraphStyle paragraph_style,
+                                       const char* ellipsis) {
+  GetPeer(paragraph_style)->SetEllipsis(ReadString(ellipsis));
 }
 
 IMPELLER_EXTERN_C

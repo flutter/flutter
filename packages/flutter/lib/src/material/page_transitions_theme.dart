@@ -755,8 +755,11 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Defaults to [ColorScheme.surface]
   final Color? backgroundColor;
 
+  /// The value of [transitionDuration] in milliseconds.
+  static const int kTransitionMilliseconds = 800;
+
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 800);
+  Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition =>
@@ -1258,10 +1261,10 @@ void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
   if (scale == 1.0) {
     return;
   }
-  transform.scale(scale, scale);
+  transform.scaleByDouble(scale, scale, scale, 1);
   final double dx = ((size.width * scale) - size.width) / 2;
   final double dy = ((size.height * scale) - size.height) / 2;
-  transform.translate(-dx, -dy);
+  transform.translateByDouble(-dx, -dy, 0, 1);
 }
 
 mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {

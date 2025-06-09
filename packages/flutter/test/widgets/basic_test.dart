@@ -424,7 +424,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isTextField), isTrue);
+      expect(node2.flagsCollection.isTextField, isTrue);
     });
 
     testWidgets('Semantics does not merge role - link', (WidgetTester tester) async {
@@ -445,7 +445,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isLink), isTrue);
+      expect(node2.flagsCollection.isLink, isTrue);
     });
 
     testWidgets('Semantics does not merge role - scopes route', (WidgetTester tester) async {
@@ -471,7 +471,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.scopesRoute), isTrue);
+      expect(node2.flagsCollection.scopesRoute, isTrue);
     });
 
     testWidgets('Semantics does not merge role - header on web', (WidgetTester tester) async {
@@ -493,7 +493,7 @@ void main() {
       if (kIsWeb) {
         expect(node1 != node2, isTrue);
         expect(node1.role, SemanticsRole.dialog);
-        expect(node2.hasFlag(SemanticsFlag.isHeader), isTrue);
+        expect(node2.flagsCollection.isHeader, isTrue);
       } else {
         expect(node1 == node2, isTrue);
       }
@@ -517,7 +517,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isImage), isTrue);
+      expect(node2.flagsCollection.isImage, isTrue);
     });
 
     testWidgets('Semantics does not merge role - slider', (WidgetTester tester) async {
@@ -538,7 +538,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isSlider), isTrue);
+      expect(node2.flagsCollection.isSlider, isTrue);
     });
 
     testWidgets('Semantics does not merge role - keyboard key', (WidgetTester tester) async {
@@ -559,7 +559,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isKeyboardKey), isTrue);
+      expect(node2.flagsCollection.isKeyboardKey, isTrue);
     });
 
     testWidgets('Semantics does not merge role - scopes route', (WidgetTester tester) async {
@@ -580,7 +580,7 @@ void main() {
       final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
       expect(node1 != node2, isTrue);
       expect(node1.role, SemanticsRole.dialog);
-      expect(node2.hasFlag(SemanticsFlag.isSlider), isTrue);
+      expect(node2.flagsCollection.isSlider, isTrue);
     });
 
     testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {

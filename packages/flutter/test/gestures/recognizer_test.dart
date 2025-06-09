@@ -167,6 +167,83 @@ void main() {
       tester.route(up2);
       expect(resolutions, <String>['rejected']);
     });
+
+    testGesture('uses expected pre-accept slop tolerance', (GestureTester tester) {
+      final List<String> resolutions = <String>[];
+      final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
+      addTearDown(indefinite.dispose);
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> defaultSlop =
+          TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
+            GestureDisposition.accepted,
+            postAcceptSlopTolerance: null,
+            onAcceptGesture: () => resolutions.add('accepted'),
+            onRejectGesture: () => resolutions.add('rejected'),
+          );
+      addTearDown(defaultSlop.dispose);
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> setSlop =
+          TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
+            GestureDisposition.accepted,
+            preAcceptSlopTolerance: 5,
+            postAcceptSlopTolerance: null,
+            onAcceptGesture: () => resolutions.add('accepted'),
+            onRejectGesture: () => resolutions.add('rejected'),
+          );
+      addTearDown(setSlop.dispose);
+      final TestPrimaryPointerGestureRecognizer<PointerUpEvent> nullSlop =
+          TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
+            GestureDisposition.accepted,
+            preAcceptSlopTolerance: null,
+            postAcceptSlopTolerance: null,
+            onAcceptGesture: () => resolutions.add('accepted'),
+            onRejectGesture: () => resolutions.add('rejected'),
+          );
+      addTearDown(nullSlop.dispose);
+
+      // Test getters
+      expect(defaultSlop.preAcceptSlopTolerance, equals(kTouchSlop));
+      expect(setSlop.preAcceptSlopTolerance, equals(5.0));
+      expect(nullSlop.preAcceptSlopTolerance, isNull);
+
+      indefinite.addPointer(down);
+      defaultSlop.addPointer(down);
+      tester.closeArena(5);
+      tester.async.flushMicrotasks();
+      tester.route(down);
+      tester.route(move);
+      tester.route(up);
+      expect(resolutions, <String>['accepted']);
+      resolutions.clear();
+
+      defaultSlop.gestureSettings = const DeviceGestureSettings(touchSlop: 5);
+      indefinite.addPointer(down);
+      defaultSlop.addPointer(down);
+      tester.closeArena(5);
+      tester.async.flushMicrotasks();
+      tester.route(down);
+      tester.route(move);
+      tester.route(up);
+      expect(resolutions, <String>['rejected']);
+      resolutions.clear();
+
+      indefinite.addPointer(down);
+      setSlop.addPointer(down);
+      tester.closeArena(5);
+      tester.async.flushMicrotasks();
+      tester.route(down);
+      tester.route(move);
+      tester.route(up);
+      expect(resolutions, <String>['rejected']);
+      resolutions.clear();
+
+      indefinite.addPointer(down2);
+      nullSlop.addPointer(down2);
+      tester.closeArena(6);
+      tester.async.flushMicrotasks();
+      tester.route(down2);
+      tester.route(move2);
+      tester.route(up2);
+      expect(resolutions, <String>['accepted']);
+    });
   });
 }
 

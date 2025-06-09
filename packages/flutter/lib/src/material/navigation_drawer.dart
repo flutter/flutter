@@ -57,6 +57,8 @@ class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({
     super.key,
     required this.children,
+    this.header,
+    this.footer,
     this.backgroundColor,
     this.shadowColor,
     this.surfaceTintColor,
@@ -120,6 +122,16 @@ class NavigationDrawer extends StatelessWidget {
   /// widgets like headlines and dividers.
   final List<Widget> children;
 
+  /// A widget to display at the top of the layout.
+  ///
+  /// Typically used for titles, navigation bars, or other header content.
+  final Widget? header;
+
+  /// A widget to display at the bottom of the layout.
+  ///
+  /// Typically used for actions, navigation controls, or other footer content.
+  final Widget? footer;
+
   /// The index into destinations for the current selected
   /// [NavigationDrawerDestination] or null if no destination is selected.
   ///
@@ -173,7 +185,16 @@ class NavigationDrawer extends StatelessWidget {
       shadowColor: shadowColor ?? navigationDrawerTheme.shadowColor,
       surfaceTintColor: surfaceTintColor ?? navigationDrawerTheme.surfaceTintColor,
       elevation: elevation ?? navigationDrawerTheme.elevation,
-      child: SafeArea(bottom: false, child: ListView(children: wrappedChildren)),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: <Widget>[
+            if (header != null) header!,
+            Expanded(child: ListView(children: wrappedChildren)),
+            if (footer != null) footer!,
+          ],
+        ),
+      ),
     );
   }
 }
