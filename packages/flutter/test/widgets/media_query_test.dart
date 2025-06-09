@@ -459,7 +459,7 @@ void main() {
 
     expect(data.accessibleNavigation, true);
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(data.accessibleNavigation, false);
     expect(rebuildCount, 4);
 
@@ -520,7 +520,7 @@ void main() {
 
     expect(data.accessibleNavigation, true);
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(data.accessibleNavigation, true);
     expect(rebuildCount, 1);
 

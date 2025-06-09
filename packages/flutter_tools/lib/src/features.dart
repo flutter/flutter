@@ -53,35 +53,32 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
-  /// Whether explicit package dependency management is enabled.
-  bool get isExplicitPackageDependenciesEnabled => false;
-
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature);
-}
 
-/// All current Flutter feature flags.
-const List<Feature> allFeatures = <Feature>[
-  flutterWebFeature,
-  flutterLinuxDesktopFeature,
-  flutterMacOSDesktopFeature,
-  flutterWindowsDesktopFeature,
-  flutterAndroidFeature,
-  flutterIOSFeature,
-  flutterFuchsiaFeature,
-  flutterCustomDevicesFeature,
-  cliAnimation,
-  nativeAssets,
-  swiftPackageManager,
-];
+  /// All current Flutter feature flags.
+  List<Feature> get allFeatures => const <Feature>[
+    flutterWebFeature,
+    flutterLinuxDesktopFeature,
+    flutterMacOSDesktopFeature,
+    flutterWindowsDesktopFeature,
+    flutterAndroidFeature,
+    flutterIOSFeature,
+    flutterFuchsiaFeature,
+    flutterCustomDevicesFeature,
+    cliAnimation,
+    nativeAssets,
+    swiftPackageManager,
+  ];
+}
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
 Iterable<Feature> get allConfigurableFeatures =>
-    allFeatures.where((Feature feature) => feature.configSetting != null);
+    featureFlags.allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
