@@ -67,16 +67,14 @@ class SemanticsController {
   /// a custom implementation can be passed via the [WidgetController] constructor.
   SemanticsController._(this._controller);
 
-  static final int _scrollingActions =
-      SemanticsAction.scrollUp.index |
+  static final int _scrollingActions = SemanticsAction.scrollUp.index |
       SemanticsAction.scrollDown.index |
       SemanticsAction.scrollLeft.index |
       SemanticsAction.scrollRight.index |
       SemanticsAction.scrollToOffset.index;
 
   /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
-  static final int _importantFlagsForAccessibility =
-      SemanticsFlag.hasCheckedState.index |
+  static final int _importantFlagsForAccessibility = SemanticsFlag.hasCheckedState.index |
       SemanticsFlag.hasToggledState.index |
       SemanticsFlag.hasEnabledState.index |
       SemanticsFlag.isButton.index |
@@ -892,8 +890,8 @@ abstract class WidgetController {
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
     return allElements.whereType<StatefulElement>().map<State>(
-      (StatefulElement element) => element.state,
-    );
+          (StatefulElement element) => element.state,
+        );
   }
 
   /// The matching state in the widget tree.

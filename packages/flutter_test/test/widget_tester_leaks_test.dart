@@ -28,9 +28,9 @@ void main() {
       .withTrackedAll()
       .withTracked(allNotDisposed: true, experimentalAllNotGCed: true)
       .withIgnored(
-        createdByTestHelpers: true,
-        testHelperExceptions: <RegExp>[RegExp(RegExp.escape(memoryLeakTestsFilePath()))],
-      );
+    createdByTestHelpers: true,
+    testHelperExceptions: <RegExp>[RegExp(RegExp.escape(memoryLeakTestsFilePath()))],
+  );
 
   for (final LeakTestCase test in memoryLeakTests) {
     for (final MapEntry<String, LeakTesting Function(LeakTesting settings)> settingsCase

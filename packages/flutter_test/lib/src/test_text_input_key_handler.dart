@@ -38,8 +38,8 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   }
 
   // These combinations must match NSStandardKeyBindingResponding.
-  static final Map<SingleActivator, List<String>>
-  _macOSActivatorToSelectors = <SingleActivator, List<String>>{
+  static final Map<SingleActivator, List<String>> _macOSActivatorToSelectors =
+      <SingleActivator, List<String>>{
     for (final bool pressShift in const <bool>[true, false]) ...<SingleActivator, List<String>>{
       SingleActivator(LogicalKeyboardKey.backspace, shift: pressShift): <String>['deleteBackward:'],
       SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift): <String>[

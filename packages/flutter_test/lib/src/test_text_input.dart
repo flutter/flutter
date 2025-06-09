@@ -336,10 +336,9 @@ class TestTextInput {
         ]),
       ),
       (ByteData? data) {
-        response =
-            (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>)
-                .map((dynamic element) => element as List<dynamic>)
-                .toList();
+        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>)
+            .map((dynamic element) => element as List<dynamic>)
+            .toList();
       },
     );
 

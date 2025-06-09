@@ -548,14 +548,12 @@ void main() {
     // candidates, it should find 1 instead of 2. If the _LastFinder wasn't
     // correctly chained after the descendant's candidates, the last element
     // with a Text widget would have been 2.
-    final Text text =
-        find
-                .descendant(of: find.byKey(key1), matching: find.byType(Text))
-                .last
-                .evaluate()
-                .single
-                .widget
-            as Text;
+    final Text text = find
+        .descendant(of: find.byKey(key1), matching: find.byType(Text))
+        .last
+        .evaluate()
+        .single
+        .widget as Text;
 
     expect(text.data, '1');
   });
@@ -1365,8 +1363,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback:
-                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.evaluate().toString();
 
@@ -1385,8 +1383,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback:
-                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString();
 
@@ -1401,8 +1399,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback:
-                (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString(describeSelf: true);
 

@@ -18,7 +18,8 @@ class TestDragData {
 }
 
 void main() {
-  testWidgets('WidgetTester.drag must break the offset into multiple parallel components if '
+  testWidgets(
+      'WidgetTester.drag must break the offset into multiple parallel components if '
       'the drag goes outside the touch slop values', (WidgetTester tester) async {
     // This test checks to make sure that the total drag will be correctly split into
     // pieces such that the first (and potentially second) moveBy function call(s) in
@@ -140,21 +141,14 @@ void main() {
             'Touch Slop: ${testResult.slop}\n'
             'Delta:      ${testResult.dragDistance}\n',
       );
-      for (
-        int valueIndex = 0;
-        valueIndex < offsetResults[resultIndex].expectedOffsets.length;
-        valueIndex += 1
-      ) {
+      for (int valueIndex = 0;
+          valueIndex < offsetResults[resultIndex].expectedOffsets.length;
+          valueIndex += 1) {
         expect(
           testResult.expectedOffsets[valueIndex],
           offsetMoreOrLessEquals(dragOffsets[valueIndex]),
-          reason:
-              'There is a difference in the expected and actual value of the '
-              '${valueIndex == 2
-                  ? 'first'
-                  : valueIndex == 3
-                  ? 'second'
-                  : 'third'}'
+          reason: 'There is a difference in the expected and actual value of the '
+              '${valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third'}'
               ' split offset for the drag with:\n'
               'Touch slop: ${testResult.slop}\n'
               'Delta:      ${testResult.dragDistance}\n',
@@ -288,8 +282,8 @@ void main() {
           onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
           onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
           onPointerPanZoomStart: (PointerPanZoomStartEvent event) => logs.add('panZoomStart'),
-          onPointerPanZoomUpdate:
-              (PointerPanZoomUpdateEvent event) => logs.add('panZoomUpdate ${event.pan}'),
+          onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) =>
+              logs.add('panZoomUpdate ${event.pan}'),
           onPointerPanZoomEnd: (PointerPanZoomEndEvent event) => logs.add('panZoomEnd'),
           child: const Text('test'),
         ),
@@ -348,7 +342,8 @@ void main() {
     }
   });
 
-  testWidgets('WidgetTester.fling produces strictly monotonically increasing timestamps, '
+  testWidgets(
+      'WidgetTester.fling produces strictly monotonically increasing timestamps, '
       'when given a large velocity', (WidgetTester tester) async {
     // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
     // same timestamp. This is more likely to happen when the velocity tracker
@@ -575,8 +570,8 @@ void main() {
                     key: const Key('listView-a'),
                     itemCount: 50,
                     shrinkWrap: true,
-                    itemBuilder:
-                        (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                    itemBuilder: (BuildContext context, int i) =>
+                        ListTile(title: Text('Item a-$i')),
                   ),
                 ),
                 const Divider(thickness: 5),
@@ -585,8 +580,8 @@ void main() {
                     key: const Key('listView-b'),
                     itemCount: 50,
                     shrinkWrap: true,
-                    itemBuilder:
-                        (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                    itemBuilder: (BuildContext context, int i) =>
+                        ListTile(title: Text('Item b-$i')),
                   ),
                 ),
               ],
@@ -816,8 +811,8 @@ void main() {
         );
         expect(
           tester.semantics.simulatedAccessibilityTraversal().map(
-            (SemanticsNode node) => node.label,
-          ),
+                (SemanticsNode node) => node.label,
+              ),
           <String>[],
         );
       });
@@ -1001,13 +996,12 @@ void main() {
 
         // Grab a sample of the matchers to validate that not every matcher is
         // needed to validate a traversal when using `containsAllInOrder`.
-        final Iterable<Matcher> expectedMatchers =
-            <Matcher>[...fullTraversalMatchers]
-              ..removeAt(0)
-              ..removeLast()
-              ..mapIndexed<Matcher?>(
-                (int i, Matcher element) => i.isEven ? element : null,
-              ).nonNulls;
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]
+          ..removeAt(0)
+          ..removeLast()
+          ..mapIndexed<Matcher?>(
+            (int i, Matcher element) => i.isEven ? element : null,
+          ).nonNulls;
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(),
@@ -1501,21 +1495,18 @@ void main() {
 
   group('WidgetTester.tapOnText', () {
     final List<String> tapLogs = <String>[];
-    final TapGestureRecognizer tapA =
-        TapGestureRecognizer()
-          ..onTap = () {
-            tapLogs.add('A');
-          };
-    final TapGestureRecognizer tapB =
-        TapGestureRecognizer()
-          ..onTap = () {
-            tapLogs.add('B');
-          };
-    final TapGestureRecognizer tapC =
-        TapGestureRecognizer()
-          ..onTap = () {
-            tapLogs.add('C');
-          };
+    final TapGestureRecognizer tapA = TapGestureRecognizer()
+      ..onTap = () {
+        tapLogs.add('A');
+      };
+    final TapGestureRecognizer tapB = TapGestureRecognizer()
+      ..onTap = () {
+        tapLogs.add('B');
+      };
+    final TapGestureRecognizer tapC = TapGestureRecognizer()
+      ..onTap = () {
+        tapLogs.add('C');
+      };
     tearDown(tapLogs.clear);
     tearDownAll(() {
       tapA.dispose();

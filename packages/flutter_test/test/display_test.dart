@@ -139,10 +139,10 @@ void main() {
 
 class DisplaySnapshot {
   DisplaySnapshot(Display display)
-    : devicePixelRatio = display.devicePixelRatio,
-      refreshRate = display.refreshRate,
-      id = display.id,
-      size = display.size;
+      : devicePixelRatio = display.devicePixelRatio,
+        refreshRate = display.refreshRate,
+        id = display.id,
+        size = display.size;
 
   final double devicePixelRatio;
   final double refreshRate;

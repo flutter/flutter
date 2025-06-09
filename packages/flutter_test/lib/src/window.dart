@@ -127,10 +127,10 @@ class FakeViewPadding implements ViewPadding {
   const FakeViewPadding({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
 
   FakeViewPadding._wrap(ViewPadding base)
-    : left = base.left,
-      top = base.top,
-      right = base.right,
-      bottom = base.bottom;
+      : left = base.left,
+        top = base.top,
+        right = base.right,
+        bottom = base.bottom;
 
   /// A view padding that has zeros for each edge.
   static const FakeViewPadding zero = FakeViewPadding();
@@ -159,7 +159,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Constructs a [TestPlatformDispatcher] that defers all behavior to the given
   /// [PlatformDispatcher] unless explicitly overridden for test purposes.
   TestPlatformDispatcher({required PlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher {
+      : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
     _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
@@ -760,9 +760,9 @@ class TestFlutterView implements FlutterView {
     required FlutterView view,
     required TestPlatformDispatcher platformDispatcher,
     required TestDisplay display,
-  }) : _view = view,
-       _platformDispatcher = platformDispatcher,
-       _display = display;
+  })  : _view = view,
+        _platformDispatcher = platformDispatcher,
+        _display = display;
 
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
@@ -1065,8 +1065,8 @@ class TestFlutterView implements FlutterView {
 class TestDisplay implements Display {
   /// Creates a new [TestDisplay] backed by the given [Display].
   TestDisplay(TestPlatformDispatcher platformDispatcher, Display display)
-    : _platformDispatcher = platformDispatcher,
-      _display = display;
+      : _platformDispatcher = platformDispatcher,
+        _display = display;
 
   final Display _display;
   final TestPlatformDispatcher _platformDispatcher;
@@ -1274,7 +1274,7 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   TestWindow({required SingletonFlutterWindow window})
-    : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
+      : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
 
   /// Constructs a [TestWindow] that defers all behavior to the given
   /// [TestPlatformDispatcher] and its [TestPlatformDispatcher.implicitView].

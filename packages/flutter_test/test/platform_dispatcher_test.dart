@@ -90,8 +90,8 @@ void main() {
       tester: tester,
       realValue: PlatformDispatcher.instance.supportsShowingSystemContextMenu,
       fakeValue: !PlatformDispatcher.instance.supportsShowingSystemContextMenu,
-      propertyRetriever:
-          () => WidgetsBinding.instance.platformDispatcher.supportsShowingSystemContextMenu,
+      propertyRetriever: () =>
+          WidgetsBinding.instance.platformDispatcher.supportsShowingSystemContextMenu,
       propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
         binding.platformDispatcher.supportsShowingSystemContextMenu = fakeValue;
       },

@@ -38,7 +38,8 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Multiple text with same label but Nodes excluded from '
+    testWidgets(
+        'Multiple text with same label but Nodes excluded from '
         'semantic tree have failing contrast should pass a11y guideline ', (
       WidgetTester tester,
     ) async {

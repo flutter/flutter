@@ -236,11 +236,10 @@ abstract final class TestAsyncUtils {
           ),
         );
       }
-      final String again =
-          (originalGuarder.callerFile == collidingGuarder.callerFile) &&
-                  (originalGuarder.callerLine == collidingGuarder.callerLine)
-              ? 'again '
-              : '';
+      final String again = (originalGuarder.callerFile == collidingGuarder.callerFile) &&
+              (originalGuarder.callerLine == collidingGuarder.callerLine)
+          ? 'again '
+          : '';
       final String collidingKind = collidingGuarder.className == null ? 'function' : 'method';
       String collidingName;
       if ((originalGuarder.className == collidingGuarder.className) &&

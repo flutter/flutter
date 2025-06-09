@@ -66,8 +66,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   ///
   /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style? pathStyle})
-    : basedir = _getBasedir(testFile, pathStyle),
-      _path = _getPath(pathStyle);
+      : basedir = _getBasedir(testFile, pathStyle),
+        _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style? style) {
     return path.Context(style: style ?? path.Style.platform);
@@ -143,25 +143,26 @@ mixin LocalComparisonOutput {
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) async => TestAsyncUtils.guard<String>(() async {
-    String additionalFeedback = '';
-    if (result.diffs != null) {
-      additionalFeedback =
-          '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs!;
-      for (final MapEntry<String, Image> entry in diffs.entries) {
-        final File output = getFailureFile(
-          key.isEmpty ? entry.key : '${entry.key}_$key',
-          golden,
-          basedir,
-        );
-        output.parent.createSync(recursive: true);
-        final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
-        output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
-      }
-    }
-    return 'Golden "$golden": ${result.error}$additionalFeedback';
-  });
+  }) async =>
+      TestAsyncUtils.guard<String>(() async {
+        String additionalFeedback = '';
+        if (result.diffs != null) {
+          additionalFeedback =
+              '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+          final Map<String, Image> diffs = result.diffs!;
+          for (final MapEntry<String, Image> entry in diffs.entries) {
+            final File output = getFailureFile(
+              key.isEmpty ? entry.key : '${entry.key}_$key',
+              golden,
+              basedir,
+            );
+            output.parent.createSync(recursive: true);
+            final ByteData? pngBytes = await entry.value.toByteData(format: ImageByteFormat.png);
+            output.writeAsBytesSync(pngBytes!.buffer.asUint8List());
+          }
+        }
+        return 'Golden "$golden": ${result.error}$additionalFeedback';
+      });
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
@@ -203,8 +204,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
     final ComparisonResult result = ComparisonResult(
       passed: false,
       diffPercent: 1.0,
-      error:
-          'Pixel test failed, image sizes do not match.\n'
+      error: 'Pixel test failed, image sizes do not match.\n'
           'Master Image: ${masterImage.width} X ${masterImage.height}\n'
           'Test Image: ${testImage.width} X ${testImage.height}',
       diffs: <String, Image>{'masterImage': masterImage, 'testImage': testImage},
@@ -228,8 +228,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       final int testPixel = testImageRgba.getUint32(byteOffset);
       final int masterPixel = masterImageRgba.getUint32(byteOffset);
 
-      final int diffPixel =
-          (_readRed(testPixel) - _readRed(masterPixel)).abs() +
+      final int diffPixel = (_readRed(testPixel) - _readRed(masterPixel)).abs() +
           (_readGreen(testPixel) - _readGreen(masterPixel)).abs() +
           (_readBlue(testPixel) - _readBlue(masterPixel)).abs() +
           (_readAlpha(testPixel) - _readAlpha(masterPixel)).abs();
@@ -255,8 +254,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
     return ComparisonResult(
       passed: false,
       diffPercent: diffPercent,
-      error:
-          'Pixel test failed, '
+      error: 'Pixel test failed, '
           '${(diffPercent * 100).toStringAsFixed(2)}%, ${pixelDiffCount}px '
           'diff detected.',
       diffs: <String, Image>{
@@ -317,4 +315,4 @@ int _toABGR(int rgba) =>
 // Converts a 32 bit abgr pixel to a 32 bit rgba pixel
 int _toRGBA(int abgr) =>
 // This is just a mirror of the other conversion.
-_toABGR(abgr);
+    _toABGR(abgr);

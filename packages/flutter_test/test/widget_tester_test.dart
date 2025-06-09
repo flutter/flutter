@@ -296,11 +296,9 @@ void main() {
         PointerDownEvent(position: location, buttons: kSecondaryMouseButton, pointer: 1),
       ]),
       ...<PointerEventRecord>[
-        for (
-          Duration t = const Duration(milliseconds: 5);
-          t < const Duration(milliseconds: 80);
-          t += const Duration(milliseconds: 16)
-        )
+        for (Duration t = const Duration(milliseconds: 5);
+            t < const Duration(milliseconds: 80);
+            t += const Duration(milliseconds: 16))
           PointerEventRecord(t, <PointerEvent>[
             PointerMoveEvent(
               timeStamp: t - const Duration(milliseconds: 1),

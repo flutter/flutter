@@ -609,8 +609,7 @@ class _PathMatcher extends Matcher {
     if (errors.isEmpty) {
       return true;
     }
-    matchState[this] =
-        'Not all the given points were inside or outside the '
+    matchState[this] = 'Not all the given points were inside or outside the '
         'path as expected:\n  ${errors.join("\n  ")}';
     return false;
   }
@@ -677,8 +676,7 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     bool result = false;
     try {
       if (!_evaluatePainter(object, canvas, context)) {
-        matchState[this] =
-            'was not one of the supported objects for the '
+        matchState[this] = 'was not one of the supported objects for the '
             '"paints" matcher.';
         return false;
       }
@@ -719,8 +717,8 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
 
 class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher {
   _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
-    : _methodName = methodName,
-      _count = count;
+      : _methodName = methodName,
+        _count = count;
 
   final Symbol _methodName;
   final int _count;
@@ -785,8 +783,7 @@ class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
     bool result = false;
     try {
       if (!_evaluatePainter(object, canvas, context)) {
-        matchState[this] =
-            'was not one of the supported objects for the '
+        matchState[this] = 'was not one of the supported objects for the '
             '"paints" matcher.';
         return false;
       }

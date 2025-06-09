@@ -423,8 +423,8 @@ class TestGesture {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int? device,
     int buttons = kPrimaryButton,
-  }) : _dispatcher = dispatcher,
-       _pointer = TestPointer(pointer, kind, device, buttons);
+  })  : _dispatcher = dispatcher,
+        _pointer = TestPointer(pointer, kind, device, buttons);
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.

@@ -678,17 +678,16 @@ abstract final class KeyEventSimulator {
     });
   }
 
-  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey =
-      (() {
-        final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
-        for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
-          final String? debugName = key.debugName;
-          if (debugName != null) {
-            result[debugName] = key;
-          }
-        }
-        return result;
-      })();
+  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey = (() {
+    final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
+    for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
+      final String? debugName = key.debugName;
+      if (debugName != null) {
+        result[debugName] = key;
+      }
+    }
+    return result;
+  })();
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key) {
     final PhysicalKeyboardKey? result = _debugNameToPhysicalKey[key.debugName];
     assert(result != null, 'Physical key for $key not found in known physical keys');
@@ -1002,7 +1001,7 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
     'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
-    : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
+      : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
 
   /// Creates a [KeySimulatorTransitModeVariant] that only contains
   /// [KeyDataTransitMode.rawKeyData].
@@ -1011,7 +1010,7 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
     'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeySimulatorTransitModeVariant.rawKeyData()
-    : this(<KeyDataTransitMode>{KeyDataTransitMode.rawKeyData});
+      : this(<KeyDataTransitMode>{KeyDataTransitMode.rawKeyData});
 
   @override
   final Set<KeyDataTransitMode> values;

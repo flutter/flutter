@@ -33,8 +33,8 @@ abstract class MockStreamHandler {
 }
 
 /// Typedef for the inline onListen callback.
-typedef MockStreamHandlerOnListenCallback =
-    void Function(Object? arguments, MockStreamHandlerEventSink events);
+typedef MockStreamHandlerOnListenCallback = void Function(
+    Object? arguments, MockStreamHandlerEventSink events);
 
 /// Typedef for the inline onCancel callback.
 typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
@@ -43,8 +43,8 @@ class _InlineMockStreamHandler extends MockStreamHandler {
   const _InlineMockStreamHandler({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
-  }) : _onListenInline = onListen,
-       _onCancelInline = onCancel;
+  })  : _onListenInline = onListen,
+        _onCancelInline = onCancel;
 
   final MockStreamHandlerOnListenCallback _onListenInline;
   final MockStreamHandlerOnCancelCallback? _onCancelInline;

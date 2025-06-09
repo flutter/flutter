@@ -268,8 +268,8 @@ void main() {
         fseIdentical: (String p1, String p2) => fs.identical(p1, p2),
         fseIdenticalSync: (String p1, String p2) => fs.identicalSync(p1, p2),
         fseGetType: (String path, bool followLinks) => fs.type(path, followLinks: followLinks),
-        fseGetTypeSync:
-            (String path, bool followLinks) => fs.typeSync(path, followLinks: followLinks),
+        fseGetTypeSync: (String path, bool followLinks) =>
+            fs.typeSync(path, followLinks: followLinks),
         fsWatch: (String a, int b, bool c) => throw UnsupportedError('unsupported'),
         fsWatchIsSupported: () => fs.isWatchSupported,
       );

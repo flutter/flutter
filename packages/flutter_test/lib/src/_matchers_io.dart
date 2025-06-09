@@ -83,7 +83,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     }
     Future<ui.Image?> imageFuture;
     final bool
-    disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
+        disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image?>) {
       imageFuture = item;
       disposeImage = false;

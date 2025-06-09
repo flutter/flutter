@@ -475,15 +475,15 @@ class _FlutterViewSnapshotMatcher extends Matcher {
 
 class FlutterViewSnapshot {
   FlutterViewSnapshot(FlutterView view)
-    : devicePixelRatio = view.devicePixelRatio,
-      displayFeatures = <DisplayFeature>[...view.displayFeatures],
-      gestureSettings = view.gestureSettings,
-      padding = view.padding,
-      physicalSize = view.physicalSize,
-      systemGestureInsets = view.systemGestureInsets,
-      viewId = view.viewId,
-      viewInsets = view.viewInsets,
-      viewPadding = view.viewPadding;
+      : devicePixelRatio = view.devicePixelRatio,
+        displayFeatures = <DisplayFeature>[...view.displayFeatures],
+        gestureSettings = view.gestureSettings,
+        padding = view.padding,
+        physicalSize = view.physicalSize,
+        systemGestureInsets = view.systemGestureInsets,
+        viewId = view.viewId,
+        viewInsets = view.viewInsets,
+        viewPadding = view.viewPadding;
 
   final double devicePixelRatio;
   final List<DisplayFeature> displayFeatures;

@@ -168,10 +168,9 @@ void testWidgets(
     // support running tests directly from the editor (where they may have
     // access to only the test name, provided by the analysis server).
     // See https://github.com/flutter/flutter/issues/86659.
-    final String combinedDescription =
-        variationDescription.isNotEmpty
-            ? '$description (variant: $variationDescription)'
-            : description;
+    final String combinedDescription = variationDescription.isNotEmpty
+        ? '$description (variant: $variationDescription)'
+        : description;
     test(
       combinedDescription,
       () {
@@ -280,17 +279,25 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   /// the [TargetPlatform] enum. If [excluding] is provided, will test all platforms
   /// except those in [excluding].
   TargetPlatformVariant.all({Set<TargetPlatform> excluding = const <TargetPlatform>{}})
-    : values = TargetPlatform.values.toSet()..removeAll(excluding);
+      : values = TargetPlatform.values.toSet()..removeAll(excluding);
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
   /// considered desktop platforms.
   TargetPlatformVariant.desktop()
-    : values = <TargetPlatform>{TargetPlatform.linux, TargetPlatform.macOS, TargetPlatform.windows};
+      : values = <TargetPlatform>{
+          TargetPlatform.linux,
+          TargetPlatform.macOS,
+          TargetPlatform.windows
+        };
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
   /// considered mobile platforms.
   TargetPlatformVariant.mobile()
-    : values = <TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia};
+      : values = <TargetPlatform>{
+          TargetPlatform.android,
+          TargetPlatform.iOS,
+          TargetPlatform.fuchsia
+        };
 
   /// Creates a [TargetPlatformVariant] that tests only the given value of
   /// [TargetPlatform].
@@ -836,7 +843,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'This feature was deprecated after v3.12.0-1.1.pre.',
     )
     Duration additionalTime = const Duration(milliseconds: 1000),
-  }) => binding.runAsync<T?>(callback);
+  }) =>
+      binding.runAsync<T?>(callback);
 
   /// Whether there are any transient callbacks scheduled.
   ///
@@ -879,18 +887,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
-      final RenderObject innerTarget =
-          result.path
-              .map((HitTestEntry candidate) => candidate.target)
-              .whereType<RenderObject>()
-              .first;
-      final Element? innerTargetElement =
-          binding.renderViews.contains(innerTarget)
-              ? null
-              : _lastWhereOrNull(
-                collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
-                (Element element) => element.renderObject == innerTarget,
-              );
+      final RenderObject innerTarget = result.path
+          .map((HitTestEntry candidate) => candidate.target)
+          .whereType<RenderObject>()
+          .first;
+      final Element? innerTargetElement = binding.renderViews.contains(innerTarget)
+          ? null
+          : _lastWhereOrNull(
+              collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
+              (Element element) => element.renderObject == innerTarget,
+            );
       if (innerTargetElement == null) {
         printToConsole('No widgets found at ${event.position}.');
         return;

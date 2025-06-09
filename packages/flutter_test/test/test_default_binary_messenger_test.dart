@@ -25,7 +25,8 @@ class TestDelegate extends BinaryMessenger {
     String channel,
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
-  ) => throw UnimplementedError();
+  ) =>
+      throw UnimplementedError();
   @override
   void setMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
 }
@@ -42,7 +43,8 @@ class WorkingTestDelegate extends BinaryMessenger {
     String channel,
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
-  ) => throw UnimplementedError();
+  ) =>
+      throw UnimplementedError();
   @override
   void setMessageHandler(String channel, MessageHandler? handler) => throw UnimplementedError();
 }

@@ -34,8 +34,7 @@ void verifyPropertyFaked<TProperty>({
   expect(
     realValue == fakeValue,
     isFalse,
-    reason:
-        'Since the real value and fake value are equal, we cannot validate '
+    reason: 'Since the real value and fake value are equal, we cannot validate '
         'that a property has been faked. Choose a different fake value to test.',
   );
   expect(propertyBeforeFaking, matcher(realValue));
