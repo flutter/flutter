@@ -4706,6 +4706,7 @@ targets:
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
+    bringup: true # https://github.com/flutter/flutter/issues/170183
     timeout: 60
     properties:
       dependencies: >-
@@ -6569,6 +6570,7 @@ targets:
 
   - name: Windows web_tool_tests_1_2
     recipe: flutter/flutter_drone
+    bringup: true # https://github.com/flutter/flutter/issues/170183
     timeout: 60
     properties:
       dependencies: >-
@@ -6593,6 +6595,7 @@ targets:
 
   - name: Windows web_tool_tests_2_2
     recipe: flutter/flutter_drone
+    bringup: true # https://github.com/flutter/flutter/issues/170183
     timeout: 60
     properties:
       dependencies: >-
