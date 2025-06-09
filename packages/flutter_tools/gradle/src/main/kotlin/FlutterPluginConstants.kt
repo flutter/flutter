@@ -38,7 +38,7 @@ object FlutterPluginConstants {
         mapOf(
             ARCH_ARM32 to 1,
             ARCH_ARM64 to 2,
-            // 3 was reserved for ARCH_X86, whose support was removed in https://github.com/flutter/flutter/pull/169884 
+            // 3 was reserved for ARCH_X86, whose support was removed in https://github.com/flutter/flutter/pull/169884
             ARCH_X86_64 to 4
         )
 
