@@ -12,7 +12,7 @@ import '../project.dart';
 enum FlutterDarwinPlatform {
   ios(
     name: 'ios',
-    frameworkName: 'Flutter',
+    binaryName: 'Flutter',
     targetPlatform: TargetPlatform.ios,
     swiftPackagePlatform: SwiftPackagePlatform.ios,
     artifactName: 'ios',
@@ -22,7 +22,7 @@ enum FlutterDarwinPlatform {
   ),
   macos(
     name: 'macos',
-    frameworkName: 'FlutterMacOS',
+    binaryName: 'FlutterMacOS',
     targetPlatform: TargetPlatform.darwin,
     swiftPackagePlatform: SwiftPackagePlatform.macos,
     artifactName: 'darwin-x64',
@@ -33,7 +33,7 @@ enum FlutterDarwinPlatform {
 
   const FlutterDarwinPlatform({
     required this.name,
-    required this.frameworkName,
+    required this.binaryName,
     required this.targetPlatform,
     required this.swiftPackagePlatform,
     required String artifactName,
@@ -43,7 +43,7 @@ enum FlutterDarwinPlatform {
   }) : _artifactName = artifactName;
 
   final String name;
-  final String frameworkName;
+  final String binaryName;
   final TargetPlatform targetPlatform;
   final SwiftPackagePlatform swiftPackagePlatform;
   final String _artifactName;
@@ -80,12 +80,12 @@ enum FlutterDarwinPlatform {
   /// Framework name with the `.framework` extension.
   ///
   /// e.g. (`Flutter.framework`, `FlutterMacOS.framework`).
-  String get frameworkPath => '$frameworkName.framework';
+  String get frameworkName => '$binaryName.framework';
 
   /// Framework name with the `.xcframework` extension.
   ///
   /// e.g. (`Flutter.xcframework`, `FlutterMacOS.xcframework`).
-  String get xcframeworkPath => '$frameworkName.xcframework';
+  String get xcframeworkName => '$binaryName.xcframework';
 
   /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {

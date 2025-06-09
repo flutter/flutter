@@ -448,7 +448,7 @@ LICENSE
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/${FlutterDarwinPlatform.ios.artifactZip}' }
   s.documentation_url     = 'https://docs.flutter.dev'
   s.platform              = :ios, '${FlutterDarwinPlatform.ios.deploymentTarget()}'
-  s.vendored_frameworks   = '${FlutterDarwinPlatform.ios.xcframeworkPath}'
+  s.vendored_frameworks   = '${FlutterDarwinPlatform.ios.xcframeworkName}'
 end
 ''';
 

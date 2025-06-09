@@ -289,8 +289,8 @@ abstract class UnpackIOS extends UnpackDarwin {
     await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory(FlutterDarwinPlatform.ios.frameworkPath)
-        .childFile(FlutterDarwinPlatform.ios.frameworkName);
+        .childDirectory(FlutterDarwinPlatform.ios.frameworkName)
+        .childFile(FlutterDarwinPlatform.ios.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');

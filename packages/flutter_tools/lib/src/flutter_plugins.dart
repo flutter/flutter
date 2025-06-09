@@ -789,7 +789,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   final Map<String, Object> context = <String, Object>{
     'os': FlutterDarwinPlatform.ios.name,
     'deploymentTarget': FlutterDarwinPlatform.ios.deploymentTarget().toString(),
-    'framework': FlutterDarwinPlatform.ios.frameworkName,
+    'framework': FlutterDarwinPlatform.ios.binaryName,
     'methodChannelPlugins': iosPlugins,
   };
   if (project.isModule) {
@@ -903,7 +903,7 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
   final Map<String, Object> context = <String, Object>{
     'os': FlutterDarwinPlatform.macos.name,
-    'framework': FlutterDarwinPlatform.macos.frameworkName,
+    'framework': FlutterDarwinPlatform.macos.binaryName,
     'methodChannelPlugins': macosMethodChannelPlugins,
   };
   await _renderTemplateToFile(

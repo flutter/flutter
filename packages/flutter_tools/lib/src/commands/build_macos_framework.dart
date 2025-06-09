@@ -194,10 +194,11 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       }
       final String licenseSource = license.readAsStringSync();
       final String artifactsMode = FlutterDarwinPlatform.macos.artifactName(mode);
+      final String frameworkName = FlutterDarwinPlatform.macos.frameworkName;
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
-  s.name                  = '${FlutterDarwinPlatform.macos.frameworkName}'
+  s.name                  = '${FlutterDarwinPlatform.macos.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
   s.summary               = 'A UI toolkit for beautiful and fast apps.'
   s.description           = <<-DESC
@@ -211,11 +212,11 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/FlutterMacOS.framework.zip' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/$frameworkName.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
   s.osx.deployment_target = '10.15'
-  s.vendored_frameworks   = 'FlutterMacOS.framework'
-  s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
+  s.vendored_frameworks   = '$frameworkName'
+  s.prepare_command       = 'unzip $frameworkName -d $frameworkName'
 end
 ''';
 
