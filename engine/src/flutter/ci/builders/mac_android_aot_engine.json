@@ -25,7 +25,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14|Mac-15",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -65,7 +65,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "16c5032a"
+                    "sdk_version": "16f6"
                 }
             }
         },
@@ -83,7 +83,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14|Mac-15",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -125,7 +125,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "16c5032a"
+                    "sdk_version": "16f6"
                 }
             }
         },
@@ -143,7 +143,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14|Mac-15",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -185,7 +185,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "16c5032a"
+                    "sdk_version": "16f6"
                 }
             }
         },
@@ -203,7 +203,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14|Mac-15",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -243,7 +243,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "16c5032a"
+                    "sdk_version": "16f6"
                 }
             }
         },
@@ -261,7 +261,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14|Mac-15",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -303,7 +303,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "16c5032a"
+                    "sdk_version": "16f6"
                 }
             }
         },
@@ -321,7 +321,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14|Mac-15",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -363,7 +363,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "16c5032a"
+                    "sdk_version": "16f6"
                 }
             }
         }
