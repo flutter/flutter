@@ -52,14 +52,12 @@ class CkCanvas {
     skCanvas.clipRRect(toSkRRect(rrect), _clipOpIntersect, doAntiAlias);
   }
 
-  void clipRSuperellipse(ui.RSuperellipse rsuperellipse, bool doAntiAlias) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    skCanvas.clipRRect(
-      toSkRRect(rsuperellipse.toApproximateRRect()),
-      _clipOpIntersect,
-      doAntiAlias,
-    );
+  void clipRSuperellipse(
+    ui.RSuperellipse rsuperellipse,
+    bool doAntiAlias, {
+    ui.RSuperellipseCache? cache,
+  }) {
+    clipPath(rsuperellipse.toPath(cache) as CkPath, doAntiAlias);
   }
 
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {

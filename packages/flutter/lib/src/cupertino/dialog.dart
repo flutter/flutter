@@ -1605,8 +1605,8 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     } else {
       child = DecoratedBox(
         decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(
-            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+          shape: RoundedSuperellipseBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
           ),
           color: CupertinoDynamicColor.resolve(
             widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,

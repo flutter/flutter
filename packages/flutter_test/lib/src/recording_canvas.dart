@@ -5,6 +5,7 @@
 /// @docImport 'mock_canvas.dart';
 library;
 
+import 'dart:ui' as ui show RSuperellipseCache;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -160,6 +161,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     PaintingContextCallback painter, {
     Clip clipBehavior = Clip.antiAlias,
     ClipRSuperellipseLayer? oldLayer,
+    ui.RSuperellipseCache? cache,
   }) {
     clipRSuperellipseAndPaint(
       clipRSuperellipse.shift(offset),

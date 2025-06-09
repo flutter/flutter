@@ -7,7 +7,7 @@
 /// @docImport 'shape_decoration.dart';
 library;
 
-import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' as ui show lerpDouble, RSuperellipseCache;
 
 import 'package:flutter/foundation.dart';
 
@@ -214,7 +214,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
   ///
   /// If `borderRadius` is not specified or null, it defaults to
   /// [BorderRadius.zero].
-  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
+  RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
     : borderRadius = borderRadius ?? BorderRadius.zero;
 
   /// The radii for each corner.
@@ -274,6 +274,10 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     );
   }
 
+  final ui.RSuperellipseCache _outerCache = ui.RSuperellipseCache();
+  final ui.RSuperellipseCache _innerCache = ui.RSuperellipseCache();
+  final ui.RSuperellipseCache _strokeCache = ui.RSuperellipseCache();
+
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     if (borderRadius == BorderRadius.zero) {
@@ -281,7 +285,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     } else {
       final RSuperellipse borderRect = borderRadius.resolve(textDirection).toRSuperellipse(rect);
       final RSuperellipse adjustedRect = borderRect.deflate(side.strokeInset);
-      return Path()..addRSuperellipse(adjustedRect);
+      return Path()..addRSuperellipse(adjustedRect, cache: _innerCache);
     }
   }
 
@@ -290,7 +294,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (borderRadius == BorderRadius.zero) {
       return Path()..addRect(rect);
     } else {
-      return Path()..addRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect));
+      return Path()..addRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect), cache: _outerCache);
     }
   }
 
@@ -299,7 +303,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (borderRadius == BorderRadius.zero) {
       canvas.drawRect(rect, paint);
     } else {
-      canvas.drawRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect), paint);
+      canvas.drawRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect), paint, cache: _outerCache);
     }
   }
 
@@ -314,14 +318,13 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
       case BorderStyle.solid:
         final double strokeOffset = (side.strokeOutset - side.strokeInset) / 2;
         if (borderRadius == BorderRadius.zero) {
-          final Rect base = rect.inflate(strokeOffset);
-          canvas.drawRect(base, side.toPaint());
+          canvas.drawRect(rect.inflate(strokeOffset), side.toPaint());
         } else {
           final RSuperellipse base = borderRadius
               .resolve(textDirection)
               .toRSuperellipse(rect)
               .inflate(strokeOffset);
-          canvas.drawRSuperellipse(base, side.toPaint());
+          canvas.drawRSuperellipse(base, side.toPaint(), cache: _strokeCache);
         }
     }
   }

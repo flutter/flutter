@@ -131,11 +131,13 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   @override
-  void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
+  void clipRSuperellipse(
+    ui.RSuperellipse rsuperellipse, {
+    bool doAntiAlias = true,
+    ui.RSuperellipseCache? cache,
+  }) {
     assert(rsuperellipseIsValid(rsuperellipse));
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    _clipRRect(rsuperellipse.toApproximateRRect(), doAntiAlias);
+    clipPath(rsuperellipse.toPath(cache), doAntiAlias: doAntiAlias);
   }
 
   @override
@@ -208,11 +210,13 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   @override
-  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
+  void drawRSuperellipse(
+    ui.RSuperellipse rsuperellipse,
+    ui.Paint paint, {
+    ui.RSuperellipseCache? cache,
+  }) {
     assert(rsuperellipseIsValid(rsuperellipse));
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    _drawRRect(rsuperellipse.toApproximateRRect(), paint);
+    drawPath(rsuperellipse.toPath(cache), paint);
   }
 
   @override

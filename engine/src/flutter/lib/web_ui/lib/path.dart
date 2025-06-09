@@ -41,7 +41,7 @@ abstract class Path {
   void addArc(Rect oval, double startAngle, double sweepAngle);
   void addPolygon(List<Offset> points, bool close);
   void addRRect(RRect rrect);
-  void addRSuperellipse(RSuperellipse rsuperellipse);
+  void addRSuperellipse(RSuperellipse rsuperellipse, {RSuperellipseCache? cache});
   void addPath(Path path, Offset offset, {Float64List? matrix4});
   void extendWithPath(Path path, Offset offset, {Float64List? matrix4});
   void close();
