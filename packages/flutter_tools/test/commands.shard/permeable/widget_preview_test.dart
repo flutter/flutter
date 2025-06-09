@@ -32,7 +32,9 @@ void main() {
   late LoggingProcessManager loggingProcessManager;
   late FakeStdio mockStdio;
   late Logger logger;
-  late LocalFileSystem fs;
+  // We perform this initialization just so we can build the generated file path for test
+  // descriptions.
+  LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
   late BotDetector botDetector;
   late Platform platform;
 

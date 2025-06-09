@@ -22,7 +22,6 @@ import 'package:watcher/watcher.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
-import 'preview_code_generator.dart';
 
 /// A path / URI pair used to map previews to a file.
 ///

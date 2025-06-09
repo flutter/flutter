@@ -139,7 +139,9 @@ void main() {
     late PreviewCodeGenerator codeGenerator;
     late FlutterProject project;
     late PreviewDetector previewDetector;
-    late FileSystem fs;
+    // We perform this initialization just so we can build the generated file path for test
+    // descriptions.
+    LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
 
     setUp(() async {
       Cache.flutterRoot = getFlutterRoot();
