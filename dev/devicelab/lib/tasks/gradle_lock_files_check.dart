@@ -28,14 +28,20 @@ Future<void> runGradleLockFilesCheck({
   bool shouldPrintOutput = true,
 }) async {
   print('Running gradle lockfiles check');
+  bool needStashPop = true;
 
   try {
-    await execFn('git', <String>['stash'], canFail: true, workingDirectory: flutterDirectory.path);
+    final String stashOutput = await _getGitStashOutput(
+        printOutput: shouldPrintOutput, evalFn: evalFn);
+    if (stashOutput.isNotEmpty &&
+        stashOutput.contains('No local changes to save')) {
+      needStashPop = false;
+    }
 
     await execFn(
       _dartCommand,
       <String>[_scriptFilePath, '--no-gradle-generation'],
-      canFail: true,
+      canFail: false,
       workingDirectory: flutterDirectory.path,
     );
 
@@ -78,13 +84,21 @@ Future<void> runGradleLockFilesCheck({
   } catch (e) {
     rethrow;
   } finally {
-    await execFn(
-      'git',
-      <String>['stash', 'pop'],
-      // Must be false in case there is no stash to pop (no changes stashed in the first place).
-      canFail: false,
-      workingDirectory: flutterDirectory.path,
-    );
+    if (needStashPop) {
+      await execFn(
+        'git',
+        <String>['stash', 'pop'],
+        canFail: true,
+        workingDirectory: flutterDirectory.path,
+      );
+    } else {
+      await execFn(
+        'git',
+        <String>['restore', '.'],
+        canFail: true,
+        workingDirectory: flutterDirectory.path,
+      );
+    }
   }
 }
 
@@ -99,7 +113,19 @@ Future<String> _getGitStatusOutput({required bool printOutput, EvalFunction eval
   final String gitStatusOutput = await evalFn(
     'git',
     <String>['status', '--porcelain', '--untracked-files=all'],
-    canFail: true,
+    canFail: false,
+    printStdout: printOutput,
+    printStderr: printOutput,
+  );
+  return gitStatusOutput;
+}
+
+Future<String> _getGitStashOutput(
+    {required bool printOutput, EvalFunction evalFn = eval}) async {
+  final String gitStatusOutput = await evalFn(
+    'git',
+    <String>['stash'],
+    canFail: false,
     printStdout: printOutput,
     printStderr: printOutput,
   );
