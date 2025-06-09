@@ -16,13 +16,13 @@ const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
 
 @immutable
 class MockCall {
+  MockCall(this.executable, List<String> args, this.canFail, this.workingDirectory)
+    : arguments = List<String>.unmodifiable(args);
+
   final String executable;
   final List<String> arguments;
   final bool canFail;
   final String? workingDirectory;
-
-  MockCall(this.executable, List<String> args, this.canFail, this.workingDirectory)
-    : arguments = List<String>.unmodifiable(args);
 
   @override
   bool operator ==(Object other) {
@@ -110,11 +110,13 @@ class MockEval {
   String _nextResult = '';
   Exception? _nextException;
 
+  String get nextResult => _nextResult;
   set nextResult(String result) {
     _nextResult = result;
     _nextException = null;
   }
 
+  Exception? get nextException => _nextException;
   set nextException(Exception? exception) {
     _nextException = exception;
     if (exception != null) {
@@ -201,19 +203,19 @@ void main() {
       );
 
       expect(mockExec.calls.length, 3);
-      expect(mockExec.calls[0], MockCall('git', <String>['stash'], true, flutterDirectory.path));
+      expect(mockExec.calls[0], MockCall('git', const <String>['stash'], true, flutterDirectory.path));
       expect(
         mockExec.calls[1],
         MockCall(
           _dartCommand,
-          <String>[_scriptFilePath, '--no-gradle-generation'],
+          const <String>[_scriptFilePath, '--no-gradle-generation'],
           true,
           flutterDirectory.path,
         ),
       );
       expect(
         mockExec.calls[2],
-        MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+        MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
       );
 
       expect(mockEval.lastExecutable, 'git');
@@ -238,7 +240,7 @@ void main() {
       expect(mockExec.calls.length, 3);
       expect(
         mockExec.calls[2],
-        MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+        MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
       );
     });
 
@@ -247,7 +249,7 @@ void main() {
       () async {
         mockExec.addResponse(0); // git stash
         mockExec.addResponse(0); // dart script
-        mockExec.addResponse(0); // git stash pop  (succeeds)
+        mockExec.addResponse(0); // git stash pop (succeeds)
         mockEval.nextResult = ' M path/to/file.lockfile\n?? another.lockfile\n'; // git status
 
         try {
@@ -266,7 +268,7 @@ void main() {
         expect(mockExec.calls.length, 3);
         expect(
           mockExec.calls[2],
-          MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+          MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
         );
       },
     );
@@ -287,19 +289,19 @@ void main() {
       );
 
       expect(mockExec.calls.length, 3); // stash, dart, pop
-      expect(mockExec.calls[0], MockCall('git', <String>['stash'], true, flutterDirectory.path));
+      expect(mockExec.calls[0], MockCall('git', const <String>['stash'], true, flutterDirectory.path));
       expect(
         mockExec.calls[1],
         MockCall(
           _dartCommand,
-          <String>[_scriptFilePath, '--no-gradle-generation'],
+          const <String>[_scriptFilePath, '--no-gradle-generation'],
           true,
           flutterDirectory.path,
         ),
       );
       expect(
         mockExec.calls[2],
-        MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+        MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
       );
       expect(mockEval.lastExecutable, isNull);
     });
@@ -322,7 +324,7 @@ void main() {
       expect(mockExec.calls.length, 3); // stash, dart, pop
       expect(
         mockExec.calls[2],
-        MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+        MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
       );
       expect(mockEval.lastExecutable, 'git');
     });
@@ -344,10 +346,10 @@ void main() {
           _throwsExceptionWithMessage('Initial git stash failed'),
         );
         expect(mockExec.calls.length, 2); // stash, pop
-        expect(mockExec.calls[0], MockCall('git', <String>['stash'], true, flutterDirectory.path));
+        expect(mockExec.calls[0], MockCall('git', const <String>['stash'], true, flutterDirectory.path));
         expect(
           mockExec.calls[1],
-          MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+          MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
         );
         expect(mockEval.lastExecutable, isNull);
       },
@@ -370,7 +372,7 @@ void main() {
       expect(mockExec.calls.length, 3);
       expect(
         mockExec.calls[2],
-        MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+        MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
       );
     });
 
@@ -395,7 +397,7 @@ void main() {
         expect(mockExec.calls.length, 3);
         expect(
           mockExec.calls[2],
-          MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+          MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
         );
       },
     );
@@ -421,7 +423,7 @@ void main() {
         expect(mockExec.calls.length, 3); // stash, dart, pop
         expect(
           mockExec.calls[2],
-          MockCall('git', <String>['stash', 'pop'], false, flutterDirectory.path),
+          MockCall('git', const <String>['stash', 'pop'], false, flutterDirectory.path),
         );
       },
     );
