@@ -776,7 +776,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         analytics: globals.analytics,
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: DarwinPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
       );
       final String presentParticiple =

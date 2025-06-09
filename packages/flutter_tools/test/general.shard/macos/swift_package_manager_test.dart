@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
@@ -16,36 +17,15 @@ import '../../src/common.dart';
 const String _doubleIndent = '        ';
 
 void main() {
-  const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
-    SupportedPlatform.ios,
-    SupportedPlatform.macos,
+  const List<FlutterDarwinPlatform> supportedPlatforms = <FlutterDarwinPlatform>[
+    FlutterDarwinPlatform.ios,
+    FlutterDarwinPlatform.macos,
   ];
 
   group('SwiftPackageManager', () {
-    for (final SupportedPlatform platform in supportedPlatforms) {
+    for (final FlutterDarwinPlatform platform in supportedPlatforms) {
       group('for ${platform.name}', () {
         group('generatePluginsSwiftPackage', () {
-          testWithoutContext('throw if invalid platform', () async {
-            final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeXcodeProject project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
-
-            final SwiftPackageManager spm = SwiftPackageManager(
-              fileSystem: fs,
-              templateRenderer: const MustacheTemplateRenderer(),
-            );
-
-            await expectLater(
-              () => spm.generatePluginsSwiftPackage(<Plugin>[], SupportedPlatform.android, project),
-              throwsToolExit(
-                message:
-                    'The platform android is not compatible with Swift Package Manager. Only iOS and macOS are allowed.',
-              ),
-            );
-          });
-
           testWithoutContext('skip if no dependencies and not already migrated', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final FakeXcodeProject project = FakeXcodeProject(
@@ -80,7 +60,7 @@ void main() {
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -133,7 +113,7 @@ $_doubleIndent
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -223,7 +203,7 @@ let package = Package(
             );
 
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -268,7 +248,7 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
@@ -289,7 +269,7 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
@@ -310,13 +290,13 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
               project: project,
               platform: platform,
-              deploymentTarget: platform == SupportedPlatform.ios ? '13.0' : '10.15',
+              deploymentTarget: platform == FlutterDarwinPlatform.ios ? '13.0' : '10.15',
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
@@ -331,7 +311,7 @@ let package = Package(
               fileSystem: fs,
             );
             final String supportedPlatform =
-                platform == SupportedPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
+                platform == FlutterDarwinPlatform.ios ? '.iOS("13.0")' : '.macOS("10.15")';
             project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             SwiftPackageManager.updateMinimumDeployment(
@@ -347,7 +327,7 @@ let package = Package(
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
-              contains(platform == SupportedPlatform.ios ? '.iOS("14.0")' : '.macOS("14.0")'),
+              contains(platform == FlutterDarwinPlatform.ios ? '.iOS("14.0")' : '.macOS("14.0")'),
             );
           });
         });

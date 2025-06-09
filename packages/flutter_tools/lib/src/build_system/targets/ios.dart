@@ -743,9 +743,9 @@ Future<void> _createStubAppFramework(
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=${DarwinPlatform.ios.deploymentTarget()}'
+        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}'
       else
-        '-miphonesimulator-version-min=${DarwinPlatform.ios.deploymentTarget()}',
+        '-miphonesimulator-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

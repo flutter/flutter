@@ -816,12 +816,12 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), DarwinPlatform.ios.name);
+  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.ios.name);
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), DarwinPlatform.macos.name);
+  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.macos.name);
 }
 
 /// Returns the web build output directory.

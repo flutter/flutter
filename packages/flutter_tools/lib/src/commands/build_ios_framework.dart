@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../version.dart';
@@ -289,8 +290,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       }
 
       // Build aot, create module.framework and copy.
-      final Directory iPhoneBuildOutput = modeDirectory.childDirectory(DarwinSDK.iphoneos.name);
-      final Directory simulatorBuildOutput = modeDirectory.childDirectory(DarwinSDK.iphonesimulator.name);
+      final Directory iPhoneBuildOutput = modeDirectory.childDirectory(
+        XcodeSdk.IPhoneOS.platformName,
+      );
+      final Directory simulatorBuildOutput = modeDirectory.childDirectory(
+        XcodeSdk.IPhoneSimulator.platformName,
+      );
       await _produceAppFramework(buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
 
       // Build and copy plugins.
@@ -442,7 +447,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.platform              = :ios, '${DarwinPlatform.ios.deploymentTarget()}'
+  s.platform              = :ios, '${FlutterDarwinPlatform.ios.deploymentTarget()}'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -564,7 +569,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        DarwinSDK.iphoneos.name,
+        XcodeSdk.IPhoneOS.platformName,
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
@@ -589,7 +594,7 @@ end
         'xcodebuild',
         '-alltargets',
         '-sdk',
-        DarwinSDK.iphonesimulator.name,
+        XcodeSdk.IPhoneSimulator.platformName,
         '-configuration',
         simulatorConfiguration,
         'SYMROOT=${simulatorBuildOutput.path}',
@@ -610,10 +615,10 @@ end
       }
 
       final Directory iPhoneBuildConfiguration = iPhoneBuildOutput.childDirectory(
-        '$xcodeBuildConfiguration-iphoneos',
+        '$xcodeBuildConfiguration-${XcodeSdk.IPhoneOS.platformName}',
       );
       final Directory simulatorBuildConfiguration = simulatorBuildOutput.childDirectory(
-        '$simulatorConfiguration-iphonesimulator',
+        '$simulatorConfiguration-${XcodeSdk.IPhoneSimulator.platformName}',
       );
 
       final Iterable<Directory> products =

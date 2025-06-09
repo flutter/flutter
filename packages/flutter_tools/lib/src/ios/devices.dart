@@ -489,7 +489,7 @@ class IOSDevice extends Device {
           analytics: globals.analytics,
           fileSystem: globals.fs,
           logger: globals.logger,
-          platform: DarwinPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
         );
         _logger.printError('');

@@ -67,10 +67,10 @@ abstract class UnpackMacOS extends UnpackDarwin {
     _removeDenylistedFiles(environment.outputDir);
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory('${DarwinPlatform.macos.frameworkName}.framework')
+        .childDirectory('${FlutterDarwinPlatform.macos.frameworkName}.framework')
         .childDirectory('Versions')
         .childDirectory('A')
-        .childFile(DarwinPlatform.macos.frameworkName);
+        .childFile(FlutterDarwinPlatform.macos.frameworkName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');

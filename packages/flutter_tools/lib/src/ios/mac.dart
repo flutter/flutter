@@ -159,7 +159,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       app.project,
-      DarwinPlatform.ios,
+      FlutterDarwinPlatform.ios,
       buildInfo,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       logger: globals.logger,
@@ -295,7 +295,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
-        platform: DarwinPlatform.ios,
+        platform: FlutterDarwinPlatform.ios,
         project: project.ios,
         deploymentTarget: iosDeploymentTarget,
       );
@@ -365,9 +365,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   } else {
     if (environmentType == EnvironmentType.physical) {
-      buildCommands.addAll(<String>['-sdk', DarwinSDK.iphoneos.name]);
+      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneOS.platformName]);
     } else {
-      buildCommands.addAll(<String>['-sdk', DarwinSDK.iphonesimulator.name]);
+      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneSimulator.platformName]);
     }
   }
 
@@ -375,9 +375,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (deviceID != null) {
     buildCommands.add('id=$deviceID');
   } else if (environmentType == EnvironmentType.physical) {
-    buildCommands.add('generic/platform=iOS');
+    buildCommands.add(XcodeSdk.IPhoneOS.generticPlatform);
   } else {
-    buildCommands.add('generic/platform=iOS Simulator');
+    buildCommands.add(XcodeSdk.IPhoneSimulator.generticPlatform);
   }
 
   if (activeArch != null) {
@@ -550,7 +550,10 @@ Future<XcodeBuildResult> buildXcodeProject({
       }
       if (hasWatchCompanion && environmentType == EnvironmentType.simulator) {
         globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
-        targetBuildDir = targetBuildDir.replaceFirst(DarwinSDK.iphoneos.name, DarwinSDK.iphonesimulator.name);
+        targetBuildDir = targetBuildDir.replaceFirst(
+          XcodeSdk.IPhoneOS.platformName,
+          XcodeSdk.IPhoneSimulator.platformName,
+        );
       }
       final String? appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(targetBuildDir, appBundle);
@@ -674,7 +677,7 @@ Future<void> diagnoseXcodeBuildFailure(
   required Analytics analytics,
   required Logger logger,
   required FileSystem fileSystem,
-  required DarwinPlatform platform,
+  required FlutterDarwinPlatform platform,
   required FlutterProject project,
 }) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
@@ -900,7 +903,7 @@ Future<bool> _handleIssues(
   XcodeBuildResult result,
   XcodeBuildExecution? xcodeBuildExecution, {
   required FlutterProject project,
-  required DarwinPlatform platform,
+  required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
 }) async {
@@ -1008,7 +1011,7 @@ Future<bool> _handleIssues(
 
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
 Future<bool> _isPluginSwiftPackageOnly({
-  required DarwinPlatform platform,
+  required FlutterDarwinPlatform platform,
   required FlutterProject project,
   required String pluginName,
   required FileSystem fileSystem,

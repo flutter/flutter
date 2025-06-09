@@ -711,9 +711,9 @@ Your $application code is in $relativeAppMain.
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
       templateContext['iosSupportedPlatform'] =
-          DarwinPlatform.ios.supportedPackagePlatform.format();
+          FlutterDarwinPlatform.ios.supportedPackagePlatform.format();
       templateContext['macosSupportedPlatform'] =
-          DarwinPlatform.macos.supportedPackagePlatform.format();
+          FlutterDarwinPlatform.macos.supportedPackagePlatform.format();
     } else {
       templates.add('plugin_cocoapods');
     }

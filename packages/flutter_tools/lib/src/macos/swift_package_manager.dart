@@ -38,7 +38,7 @@ class SwiftPackageManager {
   /// Package Manager.
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
-    DarwinPlatform platform,
+    FlutterDarwinPlatform platform,
     XcodeBasedProject project,
   ) async {
     final (
@@ -82,7 +82,7 @@ class SwiftPackageManager {
 
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) _dependenciesForPlugins(
     List<Plugin> plugins,
-    DarwinPlatform platform,
+    FlutterDarwinPlatform platform,
   ) {
     final List<SwiftPackagePackageDependency> packageDependencies =
         <SwiftPackagePackageDependency>[];
@@ -138,7 +138,7 @@ class SwiftPackageManager {
   /// deployment target for FlutterGeneratedPluginSwiftPackage.
   static void updateMinimumDeployment({
     required XcodeBasedProject project,
-    required DarwinPlatform platform,
+    required FlutterDarwinPlatform platform,
     required String deploymentTarget,
   }) {
     final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
@@ -152,15 +152,15 @@ class SwiftPackageManager {
     }
 
     final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
-    final String oldDarwinPlatform = defaultPlatform.format();
-    final String newDarwinPlatform =
+    final String oldFlutterDarwinPlatform = defaultPlatform.format();
+    final String newFlutterDarwinPlatform =
         SwiftPackageSupportedPlatform(
           platform: packagePlatform,
           version: projectDeploymentTargetVersion,
         ).format();
 
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
-      manifestContents.replaceFirst(oldDarwinPlatform, newDarwinPlatform),
+      manifestContents.replaceFirst(oldFlutterDarwinPlatform, newFlutterDarwinPlatform),
     );
   }
 }

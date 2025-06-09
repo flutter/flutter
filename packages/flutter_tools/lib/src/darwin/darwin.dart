@@ -5,10 +5,11 @@
 import '../artifacts.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../ios/xcodeproj.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 
-enum DarwinPlatform {
+enum FlutterDarwinPlatform {
   ios(
     name: 'ios',
     frameworkName: 'Flutter',
@@ -17,7 +18,7 @@ enum DarwinPlatform {
     artifactName: 'ios',
     artifactZip: 'artifacts.zip',
     xcframeworkArtifact: Artifact.flutterXcframework,
-    sdks: <DarwinSDK>[DarwinSDK.iphoneos, DarwinSDK.iphonesimulator],
+    sdks: <XcodeSdk>[XcodeSdk.IPhoneOS, XcodeSdk.IPhoneSimulator],
   ),
   macos(
     name: 'macos',
@@ -27,10 +28,10 @@ enum DarwinPlatform {
     artifactName: 'darwin-x64',
     artifactZip: 'framework.zip',
     xcframeworkArtifact: Artifact.flutterMacOSXcframework,
-    sdks: <DarwinSDK>[DarwinSDK.macos],
+    sdks: <XcodeSdk>[XcodeSdk.MacOSX],
   );
 
-  const DarwinPlatform({
+  const FlutterDarwinPlatform({
     required this.name,
     required this.frameworkName,
     required this.targetPlatform,
@@ -48,14 +49,13 @@ enum DarwinPlatform {
   final String _artifactName;
   final String artifactZip;
   final Artifact xcframeworkArtifact;
-  final List<DarwinSDK> sdks;
+  final List<XcodeSdk> sdks;
 
-  /// IPHONEOS_DEPLOYMENT_TARGET
   Version deploymentTarget() {
     switch (this) {
-      case DarwinPlatform.ios:
+      case FlutterDarwinPlatform.ios:
         return Version(13, 0, null);
-      case DarwinPlatform.macos:
+      case FlutterDarwinPlatform.macos:
         return Version(10, 15, null);
     }
   }
@@ -68,24 +68,22 @@ enum DarwinPlatform {
     return SwiftPackageSupportedPlatform(platform: packagePlatform, version: deploymentTarget());
   }
 
+  static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
+    if (targetPlatform == TargetPlatform.ios) {
+      return ios;
+    }
+    if (targetPlatform == TargetPlatform.darwin) {
+      return macos;
+    }
+    return null;
+  }
+
   XcodeBasedProject xcodeProject(FlutterProject project) {
     switch (this) {
-      case DarwinPlatform.ios:
+      case FlutterDarwinPlatform.ios:
         return project.ios;
-      case DarwinPlatform.macos:
+      case FlutterDarwinPlatform.macos:
         return project.macos;
     }
   }
-}
-
-// REplace with XcodeSdk?
-enum DarwinSDK {
-  iphoneos(name: 'iphoneos', sdkType: EnvironmentType.physical),
-  iphonesimulator(name: 'iphonesimulator', sdkType: EnvironmentType.simulator),
-  macos(name: 'macosx');
-
-  const DarwinSDK({required this.name, this.sdkType});
-
-  final String name;
-  final EnvironmentType? sdkType;
 }

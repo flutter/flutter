@@ -58,7 +58,7 @@ class DarwinDependencyManagement {
   /// Swift Package Manager requires a generated Package.swift and certain
   /// settings in the Xcode project's project.pbxproj and xcscheme (done later
   /// before build).
-  Future<void> setUp({required DarwinPlatform platform}) async {
+  Future<void> setUp({required FlutterDarwinPlatform platform}) async {
     final XcodeBasedProject xcodeProject = platform.xcodeProject(_project);
     if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
@@ -128,7 +128,7 @@ class DarwinDependencyManagement {
   /// Prints message prompting the user to deintegrate CocoaPods if using all
   /// Swift Package plugins.
   Future<({int totalCount, int swiftPackageCount, int podCount})> _evaluatePluginsAndPrintWarnings({
-    required DarwinPlatform platform,
+    required FlutterDarwinPlatform platform,
     required XcodeBasedProject xcodeProject,
   }) async {
     int pluginCount = 0;

@@ -929,7 +929,7 @@ class MacOSProject extends XcodeBasedProject {
   bool existsSync() => hostAppRoot.existsSync();
 
   @override
-  Directory get hostAppRoot => parent.directory.childDirectory(DarwinPlatform.macos.name);
+  Directory get hostAppRoot => parent.directory.childDirectory(FlutterDarwinPlatform.macos.name);
 
   /// The xcfilelist used to track the inputs for the Flutter script phase in
   /// the Xcode build.

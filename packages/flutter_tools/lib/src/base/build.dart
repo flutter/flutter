@@ -267,7 +267,7 @@ class AOTSnapshotter {
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=${DarwinPlatform.ios.deploymentTarget()}',
+        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
       if (sdkRoot != null) ...<String>['-isysroot', sdkRoot],
     ];
 
