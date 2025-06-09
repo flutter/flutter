@@ -148,18 +148,8 @@ String generateDDCLibraryBundleBootstrapScript({
   required bool isWindows,
 }) {
   return '''
-console.log('logging start of bootstrap');
-console.error('starting bootstrap');
-console.error(document.currentScript.src);
-var xhr = new XMLHttpRequest();
-xhr.open("GET", document.currentScript.src);
-xhr.onreadystatechange = function () {
-  if (this.readyState == 4 && this.status == 200 || this.status == 304) {
-    console.log('first bootstrap contents:');
-    console.log(xhr.responseText);
-  }
-};
-xhr.send();
+console.log('starting bootstrap');
+console.log(document.currentScript.src);
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
 // Save the current directory so we can access it in a closure.
 var _currentDirectory = (function () {
@@ -189,7 +179,7 @@ $_simpleLoaderScript
   ];
 
   // Load ddc_module_loader.js to access DDC's module loader API.
-  console.error('loading prerequisite scripts');
+  console.log('loading prerequisite scripts');
   let prerequisiteLoads = [];
   for (let i = 0; i < prerequisiteScripts.length; i++) {
     prerequisiteLoads.push(forceLoadModule(prerequisiteScripts[i].src));
@@ -208,7 +198,7 @@ $_simpleLoaderScript
   }
 
   var afterPrerequisiteLogic = function() {
-    console.error('loading after prerequisite scripts');
+    console.log('loading after prerequisite scripts');
     window.\$dartLoader.rootDirectories.push(_currentDirectory);
     let scripts = [
       {
@@ -244,7 +234,7 @@ $_simpleLoaderScript
     window.\$dartLoader.loadConfig = loadConfig;
     window.\$dartLoader.loader = loader;
 
-    console.error('starting to load sdk and main_module.bootstrap.js');
+    console.log('starting to load sdk and main_module.bootstrap.js');
     // Begin loading libraries
     loader.nextAttempt();
 
@@ -315,7 +305,7 @@ $_simpleLoaderScript
         xhttp.send();
       });
     }
-    console.error('done with initial bootstrap');
+    console.log('done with initial bootstrap');
   };
 })();
 ''';
@@ -355,7 +345,7 @@ if (window.trustedTypes) {
     createScriptURL: (url) => {
       let scriptUrl = _scriptUrls[url];
       if (!scriptUrl) {
-        console.error("Unknown Flutter Web bootstrap resource!", url);
+        console.log("Unknown Flutter Web bootstrap resource!", url);
       }
       return scriptUrl;
     }
@@ -485,16 +475,7 @@ String generateDDCLibraryBundleMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
-  console.error('executing secondary bootstrap');
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", document.currentScript.src);
-  xhr.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200 || this.status == 304) {
-      console.log('secondary bootstrap contents:');
-      console.log(xhr.responseText);
-    }
-  };
-  xhr.send();
+  console.log('executing secondary bootstrap');
   let appName = "org-dartlang-app:/$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
@@ -509,12 +490,12 @@ String generateDDCLibraryBundleMainModule({
   window.\$dartLoader.loadConfig.tryLoadBootstrapScript = true;
   // Should be called by $onLoadEndBootstrap once all the scripts have been
   // loaded.
-  console.error('registered onloadendbootstrap');
+  console.log('registered onloadendbootstrap');
   window.$_onLoadEndCallback = function() {
-    console.error('running onloadendcallback');
+    console.log('running onloadendcallback');
     let child = {};
     child.main = function() {
-      console.error('running child.main');
+      console.log('running child.main');
       let sdkOptions = {
         nativeNonNullAsserts: $nativeNullAssertions,
       };
@@ -528,7 +509,7 @@ String generateDDCLibraryBundleMainModule({
 }
 
 String generateDDCLibraryBundleOnLoadEndBootstrap() {
-  return '''console.error('running onloadendbootstrap');window.$_onLoadEndCallback();''';
+  return '''console.log('running onloadendbootstrap');window.$_onLoadEndCallback();''';
 }
 
 /// Generate a synthetic main module which captures the application's main
