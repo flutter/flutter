@@ -7,7 +7,7 @@ import 'dart:async';
 import '../framework/utils.dart';
 
 const String _dartCommand = 'dart';
-const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
+const String _scriptFilePath = 'dev/tools/bin/generate_gradle_lockfiles.dart';
 
 /// Runs the gradle lockfiles check script and verifies that all lockfiles
 /// are staged within git.

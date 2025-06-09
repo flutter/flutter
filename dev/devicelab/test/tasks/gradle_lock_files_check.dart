@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import '../common.dart';
 
 const String _dartCommand = 'dart';
-const String _scriptFilePath = 'tools/bin/generate_gradle_lockfiles.dart';
+const String _scriptFilePath = 'dev/tools/bin/generate_gradle_lockfiles.dart';
 
 @immutable
 class MockCall {
