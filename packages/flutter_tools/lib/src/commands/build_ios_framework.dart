@@ -377,17 +377,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
       lldbInitSourceFile.copySync(lldbInitTargetFile.path);
       lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
-      globals.printStatus(
-        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
-        'ensure debug mode works, please complete one of the following in your '
-        'native Xcode project:\n'
-        '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
-        'Test actions, set LLDB Init File to: \n\n'
-        '    ${lldbInitTargetFile.path}\n\n'
-        '  * If you are already using an LLDB Init File, please append the '
-        'following to your LLDB Init File:\n\n'
-        '    command source ${lldbInitTargetFile.path}\n',
-      );
     }
 
     return FlutterCommandResult.success();
