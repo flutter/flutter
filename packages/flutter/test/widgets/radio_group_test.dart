@@ -92,8 +92,6 @@ void main() {
   });
 
   testWidgets('Radio group will not merge up', (WidgetTester tester) async {
-    final UniqueKey key = UniqueKey();
-
     await tester.pumpWidget(
       Material(
         child: Semantics(
