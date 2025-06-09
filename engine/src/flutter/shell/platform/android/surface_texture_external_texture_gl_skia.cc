@@ -52,6 +52,8 @@ void SurfaceTextureExternalTextureGLSkia::ProcessFrame(PaintContext& context,
 
 void SurfaceTextureExternalTextureGLSkia::Detach() {
   SurfaceTextureExternalTexture::Detach();
+  // Detach will collect the texture handle.
+  // See also: https://github.com/flutter/flutter/issues/152459
   texture_name_ = 0;
 }
 
