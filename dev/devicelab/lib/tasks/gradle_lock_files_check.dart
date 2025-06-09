@@ -32,9 +32,10 @@ Future<void> runGradleLockFilesCheck({
 
   try {
     final String stashOutput = await _getGitStashOutput(
-        printOutput: shouldPrintOutput, evalFn: evalFn);
-    if (stashOutput.isNotEmpty &&
-        stashOutput.contains('No local changes to save')) {
+      printOutput: shouldPrintOutput,
+      evalFn: evalFn,
+    );
+    if (stashOutput.isNotEmpty && stashOutput.contains('No local changes to save')) {
       needStashPop = false;
     }
 
@@ -120,8 +121,7 @@ Future<String> _getGitStatusOutput({required bool printOutput, EvalFunction eval
   return gitStatusOutput;
 }
 
-Future<String> _getGitStashOutput(
-    {required bool printOutput, EvalFunction evalFn = eval}) async {
+Future<String> _getGitStashOutput({required bool printOutput, EvalFunction evalFn = eval}) async {
   final String gitStatusOutput = await evalFn(
     'git',
     <String>['stash'],

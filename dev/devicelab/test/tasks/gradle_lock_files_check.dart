@@ -103,22 +103,7 @@ class MockEval {
   bool? lastPrintStdout;
   bool? lastPrintStderr;
 
-  String _nextResult = '';
-  Exception? _nextException;
-
-  String get nextResult => _nextResult;
-  set nextResult(String result) {
-    _nextResult = result;
-    _nextException = null;
-  }
-
-  Exception? get nextException => _nextException;
-  set nextException(Exception? exception) {
-    _nextException = exception;
-    if (exception != null) {
-      _nextResult = '';
-    }
-  }
+  String nextResult = '';
 
   void reset() {
     lastExecutable = null;
@@ -126,8 +111,7 @@ class MockEval {
     lastCanFail = null;
     lastPrintStdout = null;
     lastPrintStderr = null;
-    _nextResult = '';
-    _nextException = null;
+    nextResult = '';
   }
 
   Future<String> call(
@@ -147,9 +131,6 @@ class MockEval {
     lastPrintStdout = printStdout;
     lastPrintStderr = printStderr;
 
-    if (nextException != null) {
-      throw nextException!;
-    }
     return nextResult;
   }
 }
@@ -157,14 +138,6 @@ class MockEval {
 Matcher _throwsExceptionWithMessage(String messageSubstring) {
   return throwsA(
     isA<Exception>().having((Exception e) => e.toString(), 'message', contains(messageSubstring)),
-  );
-}
-
-Matcher _throwsProcessExceptionWithCode(int exitCode) {
-  return throwsA(
-    isA<ProcessException>()
-        .having((ProcessException e) => e.errorCode, 'errorCode', exitCode)
-        .having((ProcessException e) => e.message, 'message', contains('MockProcessException')),
   );
 }
 
@@ -197,16 +170,11 @@ void main() {
       expect(mockExec.calls, <MockCall>[
         MockCall(
           _dartCommand,
-          <String>[_scriptFilePath, '--no-gradle-generation'],
+          const <String>[_scriptFilePath, '--no-gradle-generation'],
           false,
           flutterDirectory.path,
         ),
-        MockCall(
-          'git',
-          <String>['stash', 'pop'],
-          true,
-          flutterDirectory.path,
-        ),
+        MockCall('git', const <String>['stash', 'pop'], true, flutterDirectory.path),
       ]);
 
       expect(mockEval.lastExecutable, 'git');
@@ -236,16 +204,11 @@ void main() {
       expect(mockExec.calls, <MockCall>[
         MockCall(
           _dartCommand,
-          <String>[_scriptFilePath, '--no-gradle-generation'],
+          const <String>[_scriptFilePath, '--no-gradle-generation'],
           false,
           flutterDirectory.path,
         ),
-        MockCall(
-          'git',
-          <String>['stash', 'pop'],
-          true,
-          flutterDirectory.path,
-        ),
+        MockCall('git', const <String>['stash', 'pop'], true, flutterDirectory.path),
       ]);
 
       expect(mockEval.lastExecutable, 'git');
@@ -255,87 +218,119 @@ void main() {
 
     group('finally block behavior', () {
       test(
-          'rethrows ProcessException when git stash pop fails with "No such file or directory"', () async {
-        mockEval.nextResult = '';
-        mockExec.addResponse(0);
-        final noSuchFileException = ProcessException(
-            'git', <String>['stash', 'pop'],
-            'No such file or directory, errno = 2', 2
-        );
-        mockExec.addResponse(noSuchFileException);
+        'rethrows ProcessException when git stash pop fails with "No such file or directory"',
+            () async {
+          mockEval.nextResult = '';
+          mockExec.addResponse(0);
+          const ProcessException noSuchFileException = ProcessException(
+            'git',
+            <String>['stash', 'pop'],
+            'No such file or directory, errno = 2',
+            2,
+          );
+          mockExec.addResponse(noSuchFileException);
 
-        await expectLater(
-              () =>
-              runGradleLockFilesCheck(
-                execFn: mockExec.call,
-                evalFn: mockEval.call,
-                shouldPrintOutput: false,
-              ),
-          throwsA(
+          await expectLater(
+                () =>
+                runGradleLockFilesCheck(
+                  execFn: mockExec.call,
+                  evalFn: mockEval.call,
+                  shouldPrintOutput: false,
+                ),
+            throwsA(
               isA<ProcessException>()
                   .having((ProcessException e) => e.executable, 'executable',
                   'git')
                   .having((ProcessException e) => e.arguments, 'arguments',
-                  <String>['stash', 'pop'])
-                  .having((ProcessException e) => e.message, 'message',
-                  contains('No such file or directory'))
-                  .having((ProcessException e) => e.errorCode, 'errorCode', 2)
-          ),
-        );
+                  <String>[
+                    'stash',
+                    'pop',
+                  ])
+                  .having(
+                    (ProcessException e) => e.message,
+                'message',
+                contains('No such file or directory'),
+              )
+                  .having((ProcessException e) => e.errorCode, 'errorCode', 2),
+            ),
+          );
 
-        expect(mockExec.calls, <MockCall>[
-          MockCall(
-              _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
-              false, flutterDirectory.path),
-          MockCall(
-              'git', <String>['stash', 'pop'], true, flutterDirectory.path),
-        ]);
-        expect(mockEval.lastExecutable, 'git');
-        expect(mockEval.lastArguments,
-            <String>['status', '--porcelain', '--untracked-files=all']);
-      });
+          expect(mockExec.calls, <MockCall>[
+            MockCall(
+              _dartCommand,
+              const <String>[_scriptFilePath, '--no-gradle-generation'],
+              false,
+              flutterDirectory.path,
+            ),
+            MockCall(
+                'git', const <String>['stash', 'pop'], true, flutterDirectory.path),
+          ]);
+          expect(mockEval.lastExecutable, 'git');
+          expect(mockEval.lastArguments, <String>[
+            'status',
+            '--porcelain',
+            '--untracked-files=all',
+          ]);
+        },
+      );
 
       test(
-          'rethrows ProcessException when git restore . fails with "No such file or directory"', () async {
-        mockEval.nextResult = 'No local changes to save';
+        'rethrows ProcessException when git restore . fails with "No such file or directory"',
+            () async {
+          mockEval.nextResult = 'No local changes to save';
 
-        mockExec.addResponse(0);
-        final noSuchFileException = ProcessException(
-            'git', <String>['restore', '.'],
-            'No such file or directory, errno = 2', 2
-        );
-        mockExec.addResponse(noSuchFileException);
+          mockExec.addResponse(0);
+          const ProcessException noSuchFileException = ProcessException(
+            'git',
+            <String>['restore', '.'],
+            'No such file or directory, errno = 2',
+            2,
+          );
+          mockExec.addResponse(noSuchFileException);
 
-        await expectLater(
-              () =>
-              runGradleLockFilesCheck(
-                execFn: mockExec.call,
-                evalFn: mockEval.call,
-                shouldPrintOutput: false,
-              ),
-          throwsA(
+          await expectLater(
+                () =>
+                runGradleLockFilesCheck(
+                  execFn: mockExec.call,
+                  evalFn: mockEval.call,
+                  shouldPrintOutput: false,
+                ),
+            throwsA(
               isA<ProcessException>()
                   .having((ProcessException e) => e.executable, 'executable',
                   'git')
                   .having((ProcessException e) => e.arguments, 'arguments',
-                  <String>['restore', '.'])
-                  .having((ProcessException e) => e.message, 'message',
-                  contains('No such file or directory'))
-                  .having((ProcessException e) => e.errorCode, 'errorCode', 2)
-          ),
-        );
+                  <String>[
+                    'restore',
+                    '.',
+                  ])
+                  .having(
+                    (ProcessException e) => e.message,
+                'message',
+                contains('No such file or directory'),
+              )
+                  .having((ProcessException e) => e.errorCode, 'errorCode', 2),
+            ),
+          );
 
-        expect(mockExec.calls, <MockCall>[
-          MockCall(
-              _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
-              false, flutterDirectory.path),
-          MockCall(
-              'git', <String>['restore', '.'], true, flutterDirectory.path),
-        ]);
-        expect(mockEval.lastExecutable, 'git');
-        expect(mockEval.lastArguments,
-            <String>['status', '--porcelain', '--untracked-files=all']);
-      });
+          expect(mockExec.calls, <MockCall>[
+            MockCall(
+              _dartCommand,
+              const <String>[_scriptFilePath, '--no-gradle-generation'],
+              false,
+              flutterDirectory.path,
+            ),
+            MockCall(
+                'git', const <String>['restore', '.'], true, flutterDirectory.path),
+          ]);
+          expect(mockEval.lastExecutable, 'git');
+          expect(mockEval.lastArguments, <String>[
+            'status',
+            '--porcelain',
+            '--untracked-files=all',
+          ]);
+        },
+      );
 
       test(
           'original try block exception propagates if git stash pop fails gracefully', () async {
@@ -355,10 +350,13 @@ void main() {
 
         expect(mockExec.calls, <MockCall>[
           MockCall(
-              _dartCommand, <String>[_scriptFilePath, '--no-gradle-generation'],
-              false, flutterDirectory.path),
+            _dartCommand,
+            const <String>[_scriptFilePath, '--no-gradle-generation'],
+            false,
+            flutterDirectory.path,
+          ),
           MockCall(
-              'git', <String>['restore', '.'], true, flutterDirectory.path),
+              'git', const <String>['restore', '.'], true, flutterDirectory.path),
         ]);
         expect(mockEval.lastExecutable, 'git');
         expect(mockEval.lastArguments,
