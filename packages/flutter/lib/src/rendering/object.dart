@@ -4599,14 +4599,16 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
 /// for their subtree.
 mixin SemanticsAnnotationsMixin on RenderObject {
   /// Initializes the semantics annotations for this mixin.
+  // Parameters added to this method should be marked as required to ensure
+  // callers of the method provide a value.
   void initSemanticsAnnotations({
     required SemanticsProperties properties,
-    bool container = false,
-    bool explicitChildNodes = false,
-    bool excludeSemantics = false,
-    bool blockUserActions = false,
-    Locale? localeForSubtree,
-    TextDirection? textDirection,
+    required bool container,
+    required bool explicitChildNodes,
+    required bool excludeSemantics,
+    required bool blockUserActions,
+    required Locale? localeForSubtree,
+    required TextDirection? textDirection,
   }) {
     _properties = properties;
     _container = container;
