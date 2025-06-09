@@ -148,6 +148,9 @@ void runSemanticsTests() {
   group('SemanticsValidationResult', () {
     _testSemanticsValidationResult();
   });
+  group('landmarks', () {
+    _testLandmarks();
+  });
 }
 
 void _testSemanticRole() {
@@ -212,7 +215,11 @@ void _testRoleLifecycle() {
     // Check that roles are initialized immediately
     {
       final SemanticsTester tester = SemanticsTester(owner());
-      tester.updateNode(id: 0, isButton: true, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isButton: true),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
       tester.apply();
 
       tester.expectSemantics('<sem role="button"></sem>');
@@ -232,8 +239,7 @@ void _testRoleLifecycle() {
       tester.updateNode(
         id: 0,
         label: 'a label',
-        isFocusable: true,
-        isButton: true,
+        flags: const ui.SemanticsFlags(isFocusable: true, isButton: true),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
@@ -297,6 +303,14 @@ void _testEngineAccessibilityBuilder() {
     builder.onOffSwitchLabels = true;
     features = builder.build();
     expect(features.onOffSwitchLabels, isTrue);
+  });
+
+  test('announce', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.announce
+    expect(features.announce, isTrue);
+    builder.announce = false;
+    features = builder.build();
+    expect(features.announce, isFalse);
   });
 
   test('reduce motion', () {
@@ -391,7 +405,10 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0);
+    // Announce is an inverted check, see EngineAccessibilityFeatures.announce.
+    // Therefore, we need to ensure that the original copy starts with false (1 << 7).
+    const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0 | 1 << 7);
+
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
     expect(copy.boldText, false);
@@ -399,6 +416,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(boldText: true);
@@ -417,6 +435,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(highContrast: true);
@@ -426,6 +445,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, true);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(invertColors: true);
@@ -435,6 +455,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, true);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, false);
 
     copy = original.copyWith(onOffSwitchLabels: true);
@@ -446,6 +467,16 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, true);
     expect(copy.reduceMotion, false);
 
+    copy = original.copyWith(announce: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, true);
+    expect(copy.reduceMotion, false);
+
     copy = original.copyWith(reduceMotion: true);
     expect(copy.accessibleNavigation, false);
     expect(copy.boldText, false);
@@ -453,6 +484,7 @@ void _testEngineSemanticsOwner() {
     expect(copy.highContrast, false);
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
+    expect(copy.announce, false);
     expect(copy.reduceMotion, true);
   });
 
@@ -473,15 +505,7 @@ void _testEngineSemanticsOwner() {
     semantics().semanticsEnabled = false;
   });
 
-  void renderSemantics({
-    String? label,
-    String? tooltip,
-    Set<ui.SemanticsFlag> flags = const <ui.SemanticsFlag>{},
-  }) {
-    int flagValues = 0;
-    for (final ui.SemanticsFlag flag in flags) {
-      flagValues = flagValues | flag.index;
-    }
+  void renderSemantics({String? label, String? tooltip, ui.SemanticsFlags? flags}) {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
@@ -495,7 +519,7 @@ void _testEngineSemanticsOwner() {
       id: 1,
       label: label ?? '',
       tooltip: tooltip ?? '',
-      flags: flagValues,
+      flags: flags ?? ui.SemanticsFlags.none,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
     );
@@ -562,7 +586,7 @@ void _testEngineSemanticsOwner() {
 </sem>''');
 
     // Update
-    renderSemantics(label: 'Hello', flags: <ui.SemanticsFlag>{ui.SemanticsFlag.isLink});
+    renderSemantics(label: 'Hello', flags: const ui.SemanticsFlags(isLink: true));
 
     tree = owner().debugSemanticsTree!;
     expect(tree.length, 2);
@@ -777,7 +801,8 @@ void _testHeader() {
       final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
       updateNode(
         builder,
-        flags: 0 | ui.SemanticsFlag.isHeader.index,
+        flags: const ui.SemanticsFlags(isHeader: true),
+
         label: 'Header of the page',
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -799,7 +824,7 @@ void _testHeader() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isHeader.index,
+      flags: const ui.SemanticsFlags(isHeader: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -818,7 +843,7 @@ void _testHeader() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isHeader.index,
+      flags: const ui.SemanticsFlags(isHeader: true),
       label: 'Header of the page',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1372,7 +1397,7 @@ void _testContainer() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isTextField.index,
+      flags: const ui.SemanticsFlags(isTextField: true),
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
     );
@@ -1655,7 +1680,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -1679,7 +1704,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -1706,7 +1731,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1731,7 +1756,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1782,7 +1807,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1833,7 +1858,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder2,
       scrollPosition: 20.0,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1873,7 +1898,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1936,7 +1961,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1959,7 +1984,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2010,7 +2035,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2061,7 +2086,7 @@ void _testHorizontalScrolling() {
     updateNode(
       builder2,
       scrollPosition: 20.0,
-      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -2220,10 +2245,12 @@ void _testIncrementables() {
       tester.updateNode(
         id: 0,
         hasIncrease: true,
-        isFocusable: true,
-        isFocused: isFocused,
-        hasEnabledState: true,
-        isEnabled: true,
+        flags: ui.SemanticsFlags(
+          isFocusable: true,
+          isFocused: isFocused,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
         value: 'd',
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2281,7 +2308,8 @@ void _testTextField() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags: 0 | ui.SemanticsFlag.isTextField.index,
+      flags: const ui.SemanticsFlags(isTextField: true),
+
       value: 'hello',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2326,13 +2354,13 @@ void _testCheckables() {
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
       label: 'test label',
-      flags:
-          0 |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.hasToggledState.index |
-          ui.SemanticsFlag.isToggled.index |
-          ui.SemanticsFlag.isFocusable.index,
+      flags: const ui.SemanticsFlags(
+        isEnabled: true,
+        hasEnabledState: true,
+        hasToggledState: true,
+        isToggled: true,
+        isFocusable: true,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2362,11 +2390,8 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.hasToggledState.index |
-          ui.SemanticsFlag.isToggled.index |
-          ui.SemanticsFlag.hasEnabledState.index,
+      flags: const ui.SemanticsFlags(hasEnabledState: true, hasToggledState: true, isToggled: true),
+
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2388,11 +2413,8 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.hasToggledState.index |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.hasEnabledState.index,
+      flags: const ui.SemanticsFlags(hasEnabledState: true, hasToggledState: true, isEnabled: true),
+
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2414,12 +2436,14 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.hasCheckedState.index |
-          ui.SemanticsFlag.isChecked.index,
+
+      flags: const ui.SemanticsFlags(
+        isEnabled: true,
+        hasEnabledState: true,
+        hasCheckedState: true,
+        isChecked: true,
+      ),
+
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2441,11 +2465,8 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.hasCheckedState.index |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.isChecked.index,
+
+      flags: const ui.SemanticsFlags(hasCheckedState: true, hasEnabledState: true, isChecked: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2467,11 +2488,8 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.hasCheckedState.index |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.hasEnabledState.index,
+
+      flags: const ui.SemanticsFlags(hasCheckedState: true, hasEnabledState: true, isEnabled: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2493,13 +2511,14 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.hasCheckedState.index |
-          ui.SemanticsFlag.isInMutuallyExclusiveGroup.index |
-          ui.SemanticsFlag.isChecked.index,
+      flags: const ui.SemanticsFlags(
+        hasCheckedState: true,
+        isChecked: true,
+        isInMutuallyExclusiveGroup: true,
+        hasEnabledState: true,
+        isEnabled: true,
+      ),
+
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2521,12 +2540,12 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.hasCheckedState.index |
-          ui.SemanticsFlag.isInMutuallyExclusiveGroup.index |
-          ui.SemanticsFlag.isChecked.index,
+      flags: const ui.SemanticsFlags(
+        hasEnabledState: true,
+        hasCheckedState: true,
+        isInMutuallyExclusiveGroup: true,
+        isChecked: true,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2548,12 +2567,12 @@ void _testCheckables() {
     updateNode(
       builder,
       actions: 0 | ui.SemanticsAction.tap.index,
-      flags:
-          0 |
-          ui.SemanticsFlag.isEnabled.index |
-          ui.SemanticsFlag.hasEnabledState.index |
-          ui.SemanticsFlag.hasCheckedState.index |
-          ui.SemanticsFlag.isInMutuallyExclusiveGroup.index,
+      flags: const ui.SemanticsFlags(
+        hasEnabledState: true,
+        hasCheckedState: true,
+        isInMutuallyExclusiveGroup: true,
+        isEnabled: true,
+      ),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -2579,20 +2598,23 @@ void _testCheckables() {
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
-          isEnabled: true,
-          hasEnabledState: true,
-          hasCheckedState: true,
-          isInMutuallyExclusiveGroup: true,
-          isChecked: false,
+          flags: const ui.SemanticsFlags(
+            isEnabled: true,
+            hasEnabledState: true,
+            hasCheckedState: true,
+            isInMutuallyExclusiveGroup: true,
+          ),
           rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
         ),
         tester.updateNode(
           id: 2,
-          isEnabled: true,
-          hasEnabledState: true,
-          hasCheckedState: true,
-          isInMutuallyExclusiveGroup: true,
-          isChecked: true,
+          flags: const ui.SemanticsFlags(
+            isEnabled: true,
+            hasEnabledState: true,
+            hasCheckedState: true,
+            isInMutuallyExclusiveGroup: true,
+            isChecked: true,
+          ),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
       ],
@@ -2621,12 +2643,13 @@ void _testCheckables() {
 
         // The following combination of actions and flags describe a checkbox.
         hasTap: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        hasCheckedState: true,
-        isFocusable: true,
-        isFocused: isFocused,
-
+        flags: ui.SemanticsFlags(
+          hasEnabledState: true,
+          isEnabled: true,
+          hasCheckedState: true,
+          isFocusable: true,
+          isFocused: isFocused,
+        ),
         value: 'd',
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -2681,32 +2704,32 @@ void _testSelectables() {
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
       children: <SemanticsNodeUpdate>[
-        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 1,
+          flags: ui.SemanticsFlags.none,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+        ),
         tester.updateNode(
           id: 2,
-          isSelectable: true,
-          isSelected: false,
+          flags: const ui.SemanticsFlags(hasSelectedState: true),
           role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
-          isSelectable: true,
-          isSelected: true,
+          flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
           role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
         ),
         // Add two new nodes to test the aria-current fallback
         tester.updateNode(
           id: 4,
-          isSelectable: true,
-          isSelected: false,
+          flags: const ui.SemanticsFlags(hasSelectedState: true),
           rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
         ),
         tester.updateNode(
           id: 5,
-          isSelectable: true,
-          isSelected: true,
+          flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
           rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
@@ -2731,29 +2754,25 @@ void _testSelectables() {
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
-      isSelectable: true,
-      isSelected: true,
+      flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
       role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
-      isSelectable: true,
-      isSelected: false,
+      flags: const ui.SemanticsFlags(hasSelectedState: true),
       role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     // Flip the values for the aria-current fallback nodes
     tester.updateNode(
       id: 4,
-      isSelectable: true,
-      isSelected: true,
+      flags: const ui.SemanticsFlags(hasSelectedState: true, isSelected: true),
       rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
     );
     tester.updateNode(
       id: 5,
-      isSelectable: true,
-      isSelected: false,
+      flags: const ui.SemanticsFlags(hasSelectedState: true),
       rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
@@ -2779,10 +2798,12 @@ void _testSelectables() {
     final tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      isSelectable: true,
-      isSelected: true,
-      hasCheckedState: true,
-      isChecked: true,
+      flags: const ui.SemanticsFlags(
+        hasSelectedState: true,
+        isSelected: true,
+        hasCheckedState: true,
+        isChecked: true,
+      ),
       hasTap: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
     );
@@ -2810,17 +2831,20 @@ void _testExpandables() {
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
       children: <SemanticsNodeUpdate>[
-        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 1,
+
+          flags: ui.SemanticsFlags.none,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+        ),
         tester.updateNode(
           id: 2,
-          isExpandable: true,
-          isExpanded: false,
+          flags: const ui.SemanticsFlags(hasExpandedState: true),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
-          isExpandable: true,
-          isExpanded: true,
+          flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
         ),
       ],
@@ -2842,14 +2866,12 @@ void _testExpandables() {
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
-      isExpandable: true,
-      isExpanded: true,
+      flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
-      isExpandable: true,
-      isExpanded: false,
+      flags: const ui.SemanticsFlags(hasExpandedState: true),
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     tester.apply();
@@ -2875,11 +2897,13 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      isFocusable: true,
+      flags: const ui.SemanticsFlags(
+        isFocusable: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isButton: true,
+      ),
       hasTap: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      isButton: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
     tester.apply();
@@ -2904,11 +2928,8 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      isFocusable: true,
+      flags: const ui.SemanticsFlags(isFocusable: true, hasEnabledState: true, isButton: true),
       hasTap: true,
-      hasEnabledState: true,
-      isEnabled: false,
-      isButton: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
     tester.apply();
@@ -2928,12 +2949,8 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      isFocusable: true,
-      hasEnabledState: true,
-      isEnabled: true,
-
       // Not a button
-      isButton: false,
+      flags: const ui.SemanticsFlags(isFocusable: true, hasEnabledState: true, isEnabled: true),
 
       // But has a tap action and no children
       hasTap: true,
@@ -2962,10 +2979,8 @@ void _testTappable() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
+        flags: ui.SemanticsFlags(hasEnabledState: true, isEnabled: enabled, isButton: true),
         hasTap: true,
-        hasEnabledState: true,
-        isEnabled: enabled,
-        isButton: true,
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
@@ -2994,12 +3009,14 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
+      flags: const ui.SemanticsFlags(
+        hasEnabledState: true,
+        isEnabled: true,
+        isButton: true,
+        isFocusable: true,
+        isFocused: true,
+      ),
       hasTap: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      isButton: true,
-      isFocusable: true,
-      isFocused: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
     tester.apply();
@@ -3017,15 +3034,15 @@ void _testTappable() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
-
-        // The following combination of actions and flags describe a button.
+        flags: ui.SemanticsFlags(
+          // The following combination of actions and flags describe a button.
+          hasEnabledState: true,
+          isEnabled: true,
+          isButton: true,
+          isFocusable: true,
+          isFocused: isFocused,
+        ),
         hasTap: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        isButton: true,
-        isFocusable: true,
-        isFocused: isFocused,
-
         value: 'd',
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3090,20 +3107,24 @@ void _testTappable() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      isFocusable: true,
+      flags: const ui.SemanticsFlags(
+        isFocusable: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isButton: true,
+      ),
       hasTap: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      isButton: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
           id: 1,
-          isFocusable: true,
+          flags: const ui.SemanticsFlags(
+            isFocusable: true,
+            hasEnabledState: true,
+            isEnabled: true,
+            isButton: true,
+          ),
           hasTap: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          isButton: true,
           rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
         ),
       ],
@@ -3163,7 +3184,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isImage.index,
+      flags: const ui.SemanticsFlags(isImage: true),
       label: 'Test Image Label',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3185,7 +3206,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isImage.index,
+      flags: const ui.SemanticsFlags(isImage: true),
       label: 'Test Image Label',
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -3217,7 +3238,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isImage.index,
+      flags: const ui.SemanticsFlags(isImage: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3236,7 +3257,7 @@ void _testImage() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isImage.index,
+      flags: const ui.SemanticsFlags(isImage: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
@@ -3297,7 +3318,8 @@ void _testLiveRegion() {
     updateNode(
       builder,
       label: 'This is a snackbar',
-      flags: 0 | ui.SemanticsFlag.isLiveRegion.index,
+      flags: const ui.SemanticsFlags(isLiveRegion: true),
+
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3319,7 +3341,7 @@ void _testLiveRegion() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.isLiveRegion.index,
+      flags: const ui.SemanticsFlags(isLiveRegion: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3342,7 +3364,7 @@ void _testLiveRegion() {
     updateNode(
       builder,
       label: 'This is a snackbar',
-      flags: 0 | ui.SemanticsFlag.isLiveRegion.index,
+      flags: const ui.SemanticsFlags(isLiveRegion: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3353,7 +3375,7 @@ void _testLiveRegion() {
     updateNode(
       builder,
       label: 'This is a snackbar',
-      flags: 0 | ui.SemanticsFlag.isLiveRegion.index,
+      flags: const ui.SemanticsFlags(isLiveRegion: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -3583,7 +3605,8 @@ void _testRoute() {
     updateNode(
       builder,
       label: 'this is a route label',
-      flags: 0 | ui.SemanticsFlag.scopesRoute.index | ui.SemanticsFlag.namesRoute.index,
+      flags: const ui.SemanticsFlags(scopesRoute: true, namesRoute: true),
+
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
@@ -3617,7 +3640,7 @@ void _testRoute() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
-      flags: 0 | ui.SemanticsFlag.scopesRoute.index | ui.SemanticsFlag.namesRoute.index,
+      flags: const ui.SemanticsFlags(scopesRoute: true, namesRoute: true),
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
@@ -3653,13 +3676,17 @@ void _testRoute() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
-        scopesRoute: true,
+        flags: const ui.SemanticsFlags(scopesRoute: true),
         transform: Matrix4.identity().toFloat64(),
         children: <SemanticsNodeUpdate>[
           tester.updateNode(
             id: 1,
             children: <SemanticsNodeUpdate>[
-              tester.updateNode(id: 2, namesRoute: true, label: label),
+              tester.updateNode(
+                id: 2,
+                flags: const ui.SemanticsFlags(namesRoute: true),
+                label: label,
+              ),
             ],
           ),
         ],
@@ -3695,7 +3722,11 @@ void _testRoute() {
       ..semanticsEnabled = true;
 
     final SemanticsTester tester = SemanticsTester(owner());
-    tester.updateNode(id: 0, scopesRoute: true, transform: Matrix4.identity().toFloat64());
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
+      transform: Matrix4.identity().toFloat64(),
+    );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
@@ -3721,7 +3752,11 @@ void _testRoute() {
         tester.updateNode(
           id: 1,
           children: <SemanticsNodeUpdate>[
-            tester.updateNode(id: 2, namesRoute: true, label: 'Hello'),
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(namesRoute: true),
+              label: 'Hello',
+            ),
           ],
         ),
       ],
@@ -3761,7 +3796,7 @@ void _testRoute() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      scopesRoute: true,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
       transform: Matrix4.identity().toFloat64(),
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
@@ -3772,23 +3807,25 @@ void _testRoute() {
             tester.updateNode(
               id: 2,
               label: 'Button 1',
+              flags: const ui.SemanticsFlags(
+                hasEnabledState: true,
+                isEnabled: true,
+                isButton: true,
+                isFocusable: true,
+              ),
               hasTap: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isButton: true,
-              isFocusable: true,
-              isFocused: false,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
             ),
             tester.updateNode(
               id: 3,
               label: 'Button 2',
+              flags: const ui.SemanticsFlags(
+                hasEnabledState: true,
+                isEnabled: true,
+                isButton: true,
+                isFocusable: true,
+              ),
               hasTap: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isButton: true,
-              isFocusable: true,
-              isFocused: false,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
             ),
           ],
@@ -3820,7 +3857,7 @@ void _testRoute() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      scopesRoute: true,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
       transform: Matrix4.identity().toFloat64(),
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
@@ -3829,24 +3866,27 @@ void _testRoute() {
             tester.updateNode(
               id: 2,
               label: 'Button 1',
+              flags: const ui.SemanticsFlags(
+                hasEnabledState: true,
+                isEnabled: true,
+                isButton: true,
+                isFocusable: true,
+              ),
               hasTap: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isButton: true,
-              isFocusable: true,
-              isFocused: false,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
             ),
             tester.updateNode(
               id: 3,
               label: 'Button 2',
+              flags: const ui.SemanticsFlags(
+                hasEnabledState: true,
+                isEnabled: true,
+                isButton: true,
+                isFocusable: true,
+                // Asked for focus explicitly.
+                isFocused: true,
+              ),
               hasTap: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isButton: true,
-              isFocusable: true,
-              // Asked for focus explicitly.
-              isFocused: true,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
             ),
           ],
@@ -3877,7 +3917,7 @@ void _testRoute() {
     final SemanticsTester tester = SemanticsTester(owner());
     tester.updateNode(
       id: 0,
-      scopesRoute: true,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
       transform: Matrix4.identity().toFloat64(),
       children: <SemanticsNodeUpdate>[
         tester.updateNode(
@@ -3887,12 +3927,13 @@ void _testRoute() {
             tester.updateNode(
               id: 3,
               label: 'Click me!',
+              flags: const ui.SemanticsFlags(
+                hasEnabledState: true,
+                isEnabled: true,
+                isButton: true,
+                isFocusable: true,
+              ),
               hasTap: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isButton: true,
-              isFocusable: true,
-              isFocused: false,
               rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
             ),
           ],
@@ -3937,7 +3978,11 @@ void _testRoute() {
     };
 
     final SemanticsTester tester = SemanticsTester(owner());
-    tester.updateNode(id: 0, scopesRoute: true, transform: Matrix4.identity().toFloat64());
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(scopesRoute: true),
+      transform: Matrix4.identity().toFloat64(),
+    );
     tester.apply();
 
     expect(capturedActions, isEmpty);
@@ -4005,7 +4050,11 @@ void _testDialogs() {
           tester.updateNode(
             id: 1,
             children: <SemanticsNodeUpdate>[
-              tester.updateNode(id: 2, namesRoute: true, label: label),
+              tester.updateNode(
+                id: 2,
+                flags: const ui.SemanticsFlags(namesRoute: true),
+                label: label,
+              ),
             ],
           ),
         ],
@@ -4165,7 +4214,7 @@ void _testFocusable() {
           tester.updateNode(
             id: 1,
             label: 'focusable text',
-            isFocusable: true,
+            flags: const ui.SemanticsFlags(isFocusable: true),
             rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
           ),
         ],
@@ -4192,8 +4241,7 @@ void _testFocusable() {
       tester.updateNode(
         id: 1,
         label: 'test focusable',
-        isFocusable: true,
-        isFocused: true,
+        flags: const ui.SemanticsFlags(isFocusable: true, isFocused: true),
         transform: Matrix4.identity().toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
@@ -4213,7 +4261,11 @@ void _testLink() {
 
     SemanticsObject pumpSemantics() {
       final SemanticsTester tester = SemanticsTester(owner());
-      tester.updateNode(id: 0, isLink: true, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(isLink: true),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
       tester.apply();
       return tester.getSemanticsObject(0);
     }
@@ -4232,7 +4284,7 @@ void _testLink() {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
-        isLink: true,
+        flags: const ui.SemanticsFlags(isLink: true),
         linkUrl: 'https://flutter.dev',
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
@@ -4266,6 +4318,26 @@ void _testTabs() {
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
     expect(object.element.getAttribute('role'), 'tab');
+  });
+
+  test('tab with tap action', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.tab,
+      hasTap: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
+    expect(object.element.getAttribute('role'), 'tab');
+    expect(object.element.hasAttribute('flt-tappable'), isTrue);
   });
 
   test('nodes with tab panel role', () {
@@ -4472,8 +4544,7 @@ void _testMenus() {
             tester.updateNode(
               id: 4,
               role: ui.SemanticsRole.menuItem,
-              isExpandable: true,
-              isExpanded: true,
+              flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
               children: <SemanticsNodeUpdate>[
                 tester.updateNode(
                   id: 5,
@@ -4556,8 +4627,7 @@ void _testMenus() {
             tester.updateNode(
               id: 4,
               role: ui.SemanticsRole.menuItem,
-              isExpandable: true,
-              isExpanded: true,
+              flags: const ui.SemanticsFlags(hasExpandedState: true, isExpanded: true),
               children: <SemanticsNodeUpdate>[
                 tester.updateNode(
                   id: 5,
@@ -4615,12 +4685,12 @@ void _testMenus() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    SemanticsObject pumpSemantics(bool isExpandable) {
+    SemanticsObject pumpSemantics(bool hasExpandedState) {
       final SemanticsTester tester = SemanticsTester(owner());
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.menuItem,
-        isExpandable: isExpandable,
+        flags: ui.SemanticsFlags(hasExpandedState: hasExpandedState),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
@@ -4851,17 +4921,19 @@ void _testRequirable() {
       id: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
       children: <SemanticsNodeUpdate>[
-        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 1,
+          flags: ui.SemanticsFlags.none,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+        ),
         tester.updateNode(
           id: 2,
-          hasRequiredState: true,
-          isRequired: false,
+          flags: const ui.SemanticsFlags(hasRequiredState: true),
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
-          hasRequiredState: true,
-          isRequired: true,
+          flags: const ui.SemanticsFlags(hasRequiredState: true, isRequired: true),
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
         ),
       ],
@@ -4883,14 +4955,12 @@ void _testRequirable() {
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
-      hasRequiredState: true,
-      isRequired: true,
+      flags: const ui.SemanticsFlags(hasRequiredState: true, isRequired: true),
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
-      hasRequiredState: true,
-      isRequired: false,
+      flags: const ui.SemanticsFlags(hasRequiredState: true),
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
     );
     tester.apply();
@@ -4904,8 +4974,16 @@ void _testRequirable() {
 ''');
 
     // Remove the ARIA attribute
-    tester.updateNode(id: 2, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 20, 100, 40));
-    tester.updateNode(id: 3, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 40, 100, 60));
+    tester.updateNode(
+      id: 2,
+      flags: ui.SemanticsFlags.none,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      flags: ui.SemanticsFlags.none,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
@@ -4979,12 +5057,284 @@ void _testSemanticsValidationResult() {
   });
 }
 
+void _testLandmarks() {
+  test('nodes with complementary role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.complementary,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.complementary);
+    expect(object.element.getAttribute('role'), 'complementary');
+  });
+
+  test('nodes with the same complementary role have labels', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          role: ui.SemanticsRole.complementary,
+          label: 'complementary 1',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          role: ui.SemanticsRole.complementary,
+          label: 'complementary 2',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 3,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 4,
+              role: ui.SemanticsRole.complementary,
+              label: 'complementary 4',
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+    final SemanticsObject object = tester.getSemanticsObject(1);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.complementary);
+    expect(object.element.getAttribute('role'), 'complementary');
+    expect(object.element.getAttribute('aria-label'), 'complementary 1');
+
+    final SemanticsObject object2 = tester.getSemanticsObject(2);
+    expect(object2.semanticRole?.kind, EngineSemanticsRole.complementary);
+    expect(object2.element.getAttribute('role'), 'complementary');
+    expect(object2.element.getAttribute('aria-label'), 'complementary 2');
+
+    final SemanticsObject object4 = tester.getSemanticsObject(4);
+    expect(object4.semanticRole?.kind, EngineSemanticsRole.complementary);
+    expect(object4.element.getAttribute('role'), 'complementary');
+    expect(object4.element.getAttribute('aria-label'), 'complementary 4');
+  });
+
+  test('nodes with contentInfo role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.contentInfo,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object.element.getAttribute('role'), 'contentinfo');
+  });
+
+  test('nodes with the same contentInfo role have labels', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          role: ui.SemanticsRole.contentInfo,
+          label: 'contentInfo 1',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          role: ui.SemanticsRole.contentInfo,
+          label: 'contentInfo 2',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+    final SemanticsObject object1 = tester.getSemanticsObject(1);
+    expect(object1.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object1.element.getAttribute('role'), 'contentinfo');
+    expect(object1.element.getAttribute('aria-label'), 'contentInfo 1');
+
+    final SemanticsObject object2 = tester.getSemanticsObject(2);
+    expect(object2.semanticRole?.kind, EngineSemanticsRole.contentInfo);
+    expect(object2.element.getAttribute('role'), 'contentinfo');
+    expect(object2.element.getAttribute('aria-label'), 'contentInfo 2');
+  });
+
+  test('nodes with main role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.main,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object.element.getAttribute('role'), 'main');
+  });
+
+  test('node with the same main role have labels', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          label: 'main 1',
+          role: ui.SemanticsRole.main,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          label: 'main 2',
+          role: ui.SemanticsRole.main,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+    final SemanticsObject object1 = tester.getSemanticsObject(1);
+    expect(object1.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object1.element.getAttribute('role'), 'main');
+    expect(object1.element.getAttribute('aria-label'), 'main 1');
+
+    final SemanticsObject object2 = tester.getSemanticsObject(2);
+    expect(object2.semanticRole?.kind, EngineSemanticsRole.main);
+    expect(object2.element.getAttribute('role'), 'main');
+    expect(object2.element.getAttribute('aria-label'), 'main 2');
+  });
+
+  test('nodes with navigation role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.navigation,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.navigation);
+    expect(object.element.getAttribute('role'), 'navigation');
+  });
+
+  test('nodes with the same navigation role have labels', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          role: ui.SemanticsRole.navigation,
+          label: 'navigation 1',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+        tester.updateNode(
+          id: 2,
+          role: ui.SemanticsRole.navigation,
+          label: 'navigation 2',
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        ),
+      ],
+    );
+    tester.apply();
+    final SemanticsObject object = tester.getSemanticsObject(1);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.navigation);
+    expect(object.element.getAttribute('role'), 'navigation');
+    expect(object.element.getAttribute('aria-label'), 'navigation 1');
+
+    final SemanticsObject object2 = tester.getSemanticsObject(2);
+    expect(object2.semanticRole?.kind, EngineSemanticsRole.navigation);
+    expect(object2.element.getAttribute('role'), 'navigation');
+    expect(object2.element.getAttribute('aria-label'), 'navigation 2');
+  });
+
+  test('nodes with region role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Header 1',
+        role: ui.SemanticsRole.region,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.region);
+    expect(object.element.getAttribute('role'), 'region');
+    expect(object.element.getAttribute('aria-label'), 'Header 1');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
   ui.SemanticsUpdateBuilder builder, {
   int id = 0,
-  int flags = 0,
+  ui.SemanticsFlags flags = ui.SemanticsFlags.none,
   int actions = 0,
   int maxValueLength = 0,
   int currentValueLength = 0,
