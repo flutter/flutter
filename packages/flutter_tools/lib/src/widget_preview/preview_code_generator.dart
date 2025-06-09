@@ -27,7 +27,7 @@ class PreviewCodeGenerator {
   /// project.
   final FlutterProject widgetPreviewScaffoldProject;
 
-  static const String generatedPreviewFilePath = 'lib/src/generated_preview.dart';
+  late final String generatedPreviewFilePath = fs.path.join('lib', 'src', 'generated_preview.dart');
 
   static const String _kBuilderType = 'Builder';
   static const String _kBuilderLibraryUri = 'package:flutter/widgets.dart';
