@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -138,7 +139,7 @@ void main() {
   });
 
   group('radioGroup', () {
-    testWidgets('failure case, child is not mutually exclusive', (WidgetTester tester) async {
+    testWidgets('success case, child is not mutually exclusive', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -154,9 +155,7 @@ void main() {
         ),
       );
       final Object? exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'Radio buttons in a radio group must be in a mutually exclusive group');
+      expect(exception, isNull);
     });
 
     testWidgets('failure case, multiple checked children', (WidgetTester tester) async {
@@ -187,40 +186,6 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
       expect(error.message, 'Radio groups must not have multiple checked children');
-    });
-
-    testWidgets('error case, reports first error', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Semantics(
-            role: SemanticsRole.radioGroup,
-            explicitChildNodes: true,
-            child: Column(
-              children: <Widget>[
-                Semantics(
-                  label: 'Option A',
-                  child: Semantics(checked: true, child: const SizedBox.square(dimension: 1)),
-                ),
-                Semantics(
-                  label: 'Option B',
-                  child: Semantics(
-                    checked: true,
-                    inMutuallyExclusiveGroup: true,
-                    child: const SizedBox.square(dimension: 1),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      // The widget tree has multiple errors. The validation walk should stop
-      // on the first error.
-      final Object? exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'Radio buttons in a radio group must be in a mutually exclusive group');
     });
 
     testWidgets('success case', (WidgetTester tester) async {
@@ -297,6 +262,29 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, radio group can have checkbox children', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Material(
+          child: Material(
+            child: RadioGroup<int>(
+              groupValue: 0,
+              onChanged: (int? value) {},
+              child: Column(
+                children: <Widget>[
+                  Checkbox(value: false, onChanged: (bool? value) {}),
+                  const Radio<int>(value: 0),
+                  const Radio<int>(value: 1),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(Checkbox), findsOneWidget);
     });
   });
 
