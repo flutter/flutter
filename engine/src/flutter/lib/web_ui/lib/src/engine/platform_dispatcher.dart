@@ -18,13 +18,6 @@ typedef _KeyDataResponseCallback = void Function(bool handled);
 const StandardMethodCodec standardCodec = StandardMethodCodec();
 const JSONMethodCodec jsonCodec = JSONMethodCodec();
 
-class NavigationTarget {
-  final DomElement element;
-  final int nodeId;
-
-  NavigationTarget(this.element, this.nodeId);
-}
-
 /// Platform event dispatcher.
 ///
 /// This is the central entry point for platform messages and configuration
@@ -1366,11 +1359,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Determines if a click event is likely from assistive technology rather than
   /// normal mouse/touch interaction.
   bool _isLikelyAssistiveTechnologyActivation(DomEvent event) {
-    if (event is! DomMouseEvent) return false;
+    if (!event.isA<DomMouseEvent>()) {
+      return false;
+    }
 
-    final DomMouseEvent mouseEvent = event;
-    final double clientX = mouseEvent.clientX ?? 0;
-    final double clientY = mouseEvent.clientY ?? 0;
+    final DomMouseEvent mouseEvent = event as DomMouseEvent;
+    final double clientX = mouseEvent.clientX;
+    final double clientY = mouseEvent.clientY;
 
     // Pattern 1: Origin clicks from basic ATs (NVDA, JAWS, Narrator)
     if (clientX <= 2 && clientY <= 2 && clientX >= 0 && clientY >= 0) {
@@ -1388,10 +1383,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Detects sophisticated AT navigation clicks with integer coordinates
   bool _isIntegerCoordinateNavigation(DomEvent event, double clientX, double clientY) {
     // Sophisticated ATs often generate integer coordinates, normal mouse clicks are often fractional
-    if (clientX != clientX.round() || clientY != clientY.round()) return false;
+    if (clientX != clientX.round() || clientY != clientY.round()) {
+      return false;
+    }
 
     final DomElement? element = event.target as DomElement?;
-    if (element == null) return false;
+    if (element == null) {
+      return false;
+    }
 
     // Exclude test coordinates to prevent false positives in Flutter tests
     //
@@ -1414,14 +1413,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // • Small enough to catch test coordinates that would cause false positives
     // • Chosen conservatively based on observed coordinate patterns
     const double minRealAppCoordinate = 100;
-    if (clientX < minRealAppCoordinate || clientY < minRealAppCoordinate) return false;
+    if (clientX < minRealAppCoordinate || clientY < minRealAppCoordinate) {
+      return false;
+    }
 
     return _isLikelyNavigationElement(element);
   }
 
   bool _isLikelyNavigationElement(DomElement element) {
     final String? role = element.getAttribute('role');
-    final String tagName = element.tagName?.toLowerCase() ?? '';
+    final String tagName = element.tagName.toLowerCase();
 
     return tagName == 'button' ||
         role == 'button' ||
@@ -1617,4 +1618,12 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
+}
+
+/// Helper class to hold navigation target information for AT focus restoration
+class NavigationTarget {
+  NavigationTarget(this.element, this.nodeId);
+
+  final DomElement element;
+  final int nodeId;
 }
