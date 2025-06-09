@@ -13,6 +13,7 @@
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
+#include "flutter/lib/ui/semantics/semantics_flags.h"
 #include "flutter/lib/ui/semantics/string_attribute.h"
 
 namespace flutter {
@@ -114,40 +115,6 @@ enum class SemanticsValidationResult : int32_t {
   kNone = 0,
   kValid = 1,
   kInvalid = 2,
-};
-
-struct SemanticsFlags {
-  bool hasCheckedState = false;
-  bool isChecked = false;
-  bool isSelected = false;
-  bool isButton = false;
-  bool isTextField = false;
-  bool isFocused = false;
-  bool hasEnabledState = false;
-  bool isEnabled = false;
-  bool isInMutuallyExclusiveGroup = false;
-  bool isHeader = false;
-  bool isObscured = false;
-  bool scopesRoute = false;
-  bool namesRoute = false;
-  bool isHidden = false;
-  bool isImage = false;
-  bool isLiveRegion = false;
-  bool hasToggledState = false;
-  bool isToggled = false;
-  bool hasImplicitScrolling = false;
-  bool isMultiline = false;
-  bool isReadOnly = false;
-  bool isFocusable = false;
-  bool isLink = false;
-  bool isSlider = false;
-  bool isKeyboardKey = false;
-  bool isCheckStateMixed = false;
-  bool hasExpandedState = false;
-  bool isExpanded = false;
-  bool hasSelectedState = false;
-  bool hasRequiredState = false;
-  bool isRequired = false;
 };
 
 struct SemanticsNode {
