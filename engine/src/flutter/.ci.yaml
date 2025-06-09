@@ -9,7 +9,7 @@ platform_properties:
       os: Mac-15.5
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16f6"
+          "sdk_version": "17a5241e"
         }
 
 targets:
@@ -55,6 +55,30 @@ targets:
       # at https://github.com/flutter/flutter/issues/152186.
       cores: "8"
 
+  - name: Mac builder_cache
+    enabled_branches:
+      - master
+    recipe: engine_v2/cache
+    presubmit: false
+    properties:
+      cache_name: "builder"
+      cache_paths: >-
+        [
+          "builder",
+          "git"
+        ]
+      ignore_cache_paths: >-
+        [
+          "builder/src/flutter/prebuilts/SDKs",
+          "builder/src/flutter/prebuilts/Library"
+        ]
+      gclient_variables: >-
+        {
+          "download_android_deps": "true",
+          "download_jdk": "true"
+        }
+    timeout: 60
+
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
     timeout: 240
@@ -63,14 +87,31 @@ targets:
       release_build: "true"
       cpu: arm64
       config_name: mac_host_engine
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16f6"
+          "sdk_version": "17a5241e"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
       - os=Mac-15.5
+
+  - name: Mac clangd
+    recipe: engine_v2/builder
+    properties:
+      config_name: mac_clangd
+      cpu: arm64
+
+  - name: Mac mac_unopt
+    recipe: engine_v2/engine_v2
+    properties:
+      config_name: mac_unopt
+      add_recipes_cq: "true"
+    timeout: 120
 
   - name: Mac mac_ios_engine
     recipe: engine_v2/engine_v2
@@ -81,7 +122,28 @@ targets:
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16f6"
+          "sdk_version": "17a5241e"
+        }
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
+    drone_dimensions:
+      - os=Mac-15.5
+      - cpu=x86
+
+  - name: Mac mac_ios_engine_ddm
+    recipe: engine_v2/engine_v2
+    bringup: true
+    timeout: 240
+    enabled_branches:
+      # Don't run this on release branches
+      - master
+    backfill: false
+    properties:
+      add_recipes_cq: "true"
+      config_name: mac_ios_engine_ddm
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "17a5241e"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
