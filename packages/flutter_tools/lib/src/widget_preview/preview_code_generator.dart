@@ -14,7 +14,7 @@ import '../base/file_system.dart';
 import '../project.dart';
 import 'preview_detector.dart';
 
-typedef _PreviewMappingEntry = MapEntry<PreviewPath, List<PreviewDetails>>;
+typedef _PreviewMappingEntry = MapEntry<PreviewPath, PreviewDependencyNode>;
 
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
@@ -83,7 +83,7 @@ class PreviewCodeGenerator {
   ///   ),
   /// ];
   /// ```
-  void populatePreviewsInGeneratedPreviewScaffold(PreviewMapping previews) {
+  void populatePreviewsInGeneratedPreviewScaffold(PreviewDependencyGraph previews) {
     final cb.DartEmitter emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
     final cb.Library lib = cb.Library(
       (cb.LibraryBuilder b) => b.body.addAll(<cb.Spec>[
@@ -108,8 +108,8 @@ class PreviewCodeGenerator {
   }
 
   void _buildGeneratedPreviewMethod({
+    required PreviewDependencyGraph previews,
     required cb.Allocator allocator,
-    required PreviewMapping previews,
     required cb.MethodBuilder builder,
   }) {
     final List<cb.Expression> previewExpressions = <cb.Expression>[];
@@ -122,12 +122,17 @@ class PreviewCodeGenerator {
         });
     for (final _PreviewMappingEntry(
           key: (path: String _, :Uri uri),
-          value: List<PreviewDetails> previewMethods,
+          value: PreviewDependencyNode fileDetails,
         )
         in sortedPreviews) {
-      for (final PreviewDetails preview in previewMethods) {
+      for (final PreviewDetails preview in fileDetails.filePreviews) {
         previewExpressions.add(
-          _buildPreviewWidget(allocator: allocator, preview: preview, uri: uri),
+          _buildPreviewWidget(
+            allocator: allocator,
+            preview: preview,
+            uri: uri,
+            fileDetails: fileDetails,
+          ),
         );
       }
     }
@@ -147,31 +152,45 @@ class PreviewCodeGenerator {
     required cb.Allocator allocator,
     required PreviewDetails preview,
     required Uri uri,
+    required PreviewDependencyNode fileDetails,
   }) {
-    cb.Expression previewWidget = cb
-        .refer(preview.functionName, uri.toString())
-        .call(<cb.Expression>[]);
+    cb.Expression previewWidget;
+    // TODO(bkonyi): clean up the error related code.
+    if (fileDetails.hasErrors) {
+      previewWidget = cb.refer('Text', 'package:flutter/material.dart').newInstance(<cb.Expression>[
+        cb.literalString('$uri has errors!'),
+      ]);
+    } else if (fileDetails.dependencyHasErrors) {
+      previewWidget = cb.refer('Text', 'package:flutter/material.dart').newInstance(<cb.Expression>[
+        cb.literalString('Dependency of $uri has errors!'),
+      ]);
+    } else {
+      previewWidget = cb.refer(preview.functionName, uri.toString()).call(<cb.Expression>[]);
 
-    if (preview.isBuilder) {
-      previewWidget = cb.refer(_kBuilderType, _kBuilderLibraryUri).newInstance(
-        <cb.Expression>[],
-        <String, cb.Expression>{_kBuilderProperty: previewWidget},
-      );
+      if (preview.isBuilder) {
+        previewWidget = cb.refer(_kBuilderType, _kBuilderLibraryUri).newInstance(
+          <cb.Expression>[],
+          <String, cb.Expression>{_kBuilderProperty: previewWidget},
+        );
+      }
+
+      if (preview.hasWrapper) {
+        previewWidget = _buildIdentifierReference(
+          preview.wrapper!,
+        ).call(<cb.Expression>[previewWidget]);
+      }
     }
 
-    if (preview.hasWrapper) {
-      previewWidget = _buildIdentifierReference(
-        preview.wrapper!,
-      ).call(<cb.Expression>[previewWidget]);
-    }
     previewWidget =
         cb.Method((cb.MethodBuilder previewBuilder) {
           previewBuilder.body = previewWidget.code;
         }).closure;
 
-    return cb
-        .refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri)
-        .newInstance(<cb.Expression>[], <String, cb.Expression>{
+    return cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri).newInstance(
+      <cb.Expression>[],
+      <String, cb.Expression>{
+        // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
+        if (!fileDetails.dependencyHasErrors && !fileDetails.hasErrors) ...<String, cb.Expression>{
           ...?_generateCodeFromAnalyzerExpression(
             allocator: allocator,
             key: PreviewDetails.kName,
@@ -204,8 +223,10 @@ class PreviewCodeGenerator {
             expression: preview.localizations,
             isCallback: true,
           ),
-          _kBuilderProperty: previewWidget,
-        });
+        },
+        _kBuilderProperty: previewWidget,
+      },
+    );
   }
 
   Map<String, cb.Expression>? _generateCodeFromAnalyzerExpression({
@@ -229,7 +250,7 @@ class PreviewCodeGenerator {
 }
 
 /// Returns the import URI for the [analyzer.LibraryElement2] containing [element].
-String _elementToLibraryIdentifier(analyzer.Element2 element) => element.library2!.identifier;
+String? _elementToLibraryIdentifier(analyzer.Element2? element) => element?.library2!.identifier;
 
 cb.Reference _buildIdentifierReference(analyzer.Identifier identifier) {
   return switch (identifier) {
@@ -240,7 +261,7 @@ cb.Reference _buildIdentifierReference(analyzer.Identifier identifier) {
 }
 
 cb.Reference _buildSimpleIdentifierReference(analyzer.SimpleIdentifier identifier) {
-  return cb.refer(identifier.name, _elementToLibraryIdentifier(identifier.element!));
+  return cb.refer(identifier.name, _elementToLibraryIdentifier(identifier.element));
 }
 
 class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Expression> {
@@ -341,7 +362,7 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
 
   @override
   cb.Expression visitPrefixedIdentifier(analyzer.PrefixedIdentifier node) {
-    final String libraryUri = _elementToLibraryIdentifier(node.element!);
+    final String libraryUri = _elementToLibraryIdentifier(node.element)!;
 
     // If the prefix is an enum, don't strip the prefix from the emitted code.
     if (node.prefix.element! is analyzer.EnumElement2) {
