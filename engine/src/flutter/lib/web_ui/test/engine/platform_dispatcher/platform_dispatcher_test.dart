@@ -410,11 +410,6 @@ void testMain() {
 
     group('AT Focus Handler Integration', () {
       test('navigation focus handler is registered during initialization', () {
-        // The dispatcher constructor calls _addNavigationFocusHandler()
-        // We can verify this by checking that click events on navigation elements
-        // are handled appropriately
-
-        // Create a semantic navigation button
         final DomElement navButton = createDomHTMLButtonElement();
         navButton.setAttribute('id', 'flt-semantic-node-123');
         navButton.setAttribute('role', 'button');
@@ -425,22 +420,18 @@ void testMain() {
           navButton.remove();
         });
 
-        // Simulate an AT click event (origin coordinates)
         final DomMouseEvent atClickEvent = createDomMouseEvent('click', <String, Object>{
           'clientX': 0,
           'clientY': 0,
           'bubbles': true,
         });
 
-        // Dispatch the event - this should trigger the AT focus handler
         navButton.dispatchEvent(atClickEvent);
 
-        // Verify the handler was registered by checking that the event propagated
         expect(navButton.isConnected, isTrue);
       });
 
       test('does not interfere with normal click events', () {
-        // Create a semantic navigation button
         final DomElement navButton = createDomHTMLButtonElement();
         navButton.setAttribute('id', 'flt-semantic-node-456');
         navButton.setAttribute('role', 'button');
@@ -451,27 +442,21 @@ void testMain() {
           navButton.remove();
         });
 
-        // Simulate a normal mouse click (non-AT coordinates)
         final DomMouseEvent normalClickEvent = createDomMouseEvent('click', <String, Object>{
           'clientX': 150.5,
           'clientY': 200.7,
           'bubbles': true,
         });
 
-        // Dispatch the event - this should NOT trigger AT special handling
         navButton.dispatchEvent(normalClickEvent);
 
-        // Verify normal operation continues
         expect(navButton.isConnected, isTrue);
       });
 
       test('handles events from multiple navigation element types', () {
         final List<DomElement> navElements = <DomElement>[
-          // Button element
           createDomHTMLButtonElement()..setAttribute('role', 'button'),
-          // Link element
           createDomElement('a')..setAttribute('role', 'link'),
-          // Tab element
           createDomHTMLDivElement()..setAttribute('role', 'tab'),
         ];
 
@@ -488,7 +473,6 @@ void testMain() {
           }
         });
 
-        // Test that each element type can handle AT events
         for (final DomElement element in navElements) {
           final DomMouseEvent atEvent = createDomMouseEvent('click', <String, Object>{
             'clientX': 1,
@@ -496,13 +480,11 @@ void testMain() {
             'bubbles': true,
           });
 
-          // Should not throw and should handle gracefully
           expect(() => element.dispatchEvent(atEvent), returnsNormally);
         }
       });
 
       test('properly manages focus state detection', () {
-        // Create a focusable navigation element
         final DomElement navButton = createDomHTMLButtonElement();
         navButton.setAttribute('id', 'flt-semantic-node-999');
         navButton.setAttribute('role', 'button');
@@ -513,14 +495,12 @@ void testMain() {
           navButton.remove();
         });
 
-        // Simulate AT event
         final DomMouseEvent atEvent = createDomMouseEvent('click', <String, Object>{
           'clientX': 0,
           'clientY': 0,
           'bubbles': true,
         });
 
-        // Should handle gracefully - the main goal is to ensure no exceptions
         expect(() => navButton.dispatchEvent(atEvent), returnsNormally);
         expect(navButton.isConnected, isTrue);
       });
