@@ -80,20 +80,27 @@ ui.Offset _computeOffsetForInputs(
   DomEventTarget eventTarget,
   EditableTextGeometry inputGeometry,
 ) {
-  final DomElement targetElement = eventTarget as DomElement;
   final DomHTMLElement domElement = textEditing.strategy.activeDomElement;
-  assert(
-    targetElement == domElement,
-    'The targeted input element must be the active input element',
-  );
+  assert(eventTarget == domElement, 'The targeted input element must be the active input element');
+
+  final DomElement? originalTarget = event.target as DomElement?;
+  final double offsetX;
+  final double offsetY;
+
+  if (originalTarget != null && originalTarget != eventTarget) {
+    final eventTargetBounds = (eventTarget as DomElement).getBoundingClientRect();
+    final originalTargetBounds = originalTarget.getBoundingClientRect();
+    offsetX = event.offsetX + (originalTargetBounds.left - eventTargetBounds.left);
+    offsetY = event.offsetY + (originalTargetBounds.top - eventTargetBounds.top);
+  } else {
+    offsetX = event.offsetX;
+    offsetY = event.offsetY;
+  }
+
   final Float32List transformValues = inputGeometry.globalTransform;
   assert(transformValues.length == 16);
   final Matrix4 transform = Matrix4.fromFloat32List(transformValues);
-  final Vector3 transformedPoint = transform.perspectiveTransform(
-    x: event.offsetX,
-    y: event.offsetY,
-    z: 0,
-  );
+  final Vector3 transformedPoint = transform.perspectiveTransform(x: offsetX, y: offsetY, z: 0);
 
   return ui.Offset(transformedPoint.x, transformedPoint.y);
 }

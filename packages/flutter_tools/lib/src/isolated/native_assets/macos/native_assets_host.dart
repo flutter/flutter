@@ -57,7 +57,7 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
   );
 }
 
-/// Combines dylibs from [sources] into a fat binary at [targetFullPath].
+/// Combines dylibs from [sources] into a fat binary in [target].
 ///
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64

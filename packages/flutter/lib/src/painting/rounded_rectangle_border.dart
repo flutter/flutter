@@ -211,7 +211,11 @@ class _RoundedRectangleToCircleBorder extends _ShapeToCircleBorder<RoundedRectan
 ///  * [RoundedRectangleBorder], which uses the traditional [RRect] shape.
 class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
   /// Creates a rounded rectangle border.
-  const RoundedSuperellipseBorder({super.side, this.borderRadius = BorderRadius.zero});
+  ///
+  /// If `borderRadius` is not specified or null, it defaults to
+  /// [BorderRadius.zero].
+  const RoundedSuperellipseBorder({super.side, BorderRadiusGeometry? borderRadius})
+    : borderRadius = borderRadius ?? BorderRadius.zero;
 
   /// The radii for each corner.
   @override
@@ -227,7 +231,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (a is RoundedSuperellipseBorder) {
       return RoundedSuperellipseBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
     }
     if (a is CircleBorder) {
@@ -246,7 +250,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (b is RoundedSuperellipseBorder) {
       return RoundedSuperellipseBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     if (b is CircleBorder) {
@@ -272,14 +276,22 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final RSuperellipse borderRect = borderRadius.resolve(textDirection).toRSuperellipse(rect);
-    final RSuperellipse adjustedRect = borderRect.deflate(side.strokeInset);
-    return Path()..addRSuperellipse(adjustedRect);
+    if (borderRadius == BorderRadius.zero) {
+      return Path()..addRect(rect.deflate(side.strokeInset));
+    } else {
+      final RSuperellipse borderRect = borderRadius.resolve(textDirection).toRSuperellipse(rect);
+      final RSuperellipse adjustedRect = borderRect.deflate(side.strokeInset);
+      return Path()..addRSuperellipse(adjustedRect);
+    }
   }
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    return Path()..addRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect));
+    if (borderRadius == BorderRadius.zero) {
+      return Path()..addRect(rect);
+    } else {
+      return Path()..addRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect));
+    }
   }
 
   @override
@@ -300,13 +312,11 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        if (side.width == 0.0) {
-          canvas.drawRSuperellipse(
-            borderRadius.resolve(textDirection).toRSuperellipse(rect),
-            side.toPaint(),
-          );
+        final double strokeOffset = (side.strokeOutset - side.strokeInset) / 2;
+        if (borderRadius == BorderRadius.zero) {
+          final Rect base = rect.inflate(strokeOffset);
+          canvas.drawRect(base, side.toPaint());
         } else {
-          final double strokeOffset = (side.strokeOutset - side.strokeInset) / 2;
           final RSuperellipse base = borderRadius
               .resolve(textDirection)
               .toRSuperellipse(rect)

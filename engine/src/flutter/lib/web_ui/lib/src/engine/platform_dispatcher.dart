@@ -666,18 +666,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     const int vibrateHeavyImpact = 30;
     const int vibrateSelectionClick = 10;
 
-    switch (type) {
-      case 'HapticFeedbackType.lightImpact':
-        return vibrateLightImpact;
-      case 'HapticFeedbackType.mediumImpact':
-        return vibrateMediumImpact;
-      case 'HapticFeedbackType.heavyImpact':
-        return vibrateHeavyImpact;
-      case 'HapticFeedbackType.selectionClick':
-        return vibrateSelectionClick;
-      default:
-        return vibrateLongPress;
-    }
+    return switch (type) {
+      'HapticFeedbackType.lightImpact' => vibrateLightImpact,
+      'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
+      'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
+      'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      _ => vibrateLongPress,
+    };
   }
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]

@@ -104,7 +104,7 @@ void main() {
   }
 
   Finder findStaticDefaultPreview() {
-    return find.descendant(of: findFittedBox(), matching: find.byType(ClipRRect));
+    return find.descendant(of: findFittedBox(), matching: find.byType(ClipRSuperellipse));
   }
 
   group('CupertinoContextMenu before and during opening', () {
@@ -698,7 +698,8 @@ void main() {
 
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
-      final ClipRRect previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRRect;
+      final ClipRSuperellipse previewWidget =
+          tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
 

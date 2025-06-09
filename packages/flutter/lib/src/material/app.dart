@@ -951,12 +951,12 @@ class _MaterialAppState extends State<MaterialApp> {
     BuildContext context, {
     required VoidCallback onPressed,
     required String semanticsLabel,
-    bool isLeftAligned = true,
+    bool usesDefaultAlignment = true,
   }) {
     return _MaterialInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+      icon: usesDefaultAlignment ? Icons.arrow_right : Icons.arrow_left,
       isDarkTheme: _isDarkTheme(context),
     );
   }
@@ -970,9 +970,9 @@ class _MaterialAppState extends State<MaterialApp> {
     return _MaterialInspectorButton.toggle(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      // This icon is also used for the Cupertino-styled button and for DevTools.
-      // It should be updated in all 3 places if changed.
-      icon: CupertinoIcons.cursor_rays,
+      // This unicode icon is also used for the Cupertino-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
+      icon: const IconData(0x1F74A),
       isDarkTheme: _isDarkTheme(context),
       toggledOn: selectionOnTapEnabled,
     );

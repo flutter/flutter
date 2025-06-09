@@ -30,10 +30,6 @@ void main() {
     return;
   }
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   for (final String agpVersion in agpVersions) {
     for (final String buildMode in buildModes) {
       testWithoutContext(
@@ -131,9 +127,8 @@ void main() {
             expect(nativeAssetsDir, exists);
 
             // We expect one subdirectory for each Android architecture.
-            expect(nativeAssetsDir.listSync().length, 4);
+            expect(nativeAssetsDir.listSync().length, 3);
             expect(nativeAssetsDir..childDirectory('armeabi-v7a'), exists);
-            expect(nativeAssetsDir..childDirectory('x86'), exists);
             expect(nativeAssetsDir..childDirectory('arm64-v8a'), exists);
             expect(nativeAssetsDir..childDirectory('x86_64'), exists);
           });

@@ -20,6 +20,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/variable_refresh_rate_display.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
@@ -504,10 +505,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _platformViewsController = nil;
 }
 
-- (NSURL*)observatoryUrl {
-  return self.publisher.url;
-}
-
 - (NSURL*)vmServiceUrl {
   return self.publisher.url;
 }
@@ -796,7 +793,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
   if (_shell != nullptr) {
-    FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
+    [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
   }
 
@@ -863,8 +860,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       /*is_gpu_disabled=*/_isGpuDisabled);
 
   if (shell == nullptr) {
-    FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
-                   << entrypoint.UTF8String;
+    NSString* errorMessage = [NSString
+        stringWithFormat:@"Could not start a shell FlutterEngine with entrypoint: %@", entrypoint];
+    [FlutterLogger logError:errorMessage];
   } else {
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];

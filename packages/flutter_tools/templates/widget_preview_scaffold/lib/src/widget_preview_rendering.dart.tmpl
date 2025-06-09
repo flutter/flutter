@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -148,6 +148,33 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   }
 }
 
+class Preview extends StatelessWidget {
+  const Preview({super.key, required this.preview, required this.child});
+
+  final WidgetPreview preview;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  @override
+  String toStringShort() {
+    final StringBuffer buffer = StringBuffer('@Preview');
+    if (preview.name != null) {
+      buffer.write('(name: "${preview.name}")');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    preview.debugFillProperties(properties);
+  }
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({super.key, required this.preview});
 
@@ -226,7 +253,12 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             key: key,
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
-              child: widget.preview.builder(),
+              child: EnableWidgetInspectorScope(
+                child: Preview(
+                  preview: widget.preview,
+                  child: widget.preview.builder(),
+                ),
+              ),
             ),
           );
           if (performRestart) {
@@ -287,6 +319,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     preview = WidgetPreviewMediaQueryOverride(
       preview: widget.preview,
       brightnessListenable: brightnessListenable,
+      child: preview,
+    );
+
+    preview = WidgetPreviewLocalizations(
+      localizationsData: widget.preview.localizations,
       child: preview,
     );
 
@@ -437,6 +474,72 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
     }
 
     return mediaQueryData;
+  }
+}
+
+/// Wraps [child] with a [Localizations] with localization data from
+/// [localizationsData].
+class WidgetPreviewLocalizations extends StatefulWidget {
+  const WidgetPreviewLocalizations({
+    super.key,
+    required this.localizationsData,
+    required this.child,
+  });
+
+  final PreviewLocalizationsData? localizationsData;
+  final Widget child;
+
+  @override
+  State<WidgetPreviewLocalizations> createState() =>
+      _WidgetPreviewLocalizationsState();
+}
+
+class _WidgetPreviewLocalizationsState
+    extends State<WidgetPreviewLocalizations> {
+  PreviewLocalizationsData get _localizationsData => widget.localizationsData!;
+  late final LocalizationsResolver _localizationsResolver =
+      LocalizationsResolver(
+        supportedLocales: _localizationsData.supportedLocales,
+        locale: _localizationsData.locale,
+        localeListResolutionCallback:
+            _localizationsData.localeListResolutionCallback,
+        localeResolutionCallback: _localizationsData.localeResolutionCallback,
+        localizationsDelegates: _localizationsData.localizationsDelegates,
+      );
+
+  @override
+  void didUpdateWidget(WidgetPreviewLocalizations oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final PreviewLocalizationsData? localizationsData =
+        widget.localizationsData;
+    if (localizationsData == null) {
+      return;
+    }
+    _localizationsResolver.update(
+      supportedLocales: localizationsData.supportedLocales,
+      locale: localizationsData.locale,
+      localeListResolutionCallback:
+          localizationsData.localeListResolutionCallback,
+      localeResolutionCallback: localizationsData.localeResolutionCallback,
+      localizationsDelegates: localizationsData.localizationsDelegates,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.localizationsData == null) {
+      return widget.child;
+    }
+    return ListenableBuilder(
+      listenable: _localizationsResolver,
+      builder: (context, _) {
+        return Localizations(
+          locale: _localizationsResolver.locale,
+          delegates: _localizationsResolver.localizationsDelegates.toList(),
+          child: widget.child,
+        );
+      },
+    );
   }
 }
 
@@ -625,7 +728,13 @@ Future<void> mainImpl() async {
   binding.debugExcludeRootWidgetInspector = true;
   // TODO(bkonyi): store somewhere.
   await WidgetPreviewScaffoldDtdServices().connect();
-  runApp(WidgetPreviewScaffold(previews: previews));
+  runWidget(
+    DisableWidgetInspectorScope(
+      child: binding.wrapWithDefaultView(
+        WidgetPreviewScaffold(previews: previews),
+      ),
+    ),
+  );
 }
 
 /// Define the Enum for Layout Types

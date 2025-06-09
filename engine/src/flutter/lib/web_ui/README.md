@@ -27,7 +27,7 @@ The `build` subcommand builds web engine gn/ninja targets. Targets can be
 individually specified in the command line invocation, or if none are specified,
 all web engine targets are built. Common targets are as follows:
   * `sdk` - The flutter_web_sdk itself.
-  * `canvaskit` - Flutter's version of canvakit.
+  * `canvaskit` - Flutter's version of canvaskit.
   * `canvaskit_chromium` - A version of canvaskit optimized for use with
     chromium-based browsers.
   * `skwasm` - Builds experimental skia wasm module renderer.
@@ -77,7 +77,7 @@ Several other flags can be passed that filter which test suites should be run:
   * `--compiler` runs only the test suites that use a particular compiler. Valid
     values for this are `dart2js` or `dart2wasm`
   * `--renderer` runs only the test suites that use a particular renderer. Valid
-    values for this are `html`, `canvakit`, or `skwasm`
+    values for this are `html`, `canvaskit`, or `skwasm`
   * `--suite` runs a suite by name.
   * `--bundle` runs suites that target a particular test bundle.
 

@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
+#include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -296,12 +297,6 @@ static uint32_t fl_engine_gl_get_fbo(void* user_data) {
   return 0;
 }
 
-static bool fl_engine_gl_present(void* user_data) {
-  // No action required, as this is handled in
-  // compositor_present_view_callback.
-  return true;
-}
-
 static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
   fl_opengl_manager_make_resource_current(self->opengl_manager);
@@ -560,7 +555,21 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
 
   self->project = FL_DART_PROJECT(g_object_ref(project));
-  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(self));
+  const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
+  if (g_strcmp0(renderer, "software") == 0) {
+    self->compositor = FL_COMPOSITOR(fl_compositor_software_new(self));
+    g_warning(
+        "Using the software renderer. Not all features are supported. This is "
+        "not recommended.\n"
+        "\n"
+        "To switch back to the default renderer, unset the "
+        "FLUTTER_LINUX_RENDERER environment variable.");
+  } else {
+    if (renderer != nullptr && strcmp(renderer, "opengl") != 0) {
+      g_warning("Unknown renderer type '%s', defaulting to opengl", renderer);
+    }
+    self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(self));
+  }
   if (binary_messenger != nullptr) {
     self->binary_messenger =
         FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
@@ -614,16 +623,36 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
 
   FlutterRendererConfig config = {};
-  config.type = kOpenGL;
-  config.open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
-  config.open_gl.gl_proc_resolver = fl_engine_gl_proc_resolver;
-  config.open_gl.make_current = fl_engine_gl_make_current;
-  config.open_gl.clear_current = fl_engine_gl_clear_current;
-  config.open_gl.fbo_callback = fl_engine_gl_get_fbo;
-  config.open_gl.present = fl_engine_gl_present;
-  config.open_gl.make_resource_current = fl_engine_gl_make_resource_current;
-  config.open_gl.gl_external_texture_frame_callback =
-      fl_engine_gl_external_texture_frame_callback;
+  config.type = fl_compositor_get_renderer_type(self->compositor);
+  switch (config.type) {
+    case kSoftware:
+      config.software.struct_size = sizeof(FlutterSoftwareRendererConfig);
+      // No action required, as this is handled in
+      // compositor_present_view_callback.
+      config.software.surface_present_callback =
+          [](void* user_data, const void* allocation, size_t row_bytes,
+             size_t height) { return true; };
+      break;
+    case kOpenGL:
+      config.open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
+      config.open_gl.gl_proc_resolver = fl_engine_gl_proc_resolver;
+      config.open_gl.make_current = fl_engine_gl_make_current;
+      config.open_gl.clear_current = fl_engine_gl_clear_current;
+      config.open_gl.fbo_callback = fl_engine_gl_get_fbo;
+      // No action required, as this is handled in
+      // compositor_present_view_callback.
+      config.open_gl.present = [](void* user_data) { return true; };
+      config.open_gl.make_resource_current = fl_engine_gl_make_resource_current;
+      config.open_gl.gl_external_texture_frame_callback =
+          fl_engine_gl_external_texture_frame_callback;
+      break;
+    case kMetal:
+    case kVulkan:
+    default:
+      g_set_error(error, fl_engine_error_quark(), FL_ENGINE_ERROR_FAILED,
+                  "Unsupported renderer type");
+      return FALSE;
+  }
 
   FlutterTaskRunnerDescription platform_task_runner = {};
   platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);

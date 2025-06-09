@@ -6,8 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:conductor_core/conductor_core.dart';
 import 'package:conductor_core/packages_autoroller.dart';
+import 'package:conductor_core/src/repository.dart';
+import 'package:conductor_core/src/stdio.dart';
 import 'package:conductor_core/src/validate_checkout_post_gradle_regeneration.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart' show Context, Style;
@@ -252,7 +253,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: 'deadbeef'),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
           'pub',
           'get',
         ],
@@ -344,7 +345,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: 'deadbeef'),
       const FakeCommand(
         command: <String>[
-          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/flutter',
           'pub',
           'get',
         ],

@@ -114,6 +114,8 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
           (entry.type == '(__TEXT,__text)' ||
               entry.type == '(__TEXT,__const)' ||
               entry.type == '(__TEXT,__constg_swiftt)' ||
+              entry.type == '(__DATA_CONST,__const)' ||
+              entry.type == '(__DATA,__data)' ||
               entry.type == '(__DATA,__objc_data)') &&
           swiftInternalRegExp.hasMatch(entry.name);
       return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);

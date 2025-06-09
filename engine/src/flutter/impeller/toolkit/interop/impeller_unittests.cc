@@ -292,6 +292,32 @@ TEST_P(InteropPlaygroundTest, CanCreateParagraphs) {
       }));
 }
 
+TEST_P(InteropPlaygroundTest, CanCreateDecorations) {
+  hpp::TypographyContext context;
+  auto para =
+      hpp::ParagraphBuilder(context)
+          .PushStyle(
+              hpp::ParagraphStyle{}
+                  .SetForeground(hpp::Paint{}.SetColor({1.0, 0.0, 0.0, 1.0}))
+                  .SetFontSize(150.0f)
+                  .SetTextDecoration(ImpellerTextDecoration{
+                      .types = kImpellerTextDecorationTypeLineThrough |
+                               kImpellerTextDecorationTypeUnderline,
+                      .color = ImpellerColor{0.0, 1.0, 0.0, 0.75},
+                      .style = kImpellerTextDecorationStyleWavy,
+                      .thickness_multiplier = 1.5,
+                  }))
+          .AddText(std::string{"Holy text decorations Batman!"})
+          .Build(900);
+  auto dl = hpp::DisplayListBuilder{}.DrawParagraph(para, {100, 100}).Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
 TEST_P(InteropPlaygroundTest, CanCreateShapes) {
   hpp::DisplayListBuilder builder;
 
@@ -603,6 +629,31 @@ TEST_P(InteropPlaygroundTest, CanGetPathBounds) {
   ASSERT_EQ(bounds.y, 100);
   ASSERT_EQ(bounds.width, 100);
   ASSERT_EQ(bounds.height, 100);
+}
+
+TEST_P(InteropPlaygroundTest, CanControlEllipses) {
+  hpp::TypographyContext context;
+  auto style = hpp::ParagraphStyle{};
+  style.SetFontSize(50);
+  style.SetForeground(hpp::Paint{}.SetColor({.red = 1.0, .alpha = 1.0}));
+  const auto text = std::string{"The quick brown fox jumped over the lazy dog"};
+  style.SetEllipsis("🐶");
+  auto para1 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  style.SetForeground(hpp::Paint{}.SetColor({.green = 1.0, .alpha = 1.0}));
+  style.SetEllipsis(nullptr);
+  auto para2 =
+      hpp::ParagraphBuilder{context}.PushStyle(style).AddText(text).Build(250);
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawParagraph(para1, {100, 100})
+                .DrawParagraph(para2, {100, 200})
+                .Build();
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
 }
 
 }  // namespace impeller::interop::testing

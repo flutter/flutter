@@ -1055,8 +1055,8 @@ pluginManagement {
           expect(
             validateJavaAndGradle(
               BufferLogger.test(),
-              javaV: data.javaVersion,
-              gradleV: data.gradleVersion,
+              javaVersion: data.javaVersion,
+              gradleVersion: data.gradleVersion,
             ),
             data.validPair ? isTrue : isFalse,
             reason: 'J: ${data.javaVersion}, G: ${data.gradleVersion}',

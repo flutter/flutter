@@ -5161,16 +5161,16 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 71,
+          "fp16_arithmetic": 60,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "varying"
             ],
             "longest_path_cycles": [
-              0.21875,
-              0.21875,
-              0.03125,
+              0.28125,
+              0.28125,
+              0.078125,
               0.0,
               0.0,
               0.5,
@@ -5189,9 +5189,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.21875,
-              0.21875,
-              0.0,
+              0.28125,
+              0.28125,
+              0.046875,
               0.0,
               0.0,
               0.5,
@@ -5201,9 +5201,9 @@
               "varying"
             ],
             "total_cycles": [
-              0.21875,
-              0.21875,
-              0.03125,
+              0.28125,
+              0.28125,
+              0.078125,
               0.0,
               0.0,
               0.5,
@@ -5212,7 +5212,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 4,
+          "uniform_registers_used": 6,
           "work_registers_used": 20
         }
       }
@@ -5230,7 +5230,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              1.3200000524520874,
+              2.309999942779541,
               1.0,
               1.0
             ],
@@ -5243,7 +5243,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              1.3200000524520874,
+              2.309999942779541,
               1.0,
               1.0
             ],
@@ -5251,7 +5251,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              1.6666666269302368,
+              2.6666667461395264,
               1.0,
               1.0
             ]
@@ -5770,10 +5770,10 @@
       }
     }
   },
-  "flutter/impeller/entity/gles/rrect_blur.vert.gles": {
+  "flutter/impeller/entity/gles/rrect_like_blur.vert.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/rrect_blur.vert.gles",
+      "filename": "flutter/impeller/entity/gles/rrect_like_blur.vert.gles",
       "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
@@ -5883,7 +5883,7 @@
     },
     "Mali-T880": {
       "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/rrect_blur.vert.gles",
+      "filename": "flutter/impeller/entity/gles/rrect_like_blur.vert.gles",
       "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
@@ -5923,6 +5923,124 @@
           "thread_occupancy": 100,
           "uniform_registers_used": 5,
           "work_registers_used": 2
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/gles/rsuperellipse_blur.frag.gles": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/gles/rsuperellipse_blur.frag.gles",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arith_total",
+              "arith_sfu"
+            ],
+            "longest_path_cycles": [
+              1.3125,
+              1.2625000476837158,
+              0.5625,
+              1.3125,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "shortest_path_cycles": [
+              1.125,
+              1.125,
+              0.484375,
+              0.9375,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "total_cycles": [
+              1.4249999523162842,
+              1.4249999523162842,
+              0.737500011920929,
+              1.375,
+              0.0,
+              0.25,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 48,
+          "work_registers_used": 26
+        }
+      }
+    },
+    "Mali-T880": {
+      "core": "Mali-T880",
+      "filename": "flutter/impeller/entity/gles/rsuperellipse_blur.frag.gles",
+      "has_uniform_computation": false,
+      "type": "Fragment",
+      "variants": {
+        "Main": {
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "longest_path_cycles": [
+              12.210000038146973,
+              1.0,
+              0.0
+            ],
+            "pipelines": [
+              "arithmetic",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "shortest_path_cycles": [
+              11.550000190734863,
+              1.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arithmetic"
+            ],
+            "total_cycles": [
+              14.666666984558105,
+              1.0,
+              0.0
+            ]
+          },
+          "thread_occupancy": 100,
+          "uniform_registers_used": 9,
+          "work_registers_used": 4
         }
       }
     }
@@ -8896,16 +9014,16 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 100,
+          "fp16_arithmetic": 60,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "varying"
             ],
             "longest_path_cycles": [
-              0.1875,
-              0.1875,
-              0.0,
+              0.25,
+              0.25,
+              0.0625,
               0.0,
               0.0,
               0.5,
@@ -8924,9 +9042,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.1875,
-              0.1875,
-              0.0,
+              0.25,
+              0.25,
+              0.0625,
               0.0,
               0.0,
               0.5,
@@ -8936,9 +9054,9 @@
               "varying"
             ],
             "total_cycles": [
-              0.1875,
-              0.1875,
-              0.0,
+              0.25,
+              0.25,
+              0.0625,
               0.0,
               0.0,
               0.5,
@@ -8947,8 +9065,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 6,
-          "work_registers_used": 8
+          "uniform_registers_used": 10,
+          "work_registers_used": 9
         }
       }
     }
@@ -9351,10 +9469,10 @@
       }
     }
   },
-  "flutter/impeller/entity/rrect_blur.vert.vkspv": {
+  "flutter/impeller/entity/rrect_like_blur.vert.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/rrect_blur.vert.vkspv",
+      "filename": "flutter/impeller/entity/rrect_like_blur.vert.vkspv",
       "has_uniform_computation": true,
       "type": "Vertex",
       "variants": {
@@ -9459,6 +9577,79 @@
           "thread_occupancy": 100,
           "uniform_registers_used": 20,
           "work_registers_used": 7
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/rsuperellipse_blur.frag.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/rsuperellipse_blur.frag.vkspv",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arith_total",
+              "arith_sfu"
+            ],
+            "longest_path_cycles": [
+              1.3125,
+              1.2625000476837158,
+              0.53125,
+              1.3125,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "shortest_path_cycles": [
+              1.125,
+              1.125,
+              0.484375,
+              0.9375,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "total_cycles": [
+              1.4249999523162842,
+              1.4249999523162842,
+              0.699999988079071,
+              1.375,
+              0.0,
+              0.25,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 48,
+          "work_registers_used": 28
         }
       }
     }

@@ -35,7 +35,7 @@ abstract class ShutdownHooks {
   /// Runs all registered shutdown hooks and returns a future that completes when
   /// all such hooks have finished.
   ///
-  /// Shutdown hooks will be run in groups by their [ShutdownStage]. All shutdown
+  /// Shutdown hooks will be run in groups by their shutdown stage. All shutdown
   /// hooks within a given stage will be started in parallel and will be
   /// guaranteed to run to completion before shutdown hooks in the next stage are
   /// started.
@@ -143,8 +143,8 @@ abstract class ProcessUtils {
   /// When [environment] is supplied, it is used as the environment for the child
   /// process.
   ///
-  /// When [timeout] is supplied, [runAsync] will kill the child process and
-  /// throw a [ProcessException] when it doesn't finish in time.
+  /// When [timeout] is supplied, kills the child process and
+  /// throws a [ProcessException] when it doesn't finish in time.
   ///
   /// If [timeout] is supplied, the command will be retried [timeoutRetries] times
   /// if it times out.
@@ -228,7 +228,7 @@ abstract class ProcessUtils {
   ///
   /// However it did not catch a [SocketException] on Linux.
   ///
-  /// As part of making sure errors are caught, this function will call [flush]
+  /// As part of making sure errors are caught, this function will call [IOSink.flush]
   /// on [stdin] to ensure that [line] is written to the pipe before this
   /// function returns. This means completion will be blocked if the kernel
   /// buffer of the pipe is full.

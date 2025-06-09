@@ -114,7 +114,7 @@ final class AssetTransformer {
     final List<String> transformerArguments = <String>[
       '--input=${asset.absolute.path}',
       '--output=${output.absolute.path}',
-      ...?transformer.args,
+      ...transformer.args,
     ];
 
     final List<String> command = <String>[

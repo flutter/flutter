@@ -334,6 +334,19 @@ Future<void> testMain() async {
     EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
   });
 
+  test('onAccessibilityFeaturesChanged is called when semantics is enabled', () {
+    bool a11yChangeInvoked = false;
+    myWindow.onAccessibilityFeaturesChanged = () {
+      a11yChangeInvoked = true;
+    };
+
+    expect(EngineSemantics.instance.semanticsEnabled, isFalse);
+    EngineSemantics.instance.semanticsEnabled = true;
+
+    expect(EngineSemantics.instance.semanticsEnabled, isTrue);
+    expect(a11yChangeInvoked, isTrue);
+  });
+
   test('onPlatformMessage preserves the zone', () {
     final Zone innerZone = Zone.current.fork();
 

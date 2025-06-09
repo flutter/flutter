@@ -5,6 +5,7 @@
 #include "surface.h"
 #include <emscripten/wasm_worker.h>
 #include <algorithm>
+#include "live_objects.h"
 
 #include "skwasm_support.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
@@ -234,6 +235,7 @@ SkwasmObject TextureSourceWrapper::getTextureSource() {
 }
 
 SKWASM_EXPORT Surface* surface_create() {
+  liveSurfaceCount++;
   return new Surface();
 }
 
@@ -248,6 +250,7 @@ SKWASM_EXPORT void surface_setCallbackHandler(
 }
 
 SKWASM_EXPORT void surface_destroy(Surface* surface) {
+  liveSurfaceCount--;
   // Dispatch to the worker
   skwasm_dispatchDisposeSurface(surface->getThreadId(), surface);
 }

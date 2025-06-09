@@ -383,7 +383,7 @@ void main() {
       ],
     );
     painter.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/32238
+  });
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;

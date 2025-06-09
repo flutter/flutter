@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "flutter/common/constants.h"
@@ -14,6 +15,7 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
@@ -673,10 +675,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   flutterArguments.root_isolate_create_callback = _project.rootIsolateCreateCallback;
   flutterArguments.log_message_callback = [](const char* tag, const char* message,
                                              void* user_data) {
+    std::stringstream stream;
     if (tag && tag[0]) {
-      std::cout << tag << ": ";
+      stream << tag << ": ";
     }
-    std::cout << message << std::endl;
+    stream << message;
+    std::string log = stream.str();
+    [FlutterLogger logDirect:[NSString stringWithUTF8String:log.c_str()]];
   };
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
