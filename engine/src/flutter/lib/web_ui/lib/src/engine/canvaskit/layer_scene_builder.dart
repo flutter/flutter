@@ -110,7 +110,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.EngineLayer? oldLayer,
   }) {
     return pushLayer<ClipPathEngineLayer>(
-      ClipPathEngineLayer((path as LazyPath).builtPath as CkPath, clipBehavior),
+      ClipPathEngineLayer(path as LazyPath, clipBehavior),
     );
   }
 
