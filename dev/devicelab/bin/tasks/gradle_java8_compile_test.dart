@@ -14,6 +14,13 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     try {
+      section('Gradle lockfiles check');
+      try {
+        await runGradleLockFilesCheck();
+      } catch (e) {
+        return TaskResult.failure(e.toString());
+      }
+
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('check main plugin file exists');
         final File pluginMainKotlinFile = File(
@@ -88,14 +95,7 @@ class AaaPlugin: FlutterPlugin, MethodCallHandler {
           );
         });
       });
-
-      section('Gradle lockfiles check');
-      try {
-        await runGradleLockFilesCheck();
-        return TaskResult.success(null);
-      } catch (e) {
-        return TaskResult.failure(e.toString());
-      }
+      return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
     } catch (e) {
