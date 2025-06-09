@@ -1200,7 +1200,6 @@ class Node {
         _dirty = true;
         final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetAddition);
         reason.data.add(currentOutput);
-        // if this isn't a current output file there is no reason to compute the key.
         continue;
       }
     }
