@@ -386,7 +386,7 @@ void main() {
     );
 
     // In RTL, items should be in reverse order (2, 1, 0).
-    // So item 2 should be rightmost, then 1, then 0.
+    // So item 2 should be leftmost, then 1, then 0.
     for (int i = 0; i < itemCount - 1; i++) {
       final Rect current = textRects[i];
       final Rect next = textRects[i + 1];
