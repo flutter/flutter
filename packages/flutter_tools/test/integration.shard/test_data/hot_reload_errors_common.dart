@@ -43,7 +43,6 @@ void testAll({
         );
 
         project.removeFieldFromConstClass();
-        print('[[[before]]] hot reload');
         await expectLater(
           flutter.hotReload(),
           throwsA(
@@ -54,11 +53,8 @@ void testAll({
             ),
           ),
         );
-        print('[[[after]]] hot reload');
 
-        print('[[[before]]] hot restart');
         await expectLater(flutter.hotRestart(), completes);
-        print('[[[after]]] hot restart');
       },
     );
   });
