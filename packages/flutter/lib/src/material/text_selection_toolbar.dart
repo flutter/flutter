@@ -550,7 +550,10 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       i++;
 
-      if (_shouldPaintChild(child, i)) {
+      if (!_shouldPaintChild(child, i)) {
+        // There is no need to update children that won't be painted.
+        childParentData.shouldPaint = false;
+      } else {
         childParentData.shouldPaint = true;
 
         totalWidth += child.size.width;
@@ -559,8 +562,6 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
         if (child != navButton) {
           contentItems.add(child);
         }
-      } else {
-        childParentData.shouldPaint = false;
       }
     });
 
