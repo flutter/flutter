@@ -95,9 +95,9 @@ class WebTestsSuite {
     final String engineRealmFile = path.join(flutterRoot, 'bin', 'cache', 'engine.realm');
     final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
     final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
-    if (engineRealm.isNotEmpty) {
-      return;
-    }
+    // if (engineRealm.isNotEmpty) {
+    //   return;
+    // }
     final List<ShardRunner> tests = <ShardRunner>[
       for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
         () => _runFlutterDriverWebTest(
@@ -261,7 +261,7 @@ class WebTestsSuite {
       () => _runWebDebugTest('lib/stack_trace.dart'),
       () => _runWebDebugTest('lib/framework_stack_trace.dart'),
       () => _runWebDebugTest('lib/web_directory_loading.dart'),
-      () => _runWebDebugTest(
+      if (engineRealm.isNotEmpty) () => _runWebDebugTest(
         'lib/web_resources_cdn_test.dart',
         additionalArguments: <String>['--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion'],
       ),
