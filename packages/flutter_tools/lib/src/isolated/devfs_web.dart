@@ -497,6 +497,7 @@ class WebAssetServer implements AssetReader {
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
     if (request.method != 'GET') {
+      globals.printError('Not a GET request');
       // Assets are served via GET only.
       return shelf.Response.notFound('');
     }
@@ -504,6 +505,7 @@ class WebAssetServer implements AssetReader {
     final String? requestPath = _stripBasePath(request.url.path, basePath);
 
     if (requestPath == null) {
+      globals.printError('requestPath is null');
       return shelf.Response.notFound('');
     }
 
@@ -527,6 +529,9 @@ class WebAssetServer implements AssetReader {
     final String webServerPath = requestPath.replaceFirst('.dart.js', '.dart.lib.js');
     if (_webMemoryFS.files.containsKey(requestPath) ||
         _webMemoryFS.files.containsKey(webServerPath)) {
+      globals.printError(
+        'Received request for Dart file in handleRequest: ${request.requestedUri}',
+      );
       final List<int>? bytes = getFile(requestPath) ?? getFile(webServerPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
@@ -605,6 +610,8 @@ class WebAssetServer implements AssetReader {
           requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
+
+      globals.printError('File does not exist: ${file.uri}');
       return _serveIndexHtml();
     }
 
@@ -2262,7 +2269,7 @@ if (!self.dart_library) {
         // Called if the bootstrap script fails to load.
         this.onBootstrapError = () => { };
 
-        this.maxRequestPoolSize = 1000;
+        this.maxRequestPoolSize = 10;
 
         // Max retry to prevent from load failing scripts forever.
         this.maxAttempts = 6;
@@ -2850,6 +2857,7 @@ if (!self.deferred_loader) {
 
     // See docs on `DartDevEmbedder.runMain`.
     defineLibrary(libraryName, initializer) {
+      console.log(`Defined library ${libraryName} in defineLibrary`);
       // TODO(nshahan): Make this test stronger and check for generations. A
       // library that is part of a pending hot reload could also be defined as
       // part of the previous generation.
