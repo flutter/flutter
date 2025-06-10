@@ -156,7 +156,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
             SliverEnsureSemantics(
               sliver: SliverSemantics(
                 role: SemanticsRole.list,
-                sliver: SliverFixedExtentList(
+                child: SliverFixedExtentList(
                   itemExtent: 44.0,
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
