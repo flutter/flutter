@@ -1784,6 +1784,8 @@ class CompileTest {
         '--legacy'
       ]).then((ProcessResult result) {
         final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
+
+        // ignore: avoid_dynamic_calls
         testRefID = actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value'].toString();
       });
 
@@ -1801,6 +1803,8 @@ class CompileTest {
         '--legacy'
       ]).then((ProcessResult result) {
         final dynamic actionTestSummaryJSON = json.decode(result.stdout.toString());
+
+        // ignore: avoid_dynamic_calls
         actionTestSummaryID = actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
             .toString();
       });
@@ -1820,10 +1824,12 @@ class CompileTest {
         '--legacy'
       ]).then((ProcessResult result) {
         resultMetricsJSON = json.decode(result.stdout.toString());
+
+        // ignore: avoid_dynamic_calls
         resultsJson = resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values'] as List<dynamic>;
       });
-     List<double> extractedLaunchTimes = <double>[];
-     resultsJson?.map((dynamic item) => extractedLaunchTimes.add(double.parse(item['_value'] as String))).toList();
+     final List<double> extractedLaunchTimes = <double>[];
+     resultsJson.map((dynamic item) => extractedLaunchTimes.add(double.parse((item as Map<String, dynamic>)['_value'] as String))).toList();
 
       return extractedLaunchTimes;
     });
@@ -2495,133 +2501,3 @@ String? _findDarwinAppInBuildDirectory(String searchDirectory) {
   }
   return null;
 }
-
-// A class to hold the extracted IDs
-class XcresultIds {
-  final String? rootId;
-  final String? testPlanSummariesId;
-
-  XcresultIds({this.rootId, this.testPlanSummariesId});
-
-  @override
-  String toString() {
-    return 'XcresultIds(rootId: $rootId, testPlanSummariesId: $testPlanSummariesId)';
-  }
-}
-
-// Future<XcresultIds> extractXcresultIds(String xcresultPath) async {
-//   String? rootId;
-//   String? testPlanSummariesId;
-//
-//   // --- Step 1: Get the Root ID from Info.plist ---
-//   try {
-//     // Construct the path to Info.plist within the .xcresult bundle
-//     final infoPlistPath = '$xcresultPath/Info.plist';
-//
-//     // Command 1: Convert Info.plist to JSON and extract the Root ID
-//     // Equivalent to: plutil -convert json -o - benchmarkResults.xcresult/Info.plist | jq -r '.rootId.hash'
-//     final plutilResult = await Process.run(
-//       'plutil',
-//       ['-convert', 'json', '-o', '-', infoPlistPath],
-//       runInShell: true, // Useful if plutil is not directly in PATH for the Dart process
-//     );
-//
-//     if (plutilResult.exitCode == 0) {
-//       final Map<String, dynamic> infoPlistJson = json.decode(plutilResult.stdout);
-//       // Navigate to the rootId.hash
-//       if (infoPlistJson.containsKey('rootId') &&
-//           infoPlistJson['rootId'] is Map &&
-//           infoPlistJson['rootId'].containsKey('hash')) {
-//         rootId = infoPlistJson['rootId']['hash'] as String?;
-//       } else {
-//         print('Error: Could not find rootId.hash in Info.plist JSON.');
-//         // Fallback for slightly different Info.plist structures if needed
-//         // For example, some might have a simpler structure or different key names.
-//         // This part might need adjustment based on the exact Info.plist format if the above fails.
-//       }
-//     } else {
-//       print('Error running plutil: ${plutilResult.stderr}');
-//       return XcresultIds(rootId: null, testPlanSummariesId: null);
-//     }
-//
-//     if (rootId == null) {
-//       print('Failed to extract Root ID.');
-//       return XcresultIds(rootId: null, testPlanSummariesId: null);
-//     }
-//     print('Extracted ROOT_ID: $rootId');
-//
-//     // --- Step 2: Get the ActionsInvocationRecord and Extract the testsRef ID ---
-//     // Equivalent to: xcrun xcresulttool get --path benchmarkResults.xcresult --id "$ROOT_ID" --format json | jq -r '.actions._values[0].actionResult.testsRef.id._value'
-//     final xcresulttoolGetRecordResult = await Process.run(
-//       'xcrun',
-//       ['xcresulttool', 'get', '--path', xcresultPath, '--id', rootId, '--format', 'json'],
-//       runInShell: true,
-//     );
-//
-//     if (xcresulttoolGetRecordResult.exitCode == 0) {
-//       final Map<String, dynamic> actionsInvocationRecordJson = jsonDecode(xcresulttoolGetRecordResult.stdout);
-//
-//       // Navigate to actions._values[0].actionResult.testsRef.id._value
-//       // This path assumes a specific structure, error handling is important here.
-//       if (actionsInvocationRecordJson.containsKey('actions') &&
-//           actionsInvocationRecordJson['actions'] is Map &&
-//           actionsInvocationRecordJson['actions'].containsKey('_values') &&
-//           actionsInvocationRecordJson['actions']['_values'] is List &&
-//           (actionsInvocationRecordJson['actions']['_values'] as List).isNotEmpty) {
-//
-//         final firstAction = (actionsInvocationRecordJson['actions']['_values'] as List)[0];
-//         if (firstAction is Map &&
-//             firstAction.containsKey('actionResult') &&
-//             firstAction['actionResult'] is Map &&
-//             firstAction['actionResult'].containsKey('testsRef') &&
-//             firstAction['actionResult']['testsRef'] is Map &&
-//             firstAction['actionResult']['testsRef'].containsKey('id') &&
-//             firstAction['actionResult']['testsRef']['id'] is Map &&
-//             firstAction['actionResult']['testsRef']['id'].containsKey('_value')) {
-//
-//           testPlanSummariesId = firstAction['actionResult']['testsRef']['id']['_value'] as String?;
-//         } else {
-//           print('Error: Could not find the path to testsRef ID in ActionsInvocationRecord JSON.');
-//         }
-//       } else {
-//         print('Error: "actions._values" array is missing or empty in ActionsInvocationRecord JSON.');
-//       }
-//
-//     } else {
-//       print('Error running xcresulttool get for ActionsInvocationRecord: ${xcresulttoolGetRecordResult.stderr}');
-//       return XcresultIds(rootId: rootId, testPlanSummariesId: null);
-//     }
-//
-//     if (testPlanSummariesId != null) {
-//       print('Extracted TEST_PLAN_SUMMARIES_ID: $testPlanSummariesId');
-//     } else {
-//       print('Failed to extract Test Plan Summaries ID.');
-//     }
-//
-//   } catch (e) {
-//     print('An exception occurred: $e');
-//   }
-//
-//   return XcresultIds(rootId: rootId, testPlanSummariesId: testPlanSummariesId);
-// }
-//
-// Future<void> main() async {
-//   // Replace with the actual path to your .xcresult bundle
-//   final String xcresultFilePath = 'benchmarkResults.xcresult';
-//
-//   print('Starting extraction for: $xcresultFilePath');
-//   final ids = await extractXcresultIds(xcresultFilePath);
-//
-//   if (ids.rootId != null && ids.testPlanSummariesId != null) {
-//     print('\nSuccessfully extracted IDs:');
-//     print('Root ID: ${ids.rootId}');
-//     print('Test Plan Summaries ID: ${ids.testPlanSummariesId}');
-//     // You can now use these IDs for further xcresulttool get calls
-//   } else {
-//     print('\nExtraction failed or some IDs are missing.');
-//     if (ids.rootId == null) print('Root ID could not be determined.');
-//     if (ids.testPlanSummariesId == null) print('Test Plan Summaries ID could not be determined.');
-//   }
-// }
-
-
