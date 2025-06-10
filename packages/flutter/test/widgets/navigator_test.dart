@@ -272,8 +272,9 @@ void main() {
         ),
       ),
     );
-    // Default to hard edge.
+
     expect(find.text('page1'), findsOneWidget);
+
     observer._invocations.clear();
     nav.currentState!.pop();
     await tester.pumpAndSettle();
