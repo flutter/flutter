@@ -1756,17 +1756,14 @@ class CompileTest {
 
   Future<List<double>> getMetricsFromXCResults() async {
     return inDirectory<List<double>>(testDirectory, () async {
-     List<dynamic> resultsJson = <dynamic>[];
+      List<dynamic> resultsJson = <dynamic>[];
       const String resultsBundleName = 'benchmarkResults.xcresult';
       // Get ID from Info.plist
-      final ProcessResult plistIDResult = await Process.run(workingDirectory: testDirectory, 'plutil', <String>[
-        '-extract',
-        'rootId.hash',
-        'raw',
-        '-o',
-        '-',
-        '$resultsBundleName/Info.plist'
-      ]);
+      final ProcessResult plistIDResult = await Process.run(
+        workingDirectory: testDirectory,
+        'plutil',
+        <String>['-extract', 'rootId.hash', 'raw', '-o', '-', '$resultsBundleName/Info.plist'],
+      );
 
       final String plistID = plistIDResult.stdout.toString().trim();
 
@@ -1781,12 +1778,14 @@ class CompileTest {
         plistID,
         '--format',
         'json',
-        '--legacy'
+        '--legacy',
       ]).then((ProcessResult result) {
         final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
 
         // ignore: avoid_dynamic_calls
-        testRefID = actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value'].toString();
+        testRefID =
+            actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value']
+                .toString();
       });
 
       // Next, grab the ActionTestSummary using our testRefID
@@ -1800,13 +1799,14 @@ class CompileTest {
         testRefID,
         '--format',
         'json',
-        '--legacy'
+        '--legacy',
       ]).then((ProcessResult result) {
         final dynamic actionTestSummaryJSON = json.decode(result.stdout.toString());
 
         // ignore: avoid_dynamic_calls
-        actionTestSummaryID = actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
-            .toString();
+        actionTestSummaryID =
+            actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
+                .toString();
       });
 
       dynamic resultMetricsJSON = '';
@@ -1821,15 +1821,23 @@ class CompileTest {
         actionTestSummaryID,
         '--format',
         'json',
-        '--legacy'
+        '--legacy',
       ]).then((ProcessResult result) {
         resultMetricsJSON = json.decode(result.stdout.toString());
 
         // ignore: avoid_dynamic_calls
-        resultsJson = resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values'] as List<dynamic>;
+        resultsJson =
+            resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values']
+                as List<dynamic>;
       });
-     final List<double> extractedLaunchTimes = <double>[];
-     resultsJson.map((dynamic item) => extractedLaunchTimes.add(double.parse((item as Map<String, dynamic>)['_value'] as String))).toList();
+      final List<double> extractedLaunchTimes = <double>[];
+      resultsJson
+          .map(
+            (dynamic item) => extractedLaunchTimes.add(
+              double.parse((item as Map<String, dynamic>)['_value'] as String),
+            ),
+          )
+          .toList();
 
       return extractedLaunchTimes;
     });
@@ -1885,7 +1893,7 @@ class CompileTest {
       /* Time to First Frame */
       await Process.run(workingDirectory: testDirectory, 'rm', <String>[
         '-rf',
-        '$testDirectory/benchmarkResults.xcresult'
+        '$testDirectory/benchmarkResults.xcresult',
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
@@ -1914,7 +1922,7 @@ class CompileTest {
       metrics.addAll(<String, dynamic>{
         'release_swiftui_compile_millis': watch.elapsedMilliseconds,
         'release_swiftui_size_bytes': releaseSizeInBytes,
-        'time_to_first_frame': extractedLaunchTimes.average
+        'time_to_first_frame': extractedLaunchTimes.average,
       });
       return TaskResult.success(metrics);
     });
