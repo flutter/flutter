@@ -35,6 +35,8 @@ class SkwasmPaint implements ui.Paint {
       paintSetShader(rawPaint, shaderHandle);
     }
 
+    paintSetDither(rawPaint, _shader != null && _shader!.isGradient);
+
     final localMaskFilter = maskFilter;
     if (localMaskFilter != null) {
       final nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(localMaskFilter);

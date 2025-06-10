@@ -50,6 +50,8 @@ class CkPaint implements ui.Paint {
       skPaint.setShader(shader.getSkShader(filterQuality));
     }
 
+    skPaint.setDither(_shader != null && _shader!.isGradient);
+
     final localMaskFilter = maskFilter;
     if (localMaskFilter != null) {
       // CanvasKit returns `null` if the sigma is `0` or infinite.
@@ -338,6 +340,9 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @visibleForTesting
   UniqueRef<SkShader>? ref;
+
+  @override
+  bool get isGradient => false;
 
   @override
   SkShader getSkShader(ui.FilterQuality contextualQuality) {
