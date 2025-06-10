@@ -33,9 +33,10 @@ class SkwasmPaint implements ui.Paint {
     final shaderHandle = _shader?.handle;
     if (shaderHandle != null) {
       paintSetShader(rawPaint, shaderHandle);
+      if (_shader!.isGradient) {
+        paintSetDither(rawPaint, true);
+      }
     }
-
-    paintSetDither(rawPaint, _shader != null && _shader!.isGradient);
 
     final localMaskFilter = maskFilter;
     if (localMaskFilter != null) {

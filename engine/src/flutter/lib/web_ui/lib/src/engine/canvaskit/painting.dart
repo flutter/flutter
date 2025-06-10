@@ -48,9 +48,10 @@ class CkPaint implements ui.Paint {
     final shader = _shader;
     if (shader != null) {
       skPaint.setShader(shader.getSkShader(filterQuality));
+      if (shader.isGradient) {
+        skPaint.setDither(true);
+      }
     }
-
-    skPaint.setDither(_shader != null && _shader!.isGradient);
 
     final localMaskFilter = maskFilter;
     if (localMaskFilter != null) {
