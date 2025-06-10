@@ -44,7 +44,16 @@ void testAll({
 
         project.removeFieldFromConstClass();
         print('[[[before]]] hot reload');
-        await expectLater(flutter.hotReload(), completes);
+        await expectLater(
+          flutter.hotReload(),
+          throwsA(
+            isA<Exception>().having(
+              (Exception e) => e.toString(),
+              'message',
+              contains('Try performing a hot restart instead.'),
+            ),
+          ),
+        );
         print('[[[after]]] hot reload');
 
         print('[[[before]]] hot restart');
