@@ -261,10 +261,11 @@ class WebTestsSuite {
       () => _runWebDebugTest('lib/stack_trace.dart'),
       () => _runWebDebugTest('lib/framework_stack_trace.dart'),
       () => _runWebDebugTest('lib/web_directory_loading.dart'),
-      if (engineRealm.isNotEmpty) () => _runWebDebugTest(
-        'lib/web_resources_cdn_test.dart',
-        additionalArguments: <String>['--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion'],
-      ),
+      if (engineRealm.isNotEmpty)
+        () => _runWebDebugTest(
+          'lib/web_resources_cdn_test.dart',
+          additionalArguments: <String>['--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion'],
+        ),
       () => _runWebDebugTest('test/test.dart'),
       () => _runWebDebugTest('lib/null_safe_main.dart'),
       () => _runWebDebugTest(
