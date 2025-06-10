@@ -22,6 +22,7 @@ class HotReloadConstProject extends Project {
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
+  import 'package:flutter/widgets.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
