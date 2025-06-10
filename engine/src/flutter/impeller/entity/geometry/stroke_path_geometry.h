@@ -126,13 +126,9 @@ class StrokePathGeometry final : public StrokePathSourceGeometry {
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
-///        stroked outline of a |DlPath| object representing an arc with
-///        the provided oval bounds using the |StrokePathSourceGeometry|
-///        base class and a |DlPath| object to perform path iteration.
-///
-/// Note that this class will override the bounds to enforce the arc bounds
-/// since paths constructed from arcs sometimes have control opints outside
-/// the arc bounds, but don't draw pixels outside those bounds.
+///        stroked outline of an |Arc| object using the base class
+///        |StrokeSegmentsGeometry| and utilizing the special |RecordArc|
+///        extension method provided by the |PathAndArcSegmentReceiver|.
 class ArcStrokeGeometry final : public StrokeSegmentsGeometry {
  public:
   ArcStrokeGeometry(const Arc& arc, const StrokeParameters& parameters);
