@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:ui/ui.dart' as ui;
 
 import 'code_unit_flags.dart';
@@ -27,6 +29,10 @@ class TextWrapper {
   double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
   double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
+  double get maxIntrinsicWidth => _maxIntrinsicWidth;
+  double _maxIntrinsicWidth = 0.0;
+  double get minIntrinsicWidth => _minIntrinsicWidth;
+  double _minIntrinsicWidth = double.infinity;
 
   bool isWhitespace(ExtendedTextCluster cluster) {
     return _layout.hasFlag(
@@ -54,6 +60,7 @@ class TextWrapper {
     _whitespaces = ClusterRange(start: start, end: start);
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
+    _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
     _widthLetters = clusterWidth;
   }
 
@@ -80,6 +87,7 @@ class TextWrapper {
           _whitespaces.start = index;
           _whitespaces.end = index;
         }
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
@@ -105,6 +113,7 @@ class TextWrapper {
           // Close the softBreak sequence
           _whitespaces.end = index;
           // Start a new cluster sequence
+          _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
           _widthLetters = 0.0;
         }
       }
@@ -115,6 +124,7 @@ class TextWrapper {
         if (_whitespaces.end != index) {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
+          _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
           _widthLetters = 0.0;
           _whitespaces = ClusterRange(start: index, end: index);
           _widthWhitespaces = 0.0;
@@ -139,6 +149,7 @@ class TextWrapper {
             // We possibly have some leading spaces and some text after
             _widthText = _widthWhitespaces + _widthLetters;
             _widthWhitespaces = 0.0;
+            _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
             _widthLetters = 0.0;
             _whitespaces.start = index;
             _whitespaces.end = index;
@@ -161,6 +172,7 @@ class TextWrapper {
         }
 
         // Add the line
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
@@ -186,7 +198,8 @@ class TextWrapper {
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }
-
+    
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
     _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),
       ClusterRange(start: _whitespaces.start, end: _whitespaces.end),

@@ -621,7 +621,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multiplefont.png', region: region);
   });
-*/
+
   test('Draw WebParagraph letter/word spacing text', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -660,5 +660,50 @@ Future<void> testMain() async {
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_letter_word_spacing.png', region: region);
+  });
+*/
+
+  test('Query WebParagraph.GetBoxesForRange LTR text 1 line', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+
+    final Paint redPaint =
+        Paint()
+          ..color = const Color(0xFFFF0000)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
+    final Paint bluePaint =
+        Paint()
+          ..color = const Color(0xFF0000FF)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText(
+      'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+
+    final rects = paragraph.getBoxesForRange(
+      0,
+      paragraph.text!.length,
+      boxHeightStyle: BoxHeightStyle.max,
+      boxWidthStyle: BoxWidthStyle.max,
+    );
+
+    bool flip = true;
+    for (final rect in rects) {
+      print('${rect.left}:${rect.right}x${rect.top}:${rect.bottom} ');
+      canvas.drawRect(rect.toRect(), flip ? redPaint : bluePaint);
+      flip = !flip;
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_query_boxes_ltr_1.png', region: region);
   });
 }

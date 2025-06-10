@@ -312,9 +312,11 @@ class TextLayout {
 
   void wrapText(double width) {
     lines.clear();
-
     final TextWrapper wrapper = TextWrapper(paragraph.text!, this);
     wrapper.breakLines(width);
+    paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
+    paragraph.minIntrinsicWidth = wrapper.minIntrinsicWidth;
+    paragraph.requiredWidth = width;
   }
 
   ClusterRange intersectClusterRange(ClusterRange a, ClusterRange b) {
@@ -449,7 +451,7 @@ class TextLayout {
             styledTextBlock.textStyle,
             styleClusterRange,
             styleTextRange,
-            advance.width,
+            advance,
             shiftInsideLine - firstVisualClusterInBlock.advance.left,
             styledTextBlock.textRange.start,
           ),
@@ -465,6 +467,7 @@ class TextLayout {
     // At this point we are agnostic of any fonts participating in text shaping
     // so we have to assume each cluster has a (different) font
     // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
+    // TODO(jlavrova): count ascent/descent by blocks, not by clusters
     line.fontBoundingBoxAscent = 0.0;
     line.fontBoundingBoxDescent = 0.0;
     for (int i = line.textRange.start; i < line.textRange.end; i += 1) {
@@ -498,16 +501,20 @@ class TextLayout {
     // Special case: clean all text in case of maxWidth == INF & align != left
     // We had to go through shaping though because we need all the measurement numbers
     final effectiveAlign = paragraph.paragraphStyle.effectiveAlign();
+    paragraph.requiredWidth = width;
     for (final TextLine line in lines) {
       if (width == double.infinity) {
         line.formattingShift = 0;
-        continue;
+        paragraph.longestLine = line.advance.width;
+        paragraph.width = line.advance.width;
+        paragraph.height = line.advance.height;
+        assert(lines.length == 1);
+        return;
       }
       final double delta = width - line.advance.width;
       if (delta <= 0) {
         return;
       }
-
       // We do nothing for left align
       if (effectiveAlign == ui.TextAlign.justify) {
         // TODO(jlavrova): implement justify
@@ -516,9 +523,208 @@ class TextLayout {
       } else if (effectiveAlign == ui.TextAlign.center) {
         line.formattingShift = delta / 2;
       }
-
-      WebParagraphDebug.log('formatLines($width): $effectiveAlign $delta ${line.formattingShift}');
+      paragraph.longestLine = math.max(
+        paragraph.longestLine,
+        line.advance.width + line.formattingShift,
+      );
+      paragraph.width = paragraph.longestLine;
+      paragraph.height += line.advance.height;
+      WebParagraphDebug.log(
+        'formatLines($width): $effectiveAlign $delta ${line.formattingShift} ${paragraph.longestLine}',
+      );
     }
+  }
+
+  static double EPSILON = 0.001;
+  List<ui.TextBox> getBoxesForRange(
+    int start,
+    int end,
+    ui.BoxHeightStyle boxHeightStyle,
+    ui.BoxWidthStyle boxWidthStyle,
+  ) {
+    final TextRange textRange = TextRange(start: start, end: end);
+    final List<ui.TextBox> result = <ui.TextBox>[];
+    for (final line in lines) {
+      WebParagraphDebug.log(
+        'Line: ${line.textRange} & $textRange '
+        '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom} '
+        '${line.fontBoundingBoxAscent}+${line.fontBoundingBoxDescent}',
+      );
+      // We take whitespaces in account
+      final TextRange lineTextRange = convertSequentialClusterRangeToText(
+        mergeSequentialClusterRanges(line.textRange, line.whitespacesRange),
+      );
+      if (end <= lineTextRange.start || start > lineTextRange.end) {
+        continue;
+      }
+      for (final LineBlock block in line.visualBlocks) {
+        final intersect = intersectTextRange(block.textRange, textRange);
+        WebParagraphDebug.log('block: ${block.textRange} & $textRange = $intersect');
+        if (intersect.width <= 0) {
+          continue;
+        }
+        final rects = block.textMetrics!.getSelectionRects(intersect.start, intersect.end);
+        assert(
+          rects.length == 1,
+        ); // We are dealing with single bidi, single line, single style range
+        final firstRect = ui.Rect.fromLTWH(
+          rects.first.left,
+          rects.first.top,
+          rects.first.width,
+          rects.first.height,
+        ).translate(-block.advance.left, block.fontBoundingBoxAscent);
+        WebParagraphDebug.log(
+          'getSelectionRects(${intersect.start},${intersect.end}): '
+          '${firstRect.left}:${firstRect.right} x ${firstRect.top}:${firstRect.bottom}',
+        );
+        // Now we need to recalculate the rects
+        double left, right, top, bottom;
+        switch (boxHeightStyle) {
+          case ui.BoxHeightStyle.tight:
+            top =
+                firstRect.top +
+                line.advance.top +
+                line.fontBoundingBoxAscent -
+                block.fontBoundingBoxAscent;
+            bottom = top + block.fontBoundingBoxAscent + block.fontBoundingBoxDescent;
+            assert((block.advance.height - (bottom - top).abs() < EPSILON));
+          case ui.BoxHeightStyle.max:
+            top = firstRect.top + line.advance.top;
+            bottom = top + line.fontBoundingBoxAscent + line.fontBoundingBoxDescent;
+            assert((line.advance.height - (bottom - top).abs() < EPSILON));
+          case ui.BoxHeightStyle.strut:
+            // TODO(jlavrova): implement
+            throw UnimplementedError('BoxHeightStyle.strut not implemented');
+          case ui.BoxHeightStyle.includeLineSpacingMiddle:
+            // TODO(jlavrova): implement
+            throw UnimplementedError('BoxHeightStyle.includeLineSpacingMiddle not implemented');
+          case ui.BoxHeightStyle.includeLineSpacingTop:
+            // TODO(jlavrova): implement
+            throw UnimplementedError('BoxHeightStyle.includeLineSpacingTop not implemented');
+          case ui.BoxHeightStyle.includeLineSpacingBottom:
+            // TODO(jlavrova): implement
+            throw UnimplementedError('BoxHeightStyle.includeLineSpacingBottom not implemented');
+        }
+        left = firstRect.left - (line.advance.left + line.formattingShift);
+        right = left + firstRect.width;
+        WebParagraphDebug.log('getSelectionRects: $left:$right x $top:$bottom');
+        WebParagraphDebug.log(
+          'shift: -x=${line.advance.left + line.formattingShift}='
+          '${line.advance.left}+${line.formattingShift} +y=${line.advance.top + line.fontBoundingBoxAscent}',
+        );
+        result.add(
+          ui.TextBox.fromLTRBD(
+            left,
+            top,
+            right,
+            bottom,
+            block.bidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+          ),
+        );
+      }
+
+      if (boxWidthStyle == ui.BoxWidthStyle.max && paragraph.requiredWidth != double.infinity) {
+        if ((result.first.left - 0).abs() > EPSILON) {
+          result.insert(
+            0,
+            ui.TextBox.fromLTRBD(
+              0,
+              result.first.top,
+              result.first.right,
+              result.first.bottom,
+              paragraph.paragraphStyle.textDirection,
+            ),
+          );
+        }
+        if ((result.last.right - paragraph.requiredWidth).abs() > EPSILON) {
+          result.add(
+            ui.TextBox.fromLTRBD(
+              result.last.right,
+              result.last.top,
+              paragraph.requiredWidth,
+              result.last.bottom,
+              paragraph.paragraphStyle.textDirection,
+            ),
+          );
+        }
+      }
+      WebParagraphDebug.log(
+        'getBoxesForRange: [${line.advance.left}:${line.advance.right}x${line.advance.top}:${line.advance.bottom}]',
+      );
+      for (final rect in result) {
+        WebParagraphDebug.log('[${rect.left}:${rect.right}x${rect.top}:${rect.bottom}]');
+      }
+    }
+    return result;
+  }
+
+  ui.TextPosition getPositionForOffset(ui.Offset offset) {
+    int lineNum = 0;
+    for (final line in lines) {
+      lineNum++;
+      if (line.advance.top > offset.dy) {
+        // We didn't find a line that contains the offset. All previous lines are placed above it and this one - below.
+        // Actually, it's only possible for the first line (no lines before) because lines cover all vertical space.
+        assert(lineNum == 1);
+        return ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.downstream);
+      } else if (line.advance.bottom < offset.dy) {
+        // We are not there yet; we need a line closest to the offset.
+        continue;
+      }
+
+      // We found the line that contains the offset; let's go through all the visual blocks to find the position
+      int blockNum = 0;
+      for (final block in line.visualBlocks) {
+        blockNum++;
+        if (block.advance.left > offset.dx) {
+          // We didn't find any block and we already on the right side of our offset
+          // It's only possible for the first block in the line
+          assert(blockNum == 1);
+          return ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.downstream);
+        } else if (block.advance.right < offset.dx) {
+          // We are not there yet; we need a block containing the offset (or the closest to it)
+          continue;
+        }
+        // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
+        final int start =
+            block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
+        final int end =
+            block.bidiLevel.isEven ? block.clusterRange.end : block.clusterRange.start - 1;
+        final int step = block.bidiLevel.isEven ? 1 : -1;
+        for (int i = start; i != end; i += step) {
+          final cluster = textClusters[i];
+          final rect = cluster.advance.translate(
+            line.advance.left + line.formattingShift + block.clusterShiftInLine,
+            line.advance.top + line.fontBoundingBoxAscent,
+          );
+          if (rect.contains(offset)) {
+            // TODO(jlavrova): proportionally calculate the text position? I wouldn't...
+            if (offset.dx - rect.left <= rect.right - offset.dx) {
+              return ui.TextPosition(
+                offset: cluster.textRange.start,
+                affinity: ui.TextAffinity.upstream,
+              );
+            } else {
+              return ui.TextPosition(
+                offset: cluster.textRange.end,
+                affinity: ui.TextAffinity.downstream,
+              );
+            }
+          }
+        }
+        // We found the block but not the cluster? How could that happen
+        assert(false);
+      }
+
+      // We didn't find the block containing our offset and
+      // we didn't find the block that is on the right of the offset
+      // So all the blocks are on the left
+      return ui.TextPosition(offset: line.textRange.end, affinity: ui.TextAffinity.downstream);
+    }
+    // We didn't find the line containing our offset and
+    // we didn't find the line that is down from the offset
+    // So all the line are above the offset
+    return ui.TextPosition(offset: paragraph.text!.length, affinity: ui.TextAffinity.downstream);
   }
 }
 
@@ -604,19 +810,24 @@ class LineBlock {
     this.textStyle,
     this.clusterRange,
     this.textRange,
-    this.width,
+    this.advance,
     this.clusterShiftInLine,
     this.textMetricsZero,
-  );
+  ) : fontBoundingBoxAscent = textMetrics!.fontBoundingBoxAscent,
+      fontBoundingBoxDescent = textMetrics.fontBoundingBoxDescent;
+
   // TODO(jlavrova): we probably do not need that reference
   final DomTextMetrics? textMetrics; // This is just a reference to a parent styled text block
   final int bidiLevel;
   final WebTextStyle textStyle;
   final ClusterRange clusterRange;
   final TextRange textRange; // within the entire text
-  final double width;
+  final ui.Rect advance;
   final double clusterShiftInLine;
   final int textMetricsZero; // from the beginning of the line to this block start
+
+  double fontBoundingBoxAscent = 0.0;
+  double fontBoundingBoxDescent = 0.0;
 }
 
 class TextLine {

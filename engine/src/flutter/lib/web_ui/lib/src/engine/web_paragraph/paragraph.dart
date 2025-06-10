@@ -455,7 +455,8 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   double get height => _height;
-  final double _height = 0;
+  set height(double value) => _height = value;
+  double _height = 0;
 
   @override
   double get ideographicBaseline => _ideographicBaseline;
@@ -463,19 +464,25 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   double get longestLine => _longestLine;
-  final double _longestLine = 0;
+  set longestLine(double value) => _longestLine = value;
+  double _longestLine = 0;
 
   @override
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
-  final double _maxIntrinsicWidth = 0;
+  set maxIntrinsicWidth(double value) => _maxIntrinsicWidth = value;
+  double _maxIntrinsicWidth = 0;
 
   @override
   double get minIntrinsicWidth => _minIntrinsicWidth;
-  final double _minIntrinsicWidth = 0;
+  set minIntrinsicWidth(double value) => _minIntrinsicWidth = value;
+  double _minIntrinsicWidth = 0;
 
   @override
   double get width => _width;
-  final double _width = 0;
+  set width(double value) => _width = value;
+  double _width = 0;
+
+  double requiredWidth = 0;
 
   List<TextLine> get lines => _layout.lines;
 
@@ -490,12 +497,12 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    return <ui.TextBox>[];
+    return _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
   }
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    return const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream);
+    return _layout.getPositionForOffset(offset);
   }
 
   @override
@@ -510,7 +517,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    return const ui.TextRange(start: 0, end: 0);
+    return ui.TextRange.empty;
   }
 
   @override
