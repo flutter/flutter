@@ -540,8 +540,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
 
     final List<RenderBox> contentItems = <RenderBox>[];
 
-    double totalWidth = 0;
-    double maxHeight = 0;
+    double totalWidth = 0.0;
+    double maxHeight = 0.0;
 
     // First pass: calculate dimensions and collect items.
     int i = -1;
@@ -606,55 +606,56 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
 
   /// Vertical layout (overflow menu).
   Size _placeChildrenVertically() {
-    Size nextSize = Size.zero;
     final RenderBox navButton = firstChild!;
 
     double currentY = 0.0;
-    double maxItemWidth = 0.0;
+    double maxWidth = 0.0;
 
     final ToolbarItemsParentData navButtonParentData =
         navButton.parentData! as ToolbarItemsParentData;
+
     if (_shouldPaintChild(navButton, 0)) {
       navButtonParentData.shouldPaint = true;
       if (!isAbove) {
         navButtonParentData.offset = Offset.zero;
         currentY += navButton.size.height;
-        maxItemWidth = math.max(maxItemWidth, navButton.size.width);
+        maxWidth = math.max(maxWidth, navButton.size.width);
       }
     } else {
       navButtonParentData.shouldPaint = false;
     }
 
-    int childIdx = 0;
-    RenderBox? current = firstChild;
-    while (current != null) {
-      final ToolbarItemsParentData childParentData = current.parentData! as ToolbarItemsParentData;
-      if (current == navButton) {
-        current = childParentData.nextSibling;
-        childIdx++;
-        continue;
+    int i = -1;
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+
+      i++;
+
+      // Ignore the navigation button.
+      if (renderObjectChild == navButton) {
+        return;
       }
 
-      if (_shouldPaintChild(current, childIdx)) {
-        childParentData.shouldPaint = true;
-        childParentData.offset = Offset(0.0, currentY);
-        currentY += current.size.height;
-        maxItemWidth = math.max(maxItemWidth, current.size.width);
-      } else {
+      // There is no need to update children that won't be painted.
+      if (!_shouldPaintChild(child, i)) {
         childParentData.shouldPaint = false;
+        return;
       }
-      current = childParentData.nextSibling;
-      childIdx++;
-    }
+
+      childParentData.shouldPaint = true;
+      childParentData.offset = Offset(0.0, currentY);
+      currentY += child.size.height;
+      maxWidth = math.max(maxWidth, child.size.width);
+    });
 
     if (isAbove && navButtonParentData.shouldPaint) {
       navButtonParentData.offset = Offset(0.0, currentY);
       currentY += navButton.size.height;
-      maxItemWidth = math.max(maxItemWidth, navButton.size.width);
+      maxWidth = math.max(maxWidth, navButton.size.width);
     }
-    nextSize = Size(maxItemWidth, currentY);
 
-    return nextSize;
+    return Size(maxWidth, currentY);
   }
 
   // Decide which children will be painted, set their shouldPaint, and set the
