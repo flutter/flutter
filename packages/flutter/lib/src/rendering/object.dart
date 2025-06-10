@@ -325,7 +325,6 @@ class PaintingContext extends ClipContext {
   ui.PictureRecorder? _recorder;
   Canvas? _canvas;
 
-
   /// The recorder that is being used by this [PaintingContext] 
   /// to record interactions with the [Canvas].
   ///
