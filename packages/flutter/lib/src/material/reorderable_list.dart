@@ -207,7 +207,7 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// All other parameters function similarly to [ReorderableListView.builder].
   ///
-  /// This example creates a list of [Card] separated by [Divider], where the cards
+  /// This example creates a list of [Card]s separated by [Divider]s, where the cards
   /// can be reordered.
   /// {@tool dartpad}
   ///
