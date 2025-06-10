@@ -687,7 +687,7 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
     return;
   }
 
-  const Rect& oval_bounds = arc.GetBounds();
+  const Rect& oval_bounds = arc.GetOvalBounds();
   if (paint.stroke.width > oval_bounds.GetSize().MaxDimension()) {
     // This is a special case for rendering arcs whose stroke width is so large
     // you are effectively drawing a sector of a circle.

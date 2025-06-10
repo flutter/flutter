@@ -556,13 +556,12 @@ void ArcVertexGenerator::GenerateVertices(
 ArcVertexGenerator Tessellator::FilledArc(const Matrix& view_transform,
                                           const Arc& arc,
                                           bool supports_triangle_fans) {
-  size_t divisions =
-      ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() *
-                               arc.GetBounds().GetSize().MaxDimension());
+  size_t divisions = ComputeQuadrantDivisions(
+      view_transform.GetMaxBasisLengthXY() * arc.GetOvalSize().MaxDimension());
 
-  return ArcVertexGenerator(arc.ComputeIterations(divisions),
-                            GetTrigsForDivisions(divisions), arc.GetBounds(),
-                            arc.IncludeCenter(), supports_triangle_fans);
+  return ArcVertexGenerator(
+      arc.ComputeIterations(divisions), GetTrigsForDivisions(divisions),
+      arc.GetOvalBounds(), arc.IncludeCenter(), supports_triangle_fans);
 };
 
 ArcVertexGenerator Tessellator::StrokedArc(const Matrix& view_transform,
@@ -572,13 +571,13 @@ ArcVertexGenerator Tessellator::StrokedArc(const Matrix& view_transform,
   FML_DCHECK(half_width > 0);
   FML_DCHECK(arc.IsPerfectCircle());
   FML_DCHECK(!arc.IncludeCenter());
-  size_t divisions = ComputeQuadrantDivisions(
-      view_transform.GetMaxBasisLengthXY() *
-      (arc.GetBounds().GetSize().MaxDimension() + half_width));
+  size_t divisions =
+      ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() *
+                               (arc.GetOvalSize().MaxDimension() + half_width));
 
   return ArcVertexGenerator(arc.ComputeIterations(divisions),
-                            GetTrigsForDivisions(divisions), arc.GetBounds(),
-                            half_width, cap);
+                            GetTrigsForDivisions(divisions),
+                            arc.GetOvalBounds(), half_width, cap);
 }
 
 EllipticalVertexGenerator Tessellator::RoundCapLine(

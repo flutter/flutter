@@ -90,7 +90,18 @@ struct Arc {
 
   Arc(const Rect& bounds, Degrees start, Degrees sweep, bool include_center);
 
-  Rect GetBounds() const;
+  /// Return the bounds of the oval in which this arc is inscribed.
+  const Rect& GetOvalBounds() const { return bounds_; }
+
+  /// Returns the center of the oval bounds.
+  const Point GetOvalCenter() const { return bounds_.GetCenter(); }
+
+  /// Returns the size of the oval bounds.
+  const Size GetOvalSize() const { return bounds_.GetSize(); }
+
+  /// Return the tight bounds of the arc taking into account its specific
+  /// geometry such as the start and end angles and the center (if included).
+  Rect GetTightArcBounds() const;
 
   constexpr Degrees GetStart() const { return start_; }
 
@@ -128,7 +139,7 @@ struct Arc {
 namespace std {
 
 inline std::ostream& operator<<(std::ostream& out, const impeller::Arc& a) {
-  out << "Arc(" << a.GetBounds() << ", " << a.GetStart() << " + "
+  out << "Arc(" << a.GetOvalBounds() << ", " << a.GetStart() << " + "
       << a.GetSweep()
       << (a.IncludeCenter() ? ", with center)" : ", without center)");
   return out;

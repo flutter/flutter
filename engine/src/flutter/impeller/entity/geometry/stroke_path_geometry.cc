@@ -865,14 +865,14 @@ ArcStrokeGeometry::ArcStrokeGeometry(const Arc& arc,
 
 std::optional<Rect> ArcStrokeGeometry::GetCoverage(
     const Matrix& transform) const {
-  return GetStrokeCoverage(transform, arc_.GetBounds());
+  return GetStrokeCoverage(transform, arc_.GetTightArcBounds());
 }
 
 void ArcStrokeGeometry::Dispatch(PathAndArcSegmentReceiver& receiver,
                                  Tessellator& tessellator,
                                  Scalar scale) const {
-  Point center = arc_.GetBounds().GetCenter();
-  Size radii = arc_.GetBounds().GetSize() * 0.5f;
+  Point center = arc_.GetOvalCenter();
+  Size radii = arc_.GetOvalSize() * 0.5f;
 
   auto trigs =
       tessellator.GetTrigsForDeviceRadius(scale * radii.MaxDimension());

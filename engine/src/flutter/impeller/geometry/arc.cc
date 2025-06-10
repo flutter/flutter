@@ -56,7 +56,7 @@ const Arc::Iteration Arc::ComputeCircleArcIterations(size_t step_count) {
   };
 }
 
-Rect Arc::GetBounds() const {
+Rect Arc::GetTightArcBounds() const {
   if (IsFullCircle()) {
     return bounds_;
   }

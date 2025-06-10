@@ -57,11 +57,19 @@ std::optional<Rect> ArcGeometry::GetCoverage(const Matrix& transform) const {
           ? 0.0
           : LineGeometry::ComputePixelHalfWidth(transform, stroke_width_);
 
-  if (cap_ == Cap::kSquare && !arc_.IsFullCircle()) {
+  if (arc_.IsFullCircle()) {
+    // Simpler calculation than below and we don't pad by the extra distance
+    // that square caps take up because we aren't going to use caps.
+    return arc_.GetOvalBounds().Expand(padding).TransformAndClipBounds(
+        transform);
+  }
+
+  if (cap_ == Cap::kSquare) {
     padding = padding * kSqrt2;
   }
 
-  return arc_.GetBounds().Expand(padding).TransformAndClipBounds(transform);
+  return arc_.GetTightArcBounds().Expand(padding).TransformAndClipBounds(
+      transform);
 }
 
 bool ArcGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
