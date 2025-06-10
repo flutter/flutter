@@ -49,7 +49,7 @@ class HotReloadConstProject extends Project {
   void removeFieldFromConstClass() {
     final String newMainContents = main.replaceAll(
       'final int field = 2;',
-      '// final int field = 2;',
+      '//  final int field = 2;',
     );
     writeFile(
       fileSystem.path.join(dir.path, 'lib', 'main.dart'),
