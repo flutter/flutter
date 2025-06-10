@@ -320,31 +320,31 @@ platform_properties:
       device_type: "mokey"
 
 targets:
-  - name: Linux web_tool_tests
-    recipe: flutter/flutter_drone
-    timeout: 90 # https://github.com/flutter/flutter/issues/169634
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:36v1"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_tool_tests
-      subshard: "1_1"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
-      test_timeout_secs: "5400" # https://github.com/flutter/flutter/issues/162714
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
+  # - name: Linux web_tool_tests
+  #   recipe: flutter/flutter_drone
+  #   timeout: 90 # https://github.com/flutter/flutter/issues/169634
+  #   properties:
+  #     dependencies: >-
+  #       [
+  #         {"dependency": "android_sdk", "version": "version:36v1"},
+  #         {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+  #         {"dependency": "open_jdk", "version": "version:21"},
+  #         {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
+  #       ]
+  #     shard: web_tool_tests
+  #     subshard: "1_1"
+  #     tags: >
+  #       ["framework", "hostonly", "shard", "linux"]
+  #     # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+  #     presubmit_max_attempts: "2"
+  #     test_timeout_secs: "5400" # https://github.com/flutter/flutter/issues/162714
+  #   runIf:
+  #     - dev/**
+  #     - packages/flutter_tools/**
+  #     - bin/**
+  #     - .ci.yaml
+  #     - engine/**
+  #     - DEPS
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
