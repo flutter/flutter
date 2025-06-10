@@ -276,6 +276,9 @@ deps = {
   'engine/src/flutter/third_party/googletest':
    Var('chromium_git') + '/external/github.com/google/googletest' + '@' + '7f036c5563af7d0329f20e8bb42effb04629f0c0',
 
+  'engine/src/flutter/third_party/re2':
+   Var('chromium_git') + '/external/github.com/google/re2' + '@' + 'c84a140c93352cdabbfb547c531be34515b12228',
+
   'engine/src/flutter/third_party/brotli':
    Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + '350100a5bb9d9671aca85213b2ec7a70a361b0cd',
 
