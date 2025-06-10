@@ -56,8 +56,6 @@ void testAll({
         );
         print('[[[after]]] hot reload');
 
-        await Future<void>.delayed(const Duration(seconds: 60));
-
         print('[[[before]]] hot restart');
         await expectLater(flutter.hotRestart(), completes);
         print('[[[after]]] hot restart');

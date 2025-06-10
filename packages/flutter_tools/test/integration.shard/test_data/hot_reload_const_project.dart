@@ -22,12 +22,11 @@ class HotReloadConstProject extends Project {
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
-  import 'package:flutter/widgets.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     runApp(const MyApp());
   }
 
@@ -48,8 +47,10 @@ class HotReloadConstProject extends Project {
 
   void removeFieldFromConstClass() {
     final String newMainContents = main.replaceAll(
-      'final int field = 2;',
-      '// final int field = 2;',
+      "title: 'Flutter Demo',",
+      "title: 'Flutter Demo 2',",
+      // 'final int field = 2;',
+      // '// final int field = 2;',
     );
     writeFile(
       fileSystem.path.join(dir.path, 'lib', 'main.dart'),
