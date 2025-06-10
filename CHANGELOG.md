@@ -44,7 +44,6 @@ INTERNAL NOTE
 - [flutter/169101](https://github.com/flutter/flutter/issues/169101) - Reduces the cost of running the (sometimes flaky) Linux fuchsia_test on release branches.
 - [flutter/169318](https://github.com/flutter/flutter/issues/169318) - Fixed a bug where the flutter tool crash reporting did not include what plugins were being used by the current project.
 - [flutter/169160](https://github.com/flutter/flutter/issues/169160) Fixed a bug where `appFlavor` is null after hot restarts or during `flutter test`.
-- [flutter/156793](https://github.com/flutter/flutter/issues/156793) - Fix flaky crash when targeting web applications via IDEs using the DAP.
 
 ### [3.32.0](https://github.com/flutter/flutter/releases/tag/3.32.0)
 Initial stable release.
