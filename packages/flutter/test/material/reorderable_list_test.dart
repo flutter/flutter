@@ -1748,6 +1748,94 @@ void main() {
       expect(find.byType(ReorderableListView), findsOneWidget);
     });
 
+    testWidgets('ReorderableListView.separated reorder behavior', (WidgetTester tester) async {
+      Future<void> longPressDrag(Offset start, Offset end) async {
+        final TestGesture drag = await tester.startGesture(start);
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await drag.moveTo(end);
+        await tester.pump(kPressTimeout);
+        await drag.up();
+      }
+
+      final List<int> items = List<int>.generate(5, (int index) => index);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Test App')),
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableListView.separated(
+                  itemCount: items.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      key: Key('item_${items[index]}'),
+                      title: Text('Item ${items[index]}'),
+                    );
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
+                  onReorder: (int oldIndex, int newIndex) {
+                    setState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      final int item = items.removeAt(oldIndex);
+                      items.insert(newIndex, item);
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      const double appBarHeight = kToolbarHeight; // Default 56.0
+      const double itemHeight = 56.0; // ListTile height
+      const double separatorHeight = 16.0; // Divider height
+
+      // Initial position of 'Item 2'
+      const double initialItem2CenterY =
+          appBarHeight +
+          itemHeight +
+          separatorHeight +
+          itemHeight +
+          separatorHeight +
+          (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 2')).dy, initialItem2CenterY);
+
+      // Original position of 'Item 1'  
+      const double originalItem1CenterY =
+          appBarHeight + itemHeight + separatorHeight + (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 1')).dy, originalItem1CenterY);
+
+      // Drag 'Item 2' to where 'Item 1' was.
+      await longPressDrag(
+        tester.getCenter(find.text('Item 2')), // Start drag on Item 2
+        tester.getCenter(find.text('Item 1')), // Move to original Item 1 position
+      );
+      await tester.pumpAndSettle();
+
+      // After reorder, 'Item 2' should now be at the original position of 'Item 1'.
+      const double newItem2CenterY = appBarHeight + itemHeight + separatorHeight + (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 2')).dy, newItem2CenterY);
+
+      // Verify 'Item 1' has moved down.
+      const double newItem1CenterY =
+          appBarHeight +
+          itemHeight +
+          separatorHeight +
+          itemHeight +
+          separatorHeight +
+          (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 1')).dy, newItem1CenterY);
+
+      // Verify the items list order has changed
+      expect(items, [0, 2, 1, 3, 4]);
+    });
+
     group('Padding', () {
       testWidgets('Padding with no header & footer', (WidgetTester tester) async {
         const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
