@@ -90,7 +90,7 @@ struct Arc {
 
   Arc(const Rect& bounds, Degrees start, Degrees sweep, bool include_center);
 
-  constexpr const Rect& GetBounds() const { return bounds_; }
+  Rect GetBounds() const;
 
   constexpr Degrees GetStart() const { return start_; }
 

@@ -56,6 +56,49 @@ const Arc::Iteration Arc::ComputeCircleArcIterations(size_t step_count) {
   };
 }
 
+Rect Arc::GetBounds() const {
+  if (IsFullCircle()) {
+    return bounds_;
+  }
+
+  Degrees start_angle = start_.GetPositive();
+  Degrees end_angle = start_angle + sweep_;
+  FML_DCHECK(start_angle.degrees >= 0 && start_angle.degrees < 360);
+  FML_DCHECK(end_angle > start_angle && end_angle.degrees < 720);
+
+  // 1. start vector
+  // 2. end vector
+  // 3. optional center
+  // 4-7. optional quadrant extrema
+  Point extrema[7];
+  int count = 0;
+
+  extrema[count++] = Matrix::CosSin(start_angle);
+  extrema[count++] = Matrix::CosSin(end_angle);
+
+  if (include_center_) {
+    extrema[count++] = {0, 0};
+  }
+
+  // cur_axis will be pre-incremented before recording the following axis
+  int cur_axis = std::floor(start_angle.degrees / 90.0f);
+  // end_axis is a non-inclusive end of the range
+  int end_axis = std::ceil(end_angle.degrees / 90.0f);
+  while (++cur_axis < end_axis) {
+    extrema[count++] = kQuadrantAxes[cur_axis & 3];
+  }
+
+  FML_DCHECK(count <= 7);
+
+  Point center = bounds_.GetCenter();
+  Size radii = bounds_.GetSize() * 0.5f;
+
+  for (int i = 0; i < count; i++) {
+    extrema[i] = center + extrema[i] * radii;
+  }
+  return Rect::MakePointBounds(extrema, extrema + count).value_or(Rect());
+}
+
 Arc::Iteration Arc::ComputeIterations(size_t step_count,
                                       bool simplify_360) const {
   if (sweep_.degrees == 0) {

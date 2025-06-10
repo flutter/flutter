@@ -57,61 +57,11 @@ std::optional<Rect> ArcGeometry::GetCoverage(const Matrix& transform) const {
           ? 0.0
           : LineGeometry::ComputePixelHalfWidth(transform, stroke_width_);
 
-  if (arc_.IsFullCircle()) {
-    return arc_.GetBounds().Expand(padding).TransformAndClipBounds(transform);
-  }
-
-  if (cap_ == Cap::kSquare) {
+  if (cap_ == Cap::kSquare && !arc_.IsFullCircle()) {
     padding = padding * kSqrt2;
   }
 
-  Degrees start_angle = arc_.GetStart().GetPositive();
-  Degrees end_angle = start_angle + arc_.GetSweep();
-  FML_DCHECK(start_angle.degrees >= 0 && start_angle.degrees < 360);
-  FML_DCHECK(end_angle > start_angle && end_angle.degrees < 720);
-
-  // 1. start vector
-  // 2. end vector
-  // 3. optional center
-  // 4-7. optional quadrant extrema
-  Point extrema[7];
-  int count = 0;
-
-  extrema[count++] = Matrix::CosSin(start_angle);
-  extrema[count++] = Matrix::CosSin(end_angle);
-
-  if (arc_.IncludeCenter()) {
-    // We don't handle strokes with include_center so the stroking
-    // parameters should be the default.
-    FML_DCHECK(stroke_width_ < 0 && cap_ == Cap::kButt && padding == 0.0f);
-    extrema[count++] = {0, 0};
-  }
-
-  // cur_axis will be pre-incremented before recording the following axis
-  int cur_axis = std::floor(start_angle.degrees / 90.0f);
-  // end_axis is a non-inclusive end of the range
-  int end_axis = std::ceil(end_angle.degrees / 90.0f);
-  while (++cur_axis < end_axis) {
-    extrema[count++] = kQuadrantAxes[cur_axis & 3];
-  }
-
-  FML_DCHECK(count <= 7);
-
-  Point center = arc_.GetBounds().GetCenter();
-  Size radii = arc_.GetBounds().GetSize() * 0.5f;
-
-  for (int i = 0; i < count; i++) {
-    extrema[i] = center + extrema[i] * radii;
-  }
-  auto opt_rect = Rect::MakePointBounds(extrema, extrema + count);
-  if (opt_rect.has_value()) {
-    // Pretty much guaranteed because count >= 2...
-    opt_rect = opt_rect  //
-                   .value()
-                   .Expand(padding)
-                   .TransformAndClipBounds(transform);
-  }
-  return opt_rect;
+  return arc_.GetBounds().Expand(padding).TransformAndClipBounds(transform);
 }
 
 bool ArcGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
