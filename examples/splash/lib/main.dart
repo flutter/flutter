@@ -3,28 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-
-import 'package:flutter/widget_previews.dart';
-
-PreviewLocalizationsData myLocalizations() {
-  return PreviewLocalizationsData(
-    locale: Locale('en'),
-    localizationsDelegates: [
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
-    supportedLocales: [
-      Locale('en'), // English
-      Locale('es'), // Spanish
-    ],
-    localeListResolutionCallback:
-        (List<Locale>? locales, Iterable<Locale> supportedLocales) => null,
-    localeResolutionCallback:
-        (Locale? locale, Iterable<Locale> supportedLocales) => null,
-  );
-}
 
 void main() {
   runApp(
