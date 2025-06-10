@@ -167,12 +167,13 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   bool get reloadIsRestart =>
+      debuggingOptions.webUseWasm ||
       // Web behavior when not using the DDC library bundle format is to restart
       // when a reload is issued. We can't use `canHotReload` to signal this
       // since we still want a reload command to succeed, but to do a hot
       // restart.
       debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-      debuggingOptions.buildInfo.canaryFeatures != true;
+      !debuggingOptions.buildInfo.canaryFeatures;
 
   @override
   bool get supportsDetach => stopAppDuringCleanup;
@@ -321,7 +322,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
-          canaryFeatures: debuggingOptions.buildInfo.canaryFeatures ?? false,
+          canaryFeatures: debuggingOptions.buildInfo.canaryFeatures,
           webRenderer: debuggingOptions.webRenderer,
           isWasm: debuggingOptions.webUseWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
@@ -359,6 +360,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
           );
         }
+        final WebDevFS webDevFS = device!.devFS! as WebDevFS;
+        final bool useDebugExtension =
+            device!.device is WebServerDevice && debuggingOptions.startPaused;
+        // Listen for connected apps early and then await this `Future` later
+        // when we attach.
+        final Future<ConnectionResult?>? connectDebug =
+            supportsServiceProtocol ? webDevFS.connect(useDebugExtension) : null;
         await device!.device!.startApp(
           package,
           mainPath: target,
@@ -368,6 +376,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
+          connectDebug: connectDebug,
         );
       });
     } on WebSocketException catch (error, stackTrace) {
@@ -420,7 +429,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     final DateTime start = _systemClock.now();
     final Status status;
     if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
-        debuggingOptions.buildInfo.canaryFeatures == false) {
+        !debuggingOptions.buildInfo.canaryFeatures) {
       // Triggering hot reload performed hot restart for the old module formats
       // historically. Keep that behavior and only perform hot reload when the
       // new module format is used.
@@ -754,6 +763,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
+    Future<ConnectionResult?>? connectDebug,
     bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
@@ -778,10 +788,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
     Uri? websocketUri;
     if (supportsServiceProtocol) {
-      final WebDevFS webDevFS = device!.devFS! as WebDevFS;
-      final bool useDebugExtension =
-          device!.device is WebServerDevice && debuggingOptions.startPaused;
-      _connectionResult = await webDevFS.connect(useDebugExtension);
+      assert(connectDebug != null);
+      _connectionResult = await connectDebug;
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
       void onLogEvent(vmservice.Event event) {

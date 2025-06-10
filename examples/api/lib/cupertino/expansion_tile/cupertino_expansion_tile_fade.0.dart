@@ -14,7 +14,8 @@ class CupertinoExpansionTileFadeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('Cupertino Expansion Tile - Fade')),
+        navigationBar: CupertinoNavigationBar(
+            middle: Text('Cupertino Expansion Tile - Fade')),
         child: SafeArea(child: ExpansionTileExample()),
       ),
     );

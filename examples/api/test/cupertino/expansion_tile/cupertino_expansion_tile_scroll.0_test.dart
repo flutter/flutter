@@ -6,7 +6,9 @@ import 'package:flutter_api_samples/cupertino/expansion_tile/cupertino_expansion
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoExpansionTile scroll transition expands and collapses correctly', (
+  testWidgets(
+      'CupertinoExpansionTile scroll transition expands and collapses correctly',
+      (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const CupertinoExpansionTileScrollApp());

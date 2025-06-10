@@ -116,6 +116,7 @@ name: my_app
         fileSystem,
         logger,
         runPackageName,
+        includeDevDependencies: false,
         pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;

@@ -14,7 +14,8 @@ class CupertinoExpansionTileScrollApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('Cupertino Expansion Tile - Scroll')),
+        navigationBar: CupertinoNavigationBar(
+            middle: Text('Cupertino Expansion Tile - Scroll')),
         child: SafeArea(child: ExpansionTileExample()),
       ),
     );

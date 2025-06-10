@@ -114,6 +114,12 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
         platformDillName,
       );
+      final List<String> extraFrontEndOptions = <String>[
+        ...buildInfo.extraFrontEndOptions,
+        if (buildInfo.webEnableHotReload)
+        // These flags are only valid to be passed when compiling with DDC.
+        ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+      ];
 
       generator = ResidentCompiler(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
@@ -133,7 +139,7 @@ class FlutterDevice {
         assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
         targetModel: TargetModel.dartdevc,
         frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec:
@@ -1536,7 +1542,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();
       final String manifestPath = globals.fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
