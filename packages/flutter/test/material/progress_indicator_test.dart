@@ -564,6 +564,148 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets(
+    'CircularProgressIndicator & LinearProgressIndicator with custom animation controller (dynamic)',
+    (WidgetTester tester) async {
+      Future<void> testCustomAnimationController({
+        required WidgetTester tester,
+        required Widget Function(AnimationController? controller) buildWidget,
+        required AnimationController controller,
+        required double multiplier,
+      }) async {
+        final Duration duration = controller.duration!;
+        final Duration half = duration ~/ 2;
+
+        await tester.pumpWidget(buildWidget(controller));
+        expect(controller.value, equals(0.0));
+
+        controller.forward();
+        await tester.pump();
+        expect(controller.status, AnimationStatus.forward);
+
+        await tester.pump(half);
+        expect(controller.value, closeTo(0.5, 0.01));
+
+        await tester.pumpWidget(buildWidget(null));
+        await tester.pumpWidget(buildWidget(controller));
+        expect(controller.value, closeTo(0.5, 0.01));
+
+        await tester.pump();
+        expect(controller.value, closeTo(0.5, 0.01));
+
+        await tester.pump(duration - half);
+        expect(controller.value, closeTo(1.0, 0.01));
+
+        controller.stop();
+        expect(controller.status, AnimationStatus.forward);
+        expect(controller.value, closeTo(1.0, 0.01));
+
+        await tester.pump(const Duration(seconds: 2));
+        expect(controller.value, closeTo(1.0, 0.01));
+
+        controller.repeat(reverse: true);
+        await tester.pump();
+        await tester.pump(duration ~/ 5);
+        await tester.pump();
+
+        const double expectedValue = 1.0 - 0.2;
+        expect(controller.value, closeTo(expectedValue, 0.05));
+
+        controller.reset();
+        await tester.pump();
+        expect(controller.value, equals(0.0));
+
+        controller.forward();
+        await tester.pump();
+        await tester.pump(half);
+        expect(controller.value, closeTo(0.5, 0.01));
+
+        controller.forward(from: 0.6);
+        await tester.pump();
+        expect(controller.value, closeTo(0.6, 0.01));
+        await tester.pump(duration * 0.4);
+        expect(controller.value, closeTo(1.0, 0.01));
+
+        controller.stop();
+        controller.reverse();
+        await tester.pump();
+        expect(controller.value, closeTo(1.0, 0.01));
+        expect(controller.status, AnimationStatus.reverse);
+      }
+
+      Widget buildWidgetCircular({
+        AnimationController? controller,
+        AnimationController? inheritedController,
+      }) {
+        return MaterialApp(
+          theme: ThemeData(
+            progressIndicatorTheme: ProgressIndicatorThemeData(controller: inheritedController),
+          ),
+          home: Scaffold(body: Center(child: CircularProgressIndicator(controller: controller))),
+        );
+      }
+
+      Widget buildWidgetLinear({
+        AnimationController? controller,
+        AnimationController? inheritedController,
+      }) {
+        return MaterialApp(
+          theme: ThemeData(
+            progressIndicatorTheme: ProgressIndicatorThemeData(controller: inheritedController),
+          ),
+          home: Scaffold(body: Center(child: LinearProgressIndicator(controller: controller))),
+        );
+      }
+
+      final List<int> durationsInSeconds = <int>[1, 2, 3];
+      final List<AnimationController> controllers = <AnimationController>[];
+
+      for (final int seconds in durationsInSeconds) {
+        final AnimationController controller = AnimationController(
+          vsync: tester,
+          duration: Duration(seconds: seconds),
+        );
+        controllers.add(controller);
+
+        final double multiplier = 1000 / controller.duration!.inMilliseconds;
+
+        await testCustomAnimationController(
+          tester: tester,
+          buildWidget: (AnimationController? c) => buildWidgetCircular(controller: c),
+          controller: controller,
+          multiplier: multiplier,
+        );
+      }
+
+      for (final AnimationController controller in controllers) {
+        controller.dispose();
+      }
+
+      controllers.clear();
+
+      for (final int seconds in durationsInSeconds) {
+        final AnimationController controller = AnimationController(
+          vsync: tester,
+          duration: Duration(seconds: seconds),
+        );
+        controllers.add(controller);
+
+        final double multiplier = 1000 / controller.duration!.inMilliseconds;
+
+        await testCustomAnimationController(
+          tester: tester,
+          buildWidget: (AnimationController? c) => buildWidgetLinear(controller: c),
+          controller: controller,
+          multiplier: multiplier,
+        );
+      }
+
+      for (final AnimationController controller in controllers) {
+        controller.dispose();
+      }
+    },
+  );
+
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
