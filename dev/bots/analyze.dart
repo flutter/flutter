@@ -95,6 +95,9 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  printProgress('Release branch validation');
+  await verifyReleaseBranchState(flutterRoot);
+
   printProgress('TargetPlatform tool/framework consistency');
   await verifyTargetPlatform(flutterRoot);
 
@@ -172,10 +175,7 @@ Future<void> run(List<String> arguments) async {
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
-  await runCommand(flutter, <String>[
-    'update-packages',
-    '--verify-only',
-  ], workingDirectory: flutterRoot);
+  await runCommand(flutter, <String>['update-packages'], workingDirectory: flutterRoot);
 
   /// Ensure that no new dependencies have been accidentally
   /// added to core packages.
@@ -301,6 +301,15 @@ _Line _getLine(ParseStringResult parseResult, int offset) {
     parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
   );
   return _Line(lineNumber, content);
+}
+
+Future<void> verifyReleaseBranchState(String workringDirerctory) async {
+  final ProcessResult result = await Process.run(dart, <String>[
+    'bin/check_engine_version.dart',
+  ], workingDirectory: path.join(workringDirerctory, 'dev', 'tools'));
+  if (result.exitCode != 0) {
+    foundError(<String>['${result.stderr}']);
+  }
 }
 
 Future<void> verifyTargetPlatform(String workingDirectory) async {
@@ -2336,7 +2345,7 @@ Future<void> _checkConsumerDependencies() async {
       dependencies.add(currentPackage['name']! as String);
 
       final List<String> currentDependencies =
-          (currentPackage['dependencies']! as List<Object?>).cast<String>();
+          (currentPackage['directDependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
         // Don't add dependencies we've already seen or we will get stuck
         // forever if there are any circular references.

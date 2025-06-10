@@ -107,7 +107,6 @@ void main() {
       flutterProject
         ..manifest = flutterManifest
         ..directory = fileSystem.systemTempDirectory.childDirectory('app')
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         );
@@ -431,7 +430,7 @@ dependencies:
       testUsingContext(
         'Refreshing the plugin list deletes the plugin file when there were plugins but no longer are',
         () async {
-          flutterProject.flutterPluginsFile.createSync();
+          flutterProject.flutterPluginsDependenciesFile.createSync();
 
           await refreshPluginsList(flutterProject);
 
@@ -458,7 +457,6 @@ dependencies:
 
           await refreshPluginsList(flutterProject);
 
-          expect(flutterProject.flutterPluginsFile, isNot(exists), reason: 'No longer emitted');
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
 
           final String pluginsFileContents =
@@ -479,28 +477,6 @@ dependencies:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-
-      testUsingContext(
-        'Opting in to explicit-package-dependencies omits .flutter-plugins',
-        () async {
-          createFakePlugins(fs, <String>[
-            'plugin_d',
-            'plugin_a',
-            '/local_plugins/plugin_c',
-            '/local_plugins/plugin_b',
-          ]);
-
-          await refreshPluginsList(flutterProject);
-
-          expect(flutterProject.flutterPluginsFile, isNot(exists));
-          expect(flutterProject.flutterPluginsDependenciesFile, exists);
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: FakeProcessManager.empty,
           Pub: ThrowingPub.new,
         },
       );
@@ -2153,7 +2129,7 @@ flutter:
     });
 
     group('Plugin files', () {
-      testWithoutContext('pluginSwiftPackageManifestPath for iOS and macOS plugins', () async {
+      testWithoutContext('for SwiftPM and podspec paths for iOS and macOS plugins', () async {
         final MemoryFileSystem fs = MemoryFileSystem.test();
         final Plugin plugin = Plugin(
           name: 'test',
@@ -2168,7 +2144,11 @@ flutter:
           isDirectDependency: true,
           isDevDependency: false,
         );
-
+        expect(plugin.pluginSwiftPackagePath(fs, IOSPlugin.kConfigKey), '/path/to/test/ios/test');
+        expect(
+          plugin.pluginSwiftPackagePath(fs, MacOSPlugin.kConfigKey),
+          '/path/to/test/macos/test',
+        );
         expect(
           plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey),
           '/path/to/test/ios/test/Package.swift',
@@ -2177,74 +2157,6 @@ flutter:
           plugin.pluginSwiftPackageManifestPath(fs, MacOSPlugin.kConfigKey),
           '/path/to/test/macos/test/Package.swift',
         );
-      });
-
-      testWithoutContext('pluginSwiftPackageManifestPath for darwin plugins', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Plugin plugin = Plugin(
-          name: 'test',
-          path: '/path/to/test/',
-          defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-          platforms: const <String, PluginPlatform>{
-            IOSPlugin.kConfigKey: IOSPlugin(
-              name: 'test',
-              classPrefix: '',
-              sharedDarwinSource: true,
-            ),
-            MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test', sharedDarwinSource: true),
-          },
-          dependencies: <String>[],
-          isDirectDependency: true,
-          isDevDependency: false,
-        );
-
-        expect(
-          plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey),
-          '/path/to/test/darwin/test/Package.swift',
-        );
-        expect(
-          plugin.pluginSwiftPackageManifestPath(fs, MacOSPlugin.kConfigKey),
-          '/path/to/test/darwin/test/Package.swift',
-        );
-      });
-
-      testWithoutContext('pluginSwiftPackageManifestPath for non darwin plugins', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Plugin plugin = Plugin(
-          name: 'test',
-          path: '/path/to/test/',
-          defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-          platforms: const <String, PluginPlatform>{
-            WindowsPlugin.kConfigKey: WindowsPlugin(name: 'test', pluginClass: ''),
-          },
-          dependencies: <String>[],
-          isDirectDependency: true,
-          isDevDependency: false,
-        );
-
-        expect(plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey), isNull);
-        expect(plugin.pluginSwiftPackageManifestPath(fs, MacOSPlugin.kConfigKey), isNull);
-        expect(plugin.pluginSwiftPackageManifestPath(fs, WindowsPlugin.kConfigKey), isNull);
-      });
-
-      testWithoutContext('pluginPodspecPath for iOS and macOS plugins', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Plugin plugin = Plugin(
-          name: 'test',
-          path: '/path/to/test/',
-          defaultPackagePlatforms: const <String, String>{},
-          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-          platforms: const <String, PluginPlatform>{
-            IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: ''),
-            MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test'),
-          },
-          dependencies: <String>[],
-          isDirectDependency: true,
-          isDevDependency: false,
-        );
-
         expect(
           plugin.pluginPodspecPath(fs, IOSPlugin.kConfigKey),
           '/path/to/test/ios/test.podspec',
@@ -2255,7 +2167,7 @@ flutter:
         );
       });
 
-      testWithoutContext('pluginPodspecPath for darwin plugins', () async {
+      testWithoutContext('for SwiftPM and podspec paths for darwin plugins', () async {
         final MemoryFileSystem fs = MemoryFileSystem.test();
         final Plugin plugin = Plugin(
           name: 'test',
@@ -2276,6 +2188,22 @@ flutter:
         );
 
         expect(
+          plugin.pluginSwiftPackagePath(fs, IOSPlugin.kConfigKey),
+          '/path/to/test/darwin/test',
+        );
+        expect(
+          plugin.pluginSwiftPackagePath(fs, MacOSPlugin.kConfigKey),
+          '/path/to/test/darwin/test',
+        );
+        expect(
+          plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey),
+          '/path/to/test/darwin/test/Package.swift',
+        );
+        expect(
+          plugin.pluginSwiftPackageManifestPath(fs, MacOSPlugin.kConfigKey),
+          '/path/to/test/darwin/test/Package.swift',
+        );
+        expect(
           plugin.pluginPodspecPath(fs, IOSPlugin.kConfigKey),
           '/path/to/test/darwin/test.podspec',
         );
@@ -2285,7 +2213,7 @@ flutter:
         );
       });
 
-      testWithoutContext('pluginPodspecPath for non darwin plugins', () async {
+      testWithoutContext('for SwiftPM and podspec paths for non darwin plugins', () async {
         final MemoryFileSystem fs = MemoryFileSystem.test();
         final Plugin plugin = Plugin(
           name: 'test',
@@ -2300,6 +2228,12 @@ flutter:
           isDevDependency: false,
         );
 
+        expect(plugin.pluginSwiftPackagePath(fs, IOSPlugin.kConfigKey), isNull);
+        expect(plugin.pluginSwiftPackagePath(fs, MacOSPlugin.kConfigKey), isNull);
+        expect(plugin.pluginSwiftPackagePath(fs, WindowsPlugin.kConfigKey), isNull);
+        expect(plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey), isNull);
+        expect(plugin.pluginSwiftPackageManifestPath(fs, MacOSPlugin.kConfigKey), isNull);
+        expect(plugin.pluginSwiftPackageManifestPath(fs, WindowsPlugin.kConfigKey), isNull);
         expect(plugin.pluginPodspecPath(fs, IOSPlugin.kConfigKey), isNull);
         expect(plugin.pluginPodspecPath(fs, MacOSPlugin.kConfigKey), isNull);
         expect(plugin.pluginPodspecPath(fs, WindowsPlugin.kConfigKey), isNull);
@@ -2794,7 +2728,6 @@ flutter:
 
       flutterProject
         ..manifest = flutterManifest
-        ..flutterPluginsFile = flutterProject.directory.childFile('.flutter-plugins')
         ..flutterPluginsDependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
         )
@@ -2871,9 +2804,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late Directory directory;
-
-  @override
-  late File flutterPluginsFile;
 
   @override
   late File flutterPluginsDependenciesFile;

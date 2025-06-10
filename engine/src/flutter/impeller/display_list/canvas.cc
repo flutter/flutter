@@ -603,6 +603,32 @@ void Canvas::DrawLine(const Point& p0,
   }
 }
 
+void Canvas::DrawDashedLine(const Point& p0,
+                            const Point& p1,
+                            Scalar on_length,
+                            Scalar off_length,
+                            const Paint& paint) {
+  // Reasons to defer to regular DrawLine:
+  // - performance for degenerate and "regular line" cases
+  // - length is non-positive - DrawLine will draw appropriate "dot"
+  // - off_length is non-positive - no gaps, DrawLine will draw it solid
+  // - on_length is negative - invalid dashing
+  //
+  // Note that a 0 length "on" dash will draw "dot"s every "off" distance
+  // apart so we proceed with the dashing process in that case.
+  Scalar length = p0.GetDistance(p1);
+  if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    StrokeDashedLineGeometry geom(p0, p1, on_length, off_length, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  } else {
+    DrawLine(p0, p1, paint);
+  }
+}
+
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (AttemptDrawBlurredRRect(rect, {}, paint)) {
     return;
@@ -758,29 +784,26 @@ void Canvas::DrawDiffRoundRect(const RoundRect& outer,
   }
 }
 
-void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
+void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
                                    const Paint& paint) {
-  auto& rect = rse.GetBounds();
-  auto& radii = rse.GetRadii();
+  auto& rect = round_superellipse.GetBounds();
+  auto& radii = round_superellipse.GetRadii();
   if (radii.AreAllCornersSame() &&
       AttemptDrawBlurredRSuperellipse(rect, radii.top_left, paint)) {
     return;
   }
 
-  if (paint.style == Paint::Style::kFill) {
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetBlendMode(paint.blend_mode);
 
+  if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(rect, radii);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
-    return;
+  } else {
+    StrokeRoundSuperellipseGeometry geom(round_superellipse, paint.stroke);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
-
-  auto path = flutter::DlPathBuilder{}  //
-                  .AddRoundSuperellipse(rse)
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawCircle(const Point& center,
