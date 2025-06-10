@@ -120,12 +120,12 @@ class Command {
   /// Determine the lint action for the file with contents `lines`.
   @visibleForTesting
   static Future<LintAction> lintActionFromContents(Stream<String> lines) async {
-    // Check for FlUTTER_NOLINT at top of file.
+    // Check for FLUTTER_NOLINT at top of file.
     await for (final String line in lines) {
       final RegExpMatch? match = _nolintRegex.firstMatch(line);
       if (match != null) {
         return match.group(1) != null ? LintAction.skipNoLint : LintAction.failMalformedNoLint;
-      } else if (line.isNotEmpty && line[0] != '\n' && line[0] != '/') {
+      } else if (line.isNotEmpty && line[0] != '\n' && line[0] != '/' && line[0] != '#') {
         // Quick out once we find a line that isn't empty or a comment.  The
         // FLUTTER_NOLINT must show up before the first real code.
         return LintAction.lint;
