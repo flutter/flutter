@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_HEADERS_FLUTTERSCENEDELEGATE_H_
 
 #import <UIKit/UIKit.h>
+#import "FlutterMacros.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This class is typically specified as the UISceneDelegate in the Info.plist.
  */
+FLUTTER_DARWIN_EXPORT
 @interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
 @property(nonatomic, strong, nullable) UIWindow* window;
 @end
