@@ -764,20 +764,19 @@ abstract class SemanticRole {
       updateValidationResult();
     }
 
+    final List<SemanticBehavior>? behaviors = _behaviors;
+    if (behaviors != null) {
+      for (final SemanticBehavior behavior in behaviors) {
+        behavior.update();
+      }
+    }
+
     if (semanticsObject.isIdentifierDirty) {
       _updateIdentifier();
     }
 
     if (semanticsObject.isControlsNodesDirty) {
       _updateControls();
-    }
-
-    final List<SemanticBehavior>? behaviors = _behaviors;
-    if (behaviors == null) {
-      return;
-    }
-    for (final SemanticBehavior behavior in behaviors) {
-      behavior.update();
     }
   }
 
