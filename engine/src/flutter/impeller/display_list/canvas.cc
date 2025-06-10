@@ -727,11 +727,7 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
     }
   }
 
-  Scalar device_radius = oval_bounds.GetSize().MaxDimension() * 0.5f *
-                         GetCurrentTransform().GetMaxBasisLengthXY();
-  Tessellator::Trigs trigs =
-      renderer_.GetTessellator().GetTrigsForDeviceRadius(device_radius);
-  ArcStrokeGeometry geom(trigs, arc, paint.stroke);
+  ArcStrokeGeometry geom(arc, paint.stroke);
   AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 

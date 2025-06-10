@@ -19,8 +19,7 @@ namespace impeller {
 ///         curves using Conic segments which are harder to iterate.
 class PathAndArcSegmentReceiver : public PathTessellator::SegmentReceiver {
  public:
-  virtual void RecordArc(const Tessellator::Trigs& trigs,
-                         const Arc::Iteration& iterator,
+  virtual void RecordArc(const Arc& arc,
                          const Point center,
                          const Size radii) = 0;
 };
@@ -50,8 +49,11 @@ class StrokeSegmentsGeometry : public Geometry {
  protected:
   explicit StrokeSegmentsGeometry(const StrokeParameters& parameters);
 
-  /// Dispatch the path segments to the StrokePathSegmentReceiver.
-  virtual void Dispatch(PathAndArcSegmentReceiver& receiver) const = 0;
+  /// Dispatch the path segments to the StrokePathSegmentReceiver for
+  /// the provided transform scale.
+  virtual void Dispatch(PathAndArcSegmentReceiver& receiver,
+                        Tessellator& tessellator,
+                        Scalar scale) const = 0;
 
   /// Provide the stroke-padded bounds for the provided bounds of the
   /// segments themselves.
@@ -69,6 +71,7 @@ class StrokeSegmentsGeometry : public Geometry {
 
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
+      Tessellator& tessellator,
       const PathSource& source,
       const StrokeParameters& stroke,
       Scalar scale);
@@ -100,7 +103,9 @@ class StrokePathSourceGeometry : public StrokeSegmentsGeometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   // |StrokeSegmentsGeometry|
-  void Dispatch(PathAndArcSegmentReceiver& receiver) const override;
+  void Dispatch(PathAndArcSegmentReceiver& receiver,
+                Tessellator& tessellator,
+                Scalar scale) const override;
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
@@ -130,19 +135,18 @@ class StrokePathGeometry final : public StrokePathSourceGeometry {
 /// the arc bounds, but don't draw pixels outside those bounds.
 class ArcStrokeGeometry final : public StrokeSegmentsGeometry {
  public:
-  ArcStrokeGeometry(const Tessellator::Trigs& trigs,
-                    const Arc& arc,
-                    const StrokeParameters& parameters);
+  ArcStrokeGeometry(const Arc& arc, const StrokeParameters& parameters);
 
  protected:
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   // |StrokeSegmentsGeometry|
-  void Dispatch(PathAndArcSegmentReceiver& receiver) const override;
+  void Dispatch(PathAndArcSegmentReceiver& receiver,
+                Tessellator& tessellator,
+                Scalar scale) const override;
 
  private:
-  const Tessellator::Trigs& trigs_;
   const Arc arc_;
 };
 

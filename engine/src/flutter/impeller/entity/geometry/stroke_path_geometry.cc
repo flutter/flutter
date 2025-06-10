@@ -130,11 +130,12 @@ class PositionWriter {
 /// @see PathTessellator::PathToStrokedSegments
 class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
  public:
-  StrokePathSegmentReceiver(PositionWriter& vtx_builder,
+  StrokePathSegmentReceiver(Tessellator& tessellator,
+                            PositionWriter& vtx_builder,
                             const StrokeParameters& stroke,
-                            const Scalar scale,
-                            const Tessellator::Trigs& trigs)
-      : vtx_builder_(vtx_builder),
+                            const Scalar scale)
+      : tessellator_(tessellator),
+        vtx_builder_(vtx_builder),
         half_stroke_width_(stroke.width * 0.5f),
         maximum_join_cosine_(
             ComputeMaximumJoinCosine(scale, half_stroke_width_)),
@@ -142,13 +143,13 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
         join_(stroke.join),
         cap_(stroke.cap),
         scale_(scale),
-        trigs_(trigs) {
+        trigs_(MakeTrigs(tessellator, scale, half_stroke_width_)) {
     // Trigs ensures that it always contains at least 2 entries.
-    FML_DCHECK(trigs.size() >= 2);
-    FML_DCHECK(trigs[0].cos == 1.0f);  // Angle == 0 degrees
-    FML_DCHECK(trigs[0].sin == 0.0f);
-    FML_DCHECK(trigs.end()[-1].cos == 0.0f);  // Angle == 90 degrees
-    FML_DCHECK(trigs.end()[-1].sin == 1.0f);
+    FML_DCHECK(trigs_.size() >= 2);
+    FML_DCHECK(trigs_[0].cos == 1.0f);  // Angle == 0 degrees
+    FML_DCHECK(trigs_[0].sin == 0.0f);
+    FML_DCHECK(trigs_.end()[-1].cos == 0.0f);  // Angle == 90 degrees
+    FML_DCHECK(trigs_.end()[-1].sin == 1.0f);
   }
 
  protected:
@@ -283,10 +284,13 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
   }
 
   // |PathAndArcSegmentReceiver|
-  void RecordArc(const Tessellator::Trigs& trigs,
-                 const Arc::Iteration& iterator,
+  void RecordArc(const Arc& arc,
                  const Point center,
                  const Size radii) override {
+    Tessellator::Trigs trigs =
+        tessellator_.GetTrigsForDeviceRadius(scale_ * radii.MaxDimension());
+    Arc::Iteration iterator = arc.ComputeIterations(trigs.GetSteps(), false);
+
     SeparatedVector2 prev_perpendicular =
         PerpendicularFromUnitDirection({-iterator.start.y, iterator.start.x});
     HandlePreviousJoin(prev_perpendicular);
@@ -313,6 +317,7 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
   }
 
  private:
+  Tessellator& tessellator_;
   PositionWriter& vtx_builder_;
   const Scalar half_stroke_width_;
   const Scalar maximum_join_cosine_;
@@ -320,7 +325,7 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
   const Join join_;
   const Cap cap_;
   const Scalar scale_;
-  const Tessellator::Trigs& trigs_;
+  const Tessellator::Trigs trigs_;
 
   SeparatedVector2 origin_perpendicular_;
   Point origin_point_;
@@ -329,6 +334,12 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
   bool has_prior_contour_ = false;
   bool has_prior_segment_ = false;
   bool contour_needs_cap_ = false;
+
+  static Tessellator::Trigs MakeTrigs(Tessellator& tessellator,
+                                      Scalar scale,
+                                      Scalar half_stroke_width) {
+    return tessellator.GetTrigsForDeviceRadius(scale * half_stroke_width);
+  }
 
   // Half of the allowed distance between the ends of the perpendiculars.
   static constexpr Scalar kJoinPixelThreshold = 0.25f;
@@ -686,13 +697,13 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
 
 // Private for benchmarking and debugging
 std::vector<Point> StrokeSegmentsGeometry::GenerateSolidStrokeVertices(
+    Tessellator& tessellator,
     const PathSource& source,
     const StrokeParameters& stroke,
     Scalar scale) {
   std::vector<Point> points(4096);
   PositionWriter vtx_builder(points);
-  Tessellator::Trigs trigs(scale * stroke.width * 0.5f);
-  StrokePathSegmentReceiver receiver(vtx_builder, stroke, scale, trigs);
+  StrokePathSegmentReceiver receiver(tessellator, vtx_builder, stroke, scale);
   PathTessellator::PathToStrokedSegments(source, receiver);
   auto [arena, extra] = vtx_builder.GetUsedSize();
   FML_DCHECK(extra == 0u);
@@ -744,20 +755,18 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
 
   auto& host_buffer = renderer.GetTransientsBuffer();
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
+  auto& tessellator = renderer.GetTessellator();
 
-  PositionWriter position_writer(
-      renderer.GetTessellator().GetStrokePointCache());
-  Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
-      scale * adjusted_stroke.width * 0.5f);
-  StrokePathSegmentReceiver receiver(position_writer, adjusted_stroke, scale,
-                                     trigs);
-  Dispatch(receiver);
+  PositionWriter position_writer(tessellator.GetStrokePointCache());
+  StrokePathSegmentReceiver receiver(tessellator, position_writer,
+                                     adjusted_stroke, scale);
+  Dispatch(receiver, tessellator, scale);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {
-    BufferView buffer_view = host_buffer.Emplace(
-        renderer.GetTessellator().GetStrokePointCache().data(),
-        arena_length * sizeof(Point), alignof(Point));
+    BufferView buffer_view =
+        host_buffer.Emplace(tessellator.GetStrokePointCache().data(),
+                            arena_length * sizeof(Point), alignof(Point));
 
     return GeometryResult{.type = PrimitiveType::kTriangleStrip,
                           .vertex_buffer =
@@ -777,9 +786,9 @@ GeometryResult StrokeSegmentsGeometry::GetPositionBuffer(
       alignof(Point)                                      //
   );
   memcpy(buffer_view.GetBuffer()->OnGetContents() +
-             buffer_view.GetRange().offset,                       //
-         renderer.GetTessellator().GetStrokePointCache().data(),  //
-         arena_length * sizeof(Point)                             //
+             buffer_view.GetRange().offset,         //
+         tessellator.GetStrokePointCache().data(),  //
+         arena_length * sizeof(Point)               //
   );
   memcpy(buffer_view.GetBuffer()->OnGetContents() +
              buffer_view.GetRange().offset + arena_length * sizeof(Point),  //
@@ -836,8 +845,9 @@ std::optional<Rect> StrokePathSourceGeometry::GetCoverage(
   return GetStrokeCoverage(transform, GetSource().GetBounds());
 }
 
-void StrokePathSourceGeometry::Dispatch(
-    PathAndArcSegmentReceiver& receiver) const {
+void StrokePathSourceGeometry::Dispatch(PathAndArcSegmentReceiver& receiver,
+                                        Tessellator& tessellator,
+                                        Scalar scale) const {
   PathTessellator::PathToStrokedSegments(GetSource(), receiver);
 }
 
@@ -849,26 +859,30 @@ const PathSource& StrokePathGeometry::GetSource() const {
   return path_;
 }
 
-ArcStrokeGeometry::ArcStrokeGeometry(const Tessellator::Trigs& trigs,
-                                     const Arc& arc,
+ArcStrokeGeometry::ArcStrokeGeometry(const Arc& arc,
                                      const StrokeParameters& parameters)
-    : StrokeSegmentsGeometry(parameters), trigs_(trigs), arc_(arc) {}
+    : StrokeSegmentsGeometry(parameters), arc_(arc) {}
 
 std::optional<Rect> ArcStrokeGeometry::GetCoverage(
     const Matrix& transform) const {
   return GetStrokeCoverage(transform, arc_.GetBounds());
 }
 
-void ArcStrokeGeometry::Dispatch(PathAndArcSegmentReceiver& receiver) const {
-  Arc::Iteration iterator =
-      arc_.ComputeIterations(trigs_.GetSteps(), /*simplify_360=*/false);
+void ArcStrokeGeometry::Dispatch(PathAndArcSegmentReceiver& receiver,
+                                 Tessellator& tessellator,
+                                 Scalar scale) const {
   Point center = arc_.GetBounds().GetCenter();
   Size radii = arc_.GetBounds().GetSize() * 0.5f;
+
+  auto trigs =
+      tessellator.GetTrigsForDeviceRadius(scale * radii.MaxDimension());
+  Arc::Iteration iterator =
+      arc_.ComputeIterations(trigs.GetSteps(), /*simplify_360=*/false);
   Point start = center + iterator.start * radii;
   bool include_center = arc_.IncludeCenter();
 
   receiver.BeginContour(start, include_center);
-  receiver.RecordArc(trigs_, iterator, center, radii);
+  receiver.RecordArc(arc_, center, radii);
   if (include_center) {
     Point end = center + iterator.end * radii;
     receiver.RecordLine(end, center);
