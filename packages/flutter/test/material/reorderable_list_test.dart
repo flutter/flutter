@@ -1758,7 +1758,7 @@ void main() {
       }
 
       final List<int> items = List<int>.generate(5, (int index) => index);
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1806,7 +1806,7 @@ void main() {
           (itemHeight / 2);
       expect(tester.getCenter(find.text('Item 2')).dy, initialItem2CenterY);
 
-      // Original position of 'Item 1'  
+      // Original position of 'Item 1'
       const double originalItem1CenterY =
           appBarHeight + itemHeight + separatorHeight + (itemHeight / 2);
       expect(tester.getCenter(find.text('Item 1')).dy, originalItem1CenterY);
