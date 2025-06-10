@@ -365,16 +365,16 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
 
   // Converting child to text field should produce `FlutterTextField` native view accessible.
 
-  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{.is_text_field = true};
-  child1.flags2 = &child_flags;
+  FlutterSemanticsFlags child_flags_updated_1 = FlutterSemanticsFlags{.is_text_field = true};
+  child1.flags2 = &child_flags_updated_1;
   bridge->AddFlutterSemanticsNodeUpdate(child1);
   bridge->CommitUpdates();
 
   native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
   EXPECT_TRUE([native_accessibility isKindOfClass:[FlutterTextField class]]);
 
-  FlutterSemanticsFlags child_flags_new = FlutterSemanticsFlags{.is_text_field = false};
-  child1.flags2 = &child_flags_new;
+  FlutterSemanticsFlags child_flags_updated_2 = FlutterSemanticsFlags{.is_text_field = false};
+  child1.flags2 = &child_flags_updated_2;
   bridge->AddFlutterSemanticsNodeUpdate(child1);
   bridge->CommitUpdates();
 
