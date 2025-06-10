@@ -420,9 +420,19 @@ struct LexerContext {
   std::function<void(std::string_view)> callback;
   std::string buffer;
 };
-#line 461 "comments.cc"
 
-#line 463 "comments.cc"
+static void AddTrimLine(LexerContext* context,
+                        const char* text,
+                        size_t length) {
+  while (length > 0 && (!std::isalnum(*text) && *text != '\n')) {
+    text++;
+    length--;
+  }
+  context->buffer.append(text, length);
+}
+#line 469 "comments.cc"
+
+#line 471 "comments.cc"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -678,9 +688,9 @@ YY_DECL {
   }
 
   {
-#line 39 "comments.l"
+#line 47 "comments.l"
 
-#line 728 "comments.cc"
+#line 736 "comments.cc"
 
     while (/*CONSTCOND*/ 1) /* loops until end-of-file is reached */
     {
@@ -734,15 +744,15 @@ YY_DECL {
 
         case 1:
           YY_RULE_SETUP
-#line 40 "comments.l"
+#line 48 "comments.l"
           {
             BEGIN(BLOCK);
-            yyextra->buffer.append(yytext, yyleng);
+            AddTrimLine(yyextra, yytext, yyleng);
           }
           YY_BREAK
         case 2:
           YY_RULE_SETUP
-#line 44 "comments.l"
+#line 52 "comments.l"
           {
             BEGIN(C_COMMENT);
             yyextra->buffer.append(yytext, yyleng);
@@ -751,7 +761,7 @@ YY_DECL {
 
         case 3:
           YY_RULE_SETUP
-#line 50 "comments.l"
+#line 58 "comments.l"
           {
             BEGIN(INITIAL);
             yyextra->buffer.append(yytext, yyleng);
@@ -762,7 +772,7 @@ YY_DECL {
         case 4:
           /* rule 4 can match eol */
           YY_RULE_SETUP
-#line 56 "comments.l"
+#line 64 "comments.l"
           {
             yyextra->buffer.append(yytext, yyleng);
           }
@@ -771,15 +781,16 @@ YY_DECL {
         case 5:
           /* rule 5 can match eol */
           YY_RULE_SETUP
-#line 62 "comments.l"
+#line 70 "comments.l"
           {
-            yyextra->buffer.append(yytext, yyleng);
+            yyextra->buffer.append("\n", 1);
+            AddTrimLine(yyextra, yytext + 1, yyleng - 1);
           }
           YY_BREAK
         case 6:
           /* rule 6 can match eol */
           YY_RULE_SETUP
-#line 65 "comments.l"
+#line 74 "comments.l"
           {
             BEGIN(INITIAL);
             yyextra->callback(yyextra->buffer);
@@ -790,16 +801,16 @@ YY_DECL {
         case 7:
           /* rule 7 can match eol */
           YY_RULE_SETUP
-#line 72 "comments.l"
+#line 81 "comments.l"
           {
           }
           YY_BREAK
         case 8:
           YY_RULE_SETUP
-#line 73 "comments.l"
+#line 82 "comments.l"
           ECHO;
           YY_BREAK
-#line 853 "comments.cc"
+#line 862 "comments.cc"
         case YY_STATE_EOF(INITIAL):
         case YY_STATE_EOF(C_COMMENT):
         case YY_STATE_EOF(BLOCK):
@@ -923,8 +934,8 @@ YY_DECL {
         default:
           YY_FATAL_ERROR("fatal flex scanner internal error--no action found");
       } /* end of action switch */
-    } /* end of scanning one token */
-  } /* end of user's declarations */
+    }   /* end of scanning one token */
+  }     /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -1908,7 +1919,7 @@ void yyfree(void* ptr, yyscan_t yyscanner) {
 
 #define YYTABLES_NAME "yytables"
 
-#line 73 "comments.l"
+#line 82 "comments.l"
 
 void IterateComments(const char* buffer,
                      size_t size,
