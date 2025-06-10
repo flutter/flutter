@@ -329,7 +329,7 @@ class PreviewDetector {
   /// the initial [PreviewDependencyGraph] for the project.
   Future<PreviewDependencyGraph> initialize() async {
     // Find the initial set of previews.
-    await findPreviewFunctions(projectRoot);
+    await _findPreviewFunctions(projectRoot);
 
     // Determine which files have transitive dependencies with compile time errors.
     _propagateErrors();
@@ -401,7 +401,7 @@ class PreviewDetector {
     required AnalysisContext context,
     required String eventPath,
   }) async {
-    final PreviewDependencyGraph filePreviewsMapping = await findPreviewFunctions(
+    final PreviewDependencyGraph filePreviewsMapping = await _findPreviewFunctions(
       fs.file(eventPath),
     );
     if (filePreviewsMapping.length > 1) {
@@ -429,8 +429,7 @@ class PreviewDetector {
   }
 
   /// Search for functions annotated with `@Preview` in the current project.
-  @visibleForTesting
-  Future<PreviewDependencyGraph> findPreviewFunctions(FileSystemEntity entity) async {
+  Future<PreviewDependencyGraph> _findPreviewFunctions(FileSystemEntity entity) async {
     final PreviewDependencyGraph updatedPreviews = PreviewDependencyGraph();
 
     final AnalysisContext context = collection.contexts.single;

@@ -290,10 +290,8 @@ void main() {
         addPreviewContainingFile(platformPath(<String>['src', 'bar.dart'])),
       ];
       addNonPreviewContainingFile('baz.dart');
-      final PreviewDependencyGraph mapping = await previewDetector.findPreviewFunctions(
-        projectRoot,
-      );
-      expect(mapping.nodesWithPreviews.keys, previewFiles);
+      final PreviewDependencyGraph mapping = await previewDetector.initialize();
+      expect(mapping.nodesWithPreviews.keys, unorderedMatches(previewFiles));
     });
 
     testUsingContext('can detect previews in updated files', () async {

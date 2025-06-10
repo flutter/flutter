@@ -27,6 +27,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_test:
     sdk: flutter
 ''';
@@ -90,7 +92,9 @@ Widget wrapper(Widget widget) {
 ''';
 
 const String kLocalizationsDart = '''
+import 'dart:ui';
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 PreviewLocalizationsData myLocalizations() {
   return PreviewLocalizationsData(
@@ -197,9 +201,7 @@ void main() {
           PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
         expect(generatedPreviewFile, isNot(exists));
-        final PreviewDependencyGraph details = await previewDetector.findPreviewFunctions(
-          project.directory,
-        );
+        final PreviewDependencyGraph details = await previewDetector.initialize();
 
         // Populate the generated preview file.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
