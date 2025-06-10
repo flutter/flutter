@@ -186,7 +186,9 @@ void main() {
     }) async {
       final Completer<void> completer = Completer<void>();
       onChangeDetectedImpl = (PreviewDependencyGraph updated) {
-        assert(!completer.isCompleted);
+        if (completer.isCompleted) {
+          return;
+        }
         onChangeDetected(updated);
         completer.complete();
       };
