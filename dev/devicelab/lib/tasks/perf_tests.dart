@@ -1782,8 +1782,8 @@ class CompileTest {
       ]).then((ProcessResult result) {
         final dynamic actionsInvocationRecordJSON = json.decode(result.stdout.toString());
 
-        // ignore: avoid_dynamic_calls
         testRefID =
+        // ignore: avoid_dynamic_calls
             actionsInvocationRecordJSON['actions']['_values'][0]['actionResult']['testsRef']['id']['_value']
                 .toString();
       });
@@ -1803,8 +1803,8 @@ class CompileTest {
       ]).then((ProcessResult result) {
         final dynamic actionTestSummaryJSON = json.decode(result.stdout.toString());
 
-        // ignore: avoid_dynamic_calls
         actionTestSummaryID =
+        // ignore: avoid_dynamic_calls
             actionTestSummaryJSON['summaries']['_values'][0]['testableSummaries']['_values'][0]['tests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['subtests']['_values'][0]['summaryRef']['id']['_value']
                 .toString();
       });
@@ -1825,8 +1825,8 @@ class CompileTest {
       ]).then((ProcessResult result) {
         resultMetricsJSON = json.decode(result.stdout.toString());
 
-        // ignore: avoid_dynamic_calls
         resultsJson =
+        // ignore: avoid_dynamic_calls
             resultMetricsJSON['performanceMetrics']['_values'][0]['measurements']['_values']
                 as List<dynamic>;
       });
