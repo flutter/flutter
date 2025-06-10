@@ -29,6 +29,14 @@ struct LexerContext {
   std::function<void(std::string_view)> callback;
   std::string buffer;
 };
+
+static void AddTrimLine(LexerContext* context, const char* text, size_t length) {
+  while (length > 0 && (!std::isalnum(*text) && *text != '\n')) {
+    text++;
+    length--;
+  }
+  context->buffer.append(text, length);
+}
 %}
 
 COMMENT_START (\/\/|#)
@@ -39,7 +47,7 @@ COMMENT_START (\/\/|#)
 %%
 ^[ \t]*{COMMENT_START}[^\n]* {
   BEGIN(BLOCK);
-  yyextra->buffer.append(yytext, yyleng);
+  AddTrimLine(yyextra, yytext, yyleng);
 }
 ^[ \t]*\/\* {
   BEGIN(C_COMMENT);
@@ -60,7 +68,8 @@ COMMENT_START (\/\/|#)
 
 <BLOCK>{
   \n[ \t]*{COMMENT_START}[^\n]* {
-    yyextra->buffer.append(yytext, yyleng);
+    yyextra->buffer.append("\n", 1);
+    AddTrimLine(yyextra, yytext + 1, yyleng - 1);
   }
   \n|. {
     BEGIN(INITIAL);
