@@ -1690,6 +1690,64 @@ void main() {
       }
     });
 
+    testWidgets('ReorderableListView.separated throws error for items without keys', (
+      WidgetTester tester,
+    ) async {
+      // Items without keys should still throw an error in separated view
+      final Widget reorderableListViewWithoutItemKeys = ReorderableListView.separated(
+        itemBuilder: (BuildContext context, int index) {
+          // Items without keys - should cause an error
+          return SizedBox(child: Text('Item $index'));
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return const Divider();
+        },
+        itemCount: 2,
+        onReorder: (int oldIndex, int newIndex) {},
+      );
+      await tester.pumpWidget(MaterialApp(home: reorderableListViewWithoutItemKeys));
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+    });
+
+    testWidgets('ReorderableListView.separated works with keyed items and keyless separators', (
+      WidgetTester tester,
+    ) async {
+      // Items with keys and separators without keys should work (separators auto-keyed)
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              // Items with keys - should work
+              return SizedBox(
+                key: ValueKey<int>(index),
+                height: 50.0, // Give explicit height to ensure visibility
+                child: Text('Item $index'),
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              // Separators without keys - should be automatically wrapped in KeyedSubtree
+              return const Divider(height: 1.0);
+            },
+            itemCount: 3,
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isNull); // Should not throw an error
+
+      // Verify the widget tree contains at least some expected items and separators
+      // The key point is that no exception was thrown, proving separators are auto-keyed
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.byType(Divider), findsAtLeastNWidgets(1)); // Should have separators
+
+      // Verify that a ReorderableListView was actually created
+      expect(find.byType(ReorderableListView), findsOneWidget);
+    });
+
     group('Padding', () {
       testWidgets('Padding with no header & footer', (WidgetTester tester) async {
         const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);

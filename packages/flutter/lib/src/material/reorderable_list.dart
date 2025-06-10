@@ -207,9 +207,9 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// All other parameters function similarly to [ReorderableListView.builder].
   ///
-  /// {@tool dartpad}
-  /// This example creates a list of Cards separated by Dividers, where the cards
+  /// This example creates a list of [Card] separated by [Divider], where the cards
   /// can be reordered.
+  /// {@tool dartpad}
   ///
   /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.reorderable_list_view_separated.0.dart **
   /// {@end-tool}
@@ -363,14 +363,17 @@ class ReorderableListView extends StatefulWidget {
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.list_view.itemExtent}
+  ///
   /// Null if this is a [ReorderableListView.separated].
   final double? itemExtent;
 
   /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  ///
   /// Null if this is a [ReorderableListView.separated].
   final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
+  ///
   /// Null if this is a [ReorderableListView.separated].
   final Widget? prototypeItem;
 
