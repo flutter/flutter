@@ -1,0 +1,5 @@
+# This file describes all the files we don't need to do a copyright header
+# check on.
+.*\/test\/.*
+.*\/testing\/.*
+.*\/tests\/.*
