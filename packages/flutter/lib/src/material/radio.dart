@@ -106,6 +106,7 @@ class Radio<T> extends StatefulWidget {
     this.autofocus = false,
     this.enabled,
     this.groupRegistry,
+    this.backgroundColor,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false;
 
@@ -153,6 +154,7 @@ class Radio<T> extends StatefulWidget {
     this.useCupertinoCheckmarkStyle = false,
     this.enabled,
     this.groupRegistry,
+    this.backgroundColor,
   }) : _radioType = _RadioType.adaptive;
 
   /// {@macro flutter.widget.RawRadio.value}
@@ -398,6 +400,17 @@ class Radio<T> extends StatefulWidget {
   /// {@endtemplate}
   final bool? enabled;
 
+  /// The color of the background of the radio button, in all [WidgetState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it is transparent in all states.
+  final WidgetStateProperty<Color?>? backgroundColor;
+
   @override
   State<Radio<T>> createState() => _RadioState<T>();
 }
@@ -503,6 +516,7 @@ class _RadioState<T> extends State<Radio<T>> {
           splashRadius: widget.splashRadius,
           visualDensity: widget.visualDensity,
           materialTapTargetSize: widget.materialTapTargetSize,
+          backgroundColor: widget.backgroundColor,
         );
       },
     );
@@ -538,6 +552,7 @@ class _RadioPaint extends StatefulWidget {
     required this.splashRadius,
     required this.visualDensity,
     required this.materialTapTargetSize,
+    required this.backgroundColor,
   });
 
   final ToggleableStateMixin toggleableState;
@@ -549,6 +564,7 @@ class _RadioPaint extends StatefulWidget {
   final double? splashRadius;
   final VisualDensity? visualDensity;
   final MaterialTapTargetSize? materialTapTargetSize;
+  final MaterialStateProperty<Color?>? backgroundColor;
 
   @override
   State<StatefulWidget> createState() => _RadioPaintState();
@@ -598,6 +614,11 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.fillColor?.resolve(inactiveStates);
     final Color effectiveInactiveColor =
         inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
+    // TODO(ValentinVignal): ADd backgroundColor to RadioThemeData.
+    final Color activeBackgroundColor =
+        widget.backgroundColor?.resolve(activeStates) ?? Colors.transparent;
+    final Color inactiveBackgroundColor =
+        widget.backgroundColor?.resolve(inactiveStates) ?? Colors.transparent;
 
     final Set<MaterialState> focusedStates =
         widget.toggleableState.states..add(MaterialState.focused);
@@ -675,24 +696,52 @@ class _RadioPaintState extends State<_RadioPaint> {
             ..isFocused = widget.toggleableState.states.contains(MaterialState.focused)
             ..isHovered = widget.toggleableState.states.contains(MaterialState.hovered)
             ..activeColor = effectiveActiveColor
-            ..inactiveColor = effectiveInactiveColor,
+            ..inactiveColor = effectiveInactiveColor
+            ..activeBackgroundColor = activeBackgroundColor
+            ..inactiveBackgroundColor = inactiveBackgroundColor,
     );
   }
 }
 
 class _RadioPainter extends ToggleablePainter {
+  Color get inactiveBackgroundColor => _inactiveBackgroundColor!;
+  Color? _inactiveBackgroundColor;
+  set inactiveBackgroundColor(Color? value) {
+    if (_inactiveBackgroundColor == value) {
+      return;
+    }
+    _inactiveBackgroundColor = value;
+    notifyListeners();
+  }
+
+  Color get activeBackgroundColor => _activeBackgroundColor!;
+  Color? _activeBackgroundColor;
+  set activeBackgroundColor(Color? value) {
+    if (_activeBackgroundColor == value) {
+      return;
+    }
+    _activeBackgroundColor = value;
+    notifyListeners();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Offset center = (Offset.zero & size).center;
 
-    // Outer circle
+    // Background
     final Paint paint =
         Paint()
-          ..color = Color.lerp(inactiveColor, activeColor, position.value)!
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
+          ..color = Color.lerp(inactiveBackgroundColor, activeBackgroundColor, position.value)!
+          ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, _kOuterRadius, paint);
+
+    // Outer circle
+    paint
+      ..color = Color.lerp(inactiveColor, activeColor, position.value)!
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);
 
     // Inner circle
