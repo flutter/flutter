@@ -663,6 +663,42 @@ void main() {
     },
   );
 
+  testWidgets('suffix has correct semantics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/169499.
+    final UniqueKey suffix = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Scaffold(
+            body: Center(
+              child: TextField(
+                autofocus: true,
+                decoration: InputDecoration(
+                  suffix: Semantics(
+                    key: suffix,
+                    identifier: 'myId',
+                    container: true,
+                    child: const SizedBox(width: 50, height: 50, child: Text('suffix')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Wait for autofocus and suffix animation.
+    expect(find.text('suffix'), findsOneWidget);
+    expect(
+      tester.semantics.find(find.byKey(suffix)),
+      containsSemantics(
+        label: 'suffix',
+        identifier: 'myId',
+        rect: const Rect.fromLTWH(0, 0, 50, 50),
+      ),
+    );
+  });
+
   testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
     // True
 
