@@ -2293,10 +2293,10 @@ if (!self.dart_library) {
     script.setAttribute('src', policy.createScriptURL(jsFile));
     script.async = false;
     script.defer = true;
-    if (onLoad != null) {
-      script.onLoad = onLoad;
+    if (onLoad !== void 0) {
+      script.onload = onLoad;
     } else {
-      script.onLoad = function () {
+      script.onload = function () {
         console.log(`Loaded ${jsFile} in forceLoadScript`);
       }
     }
@@ -2399,7 +2399,7 @@ if (!self.dart_library) {
     addScriptsToQueue(scripts, allowScriptFn) {
       for (let i = 0; i < scripts.length; i++) {
         const script = scripts[i];
-        // console.log(`Adding script to queue: ${script.src} ${script.id}`);
+        console.log(`Adding script to queue: ${script.src} ${script.id}`);
 
         // Only load the bootstrap script after every other script has finished loading.
         if (script.src == this.loadConfig.bootstrapScript.src) {
@@ -2435,7 +2435,7 @@ if (!self.dart_library) {
 
     // Creates a script element to be loaded into the provided container.
     createAndLoadScript(src, id, container, onError, onLoad) {
-      // console.log(`About to load ${src} in createAndLoadScript`);
+      console.log(`About to load ${src} in createAndLoadScript`);
       let el = self.dart_library.createScript();
       el.src = policy.createScriptURL(src);
       el.async = false;
@@ -2514,7 +2514,7 @@ if (!self.dart_library) {
       const script = this.loadConfig.bootstrapScript;
       const src = this.registerScript(script);
       this.createAndLoadScript(src, script.id, document.head, null, function () {
-        console.log('Loaded bootstrap script');
+        // console.log('Loaded bootstrap script');
       });
       this.loadConfig.tryLoadBootstrapScript = false;
     };
@@ -2558,7 +2558,7 @@ if (!self.dart_library) {
     };
 
     onLoad(e) {
-      // console.log(`Loaded ${e.target.src} in onLoad function as part of createAndLoadScript`);
+      console.log(`Loaded ${e.target.src} in onLoad function as part of createAndLoadScript`);
       this.numLoaded++;
       if (e.target.src == this.loadConfig.bootstrapScript.src) {
         this.loadConfig.onBootstrapSuccess();
