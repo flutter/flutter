@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 
-/// {@template flutter.cupertino.CupertinoFocusTraversalGroup}
+/// {@template flutter.cupertino.CupertinoFocusHalo}
 /// A wrapper around [FocusTraversalGroup] to apply a Cupertino-style focus border
 /// around its child when any of child focus nodes gain focus.
 ///
@@ -18,36 +18,33 @@ import 'constants.dart';
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
 /// {@endtemplate}
-class CupertinoFocusTraversalGroup extends StatefulWidget {
-  /// {@macro flutter.cupertino.CupertinoFocusTraversalGroup}
-  const CupertinoFocusTraversalGroup.onRect({
+class CupertinoFocusHalo extends StatefulWidget {
+  /// {@macro flutter.cupertino.CupertinoFocusHalo}
+  const CupertinoFocusHalo.onRect({
     required this.child,
     super.key,
-  })  : borderRadius = BorderRadius.zero;
+  })  : _borderRadius = BorderRadius.zero;
 
-  /// {@macro flutter.cupertino.CupertinoFocusTraversalGroup}
-  const CupertinoFocusTraversalGroup.onRRect({
+  /// {@macro flutter.cupertino.CupertinoFocusHalo}
+  const CupertinoFocusHalo.onRRect({
     required this.child,
-    required this.borderRadius,
+    required BorderRadiusGeometry borderRadius,
     super.key,
-  });
+  }) : _borderRadius = borderRadius;
 
-  /// The radius of the border that highlights active focus.
-  ///
-  /// When [borderRadius] is null, it defaults to [CupertinoFocusTraversalGroup.defaultBorderRadius].
-  final BorderRadiusGeometry borderRadius;
+  final BorderRadiusGeometry _borderRadius;
 
   /// The child to draw the focused border around.
   ///
-  /// Since [CupertinoFocusTraversalGroup] can't request focus to itself, this [child] should
+  /// Since [CupertinoFocusHalo] can't request focus to itself, this [child] should
   /// contain widget(s) that can request focus.
   final Widget child;
 
   @override
-  State<CupertinoFocusTraversalGroup> createState() => _CupertinoFocusTraversalGroupState();
+  State<CupertinoFocusHalo> createState() => _CupertinoFocusHaloState();
 }
 
-class _CupertinoFocusTraversalGroupState extends State<CupertinoFocusTraversalGroup> {
+class _CupertinoFocusHaloState extends State<CupertinoFocusHalo> {
   bool _childHasFocus = false;
 
   Color get _effectiveFocusOutlineColor =>
@@ -71,7 +68,7 @@ class _CupertinoFocusTraversalGroupState extends State<CupertinoFocusTraversalGr
       child: DecoratedBox(
         position: DecorationPosition.foreground,
         decoration: BoxDecoration(
-          borderRadius: widget.borderRadius,
+          borderRadius: widget._borderRadius,
           border:
               _childHasFocus
                   ? Border.fromBorderSide(

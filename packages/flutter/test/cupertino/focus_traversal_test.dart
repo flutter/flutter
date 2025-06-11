@@ -48,7 +48,7 @@ void main() {
         CupertinoApp(
           home: Column(
             children: <Widget>[
-              CupertinoFocusTraversalGroup.onRect(
+              CupertinoFocusHalo.onRect(
                 key: group1Key,
                 child: Column(
                   children: <Widget>[
@@ -63,7 +63,7 @@ void main() {
                   ],
                 ),
               ),
-              CupertinoFocusTraversalGroup.onRect(
+              CupertinoFocusHalo.onRect(
                 key: group2Key,
                 child: Focus(
                   focusNode: group2Child1FocusNode,
@@ -124,7 +124,7 @@ void main() {
         CupertinoApp(
           home: Column(
             children: <Widget>[
-              CupertinoFocusTraversalGroup.onRect(
+              CupertinoFocusHalo.onRect(
                 key: group1Key,
                 child: Column(
                   children: <Widget>[
@@ -139,7 +139,7 @@ void main() {
                   ],
                 ),
               ),
-              CupertinoFocusTraversalGroup.onRect(
+              CupertinoFocusHalo.onRect(
                 key: group2Key,
                 child: Focus(
                   focusNode: group2Child1FocusNode,
