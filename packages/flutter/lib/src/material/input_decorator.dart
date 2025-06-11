@@ -1842,7 +1842,7 @@ class InputDecorator extends StatefulWidget {
   /// The text and styles to use when decorating the child.
   ///
   /// Null [InputDecoration] properties are initialized with the corresponding
-  /// values from [ThemeData.inputDecorationTheme].
+  /// values from the ambient [InputDecorationThemeData].
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -2023,9 +2023,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   InputDecoration? _effectiveDecoration;
   InputDecoration get decoration =>
-      _effectiveDecoration ??= widget.decoration.applyDefaults(
-        Theme.of(context).inputDecorationTheme,
-      );
+      _effectiveDecoration ??= widget.decoration.applyDefaults(InputDecorationTheme.of(context));
 
   TextAlign? get textAlign => widget.textAlign;
   bool get isFocused => widget.isFocused;
@@ -2081,10 +2079,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
     final Color enabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
     if (isHovering) {
-      final Color hoverColor =
-          decoration.hoverColor ??
-          themeData.inputDecorationTheme.hoverColor ??
-          themeData.hoverColor;
+      final Color hoverColor = decoration.hoverColor ?? themeData.hoverColor;
       return Color.alphaBlend(hoverColor.withOpacity(0.12), enabledColor);
     }
     return enabledColor;
@@ -2105,35 +2100,28 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled == null || !decoration.filled! || !decoration.enabled) {
       return Colors.transparent;
     }
-    return decoration.hoverColor ??
-        themeData.inputDecorationTheme.hoverColor ??
-        themeData.hoverColor;
+    return decoration.hoverColor ?? themeData.hoverColor;
   }
 
   Color _getIconColor(ThemeData themeData, InputDecorationThemeData defaults) {
     return MaterialStateProperty.resolveAs(decoration.iconColor, materialState) ??
-        MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.iconColor, materialState) ??
         MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
   Color _getPrefixIconColor(
-    InputDecorationThemeData inputDecorationTheme,
     IconButtonThemeData iconButtonTheme,
     InputDecorationThemeData defaults,
   ) {
     return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState) ??
-        MaterialStateProperty.resolveAs(inputDecorationTheme.prefixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
         MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
   Color _getSuffixIconColor(
-    InputDecorationThemeData inputDecorationTheme,
     IconButtonThemeData iconButtonTheme,
     InputDecorationThemeData defaults,
   ) {
     return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState) ??
-        MaterialStateProperty.resolveAs(inputDecorationTheme.suffixIconColor, materialState) ??
         iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
         MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
@@ -2158,9 +2146,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       materialState,
     );
 
-    final TextStyle? style =
-        MaterialStateProperty.resolveAs(decoration.labelStyle, materialState) ??
-        MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.labelStyle, materialState);
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState);
 
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
@@ -2177,9 +2163,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       materialState,
     );
 
-    final TextStyle? style =
-        MaterialStateProperty.resolveAs(decoration.hintStyle, materialState) ??
-        MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.hintStyle, materialState);
+    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState);
 
     return (themeData.useMaterial3
             ? themeData.textTheme.bodyLarge!
@@ -2201,12 +2185,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       decoration.floatingLabelStyle ?? decoration.labelStyle,
     );
 
-    final TextStyle? style =
-        MaterialStateProperty.resolveAs(decoration.floatingLabelStyle, materialState) ??
-        MaterialStateProperty.resolveAs(
-          themeData.inputDecorationTheme.floatingLabelStyle,
-          materialState,
-        );
+    final TextStyle? style = MaterialStateProperty.resolveAs(
+      decoration.floatingLabelStyle,
+      materialState,
+    );
 
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
@@ -2267,7 +2249,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         borderSide: BorderSide(
           color: _getDefaultM2BorderColor(themeData),
           width:
-              ((decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) ||
+              ((decoration.isCollapsed!) ||
                       decoration.border == InputBorder.none ||
                       !decoration.enabled)
                   ? 0.0
@@ -2297,7 +2279,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final InputDecorationThemeData defaults =
         useMaterial3 ? _InputDecoratorDefaultsM3(context) : _InputDecoratorDefaultsM2(context);
-    final InputDecorationThemeData inputDecorationTheme = themeData.inputDecorationTheme;
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
@@ -2466,14 +2447,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       ),
                   child: IconTheme.merge(
                     data: IconThemeData(
-                      color: _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      color: _getPrefixIconColor(iconButtonTheme, defaults),
                       size: iconSize,
                     ),
                     child: IconButtonTheme(
                       data: IconButtonThemeData(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll<Color>(
-                            _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                            _getPrefixIconColor(iconButtonTheme, defaults),
                           ),
                           iconSize: WidgetStatePropertyAll<double>(iconSize),
                         ).merge(iconButtonTheme.style),
@@ -2504,14 +2485,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                       ),
                   child: IconTheme.merge(
                     data: IconThemeData(
-                      color: _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      color: _getSuffixIconColor(iconButtonTheme, defaults),
                       size: iconSize,
                     ),
                     child: IconButtonTheme(
                       data: IconButtonThemeData(
                         style: ButtonStyle(
                           foregroundColor: WidgetStatePropertyAll<Color>(
-                            _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                            _getSuffixIconColor(iconButtonTheme, defaults),
                           ),
                           iconSize: WidgetStatePropertyAll<double>(iconSize),
                         ).merge(iconButtonTheme.style),
@@ -2575,7 +2556,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final EdgeInsetsDirectional contentPadding;
     final double floatingLabelHeight;
 
-    if (decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) {
+    if (decoration.isCollapsed!) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsetsDirectional.zero;
     } else if (!border.isOutline) {
@@ -2632,7 +2613,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final _Decorator decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
-        isCollapsed: decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed,
+        isCollapsed: decoration.isCollapsed!,
         inputGap: inputGap,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration.floatingLabelAlignment!,
@@ -2663,8 +2644,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       expands: widget.expands,
     );
 
-    final BoxConstraints? constraints =
-        decoration.constraints ?? themeData.inputDecorationTheme.constraints;
+    final BoxConstraints? constraints = decoration.constraints;
     if (constraints != null) {
       return ConstrainedBox(constraints: constraints, child: decorator);
     }
@@ -2749,7 +2729,7 @@ class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
   ///
-  /// Unless specified by [ThemeData.inputDecorationTheme], [InputDecorator]
+  /// Unless specified by the ambient [InputDecorationThemeData], [InputDecorator]
   /// defaults [isDense] to false and [filled] to false. The default border is
   /// an instance of [UnderlineInputBorder]. If [border] is [InputBorder.none]
   /// then no border is drawn.
@@ -3836,9 +3816,8 @@ class InputDecoration {
   /// allows you to control how big the decorator will be in its available
   /// space.
   ///
-  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
-  /// [InputDecorationThemeData.constraints] will be used. If that
-  /// is null then the decorator will fill the available width with
+  /// If null, then the ambient [InputDecorationThemeData.constraints] will be used.
+  /// If that is null then the decorator will fill the available width with
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
@@ -3856,9 +3835,8 @@ class InputDecoration {
   /// When the visual density is [VisualDensity.standard] vertical aspect of
   /// [contentPadding] is not changed.
   ///
-  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
-  /// [InputDecorationThemeData.visualDensity] will be used. If that is null then
-  /// [ThemeData.visualDensity] will be used.
+  /// If null, then the ambient [InputDecorationThemeData.visualDensity] will be used.
+  /// If that is null then [ThemeData.visualDensity] will be used.
   ///
   /// See also:
   ///
@@ -4252,7 +4230,8 @@ class InputDecoration {
 ///  * [ThemeData.inputDecorationTheme], which specifies an input decoration theme as
 ///    part of the overall Material theme.
 class InputDecorationTheme extends InheritedTheme with Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.cardTheme].
+  /// Creates a [InputDecorationTheme] that controls visual parameters for
+  /// descendant [InputDecorator]s.
   const InputDecorationTheme({
     super.key,
     TextStyle? labelStyle,
@@ -4859,8 +4838,8 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
 ///    part of the overall Material theme.
 @immutable
 class InputDecorationThemeData with Diagnosticable {
-  /// Creates a value for [ThemeData.inputDecorationTheme] that
-  /// defines default values for [InputDecorator].
+  /// Creates a [InputDecorationThemeData] that can be used to override default
+  /// properties in a [InputDecorationTheme] widget.
   const InputDecorationThemeData({
     this.labelStyle,
     this.floatingLabelStyle,
