@@ -119,6 +119,7 @@ void main() {
           'Artifact.engineDartBinary.TargetPlatform.web_javascript',
           'compile',
           'wasm',
+          '--packages=.dart_tool/package_config.json',
           '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
           '--extra-compiler-option=--multi-root-scheme=org-dartlang-app',
           '--extra-compiler-option=--multi-root=project/test',
