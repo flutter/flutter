@@ -149,6 +149,7 @@ Future<void> main(List<String> args) async {
       'snippets': _runSnippetsTests,
       'docs': docsRunner,
       'verify_binaries_codesigned': verifyCodesignedTestRunner,
+      'verify_binaries_pre_codesigned': verifyPreCodesignedTestRunner,
       kTestHarnessShardName:
           testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
