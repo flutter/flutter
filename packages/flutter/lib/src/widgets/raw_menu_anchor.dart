@@ -493,15 +493,18 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
       _parent?._addChild(this);
     }
 
-    _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
-    _scrollPosition = Scrollable.maybeOf(context)?.position;
-    _scrollPosition?.isScrollingNotifier.addListener(_handleScroll);
-    final Size newSize = MediaQuery.sizeOf(context);
-    if (_viewSize != null && newSize != _viewSize) {
-      // Close the menus if the view changes size.
-      root.handleCloseRequest();
+    if (isRoot) {
+      _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
+      _scrollPosition = Scrollable.maybeOf(context)?.position;
+      _scrollPosition?.isScrollingNotifier.addListener(_handleScroll);
+
+      final Size newSize = MediaQuery.sizeOf(context);
+      if (_viewSize != null && newSize != _viewSize && isOpen) {
+        // Close the menus if the view changes size.
+        handleCloseRequest();
+      }
+      _viewSize = newSize;
     }
-    _viewSize = newSize;
   }
 
   @override
@@ -538,7 +541,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     // If an ancestor scrolls, and we're a root anchor, then close the menus.
     // Don't just close it on *any* scroll, since we want to be able to scroll
     // menus themselves if they're too big for the view.
-    if (isRoot) {
+    if (isOpen) {
       handleCloseRequest();
     }
   }
