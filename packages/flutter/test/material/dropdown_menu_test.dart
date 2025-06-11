@@ -3665,7 +3665,6 @@ void main() {
         isTextField: true,
         hasEnabledState: true,
         isEnabled: true,
-        // isFocusable: true,
         label: 'Test',
         isReadOnly: true,
         textDirection: TextDirection.ltr,
