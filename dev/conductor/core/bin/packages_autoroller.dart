@@ -100,7 +100,6 @@ String _parseOrgName(String remoteUrl) {
 }
 
 Checkouts _localCheckouts(String token) {
-  const FileSystem fileSystem = LocalFileSystem();
   const ProcessManager processManager = LocalProcessManager();
   const Platform platform = LocalPlatform();
   final Stdio stdio = VerboseStdio(
@@ -110,7 +109,6 @@ Checkouts _localCheckouts(String token) {
     filter: (String message) => message.replaceAll(token, '[GitHub TOKEN]'),
   );
   return Checkouts(
-    fileSystem: fileSystem,
     parentDirectory: _localFlutterRoot.parent,
     platform: platform,
     processManager: processManager,

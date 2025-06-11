@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:conductor_core/src/repository.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
@@ -31,48 +30,6 @@ void main() {
       stdio = TestStdio();
     });
 
-    test('updateDartRevision() updates the DEPS file', () async {
-      const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final File depsFile = fileSystem.file('/DEPS');
-      depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-      await repo.updateDartRevision(nextDartRevision, depsFile: depsFile);
-      final String updatedDepsFileContent = depsFile.readAsStringSync();
-      expect(updatedDepsFileContent, generateMockDeps(nextDartRevision));
-    });
-
-    test('updateDartRevision() throws exception on malformed DEPS file', () {
-      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final File depsFile = fileSystem.file('/DEPS');
-      depsFile.writeAsStringSync('''
-vars = {
-}''');
-      expect(
-        () async => repo.updateDartRevision(nextDartRevision, depsFile: depsFile),
-        throwsExceptionWith('Unexpected content in the DEPS file at'),
-      );
-    });
-
     test('commit() throws if there are no local changes to commit and addFirst = true', () {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
@@ -89,6 +46,8 @@ vars = {
             fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
           ],
         ),
+        const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
+        const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
         const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
         const FakeCommand(command: <String>['git', 'status', '--porcelain']),
@@ -97,14 +56,16 @@ vars = {
       ]);
 
       final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
       );
 
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(
+        checkouts,
+        mirrorRemote: const Remote.mirror('mirror'),
+      );
       expect(
         () async => repo.commit(message, addFirst: true),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
@@ -127,6 +88,8 @@ vars = {
             fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
           ],
         ),
+        const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
+        const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
         const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
         const FakeCommand(command: <String>['git', 'commit', '--message', message]),
@@ -134,94 +97,19 @@ vars = {
       ]);
 
       final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
       );
 
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(
+        checkouts,
+        mirrorRemote: const Remote.mirror('mirror'),
+      );
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });
-
-    test(
-      'updateCandidateBranchVersion() returns false if branch is the same as version file',
-      () async {
-        const String branch = 'flutter-2.15-candidate.3';
-        final File versionFile = fileSystem.file('/release-candidate-branch.version')
-          ..writeAsStringSync(branch);
-
-        final Checkouts checkouts = Checkouts(
-          fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(rootDir),
-          platform: platform,
-          processManager: processManager,
-          stdio: stdio,
-        );
-
-        final FrameworkRepository repo = FrameworkRepository(checkouts);
-        final bool didUpdate = await repo.updateCandidateBranchVersion(
-          branch,
-          versionFile: versionFile,
-        );
-        expect(didUpdate, false);
-      },
-    );
-
-    test(
-      'framework repo set as localUpstream ensures requiredLocalBranches exist locally',
-      () async {
-        const String commit = 'deadbeef';
-        const String candidateBranch = 'flutter-1.2-candidate.3';
-        bool createdCandidateBranch = false;
-        processManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              FrameworkRepository.defaultUpstream,
-              fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-            ],
-          ),
-          FakeCommand(
-            command: const <String>['git', 'checkout', candidateBranch, '--'],
-            onRun: (_) => createdCandidateBranch = true,
-          ),
-          const FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
-          const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
-          const FakeCommand(
-            command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
-          ),
-          const FakeCommand(
-            command: <String>['git', 'checkout', FrameworkRepository.defaultBranch],
-          ),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit),
-        ]);
-        final Checkouts checkouts = Checkouts(
-          fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(rootDir),
-          platform: platform,
-          processManager: processManager,
-          stdio: stdio,
-        );
-
-        final Repository repo = FrameworkRepository(
-          checkouts,
-          additionalRequiredLocalBranches: <String>[candidateBranch],
-          localUpstream: true,
-        );
-        // call this so that repo.lazilyInitialize() is called.
-        await repo.checkoutDirectory;
-
-        expect(processManager.hasRemainingExpectations, false);
-        expect(createdCandidateBranch, true);
-      },
-    );
 
     test('.listRemoteBranches() parses git output', () async {
       const String remoteName = 'mirror';
@@ -248,9 +136,8 @@ Extraneous debug information that should be ignored.
             '${rootDir}flutter_conductor_checkouts/framework',
           ],
         ),
-        FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
-        FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
-        FakeCommand(command: <String>['git', 'checkout', 'master', '--']),
+        FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', 'mirror']),
+        FakeCommand(command: <String>['git', 'fetch', 'mirror']),
         FakeCommand(command: <String>['git', 'checkout', 'master']),
         FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision),
         FakeCommand(
@@ -259,14 +146,16 @@ Extraneous debug information that should be ignored.
         ),
       ]);
       final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
         stdio: stdio,
       );
 
-      final Repository repo = FrameworkRepository(checkouts, localUpstream: true);
+      final Repository repo = FrameworkRepository(
+        checkouts,
+        mirrorRemote: const Remote.mirror('mirror'),
+      );
       final List<String> branchNames = await repo.listRemoteBranches(remoteName);
       expect(
         branchNames,
@@ -274,22 +163,4 @@ Extraneous debug information that should be ignored.
       );
     });
   });
-}
-
-String generateMockDeps(String dartRevision) {
-  return '''
-vars = {
-  'chromium_git': 'https://chromium.googlesource.com',
-  'swiftshader_git': 'https://swiftshader.googlesource.com',
-  'dart_git': 'https://dart.googlesource.com',
-  'flutter_git': 'https://flutter.googlesource.com',
-  'fuchsia_git': 'https://fuchsia.googlesource.com',
-  'github_git': 'https://github.com',
-  'skia_git': 'https://skia.googlesource.com',
-  'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
-  'skia_revision': '4e9d5e2bdf04c58bc0bff57be7171e469e5d7175',
-
-  'dart_revision': '$dartRevision',
-  'dart_boringssl_gen_rev': '7322fc15cc065d8d2957fccce6b62a509dc4d641',
-}''';
 }
