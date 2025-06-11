@@ -163,7 +163,8 @@ class RefreshIndicator extends StatefulWidget {
     this.dragSensitivity = 1.0,
   }) : _indicatorType = _IndicatorType.material,
        onStatusChange = null,
-       assert(elevation >= 0.0);
+       assert(elevation >= 0.0),
+       assert(dragSensitivity > 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
   /// platform is iOS or macOS, following Material design's
@@ -198,7 +199,8 @@ class RefreshIndicator extends StatefulWidget {
     this.dragSensitivity = 1.0,
   }) : _indicatorType = _IndicatorType.adaptive,
        onStatusChange = null,
-       assert(elevation >= 0.0);
+       assert(elevation >= 0.0),
+       assert(dragSensitivity > 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
   /// successfully armed by a drag event.
@@ -224,7 +226,8 @@ class RefreshIndicator extends StatefulWidget {
        color = null,
        backgroundColor = null,
        strokeWidth = 0.0,
-       assert(elevation >= 0.0);
+       assert(elevation >= 0.0),
+       assert(dragSensitivity > 0.0);
 
   /// The widget below this widget in the tree.
   ///
