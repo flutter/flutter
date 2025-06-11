@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:conductor_core/src/repository.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
@@ -31,48 +30,6 @@ void main() {
       stdio = TestStdio();
     });
 
-    test('updateDartRevision() updates the DEPS file', () async {
-      const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
-      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final File depsFile = fileSystem.file('/DEPS');
-      depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
-      await repo.updateDartRevision(nextDartRevision, depsFile: depsFile);
-      final String updatedDepsFileContent = depsFile.readAsStringSync();
-      expect(updatedDepsFileContent, generateMockDeps(nextDartRevision));
-    });
-
-    test('updateDartRevision() throws exception on malformed DEPS file', () {
-      const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
-
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final File depsFile = fileSystem.file('/DEPS');
-      depsFile.writeAsStringSync('''
-vars = {
-}''');
-      expect(
-        () async => repo.updateDartRevision(nextDartRevision, depsFile: depsFile),
-        throwsExceptionWith('Unexpected content in the DEPS file at'),
-      );
-    });
-
     test('commit() throws if there are no local changes to commit and addFirst = true', () {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
@@ -97,7 +54,6 @@ vars = {
       ]);
 
       final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
@@ -134,7 +90,6 @@ vars = {
       ]);
 
       final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
@@ -145,30 +100,6 @@ vars = {
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });
-
-    test(
-      'updateCandidateBranchVersion() returns false if branch is the same as version file',
-      () async {
-        const String branch = 'flutter-2.15-candidate.3';
-        final File versionFile = fileSystem.file('/release-candidate-branch.version')
-          ..writeAsStringSync(branch);
-
-        final Checkouts checkouts = Checkouts(
-          fileSystem: fileSystem,
-          parentDirectory: fileSystem.directory(rootDir),
-          platform: platform,
-          processManager: processManager,
-          stdio: stdio,
-        );
-
-        final FrameworkRepository repo = FrameworkRepository(checkouts);
-        final bool didUpdate = await repo.updateCandidateBranchVersion(
-          branch,
-          versionFile: versionFile,
-        );
-        expect(didUpdate, false);
-      },
-    );
 
     test(
       'framework repo set as localUpstream ensures requiredLocalBranches exist locally',
@@ -203,7 +134,6 @@ vars = {
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit),
         ]);
         final Checkouts checkouts = Checkouts(
-          fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(rootDir),
           platform: platform,
           processManager: processManager,
@@ -259,7 +189,6 @@ Extraneous debug information that should be ignored.
         ),
       ]);
       final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
         parentDirectory: fileSystem.directory(rootDir),
         platform: platform,
         processManager: processManager,
@@ -274,22 +203,4 @@ Extraneous debug information that should be ignored.
       );
     });
   });
-}
-
-String generateMockDeps(String dartRevision) {
-  return '''
-vars = {
-  'chromium_git': 'https://chromium.googlesource.com',
-  'swiftshader_git': 'https://swiftshader.googlesource.com',
-  'dart_git': 'https://dart.googlesource.com',
-  'flutter_git': 'https://flutter.googlesource.com',
-  'fuchsia_git': 'https://fuchsia.googlesource.com',
-  'github_git': 'https://github.com',
-  'skia_git': 'https://skia.googlesource.com',
-  'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
-  'skia_revision': '4e9d5e2bdf04c58bc0bff57be7171e469e5d7175',
-
-  'dart_revision': '$dartRevision',
-  'dart_boringssl_gen_rev': '7322fc15cc065d8d2957fccce6b62a509dc4d641',
-}''';
 }

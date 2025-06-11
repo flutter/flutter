@@ -643,149 +643,12 @@ class FrameworkRepository extends Repository {
     }
     await _ensureToolReady();
   }
-
-  /// Create a release candidate branch version file.
-  ///
-  /// This file allows for easily traversing what candidate branch was used
-  /// from a release channel.
-  ///
-  /// Returns [true] if the version file was updated and a commit is needed.
-  Future<bool> updateCandidateBranchVersion(
-    String branch, {
-    @visibleForTesting File? versionFile,
-  }) async {
-    assert(branch.isNotEmpty);
-    versionFile ??= (await checkoutDirectory)
-        .childDirectory('bin')
-        .childDirectory('internal')
-        .childFile('release-candidate-branch.version');
-    if (versionFile.existsSync()) {
-      final String oldCandidateBranch = versionFile.readAsStringSync();
-      if (oldCandidateBranch.trim() == branch.trim()) {
-        stdio.printTrace(
-          'Tried to update the candidate branch but version file is already up to date at: $branch',
-        );
-        return false;
-      }
-    }
-    stdio.printStatus('Create ${versionFile.path} containing $branch');
-    versionFile.writeAsStringSync(
-      // Version files have trailing newlines
-      '${branch.trim()}\n',
-      flush: true,
-    );
-    return true;
-  }
-
-  /// Update the `dart_revision` entry in the DEPS file.
-  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) async {
-    return _updateDartRevision(this, newRevision, depsFile: depsFile);
-  }
 }
 
-/// A wrapper around the host repository that is executing the conductor.
-///
-/// [Repository] methods that mutate the underlying repository will throw a
-/// [ConductorException].
-class HostFrameworkRepository extends FrameworkRepository {
-  HostFrameworkRepository({
-    required Checkouts checkouts,
-    String name = 'host-framework',
-    required String upstreamPath,
-  }) : super(
-         checkouts,
-         name: name,
-         upstreamRemote: Remote.upstream('file://$upstreamPath/'),
-         localUpstream: false,
-       ) {
-    _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
-  }
-
-  @override
-  Future<Directory> get checkoutDirectory async => _checkoutDirectory!;
-
-  @override
-  Future<void> newBranch(String branchName) async {
-    throw ConductorException('newBranch not implemented for the host repository');
-  }
-
-  @override
-  Future<void> checkout(String ref) async {
-    throw ConductorException('checkout not implemented for the host repository');
-  }
-
-  @override
-  Future<String> reset(String ref) async {
-    throw ConductorException('reset not implemented for the host repository');
-  }
-
-  @override
-  Future<void> tag(String commit, String tagName, String remote) async {
-    throw ConductorException('tag not implemented for the host repository');
-  }
-
-  void updateChannel(
-    String commit,
-    String remote,
-    String branch, {
-    bool force = false,
-    bool dryRun = false,
-  }) {
-    throw ConductorException('updateChannel not implemented for the host repository');
-  }
-
-  @override
-  Future<String> authorEmptyCommit([String message = 'An empty commit']) async {
-    throw ConductorException('authorEmptyCommit not implemented for the host repository');
-  }
-}
-
-//class EngineRepository extends Repository {
-//  EngineRepository(
-//    this.checkouts, {
-//    super.name = 'engine',
-//    String super.initialRef = EngineRepository.defaultBranch,
-//    super.upstreamRemote = const Remote.upstream(EngineRepository.defaultUpstream),
-//    super.localUpstream,
-//    super.previousCheckoutLocation,
-//    super.mirrorRemote,
-//    List<String>? additionalRequiredLocalBranches,
-//  }) : super(
-//         fileSystem: checkouts.fileSystem,
-//         parentDirectory: checkouts.directory,
-//         platform: checkouts.platform,
-//         processManager: checkouts.processManager,
-//         stdio: checkouts.stdio,
-//         requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
-//       );
-//
-//  final Checkouts checkouts;
-//
-//  static const String defaultUpstream = 'git@github.com:flutter/engine.git';
-//  static const String defaultBranch = 'main';
-//
-//  /// Update the `dart_revision` entry in the DEPS file.
-//  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) =>
-//      _updateDartRevision(this, newRevision, depsFile: depsFile);
-//
-//  @override
-//  Future<Repository> cloneRepository(String? cloneName) async {
-//    assert(localUpstream);
-//    cloneName ??= 'clone-of-$name';
-//    return EngineRepository(
-//      checkouts,
-//      name: cloneName,
-//      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
-//    );
-//  }
-//}
-
-/// An enum of all the repositories that the Conductor supports.
-enum RepositoryType { framework, engine }
-
-class Checkouts {
+/// Represents the environment in which a command is being executed.
+@immutable
+final class Checkouts {
   Checkouts({
-    required this.fileSystem,
     required this.platform,
     required this.processManager,
     required this.stdio,
@@ -797,34 +660,18 @@ class Checkouts {
     }
   }
 
+  /// Which directory is be used to checkout code.
   final Directory directory;
-  final FileSystem fileSystem;
+
+  /// The file system used to access the checkout path.
+  FileSystem get fileSystem => directory.fileSystem;
+
+  /// The platform being executed on.
   final Platform platform;
+
+  /// Ability to spawn processes on the current system.
   final ProcessManager processManager;
+
+  /// Standard I/O facade.
   final Stdio stdio;
-}
-
-Future<void> _updateDartRevision(
-  Repository repo,
-  String newRevision, {
-  @visibleForTesting File? depsFile,
-}) async {
-  assert(newRevision.length == 40);
-  depsFile ??= (await repo.checkoutDirectory).childFile('DEPS');
-  final String fileContent = depsFile.readAsStringSync();
-  final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
-  final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
-  if (allMatches.length != 1) {
-    throw ConductorException(
-      'Unexpected content in the DEPS file at ${depsFile.path}\n'
-      'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
-      '${allMatches.length}.',
-    );
-  }
-  final String updatedFileContent = fileContent.replaceFirst(
-    dartPattern,
-    "  'dart_revision': '$newRevision',",
-  );
-
-  depsFile.writeAsStringSync(updatedFileContent, flush: true);
 }
