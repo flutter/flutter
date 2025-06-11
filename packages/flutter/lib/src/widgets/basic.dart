@@ -3845,7 +3845,7 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   }
 }
 
-/// An abstract class for building widgets that annotate their widget tree with a
+/// An abstract class for building widgets that annotate their subtree with a
 /// description of the meaning of the widgets.
 ///
 /// {@template flutter.widgets.SemanticsBase}
@@ -3862,7 +3862,7 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 ///    (which might be useful if it is, e.g., totally decorative and not
 ///    important to the user).
 ///  * [RenderObject.describeSemanticsConfiguration], the rendering library API
-///    through which the [Semantics] widget is actually implemented.
+///    through which the [Semantics] widget and [SliverSemantics] sliver are actually implemented.
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
