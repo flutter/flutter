@@ -709,6 +709,7 @@ void main() {
                       SemanticsFlag.hasEnabledState,
                       SemanticsFlag.isEnabled,
                       SemanticsFlag.isFocused,
+                      SemanticsFlag.isFocusable,
                     ],
                     actions: <SemanticsAction>[
                       if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
@@ -734,6 +735,7 @@ void main() {
                   SemanticsFlag.hasEnabledState,
                   SemanticsFlag.isEnabled,
                   SemanticsFlag.isFocused,
+                  SemanticsFlag.isFocusable,
                   SemanticsFlag.isHeader,
                   if (!isCupertino) SemanticsFlag.namesRoute,
                 ],
@@ -913,6 +915,7 @@ void main() {
                       SemanticsFlag.hasEnabledState,
                       SemanticsFlag.isEnabled,
                       SemanticsFlag.isFocused,
+                      SemanticsFlag.isFocusable,
                     ],
                     actions: <SemanticsAction>[
                       if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
@@ -938,6 +941,7 @@ void main() {
                   SemanticsFlag.hasEnabledState,
                   SemanticsFlag.isEnabled,
                   SemanticsFlag.isFocused,
+                  SemanticsFlag.isFocusable,
                   SemanticsFlag.isHeader,
                   if (!isCupertino) SemanticsFlag.namesRoute,
                 ],
