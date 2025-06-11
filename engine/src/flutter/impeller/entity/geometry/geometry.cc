@@ -109,8 +109,8 @@ std::unique_ptr<Geometry> Geometry::MakeFilledArc(const Rect& oval_bounds,
                                                   Degrees start,
                                                   Degrees sweep,
                                                   bool include_center) {
-  return std::make_unique<ArcGeometry>(oval_bounds, start, sweep,
-                                       include_center);
+  return std::make_unique<ArcGeometry>(
+      Arc(oval_bounds, start, sweep, include_center));
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokedArc(
@@ -118,7 +118,8 @@ std::unique_ptr<Geometry> Geometry::MakeStrokedArc(
     Degrees start,
     Degrees sweep,
     const StrokeParameters& stroke) {
-  return std::make_unique<ArcGeometry>(oval_bounds, start, sweep, stroke);
+  return std::make_unique<ArcGeometry>(Arc(oval_bounds, start, sweep, false),
+                                       stroke);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeRoundRect(const Rect& rect,

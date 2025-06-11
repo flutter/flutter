@@ -486,7 +486,7 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
   }
 }
 
-ArcVertexGenerator::ArcVertexGenerator(const ArcIteration& iteration,
+ArcVertexGenerator::ArcVertexGenerator(const Arc::Iteration& iteration,
                                        Trigs&& trigs,
                                        const Rect& oval_bounds,
                                        bool use_center,
@@ -499,7 +499,7 @@ ArcVertexGenerator::ArcVertexGenerator(const ArcIteration& iteration,
       cap_(Cap::kButt),
       supports_triangle_fans_(supports_triangle_fans) {}
 
-ArcVertexGenerator::ArcVertexGenerator(const ArcIteration& iteration,
+ArcVertexGenerator::ArcVertexGenerator(const Arc::Iteration& iteration,
                                        Trigs&& trigs,
                                        const Rect& oval_bounds,
                                        Scalar half_width,
@@ -554,36 +554,30 @@ void ArcVertexGenerator::GenerateVertices(
 }
 
 ArcVertexGenerator Tessellator::FilledArc(const Matrix& view_transform,
-                                          const Rect& oval_bounds,
-                                          Degrees start,
-                                          Degrees sweep,
-                                          bool use_center,
+                                          const Arc& arc,
                                           bool supports_triangle_fans) {
-  size_t divisions =
-      ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() *
-                               oval_bounds.GetSize().MaxDimension());
+  size_t divisions = ComputeQuadrantDivisions(
+      view_transform.GetMaxBasisLengthXY() * arc.GetOvalSize().MaxDimension());
 
   return ArcVertexGenerator(
-      ComputeArcQuadrantIterations(divisions + 1, start, sweep),
-      GetTrigsForDivisions(divisions), oval_bounds, use_center,
-      supports_triangle_fans);
+      arc.ComputeIterations(divisions), GetTrigsForDivisions(divisions),
+      arc.GetOvalBounds(), arc.IncludeCenter(), supports_triangle_fans);
 };
 
 ArcVertexGenerator Tessellator::StrokedArc(const Matrix& view_transform,
-                                           const Rect& oval_bounds,
-                                           Degrees start,
-                                           Degrees sweep,
+                                           const Arc& arc,
                                            Cap cap,
                                            Scalar half_width) {
   FML_DCHECK(half_width > 0);
-  FML_DCHECK(oval_bounds.IsSquare());
-  size_t divisions = ComputeQuadrantDivisions(
-      view_transform.GetMaxBasisLengthXY() *
-      (oval_bounds.GetSize().MaxDimension() + half_width));
+  FML_DCHECK(arc.IsPerfectCircle());
+  FML_DCHECK(!arc.IncludeCenter());
+  size_t divisions =
+      ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() *
+                               (arc.GetOvalSize().MaxDimension() + half_width));
 
-  return ArcVertexGenerator(
-      ComputeArcQuadrantIterations(divisions + 1, start, sweep),
-      GetTrigsForDivisions(divisions), oval_bounds, half_width, cap);
+  return ArcVertexGenerator(arc.ComputeIterations(divisions),
+                            GetTrigsForDivisions(divisions),
+                            arc.GetOvalBounds(), half_width, cap);
 }
 
 EllipticalVertexGenerator Tessellator::RoundCapLine(
@@ -744,7 +738,7 @@ void Tessellator::GenerateStrokedCircle(
 }
 
 void Tessellator::GenerateFilledArcFan(const Trigs& trigs,
-                                       const ArcIteration& iteration,
+                                       const Arc::Iteration& iteration,
                                        const Rect& oval_bounds,
                                        bool use_center,
                                        const TessellatedVertexProc& proc) {
@@ -765,7 +759,7 @@ void Tessellator::GenerateFilledArcFan(const Trigs& trigs,
 }
 
 void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
-                                         const ArcIteration& iteration,
+                                         const Arc::Iteration& iteration,
                                          const Rect& oval_bounds,
                                          bool use_center,
                                          const TessellatedVertexProc& proc) {
@@ -800,7 +794,7 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
 }
 
 void Tessellator::GenerateStrokedArc(const Trigs& trigs,
-                                     const ArcIteration& iteration,
+                                     const Arc::Iteration& iteration,
                                      const Rect& oval_bounds,
                                      Scalar half_width,
                                      Cap cap,
@@ -926,105 +920,6 @@ void Tessellator::GenerateFilledRoundRect(
     proc({right + offset.x, bottom + offset.y});
     proc({right + offset.x, top - offset.y});
   }
-}
-
-const Tessellator::ArcIteration Tessellator::ComputeCircleArcIterations(
-    size_t count) {
-  return {
-      {1.0f, 0.0f},
-      {1.0f, 0.0f},
-      4u,
-      {
-          {kQuadrantAxes[0], 1u, count},
-          {kQuadrantAxes[1], 0u, count},
-          {kQuadrantAxes[2], 0u, count},
-          {kQuadrantAxes[3], 0u, count},
-          {{}, 0u, 0u},
-      },
-  };
-}
-
-Tessellator::ArcIteration Tessellator::ComputeArcQuadrantIterations(
-    size_t trig_size,
-    Degrees start,
-    Degrees sweep) {
-  if (sweep.degrees == 0 || !start.IsFinite() || !sweep.IsFinite()) {
-    return {};
-  }
-
-  if (sweep.degrees < 0) {
-    start = start + sweep;
-    sweep = -sweep;
-  }
-
-  size_t steps = trig_size - 1;
-
-  if (sweep.degrees >= 360) {
-    return ComputeCircleArcIterations(steps);
-  }
-
-  start = start.GetPositive();
-  Degrees end = start + sweep;
-  FML_DCHECK(start.degrees >= 0.0f && start.degrees < 360.0f);
-  FML_DCHECK(end >= start && end.degrees < start.degrees + 360.0f);
-
-  ArcIteration iterations;
-  iterations.start = impeller::Matrix::CosSin(start);
-  iterations.end = impeller::Matrix::CosSin(end);
-
-  // We nudge the start and stop by 1/10th of a step so we don't end
-  // up with degenerately small steps at the start and end of the
-  // arc.
-  Degrees nudge = Degrees((90.0f / steps) * 0.1f);
-
-  if ((start + nudge) >= (end - nudge)) {
-    iterations.quadrant_count = 0u;
-    return iterations;
-  }
-
-  int cur_quadrant =
-      static_cast<int>(std::floor((start + nudge).degrees / 90.0f));
-  int end_quadrant =
-      static_cast<int>(std::floor((end - nudge).degrees / 90.0f));
-  FML_DCHECK(cur_quadrant >= 0 &&  //
-             cur_quadrant <= 4);
-  FML_DCHECK(end_quadrant >= cur_quadrant &&  //
-             end_quadrant <= cur_quadrant + 4);
-  FML_DCHECK(cur_quadrant * 90 <= (start + nudge).degrees);
-  FML_DCHECK(end_quadrant * 90 + 90 >= (end - nudge).degrees);
-
-  auto next_step = [steps](Degrees angle, int quadrant) -> size_t {
-    Scalar quadrant_fract = angle.degrees / 90.0f - quadrant;
-    return static_cast<size_t>(std::ceil(quadrant_fract * steps));
-  };
-
-  int i = 0;
-  iterations.quadrants[i] = {
-      kQuadrantAxes[cur_quadrant & 3],
-      next_step(start + nudge, cur_quadrant),
-      steps,
-  };
-  if (iterations.quadrants[0].end_index > iterations.quadrants[0].start_index) {
-    i++;
-  }
-  while (cur_quadrant < end_quadrant) {
-    iterations.quadrants[i++] = {
-        kQuadrantAxes[(++cur_quadrant) % 4],
-        0u,
-        steps,
-    };
-  }
-  FML_DCHECK(i <= 5);
-  if (i > 0) {
-    iterations.quadrants[i - 1].end_index =
-        next_step(end - nudge, cur_quadrant);
-    if (iterations.quadrants[i - 1].end_index <=
-        iterations.quadrants[i - 1].start_index) {
-      i--;
-    }
-  }
-  iterations.quadrant_count = i;
-  return iterations;
 }
 
 }  // namespace impeller

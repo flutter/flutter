@@ -14,10 +14,12 @@ namespace impeller {
 class ImpellerBenchmarkAccessor {
  public:
   static std::vector<Point> GenerateSolidStrokeVertices(
+      Tessellator& tessellator,
       const PathSource& path,
       const StrokeParameters& stroke,
       Scalar scale) {
-    return StrokePathGeometry::GenerateSolidStrokeVertices(path, stroke, scale);
+    return StrokePathGeometry::GenerateSolidStrokeVertices(  //
+        tessellator, path, stroke, scale);
   }
 };
 
@@ -40,6 +42,7 @@ static void BM_StrokePath(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
   auto path = std::get<flutter::DlPath>(args_tuple);
 
+  Tessellator tessellator;
   StrokeParameters stroke{
       .width = 5.0f,
       .cap = std::get<Cap>(args_tuple),
@@ -53,7 +56,7 @@ static void BM_StrokePath(benchmark::State& state, Args&&... args) {
   size_t single_point_count = 0u;
   while (state.KeepRunning()) {
     auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
-        path, stroke, scale);
+        tessellator, path, stroke, scale);
     single_point_count = vertices.size();
     point_count += single_point_count;
   }
