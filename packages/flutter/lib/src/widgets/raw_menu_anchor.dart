@@ -117,33 +117,18 @@ typedef RawMenuAnchorOverlayBuilder =
 typedef RawMenuAnchorChildBuilder =
     Widget Function(BuildContext context, MenuController controller, Widget? child);
 
-/// Signature for a callback that shows the menu overlay of a [RawMenuAnchor].
-///
-/// This signature is used by the `showOverlay` argument in
-/// [RawMenuAnchor.onOpenRequested]. See [RawMenuAnchor.onOpenRequested] for
-/// more information.
-typedef RawMenuAnchorShowOverlayCallback = void Function();
-
-/// Signature for a callback that hides the menu overlay of a [RawMenuAnchor].
-///
-/// This signature is used by the `hideOverlay` parameter in
-/// [RawMenuAnchor.onCloseRequested]. See [RawMenuAnchor.onCloseRequested] for
-/// more information.
-typedef RawMenuAnchorHideOverlayCallback = VoidCallback;
-
 /// Signature for the callback used by [RawMenuAnchor.onOpenRequested] to
 /// intercept requests to open a menu.
 ///
 /// See [RawMenuAnchor.onOpenRequested] for more information.
 typedef RawMenuAnchorOpenRequestedCallback =
-    void Function(Offset? position, RawMenuAnchorShowOverlayCallback showOverlay);
+    void Function(Offset? position, VoidCallback showOverlay);
 
 /// Signature for the callback used by [RawMenuAnchor.onCloseRequested] to
 /// intercept requests to close a menu.
 ///
 /// See [RawMenuAnchor.onCloseRequested] for more information.
-typedef RawMenuAnchorCloseRequestedCallback =
-    void Function(RawMenuAnchorHideOverlayCallback hideOverlay);
+typedef RawMenuAnchorCloseRequestedCallback = void Function(VoidCallback hideOverlay);
 
 // An InheritedWidget used to notify anchor descendants when a menu opens
 // and closes, and to pass the anchor's controller to descendants.
@@ -186,8 +171,8 @@ class _MenuControllerScope extends InheritedWidget {
 /// ### Adding animations to menus
 ///
 /// A [RawMenuAnchor] has no knowledge of animations, as evident from its APIs,
-/// which don't involve [AnimationController] at all. It is only knows whether
-/// the overlay is shown or hidden.
+/// which don't involve [AnimationController] at all. It only knows whether the
+/// overlay is shown or hidden.
 ///
 /// If another widget intends to implement a menu with opening and closing
 /// transitions, [RawMenuAnchor]'s overlay should remain visible throughout both
@@ -204,15 +189,16 @@ class _MenuControllerScope extends InheritedWidget {
 /// need to manage additional information (such as the state of an
 /// [AnimationController]) to determine how to respond in such scenarios.
 ///
-/// To programmatically control a [RawMenuAnchor], like opening or closing it, or checking its state,
-/// you can get its associated [MenuController]. Use `MenuController.maybeOf(BuildContext context)`
-/// to retrieve the controller for the closest [RawMenuAnchor] ancestor of a given `BuildContext`.
-/// More detailed usage of [MenuController] is available in its class documentation.
+/// To programmatically control a [RawMenuAnchor], like opening or closing it,
+/// or checking its state, you can get its associated [MenuController]. Use
+/// `MenuController.maybeOf(BuildContext context)` to retrieve the controller
+/// for the closest [RawMenuAnchor] ancestor of a given `BuildContext`. More
+/// detailed usage of [MenuController] is available in its class documentation.
 ///
 /// {@tool dartpad}
 ///
-/// This example uses a [RawMenuAnchor] to build a basic select menu with
-/// four items.
+/// This example uses a [RawMenuAnchor] to build a basic select menu with four
+/// items.
 ///
 /// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.0.dart **
 /// {@end-tool}
@@ -235,7 +221,7 @@ class _MenuControllerScope extends InheritedWidget {
 class RawMenuAnchor extends StatefulWidget {
   /// A [RawMenuAnchor] that delegates overlay construction to an [overlayBuilder].
   ///
-  /// The [overlayBuilder] should not be null.
+  /// The [overlayBuilder] must not be null.
   const RawMenuAnchor({
     super.key,
     this.childFocusNode,
@@ -278,7 +264,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// triggers [onClose].
   ///
   /// The default implementation of [onCloseRequested] calls `hideOverlay`
-  /// synchronously, thereby calling [onClose] synchronously. In this case, the
+  /// synchronously, thereby calling [onClose] synchronously. In this case,
   /// [onClose] is called regardless of whether the menu overlay is already
   /// hidden.
   ///
@@ -292,16 +278,19 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   /// This callback is triggered every time [MenuController.open] is called,
   /// even when the menu overlay is already showing. As a result, this callback
-  /// can be used to trigger opening animations or observe when a menu is
-  /// repositioned.
+  /// is a good place to begin menu opening animations, or observe when a menu
+  /// is repositioned.
   ///
   /// After an open request is intercepted, the `showOverlay` callback should be
   /// called when the menu overlay (the widget built by [overlayBuilder]) is
   /// ready to be shown. This can occur immediately (the default behavior), or
   /// after a delay. Calling `showOverlay` sets [MenuController.isOpen] to true,
   /// builds (or rebuilds) the overlay widget, and shows the menu overlay at the
-  /// front of the overlay stack. If `showOverlay` is not called, the menu will
-  /// stay hidden.
+  /// front of the overlay stack.
+  ///
+  /// If `showOverlay` is not called, the menu will stay hidden. Calling
+  /// `showOverlay` after disposal is a no-op, and will not trigger [onOpen] or
+  /// show the menu overlay.
   ///
   /// If a [RawMenuAnchor] is used in a themed menu that plays an opening
   /// animation, the themed menu should show the overlay before starting the
@@ -314,7 +303,7 @@ class RawMenuAnchor extends StatefulWidget {
   ///
   ///  1. Optional delay.
   ///  2. Call `showOverlay` (whose call chain eventually invokes [onOpen]).
-  ///  3. Optionally starts the opening animation.
+  ///  3. Optionally start the opening animation.
   ///
   /// Defaults to a callback that immediately shows the menu.
   final RawMenuAnchorOpenRequestedCallback onOpenRequested;
@@ -334,6 +323,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// since the animation plays on the overlay itself. This means that
   /// [MenuController.isOpen] will stay true while closing animations are
   /// running.
+  ///
+  /// Calling `hideOverlay` after disposal is a no-op, and will not trigger
+  /// [onClose] or hide the menu overlay.
   ///
   /// Typically, [onCloseRequested] consists of the following steps:
   ///
@@ -406,8 +398,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// If not supplied, the anchor will not retain focus when the menu is opened.
   final FocusNode? childFocusNode;
 
-  /// Whether or not a tap event that closes the menu will be permitted to
-  /// continue on to the gesture arena.
+  /// Whether a tap event that closes the menu will be permitted to continue on
+  /// to the gesture arena.
   ///
   /// If false, then tapping outside of a menu when the menu is open will both
   /// close the menu, and allow the tap to participate in the gesture arena.
@@ -422,14 +414,11 @@ class RawMenuAnchor extends StatefulWidget {
   /// widgets.
   final MenuController controller;
 
-  static void _defaultOnOpenRequested(
-    Offset? position,
-    RawMenuAnchorShowOverlayCallback showOverlay,
-  ) {
+  static void _defaultOnOpenRequested(Offset? position, VoidCallback showOverlay) {
     showOverlay();
   }
 
-  static void _defaultOnCloseRequested(RawMenuAnchorHideOverlayCallback hideOverlay) {
+  static void _defaultOnCloseRequested(VoidCallback hideOverlay) {
     hideOverlay();
   }
 
@@ -858,7 +847,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 ///
 /// When a [MenuController] is given to a [RawMenuAnchorGroup],
 ///  - [MenuController.open] has no effect.
-///  - [MenuController.close] closes all child [RawMenuAnchor]s that are open
+///  - [MenuController.close] closes all child [RawMenuAnchor]s that are open.
 ///  - [MenuController.isOpen] reflects whether any child [RawMenuAnchor] is
 ///    open.
 ///
@@ -1005,7 +994,8 @@ final class MenuController {
   /// Opens the menu that this [MenuController] is associated with.
   ///
   /// If `position` is given, then the menu will open at the position given, in
-  /// the coordinate space of the [MenuAnchor] this controller is attached to.
+  /// the coordinate space of the [RawMenuAnchor] that this controller is
+  /// attached to.
   ///
   /// If given, the `position` will override the [MenuAnchor.alignmentOffset]
   /// given to the [MenuAnchor].

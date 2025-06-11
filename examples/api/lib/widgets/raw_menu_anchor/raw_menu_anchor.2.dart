@@ -46,7 +46,7 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     super.dispose();
   }
 
-  void _handleMenuOpenRequest(Offset? position, RawMenuAnchorShowOverlayCallback showOverlay) {
+  void _handleMenuOpenRequest(Offset? position, VoidCallback showOverlay) {
     // Mount or reposition the menu before animating the menu open.
     showOverlay();
 
@@ -60,7 +60,7 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
     animationController.forward();
   }
 
-  void _handleMenuCloseRequest(RawMenuAnchorHideOverlayCallback hideOverlay) {
+  void _handleMenuCloseRequest(VoidCallback hideOverlay) {
     if (!_animationStatus.isForwardOrCompleted) {
       // If the menu is already closed or closing, do nothing.
       return;
