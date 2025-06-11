@@ -1513,6 +1513,7 @@ void main() {
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
+          SemanticsFlag.isFocusable,
         ],
       ),
     );
@@ -1544,6 +1545,7 @@ void main() {
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
+          SemanticsFlag.isFocusable,
         ],
       ),
     );
@@ -1580,6 +1582,7 @@ void main() {
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
+          SemanticsFlag.isFocusable,
         ],
       ),
     );
@@ -1615,6 +1618,7 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               actions: <SemanticsAction>[SemanticsAction.longPress],
+              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
               textDirection: TextDirection.ltr,
               inputType: ui.SemanticsInputType.text,
               children: <TestSemantics>[
@@ -2171,6 +2175,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isMultiline,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2208,6 +2213,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2244,6 +2250,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2278,6 +2285,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2359,6 +2367,7 @@ void main() {
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
+                SemanticsFlag.isFocusable,
                 // SelectableText act like a text widget when enableInteractiveSelection
                 // is false. It will not respond to any pointer event.
                 // SemanticsFlag.isFocused,
@@ -2398,6 +2407,7 @@ void main() {
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2436,6 +2446,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2473,6 +2484,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2535,6 +2547,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           actions: <SemanticsAction>[SemanticsAction.longPress],
+                          flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                           inputType: ui.SemanticsInputType.text,
                           children: <TestSemantics>[
                             TestSemantics(
@@ -2621,6 +2634,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2676,6 +2690,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -2715,6 +2730,7 @@ void main() {
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
+                SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[SemanticsAction.longPress],
               value: testValue,
@@ -2743,6 +2759,7 @@ void main() {
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
