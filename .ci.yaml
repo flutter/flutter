@@ -4705,6 +4705,7 @@ targets:
       shard: verify_binaries_codesigned
 
   - name: Mac_x64 verify_binaries_pre_codesigned
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
@@ -4714,6 +4715,7 @@ targets:
       shard: verify_binaries_pre_codesigned
 
   - name: Mac_arm64 verify_binaries_pre_codesigned
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
