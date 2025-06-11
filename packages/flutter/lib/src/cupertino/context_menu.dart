@@ -11,9 +11,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
 
+import '../services/hardware_keyboard.dart';
 import 'colors.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
@@ -83,6 +85,10 @@ Rect _getRect(GlobalKey globalKey) {
 // [CupertinoContextMenu] opens.
 enum _ContextMenuLocation { center, left, right }
 
+class _ContextMenuIntent extends Intent {
+  const _ContextMenuIntent();
+}
+
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
 /// When open, the [CupertinoContextMenu] shows the child in a large full-screen
@@ -122,6 +128,7 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required Widget this.child,
     this.enableHapticFeedback = false,
+    this.focusNode,
   }) : assert(actions.isNotEmpty),
        builder = ((BuildContext context, Animation<double> animation) => child);
 
@@ -136,6 +143,7 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required this.builder,
     this.enableHapticFeedback = false,
+    this.focusNode,
   }) : assert(actions.isNotEmpty),
        child = null;
 
@@ -359,13 +367,18 @@ class CupertinoContextMenu extends StatefulWidget {
   /// Defaults to false.
   final bool enableHapticFeedback;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
   @override
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
 
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
+  bool _isFocused = false;
   bool _childHidden = false;
+  KeyEvent? _lastKeyEvent;
   // Animates the child while it's opening.
   late AnimationController _openController;
   Rect? _decoyChildEndRect;
@@ -391,6 +404,10 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           ..onTapUp = _onTapUp
           ..onTap = _onTap;
   }
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    _ContextMenuIntent: CallbackAction<_ContextMenuIntent>(onInvoke: _handleOpenIntent),
+  };
 
   void _listenerCallback() {
     if (_openController.status != AnimationStatus.reverse && _openController.value >= _midpoint) {
@@ -558,7 +575,10 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     }
   }
 
-  void _onTapDown(TapDownDetails details) {
+  void _onTapDown(TapDownDetails details) => _handleOpenIntent();
+
+  void _handleOpenIntent([Intent? intent]) {
+    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
     _openController.addListener(_listenerCallback);
     setState(() {
       _childHidden = true;
@@ -594,7 +614,40 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       },
     );
     Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(_lastOverlayEntry!);
-    _openController.forward();
+    _openController.forward(from: intent is _ContextMenuIntent ? 1.0 : null);
+  }
+
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() {
+      _isFocused = showHighlight;
+      _lastKeyEvent = null;
+    });
+  }
+
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
+      if (_lastKeyEvent == null) {
+        FocusScope.of(context).nextFocus();
+      }
+
+      _lastKeyEvent = event;
+
+      return KeyEventResult.handled;
+    }
+
+    if (event case KeyUpEvent(logicalKey: LogicalKeyboardKey.tab)) {
+      if (_lastKeyEvent case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
+        FocusScope.of(context).nextFocus();
+      }
+
+      _lastKeyEvent = event;
+
+      return KeyEventResult.handled;
+    }
+
+    _lastKeyEvent = event;
+
+    return KeyEventResult.ignored;
   }
 
   @override
@@ -608,7 +661,32 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           child: Visibility.maintain(
             key: _childGlobalKey,
             visible: !_childHidden,
-            child: widget.builder(context, _openController),
+            child: Shortcuts(
+              shortcuts: <ShortcutActivator, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.tab, LogicalKeyboardKey.keyM):
+                    const _ContextMenuIntent(),
+              },
+              child: FocusableActionDetector(
+                actions: _actionMap,
+                focusNode: widget.focusNode,
+                enabled: !_childHidden,
+                onShowFocusHighlight: _onShowFocusHighlight,
+                onKeyEvent: _onKeyEvent,
+                child:
+                    Semantics(
+                      button: true,
+                      child: _isFocused
+                        ? Container(
+                          // TODO: Use focus halo
+                          decoration: BoxDecoration(
+                            border: Border.all(color: CupertinoColors.activeBlue, width: 2.0),
+                          ),
+                          child: widget.builder(context, _openController),
+                        )
+                        : widget.builder(context, _openController),
+                    ),
+              ),
+            ),
           ),
         ),
       ),

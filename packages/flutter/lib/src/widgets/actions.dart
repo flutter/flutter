@@ -1154,6 +1154,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.onFocusChange,
     this.mouseCursor = MouseCursor.defer,
     this.includeFocusSemantics = true,
+    this.onKeyEvent,
     required this.child,
   });
 
@@ -1211,6 +1212,12 @@ class FocusableActionDetector extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool includeFocusSemantics;
+
+  /// A callback that will be called when a key event occurs.
+  ///
+  /// Returns a [KeyEventResult] that describes how, and whether, the key event
+  /// was handled.
+  final FocusOnKeyEventCallback? onKeyEvent;
 
   /// The child widget for this [FocusableActionDetector] widget.
   ///
@@ -1364,6 +1371,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         autofocus: widget.autofocus,
         descendantsAreFocusable: widget.descendantsAreFocusable,
         descendantsAreTraversable: widget.descendantsAreTraversable,
+        onKeyEvent: widget.onKeyEvent,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         includeSemantics: widget.includeFocusSemantics,
