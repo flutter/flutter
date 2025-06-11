@@ -128,7 +128,7 @@ abstract class FlutterVersion {
       fetchTags: fetchTags,
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
-    final _FlutterVersionGit result = _FlutterVersionGit._(
+    final result = _FlutterVersionGit._(
       clock: clock,
       flutterRoot: flutterRoot,
       frameworkRevision: frameworkRevision,
@@ -223,18 +223,18 @@ abstract class FlutterVersion {
 
   @override
   String toString() {
-    final String versionText =
+    final versionText =
         frameworkVersion == kUnknownFrameworkVersion ? '' : ' $frameworkVersion';
-    final String flutterText =
+    final flutterText =
         'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
-    final String frameworkText =
+    final frameworkText =
         'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
-    String engineText = 'Engine • revision $engineRevisionShort ($engineAge)';
+    var engineText = 'Engine • revision $engineRevisionShort ($engineAge)';
     if (engineCommitDate != null) {
       engineText = '$engineText • $engineCommitDate';
     }
 
-    final String toolsText = 'Tools • Dart $dartSdkVersion • DevTools $devToolsVersion';
+    final toolsText = 'Tools • Dart $dartSdkVersion • DevTools $devToolsVersion';
 
     // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
     // Framework • revision 340c158f32 (85 minutes ago) • 2018-10-26 11:27:22 -0400
@@ -451,7 +451,7 @@ String _gitCommitDate({
     return _runSync(args, lenient: false, workingDirectory: workingDirectory);
   } on VersionCheckError catch (e) {
     if (lenient) {
-      final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
+      final dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
       globals.printError(
         'Failed to find the latest git commit date: $e\n'
         'Returning $dummyDate instead.',
@@ -488,7 +488,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
   }) {
     try {
       final String jsonContents = jsonFile.readAsStringSync();
-      final Map<String, Object?> manifest = jsonDecode(jsonContents) as Map<String, Object?>;
+      final manifest = jsonDecode(jsonContents) as Map<String, Object?>;
 
       return _FlutterVersionFromFile._(
         clock: clock,
@@ -638,7 +638,7 @@ class _FlutterVersionGit extends FlutterVersion {
   void ensureVersionFile() {
     _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
 
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!newVersionFile.existsSync()) {
       newVersionFile.writeAsStringSync(encoder.convert(toJson()));
@@ -819,7 +819,7 @@ class VersionCheckStamp {
       jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
     }
 
-    const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
+    const prettyJsonEncoder = JsonEncoder.withIndent('  ');
     (cache ?? globals.cache).setStampFor(
       flutterVersionCheckStampFile,
       prettyJsonEncoder.convert(jsonData),
@@ -835,7 +835,7 @@ class VersionCheckStamp {
     updateKnownRemoteVersion = updateKnownRemoteVersion ?? lastKnownRemoteVersion;
     updateTimeWarningWasPrinted = updateTimeWarningWasPrinted ?? lastTimeWarningWasPrinted;
 
-    final Map<String, String> jsonData = <String, String>{};
+    final jsonData = <String, String>{};
 
     if (updateTimeVersionWasChecked != null) {
       jsonData['lastTimeVersionWasChecked'] = '$updateTimeVersionWasChecked';
@@ -1003,15 +1003,15 @@ class GitTagVersion {
     ).trim().split('\n');
 
     // Check first for a stable tag
-    final RegExp stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
-    for (final String tag in tags) {
+    final stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
+    for (final tag in tags) {
       if (stableTagPattern.hasMatch(tag.trim())) {
         return parse(tag);
       }
     }
     // Next check for a dev tag
-    final RegExp devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
-    for (final String tag in tags) {
+    final devTagPattern = RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$');
+    for (final tag in tags) {
       if (devTagPattern.hasMatch(tag.trim())) {
         return parse(tag);
       }
@@ -1031,7 +1031,7 @@ class GitTagVersion {
   /// for commit abc123 that is 6 commits after tag 1.2.3-4.5.pre, git would
   /// return '1.2.3-4.5.pre-6-gabc123').
   static GitTagVersion parseVersion(String version) {
-    final RegExp versionPattern = RegExp(
+    final versionPattern = RegExp(
       r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?(?:-(\d+)-g([a-f0-9]+))?$',
     );
     final Match? match = versionPattern.firstMatch(version.trim());

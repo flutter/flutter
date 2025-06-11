@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
-    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
-    const TextStyle s1 = TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, height: 123.0);
+    const textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    const s1 = TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, height: 123.0);
 
     await tester.pumpWidget(const DefaultTextStyle(style: s1, child: textWidget));
 
@@ -39,9 +39,9 @@ void main() {
   });
 
   testWidgets('AnimatedDefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
-    const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
-    const TextStyle s1 = TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, height: 123.0);
-    const TextStyle s2 = TextStyle(fontSize: 20.0, fontWeight: FontWeight.w200, height: 1.0);
+    const textWidget = Text('Hello', textDirection: TextDirection.ltr);
+    const s1 = TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, height: 123.0);
+    const s2 = TextStyle(fontSize: 20.0, fontWeight: FontWeight.w200, height: 1.0);
 
     await tester.pumpWidget(
       const AnimatedDefaultTextStyle(

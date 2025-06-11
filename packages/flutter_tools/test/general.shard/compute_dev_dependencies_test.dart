@@ -39,7 +39,7 @@ void main() {
   ///
   /// Each pubspec is stored in `<packagename>/pubspec.yaml`.
   void writePubspecs(List<Package> graph) {
-    final Map<String, Object?> packageConfigMap = <String, Object?>{'configVersion': 2};
+    final packageConfigMap = <String, Object?>{'configVersion': 2};
     for (final Package package in graph) {
       fileSystem.file(fileSystem.path.join(package.name, 'pubspec.yaml'))
         ..createSync(recursive: true)

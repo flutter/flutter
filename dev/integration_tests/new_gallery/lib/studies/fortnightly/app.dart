@@ -90,8 +90,8 @@ class _FortnightlyHomeDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double menuWidth = 200.0;
-    const SizedBox spacer = SizedBox(width: 20);
+    const menuWidth = 200.0;
+    const spacer = SizedBox(width: 20);
     final double headerHeight = 40 * reducedTextScale(context);
 
     return Scaffold(

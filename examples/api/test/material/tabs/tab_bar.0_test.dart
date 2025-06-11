@@ -17,9 +17,9 @@ void main() {
     final Finder tab2 = find.widgetWithIcon(Tab, Icons.beach_access_sharp);
     final Finder tab3 = find.widgetWithIcon(Tab, Icons.brightness_5_sharp);
 
-    const String tabBarViewText1 = "It's cloudy here";
-    const String tabBarViewText2 = "It's rainy here";
-    const String tabBarViewText3 = "It's sunny here";
+    const tabBarViewText1 = "It's cloudy here";
+    const tabBarViewText2 = "It's rainy here";
+    const tabBarViewText3 = "It's sunny here";
 
     expect(find.text(tabBarViewText1), findsNothing);
     expect(find.text(tabBarViewText2), findsOneWidget);

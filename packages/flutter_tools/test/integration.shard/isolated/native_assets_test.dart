@@ -58,7 +58,7 @@ void main() {
       if (device == 'flutter-tester' && buildMode != 'debug') {
         continue;
       }
-      final String hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
+      final hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
       testWithoutContext('flutter run$hotReload with native assets $device $buildMode', () async {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
@@ -409,7 +409,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
       .childDirectory('flutter-apk')
       .childFile('app-$buildMode.apk');
   expect(apk, exists);
-  final OperatingSystemUtils osUtils = OperatingSystemUtils(
+  final osUtils = OperatingSystemUtils(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
     platform: platform,
@@ -419,7 +419,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
   apkUnzipped.createSync();
   osUtils.unzip(apk, apkUnzipped);
   final Directory lib = apkUnzipped.childDirectory('lib');
-  for (final String arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
+  for (final arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
     final Directory archDir = lib.childDirectory(arch);
     expect(archDir, exists);
     // The dylibs should be next to the flutter and app so.
@@ -463,9 +463,9 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
 
     final File inputFile = subDir.childFile('input.json');
     expect(inputFile, exists);
-    final Map<String, Object?> inputContents =
+    final inputContents =
         json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
-    final BuildInput input = BuildInput(inputContents);
+    final input = BuildInput(inputContents);
     final BuildConfig config = input.config;
     if (!config.buildCodeAssets) {
       continue;

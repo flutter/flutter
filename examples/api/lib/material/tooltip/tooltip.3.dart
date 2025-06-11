@@ -27,7 +27,7 @@ class TooltipSample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
+    final tooltipkey = GlobalKey<TooltipState>();
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),

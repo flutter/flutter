@@ -25,7 +25,7 @@ void main() {
     expect(find.byType(Image), findsNWidgets(2));
 
     RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered).first);
-    ColorFilterLayer colorFilterLayer = renderObject.debugLayer! as ColorFilterLayer;
+    var colorFilterLayer = renderObject.debugLayer! as ColorFilterLayer;
 
     // Verify that red colored filter with modulate blend mode is applied to the first image.
     expect(

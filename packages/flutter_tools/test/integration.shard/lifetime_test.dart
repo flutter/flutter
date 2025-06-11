@@ -18,7 +18,7 @@ import 'test_utils.dart';
 const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late FlutterRunTestDriver flutter;
   late Directory tempDir;
 

@@ -15,8 +15,8 @@ late final ui.FlutterView view;
 late ui.Paragraph paragraph;
 
 ui.Picture paint(ui.Rect paintBounds) {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder, paintBounds);
 
   final double devicePixelRatio = view.devicePixelRatio;
   final ui.Size logicalSize = view.physicalSize / devicePixelRatio;
@@ -39,13 +39,13 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = view.devicePixelRatio;
-  final Float64List deviceTransform =
+  final deviceTransform =
       Float64List(16)
         ..[0] = devicePixelRatio
         ..[5] = devicePixelRatio
         ..[10] = 1.0
         ..[15] = 1.0;
-  final ui.SceneBuilder sceneBuilder =
+  final sceneBuilder =
       ui.SceneBuilder()
         ..pushTransform(deviceTransform)
         ..addPicture(ui.Offset.zero, picture)
@@ -66,7 +66,7 @@ void main() {
   view = ui.PlatformDispatcher.instance.implicitView!;
 
   // To create a paragraph of text, we use ParagraphBuilder.
-  final ui.ParagraphBuilder builder =
+  final builder =
       ui.ParagraphBuilder(
           // The text below has a primary direction of left-to-right.
           // The embedded text has other directions.

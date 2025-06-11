@@ -23,7 +23,7 @@ Rect boundsFor(WidgetController controller, Finder item) {
 }
 
 Future<void> main() async {
-  final Completer<void> ready = Completer<void>();
+  final ready = Completer<void>();
   runApp(
     GestureDetector(
       onTap: () {
@@ -73,7 +73,7 @@ Future<void> main() async {
     await endOfAnimation();
   }
 
-  for (int iteration = 0; iteration < 15; iteration += 1) {
+  for (var iteration = 0; iteration < 15; iteration += 1) {
     debugPrint('Tapping... (iteration $iteration)');
     await controller.tap(demoItem);
     await endOfAnimation();

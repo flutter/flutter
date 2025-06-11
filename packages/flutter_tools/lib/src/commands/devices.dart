@@ -70,7 +70,7 @@ class DevicesCommand extends FlutterCommand {
       );
     }
 
-    final DevicesCommandOutput output = DevicesCommandOutput(
+    final output = DevicesCommandOutput(
       platform: globals.platform,
       logger: globals.logger,
       deviceManager: globals.deviceManager,
@@ -148,8 +148,8 @@ class DevicesCommandOutput {
   }
 
   Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
-    List<Device> attachedDevices = <Device>[];
-    List<Device> wirelessDevices = <Device>[];
+    var attachedDevices = <Device>[];
+    var wirelessDevices = <Device>[];
     final DeviceManager? deviceManager = _deviceManager;
     if (deviceManager != null) {
       // Refresh the cache and then get the attached and wireless devices from
@@ -188,11 +188,11 @@ class DevicesCommandOutput {
   }
 
   Future<void> _printDiagnostics({required bool foundAny}) async {
-    final StringBuffer status = StringBuffer();
+    final status = StringBuffer();
     status.writeln();
     final List<String> diagnostics = await _deviceManager?.getDeviceDiagnostics() ?? <String>[];
     if (diagnostics.isNotEmpty) {
-      for (final String diagnostic in diagnostics) {
+      for (final diagnostic in diagnostics) {
         status.writeln(diagnostic);
         status.writeln();
       }
@@ -257,7 +257,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
           timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
         );
 
-    List<Device> attachedDevices = <Device>[];
+    var attachedDevices = <Device>[];
     final DeviceManager? deviceManager = _deviceManager;
     if (deviceManager != null) {
       attachedDevices = await _getAttachedDevices(deviceManager);
@@ -265,7 +265,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
 
     // Number of lines to clear starts at 1 because it's inclusive of the line
     // the cursor is on, which will be blank for this use case.
-    int numLinesToClear = 1;
+    var numLinesToClear = 1;
 
     // Display list of attached devices.
     if (attachedDevices.isNotEmpty) {
@@ -287,7 +287,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
 
     final Status waitingStatus = _logger.startSpinner();
     await extendedWirelessDiscovery;
-    List<Device> wirelessDevices = <Device>[];
+    var wirelessDevices = <Device>[];
     if (deviceManager != null) {
       wirelessDevices = await _getWirelessDevices(deviceManager);
     }

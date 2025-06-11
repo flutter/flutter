@@ -13,7 +13,7 @@ void main(List<String> args) async {
       throw ArgumentError('User-define `magic_value` must be an integer, found: $magicValue.');
     }
     final String packageName = input.packageName;
-    final CBuilder cbuilder = CBuilder.library(
+    final cbuilder = CBuilder.library(
       name: packageName,
       assetName: '$packageName.dart',
       sources: <String>['src/$packageName.c'],

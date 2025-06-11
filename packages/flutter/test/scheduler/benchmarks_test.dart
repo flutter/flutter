@@ -43,7 +43,7 @@ void main() {
   test('test pumpBenchmark() only runs one frame', () async {
     await benchmarkWidgets(
       (WidgetTester tester) async {
-        const Key root = Key('root');
+        const root = Key('root');
         binding.attachRootWidget(binding.wrapWithDefaultView(Container(key: root)));
         await tester.pump();
 

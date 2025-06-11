@@ -209,7 +209,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     // Draw the track.
-    final Paint trackPaint = Paint()..color = trackColor;
+    final trackPaint = Paint()..color = trackColor;
     if (indicatorBorderRadius != null) {
       final RRect trackRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(trackRect);
       canvas.drawRRect(trackRRect, trackPaint);
@@ -220,7 +220,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     void drawStopIndicator() {
       // Limit the stop indicator radius to the height of the indicator.
       final double radius = math.min(stopIndicatorRadius!, size.height / 2);
-      final Paint indicatorPaint = Paint()..color = stopIndicatorColor!;
+      final indicatorPaint = Paint()..color = stopIndicatorColor!;
       final Offset position = switch (textDirection) {
         TextDirection.rtl => Offset(size.height / 2, size.height / 2),
         TextDirection.ltr => Offset(size.width - size.height / 2, size.height / 2),
@@ -237,7 +237,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       if (width <= 0.0) {
         return;
       }
-      final Paint activeIndicatorPaint = Paint()..color = valueColor;
+      final activeIndicatorPaint = Paint()..color = valueColor;
       final double left = switch (textDirection) {
         TextDirection.rtl => size.width - width - x,
         TextDirection.ltr => x,
@@ -585,7 +585,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint =
+    final paint =
         Paint()
           ..color = valueColor
           ..strokeWidth = strokeWidth
@@ -594,12 +594,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     // Use the negative operator as intended to keep the exposed constant value
     // as users are already familiar with.
     final double strokeOffset = strokeWidth / 2 * -strokeAlign;
-    final Offset arcBaseOffset = Offset(strokeOffset, strokeOffset);
-    final Size arcActualSize = Size(size.width - strokeOffset * 2, size.height - strokeOffset * 2);
+    final arcBaseOffset = Offset(strokeOffset, strokeOffset);
+    final arcActualSize = Size(size.width - strokeOffset * 2, size.height - strokeOffset * 2);
     final bool hasGap = trackGap != null && trackGap! > 0;
 
     if (trackColor != null) {
-      final Paint backgroundPaint =
+      final backgroundPaint =
           Paint()
             ..color = trackColor!
             ..strokeWidth = strokeWidth
@@ -1064,14 +1064,14 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
 
-    final Path path =
+    final path =
         Path()
           ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
           ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
           ..lineTo(arrowheadPointX, arrowheadPointY)
           ..close();
 
-    final Paint paint =
+    final paint =
         Paint()
           ..color = valueColor
           ..strokeWidth = strokeWidth

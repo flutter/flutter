@@ -25,7 +25,7 @@ class WebMemoryFS {
   ///
   /// Returns the list of updated files.
   List<String> write(File codeFile, File manifestFile, File sourcemapFile, File metadataFile) {
-    final List<String> modules = <String>[];
+    final modules = <String>[];
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
     final Uint8List metadataBytes = metadataFile.readAsBytesSync();
@@ -45,7 +45,7 @@ class WebMemoryFS {
       if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
         continue;
       }
-      final Uint8List byteView = Uint8List.view(codeBytes.buffer, codeStart, codeEnd - codeStart);
+      final byteView = Uint8List.view(codeBytes.buffer, codeStart, codeEnd - codeStart);
       final String fileName = filePath.startsWith('/') ? filePath.substring(1) : filePath;
       files[fileName] = byteView;
 
@@ -54,12 +54,12 @@ class WebMemoryFS {
       if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
         continue;
       }
-      final Uint8List sourcemapView = Uint8List.view(
+      final sourcemapView = Uint8List.view(
         sourcemapBytes.buffer,
         sourcemapStart,
         sourcemapEnd - sourcemapStart,
       );
-      final String sourcemapName = '$fileName.map';
+      final sourcemapName = '$fileName.map';
       sourcemaps[sourcemapName] = sourcemapView;
 
       final int metadataStart = metadataOffsets[0];
@@ -67,12 +67,12 @@ class WebMemoryFS {
       if (metadataStart < 0 || metadataEnd > metadataBytes.lengthInBytes) {
         continue;
       }
-      final Uint8List metadataView = Uint8List.view(
+      final metadataView = Uint8List.view(
         metadataBytes.buffer,
         metadataStart,
         metadataEnd - metadataStart,
       );
-      final String metadataName = '$fileName.metadata';
+      final metadataName = '$fileName.metadata';
       metadataFiles[metadataName] = metadataView;
 
       modules.add(fileName);

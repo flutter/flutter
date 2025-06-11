@@ -29,15 +29,15 @@ String getDefaultCachedKernelPath({
   FileSystem? fileSystem,
   Config? config,
 }) {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   final List<String> cacheFrontEndOptions =
       extraFrontEndOptions.toList()
         ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
-  String buildPrefix = '';
+  var buildPrefix = '';
   if (buffer.isNotEmpty) {
-    final String output = buffer.toString();
+    final output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = '${hex.encode(digest.bytes)}.';
   }

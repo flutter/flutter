@@ -16,7 +16,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       expect(find.widgetWithText(ListTile, 'item $i'), findsOne);
     }
 

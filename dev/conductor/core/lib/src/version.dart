@@ -176,7 +176,7 @@ class Version {
 
   factory Version.fromCandidateBranch(String branchName) {
     // Regular dev release.
-    final RegExp pattern = RegExp(r'flutter-(\d+)\.(\d+)-candidate.(\d+)');
+    final pattern = RegExp(r'flutter-(\d+)\.(\d+)-candidate.(\d+)');
     final RegExpMatch? match = pattern.firstMatch(branchName);
     late final int x;
     late final int y;

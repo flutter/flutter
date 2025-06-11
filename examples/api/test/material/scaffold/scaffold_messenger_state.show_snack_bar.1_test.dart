@@ -23,8 +23,8 @@ void main() {
     await tester.tap(buttonFinder.last);
     await tester.pumpAndSettle();
 
-    final AssertionError exception = tester.takeException() as AssertionError;
-    const String message =
+    final exception = tester.takeException() as AssertionError;
+    const message =
         'Floating SnackBar presented off screen.\n'
         'A SnackBar with behavior property set to SnackBarBehavior.floating is fully '
         'or partially off screen because some or all the widgets provided to '

@@ -51,12 +51,12 @@ void main() {
 
   test('ListTileThemeData lerp special cases', () {
     expect(ListTileThemeData.lerp(null, null, 0), null);
-    const ListTileThemeData data = ListTileThemeData();
+    const data = ListTileThemeData();
     expect(identical(ListTileThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ListTileThemeData defaults', () {
-    const ListTileThemeData themeData = ListTileThemeData();
+    const themeData = ListTileThemeData();
     expect(themeData.dense, null);
     expect(themeData.shape, null);
     expect(themeData.style, null);
@@ -81,7 +81,7 @@ void main() {
   });
 
   testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData().debugFillProperties(builder);
 
     final List<String> description =
@@ -94,7 +94,7 @@ void main() {
   });
 
   testWidgets('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData(
       dense: true,
       shape: StadiumBorder(),
@@ -262,8 +262,8 @@ void main() {
       );
     }
 
-    const Color green = Color(0xFF00FF00);
-    const Color red = Color(0xFFFF0000);
+    const green = Color(0xFF00FF00);
+    const red = Color(0xFFFF0000);
     const ShapeBorder roundedShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
     );
@@ -406,23 +406,23 @@ void main() {
   testWidgets(
     "Material3 - ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
-      const TextStyle titleTextStyle = TextStyle(
+      const titleTextStyle = TextStyle(
         fontSize: 23.0,
         color: Color(0xffff0000),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle subtitleTextStyle = TextStyle(
+      const subtitleTextStyle = TextStyle(
         fontSize: 20.0,
         color: Color(0xff00ff00),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+      const leadingAndTrailingTextStyle = TextStyle(
         fontSize: 18.0,
         color: Color(0xff0000ff),
         fontStyle: FontStyle.italic,
       );
 
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         listTileTheme: const ListTileThemeData(
           titleTextStyle: titleTextStyle,
           subtitleTextStyle: subtitleTextStyle,
@@ -473,23 +473,23 @@ void main() {
   testWidgets(
     "Material2 - ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
-      const TextStyle titleTextStyle = TextStyle(
+      const titleTextStyle = TextStyle(
         fontSize: 23.0,
         color: Color(0xffff0000),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle subtitleTextStyle = TextStyle(
+      const subtitleTextStyle = TextStyle(
         fontSize: 20.0,
         color: Color(0xff00ff00),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+      const leadingAndTrailingTextStyle = TextStyle(
         fontSize: 18.0,
         color: Color(0xff0000ff),
         fontStyle: FontStyle.italic,
       );
 
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         useMaterial3: false,
         listTileTheme: const ListTileThemeData(
           titleTextStyle: titleTextStyle,
@@ -541,24 +541,24 @@ void main() {
   testWidgets(
     "Material3 - ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         listTileTheme: const ListTileThemeData(
           titleTextStyle: TextStyle(fontSize: 20.0),
           subtitleTextStyle: TextStyle(fontSize: 17.5),
           leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
         ),
       );
-      const TextStyle titleTextStyle = TextStyle(
+      const titleTextStyle = TextStyle(
         fontSize: 23.0,
         color: Color(0xffff0000),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle subtitleTextStyle = TextStyle(
+      const subtitleTextStyle = TextStyle(
         fontSize: 20.0,
         color: Color(0xff00ff00),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+      const leadingAndTrailingTextStyle = TextStyle(
         fontSize: 18.0,
         color: Color(0xff0000ff),
         fontStyle: FontStyle.italic,
@@ -610,7 +610,7 @@ void main() {
   testWidgets(
     "Material2 - ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         useMaterial3: false,
         listTileTheme: const ListTileThemeData(
           titleTextStyle: TextStyle(fontSize: 20.0),
@@ -618,17 +618,17 @@ void main() {
           leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
         ),
       );
-      const TextStyle titleTextStyle = TextStyle(
+      const titleTextStyle = TextStyle(
         fontSize: 23.0,
         color: Color(0xffff0000),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle subtitleTextStyle = TextStyle(
+      const subtitleTextStyle = TextStyle(
         fontSize: 20.0,
         color: Color(0xff00ff00),
         fontStyle: FontStyle.italic,
       );
-      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+      const leadingAndTrailingTextStyle = TextStyle(
         fontSize: 18.0,
         color: Color(0xff0000ff),
         fontStyle: FontStyle.italic,
@@ -681,7 +681,7 @@ void main() {
     WidgetTester tester,
   ) async {
     late ListTileThemeData theme;
-    bool isSelected = false;
+    var isSelected = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -722,7 +722,7 @@ void main() {
   testWidgets(
     "ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties",
     (WidgetTester tester) async {
-      bool isSelected = false;
+      var isSelected = false;
       final Color tileColor = Colors.green.shade500;
       final Color selectedTileColor = Colors.red.shade500;
 
@@ -764,7 +764,7 @@ void main() {
   testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     final ShapeBorder shapeBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20.0),
     );
@@ -798,13 +798,13 @@ void main() {
   testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (
     WidgetTester tester,
   ) async {
-    bool enabled = false;
-    bool selected = false;
+    var enabled = false;
+    var selected = false;
     const Color defaultColor = Colors.blue;
     const Color selectedColor = Colors.green;
     const Color disabledColor = Colors.red;
 
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       listTileTheme: ListTileThemeData(
         textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
@@ -860,14 +860,14 @@ void main() {
   testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (
     WidgetTester tester,
   ) async {
-    bool enabled = false;
-    bool selected = false;
+    var enabled = false;
+    var selected = false;
     const Color defaultColor = Colors.blue;
     const Color selectedColor = Colors.green;
     const Color disabledColor = Colors.red;
     final Key leadingKey = UniqueKey();
 
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       listTileTheme: ListTileThemeData(
         iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
@@ -921,7 +921,7 @@ void main() {
   testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/119734
 
-    const ListTileThemeData original = ListTileThemeData(
+    const original = ListTileThemeData(
       dense: true,
       shape: StadiumBorder(),
       style: ListTileStyle.drawer,
@@ -991,8 +991,8 @@ void main() {
   ) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
-    const String titleText = '\nHeadline Text\n';
-    const String subtitleText = '\nSupporting Text\n';
+    const titleText = '\nHeadline Text\n';
+    const subtitleText = '\nSupporting Text\n';
 
     Widget buildFrame({ListTileTitleAlignment? alignment}) {
       return MaterialApp(
@@ -1112,8 +1112,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/165453
   testWidgets('ListTileThemeData isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double avatarTop = 130.0;
-    const double placeholderTop = 138.0;
+    const avatarTop = 130.0;
+    const placeholderTop = 138.0;
 
     Widget buildFrame({bool? isThreeLine}) {
       return MaterialApp(
@@ -1210,8 +1210,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/165453
   testWidgets('ListTileTheme isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double avatarTop = 130.0;
-    const double placeholderTop = 138.0;
+    const avatarTop = 130.0;
+    const placeholderTop = 138.0;
 
     await tester.pumpWidget(
       MaterialApp(

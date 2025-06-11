@@ -210,9 +210,9 @@ void main() {
 
 Matrix4 rotateAroundXAxis(double a) {
   // 3D rotation transform with alpha=a
-  const double x = 1.0;
-  const double y = 0.0;
-  const double z = 0.0;
+  const x = 1.0;
+  const y = 0.0;
+  const z = 0.0;
   final double sc = math.sin(a / 2.0) * math.cos(a / 2.0);
   final double sq = math.sin(a / 2.0) * math.sin(a / 2.0);
   return Matrix4.fromList(<double>[

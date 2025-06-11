@@ -6,7 +6,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main() async {
-  const String fileName = 'large_image_changer';
+  const fileName = 'large_image_changer';
 
   test('Animate for 20 seconds', () async {
     final FlutterDriver driver = await FlutterDriver.connect();
@@ -33,7 +33,7 @@ Future<void> main() async {
     }
 
     if (timeline != null) {
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile(fileName, pretty: true);
     }
 

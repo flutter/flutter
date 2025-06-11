@@ -91,7 +91,7 @@ class Background extends StatelessWidget {
       final double left = min(textBounds.left, center.dx - 88.0);
       final double right = max(textBounds.right, center.dx + 88.0);
       final double endX = (left + right) / 2 + shift;
-      final Offset end = Offset(endX, endY);
+      final end = Offset(endX, endY);
 
       return animations.backgroundCenter(status, start, end).value;
     }

@@ -27,7 +27,7 @@ import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
 Future<void> main(List<String> rawArgs) async {
-  bool removeUndefined = false;
+  var removeUndefined = false;
   if (rawArgs.contains('--remove-undefined')) {
     removeUndefined = true;
   }
@@ -53,7 +53,7 @@ Map<String, dynamic> loadBundle(File file) {
 }
 
 void writeBundle(File file, Map<String, dynamic> bundle) {
-  final StringBuffer contents = StringBuffer();
+  final contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
     contents.writeln('  "$key": ${json.encode(bundle[key])}${key == bundle.keys.last ? '' : ','}');
@@ -70,7 +70,7 @@ Set<String> resourceKeys(Map<String, dynamic> bundle) {
 }
 
 bool intentionallyOmitted(String key, Map<String, dynamic> bundle) {
-  final String attributeKey = '@$key';
+  final attributeKey = '@$key';
   final dynamic attribute = bundle[attributeKey];
   return attribute is Map && attribute.containsKey('notUsed');
 }
@@ -91,8 +91,8 @@ void updateMissingResources(
   String groupPrefix, {
   bool removeUndefined = false,
 }) {
-  final Directory localizationDir = Directory(localizationPath);
-  final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
+  final localizationDir = Directory(localizationPath);
+  final filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
   final Map<String, dynamic> englishBundle = loadBundle(
     File(path.join(localizationPath, '${groupPrefix}_en.arb')),
@@ -104,15 +104,15 @@ void updateMissingResources(
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)![1]!;
-      final LocaleInfo locale = LocaleInfo.fromString(localeString);
+      final locale = LocaleInfo.fromString(localeString);
 
       // Only look at top-level language locales
       if (locale.length == 1) {
-        final File arbFile = File(entityPath);
+        final arbFile = File(entityPath);
         final Map<String, dynamic> localeBundle = loadBundle(arbFile);
         final Set<String> localeResources = resourceKeys(localeBundle);
         // Whether or not the resources were modified and need to be updated.
-        bool shouldWrite = false;
+        var shouldWrite = false;
 
         // Remove any localizations that are not defined in the canonical
         // locale. This allows unused localizations to be removed if

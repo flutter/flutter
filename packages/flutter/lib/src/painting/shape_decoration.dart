@@ -375,7 +375,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     bool debugHandleDisabledShadowStart(Canvas canvas, BoxShadow boxShadow, Path path) {
       if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
         canvas.save();
-        final Path clipPath = Path();
+        final clipPath = Path();
         clipPath.fillType = PathFillType.evenOdd;
         clipPath.addRect(Rect.largest);
         clipPath.addPath(path, Offset.zero);
@@ -393,7 +393,7 @@ class _ShapeDecorationPainter extends BoxPainter {
 
     if (_shadowCount != null) {
       if (_decoration.shape.preferPaintInterior) {
-        for (int index = 0; index < _shadowCount!; index += 1) {
+        for (var index = 0; index < _shadowCount!; index += 1) {
           assert(
             debugHandleDisabledShadowStart(
               canvas,
@@ -410,7 +410,7 @@ class _ShapeDecorationPainter extends BoxPainter {
           assert(debugHandleDisabledShadowEnd(canvas, _decoration.shadows![index]));
         }
       } else {
-        for (int index = 0; index < _shadowCount!; index += 1) {
+        for (var index = 0; index < _shadowCount!; index += 1) {
           assert(
             debugHandleDisabledShadowStart(
               canvas,

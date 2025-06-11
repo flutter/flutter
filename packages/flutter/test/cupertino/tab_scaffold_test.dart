@@ -55,7 +55,7 @@ void main() {
   }
 
   testWidgets('Tab switching', (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
+    final tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -103,7 +103,7 @@ void main() {
   });
 
   testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
-    final List<int> tabsBuilt = <int>[];
+    final tabsBuilt = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -139,11 +139,11 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[
+    final focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
     ];
-    for (final FocusNode focusNode in focusNodes) {
+    for (final focusNode in focusNodes) {
       addTearDown(focusNode.dispose);
     }
 
@@ -174,13 +174,13 @@ void main() {
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = <FocusNode>[
+    final focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
       FocusNode(debugLabel: 'Node 3'),
       FocusNode(debugLabel: 'Node 4'),
     ];
-    for (final FocusNode focusNode in focusNodes) {
+    for (final focusNode in focusNodes) {
       addTearDown(focusNode.dispose);
     }
 
@@ -227,9 +227,9 @@ void main() {
   testWidgets('Programmatic tab switching by changing the index of an existing controller', (
     WidgetTester tester,
   ) async {
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    final controller = CupertinoTabController(initialIndex: 1);
     addTearDown(controller.dispose);
-    final List<int> tabsPainted = <int>[];
+    final tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -270,7 +270,7 @@ void main() {
   testWidgets('Programmatic tab switching by passing in a new controller', (
     WidgetTester tester,
   ) async {
-    final List<int> tabsPainted = <int>[];
+    final tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -292,7 +292,7 @@ void main() {
 
     expect(tabsPainted, const <int>[0]);
 
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    final controller = CupertinoTabController(initialIndex: 1);
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -337,7 +337,7 @@ void main() {
       ),
     );
 
-    BoxDecoration tabDecoration =
+    var tabDecoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -557,7 +557,7 @@ void main() {
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (
     WidgetTester tester,
   ) async {
-    final List<int> tabsBuilt = <int>[];
+    final tabsBuilt = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -627,8 +627,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
   testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
-    final CupertinoTabController controller = CupertinoTabController();
+    final tabsPainted = <int>[];
+    final controller = CupertinoTabController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -684,8 +684,8 @@ void main() {
   testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
       'a new instance of CupertinoTabController should be created and used by the widget, '
       "while preserving the previous controller's tab index", (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
-    final CupertinoTabController oldController = CupertinoTabController();
+    final tabsPainted = <int>[];
+    final oldController = CupertinoTabController();
     addTearDown(oldController.dispose);
 
     await tester.pumpWidget(
@@ -744,7 +744,7 @@ void main() {
 
   testWidgets('Do not call dispose on a controller that we do not own '
       'but do remove from its listeners when done listening to it', (WidgetTester tester) async {
-    final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
+    final mockController = MockCupertinoTabController(initialIndex: 0);
     addTearDown(mockController.dispose);
 
     await tester.pumpWidget(
@@ -774,7 +774,7 @@ void main() {
   });
 
   testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
-    CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    var controller = CupertinoTabController(initialIndex: 2);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -810,9 +810,9 @@ void main() {
 
   testWidgets('A controller can control more than one CupertinoTabScaffold, '
       'removal of listeners does not break the controller', (WidgetTester tester) async {
-    final List<int> tabsPainted0 = <int>[];
-    final List<int> tabsPainted1 = <int>[];
-    MockCupertinoTabController controller = MockCupertinoTabController(initialIndex: 2);
+    final tabsPainted0 = <int>[];
+    final tabsPainted1 = <int>[];
+    var controller = MockCupertinoTabController(initialIndex: 2);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -914,7 +914,7 @@ void main() {
   });
 
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    final controller = CupertinoTabController(initialIndex: 2);
     addTearDown(controller.dispose);
 
     try {
@@ -946,7 +946,7 @@ void main() {
     controller.index = 10;
     await tester.pump();
 
-    final String message = tester.takeException().toString();
+    final message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
   });
@@ -954,12 +954,12 @@ void main() {
   testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (
     WidgetTester tester,
   ) async {
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    final controller = CupertinoTabController(initialIndex: 2);
     addTearDown(controller.dispose);
 
-    final List<FocusScopeNode> scopes = <FocusScopeNode>[];
-    for (int i = 0; i < 5; i++) {
-      final FocusScopeNode scope = FocusScopeNode();
+    final scopes = <FocusScopeNode>[];
+    for (var i = 0; i < 5; i++) {
+      final scope = FocusScopeNode();
       addTearDown(scope.dispose);
       scopes.add(scope);
     }
@@ -976,13 +976,13 @@ void main() {
       ),
     );
 
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       controller.index = i;
       await tester.pump();
     }
     await tester.pump();
 
-    final List<FocusScopeNode> newScopes = <FocusScopeNode>[];
+    final newScopes = <FocusScopeNode>[];
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -995,7 +995,7 @@ void main() {
         ),
       ),
     );
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       controller.index = i;
       await tester.pump();
     }
@@ -1015,7 +1015,7 @@ void main() {
 
     expectAssertionError(() => CupertinoTabController(initialIndex: -1), '>= 0');
 
-    final CupertinoTabController controller = CupertinoTabController();
+    final controller = CupertinoTabController();
     addTearDown(controller.dispose);
 
     expectAssertionError(() => controller.index = -1, '>= 0');
@@ -1206,7 +1206,7 @@ void main() {
     expect(find.text('Content 2'), findsOneWidget);
     expect(find.text('Content 3'), findsNothing);
 
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 3);
+    final controller = CupertinoTabController(initialIndex: 3);
     addTearDown(controller.dispose);
     await tester.pumpWidget(buildWidget(controller: controller));
 

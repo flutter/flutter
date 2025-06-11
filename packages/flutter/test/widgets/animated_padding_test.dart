@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedPadding.debugFillProperties', (WidgetTester tester) async {
-    final AnimatedPadding padding = AnimatedPadding(
+    final padding = AnimatedPadding(
       padding: const EdgeInsets.all(7.0),
       curve: Curves.ease,
       duration: const Duration(milliseconds: 200),

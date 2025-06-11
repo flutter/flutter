@@ -48,7 +48,7 @@ void main(List<String> args) {
 }
 
 Future<void> run(List<String> args) async {
-  final ArgParser parser =
+  final parser =
       ArgParser()
         ..addOption(_kOptionPackages, help: 'The .packages file')
         ..addOption(_kOptionShell, help: 'The flutter_tester binary')
@@ -94,7 +94,7 @@ Future<void> run(List<String> args) async {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
     Directory? coverageDirectory;
-    final String? coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
+    final coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String?;
     if (coverageDirectoryPath != null) {
       if (!globals.fs.isDirectorySync(coverageDirectoryPath)) {
         throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
@@ -140,19 +140,19 @@ Future<void> run(List<String> args) async {
       testDirectory = globals.fs.directory(argResults[_kOptionTestDirectory]);
     }
 
-    final Map<String, String> tests = <String, String>{};
-    final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
+    final tests = <String, String>{};
+    final jsonList = List<Map<String, dynamic>>.from(
       (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>)
           .cast<Map<String, dynamic>>(),
     );
-    for (final Map<String, dynamic> map in jsonList) {
+    for (final map in jsonList) {
       final String source = globals.fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = globals.fs.file(map['dill']).resolveSymbolicLinksSync();
       tests[source] = dill;
     }
 
     // TODO(dnfield): This should be injected.
-    final BuildInfo buildInfo = BuildInfo(
+    final buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: false,

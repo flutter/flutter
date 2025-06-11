@@ -175,8 +175,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   Future<void> handleSystemMessage(Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
-    final String type = message['type'] as String;
+    final message = systemMessage as Map<String, dynamic>;
+    final type = message['type'] as String;
     switch (type) {
       case 'fontsChange':
         _systemFonts.notifyListeners();

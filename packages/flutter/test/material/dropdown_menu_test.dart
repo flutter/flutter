@@ -13,13 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  const String longText = 'one two three four five six seven eight nine ten eleven twelve';
-  final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
-  final List<DropdownMenuEntry<TestMenu>> menuChildrenWithIcons = <DropdownMenuEntry<TestMenu>>[];
-  const double leadingIconToInputPadding = 4.0;
+  const longText = 'one two three four five six seven eight nine ten eleven twelve';
+  final menuChildren = <DropdownMenuEntry<TestMenu>>[];
+  final menuChildrenWithIcons = <DropdownMenuEntry<TestMenu>>[];
+  const leadingIconToInputPadding = 4.0;
 
   for (final TestMenu value in TestMenu.values) {
-    final DropdownMenuEntry<TestMenu> entry = DropdownMenuEntry<TestMenu>(
+    final entry = DropdownMenuEntry<TestMenu>(
       value: value,
       label: value.label,
     );
@@ -32,7 +32,7 @@ void main() {
       ValueKey<String>('trailing-${menuEntry.label}');
 
   for (final TestMenu value in TestMenu.values) {
-    final DropdownMenuEntry<TestMenu> entry = DropdownMenuEntry<TestMenu>(
+    final entry = DropdownMenuEntry<TestMenu>(
       value: value,
       label: value.label,
       leadingIcon: Icon(key: leadingIconKey(value), Icons.alarm),
@@ -93,7 +93,7 @@ void main() {
   }
 
   testWidgets('DropdownMenu defaults', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -135,16 +135,16 @@ void main() {
   });
 
   group('Item style', () {
-    const Color focusedBackgroundColor = Color(0xffff0000);
-    const Color focusedForegroundColor = Color(0xff00ff00);
-    const Color focusedIconColor = Color(0xff0000ff);
-    const Color focusedOverlayColor = Color(0xffff00ff);
-    const Color defaultBackgroundColor = Color(0xff00ffff);
-    const Color defaultForegroundColor = Color(0xff000000);
-    const Color defaultIconColor = Color(0xffffffff);
-    const Color defaultOverlayColor = Color(0xffffff00);
+    const focusedBackgroundColor = Color(0xffff0000);
+    const focusedForegroundColor = Color(0xff00ff00);
+    const focusedIconColor = Color(0xff0000ff);
+    const focusedOverlayColor = Color(0xffff00ff);
+    const defaultBackgroundColor = Color(0xff00ffff);
+    const defaultForegroundColor = Color(0xff000000);
+    const defaultIconColor = Color(0xffffffff);
+    const defaultOverlayColor = Color(0xffffff00);
 
-    final ButtonStyle customButtonStyle = ButtonStyle(
+    final customButtonStyle = ButtonStyle(
       backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.focused)) {
           return focusedBackgroundColor;
@@ -171,8 +171,8 @@ void main() {
       }),
     );
 
-    final List<DropdownMenuEntry<TestMenu>> styledMenuEntries = <DropdownMenuEntry<TestMenu>>[];
-    for (final DropdownMenuEntry<TestMenu> entryWithIcons in menuChildrenWithIcons) {
+    final styledMenuEntries = <DropdownMenuEntry<TestMenu>>[];
+    for (final entryWithIcons in menuChildrenWithIcons) {
       styledMenuEntries.add(
         DropdownMenuEntry<TestMenu>(
           value: entryWithIcons.value,
@@ -209,7 +209,7 @@ void main() {
       const TestMenu selectedItem = TestMenu.mainMenu3;
       const TestMenu nonSelectedItem = TestMenu.mainMenu2;
 
-      final ThemeData themeData = ThemeData();
+      final themeData = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -377,8 +377,8 @@ void main() {
       const TestMenu selectedItem = TestMenu.mainMenu3;
       const TestMenu nonSelectedItem = TestMenu.mainMenu2;
 
-      const Color luckyColor = Color(0xff777777);
-      final ButtonStyle singleColorButtonStyle = ButtonStyle(
+      const luckyColor = Color(0xff777777);
+      final singleColorButtonStyle = ButtonStyle(
         backgroundColor: MaterialStateProperty.all(luckyColor),
         foregroundColor: MaterialStateProperty.all(luckyColor),
         iconColor: MaterialStateProperty.all(luckyColor),
@@ -441,15 +441,15 @@ void main() {
       const TestMenu selectedItem = TestMenu.mainMenu3;
       const TestMenu nonSelectedItem = TestMenu.mainMenu2;
 
-      const Color luckyColor = Color(0xff777777);
-      final ButtonStyle partialButtonStyle = ButtonStyle(
+      const luckyColor = Color(0xff777777);
+      final partialButtonStyle = ButtonStyle(
         backgroundColor: MaterialStateProperty.all(luckyColor),
         foregroundColor: MaterialStateProperty.all(luckyColor),
       );
 
-      final List<DropdownMenuEntry<TestMenu>> partiallyStyledMenuEntries =
+      final partiallyStyledMenuEntries =
           <DropdownMenuEntry<TestMenu>>[];
-      for (final DropdownMenuEntry<TestMenu> entryWithIcons in menuChildrenWithIcons) {
+      for (final entryWithIcons in menuChildrenWithIcons) {
         partiallyStyledMenuEntries.add(
           DropdownMenuEntry<TestMenu>(
             value: entryWithIcons.value,
@@ -565,7 +565,7 @@ void main() {
   testWidgets(
     'Material2 - The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(useMaterial3: false);
+      final themeData = ThemeData(useMaterial3: false);
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -612,7 +612,7 @@ void main() {
   testWidgets(
     'Material3 - The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData();
+      final themeData = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -659,18 +659,18 @@ void main() {
   testWidgets('The width property can customize the width of the dropdown menu', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    final themeData = ThemeData();
+    final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
 
     for (final ShortMenu value in ShortMenu.values) {
-      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(
+      final entry = DropdownMenuEntry<ShortMenu>(
         value: value,
         label: value.label,
       );
       shortMenuItems.add(entry);
     }
 
-    const double customBigWidth = 250.0;
+    const customBigWidth = 250.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customBigWidth));
     RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
     expect(box.size.width, customBigWidth);
@@ -683,7 +683,7 @@ void main() {
 
     // reset test
     await tester.pumpWidget(Container());
-    const double customSmallWidth = 100.0;
+    const customSmallWidth = 100.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customSmallWidth));
     box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
     expect(box.size.width, customSmallWidth);
@@ -697,18 +697,18 @@ void main() {
 
   testWidgets('The width property update test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/120567
-    final ThemeData themeData = ThemeData();
-    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    final themeData = ThemeData();
+    final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
 
     for (final ShortMenu value in ShortMenu.values) {
-      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(
+      final entry = DropdownMenuEntry<ShortMenu>(
         value: value,
         label: value.label,
       );
       shortMenuItems.add(entry);
     }
 
-    double customWidth = 250.0;
+    var customWidth = 250.0;
     await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
     RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
     expect(box.size.width, customWidth);
@@ -740,10 +740,10 @@ void main() {
     );
 
     final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
-    const double menuEntryPadding = 24.0; // See _kDefaultHorizontalPadding.
-    const double decorationStartGap = 4.0; // See _kInputStartGap.
-    const double leadingWidth = 16.0;
-    const double trailingWidth = 56.0;
+    const menuEntryPadding = 24.0; // See _kDefaultHorizontalPadding.
+    const decorationStartGap = 4.0; // See _kInputStartGap.
+    const leadingWidth = 16.0;
+    const trailingWidth = 56.0;
 
     expect(
       width,
@@ -775,9 +775,9 @@ void main() {
     );
 
     final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
-    const double leadingWidth = 16.0;
-    const double trailingWidth = 56.0;
-    const double labelPadding = 8.0; // See RenderEditable.floatingCursorAddedMargin.
+    const leadingWidth = 16.0;
+    const trailingWidth = 56.0;
+    const labelPadding = 8.0; // See RenderEditable.floatingCursorAddedMargin.
 
     expect(width, labelWidth + labelPadding + leadingWidth + trailingWidth);
   });
@@ -785,10 +785,10 @@ void main() {
   testWidgets('The width of MenuAnchor respects MenuAnchor.expandedInsets', (
     WidgetTester tester,
   ) async {
-    const double parentWidth = 500.0;
-    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    const parentWidth = 500.0;
+    final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
     for (final ShortMenu value in ShortMenu.values) {
-      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(
+      final entry = DropdownMenuEntry<ShortMenu>(
         value: value,
         label: value.label,
       );
@@ -856,10 +856,10 @@ void main() {
   testWidgets('expandedInsets can use EdgeInsets or EdgeInsetsDirectional', (
     WidgetTester tester,
   ) async {
-    const double parentWidth = 500.0;
-    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+    const parentWidth = 500.0;
+    final shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
     for (final ShortMenu value in ShortMenu.values) {
-      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(
+      final entry = DropdownMenuEntry<ShortMenu>(
         value: value,
         label: value.label,
       );
@@ -935,17 +935,17 @@ void main() {
   testWidgets(
     'Material2 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(useMaterial3: false);
+      final themeData = ThemeData(useMaterial3: false);
       await tester.pumpWidget(buildTest(themeData, menuChildren));
 
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
       final Element firstItem = tester.element(findMenuItemButton('Item 0'));
-      final RenderBox firstBox = firstItem.renderObject! as RenderBox;
+      final firstBox = firstItem.renderObject! as RenderBox;
       final Offset topLeft = firstBox.localToGlobal(firstBox.size.topLeft(Offset.zero));
       final Element lastItem = tester.element(findMenuItemButton('Item 5'));
-      final RenderBox lastBox = lastItem.renderObject! as RenderBox;
+      final lastBox = lastItem.renderObject! as RenderBox;
       final Offset bottomRight = lastBox.localToGlobal(lastBox.size.bottomRight(Offset.zero));
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
@@ -978,17 +978,17 @@ void main() {
   testWidgets(
     'Material3 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData();
+      final themeData = ThemeData();
       await tester.pumpWidget(buildTest(themeData, menuChildren));
 
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
       final Element firstItem = tester.element(findMenuItemButton('Item 0'));
-      final RenderBox firstBox = firstItem.renderObject! as RenderBox;
+      final firstBox = firstItem.renderObject! as RenderBox;
       final Offset topLeft = firstBox.localToGlobal(firstBox.size.topLeft(Offset.zero));
       final Element lastItem = tester.element(findMenuItemButton('Item 5'));
-      final RenderBox lastBox = lastItem.renderObject! as RenderBox;
+      final lastBox = lastItem.renderObject! as RenderBox;
       final Offset bottomRight = lastBox.localToGlobal(lastBox.size.bottomRight(Offset.zero));
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
@@ -1020,7 +1020,7 @@ void main() {
 
   testWidgets('The text in the menu button should be aligned with the text of '
       'the text field - LTR', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     // Default text field (without leading icon).
     await tester.pumpWidget(buildTest(themeData, menuChildren, label: const Text('label')));
 
@@ -1085,7 +1085,7 @@ void main() {
 
   testWidgets('The text in the menu button should be aligned with the text of '
       'the text field - RTL', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     // Default text field (without leading icon).
     await tester.pumpWidget(
       MaterialApp(
@@ -1242,7 +1242,7 @@ void main() {
   });
 
   testWidgets('DropdownMenu has default trailing icon button', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren));
     await tester.pump();
 
@@ -1263,7 +1263,7 @@ void main() {
   });
 
   testWidgets('Trailing IconButton status test', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(buildTest(themeData, menuChildren, width: 100.0, menuHeight: 100.0));
     await tester.pump();
 
@@ -1293,7 +1293,7 @@ void main() {
   testWidgets('Trailing IconButton height respects InputDecorationTheme.suffixIconConstraints', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
 
     // Default suffix icon constraints.
     await tester.pumpWidget(buildTest(themeData, menuChildren));
@@ -1318,7 +1318,7 @@ void main() {
   });
 
   testWidgets('InputDecorationTheme.isCollapsed reduces height', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
 
     // Default height.
     await tester.pumpWidget(buildTest(themeData, menuChildren));
@@ -1357,7 +1357,7 @@ void main() {
 
   testWidgets('Do not crash when resize window during menu opening', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1390,7 +1390,7 @@ void main() {
   });
 
   testWidgets('DropdownMenu can customize trailing icon button', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1421,7 +1421,7 @@ void main() {
   });
 
   testWidgets('Down key can highlight the menu item while focused', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1452,7 +1452,7 @@ void main() {
   });
 
   testWidgets('Up key can highlight the menu item while focused', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1479,10 +1479,10 @@ void main() {
   });
 
   testWidgets('Left and right keys can move text field selection', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1526,7 +1526,7 @@ void main() {
   testWidgets('Up and down keys can highlight the menu item when expandedInsets is set', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1565,10 +1565,10 @@ void main() {
   testWidgets('Left and right keys can move text field selection when expandedInsets is set', (
     WidgetTester tester,
   ) async {
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1612,7 +1612,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Down key and up key can navigate while focused when a label text '
       'contains another label text', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1707,7 +1707,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/165867.
   testWidgets('Keyboard navigation only traverses filtered entries', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1756,7 +1756,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1766,7 +1766,7 @@ void main() {
       ),
     );
 
-    const String itemLabel = 'Item 2';
+    const itemLabel = 'Item 2';
     // Open the menu
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
@@ -1785,7 +1785,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/152375.
   testWidgets('Down key and up key can navigate while focused when a label text contains '
       'another label text using customized search algorithm', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1841,7 +1841,7 @@ void main() {
   testWidgets('Searching can highlight entry after keyboard navigation while focused', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1866,7 +1866,7 @@ void main() {
 
   testWidgets('The text input should match the label of the menu item '
       'when pressing down key while focused', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1897,7 +1897,7 @@ void main() {
 
   testWidgets('The text input should match the label of the menu item '
       'when pressing up key while focused', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1929,8 +1929,8 @@ void main() {
   testWidgets('Disabled button will be skipped while pressing up/down key while focused', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+    final themeData = ThemeData();
+    final menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Item 1', enabled: false),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Item 2', enabled: false),
@@ -1970,7 +1970,7 @@ void main() {
   testWidgets('Searching is enabled by default if initialSelection is non null', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -1995,7 +1995,7 @@ void main() {
   testWidgets('Highlight can move up/down starting from the searching result while focused', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -2028,7 +2028,7 @@ void main() {
   });
 
   testWidgets('Filtering is disabled by default', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -2051,7 +2051,7 @@ void main() {
   });
 
   testWidgets('Enable filtering', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -2084,8 +2084,8 @@ void main() {
   testWidgets('Enable filtering with custom filter callback that filter text case sensitive', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    final TextEditingController controller = TextEditingController();
+    final themeData = ThemeData();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2132,8 +2132,8 @@ void main() {
   testWidgets(
     'Throw assertion error when enable filtering with custom filter callback and enableFilter set on False',
     (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData();
-      final TextEditingController controller = TextEditingController();
+      final themeData = ThemeData();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
 
       expect(() {
@@ -2159,8 +2159,8 @@ void main() {
   testWidgets('The controller can access the value in the input field', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    final TextEditingController controller = TextEditingController();
+    final themeData = ThemeData();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2197,8 +2197,8 @@ void main() {
   testWidgets('The menu should be closed after text editing is complete', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    final TextEditingController controller = TextEditingController();
+    final themeData = ThemeData();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2231,16 +2231,16 @@ void main() {
   testWidgets('The onSelected gets called only when a selection is made', (
     WidgetTester tester,
   ) async {
-    int selectionCount = 0;
+    var selectionCount = 0;
 
-    final ThemeData themeData = ThemeData();
-    final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+    final themeData = ThemeData();
+    final menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 1', enabled: false),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 2'),
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 3'),
     ];
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2271,7 +2271,7 @@ void main() {
       TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => true,
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
     };
-    int expectedCount = 1;
+    var expectedCount = 1;
 
     // Test onSelected on key press
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
@@ -2332,8 +2332,8 @@ void main() {
   testWidgets('The selectedValue gives an initial text and highlights the according item', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    final TextEditingController controller = TextEditingController();
+    final themeData = ThemeData();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2366,7 +2366,7 @@ void main() {
   testWidgets(
     'When the initial selection matches a menu entry, the text field displays the corresponding value',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -2392,7 +2392,7 @@ void main() {
   testWidgets('Text field is empty when the initial selection does not match any menu entries', (
     WidgetTester tester,
   ) async {
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2418,7 +2418,7 @@ void main() {
   testWidgets(
     'Text field content is not cleared when the initial selection does not match any menu entries',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'Flutter');
+      final controller = TextEditingController(text: 'Flutter');
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -2444,7 +2444,7 @@ void main() {
 
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
 
     Widget buildDropdownMenu() => MaterialApp(
       theme: themeData,
@@ -2464,7 +2464,7 @@ void main() {
 
   testWidgets('The text input field should be focused on desktop platforms '
       'when it is tapped', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
 
     Widget buildDropdownMenu() => MaterialApp(
       theme: themeData,
@@ -2483,7 +2483,7 @@ void main() {
 
   testWidgets('If requestFocusOnTap is true, the text input field can request focus, '
       'otherwise it cannot request focus', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
 
     Widget buildDropdownMenu({required bool requestFocusOnTap}) => MaterialApp(
       theme: themeData,
@@ -2692,9 +2692,9 @@ void main() {
   testWidgets('Semantics does not include hint when input is not empty', (
     WidgetTester tester,
   ) async {
-    const String hintText = 'I am hintText';
+    const hintText = 'I am hintText';
     TestMenu? selectedValue;
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2735,7 +2735,7 @@ void main() {
   });
 
   testWidgets('Semantics does not include initial menu buttons', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2768,9 +2768,9 @@ void main() {
   });
 
   testWidgets('helperText is not visible when errorText is not null', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
-    const String helperText = 'I am helperText';
-    const String errorText = 'I am errorText';
+    final themeData = ThemeData();
+    const helperText = 'I am helperText';
+    const errorText = 'I am errorText';
 
     Widget buildFrame(bool hasError) {
       return MaterialApp(
@@ -2800,8 +2800,8 @@ void main() {
   testWidgets('DropdownMenu can respect helperText when helperText is not null', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    const String helperText = 'I am helperText';
+    final themeData = ThemeData();
+    const helperText = 'I am helperText';
 
     Widget buildFrame() {
       return MaterialApp(
@@ -2824,8 +2824,8 @@ void main() {
   testWidgets('DropdownMenu can respect errorText when errorText is not null', (
     WidgetTester tester,
   ) async {
-    final ThemeData themeData = ThemeData();
-    const String errorText = 'I am errorText';
+    final themeData = ThemeData();
+    const errorText = 'I am errorText';
 
     Widget buildFrame() {
       return MaterialApp(
@@ -2868,19 +2868,19 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/131676.
   testWidgets('Material3 - DropdownMenu uses correct text styles', (WidgetTester tester) async {
-    const TextStyle inputTextThemeStyle = TextStyle(
+    const inputTextThemeStyle = TextStyle(
       fontSize: 18.5,
       fontStyle: FontStyle.italic,
       wordSpacing: 1.2,
       decoration: TextDecoration.lineThrough,
     );
-    const TextStyle menuItemTextThemeStyle = TextStyle(
+    const menuItemTextThemeStyle = TextStyle(
       fontSize: 20.5,
       fontStyle: FontStyle.italic,
       wordSpacing: 2.1,
       decoration: TextDecoration.underline,
     );
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       textTheme: const TextTheme(
         bodyLarge: inputTextThemeStyle,
         labelLarge: menuItemTextThemeStyle,
@@ -2911,7 +2911,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/126882
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -2935,7 +2935,7 @@ void main() {
     await tester.pumpAndSettle();
 
     Finder findMenuItemText(String label) {
-      final String labelText = '$label $longText';
+      final labelText = '$label $longText';
       return find.descendant(of: findMenuItemButton(labelText), matching: find.byType(Text)).last;
     }
 
@@ -2955,7 +2955,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/126882
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     Widget buildFrame({required int maxLines}) {
@@ -2979,7 +2979,7 @@ void main() {
     }
 
     Finder findMenuItemText(String label) {
-      final String labelText = '$label $longText';
+      final labelText = '$label $longText';
       return find.descendant(of: findMenuItemButton(labelText), matching: find.byType(Text)).last;
     }
 
@@ -3047,7 +3047,7 @@ void main() {
   });
 
   testWidgets('DropdownMenu can have customized search algorithm', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     Widget dropdownMenu({SearchCallback<int>? searchCallback}) {
       return MaterialApp(
         theme: theme,
@@ -3138,10 +3138,10 @@ void main() {
   testWidgets('onSelected gets called when a selection is made in a nested menu', (
     WidgetTester tester,
   ) async {
-    int selectionCount = 0;
+    var selectionCount = 0;
 
-    final ThemeData themeData = ThemeData();
-    final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+    final themeData = ThemeData();
+    final menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
     ];
 
@@ -3194,10 +3194,10 @@ void main() {
   testWidgets(
     'When onSelected is called and menu is closed, no textEditingController exception is thrown',
     (WidgetTester tester) async {
-      int selectionCount = 0;
+      var selectionCount = 0;
 
-      final ThemeData themeData = ThemeData();
-      final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+      final themeData = ThemeData();
+      final menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
         const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
       ];
 
@@ -3279,7 +3279,7 @@ void main() {
   );
 
   testWidgets('Menu shows scrollbar when height is limited', (WidgetTester tester) async {
-    final List<DropdownMenuEntry<TestMenu>> menuItems = <DropdownMenuEntry<TestMenu>>[
+    final menuItems = <DropdownMenuEntry<TestMenu>>[
       DropdownMenuEntry<TestMenu>(
         value: TestMenu.mainMenu0,
         label: 'Item 0',
@@ -3298,9 +3298,9 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('DropdownMenu.focusNode can focus text input field', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3335,7 +3335,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/131120.
   testWidgets('Focus traversal ignores non visible entries', (WidgetTester tester) async {
-    final FocusNode buttonFocusNode = FocusNode();
+    final buttonFocusNode = FocusNode();
     addTearDown(buttonFocusNode.dispose);
 
     await tester.pumpWidget(
@@ -3374,15 +3374,15 @@ void main() {
   });
 
   testWidgets('DropdownMenu honors inputFormatters', (WidgetTester tester) async {
-    int called = 0;
-    final TextInputFormatter formatter = TextInputFormatter.withFunction((
+    var called = 0;
+    final formatter = TextInputFormatter.withFunction((
       TextEditingValue oldValue,
       TextEditingValue newValue,
     ) {
       called += 1;
       return newValue;
     });
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -3470,7 +3470,7 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/147173.
   testWidgets('Text field with large helper text can be selected', (WidgetTester tester) async {
-    const String labelText = 'MenuEntry 1';
+    const labelText = 'MenuEntry 1';
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -3555,7 +3555,7 @@ void main() {
   });
 
   testWidgets('DropdownMenu passes an alignmentOffset to MenuAnchor', (WidgetTester tester) async {
-    const Offset alignmentOffset = Offset(0, 16);
+    const alignmentOffset = Offset(0, 16);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -3625,7 +3625,7 @@ void main() {
   testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (
     WidgetTester tester,
   ) async {
-    const String label = 'Test';
+    const label = 'Test';
     Widget buildDropdownMenu({bool? requestFocusOnTap}) {
       return MaterialApp(
         home: Scaffold(
@@ -3673,7 +3673,7 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/151854.
   testWidgets('scrollToHighlight does not scroll parent', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -3832,7 +3832,7 @@ void main() {
     // tester.getRect because when tight constraints are applied to the
     // Dropdown the TextField bounds are expanded while the visible size
     // remains 56 pixels.
-    const double textFieldBottom = 56.0;
+    const textFieldBottom = 56.0;
 
     testWidgets('when given loose constraints and expandedInsets is set', (
       WidgetTester tester,
@@ -3933,7 +3933,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/143505.
   testWidgets('Using keyboard navigation to select', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     TestMenu? selectedMenu;
     await tester.pumpWidget(
@@ -3952,7 +3952,7 @@ void main() {
       ),
     );
     // Pressing the tab key 3 times moves the focus to the icon button.
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
     }
@@ -3999,7 +3999,7 @@ void main() {
         TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => 2,
         TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 3,
       };
-      for (int i = 0; i < tabCount; i++) {
+      for (var i = 0; i < tabCount; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }
@@ -4097,7 +4097,7 @@ void main() {
   testWidgets('items can be constrainted to be smaller than the text field with menuStyle', (
     WidgetTester tester,
   ) async {
-    const String longLabel = 'This is a long text that it can overflow.';
+    const longLabel = 'This is a long text that it can overflow.';
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -4142,7 +4142,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/164905.
   testWidgets('ensure exclude semantics for trailing button', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -4219,7 +4219,7 @@ void main() {
   });
 
   testWidgets('restorationId is passed to inner TextField', (WidgetTester tester) async {
-    const String restorationId = 'dropdown_menu';
+    const restorationId = 'dropdown_menu';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4283,8 +4283,8 @@ void main() {
   testWidgets('Explicitly provided controllers should not be disposed when switched out.', (
     WidgetTester tester,
   ) async {
-    final TextEditingController controller1 = TextEditingController();
-    final TextEditingController controller2 = TextEditingController();
+    final controller1 = TextEditingController();
+    final controller2 = TextEditingController();
     Future<void> pumpDropdownMenu(TextEditingController? controller) {
       return tester.pumpWidget(
         MaterialApp(

@@ -27,7 +27,7 @@ class GridViewExampleApp extends StatelessWidget {
             // scrollDirection: Axis.horizontal, // The default is vertical.
             // reverse: true, // The default is false, going down (or left to right).
             itemBuilder: (BuildContext context, int index) {
-              final math.Random random = math.Random(index);
+              final random = math.Random(index);
               return GridTile(
                 header: GridTileBar(
                   title: Text('$index', style: const TextStyle(color: Colors.black)),

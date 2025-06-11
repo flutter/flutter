@@ -15,7 +15,7 @@ void main() {
 
     await tester.pumpWidget(const example.FloatingActionButtonExampleApp());
 
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     expect(find.byType(FloatingActionButton), findsNWidgets(4));
     expect(find.byIcon(Icons.add), findsNWidgets(4));

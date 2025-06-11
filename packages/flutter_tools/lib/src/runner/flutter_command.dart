@@ -596,7 +596,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   late final bool enableDds = () {
-    bool ddsEnabled = false;
+    var ddsEnabled = false;
     if (argResults?.wasParsed('disable-dds') ?? false) {
       if (argResults?.wasParsed('dds') ?? false) {
         throwToolExit(
@@ -1163,7 +1163,7 @@ abstract class FlutterCommand extends Command<void> {
     final bool jitReleaseResult = !_excludeRelease && argIfDefined('jit-release', false);
     final bool releaseResult = !_excludeRelease && argIfDefined('release', false);
     final bool profileResult = argIfDefined('profile', false);
-    final List<bool> modeFlags = <bool>[
+    final modeFlags = <bool>[
       debugResult,
       profileResult,
       jitReleaseResult,
@@ -1323,8 +1323,8 @@ abstract class FlutterCommand extends Command<void> {
             : <String>[];
 
     if (experiments.isNotEmpty) {
-      for (final String expFlag in experiments) {
-        final String flag = '--enable-experiment=$expFlag';
+      for (final expFlag in experiments) {
+        final flag = '--enable-experiment=$expFlag';
         extraFrontEndOptions.add(flag);
         extraGenSnapshotOptions.add(flag);
       }
@@ -1409,7 +1409,7 @@ abstract class FlutterCommand extends Command<void> {
     final bool useCdn =
         !argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag) ||
         boolArg(FlutterOptions.kWebResourcesCdnFlag);
-    bool useLocalWebSdk = false;
+    var useLocalWebSdk = false;
     if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
       useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
     }
@@ -1502,7 +1502,7 @@ abstract class FlutterCommand extends Command<void> {
   /// tracking of the command.
   Future<String?> get usagePath async {
     if (parent is FlutterCommand) {
-      final FlutterCommand? commandParent = parent as FlutterCommand?;
+      final commandParent = parent as FlutterCommand?;
       final String? path = await commandParent?.usagePath;
       // Don't report for parents that return null for usagePath.
       return path == null ? null : '$path/$name';
@@ -1541,7 +1541,7 @@ abstract class FlutterCommand extends Command<void> {
         if (commandPath != null) {
           _registerSignalHandlers(commandPath, startTime);
         }
-        FlutterCommandResult commandResult = FlutterCommandResult.fail();
+        var commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
@@ -1583,7 +1583,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   List<String> extractDartDefines({required Map<String, Object?> defineConfigJsonMap}) {
-    final List<String> dartDefines = <String>[];
+    final dartDefines = <String>[];
 
     defineConfigJsonMap.forEach((String key, Object? value) {
       dartDefines.add('$key=$value');
@@ -1597,12 +1597,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Map<String, Object?> extractDartDefineConfigJsonMap() {
-    final Map<String, Object?> dartDefineConfigJsonMap = <String, Object?>{};
+    final dartDefineConfigJsonMap = <String, Object?>{};
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
       final List<String> configFilePaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
 
-      for (final String path in configFilePaths) {
+      for (final path in configFilePaths) {
         if (!globals.fs.isFileSync(path)) {
           throwToolExit(
             'Did not find the file passed to "--${FlutterOptions.kDartDefineFromFileOption}". Path: $path',
@@ -1708,8 +1708,8 @@ abstract class FlutterCommand extends Command<void> {
             .where((String line) => !line.startsWith('#')) // Remove comment lines.
             .toList();
 
-    final Map<String, String> propertyMap = <String, String>{};
-    for (final String line in lines) {
+    final propertyMap = <String, String>{};
+    for (final line in lines) {
       final MapEntry<String, String> property = _parseProperty(line);
       propertyMap[property.key] = property.value;
     }
@@ -1718,12 +1718,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Map<String, String> extractWebHeaders() {
-    final Map<String, String> webHeaders = <String, String>{};
+    final webHeaders = <String, String>{};
 
     if (argParser.options.containsKey('web-header')) {
       final List<String> candidates = stringsArg('web-header');
-      final List<String> invalidHeaders = <String>[];
-      for (final String candidate in candidates) {
+      final invalidHeaders = <String>[];
+      for (final candidate in candidates) {
         final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
         if (keyValueMatch == null) {
           invalidHeaders.add(candidate);
@@ -1779,7 +1779,7 @@ abstract class FlutterCommand extends Command<void> {
     );
 
     // Send timing.
-    final List<String?> labels = <String?>[
+    final labels = <String?>[
       commandResult.exitStatus.name,
       if (commandResult.timingLabelParts?.isNotEmpty ?? false) ...?commandResult.timingLabelParts,
     ];
@@ -2036,8 +2036,8 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     if (devices.isEmpty) {
       return super.requiredArtifacts;
     }
-    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{DevelopmentArtifact.universal};
-    for (final Device device in devices) {
+    final artifacts = <DevelopmentArtifact>{DevelopmentArtifact.universal};
+    for (final device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(targetPlatform);
       if (developmentArtifact != null) {

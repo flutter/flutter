@@ -123,9 +123,9 @@ class ImageConfiguration {
 
   @override
   String toString() {
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     result.write('ImageConfiguration(');
-    bool hasArguments = false;
+    var hasArguments = false;
     if (bundle != null) {
       result.write('bundle: $bundle');
       hasArguments = true;
@@ -432,7 +432,7 @@ abstract class ImageProvider<T extends Object> {
     required ImageConfiguration configuration,
     ImageErrorListener? handleError,
   }) {
-    final Completer<ImageCacheStatus?> completer = Completer<ImageCacheStatus?>();
+    final completer = Completer<ImageCacheStatus?>();
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
@@ -476,7 +476,7 @@ abstract class ImageProvider<T extends Object> {
     _AsyncKeyErrorHandler<T?> errorCallback,
   ) {
     T? obtainedKey;
-    bool didError = false;
+    var didError = false;
     Future<void> handleError(Object exception, StackTrace? stack) async {
       if (didError) {
         return;

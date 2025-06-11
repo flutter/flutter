@@ -30,7 +30,7 @@ void main() {
   });
 
   test('Adding a persistent frame callback during a persistent frame callback', () {
-    bool calledBack = false;
+    var calledBack = false;
     SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {
       if (!calledBack) {
         SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {

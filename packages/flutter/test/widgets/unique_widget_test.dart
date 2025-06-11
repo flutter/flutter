@@ -19,7 +19,7 @@ class TestUniqueWidgetState extends State<TestUniqueWidget> {
 
 void main() {
   testWidgets('Unique widget control test', (WidgetTester tester) async {
-    final TestUniqueWidget widget = TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
+    final widget = TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
 
     await tester.pumpWidget(widget);
 

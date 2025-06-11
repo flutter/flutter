@@ -63,7 +63,7 @@ Future<void> enableSkiaGoldComparator({String? namePrefix}) async {
     '  - namePrefix:  $namePrefix\n'
     '  - isPresubmit: $isPresubmit\n',
   );
-  final SkiaGoldClient skiaGoldClient = SkiaGoldClient(
+  final skiaGoldClient = SkiaGoldClient(
     _localFs.directory(tmpDir.path),
     fs: _localFs,
     process: const LocalProcessManager(),

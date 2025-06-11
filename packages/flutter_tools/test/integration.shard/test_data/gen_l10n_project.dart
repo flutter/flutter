@@ -1085,7 +1085,7 @@ void main() {
 }''';
 
   String l10nYaml({required bool useDeferredLoading, required bool useNamedParameters}) {
-    String l10nYamlString = '';
+    var l10nYamlString = '';
 
     if (useDeferredLoading) {
       l10nYamlString += 'use-deferred-loading: true\n';

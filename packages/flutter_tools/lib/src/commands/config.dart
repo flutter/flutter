@@ -166,7 +166,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
-      final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings(
         config: globals.config,
         logger: globals.logger,
         platform: globals.platform,
@@ -211,7 +211,7 @@ class ConfigCommand extends FlutterCommand {
 
   Future<void> handleMachine() async {
     // Get all the current values.
-    final Map<String, Object?> results = <String, Object?>{};
+    final results = <String, Object?>{};
     for (final String key in globals.config.keys) {
       results[key] = globals.config.getValue(key);
     }
@@ -245,7 +245,7 @@ class ConfigCommand extends FlutterCommand {
 
   /// List all config settings. for feature flags, include whether they are available.
   String get settingsText {
-    final Map<String, Feature> featuresByName = <String, Feature>{};
+    final featuresByName = <String, Feature>{};
     final String channel = globals.flutterVersion.channel;
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
@@ -253,14 +253,14 @@ class ConfigCommand extends FlutterCommand {
         featuresByName[configSetting] = feature;
       }
     }
-    final Set<String> keys = <String>{
+    final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...globals.config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
       Object? value = globals.config.getValue(key);
       value ??= '(Not set)';
-      final StringBuffer buffer = StringBuffer('  $key: $value');
+      final buffer = StringBuffer('  $key: $value');
       if (featuresByName.containsKey(key)) {
         final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
         if (!setting.available) {
@@ -269,7 +269,7 @@ class ConfigCommand extends FlutterCommand {
       }
       return buffer.toString();
     });
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('All Settings:');
     if (settings.isEmpty) {
       buffer.writeln('  No configs have been configured.');

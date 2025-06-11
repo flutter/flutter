@@ -111,7 +111,7 @@ class IntegrationTestTestDevice implements TestDevice {
         .where((vm_service.Event e) => e.extensionKind == kIntegrationTestExtension)
         .map((vm_service.Event e) => e.extensionData!.data[kIntegrationTestData] as String);
 
-    final StreamChannelController<String> controller = StreamChannelController<String>();
+    final controller = StreamChannelController<String>();
 
     controller.local.stream.listen((String event) {
       vmService.service.callServiceExtension(

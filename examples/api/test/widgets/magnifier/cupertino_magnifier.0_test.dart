@@ -40,12 +40,12 @@ void main() {
     // Make sure magnifier is present.
     final Finder positionedWidget = find.byType(Positioned);
     final Widget positionedWidgetInTree = tester.widget(positionedWidget.first);
-    final Positioned oldConcretePositioned = positionedWidgetInTree as Positioned;
+    final oldConcretePositioned = positionedWidgetInTree as Positioned;
     final Offset centerOfPositioned = tester.getCenter(positionedWidget.first);
 
     // Drag the magnifier and confirm its new position is expected.
-    const Offset dragDistance = Offset(10, 10);
-    final Offset updatedPositioned = Offset(
+    const dragDistance = Offset(10, 10);
+    final updatedPositioned = Offset(
       oldConcretePositioned.left ?? 0.0 + 10.0,
       oldConcretePositioned.top ?? 0.0 + 10.0,
     );

@@ -99,9 +99,9 @@ void main() {
 
     List<Map<String, dynamic>> genGC(String name, int count, int startTime, int timeDiff) {
       int ts = startTime;
-      bool begin = true;
-      final List<Map<String, dynamic>> ret = <Map<String, dynamic>>[];
-      for (int i = 0; i < count; i++) {
+      var begin = true;
+      final ret = <Map<String, dynamic>>[];
+      for (var i = 0; i < count; i++) {
         ret.add(<String, dynamic>{
           'name': name,
           'cat': 'GC',
@@ -127,8 +127,8 @@ void main() {
     }
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
-      final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
-      int t = 0;
+      final result = <Map<String, dynamic>>[];
+      var t = 0;
       for (final int duration in sequence) {
         result.add(begin(t));
         t += duration * 1000;
@@ -435,16 +435,16 @@ void main() {
         );
       });
 
-      const List<List<int>> sequences = <List<int>>[
+      const sequences = <List<int>>[
         <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         <int>[1, 2, 3, 4, 5],
         <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
       ];
 
-      const List<int> p90s = <int>[9, 5, 18];
+      const p90s = <int>[9, 5, 18];
 
       test('computes 90th frame rasterizer time in milliseconds', () {
-        for (int i = 0; i < sequences.length; ++i) {
+        for (var i = 0; i < sequences.length; ++i) {
           expect(
             summarize(
               rasterizeTimeSequenceInMillis(sequences[i]),
@@ -455,8 +455,8 @@ void main() {
       });
 
       test('compute 99th frame rasterizer time in milliseconds', () {
-        final List<int> sequence = <int>[];
-        for (int i = 1; i <= 100; ++i) {
+        final sequence = <int>[];
+        for (var i = 1; i <= 100; ++i) {
           sequence.add(i);
         }
         expect(
@@ -724,7 +724,7 @@ void main() {
 
     group('SceneDisplayLagSummarizer tests', () {
       SceneDisplayLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
-        final Timeline timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
+        final timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
         return SceneDisplayLagSummarizer(timeline.events!);
       }
 
@@ -790,7 +790,7 @@ void main() {
 
     group('ProfilingSummarizer tests', () {
       ProfilingSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
-        final Timeline timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
+        final timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
         return ProfilingSummarizer.fromEvents(timeline.events!);
       }
 
@@ -831,7 +831,7 @@ void main() {
 
     group('VsyncFrameLagSummarizer tests', () {
       VsyncFrameLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
-        final Timeline timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
+        final timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
         return VsyncFrameLagSummarizer(timeline.events!);
       }
 
@@ -872,9 +872,9 @@ void main() {
       });
 
       test('percentile_vsync_frame_lag', () async {
-        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-        int ts = 100;
-        for (int i = 0; i < 100; i++) {
+        final events = <Map<String, dynamic>>[];
+        var ts = 100;
+        for (var i = 0; i < 100; i++) {
           events.add(platformVsync(ts));
           ts = ts + 10 * (i + 1);
           events.add(vsyncCallback(ts));
@@ -887,9 +887,9 @@ void main() {
     });
 
     group('RefreshRateSummarizer tests', () {
-      const double kCompareDelta = 0.01;
+      const kCompareDelta = 0.01;
       RefreshRateSummary summarizeRefresh(List<Map<String, dynamic>> traceEvents) {
-        final Timeline timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
+        final timeline = Timeline.fromJson(<String, dynamic>{'traceEvents': traceEvents});
         return RefreshRateSummary(vsyncEvents: timeline.events!);
       }
 
@@ -899,9 +899,9 @@ void main() {
         required int interval,
         required int margin,
       }) {
-        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+        final events = <Map<String, dynamic>>[];
         int startTimeInNanoseconds = startTime;
-        for (int i = 0; i < numberOfEvents; i++) {
+        for (var i = 0; i < numberOfEvents; i++) {
           final int randomMargin = margin >= 1 ? (-margin + Random().nextInt(margin * 2)) : 0;
           final int endTime = startTimeInNanoseconds + interval + randomMargin;
           events.add(
@@ -917,10 +917,10 @@ void main() {
       }
 
       test('Recognize 30 hz frames.', () async {
-        const int startTimeInNanoseconds = 2750850055430;
-        const int intervalInNanoseconds = 33333333;
+        const startTimeInNanoseconds = 2750850055430;
+        const intervalInNanoseconds = 33333333;
         // allow some margins
-        const int margin = 3000000;
+        const margin = 3000000;
         final List<Map<String, dynamic>> events = populateEvents(
           numberOfEvents: 100,
           startTime: startTimeInNanoseconds,
@@ -936,10 +936,10 @@ void main() {
       });
 
       test('Recognize 60 hz frames.', () async {
-        const int startTimeInNanoseconds = 2750850055430;
-        const int intervalInNanoseconds = 16666666;
+        const startTimeInNanoseconds = 2750850055430;
+        const intervalInNanoseconds = 16666666;
         // allow some margins
-        const int margin = 1200000;
+        const margin = 1200000;
         final List<Map<String, dynamic>> events = populateEvents(
           numberOfEvents: 100,
           startTime: startTimeInNanoseconds,
@@ -956,10 +956,10 @@ void main() {
       });
 
       test('Recognize 90 hz frames.', () async {
-        const int startTimeInNanoseconds = 2750850055430;
-        const int intervalInNanoseconds = 11111111;
+        const startTimeInNanoseconds = 2750850055430;
+        const intervalInNanoseconds = 11111111;
         // allow some margins
-        const int margin = 500000;
+        const margin = 500000;
         final List<Map<String, dynamic>> events = populateEvents(
           numberOfEvents: 100,
           startTime: startTimeInNanoseconds,
@@ -976,10 +976,10 @@ void main() {
       });
 
       test('Recognize 120 hz frames.', () async {
-        const int startTimeInNanoseconds = 2750850055430;
-        const int intervalInNanoseconds = 8333333;
+        const startTimeInNanoseconds = 2750850055430;
+        const intervalInNanoseconds = 8333333;
         // allow some margins
-        const int margin = 300000;
+        const margin = 300000;
         final List<Map<String, dynamic>> events = populateEvents(
           numberOfEvents: 100,
           startTime: startTimeInNanoseconds,
@@ -995,8 +995,8 @@ void main() {
       });
 
       test('Identify illegal refresh rates.', () async {
-        const int startTimeInNanoseconds = 2750850055430;
-        const int intervalInNanoseconds = 10000000;
+        const startTimeInNanoseconds = 2750850055430;
+        const intervalInNanoseconds = 10000000;
         final List<Map<String, dynamic>> events = populateEvents(
           numberOfEvents: 1,
           startTime: startTimeInNanoseconds,
@@ -1013,13 +1013,13 @@ void main() {
       });
 
       test('Mixed refresh rates.', () async {
-        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-        const int num30Hz = 10;
-        const int num60Hz = 20;
-        const int num80Hz = 20;
-        const int num90Hz = 20;
-        const int num120Hz = 40;
-        const int numIllegal = 10;
+        final events = <Map<String, dynamic>>[];
+        const num30Hz = 10;
+        const num60Hz = 20;
+        const num80Hz = 20;
+        const num90Hz = 20;
+        const num120Hz = 40;
+        const numIllegal = 10;
         const int totalFrames = num30Hz + num60Hz + num80Hz + num90Hz + num120Hz + numIllegal;
 
         // Add 30hz frames

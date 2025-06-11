@@ -17,10 +17,10 @@ enum MenuItem {
 }
 
 void main() {
-  final List<DropdownMenuEntry<MenuItem>> menuEntries = <DropdownMenuEntry<MenuItem>>[];
+  final menuEntries = <DropdownMenuEntry<MenuItem>>[];
 
   for (final MenuItem value in MenuItem.values) {
-    final DropdownMenuEntry<MenuItem> entry = DropdownMenuEntry<MenuItem>(
+    final entry = DropdownMenuEntry<MenuItem>(
       value: value,
       label: value.label,
     );
@@ -107,7 +107,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.width, null);
 
-    const double width = 100.0;
+    const width = 100.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -131,7 +131,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.menuHeight, null);
 
-    const double menuHeight = 100.0;
+    const menuHeight = 100.0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -158,7 +158,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.leadingIcon, null);
 
-    const Icon leadingIcon = Icon(Icons.abc);
+    const leadingIcon = Icon(Icons.abc);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -185,7 +185,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.trailingIcon, null);
 
-    const Icon trailingIcon = Icon(Icons.abc);
+    const trailingIcon = Icon(Icons.abc);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -236,7 +236,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.hintText, null);
 
-    const String hintText = 'Hint';
+    const hintText = 'Hint';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -263,7 +263,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.helperText, null);
 
-    const String helperText = 'Hint';
+    const helperText = 'Hint';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -292,7 +292,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.selectedTrailingIcon, null);
 
-    const Icon selectedTrailingIcon = Icon(Icons.abc);
+    const selectedTrailingIcon = Icon(Icons.abc);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -319,7 +319,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.enableFilter, false);
 
-    const bool enableFilter = true;
+    const enableFilter = true;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -346,7 +346,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.enableSearch, true);
 
-    const bool enableSearch = false;
+    const enableSearch = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -400,7 +400,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.textStyle, null);
 
-    const TextStyle textStyle = TextStyle(fontWeight: FontWeight.bold);
+    const textStyle = TextStyle(fontWeight: FontWeight.bold);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -456,7 +456,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.inputDecorationTheme, null);
 
-    const InputDecorationTheme inputDecorationTheme = InputDecorationTheme();
+    const inputDecorationTheme = InputDecorationTheme();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -483,7 +483,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.menuStyle, null);
 
-    const MenuStyle menuStyle = MenuStyle();
+    const menuStyle = MenuStyle();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -510,7 +510,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.controller, null);
 
-    final TextEditingController controller = TextEditingController();
+    final controller = TextEditingController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -539,7 +539,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.focusNode, null);
 
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -568,7 +568,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.requestFocusOnTap, null);
 
-    const bool requestFocusOnTap = true;
+    const requestFocusOnTap = true;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -718,7 +718,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.inputFormatters, null);
 
-    final List<TextInputFormatter> inputFormatters = <TextInputFormatter>[];
+    final inputFormatters = <TextInputFormatter>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -772,7 +772,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.maxLines, 1);
 
-    const int maxLines = 3;
+    const maxLines = 3;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -826,7 +826,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.restorationId, null);
 
-    const String restorationId = 'dropdown_menu';
+    const restorationId = 'dropdown_menu';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -845,7 +845,7 @@ void main() {
   });
 
   testWidgets('Field state is correcly updated', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -871,7 +871,7 @@ void main() {
   testWidgets('onSaved callback is called when the field is outside a Form', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     MenuItem? savedValue = MenuItem.menuItem0;
     await tester.pumpWidget(
@@ -904,7 +904,7 @@ void main() {
   testWidgets('onSaved callback is called when the field is inside a Form', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     MenuItem? savedValue = MenuItem.menuItem0;
     await tester.pumpWidget(
@@ -937,7 +937,7 @@ void main() {
   });
 
   testWidgets('Field can be reset', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     MenuItem? savedValue = MenuItem.menuItem0;
     await tester.pumpWidget(
@@ -968,7 +968,7 @@ void main() {
   });
 
   testWidgets('isValid and hasError results are correct', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -986,7 +986,7 @@ void main() {
     expect(fieldKey.currentState!.isValid, true);
     expect(fieldKey.currentState!.hasError, false);
 
-    const String validationError = 'Required';
+    const validationError = 'Required';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1006,9 +1006,9 @@ void main() {
   });
 
   testWidgets('Validation result is shown as error text', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
-    const String validationError = 'Required';
+    const validationError = 'Required';
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1032,7 +1032,7 @@ void main() {
   });
 
   testWidgets('Initial selection is applied', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1052,7 +1052,7 @@ void main() {
   testWidgets(
     'Initial selection is applied when updated and the field has not been updated in-between',
     (WidgetTester tester) async {
-      final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+      final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1087,7 +1087,7 @@ void main() {
   testWidgets(
     'Initial selection is not applied when updated and the field has been updated in-between',
     (WidgetTester tester) async {
-      final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+      final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1131,9 +1131,9 @@ void main() {
   );
 
   testWidgets('Selected value is restorable', (WidgetTester tester) async {
-    final GlobalKey<FormFieldState<MenuItem>> formFieldState =
+    final formFieldState =
         GlobalKey<FormFieldState<MenuItem>>();
-    const String restorationId = 'dropdown_menu_form_field';
+    const restorationId = 'dropdown_menu_form_field';
 
     await tester.pumpWidget(
       MaterialApp(

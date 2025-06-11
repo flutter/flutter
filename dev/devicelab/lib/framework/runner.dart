@@ -47,8 +47,8 @@ Future<void> runTasks(
   @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
-    TaskResult result = TaskResult.success(null);
-    int failureCount = 0;
+    var result = TaskResult.success(null);
+    var failureCount = 0;
     while (failureCount <= MetricsResultWriter.retryNumber) {
       result = await rerunTask(
         taskName,
@@ -137,7 +137,7 @@ Future<TaskResult> rerunTask(
   section('Finished task "$taskName"');
 
   if (resultsPath != null) {
-    final MetricsResultWriter cocoon = MetricsResultWriter();
+    final cocoon = MetricsResultWriter();
     await cocoon.writeTaskResultToFile(
       builderName: luciBuilder,
       gitBranch: gitBranch,
@@ -171,7 +171,7 @@ Future<TaskResult> runTask(
   bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
-  final String taskExecutable = 'bin/tasks/$taskName.dart';
+  final taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync()) {
     print('Executable Dart file not found: $taskExecutable');
@@ -202,7 +202,7 @@ Future<TaskResult> runTask(
     environment: <String, String>{if (deviceId != null) DeviceIdEnvName: deviceId},
   );
 
-  bool runnerFinished = false;
+  var runnerFinished = false;
 
   unawaited(
     runner.exitCode.whenComplete(() {
@@ -210,7 +210,7 @@ Future<TaskResult> runTask(
     }),
   );
 
-  final Completer<Uri> uri = Completer<Uri>();
+  final uri = Completer<Uri>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
@@ -254,7 +254,7 @@ Future<TaskResult> runTask(
     // Notify the task process that the task result has been received and it
     // can proceed to shutdown.
     await _acknowledgeTaskResultReceived(service: service, isolateId: isolateId);
-    final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
+    final taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
     return taskResult;
@@ -272,13 +272,13 @@ Future<TaskResult> runTask(
 }
 
 Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
-  final List<String> pathSegments = <String>[
+  final pathSegments = <String>[
     // Add authentication code.
     if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
     'ws',
   ];
-  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments: pathSegments).toString();
-  final Stopwatch stopwatch = Stopwatch()..start();
+  final url = vmServiceUri.replace(scheme: 'ws', pathSegments: pathSegments).toString();
+  final stopwatch = Stopwatch()..start();
 
   while (true) {
     try {

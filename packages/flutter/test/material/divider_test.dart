@@ -11,7 +11,7 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final decoration = container.decoration! as BoxDecoration;
     expect(decoration.border!.bottom.width, 1.0);
   });
 
@@ -22,7 +22,7 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final decoration = container.decoration! as BoxDecoration;
     expect(decoration.border!.bottom.width, 0.0);
   });
 
@@ -34,7 +34,7 @@ void main() {
       ),
     );
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final decoration = container.decoration! as BoxDecoration;
     expect(decoration.border!.bottom.width, 5.0);
   });
 
@@ -46,8 +46,8 @@ void main() {
       ),
     );
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
-    final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+    final decoration = container.decoration! as BoxDecoration;
+    final borderRadius = decoration.borderRadius! as BorderRadius;
     expect(borderRadius.bottomLeft, const Radius.circular(5));
     expect(borderRadius.bottomRight, const Radius.circular(5));
     expect(borderRadius.topLeft, const Radius.circular(5));
@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
-    const double customIndent = 10.0;
+    const customIndent = 10.0;
     Rect dividerRect;
     Rect lineRect;
 
@@ -99,8 +99,8 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
-    final Border border = decoration.border! as Border;
+    final decoration = container.decoration! as BoxDecoration;
+    final border = decoration.border! as Border;
     expect(border.left.width, 1.0);
   });
 
@@ -114,8 +114,8 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
-    final Border border = decoration.border! as Border;
+    final decoration = container.decoration! as BoxDecoration;
+    final border = decoration.border! as Border;
     expect(border.left.width, 0.0);
   });
 
@@ -127,8 +127,8 @@ void main() {
       ),
     );
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
-    final Border border = decoration.border! as Border;
+    final decoration = container.decoration! as BoxDecoration;
+    final border = decoration.border! as Border;
     expect(border.left.width, 5.0);
   });
 
@@ -153,7 +153,7 @@ void main() {
   });
 
   testWidgets('Vertical divider custom indentation', (WidgetTester tester) async {
-    const double customIndent = 10.0;
+    const customIndent = 10.0;
     Rect dividerRect;
     Rect lineRect;
 
@@ -200,8 +200,8 @@ void main() {
       ),
     );
     final Container container = tester.widget(find.byType(Container));
-    final BoxDecoration decoration = container.decoration! as BoxDecoration;
-    final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+    final decoration = container.decoration! as BoxDecoration;
+    final borderRadius = decoration.borderRadius! as BorderRadius;
     expect(borderRadius.bottomLeft, const Radius.circular(5));
     expect(borderRadius.bottomRight, const Radius.circular(5));
     expect(borderRadius.topLeft, const Radius.circular(5));

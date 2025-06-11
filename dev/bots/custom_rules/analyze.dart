@@ -39,7 +39,7 @@ Future<void> analyzeWithRules(
         (String relativePath) => path.canonicalize('$flutterRootDirectory/$relativePath'),
       ) ??
       <String>[path.canonicalize(flutterRootDirectory)];
-  final AnalysisContextCollection collection = AnalysisContextCollection(
+  final collection = AnalysisContextCollection(
     includedPaths: includes.toList(),
     excludedPaths:
         excludePaths
@@ -47,12 +47,12 @@ Future<void> analyzeWithRules(
             .toList(),
   );
 
-  final List<String> analyzerErrors = <String>[];
+  final analyzerErrors = <String>[];
   for (final AnalysisContext context in collection.contexts) {
     final Iterable<String> analyzedFilePaths = context.contextRoot.analyzedFiles();
     final AnalysisSession session = context.currentSession;
 
-    for (final String filePath in analyzedFilePaths) {
+    for (final filePath in analyzedFilePaths) {
       final SomeResolvedUnitResult unit = await session.getResolvedUnit(filePath);
       if (unit is ResolvedUnitResult) {
         for (final AnalyzeRule rule in rules) {

@@ -9,16 +9,16 @@ import 'common.dart';
 
 void main() {
   test('ABTest', () {
-    final ABTest ab = ABTest(localEngine: 'engine', localEngineHost: 'engine', taskName: 'test');
+    final ab = ABTest(localEngine: 'engine', localEngineHost: 'engine', taskName: 'test');
 
-    for (int i = 0; i < 5; i++) {
-      final TaskResult aResult = TaskResult.fromJson(<String, dynamic>{
+    for (var i = 0; i < 5; i++) {
+      final aResult = TaskResult.fromJson(<String, dynamic>{
         'success': true,
         'data': <String, dynamic>{'i': i, 'j': 10 * i, 'not_a_metric': 'something'},
         'benchmarkScoreKeys': <String>['i', 'j'],
       });
       ab.addAResult(aResult);
-      final TaskResult bResult = TaskResult.fromJson(<String, dynamic>{
+      final bResult = TaskResult.fromJson(<String, dynamic>{
         'success': true,
         'data': <String, dynamic>{'i': i + 1, 'k': 10 * i + 1},
         'benchmarkScoreKeys': <String>['i', 'k'],

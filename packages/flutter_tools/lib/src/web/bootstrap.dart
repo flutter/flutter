@@ -583,11 +583,11 @@ String generateTestEntrypoint({
   required List<WebTestInfo> testInfos,
   required LanguageVersion languageVersion,
 }) {
-  final List<String> importMainStatements = <String>[];
-  final List<String> importTestConfigStatements = <String>[];
-  final List<String> webTestPairs = <String>[];
+  final importMainStatements = <String>[];
+  final importTestConfigStatements = <String>[];
+  final webTestPairs = <String>[];
 
-  for (int index = 0; index < testInfos.length; index++) {
+  for (var index = 0; index < testInfos.length; index++) {
     final WebTestInfo testInfo = testInfos[index];
     final String entryPointPath = testInfo.entryPoint;
     importMainStatements.add(
@@ -663,7 +663,7 @@ String generateTestBootstrapFileContents(String mainUri, String requireUrl, Stri
 }
 
 String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
-  final String serviceWorkerSettings =
+  final serviceWorkerSettings =
       includeServiceWorkerSettings
           ? '''
 {

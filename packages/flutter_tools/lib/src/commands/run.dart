@@ -528,9 +528,9 @@ class RunCommand extends RunCommandBase {
       (() async {
         String deviceType, deviceOsVersion;
         bool isEmulator;
-        bool anyAndroidDevices = false;
-        bool anyIOSDevices = false;
-        bool anyWirelessIOSDevices = false;
+        var anyAndroidDevices = false;
+        var anyIOSDevices = false;
+        var anyWirelessIOSDevices = false;
 
         if (devices == null || devices!.isEmpty) {
           deviceType = 'none';
@@ -570,7 +570,7 @@ class RunCommand extends RunCommandBase {
         }
 
         String? androidEmbeddingVersion;
-        final List<String> hostLanguage = <String>[];
+        final hostLanguage = <String>[];
         if (anyAndroidDevices) {
           final AndroidProject androidProject = FlutterProject.current().android;
           if (androidProject.existsSync()) {
@@ -805,7 +805,7 @@ class RunCommand extends RunCommandBase {
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
-    final List<FlutterDevice> flutterDevices = <FlutterDevice>[
+    final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
@@ -829,7 +829,7 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics.
     //
     // Do not add more operations to the future.
-    final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
+    final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
     // This callback can't throw.

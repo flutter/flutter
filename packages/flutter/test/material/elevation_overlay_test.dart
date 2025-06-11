@@ -13,8 +13,8 @@ void main() {
   });
 
   test('applySurfaceTint with exact elevation levels uses the right opacity overlay', () {
-    const Color baseColor = Color(0xff888888);
-    const Color surfaceTintColor = Color(0xff44CCFF);
+    const baseColor = Color(0xff888888);
+    const surfaceTintColor = Color(0xff44CCFF);
 
     Color overlayWithOpacity(double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
@@ -61,8 +61,8 @@ void main() {
   });
 
   test('applySurfaceTint with elevation lower than level 0 should have no overlay', () {
-    const Color baseColor = Color(0xff888888);
-    const Color surfaceTintColor = Color(0xff44CCFF);
+    const baseColor = Color(0xff888888);
+    const surfaceTintColor = Color(0xff44CCFF);
 
     Color overlayWithOpacity(double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
@@ -75,8 +75,8 @@ void main() {
   });
 
   test('applySurfaceTint with elevation higher than level 5 should have no level 5 overlay', () {
-    const Color baseColor = Color(0xff888888);
-    const Color surfaceTintColor = Color(0xff44CCFF);
+    const baseColor = Color(0xff888888);
+    const surfaceTintColor = Color(0xff44CCFF);
 
     Color overlayWithOpacity(double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
@@ -90,8 +90,8 @@ void main() {
   });
 
   test('applySurfaceTint with elevation between two levels should interpolate the opacity', () {
-    const Color baseColor = Color(0xff888888);
-    const Color surfaceTintColor = Color(0xff44CCFF);
+    const baseColor = Color(0xff888888);
+    const surfaceTintColor = Color(0xff44CCFF);
 
     Color overlayWithOpacity(double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);

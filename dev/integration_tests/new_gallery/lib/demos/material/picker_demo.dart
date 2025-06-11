@@ -69,8 +69,8 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   static Route<TimeOfDay> _timePickerRoute(BuildContext context, Object? arguments) {
-    final List<Object> args = arguments! as List<Object>;
-    final TimeOfDay initialTime = TimeOfDay(hour: args[0] as int, minute: args[1] as int);
+    final args = arguments! as List<Object>;
+    final initialTime = TimeOfDay(hour: args[0] as int, minute: args[1] as int);
 
     return DialogRoute<TimeOfDay>(
       context: context,
@@ -146,7 +146,7 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   String get _labelText {
-    final DateFormat yMMMd = DateFormat.yMMMd();
+    final yMMMd = DateFormat.yMMMd();
     return switch (widget.type) {
       PickerDemoType.date => yMMMd.format(_fromDate.value),
       PickerDemoType.time => _fromTime.value.format(context),

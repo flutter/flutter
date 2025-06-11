@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Tooltip is visible when hovering over text', (WidgetTester tester) async {
-    const String tooltipText = 'I am a rich tooltip. I am another span of this rich tooltip';
+    const tooltipText = 'I am a rich tooltip. I am another span of this rich tooltip';
 
     await tester.pumpWidget(const example.TooltipExampleApp());
 

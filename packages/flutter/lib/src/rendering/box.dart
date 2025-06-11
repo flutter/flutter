@@ -290,7 +290,7 @@ class BoxConstraints extends Constraints {
   ///  * [constrainDimensions], which applies the same algorithm to
   ///    separately provided widths and heights.
   Size constrain(Size size) {
-    Size result = Size(constrainWidth(size.width), constrainHeight(size.height));
+    var result = Size(constrainWidth(size.width), constrainHeight(size.height));
     assert(() {
       result = _debugPropagateDebugSize(size, result);
       return true;
@@ -352,7 +352,7 @@ class BoxConstraints extends Constraints {
       width = height * aspectRatio;
     }
 
-    Size result = Size(constrainWidth(width), constrainHeight(height));
+    var result = Size(constrainWidth(width), constrainHeight(height));
     assert(() {
       result = _debugPropagateDebugSize(size, result);
       return true;
@@ -556,7 +556,7 @@ class BoxConstraints extends Constraints {
       }
 
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
-        final List<String> affectedFieldsList = <String>[
+        final affectedFieldsList = <String>[
           if (minWidth.isNaN) 'minWidth',
           if (maxWidth.isNaN) 'maxWidth',
           if (minHeight.isNaN) 'minHeight',
@@ -661,7 +661,7 @@ class BoxConstraints extends Constraints {
 
   @override
   String toString() {
-    final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
+    final annotation = isNormalized ? '' : '; NOT NORMALIZED';
     if (minWidth == double.infinity && minHeight == double.infinity) {
       return 'BoxConstraints(biggest$annotation)';
     }
@@ -1585,7 +1585,7 @@ abstract class RenderBox extends RenderObject {
     assert(
       RenderObject.debugCheckingIntrinsics || !debugDoingThisResize,
     ); // performResize should not depend on anything except the incoming constraints
-    bool shouldCache = true;
+    var shouldCache = true;
     assert(() {
       // we don't want the debug-mode intrinsic tests to affect
       // who gets marked dirty, etc.
@@ -2136,7 +2136,7 @@ abstract class RenderBox extends RenderObject {
       _computingThisDryBaseline = true;
       return true;
     }());
-    final BaselineOffset result = BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
+    final result = BaselineOffset(computeDryBaseline(pair.$1, pair.$2));
     assert(() {
       assert(_computingThisDryBaseline);
       _computingThisDryBaseline = false;
@@ -2318,7 +2318,7 @@ abstract class RenderBox extends RenderObject {
         return true;
       }
       assert(!debugDoingThisResize);
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[
+      final information = <DiagnosticsNode>[
         ErrorSummary('RenderBox size setter called incorrectly.'),
       ];
       if (debugDoingThisLayout) {
@@ -2586,7 +2586,7 @@ abstract class RenderBox extends RenderObject {
       }
       // verify that the size is not infinite
       if (!_size!.isFinite) {
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+        final information = <DiagnosticsNode>[
           ErrorSummary('$runtimeType object was given an infinite size during layout.'),
           ErrorDescription(
             'This probably means that it is a render object that tries to be '
@@ -2595,7 +2595,7 @@ abstract class RenderBox extends RenderObject {
           ),
         ];
         if (!constraints.hasBoundedWidth) {
-          RenderBox node = this;
+          var node = this;
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox) {
             node = node.parent! as RenderBox;
           }
@@ -2607,7 +2607,7 @@ abstract class RenderBox extends RenderObject {
           );
         }
         if (!constraints.hasBoundedHeight) {
-          RenderBox node = this;
+          var node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox) {
             node = node.parent! as RenderBox;
           }
@@ -2653,7 +2653,7 @@ abstract class RenderBox extends RenderObject {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
-        final List<DiagnosticsNode> failures = <DiagnosticsNode>[];
+        final failures = <DiagnosticsNode>[];
 
         double testIntrinsic(
           double Function(double extent) function,
@@ -2774,7 +2774,7 @@ abstract class RenderBox extends RenderObject {
 
   void _debugVerifyDryBaselines() {
     assert(() {
-      final List<DiagnosticsNode> messages = <DiagnosticsNode>[
+      final messages = <DiagnosticsNode>[
         ErrorDescription('The constraints used were $constraints.'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
@@ -3034,7 +3034,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     final Offset offset = childParentData.offset;
     transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
@@ -3071,7 +3071,7 @@ abstract class RenderBox extends RenderObject {
     if (det == 0.0) {
       return Offset.zero;
     }
-    final Vector3 n = Vector3(0.0, 0.0, 1.0);
+    final n = Vector3(0.0, 0.0, 1.0);
     final Vector3 i = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
     final Vector3 d = transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - i;
     final Vector3 s = transform.perspectiveTransform(Vector3(point.dx, point.dy, 0.0));
@@ -3213,7 +3213,7 @@ abstract class RenderBox extends RenderObject {
   @visibleForTesting
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-      final Paint paint =
+      final paint =
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.0
@@ -3229,7 +3229,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
-      final Paint paint =
+      final paint =
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 0.25;
@@ -3267,7 +3267,7 @@ abstract class RenderBox extends RenderObject {
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {
-        final Paint paint = Paint()..color = Color(0x00BBBB | ((0x04000000 * depth) & 0xFF000000));
+        final paint = Paint()..color = Color(0x00BBBB | ((0x04000000 * depth) & 0xFF000000));
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
@@ -3300,7 +3300,7 @@ mixin RenderBoxContainerDefaultsMixin<
     assert(!debugNeedsLayout);
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final childParentData = child.parentData! as ParentDataType;
       final double? result = child.getDistanceToActualBaseline(baseline);
       if (result != null) {
         return result + childParentData.offset.dy;
@@ -3319,7 +3319,7 @@ mixin RenderBoxContainerDefaultsMixin<
     BaselineOffset minBaseline = BaselineOffset.noBaseline;
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final childParentData = child.parentData! as ParentDataType;
       final BaselineOffset candidate =
           BaselineOffset(child.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy;
       minBaseline = minBaseline.minOf(candidate);
@@ -3341,7 +3341,7 @@ mixin RenderBoxContainerDefaultsMixin<
     ChildType? child = lastChild;
     while (child != null) {
       // The x, y parameters have the top left of the node's box as the origin.
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final childParentData = child.parentData! as ParentDataType;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -3367,7 +3367,7 @@ mixin RenderBoxContainerDefaultsMixin<
   void defaultPaint(PaintingContext context, Offset offset) {
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final childParentData = child.parentData! as ParentDataType;
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
@@ -3379,10 +3379,10 @@ mixin RenderBoxContainerDefaultsMixin<
   /// this render object. If you're accessing the children in order, consider
   /// walking the child list directly.
   List<ChildType> getChildrenAsList() {
-    final List<ChildType> result = <ChildType>[];
+    final result = <ChildType>[];
     RenderBox? child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData! as ParentDataType;
+      final childParentData = child.parentData! as ParentDataType;
       result.add(child as ChildType);
       child = childParentData.nextSibling;
     }

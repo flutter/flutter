@@ -21,7 +21,7 @@ Future<void> main() async {
       IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   test('Prints an appropriate message on socket exception', () async {
-    bool gotStateError = false;
+    var gotStateError = false;
     try {
       await binding.enableTimeline(httpClient: SocketExceptionHttpClient());
     } on StateError catch (e) {

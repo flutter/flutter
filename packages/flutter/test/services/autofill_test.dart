@@ -12,7 +12,7 @@ void main() {
 
   group('AutofillClient', () {
     late FakeTextChannel fakeTextChannel;
-    final FakeAutofillScope scope = FakeAutofillScope();
+    final scope = FakeAutofillScope();
 
     setUp(() {
       fakeTextChannel = FakeTextChannel((MethodCall call) async {});
@@ -43,10 +43,10 @@ void main() {
     test(
       'AutofillClients send the correct configuration to the platform and responds to updateEditingStateWithTag method correctly',
       () async {
-        final FakeAutofillClient client1 = FakeAutofillClient(
+        final client1 = FakeAutofillClient(
           const TextEditingValue(text: 'test1'),
         );
-        final FakeAutofillClient client2 = FakeAutofillClient(
+        final client2 = FakeAutofillClient(
           const TextEditingValue(text: 'test2'),
         );
 
@@ -83,7 +83,7 @@ void main() {
           MethodCall('TextInput.setClient', <dynamic>[1, expectedConfiguration]),
         ]);
 
-        const TextEditingValue text2 = TextEditingValue(text: 'Text 2');
+        const text2 = TextEditingValue(text: 'Text 2');
         fakeTextChannel.incoming?.call(
           MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
             0,

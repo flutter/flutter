@@ -629,7 +629,7 @@ class _RenderMagnification extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     final Offset thisCenter = Alignment.center.alongSize(size) + offset;
-    final Matrix4 matrix =
+    final matrix =
         Matrix4.identity()
           ..translateByDouble(
             magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
@@ -638,7 +638,7 @@ class _RenderMagnification extends RenderProxyBox {
             1,
           )
           ..scaleByDouble(magnificationScale, magnificationScale, magnificationScale, 1);
-    final ImageFilter filter = ImageFilter.matrix(
+    final filter = ImageFilter.matrix(
       matrix.storage,
       filterQuality: FilterQuality.high,
     );

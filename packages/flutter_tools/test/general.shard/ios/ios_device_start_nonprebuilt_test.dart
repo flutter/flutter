@@ -134,7 +134,7 @@ void main() {
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
         );
-        final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+        final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
@@ -197,7 +197,7 @@ void main() {
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
         );
-        final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+        final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
@@ -235,7 +235,7 @@ void main() {
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
         );
-        final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+        final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
@@ -312,7 +312,7 @@ void main() {
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
         );
-        final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+        final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
@@ -417,7 +417,7 @@ void main() {
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
         );
-        final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+        final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
@@ -452,7 +452,7 @@ void main() {
           ),
         );
 
-        final FakeAsync fakeAsync = FakeAsync();
+        final fakeAsync = FakeAsync();
         final Future<LaunchResult> pendingResult = fakeAsync.run((_) async {
           return iosDevice.startApp(
             buildableIOSApp,
@@ -531,7 +531,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -577,7 +577,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -623,7 +623,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -657,7 +657,7 @@ void main() {
       testUsingContext(
         'ensure arguments passed to launch',
         () async {
-          final FakeIOSCoreDeviceControl coreDeviceControl = FakeIOSCoreDeviceControl();
+          final coreDeviceControl = FakeIOSCoreDeviceControl();
           final IOSDevice iosDevice = setUpIOSDevice(
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
@@ -670,7 +670,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -731,7 +731,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -740,7 +740,7 @@ void main() {
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
               .createSync(recursive: true);
 
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           iosDevice.portForwarder = const NoOpDevicePortForwarder();
           iosDevice.setLogReader(buildableIOSApp, deviceLogReader);
@@ -801,7 +801,7 @@ void main() {
         testUsingContext(
           'succeeds',
           () async {
-            const String flavor = 'free';
+            const flavor = 'free';
             final IOSDevice iosDevice = setUpIOSDevice(
               fileSystem: fileSystem,
               processManager: FakeProcessManager.any(),
@@ -827,7 +827,7 @@ void main() {
             final FlutterProject flutterProject = FlutterProject.fromDirectory(
               fileSystem.currentDirectory,
             );
-            final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+            final buildableIOSApp = BuildableIOSApp(
               flutterProject.ios,
               'flutter',
               'My Super Awesome App',
@@ -836,7 +836,7 @@ void main() {
                 .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
                 .createSync(recursive: true);
 
-            final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+            final deviceLogReader = FakeDeviceLogReader();
 
             iosDevice.portForwarder = const NoOpDevicePortForwarder();
             iosDevice.setLogReader(buildableIOSApp, deviceLogReader);
@@ -883,8 +883,8 @@ void main() {
       testUsingContext(
         'updates Generated.xcconfig before and after launch',
         () async {
-          final Completer<void> debugStartedCompleter = Completer<void>();
-          final Completer<void> debugEndedCompleter = Completer<void>();
+          final debugStartedCompleter = Completer<void>();
+          final debugEndedCompleter = Completer<void>();
           final IOSDevice iosDevice = setUpIOSDevice(
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
@@ -911,7 +911,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -920,7 +920,7 @@ void main() {
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
               .createSync(recursive: true);
 
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           iosDevice.portForwarder = const NoOpDevicePortForwarder();
           iosDevice.setLogReader(buildableIOSApp, deviceLogReader);
@@ -990,7 +990,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -1044,7 +1044,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -1099,7 +1099,7 @@ void main() {
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
           );
-          final BuildableIOSApp buildableIOSApp = BuildableIOSApp(
+          final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
@@ -1108,7 +1108,7 @@ void main() {
               .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
               .createSync(recursive: true);
 
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           iosDevice.portForwarder = const NoOpDevicePortForwarder();
           iosDevice.setLogReader(buildableIOSApp, deviceLogReader);
@@ -1184,7 +1184,7 @@ IOSDevice setUpIOSDevice({
   DarwinArch cpuArchitecture = DarwinArch.arm64,
 }) {
   artifacts ??= Artifacts.test();
-  final Cache cache = Cache.test(
+  final cache = Cache.test(
     artifacts: <ArtifactSet>[FakeDyldEnvironmentArtifact()],
     processManager: FakeProcessManager.any(),
   );

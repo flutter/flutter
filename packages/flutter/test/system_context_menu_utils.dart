@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart' show FlutterError;
 /// Returns a [IOSSystemContextMenuItem] of the correct subclass given its
 /// json data.
 IOSSystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynamic> json) {
-  final String? type = json['type'] as String?;
-  final String? title = json['title'] as String?;
+  final type = json['type'] as String?;
+  final title = json['title'] as String?;
   return switch (type) {
     'copy' => const IOSSystemContextMenuItemDataCopy(),
     'cut' => const IOSSystemContextMenuItemDataCut(),

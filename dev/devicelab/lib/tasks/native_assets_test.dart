@@ -39,7 +39,7 @@ TaskFunction createNativeAssetsTest({
           packageDirectory.uri.resolve('example/').toFilePath(),
         );
 
-        final List<String> options = <String>[
+        final options = <String>[
           '-d',
           deviceIdOverride!,
           '--no-android-gradle-daemon',
@@ -48,9 +48,9 @@ TaskFunction createNativeAssetsTest({
           '--uninstall-first',
           '--$buildMode',
         ];
-        int transitionCount = 0;
-        bool done = false;
-        bool error = false;
+        var transitionCount = 0;
+        var done = false;
+        var error = false;
 
         await inDirectory<void>(exampleDirectory, () async {
           final int runFlutterResult = await runFlutter(
@@ -100,7 +100,7 @@ TaskFunction createNativeAssetsTest({
           }
         });
 
-        final int expectedNumberOfTransitions = buildMode == 'debug' ? 4 : 1;
+        final expectedNumberOfTransitions = buildMode == 'debug' ? 4 : 1;
         if (transitionCount != expectedNumberOfTransitions) {
           return TaskResult.failure(
             'Did not get expected number of transitions: $transitionCount '
@@ -126,8 +126,8 @@ Future<int> runFlutter({
 }) async {
   final Process process = await startFlutter('run', options: options);
 
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
   process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
     String line,
   ) {
@@ -155,7 +155,7 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
     packageName,
   ], workingDirectory: tempDirectory.path);
 
-  final Directory packageDirectory = Directory(path.join(tempDirectory.path, packageName));
+  final packageDirectory = Directory(path.join(tempDirectory.path, packageName));
   await _pinDependencies(File(path.join(packageDirectory.path, 'pubspec.yaml')));
   await _pinDependencies(File(path.join(packageDirectory.path, 'example', 'pubspec.yaml')));
 

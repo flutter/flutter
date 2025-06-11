@@ -23,7 +23,7 @@ void main() {
 
   testUsingContext('precache should acquire lock', () async {
     final Platform platform = FakePlatform(environment: <String, String>{});
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       platform: platform,
@@ -39,7 +39,7 @@ void main() {
       operatingSystem: 'windows',
       environment: <String, String>{'FLUTTER_ROOT': 'flutter', 'FLUTTER_ALREADY_LOCKED': 'true'},
     );
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
@@ -53,7 +53,7 @@ void main() {
   testUsingContext(
     'precache downloads web artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -76,7 +76,7 @@ void main() {
   testUsingContext(
     'precache does not download web artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
@@ -96,7 +96,7 @@ void main() {
   testUsingContext(
     'precache downloads macOS artifacts on dev branch when macOS is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -119,7 +119,7 @@ void main() {
   testUsingContext(
     'precache does not download macOS artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
@@ -139,7 +139,7 @@ void main() {
   testUsingContext(
     'precache downloads Windows artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
@@ -162,7 +162,7 @@ void main() {
   testUsingContext(
     'precache does not download Windows artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
@@ -182,7 +182,7 @@ void main() {
   testUsingContext(
     'precache downloads Linux artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -205,7 +205,7 @@ void main() {
   testUsingContext(
     'precache does not download Linux artifacts on dev branch when feature is enabled.',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
@@ -223,7 +223,7 @@ void main() {
   );
 
   testUsingContext('precache exits if requesting mismatched artifacts.', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
@@ -239,7 +239,7 @@ void main() {
   });
 
   testUsingContext('precache adds artifact flags to requested artifacts', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(
@@ -281,7 +281,7 @@ void main() {
   });
 
   testUsingContext('precache expands android artifacts when the android flag is used', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
@@ -300,7 +300,7 @@ void main() {
   });
 
   testUsingContext('precache adds artifact flags to requested android artifacts', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
@@ -326,7 +326,7 @@ void main() {
   });
 
   testUsingContext('precache downloads iOS and Android artifacts by default', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
@@ -348,7 +348,7 @@ void main() {
   });
 
   testUsingContext('precache --all-platforms gets all artifacts', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(
@@ -384,7 +384,7 @@ void main() {
   testUsingContext(
     'precache with default artifacts does not override platform filtering',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
@@ -400,7 +400,7 @@ void main() {
   testUsingContext(
     'precache with explicit artifact options overrides platform filtering',
     () async {
-      final PrecacheCommand command = PrecacheCommand(
+      final command = PrecacheCommand(
         cache: cache,
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -430,7 +430,7 @@ void main() {
 
   testUsingContext('precache deletes artifact stampfiles when --force is provided', () async {
     cache.isUpToDateValue = true;
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
@@ -442,7 +442,7 @@ void main() {
   });
 
   testUsingContext('precache downloads all enabled platforms if no flags are provided.', () async {
-    final PrecacheCommand command = PrecacheCommand(
+    final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(

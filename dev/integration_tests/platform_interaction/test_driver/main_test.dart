@@ -16,7 +16,7 @@ void main() {
     test('step through', () async {
       final SerializableFinder stepButton = find.byValueKey('step');
       final SerializableFinder statusField = find.byValueKey('status');
-      int step = 0;
+      var step = 0;
       while (await driver.getText(statusField) == 'ok') {
         await driver.tap(stepButton);
         step++;

@@ -719,7 +719,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapDown({required PointerDownEvent down}) {
-    final TapDownDetails details = TapDownDetails(
+    final details = TapDownDetails(
       globalPosition: down.position,
       localPosition: down.localPosition,
       kind: getKindForPointer(down.pointer),
@@ -744,7 +744,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({required PointerDownEvent down, required PointerUpEvent up}) {
-    final TapUpDetails details = TapUpDetails(
+    final details = TapUpDetails(
       kind: up.kind,
       globalPosition: up.position,
       localPosition: up.localPosition,
@@ -776,7 +776,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   @override
   void handleTapMove({required PointerMoveEvent move}) {
     if (onTapMove != null && move.buttons == kPrimaryButton) {
-      final TapMoveDetails details = TapMoveDetails(
+      final details = TapMoveDetails(
         globalPosition: move.position,
         localPosition: move.localPosition,
         kind: getKindForPointer(move.pointer),

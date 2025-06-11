@@ -32,7 +32,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of macOS key codes to physical keys.
   String get _scanCodeMap {
-    final OutputLines<int> lines = OutputLines<int>('macOS scancode map');
+    final lines = OutputLines<int>('macOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.macOSScanCode != null) {
         lines.add(
@@ -45,7 +45,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
   }
 
   String get _keyCodeToLogicalMap {
-    final OutputLines<int> lines = OutputLines<int>('macOS keycode map');
+    final lines = OutputLines<int>('macOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.macOSKeyCodeValues, entry.macOSKeyCodeNames, (
         int macOSValue,
@@ -62,9 +62,9 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
-    final StringBuffer buffer = StringBuffer();
-    const List<MaskConstant> maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kMacosPlane];
-    for (final MaskConstant constant in maskConstants) {
+    final buffer = StringBuffer();
+    const maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kMacosPlane];
+    for (final constant in maskConstants) {
       buffer.writeln(
         'const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};',
       );
@@ -74,7 +74,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates a map from the key code to a modifier flag.
   String get _keyToModifierFlagMap {
-    final StringBuffer modifierKeyMap = StringBuffer();
+    final modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
       modifierKeyMap.writeln(
         '  @${toHex(logicalData.entryByName(name).macOSKeyCodeValues[0])} : @(kModifierFlag${lowerCamelToUpperCamel(name)}),',
@@ -85,7 +85,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates a map from the modifier flag to the key code.
   String get _modifierFlagToKeyMap {
-    final StringBuffer modifierKeyMap = StringBuffer();
+    final modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
       modifierKeyMap.writeln(
         '  @(kModifierFlag${lowerCamelToUpperCamel(name)}) : @${toHex(logicalData.entryByName(name).macOSKeyCodeValues[0])},',
@@ -96,7 +96,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates some keys that needs special attention.
   String get _specialKeyConstants {
-    final StringBuffer specialKeyConstants = StringBuffer();
+    final specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialPhysicalKeys) {
       specialKeyConstants.writeln(
         'const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.entryByName(keyName).usbHidCode)};',
@@ -112,11 +112,11 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
 
   final Map<String, bool> _layoutGoals;
   String get _layoutGoalsString {
-    final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
+    final lines = OutputLines<int>('macOS layout goals');
     _layoutGoals.forEach((String name, bool mandatory) {
       final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
-      final String line =
+      final line =
           'LayoutGoal{'
           '${toHex(physicalEntry.macOSScanCode, digits: 2)}, '
           '${toHex(logicalEntry.value, digits: 2)}, '

@@ -15,7 +15,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       expect(find.widgetWithText(ListTile, 'Initial list item $i'), findsOne);
     }
 
@@ -24,7 +24,7 @@ void main() {
     expect(find.byType(SearchBar), findsOne);
 
     final double searchBarHeight = tester.getSize(find.byType(SearchBar)).height;
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     testPointer.hover(tester.getCenter(find.byType(CustomScrollView)));
     await tester.sendEventToBinding(testPointer.scroll(Offset(0.0, 2 * searchBarHeight)));
     await tester.pump();

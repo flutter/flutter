@@ -19,7 +19,7 @@ void main() {
   testWidgets(
     'ImageDecoration.lerp 1',
     (WidgetTester tester) async {
-      final MemoryImage green = MemoryImage(
+      final green = MemoryImage(
         Uint8List.fromList(<int>[
           0x89,
           0x50,
@@ -105,7 +105,7 @@ void main() {
           0x82,
         ]),
       );
-      final MemoryImage red = MemoryImage(
+      final red = MemoryImage(
         Uint8List.fromList(<int>[
           0x89,
           0x50,
@@ -192,8 +192,8 @@ void main() {
         ]),
       );
 
-      late final _ImageLoader greenLoader = _ImageLoader(green);
-      late final _ImageLoader redLoader = _ImageLoader(red);
+      late final greenLoader = _ImageLoader(green);
+      late final redLoader = _ImageLoader(red);
 
       await tester.runAsync(() async {
         await greenLoader.load();
@@ -359,7 +359,7 @@ void main() {
           return getPixel(x, y);
         }
 
-        const Color lime = Color(0xFF00FF00);
+        const lime = Color(0xFF00FF00);
         expect(getBlockPixel(0), isSameColorAs(lime)); // pure green
         expect(getBlockPixel(1), isSameColorAs(lime)); // 100% green 0% red
         expect(getBlockPixel(2), isSameColorAs(const Color(0xFF19E600)));
@@ -369,7 +369,7 @@ void main() {
         expect(getBlockPixel(6), isSameColorAs(const Color(0xFFE61900)));
         expect(getBlockPixel(7), isSameColorAs(const Color(0xFFFF0000))); // 0% green 100% red
         expect(getBlockPixel(8), isSameColorAs(const Color(0xFFFF0000))); // pure red
-        for (int index = 9; index < 40; index += 1) {
+        for (var index = 9; index < 40; index += 1) {
           expect(getBlockPixel(index), isSameColorAs(lime));
         }
       }
@@ -385,7 +385,7 @@ void main() {
   testWidgets(
     'ImageDecoration.lerp 2',
     (WidgetTester tester) async {
-      final MemoryImage cmyk = MemoryImage(
+      final cmyk = MemoryImage(
         Uint8List.fromList(<int>[
           0x89,
           0x50,
@@ -484,7 +484,7 @@ void main() {
           0x82,
         ]),
       );
-      final MemoryImage wrgb = MemoryImage(
+      final wrgb = MemoryImage(
         Uint8List.fromList(<int>[
           0x89,
           0x50,
@@ -584,8 +584,8 @@ void main() {
         ]),
       );
 
-      late final _ImageLoader cmykLoader = _ImageLoader(cmyk);
-      late final _ImageLoader wrgbLoader = _ImageLoader(wrgb);
+      late final cmykLoader = _ImageLoader(cmyk);
+      late final wrgbLoader = _ImageLoader(wrgb);
 
       await tester.runAsync(() async {
         await cmykLoader.load();
@@ -858,7 +858,7 @@ void main() {
         }
 
         Color getPixelFromBlock(int index, int dx, int dy) {
-          const int padding = 2;
+          const padding = 2;
           int x = index * 24 + dx + padding;
           final int y = (x ~/ image.width) * 24 + dy + padding;
           x %= image.width;
@@ -911,7 +911,7 @@ void main() {
   testWidgets(
     'ImageDecoration.lerp with colored background',
     (WidgetTester tester) async {
-      final MemoryImage cmyk = MemoryImage(
+      final cmyk = MemoryImage(
         Uint8List.fromList(<int>[
           0x89,
           0x50,
@@ -1010,7 +1010,7 @@ void main() {
           0x82,
         ]),
       );
-      final MemoryImage wrgb = MemoryImage(
+      final wrgb = MemoryImage(
         Uint8List.fromList(<int>[
           0x89,
           0x50,
@@ -1110,8 +1110,8 @@ void main() {
         ]),
       );
 
-      late final _ImageLoader cmykLoader = _ImageLoader(cmyk);
-      late final _ImageLoader wrgbLoader = _ImageLoader(wrgb);
+      late final cmykLoader = _ImageLoader(cmyk);
+      late final wrgbLoader = _ImageLoader(wrgb);
 
       await tester.runAsync(() async {
         await cmykLoader.load();

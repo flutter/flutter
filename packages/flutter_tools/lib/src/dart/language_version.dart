@@ -51,7 +51,7 @@ bool _inUnitTest() {
 /// The specification for the language version tag is defined at:
 /// https://github.com/dart-lang/language/blob/main/accepted/2.8/language-versioning/feature-specification.md#individual-library-language-version-override
 LanguageVersion determineLanguageVersion(File file, Package? package, String flutterRoot) {
-  int blockCommentDepth = 0;
+  var blockCommentDepth = 0;
   // If reading the file fails, default to a null-safe version. The
   // command will likely fail later in the process with a better error
   // message.
@@ -62,7 +62,7 @@ LanguageVersion determineLanguageVersion(File file, Package? package, String flu
     return currentLanguageVersion(file.fileSystem, flutterRoot);
   }
 
-  for (final String line in lines) {
+  for (final line in lines) {
     final String trimmedLine = line.trim();
     if (trimmedLine.isEmpty) {
       continue;
@@ -73,7 +73,7 @@ LanguageVersion determineLanguageVersion(File file, Package? package, String flu
     // the same line. This does not handle the case of invalid
     // block comment combinations like `*/ /*` since that will cause
     // a compilation error anyway.
-    bool sawBlockComment = false;
+    var sawBlockComment = false;
     final int startMatches = _blockCommentStart.allMatches(trimmedLine).length;
     final int endMatches = _blockCommentEnd.allMatches(trimmedLine).length;
     if (startMatches > 0) {

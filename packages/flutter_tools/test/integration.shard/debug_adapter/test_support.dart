@@ -81,7 +81,7 @@ class SimpleFlutterRunner {
         final Object? message = json.single;
         // Parse the add.debugPort event which contains our VM Service URI.
         if (message is Map<String, Object?> && message['event'] == 'app.debugPort') {
-          final String vmServiceUri =
+          final vmServiceUri =
               (message['params']! as Map<String, Object?>)['wsUri']! as String;
           if (!_vmServiceUriCompleter.isCompleted) {
             _vmServiceUriCompleter.complete(Uri.parse(vmServiceUri));
@@ -106,7 +106,7 @@ class SimpleFlutterRunner {
       globals.platform.isWindows ? 'flutter.bat' : 'flutter',
     );
 
-    final List<String> args = <String>['run', '--machine', '-d', 'flutter-tester'];
+    final args = <String>['run', '--machine', '-d', 'flutter-tester'];
 
     final Process process = await Process.start(
       flutterToolPath,

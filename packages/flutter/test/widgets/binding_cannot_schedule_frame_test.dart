@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Can only schedule frames after widget binding attaches the root widget', () async {
-    final WidgetsFlutterBindingWithTestBinaryMessenger binding =
+    final binding =
         WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);

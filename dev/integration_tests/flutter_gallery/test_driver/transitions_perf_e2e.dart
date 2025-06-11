@@ -41,7 +41,7 @@ void main([List<String> args = const <String>[]]) {
       });
 
       // Execute the remaining tests.
-      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+      final unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), tester);
     }, semanticsEnabled: withSemantics);
   });

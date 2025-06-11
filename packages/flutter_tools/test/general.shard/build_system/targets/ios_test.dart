@@ -622,7 +622,7 @@ void main() {
     'AotAssemblyRelease throws exception if asked to build for simulator',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{
           kTargetPlatform: 'ios',
@@ -659,7 +659,7 @@ void main() {
     'AotAssemblyRelease throws exception if sdk root is missing',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kTargetPlatform: 'ios'},
         processManager: processManager,
@@ -764,7 +764,7 @@ void main() {
     });
 
     testWithoutContext('iphonesimulator', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -803,7 +803,7 @@ void main() {
     });
 
     testWithoutContext('fails when frameworks missing', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -837,7 +837,7 @@ void main() {
       );
       dSYM.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -865,7 +865,7 @@ void main() {
     testWithoutContext('fails when requested archs missing from framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -905,7 +905,7 @@ void main() {
     testWithoutContext('fails when lipo extract fails', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1039,7 +1039,7 @@ void main() {
     testWithoutContext('skips thin framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1069,7 +1069,7 @@ void main() {
     testWithoutContext('thins fat framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1109,7 +1109,7 @@ void main() {
     testWithoutContext('strips framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1134,7 +1134,7 @@ void main() {
     testWithoutContext('fails when codesign fails', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1196,7 +1196,7 @@ void main() {
       );
       dSYM.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,

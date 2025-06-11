@@ -365,7 +365,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, Object?> contextOverrides = <Type, Object?>{};
+    final contextOverrides = <Type, Object?>{};
 
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
@@ -458,7 +458,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        final String? specifiedDeviceId =
+        final specifiedDeviceId =
             topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
           globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;

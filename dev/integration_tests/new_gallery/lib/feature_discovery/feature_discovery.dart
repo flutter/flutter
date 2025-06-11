@@ -220,7 +220,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> with TickerProvider
           });
         } else {
           if (showOverlay && !FeatureDiscoveryController._of(ctx).isLocked) {
-            final OverlayEntry entry = OverlayEntry(
+            final entry = OverlayEntry(
               builder: (_) => buildOverlay(ctx, getOverlayCenter(ctx)),
             );
 
@@ -247,10 +247,10 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> with TickerProvider
 
   /// Compute the center position of the overlay.
   Offset getOverlayCenter(BuildContext parentCtx) {
-    final RenderBox box = parentCtx.findRenderObject()! as RenderBox;
+    final box = parentCtx.findRenderObject()! as RenderBox;
     final Size size = box.size;
     final Offset topLeftPosition = box.localToGlobal(Offset.zero);
-    final Offset centerPosition = Offset(
+    final centerPosition = Offset(
       topLeftPosition.dx + size.width / 2,
       topLeftPosition.dy + size.height / 2,
     );

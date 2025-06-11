@@ -30,7 +30,7 @@ Future<ui.Image> captureImage(Element element) {
     renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+  final layer = renderObject.debugLayer! as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 

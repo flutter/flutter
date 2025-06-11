@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(const TestApp());
     await tester.pumpAndSettle();
 
-    int step = -1;
+    var step = -1;
     while (getStatus(tester) == 'ok') {
       step++;
       print('>> Tapping for step $step...');

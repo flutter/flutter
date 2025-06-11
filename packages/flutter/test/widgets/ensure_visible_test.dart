@@ -321,7 +321,7 @@ void main() {
       // Regressing test for https://github.com/flutter/flutter/issues/65100
       Finder findKey(String coordinate) => find.byKey(ValueKey<String>(coordinate));
       BuildContext findContext(String coordinate) => tester.element(findKey(coordinate));
-      final List<Row> rows = List<Row>.generate(
+      final rows = List<Row>.generate(
         7,
         (int y) => Row(
           children: List<SizedBox>.generate(

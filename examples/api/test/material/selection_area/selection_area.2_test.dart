@@ -14,7 +14,7 @@ void main() {
     expect(find.widgetWithIcon(FloatingActionButton, Icons.undo), findsOneWidget);
     expect(find.byType(Column), findsNWidgets(2));
     expect(find.textContaining('This is some bulleted list:\n'), findsOneWidget);
-    for (int i = 1; i <= 7; i += 1) {
+    for (var i = 1; i <= 7; i += 1) {
       expect(find.widgetWithText(Text, '• Bullet $i'), findsOneWidget);
     }
     expect(find.textContaining('This is some text in a text widget.'), findsOneWidget);
@@ -67,7 +67,7 @@ void main() {
     expect(paragraph1.selections.length, 1);
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 27));
     // Bulleted list.
-    for (final RenderParagraph paragraphBullet in bullets) {
+    for (final paragraphBullet in bullets) {
       expect(paragraphBullet.selections.length, 1);
       expect(paragraphBullet.selections[0], const TextSelection(baseOffset: 0, extentOffset: 10));
     }
@@ -84,9 +84,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify selection is red.
-    final TextSpan paragraph1ResultingSpan = paragraph1.text as TextSpan;
-    final TextSpan paragraph2ResultingSpan = paragraph2.text as TextSpan;
-    final TextSpan paragraph3ResultingSpan = paragraph3.text as TextSpan;
+    final paragraph1ResultingSpan = paragraph1.text as TextSpan;
+    final paragraph2ResultingSpan = paragraph2.text as TextSpan;
+    final paragraph3ResultingSpan = paragraph3.text as TextSpan;
     // Title of bulleted list is partially red.
     expect(paragraph1ResultingSpan.children, isNotNull);
     expect(paragraph1ResultingSpan.children!.length, 1);
@@ -110,8 +110,8 @@ void main() {
     );
     expect((paragraph1ResultingSpan.children![0] as TextSpan).children![2], isA<WidgetSpan>());
     // Bullets are red.
-    for (final RenderParagraph paragraphBullet in bullets) {
-      final TextSpan resultingBulletSpan = paragraphBullet.text as TextSpan;
+    for (final paragraphBullet in bullets) {
+      final resultingBulletSpan = paragraphBullet.text as TextSpan;
       expect(resultingBulletSpan.children, isNotNull);
       expect(resultingBulletSpan.children!.length, 1);
       expect(resultingBulletSpan.children![0], isA<TextSpan>());

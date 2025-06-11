@@ -20,14 +20,14 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
 
-    final String projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
     final TaskResult installTestsResult = await inDirectory(projectDir, () async {
       await flutter('install', options: <String>['--flavor', 'paid', '-d', 'macos']);
       await flutter(
         'install',
         options: <String>['--flavor', 'paid', '--uninstall-only', '-d', 'macos'],
       );
-      final StringBuffer stderr = StringBuffer();
+      final stderr = StringBuffer();
       await evalFlutter(
         'build',
         canFail: true,
@@ -54,7 +54,7 @@ Future<void> main() async {
             ),
           ).readAsBytesSync();
 
-      final Map<Object?, Object?> assetManifest =
+      final assetManifest =
           const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestFileData))
               as Map<Object?, Object?>;
 
@@ -74,7 +74,7 @@ Future<void> main() async {
         );
       }
 
-      final String stderrString = stderr.toString();
+      final stderrString = stderr.toString();
       print(stderrString);
       if (!stderrString.contains('The Xcode project defines schemes:')) {
         print(stderrString);
@@ -99,7 +99,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     );
   });
 
-  final File generatedXcconfig = File(
+  final generatedXcconfig = File(
     path.join(projectDir, 'macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
   );
   if (!generatedXcconfig.existsSync()) {
@@ -109,14 +109,14 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('Generated.xcconfig does not contain FLAVOR=free');
   }
 
-  const String configuration = 'Debug-paid';
-  const String productName = 'Debug Paid';
-  const String buildDir = 'build/macos';
-  final String appPath = '$projectDir/$buildDir/$configuration/$productName.app';
+  const configuration = 'Debug-paid';
+  const productName = 'Debug Paid';
+  const buildDir = 'build/macos';
+  final appPath = '$projectDir/$buildDir/$configuration/$productName.app';
 
   // Delete app bundle before build to ensure checks below do not use previously
   // built bundle.
-  final Directory appBundle = Directory(appPath);
+  final appBundle = Directory(appPath);
   if (appBundle.existsSync()) {
     appBundle.deleteSync(recursive: true);
   }

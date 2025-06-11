@@ -63,7 +63,7 @@ void main() {
     });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -73,7 +73,7 @@ void main() {
 
       expect(await const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
-      final Environment environment2 = Environment.test(
+      final environment2 = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -86,7 +86,7 @@ void main() {
     });
 
     testWithoutContext('skipped based on platform', () async {
-      const Map<String, bool> canSkip = <String, bool>{
+      const canSkip = <String, bool>{
         'darwin-x64': false,
         'linux-x64': false,
         'linux-arm64': false,
@@ -120,7 +120,7 @@ void main() {
       "doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins",
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -162,7 +162,7 @@ name: path_provider_example
       'regenerates dart_plugin_registrant.dart',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -248,7 +248,7 @@ name: path_provider_example
       'removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -301,7 +301,7 @@ name: path_provider_example
       'target file is outside the current project package',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),

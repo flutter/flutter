@@ -212,7 +212,7 @@ abstract class SliverChildDelegate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     return '${describeIdentity(this)}(${description.join(", ")})';
   }
@@ -912,7 +912,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive>
 
 // Return a Widget for the given Exception
 Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
-  final FlutterErrorDetails details = FlutterErrorDetails(
+  final details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,
     library: 'widgets library',

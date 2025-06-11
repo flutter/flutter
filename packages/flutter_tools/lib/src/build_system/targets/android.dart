@@ -46,7 +46,7 @@ abstract class AndroidAssetBundle extends Target {
       throw MissingDefineException(kBuildMode, name);
     }
 
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets')
       ..createSync(recursive: true);
 
@@ -207,7 +207,7 @@ class AndroidAot extends AotElfBase {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -226,14 +226,14 @@ class AndroidAot extends AotElfBase {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final List<File> outputs = <File>[]; // outputs for the depfile
-    final String manifestPath = '${output.path}${environment.platform.pathSeparator}manifest.json';
+    final outputs = <File>[]; // outputs for the depfile
+    final manifestPath = '${output.path}${environment.platform.pathSeparator}manifest.json';
     if (environment.defines[kDeferredComponents] == 'true') {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
       outputs.add(environment.fileSystem.file(manifestPath));
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
@@ -266,7 +266,7 @@ class AndroidAot extends AotElfBase {
         environment.fileSystem.file(manifestPath),
         environment.logger,
       );
-      for (final LoadingUnit unit in loadingUnits) {
+      for (final unit in loadingUnits) {
         outputs.add(environment.fileSystem.file(unit.path));
       }
     }
@@ -334,8 +334,8 @@ class AndroidAotBundle extends Target {
     final File outputLibFile = buildDir.childFile('app.so');
     outputLibFile.copySync(outputDirectory.childFile('app.so').path);
 
-    final List<File> inputs = <File>[];
-    final List<File> outputs = <File>[];
+    final inputs = <File>[];
+    final outputs = <File>[];
     final File manifestFile = buildDir.childFile('manifest.json');
     if (manifestFile.existsSync()) {
       final File destinationFile = outputDirectory.childFile('manifest.json');
@@ -406,7 +406,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     _components ??= FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[];
-    final List<String> abis = <String>[_androidAbiName];
+    final abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
       environment.outputDir,
       environment.logger,
@@ -482,9 +482,9 @@ Depfile copyDeferredComponentSoFiles(
   List<String> abis,
   BuildMode buildMode,
 ) {
-  final List<File> inputs = <File>[];
-  final List<File> outputs = <File>[];
-  final Set<int> usedLoadingUnits = <int>{};
+  final inputs = <File>[];
+  final outputs = <File>[];
+  final usedLoadingUnits = <int>{};
   // Copy all .so files for loading units that are paired with a deferred component.
   for (final String abi in abis) {
     for (final DeferredComponent component in components) {

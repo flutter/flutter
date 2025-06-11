@@ -18,12 +18,12 @@ import '../bin/packages_autoroller.dart' show run;
 import 'common.dart';
 
 void main() {
-  const String flutterRoot = '/flutter';
-  const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
-  const String githubClient = 'gh';
-  const String token = '0123456789abcdef';
-  const String orgName = 'flutter-roller';
-  const String mirrorUrl = 'https://githost.com/flutter-roller/flutter.git';
+  const flutterRoot = '/flutter';
+  const checkoutsParentDirectory = '$flutterRoot/dev/conductor';
+  const githubClient = 'gh';
+  const token = '0123456789abcdef';
+  const orgName = 'flutter-roller';
+  const mirrorUrl = 'https://githost.com/flutter-roller/flutter.git';
   final String localPathSeparator = const LocalPlatform().pathSeparator;
   final String localOperatingSystem = const LocalPlatform().operatingSystem;
   late MemoryFileSystem fileSystem;
@@ -36,14 +36,14 @@ void main() {
     stdio = TestStdio();
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.empty();
-    final FakePlatform platform = FakePlatform(
+    final platform = FakePlatform(
       environment: <String, String>{
         'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
       },
       operatingSystem: localOperatingSystem,
       pathSeparator: localPathSeparator,
     );
-    final Checkouts checkouts = Checkouts(
+    final checkouts = Checkouts(
       fileSystem: fileSystem,
       parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
       platform: platform,
@@ -64,7 +64,7 @@ void main() {
   });
 
   test('GitHub token is redacted from exceptions while pushing', () async {
-    final StreamController<List<int>> controller = StreamController<List<int>>();
+    final controller = StreamController<List<int>>();
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -157,7 +157,7 @@ void main() {
   });
 
   test('Does not attempt to roll if bot already has an open PR', () async {
-    final StreamController<List<int>> controller = StreamController<List<int>>();
+    final controller = StreamController<List<int>>();
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -202,7 +202,7 @@ void main() {
   });
 
   test('Does not commit or create a PR if no changes were made', () async {
-    final StreamController<List<int>> controller = StreamController<List<int>>();
+    final controller = StreamController<List<int>>();
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -294,7 +294,7 @@ void main() {
   });
 
   test('can roll with correct inputs', () async {
-    final StreamController<List<int>> controller = StreamController<List<int>>();
+    final controller = StreamController<List<int>>();
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
         command: const <String>[
@@ -472,7 +472,7 @@ void main() {
   });
 
   group('command argument validations', () {
-    const String tokenPath = '/path/to/token';
+    const tokenPath = '/path/to/token';
 
     test('validates that file exists at --token option', () async {
       await expectLater(
@@ -507,9 +507,9 @@ void main() {
   });
 
   test('VerboseStdio logger can filter out confidential pattern', () async {
-    const String token = 'secret';
-    const String replacement = 'replacement';
-    final VerboseStdio stdio = VerboseStdio(
+    const token = 'secret';
+    const replacement = 'replacement';
+    final stdio = VerboseStdio(
       stdin: _NoOpStdin(),
       stderr: _NoOpStdout(),
       stdout: _NoOpStdout(),
@@ -532,7 +532,7 @@ void main() {
   });
 
   group('CheckoutStatePostGradleRegeneration', () {
-    final Context ctx = Context(style: Style.posix);
+    final ctx = Context(style: Style.posix);
 
     test('empty input returns NoDiff', () {
       expect(CheckoutStatePostGradleRegeneration('', ctx), const NoDiff());
@@ -550,8 +550,8 @@ void main() {
     });
 
     test('if a *.zip file is added returns NonLockfileChanges', () {
-      const String pathToZip = 'dev/benchmarks/test_apps/stocks/android/very-large-archive.zip';
-      CheckoutStatePostGradleRegeneration result = CheckoutStatePostGradleRegeneration('''
+      const pathToZip = 'dev/benchmarks/test_apps/stocks/android/very-large-archive.zip';
+      var result = CheckoutStatePostGradleRegeneration('''
  A dev/benchmarks/test_apps/stocks/android/buildscript-gradle.lockfile
  A $pathToZip
  M dev/integration_tests/ui/android/project-app.lockfile
@@ -564,8 +564,8 @@ void main() {
     });
 
     test('if it contains a line not matching the regex returns MalformedLine', () {
-      const String malformedLine = 'New Git Output.';
-      CheckoutStatePostGradleRegeneration result = CheckoutStatePostGradleRegeneration('''
+      const malformedLine = 'New Git Output.';
+      var result = CheckoutStatePostGradleRegeneration('''
 $malformedLine
  A dev/benchmarks/test_apps/stocks/android/buildscript-gradle.lockfile
  M dev/integration_tests/ui/android/project-app.lockfile

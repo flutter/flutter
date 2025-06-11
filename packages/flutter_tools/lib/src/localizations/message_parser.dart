@@ -168,7 +168,7 @@ $indent])''';
         children.length != other.children.length) {
       return false;
     }
-    for (int i = 0; i < children.length; i++) {
+    for (var i = 0; i < children.length; i++) {
       if (children[i] != other.children[i]) {
         return false;
       }
@@ -233,12 +233,12 @@ class Parser {
   // is passed, relax the syntax so that "{" and "}" can be used as strings in
   // certain cases.
   List<Node> lexIntoTokens() {
-    final bool useRelaxedLexer = placeholders != null;
-    final List<Node> tokens = <Node>[];
-    bool isString = true;
+    final useRelaxedLexer = placeholders != null;
+    final tokens = <Node>[];
+    var isString = true;
     // Index specifying where to match from
-    int startIndex = 0;
-    int depth = 0;
+    var startIndex = 0;
+    var depth = 0;
 
     // At every iteration, we should be able to match a new token until we
     // reach the end of the string. If for some reason we don't match a
@@ -394,9 +394,9 @@ class Parser {
 
   Node parseIntoTree() {
     final List<Node> tokens = lexIntoTokens();
-    final List<ST> parsingStack = <ST>[ST.message];
-    final Node syntaxTree = Node(ST.empty, 0, expectedSymbolCount: 1);
-    final List<Node> treeTraversalStack = <Node>[syntaxTree];
+    final parsingStack = <ST>[ST.message];
+    final syntaxTree = Node(ST.empty, 0, expectedSymbolCount: 1);
+    final treeTraversalStack = <Node>[syntaxTree];
 
     // Helper function for parsing and constructing tree.
     void parseAndConstructNode(ST nonterminal, int ruleIndex) {
@@ -405,7 +405,7 @@ class Parser {
 
       // When we run out of tokens, just use -1 to represent the last index.
       final int positionInMessage = tokens.isNotEmpty ? tokens.first.positionInMessage : -1;
-      final Node node = Node(
+      final node = Node(
         nonterminal,
         positionInMessage,
         expectedSymbolCount: grammarRule.length,
@@ -592,7 +592,7 @@ class Parser {
   // expectedSymbolCount and isFull is no longer useful after this operation.
   Node compress(Node syntaxTree) {
     Node node = syntaxTree;
-    final List<Node> children = <Node>[];
+    final children = <Node>[];
     switch (syntaxTree.type) {
       case ST.message:
       case ST.pluralParts:
@@ -627,9 +627,9 @@ class Parser {
           );
         }
         // Identifier must be one of "zero", "one", "two", "few", "many".
-        for (final Node node in children) {
+        for (final node in children) {
           final Node pluralPartFirstToken = node.children[0];
-          const List<String> validIdentifiers = <String>['zero', 'one', 'two', 'few', 'many'];
+          const validIdentifiers = <String>['zero', 'one', 'two', 'few', 'many'];
           if (pluralPartFirstToken.type == ST.identifier &&
               !validIdentifiers.contains(pluralPartFirstToken.value)) {
             throw L10nParserException(

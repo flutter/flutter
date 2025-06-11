@@ -12,8 +12,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Duration expansionDuration = Duration(milliseconds: 250);
-  const Duration infinitesimalDuration = Duration(microseconds: 1);
+  const expansionDuration = Duration(milliseconds: 250);
+  const infinitesimalDuration = Duration(microseconds: 1);
   testWidgets('Toggles expansion on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('Can be controlled by ExpansibleController', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(
@@ -66,7 +66,7 @@ void main() {
   });
 
   testWidgets('Controller can set the tile to be initially expanded', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoPageScaffold(

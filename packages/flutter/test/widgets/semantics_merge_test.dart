@@ -15,7 +15,7 @@ void main() {
   });
 
   testWidgets('MergeSemantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     // not merged
     await tester.pumpWidget(
@@ -103,7 +103,7 @@ void main() {
   testWidgets('MergeSemantics works if other nodes are implicitly merged into its node', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(

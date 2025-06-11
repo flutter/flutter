@@ -42,7 +42,7 @@ final RegExp releaseCandidateBranchRegex = RegExp(r'flutter-(\d+)\.(\d+)-candida
 
 /// Cast a dynamic to String and trim.
 String stdoutToString(dynamic input) {
-  final String str = input as String;
+  final str = input as String;
   return str.trim();
 }
 
@@ -57,7 +57,7 @@ class ConductorException implements Exception {
 
 bool assertsEnabled() {
   // Verify asserts enabled
-  bool assertsEnabled = false;
+  var assertsEnabled = false;
 
   assert(() {
     assertsEnabled = true;
@@ -83,7 +83,7 @@ String? getValueFromEnvOrArgs(
   if (env[envName] != null) {
     return env[envName];
   }
-  final String? argValue = argResults[name] as String?;
+  final argValue = argResults[name] as String?;
   if (argValue != null) {
     return argValue;
   }
@@ -119,7 +119,7 @@ List<String> getValuesFromEnvOrArgs(String name, ArgResults argResults, Map<Stri
   if (env[envName] != null && env[envName] != '') {
     return env[envName]!.split(',');
   }
-  final List<String>? argValues = argResults[name] as List<String>?;
+  final argValues = argResults[name] as List<String>?;
   if (argValues != null) {
     return argValues;
   }

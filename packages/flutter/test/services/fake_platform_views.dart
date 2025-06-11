@@ -207,17 +207,17 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
-    final double? width = args['width'] as double?;
-    final double? height = args['height'] as double?;
-    final int layoutDirection = args['direction'] as int;
-    final bool? hybrid = args['hybrid'] as bool?;
-    final bool? hybridFallback = args['hybridFallback'] as bool?;
-    final Uint8List? creationParams = args['params'] as Uint8List?;
-    final double? top = args['top'] as double?;
-    final double? left = args['left'] as double?;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final viewType = args['viewType'] as String;
+    final width = args['width'] as double?;
+    final height = args['height'] as double?;
+    final layoutDirection = args['direction'] as int;
+    final hybrid = args['hybrid'] as bool?;
+    final hybridFallback = args['hybridFallback'] as bool?;
+    final creationParams = args['params'] as Uint8List?;
+    final top = args['top'] as double?;
+    final left = args['left'] as double?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -262,10 +262,10 @@ class FakeAndroidPlatformViewsController {
 
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
-    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
+    final arguments = call.arguments as Map<Object?, Object?>;
 
-    final int id = arguments['id']! as int;
-    final bool hybrid = arguments['hybrid']! as bool;
+    final id = arguments['id']! as int;
+    final hybrid = arguments['hybrid']! as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {
       throw ArgumentError(
@@ -289,10 +289,10 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _resize(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final double width = args['width'] as double;
-    final double height = args['height'] as double;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final width = args['width'] as double;
+    final height = args['height'] as double;
 
     if (!_views.containsKey(id)) {
       throw PlatformException(
@@ -312,26 +312,26 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _offset(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final double top = args['top'] as double;
-    final double left = args['left'] as double;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final top = args['top'] as double;
+    final left = args['left'] as double;
     offsets[id] = Offset(left, top);
     return Future<dynamic>.sync(() => null);
   }
 
   Future<dynamic> _touch(MethodCall call) {
-    final List<dynamic> args = call.arguments as List<dynamic>;
-    final int id = args[0] as int;
-    final int action = args[3] as int;
+    final args = call.arguments as List<dynamic>;
+    final id = args[0] as int;
+    final action = args[3] as int;
     final List<List<dynamic>> pointerProperties = (args[5] as List<dynamic>).cast<List<dynamic>>();
     final List<List<dynamic>> pointerCoords = (args[6] as List<dynamic>).cast<List<dynamic>>();
-    final List<Offset> pointerOffsets = <Offset>[];
-    final List<int> pointerIds = <int>[];
-    for (int i = 0; i < pointerCoords.length; i++) {
+    final pointerOffsets = <Offset>[];
+    final pointerIds = <int>[];
+    for (var i = 0; i < pointerCoords.length; i++) {
       pointerIds.add(pointerProperties[i][0] as int);
-      final double x = pointerCoords[i][7] as double;
-      final double y = pointerCoords[i][8] as double;
+      final x = pointerCoords[i][7] as double;
+      final y = pointerCoords[i][8] as double;
       pointerOffsets.add(Offset(x, y));
     }
 
@@ -344,9 +344,9 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _setDirection(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final int layoutDirection = args['direction'] as int;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final layoutDirection = args['direction'] as int;
 
     if (!_views.containsKey(id)) {
       throw PlatformException(
@@ -361,7 +361,7 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _clearFocus(MethodCall call) {
-    final int id = call.arguments as int;
+    final id = call.arguments as int;
 
     if (!_views.containsKey(id)) {
       throw PlatformException(
@@ -426,10 +426,10 @@ class FakeIosPlatformViewsController {
     if (creationDelay != null) {
       await creationDelay!.future;
     }
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
-    final Uint8List? creationParams = args['params'] as Uint8List?;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final viewType = args['viewType'] as String;
+    final creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -452,21 +452,21 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _acceptGesture(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
     gesturesAccepted[id] = gesturesAccepted[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _rejectGesture(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
     gesturesRejected[id] = gesturesRejected[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
+    final id = call.arguments as int;
 
     if (!_views.containsKey(id)) {
       throw PlatformException(
@@ -531,10 +531,10 @@ class FakeMacosPlatformViewsController {
     if (creationDelay != null) {
       await creationDelay!.future;
     }
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
-    final Uint8List? creationParams = args['params'] as Uint8List?;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final viewType = args['viewType'] as String;
+    final creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -557,21 +557,21 @@ class FakeMacosPlatformViewsController {
   }
 
   Future<dynamic> _acceptGesture(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
     gesturesAccepted[id] = gesturesAccepted[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _rejectGesture(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
     gesturesRejected[id] = gesturesRejected[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
+    final id = call.arguments as int;
 
     if (!_views.containsKey(id)) {
       throw PlatformException(

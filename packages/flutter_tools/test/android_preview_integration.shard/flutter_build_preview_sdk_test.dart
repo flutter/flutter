@@ -13,7 +13,7 @@ void main() {
   late String flutterBin;
   late Directory exampleAppDir;
   late Directory pluginDir;
-  final RegExp compileSdkVersionMatch = RegExp(r'compileSdk\s*=?\s*[\w.]+');
+  final compileSdkVersionMatch = RegExp(r'compileSdk\s*=?\s*[\w.]+');
   final String builtApkPath = <String>[
     'build',
     'app',

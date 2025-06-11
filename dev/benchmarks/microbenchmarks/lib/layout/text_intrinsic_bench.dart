@@ -21,22 +21,22 @@ Future<void> execute() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding =
+  final binding =
       TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
-  final Stopwatch watch = Stopwatch();
-  int iterations = 0;
+  final watch = Stopwatch();
+  var iterations = 0;
 
   await benchmarkWidgets((WidgetTester tester) async {
     runApp(intrinsicTextHeight);
     // Wait for the UI to stabilize.
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final TestViewConfiguration big = TestViewConfiguration.fromView(
+    final big = TestViewConfiguration.fromView(
       size: const Size(360.0, 640.0),
       view: tester.view,
     );
-    final TestViewConfiguration small = TestViewConfiguration.fromView(
+    final small = TestViewConfiguration.fromView(
       size: const Size(100.0, 640.0),
       view: tester.view,
     );
@@ -52,7 +52,7 @@ Future<void> execute() async {
     watch.stop();
   });
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Text intrinsic height',
     value: watch.elapsedMicroseconds / iterations,

@@ -280,7 +280,7 @@ class UpgradeCommandRunner {
       );
       revision = result.stdout.trim();
     } on Exception catch (e) {
-      final String errorString = e.toString();
+      final errorString = e.toString();
       if (errorString.contains('fatal: HEAD does not point to a branch')) {
         throwToolExit(
           'Unable to upgrade Flutter: Your Flutter checkout is currently not '

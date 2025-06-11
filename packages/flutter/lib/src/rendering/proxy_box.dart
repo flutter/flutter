@@ -178,7 +178,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    bool hitTarget = false;
+    var hitTarget = false;
     if (size.contains(position)) {
       hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
       if (hitTarget || behavior == HitTestBehavior.translucent) {
@@ -903,7 +903,7 @@ class RenderOpacity extends RenderProxyBox {
       return;
     }
     final bool didNeedCompositing = alwaysNeedsCompositing;
-    final bool wasVisible = _alpha != 0;
+    final wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing) {
@@ -1410,7 +1410,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
     if (oldClipper.runtimeType != ShapeBorderClipper) {
       return true;
     }
-    final ShapeBorderClipper typedOldClipper = oldClipper as ShapeBorderClipper;
+    final typedOldClipper = oldClipper as ShapeBorderClipper;
     return typedOldClipper.shape != shape || typedOldClipper.textDirection != textDirection;
   }
 }
@@ -1855,7 +1855,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(_clip != null);
     final Offset center = _clip!.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = Offset(
+    final offset = Offset(
       (position.dx - center.dx) / _clip!.width,
       (position.dy - center.dy) / _clip!.height,
     );
@@ -2142,8 +2142,8 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
-    bool paintShadows = true;
+    final offsetRRectAsPath = Path()..addRRect(offsetRRect);
+    var paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
         if (elevation > 0.0) {
@@ -2164,7 +2164,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     if (elevation != 0.0 && paintShadows) {
       canvas.drawShadow(offsetRRectAsPath, shadowColor, elevation, color.alpha != 0xFF);
     }
-    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    final usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
     if (!usesSaveLayer) {
       canvas.drawRRect(offsetRRect, Paint()..color = color);
     }
@@ -2248,7 +2248,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
     _updateClip();
     final Path offsetPath = _clip!.shift(offset);
-    bool paintShadows = true;
+    var paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
         if (elevation > 0.0) {
@@ -2269,7 +2269,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     if (elevation != 0.0 && paintShadows) {
       canvas.drawShadow(offsetPath, shadowColor, elevation, color.alpha != 0xFF);
     }
-    final bool usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
+    final usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;
     if (!usesSaveLayer) {
       canvas.drawPath(offsetPath, Paint()..color = color);
     }
@@ -2623,7 +2623,7 @@ class RenderTransform extends RenderProxyBox {
     if (_origin == null && resolvedAlignment == null) {
       return _transform;
     }
-    final Matrix4 result = Matrix4.identity();
+    final result = Matrix4.identity();
     if (_origin != null) {
       result.translateByDouble(_origin!.dx, _origin!.dy, 0, 1);
     }
@@ -2689,11 +2689,11 @@ class RenderTransform extends RenderProxyBox {
           layer = null;
         }
       } else {
-        final Matrix4 effectiveTransform =
+        final effectiveTransform =
             Matrix4.translationValues(offset.dx, offset.dy, 0.0)
               ..multiply(transform)
               ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
-        final ui.ImageFilter filter = ui.ImageFilter.matrix(
+        final filter = ui.ImageFilter.matrix(
           effectiveTransform.storage,
           filterQuality: filterQuality!,
         );
@@ -3479,7 +3479,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({double pixelRatio = 1.0}) {
     assert(!debugNeedsPaint);
-    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+    final offsetLayer = layer! as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
@@ -3545,7 +3545,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImageSync] for more information about the image returned.
   ui.Image toImageSync({double pixelRatio = 1.0}) {
     assert(!debugNeedsPaint);
-    final OffsetLayer offsetLayer = layer! as OffsetLayer;
+    final offsetLayer = layer! as OffsetLayer;
     return offsetLayer.toImageSync(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
@@ -3606,7 +3606,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    bool inReleaseMode = true;
+    var inReleaseMode = true;
     assert(() {
       inReleaseMode = false;
       final int totalPaints = debugSymmetricPaintCount + debugAsymmetricPaintCount;
@@ -4077,7 +4077,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     if (_onTap == value) {
       return;
     }
-    final bool hadHandler = _onTap != null;
+    final hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler) {
       markNeedsSemanticsUpdate();
@@ -4091,7 +4091,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     if (_onLongPress == value) {
       return;
     }
-    final bool hadHandler = _onLongPress != null;
+    final hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler) {
       markNeedsSemanticsUpdate();
@@ -4105,7 +4105,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     if (_onHorizontalDragUpdate == value) {
       return;
     }
-    final bool hadHandler = _onHorizontalDragUpdate != null;
+    final hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler) {
       markNeedsSemanticsUpdate();
@@ -4119,7 +4119,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     if (_onVerticalDragUpdate == value) {
       return;
     }
-    final bool hadHandler = _onVerticalDragUpdate != null;
+    final hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler) {
       markNeedsSemanticsUpdate();
@@ -4220,7 +4220,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> gestures = <String>[
+    final gestures = <String>[
       if (onTap != null) 'tap',
       if (onLongPress != null) 'long press',
       if (onHorizontalDragUpdate != null) 'horizontal scroll',
@@ -4887,7 +4887,7 @@ class RenderLeaderLayer extends RenderProxyBox {
     if (layer == null) {
       layer = LeaderLayer(link: link, offset: offset);
     } else {
-      final LeaderLayer leaderLayer = layer! as LeaderLayer;
+      final leaderLayer = layer! as LeaderLayer;
       leaderLayer
         ..link = link
         ..offset = offset;
@@ -5175,7 +5175,7 @@ class RenderAnnotatedRegion<T extends Object> extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     // Annotated region layers are not retained because they do not create engine layers.
-    final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
+    final layer = AnnotatedRegionLayer<T>(
       value,
       size: sized ? size : null,
       offset: sized ? offset : null,

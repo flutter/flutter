@@ -40,7 +40,7 @@ class HeaderForm extends StatelessWidget {
           isDesktop
               ? LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
-                  int crossAxisCount = isSmallDesktop ? 2 : 4;
+                  var crossAxisCount = isSmallDesktop ? 2 : 4;
                   if (fields.length < crossAxisCount) {
                     crossAxisCount = fields.length;
                   }

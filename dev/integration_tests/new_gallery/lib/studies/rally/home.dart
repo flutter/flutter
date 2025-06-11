@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     final bool isDesktop = isDisplayDesktop(context);
     Widget tabBarView;
     if (isDesktop) {
-      final bool isTextDirectionRtl =
+      final isTextDirectionRtl =
           GalleryOptions.of(context).resolvedTextDirection() == TextDirection.rtl;
       final int verticalRotation = isTextDirectionRtl ? turnsToRotateLeft : turnsToRotateRight;
       final int revertVerticalRotation =
@@ -310,7 +310,7 @@ class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixi
     // unit, and there is always 1 expanded tab which is 1 unit + any extra
     // space determined by the multiplier.
     final double width = MediaQuery.of(context).size.width;
-    const int expandedTitleWidthMultiplier = 2;
+    const expandedTitleWidthMultiplier = 2;
     final double unitWidth = width / (tabCount + expandedTitleWidthMultiplier);
 
     return ConstrainedBox(

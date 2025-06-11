@@ -18,7 +18,7 @@ import 'package:file/local.dart';
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
-  const String usageMessage =
+  const usageMessage =
       "If you don't wish to re-generate the "
       'settings.gradle, build.gradle, and gradle-wrapper.properties files,\n'
       'add the flag `--no-gradle-generation`.\n'
@@ -26,7 +26,7 @@ void main(List<String> arguments) {
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
-  final ArgParser argParser =
+  final argParser =
       ArgParser()
         ..addFlag(
           'gradle-generation',
@@ -94,7 +94,7 @@ void main(List<String> arguments) {
     print('Running without exclusion.');
   }
 
-  for (final Directory androidDirectory in androidDirectories) {
+  for (final androidDirectory in androidDirectories) {
     if (!androidDirectory.existsSync()) {
       throw '$androidDirectory does not exist';
     }

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Test semantics of TabPageSelector in pt-BR', (WidgetTester tester) async {
-    final TabController controller = TabController(vsync: const TestVSync(), length: 2);
+    final controller = TabController(vsync: const TestVSync(), length: 2);
 
     await tester.pumpWidget(
       Localizations(

@@ -38,7 +38,7 @@ abstract class WebDevice {
 
 TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompiler) {
   return () async {
-    final List<String> options = <String>[
+    final options = <String>[
       '--hot',
       '-d',
       webDevice,
@@ -46,10 +46,10 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
       '--resident',
       '--target=lib/main.dart',
     ];
-    int hotRestartCount = 0;
-    final String expectedMessage =
+    var hotRestartCount = 0;
+    final expectedMessage =
         webDevice == WebDevice.webServer ? 'Recompile complete' : 'Reloaded application';
-    final Map<String, int> measurements = <String, int>{};
+    final measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
@@ -57,7 +57,7 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
 
       final String rootPubspec =
           File(path.join(flutterDirectory.path, 'pubspec.yaml')).readAsStringSync();
-      final YamlEditor yamlEditor = YamlEditor(rootPubspec);
+      final yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
       File(
         path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),
@@ -68,10 +68,10 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           await flutter('packages', options: <String>['get']);
           final Process process = await startFlutter('run', options: options);
 
-          final Completer<void> stdoutDone = Completer<void>();
-          final Completer<void> stderrDone = Completer<void>();
-          final Stopwatch sw = Stopwatch()..start();
-          bool restarted = false;
+          final stdoutDone = Completer<void>();
+          final stderrDone = Completer<void>();
+          final sw = Stopwatch()..start();
+          var restarted = false;
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
@@ -145,11 +145,11 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
         // Start `flutter run` again to make sure it loads from the previous
         // state. dev compilers loads up from previously compiled JavaScript.
         {
-          final Stopwatch sw = Stopwatch()..start();
+          final sw = Stopwatch()..start();
           final Process process = await startFlutter('run', options: options);
-          final Completer<void> stdoutDone = Completer<void>();
-          final Completer<void> stderrDone = Completer<void>();
-          bool restarted = false;
+          final stdoutDone = Completer<void>();
+          final stderrDone = Completer<void>();
+          var restarted = false;
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())

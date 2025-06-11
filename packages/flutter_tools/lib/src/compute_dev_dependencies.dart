@@ -40,7 +40,7 @@ Try running `flutter pub get`''');
   }
   final String rootName = project.manifest.appName;
 
-  final Map<String, Dependency> result = <String, Dependency>{};
+  final result = <String, Dependency>{};
   result[rootName] = Dependency(
     rootName,
     project.directory.uri,
@@ -62,7 +62,7 @@ Try running `flutter pub get`''');
 Failed to parse ${packageGraphFile.path}: devDependencies for `${project.manifest.appName}` missing.
 Try running `flutter pub get`''');
   }
-  final List<String> packageNamesToVisit = <String>[...dependencies, ...devDependencies];
+  final packageNamesToVisit = <String>[...dependencies, ...devDependencies];
   while (packageNamesToVisit.isNotEmpty) {
     final String current = packageNamesToVisit.removeLast();
     if (result.containsKey(current)) {
@@ -87,7 +87,7 @@ Try running `flutter pub get`''');
 
   // Do a second traversal of only the non-dev-dependencies, to patch up the
   // `isExclusiveDevDependency` property.
-  final Set<String> visitedDependencies = <String>{};
+  final visitedDependencies = <String>{};
   packageNamesToVisit.add(project.manifest.appName);
   while (packageNamesToVisit.isNotEmpty) {
     final String current = packageNamesToVisit.removeLast();
@@ -139,8 +139,8 @@ class _PackageGraph {
     if (packages is! List<Object?>) {
       throw FormatException('expected `packages` to be a list, got $packages');
     }
-    final Map<String, List<String>> dependencies = <String, List<String>>{};
-    final Map<String, List<String>> devDependencies = <String, List<String>>{};
+    final dependencies = <String, List<String>>{};
+    final devDependencies = <String, List<String>>{};
     for (final Object? package in packages) {
       if (package is! Map<String, Object?>) {
         throw const FormatException('Expected `package` to be a map');

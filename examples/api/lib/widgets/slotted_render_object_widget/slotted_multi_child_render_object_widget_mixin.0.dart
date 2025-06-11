@@ -97,7 +97,7 @@ class RenderDiagonal extends RenderBox
   @override
   void performLayout() {
     // Children are allowed to be as big as they want (= unconstrained).
-    const BoxConstraints childConstraints = BoxConstraints();
+    const childConstraints = BoxConstraints();
 
     // Lay out the top left child and position it at offset zero.
     Size topLeftSize = Size.zero;
@@ -141,7 +141,7 @@ class RenderDiagonal extends RenderBox
     }
 
     void paintChild(RenderBox child, PaintingContext context, Offset offset) {
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      final childParentData = child.parentData! as BoxParentData;
       context.paintChild(child, childParentData.offset + offset);
     }
 
@@ -168,7 +168,7 @@ class RenderDiagonal extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     for (final RenderBox child in children) {
-      final BoxParentData parentData = child.parentData! as BoxParentData;
+      final parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,
@@ -218,7 +218,7 @@ class RenderDiagonal extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    const BoxConstraints childConstraints = BoxConstraints();
+    const childConstraints = BoxConstraints();
     final Size topLeftSize = _topLeft?.getDryLayout(childConstraints) ?? Size.zero;
     final Size bottomRightSize = _bottomRight?.getDryLayout(childConstraints) ?? Size.zero;
     return constraints.constrain(

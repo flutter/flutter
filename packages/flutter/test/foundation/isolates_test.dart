@@ -131,7 +131,7 @@ Future<int> computeClosure(int square) {
 }
 
 Future<int> computeInvalidClosure(int square) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
 
   return compute((_) {
     r.sendPort.send('Computing!');
@@ -141,18 +141,18 @@ Future<int> computeInvalidClosure(int square) {
 }
 
 Future<int> computeInstanceMethod(int square) {
-  final ComputeTestSubject subject = ComputeTestSubject(square);
+  final subject = ComputeTestSubject(square);
   return compute(subject.method, square);
 }
 
 Future<int> computeInvalidInstanceMethod(int square) {
-  final ComputeTestSubject subject = ComputeTestSubject(square, ReceivePort());
+  final subject = ComputeTestSubject(square, ReceivePort());
   expect(subject.additional, isA<ReceivePort>());
   return compute(subject.method, square);
 }
 
 dynamic testInvalidResponse(int square) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
   try {
     return r;
   } finally {
@@ -161,7 +161,7 @@ dynamic testInvalidResponse(int square) {
 }
 
 dynamic testInvalidError(int square) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
   try {
     throw r;
   } finally {

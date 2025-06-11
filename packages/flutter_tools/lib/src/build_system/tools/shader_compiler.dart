@@ -53,7 +53,7 @@ class DevelopmentShaderCompiler {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;
-    bool cleanupInput = false;
+    var cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
     try {
@@ -169,7 +169,7 @@ class ShaderCompiler {
     }
 
     final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
-    final List<String> cmd = <String>[
+    final cmd = <String>[
       impellerc.path,
       ..._shaderTargetsFromTargetPlatform(targetPlatform),
       '--iplr',
