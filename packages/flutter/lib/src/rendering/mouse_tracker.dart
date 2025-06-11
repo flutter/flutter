@@ -235,8 +235,8 @@ class MouseTracker extends ChangeNotifier {
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestInViewResultToAnnotations(
     HitTestResult result,
   ) {
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations =
-        LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
+    // ignore: prefer_collection_literals
+    final annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
     for (final HitTestEntry entry in result.path) {
       final Object target = entry.target;
       if (target is MouseTrackerAnnotation) {
