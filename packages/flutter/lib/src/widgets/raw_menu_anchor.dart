@@ -289,8 +289,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// front of the overlay stack.
   ///
   /// If `showOverlay` is not called, the menu will stay hidden. Calling
-  /// `showOverlay` after disposal is a no-op, and will not trigger [onOpen] or
-  /// show the menu overlay.
+  /// `showOverlay` after disposal is a no-op, meaning it will not trigger
+  /// [onOpen] or show the menu overlay.
   ///
   /// If a [RawMenuAnchor] is used in a themed menu that plays an opening
   /// animation, the themed menu should show the overlay before starting the
@@ -324,8 +324,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// [MenuController.isOpen] will stay true while closing animations are
   /// running.
   ///
-  /// Calling `hideOverlay` after disposal is a no-op, and will not trigger
-  /// [onClose] or hide the menu overlay.
+  /// Calling `hideOverlay` after disposal is a no-op, meaning it will not
+  /// trigger [onClose] or hide the menu overlay.
   ///
   /// Typically, [onCloseRequested] consists of the following steps:
   ///
