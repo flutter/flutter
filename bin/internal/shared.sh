@@ -189,7 +189,7 @@ function upgrade_flutter () (
     else
       SNAPSHOT_KIND="jit-snapshot"
     fi
-    "$DART" compile $SNAPSHOT_KIND --verbosity=error $FLUTTER_TOOL_ARGS --output="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" "$SCRIPT_PATH" > /dev/null
+    "$DART" compile $SNAPSHOT_KIND --verbosity=error --output="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" "$SCRIPT_PATH" > /dev/null
     echo "$compilekey" > "$STAMP_PATH"
 
     # Delete any temporary snapshot path.
@@ -216,7 +216,7 @@ function shared::execute() {
   fi
 
   FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
-  
+
   SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
   if [[ "$FLUTTER_TOOLS_USE_AOT_SNAPSHOT" == "true" ]]; then
     SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.aot-snapshot"
