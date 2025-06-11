@@ -1833,7 +1833,7 @@ void main() {
       expect(tester.getCenter(find.text('Item 1')).dy, newItem1CenterY);
 
       // Verify the items list order has changed
-      expect(items, [0, 2, 1, 3, 4]);
+      expect(items, <int>[0, 2, 1, 3, 4]);
     });
 
     group('Padding', () {
