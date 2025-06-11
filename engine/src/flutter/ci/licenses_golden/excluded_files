@@ -1618,8 +1618,8 @@
 ../../../flutter/third_party/dart/runtime/vm/isolate_reload_test.cc
 ../../../flutter/third_party/dart/runtime/vm/isolate_test.cc
 ../../../flutter/third_party/dart/runtime/vm/json_test.cc
-../../../flutter/third_party/dart/runtime/vm/kernel_test.cc
 ../../../flutter/third_party/dart/runtime/vm/libfuzzer/README.md
+../../../flutter/third_party/dart/runtime/vm/line_starts_reader_test.cc
 ../../../flutter/third_party/dart/runtime/vm/log_test.cc
 ../../../flutter/third_party/dart/runtime/vm/longjump_test.cc
 ../../../flutter/third_party/dart/runtime/vm/memory_region_test.cc
