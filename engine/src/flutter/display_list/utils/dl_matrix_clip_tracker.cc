@@ -19,12 +19,15 @@ static const DlRect& ProtectEmpty(const DlRect& rect) {
 
 DisplayListMatrixClipState::DisplayListMatrixClipState(const DlRect& cull_rect,
                                                        const DlMatrix& matrix)
-    : cull_rect_(ProtectEmpty(cull_rect)), matrix_(matrix) {}
+    : cull_rect_(ProtectEmpty(cull_rect)),
+      matrix_(matrix),
+      is_translate_scale_(matrix.IsTranslationScaleOnly()) {}
 
 bool DisplayListMatrixClipState::inverseTransform(
     const DisplayListMatrixClipState& tracker) {
   if (tracker.is_matrix_invertable()) {
     matrix_ = matrix_ * tracker.matrix_.Invert();
+    is_translate_scale_ = matrix_.IsTranslationScaleOnly();
     return true;
   }
   return false;
@@ -32,14 +35,18 @@ bool DisplayListMatrixClipState::inverseTransform(
 
 bool DisplayListMatrixClipState::mapAndClipRect(const DlRect& src,
                                                 DlRect* mapped) const {
-  DlRect dl_mapped = src.TransformAndClipBounds(matrix_);
-  auto dl_intersected = dl_mapped.Intersection(cull_rect_);
-  if (dl_intersected.has_value()) {
-    *mapped = dl_intersected.value();
+  DlRect dl_mapped;
+  if (is_translate_scale_) {
+    dl_mapped = src.TransformBoundsTranslateScale(matrix_);
+  } else {
+    dl_mapped = src.TransformAndClipBounds(matrix_);
+  }
+  impeller::Rect dl_intersected = dl_mapped.FastIntersection(cull_rect_);
+  if (!dl_intersected.IsEmpty()) {
+    *mapped = dl_intersected;
     return true;
   }
   *mapped = DlRect();
-  return false;
 }
 
 void DisplayListMatrixClipState::clipRect(const DlRect& rect,
