@@ -16,6 +16,19 @@ set -e
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
 
+# Experiment: If FLUTTER_TOOLS_USE_AOT_SNAPSHOT is set, prefer AOT compilation.
+#
+# There is a chance that either this is not significantly faster, is actually
+# slower, or the time spent compiling the tool outweighs the incremental benefit
+# in runtime speed: https://github.com/flutter/flutter/issues/170486.
+#
+# Check if FLUTTER_TOOLS_USE_AOT_SNAPSHOT is set in the environment
+if [[ "${FLUTTER_TOOLS_USE_AOT_SNAPSHOT}" == "1" || "${FLUTTER_TOOLS_USE_AOT_SNAPSHOT}" == "true" ]]; then
+    FLUTTER_TOOLS_USE_AOT_SNAPSHOT="true"
+else
+    FLUTTER_TOOLS_USE_AOT_SNAPSHOT="false"
+fi
+
 function pub_upgrade_with_retry {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
@@ -171,7 +184,12 @@ function upgrade_flutter () (
     fi
 
     # Compile...
-    "$DART" --verbosity=error $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
+    if [[ "$FLUTTER_TOOLS_USE_AOT_SNAPSHOT" == "true" ]]; then
+      SNAPSHOT_KIND="aot-snapshot"
+    else
+      SNAPSHOT_KIND="jit-snapshot"
+    fi
+    "$DART" compile $SNAPSHOT_KIND --verbosity=error $FLUTTER_TOOL_ARGS --output="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" "$SCRIPT_PATH" > /dev/null
     echo "$compilekey" > "$STAMP_PATH"
 
     # Delete any temporary snapshot path.
@@ -198,7 +216,12 @@ function shared::execute() {
   fi
 
   FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
+  
   SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
+  if [[ "$FLUTTER_TOOLS_USE_AOT_SNAPSHOT" == "true" ]]; then
+    SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.aot-snapshot"
+  fi
+
   STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
   SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
   DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
@@ -256,6 +279,11 @@ function shared::execute() {
   # SHARED_NAME itself is prepared by the caller script.
   upgrade_flutter 7< "$SHARED_NAME"
 
+  DART_RUN_SNAPSHOT="$DART"
+  if [[ "$FLUTTER_TOOLS_USE_AOT_SNAPSHOT" == "true" ]]; then
+    DART_RUN_SNAPSHOT="${DART}aotruntime"
+  fi
+
   case "$BIN_NAME" in
     flutter-dev)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
@@ -265,7 +293,7 @@ function shared::execute() {
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      exec "$DART" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      exec "$DART_RUN_SNAPSHOT" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
       exec "$DART" "$@"

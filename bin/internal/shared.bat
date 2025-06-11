@@ -201,9 +201,9 @@ GOTO :after_subroutine
       )
 
     IF "%FLUTTER_TOOL_ARGS%" == "" (
-      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
+      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="aot-snapshot" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
     ) else (
-      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%" > NUL
+      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="aot-snapshot" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%" > NUL
     )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool. 1>&2
