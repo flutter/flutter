@@ -1207,7 +1207,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: CupertinoFocusTraversalGroup.onRRect(
+      child: CupertinoFocusHalo.onRRect(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
         child: _ActionSheetButtonBackground(
           isCancel: true,
@@ -1666,13 +1666,10 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
     } else {
       const BorderRadius borderRadius = BorderRadius.all(Radius.circular(_kCornerRadius));
 
-      child = ClipRRect(
+      child = ClipRSuperellipse(
         borderRadius: borderRadius,
         child: DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: const RoundedSuperellipseBorder(
-              borderRadius: borderRadius,
-            ),
+          decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(
               widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
               context,
@@ -1885,7 +1882,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: CupertinoFocusTraversalGroup.onRRect(
+      child: CupertinoFocusHalo.onRRect(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
           topLeft: Radius.zero,
           topRight: Radius.zero,

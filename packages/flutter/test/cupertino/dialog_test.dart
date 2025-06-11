@@ -2179,7 +2179,7 @@ void main() {
           return element.widget.runtimeType.toString() == '_ActionSheetButtonBackground';
         }),
         matching: find.descendant(
-          of: find.byType(CupertinoFocusTraversalGroup),
+          of: find.byType(CupertinoFocusHalo),
           matching: find.byType(DecoratedBox),
         ),
       );
