@@ -27,11 +27,21 @@ import 'theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
-const double _dayPickerRowHeight = 42.0;
+// Current M2 implementation is not compliant with the M2 specification.
+// Instead of a 42 pixels row height it should be 40 with a 2 pixels inner padding.
+// See: https://m2.material.io/components/date-pickers#specs.
+const double _dayPickerRowHeightM2 = 42.0;
+// For M3, row height is 48 pxiels with 4 pixels inner padding.
+// See: https://m3.material.io/components/date-pickers/specs#2d53890e-a08f-4c63-a0d9-abd9e95b4245.
+const double _dayPickerRowHeightM3 = 48.0;
+
 const int _maxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // One extra row for the day-of-week header.
-const double _maxDayPickerHeight = _dayPickerRowHeight * (_maxDayPickerRowCount + 1);
-const double _monthPickerHorizontalPadding = 8.0;
+const double _maxDayPickerHeightM2 = _dayPickerRowHeightM2 * (_maxDayPickerRowCount + 1);
+const double _maxDayPickerHeightM3 = _dayPickerRowHeightM3 * (_maxDayPickerRowCount + 1);
+
+const double _monthPickerHorizontalPaddingPortraitM3 = 12.0;
+const double _monthPickerHorizontalPaddingOther = 8.0;
 
 const int _yearPickerColumnCount = 3;
 const double _yearPickerPadding = 16.0;
@@ -361,14 +371,22 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           context,
         ).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) /
         _fontSizeToScale;
+
+    // Conform to M3 spec in portrait mode (landscape mode is not specified).
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final double maxDayPickerHeight =
+        Theme.of(context).useMaterial3 && orientation == Orientation.portrait
+            ? _maxDayPickerHeightM3
+            : _maxDayPickerHeightM2;
+
     // Scale the height of the picker area up with larger text. The size of the
-    // picker has room for larger text, up until a scale facotr of 1.3. After
+    // picker has room for larger text, up until a scale factor of 1.3. After
     // after which, we increase the height to add room for content to continue
     // to scale the text size.
     final double scaledMaxDayPickerHeight =
         textScaleFactor > 1.3
-            ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8))
-            : _maxDayPickerHeight;
+            ? maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8))
+            : maxDayPickerHeight;
     return Stack(
       children: <Widget>[
         SizedBox(height: _subHeaderHeight + scaledMaxDayPickerHeight, child: _buildPicker()),
@@ -1081,8 +1099,12 @@ class _DayPickerState extends State<_DayPicker> {
       }
     }
 
+    final double monthPickerHorizontalPadding =
+        Theme.of(context).useMaterial3 && !isLandscapeOrientation
+            ? _monthPickerHorizontalPaddingPortraitM3
+            : _monthPickerHorizontalPaddingOther;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: _monthPickerHorizontalPadding),
+      padding: EdgeInsets.symmetric(horizontal: monthPickerHorizontalPadding),
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor:
             isLandscapeOrientation
@@ -1191,6 +1213,13 @@ class _DayState extends State<_Day> {
       ),
     );
 
+    // Adds padding as per M3 guidelines for portrait mode. Not applied in landscape
+    // mode currently due to unclear specifications.
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    if (Theme.of(context).useMaterial3 && orientation == Orientation.portrait) {
+      dayWidget = Padding(padding: const EdgeInsets.all(4.0), child: dayWidget);
+    }
+
     if (widget.isDisabled) {
       dayWidget = ExcludeSemantics(child: dayWidget);
     } else {
@@ -1239,10 +1268,16 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
     final double textScaleFactor =
         MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(_fontSizeToScale) /
         _fontSizeToScale;
+    // Conform to M3 spec in portrait mode (landscape mode is not specified).
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final double dayPickerRowHeight =
+        Theme.of(context).useMaterial3 && orientation == Orientation.portrait
+            ? _dayPickerRowHeightM3
+            : _dayPickerRowHeightM2;
     final double scaledRowHeight =
         textScaleFactor > 1.3
-            ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight
-            : _dayPickerRowHeight;
+            ? ((textScaleFactor - 1) * 30) + dayPickerRowHeight
+            : dayPickerRowHeight;
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
     final double tileHeight = math.min(
