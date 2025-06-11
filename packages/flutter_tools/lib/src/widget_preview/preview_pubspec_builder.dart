@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../convert.dart';
 import '../dart/pub.dart';
 import '../flutter_manifest.dart';
 import '../project.dart';
