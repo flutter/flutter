@@ -7,6 +7,7 @@ _skia_root = "//flutter/third_party/skia"
 import("$_skia_root/gn/shared_sources.gni")
 import("$_skia_root/gn/skia.gni")
 import("$_skia_root/gn/toolchain/wasm.gni")
+import("$_skia_root/modules/pathops/pathops.gni")
 import("flutter_defines.gni")
 
 if (is_fuchsia) {
@@ -657,6 +658,7 @@ skia_component("skia") {
   public += skia_utils_public
   public += skia_effects_public
   public += skia_effects_imagefilter_public
+  public += skia_pathops_public
 
   sources = []
   sources += skia_core_sources
@@ -670,6 +672,7 @@ skia_component("skia") {
   sources += skia_encode_srcs
   sources += skia_sksl_core_sources
   sources += skia_sksl_core_module_sources
+  sources += skia_pathops_sources
   sources += skia_ports_sources
   sources += [
     "$_skia_root/src/android/SkAndroidFrameworkUtils.cpp",
