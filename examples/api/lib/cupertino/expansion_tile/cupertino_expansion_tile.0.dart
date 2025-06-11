@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 
 /// Flutter code sample for [CupertinoExpansionTile] showing both
 /// fade and scroll transition modes.
+
 void main() => runApp(const CupertinoExpansionTileApp());
 
 class CupertinoExpansionTileApp extends StatelessWidget {
@@ -27,14 +28,14 @@ class ExpansionTileExamples extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const <Widget>[
+    return const Column(
+      spacing: 10,
+      children: <Widget>[
         TransitionTileSection(
           title: 'Fade Transition',
           transitionMode: ExpansionTileTransitionMode.fade,
         ),
-        SizedBox(height: 24),
+
         TransitionTileSection(
           title: 'Scroll Transition',
           transitionMode: ExpansionTileTransitionMode.scroll,
