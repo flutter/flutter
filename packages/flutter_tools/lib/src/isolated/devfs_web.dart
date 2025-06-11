@@ -511,10 +511,12 @@ class WebAssetServer implements AssetReader {
 
     // If the response is `/`, then we are requesting the index file.
     if (requestPath == '/' || requestPath.isEmpty) {
+      globals.printError('Serving index.html');
       return _serveIndexHtml();
     }
 
     if (requestPath == 'flutter_bootstrap.js') {
+      globals.printError('Serving flutter_bootstrap.js');
       return _serveFlutterBootstrapJs();
     }
 
@@ -2269,7 +2271,7 @@ if (!self.dart_library) {
         // Called if the bootstrap script fails to load.
         this.onBootstrapError = () => { };
 
-        this.maxRequestPoolSize = 10;
+        this.maxRequestPoolSize = 1000;
 
         // Max retry to prevent from load failing scripts forever.
         this.maxAttempts = 6;

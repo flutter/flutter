@@ -240,7 +240,7 @@ class ChromiumLauncher {
     _logger.printError('user data path: ${userDataDir.path}');
     final io.File chromeDebugLogFile = io.File('${userDataDir.path}/Default/chrome_debug.log');
     // bool printedUserDataDir = false;
-    Timer.periodic(const Duration(seconds: 60), (Timer timer) {
+    Timer.periodic(const Duration(seconds: 120), (Timer timer) {
       // if (!printedUserDataDir && userDataDir.existsSync()) {
       //   _logger.printError('user data dir exists');
       //   _logger.printError('Contents:');
@@ -264,6 +264,19 @@ class ChromiumLauncher {
         timer.cancel();
         _logger.printError('${chromeDebugLogFile.path} exists');
         _logger.printError('Chrome debug log output: ${chromeDebugLogFile.readAsStringSync()}');
+        final grep = Process.start('grep', <String>[
+          '-Rn',
+          '"ERR_INSUFFICIENT_RESOURCES"',
+          userDataDir.path,
+        ]);
+        grep.then((Process process) {
+          process.stdout.listen(
+            (List<int> e) => _logger.printError('found match: ${utf8.decode(e)}'),
+          );
+          process.stderr.listen(
+            (List<int> e) => _logger.printError('error greping: ${utf8.decode(e)}'),
+          );
+        });
       } else {
         _logger.printError('${chromeDebugLogFile.path} does not exist yet');
       }
