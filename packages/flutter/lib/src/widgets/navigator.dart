@@ -5637,9 +5637,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
       );
 
-      if (next != null && predicate(next.route)) {
+      if (next != null && !next.route.willHandlePopInternally && predicate(next.route)) {
         pop<T>(result);
-        return;
       } else {
         pop();
       }
