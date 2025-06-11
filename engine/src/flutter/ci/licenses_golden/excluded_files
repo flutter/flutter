@@ -172,6 +172,7 @@
 ../../../flutter/impeller/entity/save_layer_utils_unittests.cc
 ../../../flutter/impeller/fixtures
 ../../../flutter/impeller/geometry/README.md
+../../../flutter/impeller/geometry/arc_unittests.cc
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_source_unittests.cc
