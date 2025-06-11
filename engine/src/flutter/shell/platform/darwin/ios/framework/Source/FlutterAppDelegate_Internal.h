@@ -7,9 +7,11 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 
 @interface FlutterAppDelegate ()
 
+@property(nonatomic, nullable, readonly) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 - (nullable FlutterEngine*)takeLaunchEngine;
 
 @end

@@ -7,7 +7,9 @@
 #import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneDelegate.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 
 @interface FlutterSceneDelegateTest : XCTestCase
 @end
@@ -23,8 +25,10 @@
 - (void)testBridgeShortcut {
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-  id<UIApplicationDelegate> mockAppDelegate = OCMClassMock([FlutterAppDelegate class]);
+  id mockAppDelegate = OCMClassMock([FlutterAppDelegate class]);
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplication delegate]).andReturn(mockAppDelegate);
+  OCMStub([mockAppDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
   id windowScene = OCMClassMock([UIWindowScene class]);
   id shortcut = OCMClassMock([UIApplicationShortcutItem class]);
 
@@ -34,8 +38,8 @@
                  completionHandler:^(BOOL succeeded){
                  }];
 
-  OCMVerify([mockAppDelegate application:[OCMArg any]
-            performActionForShortcutItem:[OCMArg any]
-                       completionHandler:[OCMArg any]]);
+  OCMVerify([(FlutterPluginAppLifeCycleDelegate*)mockLifecycleDelegate application:[OCMArg any]
+                                                      performActionForShortcutItem:[OCMArg any]
+                                                                 completionHandler:[OCMArg any]]);
 }
 @end
