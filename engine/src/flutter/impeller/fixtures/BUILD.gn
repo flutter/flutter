@@ -131,6 +131,7 @@ test_fixtures("file_fixtures") {
     "sample.comp",
     "sample.frag",
     "sample.vert",
+    "check_gles_definition.frag",
     "sample_with_binding.vert",
     "simple.vert.hlsl",
     "sa%m#ple.vert",

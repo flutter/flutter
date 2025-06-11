@@ -363,6 +363,11 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
 
       spirv_options.target = target;
       spirv_options.macro_definitions.push_back("IMPELLER_GRAPHICS_BACKEND");
+      if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES ||
+          source_options.target_platform ==
+              TargetPlatform::kRuntimeStageGLES3) {
+        spirv_options.macro_definitions.push_back("IMPELLER_TARGET_OPENGLES");
+      }
     } break;
     case TargetPlatform::kSkSL: {
       SPIRVCompilerTargetEnv target;
