@@ -420,7 +420,7 @@ class WebTestsSuite {
     await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     await runCommand(
       flutter,
-      <String>['build', 'web', '--target=$target', '--profile'],
+      <String>['build', 'web', '--target=$target', '--profile', '--no-web-resources-cdn'],
       workingDirectory: testAppDirectory,
       environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
@@ -506,7 +506,7 @@ class WebTestsSuite {
     await runCommand(flutter, <String>['clean'], workingDirectory: testAppDirectory);
     await runCommand(
       flutter,
-      <String>['build', 'web', '--$buildMode', '-t', entrypoint],
+      <String>['build', 'web', '--$buildMode', '-t', entrypoint, '--no-web-resources-cdn'],
       workingDirectory: testAppDirectory,
       environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
@@ -595,6 +595,7 @@ class WebTestsSuite {
         'build',
         'web',
         '--release',
+        '--no-web-resources-cdn',
         ...additionalArguments,
         '-t',
         target,
