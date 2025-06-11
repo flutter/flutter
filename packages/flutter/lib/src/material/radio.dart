@@ -564,7 +564,7 @@ class _RadioPaint extends StatefulWidget {
   final double? splashRadius;
   final VisualDensity? visualDensity;
   final MaterialTapTargetSize? materialTapTargetSize;
-  final MaterialStateProperty<Color?>? backgroundColor;
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   @override
   State<StatefulWidget> createState() => _RadioPaintState();
