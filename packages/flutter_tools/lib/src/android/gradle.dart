@@ -700,10 +700,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    final String escapedApkAnalyzerPath = '"$apkAnalyzerPath"';
+    if (globals.platform.isWindows && apkAnalyzerPath.contains(' ')) {
+      apkAnalyzerPath.replaceAll(r' ', r'\ ');
+    }
 
     final RunResult result = await _processUtils.run(
-      <String>[escapedApkAnalyzerPath, 'files', 'list', aabPath],
+      <String>[apkAnalyzerPath, 'files', 'list', aabPath],
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: _java?.environment,
     );
