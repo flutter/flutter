@@ -614,7 +614,7 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.fillColor?.resolve(inactiveStates);
     final Color effectiveInactiveColor =
         inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
-    // TODO(ValentinVignal): ADd backgroundColor to RadioThemeData.
+    // TODO(ValentinVignal): Add backgroundColor to RadioThemeData.
     final Color activeBackgroundColor =
         widget.backgroundColor?.resolve(activeStates) ?? Colors.transparent;
     final Color inactiveBackgroundColor =
