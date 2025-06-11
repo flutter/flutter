@@ -208,6 +208,8 @@ class AndroidDevice extends Device {
         }
       case 'armeabi-v7a':
         return TargetPlatform.android_arm;
+      case 'x86_64':
+        return TargetPlatform.android_x64;
       default:
         throw UnsupportedError('Unsupported Android architecture: $abi');
     }
